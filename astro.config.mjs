@@ -6,8 +6,8 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: 'My Docs',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+			title: 'LSL Dev',
+			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Martin-Pitt/lsl.slua.dev' }],
 			sidebar: [
 				{
 					label: 'Guides',

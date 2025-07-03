@@ -15,20 +15,22 @@ export default defineConfig({
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Martin-Pitt/lsl.slua.dev' }],
 			editLink: { baseUrl: 'https://github.com/Martin-Pitt/lsl.dev/edit/main/docs/' },
 			lastUpdated: true,
+			customCss: [
+				'./src/styles/custom.css',
+			],
 			sidebar: [
+				{ label: 'Portal', link: '/' },
 				{
-					label: 'Portal',
-					link: '/',
+					label: 'Reference',
+					items: [
+						{ label: 'Functions', link: 'functions' },
+						{ label: 'Events', link: 'events' },
+						{ label: 'Constants', link: 'constants' },
+						{ label: 'Types', link: 'types' },
+						{ label: 'Flow Control', link: 'controls' },
+					]
 				},
-				{
-					label: 'Functions',
-					link: 'functions'
-				},
-				{
-					label: 'Guides',
-					autogenerate: { directory: 'guides' },
-				},
-				
+				{ label: 'Guides', autogenerate: { directory: 'guides' } },
 				
 				/*{
 					label: 'Guides',

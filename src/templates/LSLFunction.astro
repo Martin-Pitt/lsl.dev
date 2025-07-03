@@ -1,6 +1,19 @@
 ---
-const { name } = Astro.props;
+import { Code, FileTree } from "@astrojs/starlight/components";
+const { name, returnType, arguments: args = [], energy, sleep } = Astro.props;
 ---
+
+<!-- Lazily using the FileTree here, but it's roughly what I'm trying to achieve UI wise -->
+<FileTree>
+	<ul>
+		<li>{name} {returnType}
+			<ul>{args.map(({ name, type, description }) => (
+				<li>{name} {type} {description && ' — ' + description}</li>
+			))}
+			</ul>
+		</li>
+	</ul>
+</FileTree>
 
 {Astro.slots.has('description') && (<section>
 <slot name="description"/>

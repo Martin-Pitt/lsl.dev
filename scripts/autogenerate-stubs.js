@@ -264,10 +264,10 @@ ${description.replace(/\n/g, '\n')}
  * Create filename from item name
  */
 function createFilename(name) {
-	return name.toLowerCase()
+	return name + '.mdx'; /*name.toLowerCase()
 		.replace(/[^a-z0-9]/g, '-')
 		.replace(/-+/g, '-')
-		.replace(/^-|-$/g, '') + '.mdx';
+		.replace(/^-|-$/g, '') + '.mdx';*/
 }
 
 /**

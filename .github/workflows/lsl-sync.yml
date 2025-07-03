@@ -1,0 +1,91 @@
+name: Sync LSL Definitions and Generate Stubs
+
+on:
+  # Run on push to main branch
+  push:
+    branches: [ main ]
+  
+  # Run on pull requests to main
+  pull_request:
+    branches: [ main ]
+  
+  # Allow manual trigger
+  workflow_dispatch:
+  
+  # Run daily at 2 AM UTC to catch updates
+  #schedule:
+  #  - cron: '0 2 * * *'
+
+jobs:
+  sync-and-generate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        # Use a personal access token if you need to trigger other workflows
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Create data directory
+      run: mkdir -p src/content/data
+    
+    - name: Download LSL definitions
+      run: |
+        curl -L -o src/content/data/lsl_definitions.yml \
+          https://raw.githubusercontent.com/secondlife/lsl-definitions/main/lsl_definitions.yaml
+    
+    - name: Verify downloaded file
+      run: |
+        if [ ! -f src/content/data/lsl_definitions.yml ]; then
+          echo "Error: LSL definitions file not downloaded"
+          exit 1
+        fi
+        echo "LSL definitions file size: $(wc -c < src/content/data/lsl_definitions.yml) bytes"
+    
+    - name: Run autogenerate stubs script
+      run: npm run autogenerate-stubs
+    
+    - name: Check for changes
+      id: verify-changed-files
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Commit and push changes
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Update LSL definitions and regenerate stubs"
+        git push
+    
+    - name: Create Pull Request (for non-main branches)
+      if: github.ref != 'refs/heads/main' && steps.verify-changed-files.outputs.changed == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Update LSL definitions and regenerate stubs
+        title: 'Auto-update: LSL definitions and generated stubs'
+        body: |
+          This PR was automatically created by the LSL sync workflow.
+          
+          Changes:
+          - Updated LSL definitions from secondlife/lsl-definitions
+          - Regenerated stub pages using autogenerate-stubs script
+          
+          Please review the changes before merging.
+        branch: auto-update-lsl-definitions

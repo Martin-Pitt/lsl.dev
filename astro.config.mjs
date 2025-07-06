@@ -13,13 +13,14 @@ export default defineConfig({
 				root: { label: 'English', lang: 'en' },
 			},
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Martin-Pitt/lsl.slua.dev' }],
-			editLink: { baseUrl: 'https://github.com/Martin-Pitt/lsl.dev/edit/main/docs/' },
+			editLink: { baseUrl: 'https://github.com/Martin-Pitt/lsl.dev/edit/main/' },
 			lastUpdated: true,
 			customCss: [
 				'./src/styles/custom.css',
 			],
+			tableOfContents: false,
 			sidebar: [
-				{ label: 'Portal', link: '/' },
+				{ label: 'Features', link: 'features' },
 				{
 					label: 'Reference',
 					items: [

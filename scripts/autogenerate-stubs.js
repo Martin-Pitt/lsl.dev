@@ -110,27 +110,17 @@ function generateFunctionStub(itemName, itemData, categoryName) {
 		};
 	});
 	
-	const props = {
-		name: itemName,
-		returnType: itemData.return || 'void',
-		arguments: JSON.stringify(argumentsArray, null, '\t'),
-	};
-	if(itemData.energy != 10) props.energy = itemData.energy;
-	if(itemData.sleep != 0) props.sleep = itemData.sleep;
-	
 	return `${frontmatter}import LSLFunction from '/src/templates/LSLFunction.astro'
 
 <LSLFunction
-	name="${itemName}"
-	returnType="${itemData.return || 'void'}"
-	arguments={${JSON.stringify(argumentsArray, null, '\t')}}${
+	name="${itemName}"${
+	itemData.return && itemData.return != 'void'? `\n\treturnType="${itemData.return}"` : ''}${
+	argumentsArray.length? `\n\targuments={${JSON.stringify(argumentsArray, null, '\t')}}` : ''}${
 	itemData.energy != 10? `\n\tenergy={${itemData.energy}}` : ''}${
 	itemData.sleep != 0? `\n\tsleep={${itemData.sleep}}` : ''}
->
-	<Fragment slot="description">
-		${description.replace(/\n/g, '\n\t\t\n\t\t')}
-	</Fragment>
-</LSLFunction>
+/>
+
+${description.replace(/\n/g, '\n\n')}
 `;
 }
 
@@ -149,11 +139,9 @@ function generateConstantStub(itemName, itemData, categoryName) {
 	name="${itemName}"
 	type="${type}"
 	value="${escapeForMDX(value)}"
->
-	<Fragment slot="description">
-		${description.replace(/\n/g, '\n\t\t')}
-	</Fragment>
-</LSLConstant>
+/>
+
+${description.replace(/\n/g, '\n\n')}
 `;
 }
 
@@ -184,11 +172,9 @@ function generateEventStub(itemName, itemData, categoryName) {
 <LSLEvent
 	name="${itemName}"
 	arguments={${JSON.stringify(argumentsArray, null, '\t')}}
->
-	<Fragment slot="description">
-		${description.replace(/\n/g, '\n\t\t')}
-	</Fragment>
-</LSLEvent>
+/>
+
+${description.replace(/\n/g, '\n\n')}
 `;
 }
 
@@ -201,13 +187,9 @@ function generateTypeStub(itemName, itemData, categoryName) {
 	
 	return `${frontmatter}import LSLType from '/src/templates/LSLType.astro'
 
-<LSLType
-	name="${itemName}"
->
-	<Fragment slot="description">
-		${description.replace(/\n/g, '\n\t\t')}
-	</Fragment>
-</LSLType>
+<LSLType name="${itemName}"/>
+
+${description.replace(/\n/g, '\n\n')}
 `;
 }
 
@@ -220,13 +202,9 @@ function generateControlStub(itemName, itemData, categoryName) {
 	
 	return `${frontmatter}import LSLControl from '/src/templates/LSLControl.astro'
 
-<LSLControl
-	name="${itemName}"
->
-	<Fragment slot="description">
-		${description.replace(/\n/g, '\n\t\t')}
-	</Fragment>
-</LSLControl>
+<LSLControl name="${itemName}"/>
+
+${description.replace(/\n/g, '\n\n')}
 `;
 }
 

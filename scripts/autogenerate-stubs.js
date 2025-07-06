@@ -110,7 +110,7 @@ function generateFunctionStub(itemName, itemData, categoryName) {
 		};
 	});
 	
-	return `${frontmatter}import LSLFunction from '/src/templates/LSLFunction.astro'
+	return `${frontmatter}import LSLFunction from '/src/content/templates/LSLFunction.astro'
 
 <LSLFunction
 	name="${itemName}"${
@@ -133,7 +133,7 @@ function generateConstantStub(itemName, itemData, categoryName) {
 	const value = itemData.value !== undefined ? String(itemData.value) : 'unknown';
 	const type = itemData.type || 'unknown';
 	
-	return `${frontmatter}import LSLConstant from '/src/templates/LSLConstant.astro'
+	return `${frontmatter}import LSLConstant from '/src/content/templates/LSLConstant.astro'
 
 <LSLConstant
 	name="${itemName}"
@@ -167,7 +167,7 @@ function generateEventStub(itemName, itemData, categoryName) {
 		};
 	});
 	
-	return `${frontmatter}import LSLEvent from '/src/templates/LSLEvent.astro'
+	return `${frontmatter}import LSLEvent from '/src/content/templates/LSLEvent.astro'
 
 <LSLEvent
 	name="${itemName}"
@@ -185,7 +185,7 @@ function generateTypeStub(itemName, itemData, categoryName) {
 	const frontmatter = generateItemFrontmatter(itemName, categoryName, itemData);
 	const description = escapeForMDX(itemData.tooltip || itemData.description || 'No description available.');
 	
-	return `${frontmatter}import LSLType from '/src/templates/LSLType.astro'
+	return `${frontmatter}import LSLType from '/src/content/templates/LSLType.astro'
 
 <LSLType name="${itemName}"/>
 
@@ -200,7 +200,7 @@ function generateControlStub(itemName, itemData, categoryName) {
 	const frontmatter = generateItemFrontmatter(itemName, categoryName, itemData);
 	const description = escapeForMDX(itemData.tooltip || itemData.description || 'No description available.');
 	
-	return `${frontmatter}import LSLControl from '/src/templates/LSLControl.astro'
+	return `${frontmatter}import LSLControl from '/src/content/templates/LSLControl.astro'
 
 <LSLControl name="${itemName}"/>
 

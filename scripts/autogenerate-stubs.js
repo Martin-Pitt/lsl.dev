@@ -84,6 +84,21 @@ function generateItemFrontmatter(itemName, categoryName, itemData) {
 		...(itemData.version && { version: itemData.version }),
 		...(itemData.tags && { tags: itemData.tags })
 	};
+	
+	if(itemData['god-mode']) frontmatter.sidebar = {
+		badge: {
+			text: 'godmode',
+			variant: 'danger',
+		}
+	};
+	
+	else if(itemData.deprecated) frontmatter.sidebar = {
+		badge: {
+			text: 'deprecated',
+			variant: 'caution',
+		}
+	};
+	
 
 	return generateFrontmatter(frontmatter);
 }

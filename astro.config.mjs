@@ -90,6 +90,12 @@ export default defineConfig({
 					// },
 		  		], {
 					topics: {
+						guides: [
+							'/guides/**',
+						],
+						features: [
+							'/features/**',
+						],
 						reference: [
 							'/functions/**',
 							'/events/**',
@@ -101,20 +107,6 @@ export default defineConfig({
 				}),
 			],
 			tableOfContents: false,
-			/*sidebar: [
-				{ label: 'Features', link: 'Features' },
-				{
-					label: 'Reference',
-					items: [
-						{ label: 'Functions', link: 'functions' },
-						{ label: 'Events', link: 'events' },
-						{ label: 'Constants', link: 'constants' },
-						{ label: 'Types', link: 'types' },
-						{ label: 'Flow Control', link: 'controls' },
-					]
-				},
-				{ label: 'Guides', autogenerate: { directory: 'guides' } },
-			],*/
 		}),
 	],
 });

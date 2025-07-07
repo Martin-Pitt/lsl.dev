@@ -85,21 +85,9 @@ function generateItemFrontmatter(itemName, categoryName, itemData) {
 		...(itemData.tags && { tags: itemData.tags })
 	};
 	
-	if(itemData['god-mode']) frontmatter.sidebar = {
-		badge: {
-			text: 'godmode',
-			variant: 'danger',
-		}
-	};
+	// Hide godmode or deprecated functions from the sidebar (they can still show up on the overview)
+	if(itemData['god-mode'] || itemData.deprecated) frontmatter.sidebar = { hidden: true };
 	
-	else if(itemData.deprecated) frontmatter.sidebar = {
-		badge: {
-			text: 'deprecated',
-			variant: 'caution',
-		}
-	};
-	
-
 	return generateFrontmatter(frontmatter);
 }
 

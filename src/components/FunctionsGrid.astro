@@ -1,0 +1,12 @@
+---
+import { Badge } from "@astrojs/starlight/components";
+const pages = Object.values(import.meta.glob('../content/docs/functions/*', { eager: true }));
+---
+
+<div class="category-links">
+	{pages.map(page =>
+		<a href={'/' + (page.frontmatter.slug || page.url.replace('src/content/docs', '').replace('.mdx', ''))}>
+			{page.frontmatter.title}  {page.frontmatter.editorial == 'stub' && <Badge text="Stub" variant="caution"/>}
+		</a>
+	)}
+</div>

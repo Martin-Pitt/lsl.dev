@@ -157,14 +157,11 @@ function generateEventStub(itemName, itemData, categoryName) {
 	// where each object has one key (the parameter name) with type/tooltip properties
 	const argumentsArray = args.map(argObj => {
 		// Each argument is an object with one key (the parameter name)
-		const paramName = Object.keys(argObj)[0];
-		const paramData = argObj[paramName];
-		
-		return {
-			name: paramName,
-			type: paramData.type || 'unknown',
-			description: escapeForMDX(paramData.tooltip || paramData.description || 'No description available.')
-		};
+		const name = Object.keys(argObj)[0];
+		const paramData = argObj[name];
+		const type = paramData.type || 'unknown';
+		const description = paramData.tooltip || paramData.description? escapeForMDX(paramData.tooltip || paramData.description) : undefined; // || 'No description available.'
+		return { name, type, description };
 	});
 	
 	return `${frontmatter}import LSLEvent from '/src/content/templates/LSLEvent.astro'
@@ -233,7 +230,7 @@ function generateStubContent(item, category) {
 
 ${description.replace(/\n/g, '\n')}
 
-<!-- TODO: Add content for ${category} -->
+{/* TODO: Add content for ${category} */}
 `;
 	}
 }

@@ -58,27 +58,20 @@ export default defineConfig({
 							// { label: 'Functions', link: '/functions/' },
 							{
 								label: 'Functions',
-								items: [
-									{ label: 'Overview', link: '/functions/' },
-									{
-										label: 'All',
-										collapsed: true,
-										autogenerate: { directory: 'functions' },
-									},
-								],
+								collapsed: true,
+								autogenerate: { directory: 'functions' },
 							},
 							{
 								label: 'Events',
-								items: [
-									{ label: 'Overview', link: '/events/' },
-									{
-										label: 'All',
-										collapsed: true,
-										autogenerate: { directory: 'events' },
-									},
-								],
+								collapsed: true,
+								autogenerate: { directory: 'events' },
 							},
-							{ label: 'Constants', link: '/constants/' },
+							{
+								label: 'Constants',
+								collapsed: true,
+								autogenerate: { directory: 'constants' },
+							},
+							// { label: 'Constants', link: '/constants/' },
 							{ label: 'Types', link: '/types/' },
 							{ label: 'Flow Control', link: '/controls/' },
 						],

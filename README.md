@@ -1,17 +1,38 @@
-# Starlight Starter Kit: Basics
+# LSL.dev
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+LSL.dev is brand new home for LSL — focused on being a modernised version of the [LSL Portal of the SL Wiki](https://wiki.secondlife.com/wiki/LSL_Portal).
 
-```
-npm create astro@latest -- --template starlight
-```
+This project is unofficial, and currently being developed and maintained by myself Martin Pitt, whom you may be more familiar with as Nexii Malthus in-world.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/starlight/tree/main/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/starlight/tree/main/examples/basics)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/withastro/starlight&create_from_path=examples/basics)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwithastro%2Fstarlight%2Ftree%2Fmain%2Fexamples%2Fbasics&project-name=my-starlight-docs&repository-name=my-starlight-docs)
+As a work in progress, I'm working on setting up the project and giving it a steady starting place before slowly ramping up the involvement of contributors into the project to make a true community open-source project by LSL Scripters for LSL Scripters.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+There is also a sister project at [Martin-Pitt/slua.dev](https://github.com/Martin-Pitt/slua.dev) which will cover the documentation of the new Second Life scripting language SLua that is currently available on the beta grid.
+
+The high-level roadmap is roughly as follows:
+
+1. Setup LSL.dev the project
+1. Figure out approach, styling, theme, what I can and should do, user experience, info architecture, content design
+1. Core content/templates
+1. Migrate content from the current wiki
+	* Starting with a few pages at first to test different types of content and their integration / necessary components to design and develop
+	* May take opportunity to rewrite pages as I migrate them! Of course this is an insane amount of work — but look, I've been in and out of the LSL wiki for two decades now
+1. Feature Category pages that are as useful as my [Combat2 article](https://wiki.secondlife.com/wiki/Category:LSL_Combat2)
+	* I want really high quality overview pages that summarise/bullet point the most important aspects of that feature and are chock full of internal links throughout
+	* This will be a LOT of work because a lot of the LSL feature pages are really bad, outdated, undocumented or just needing a bit of TLC
+1. Put LSL.dev into a useful state first
+	1. Where all the reference/lookup pages are covered first
+	1. … following by ways of navigating to them through simple Feature Categories
+	1. Fleshing out those Feature Category pages over time from a simple lookup index and into teaching material
+1. Further development and the future of SL technical documentation and knowledge
+	* Guides, Recipes, Tutorials, Discord community, …
+	* SLua.dev
+	* *Maybe* an updated [Content Creator docs site](https://wiki.secondlife.com/wiki/Creation_Portal) that covers avatars, building, textures, 3D modelling, videos, region design, landscaping, content creation within community nichés like SLMC, Sailing, Aircraft/Airports, Driving/Drivers of SL
+	* *Maybe* a general SL knowledge site? Cover avatars, exploration, activities, linden homes, communities like SLMC, Sailing, Aircraft/Airports, Driving/Drivers of SL, Bay City, …
+
+
+
+<!--
+Commented out useful bits below from starter readme, might integrate later
 
 ## 🚀 Project Structure
 
@@ -47,8 +68,4 @@ All commands are run from the root of the project, from a terminal:
 | `npm run build`           | Build your production site to `./dist/`          |
 | `npm run preview`         | Preview your build locally, before deploying     |
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+| `npm run astro -- --help` | Get help using the Astro CLI                     | -->

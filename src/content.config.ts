@@ -3,8 +3,30 @@ import { docsLoader } from '@astrojs/starlight/loaders';
 import { docsSchema } from '@astrojs/starlight/schema';
 import { glob } from 'astro/loaders';
 
+// Hide the prev/next by default as mostly useless throughout the reference pages
+const DefaultPrevNextLinkConfigSchema = z.union([
+	z.boolean(),
+	z.string(),
+	z.object({
+		link: z.string().optional(),
+		label: z.string().optional(),
+	})
+	.strict(),
+])
+.optional()
+.default(false);
 
-const docs = defineCollection({ loader: docsLoader(), schema: docsSchema() });
+const docs = defineCollection({
+	loader: docsLoader(),
+	schema: docsSchema({
+		extend: z.object({
+			prev: DefaultPrevNextLinkConfigSchema,
+			next: DefaultPrevNextLinkConfigSchema,
+		})
+	})
+});
+
+// Capture a collection of all the function pages
 const functions = defineCollection({
 	loader: glob({ pattern: '*.{md,mdx}', base: './src/content/docs/functions'}),
 	schema: z.object({

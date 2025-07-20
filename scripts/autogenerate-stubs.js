@@ -113,6 +113,8 @@ function generateFunctionStub(itemName, itemData, categoryName) {
 		};
 	});
 	
+	const sleep = 'mono_sleep' in itemData? itemData.mono_sleep : itemData.sleep;
+	
 	return `${frontmatter}import LSLFunction from '/src/content/templates/LSLFunction.astro'
 
 <LSLFunction
@@ -120,7 +122,7 @@ function generateFunctionStub(itemName, itemData, categoryName) {
 	itemData.return && itemData.return != 'void'? `\n\treturnType="${itemData.return}"` : ''}${
 	argumentsArray.length? `\n\targuments={${JSON.stringify(argumentsArray, null, '\t')}}` : ''}${
 	itemData.energy != 10? `\n\tenergy={${itemData.energy}}` : ''}${
-	itemData.sleep != 0? `\n\tsleep={${itemData.sleep}}` : ''}
+	sleep != 0? `\n\tsleep={${sleep}}` : ''}
 />
 
 ${description.replace(/\n/g, '\n\n')}

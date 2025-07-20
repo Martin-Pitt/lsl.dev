@@ -3,11 +3,22 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 import starlightThemeObsidian from 'starlight-theme-obsidian';
+import { astroExpressiveCode } from '@astrojs/starlight/expressive-code';
+import { readFile } from 'fs/promises';
+
 
 
 // https://astro.build/config
 export default defineConfig({
 	integrations: [
+		astroExpressiveCode({
+			shiki: {
+				langs: [
+					JSON.parse(await readFile('./src/content/data/lsl_grammar.json', 'utf-8'))
+				],
+			},
+			tabWidth: 0,
+		}),
 		starlight({
 			title: 'LSL Dev',
 			defaultLocale: 'root',

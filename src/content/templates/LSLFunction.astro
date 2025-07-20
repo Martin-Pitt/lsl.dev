@@ -15,7 +15,7 @@ const { name } = Astro.props;
 const definition = definitions.functions[name];
 const {
 	returnType = definition.return || 'void',
-	arguments: args = definition.arguments.map(mapFunctionArguments),
+	arguments: args = definition.arguments?.map(mapFunctionArguments),
 	energy = definition.energy,
 	sleep = 'mono_sleep' in definition? definition.mono_sleep : definition.sleep
 } = Astro.props;
@@ -25,10 +25,10 @@ const {
 <FileTree>
 	<ul>
 		<li>{name} {returnType}
-			<ul>{args.map(({ name, type, description }) => (
+			{args && <ul>{args.map(({ name, type, description }) => (
 				<li>{name} {type} {description && ' — ' + description}</li>
 			))}
-			</ul>
+			</ul>}
 		</li>
 	</ul>
 </FileTree>

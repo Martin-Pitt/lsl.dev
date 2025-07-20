@@ -7,6 +7,7 @@ editorial: draft
 category: functions
 ---
 import LSLFunction from '/src/content/templates/LSLFunction.astro'
+import { Code } from '@astrojs/starlight/components';
 
 <LSLFunction
 	name="llRezObjectWithParams"
@@ -14,11 +15,13 @@ import LSLFunction from '/src/content/templates/LSLFunction.astro'
 	arguments={[
 	{
 		"name": "InventoryItem",
-		"type": "string"
+		"type": "string",
+		"description": "Name of object in inventory to instantiate"
 	},
 	{
 		"name": "Params",
-		"type": "list"
+		"type": "list",
+		"description": "Initial list of parameters to rez the object with"
 	}
 ]}
 	energy={200}
@@ -26,7 +29,7 @@ import LSLFunction from '/src/content/templates/LSLFunction.astro'
 />
 
 Instantiate **inventory** object at **pos** with an initial set of parameters specified in **params**.
-		
+
 **pos** will default to the position of the object containing the script, unless [REZ_POS](/constants/REZ_POS) is specified. (see below)
 
 Returns a key which will be the key of the object when it is successfully rezzed in the world.
@@ -37,11 +40,57 @@ Spec goes here
 
 ## Caveats
 
-Pls list them caveats
+* This function causes the script to sleep at least for 0.1s and uses 200.0 energy, which effectively means there also an imposed delay across the object that can cause scripts in the linkset to skip
+	* In practice, using multiple scripts, it is possible to reach a maximum object creation speed of 900 objects per minute per object linkset, and with an active `control` event can be exceeded to double that amount
+	* Mind that there are some dynamic limits in place that are designed to prevent griefing
+* If **inventory** is missing from the prim's inventory or it is not an object then an error is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL).
+* Silently fails to rez **inventory** if [REZ_POS](/constants/REZ_POS) is too far from the geometric center of the object trying to rez **inventory** (generally 10 meters {/* TODO: Insert or link to the rez dist algo */}).
+* When scripting attachments meant to rez objects, remember that when used in the root of an attachment <code>[llGetPos](/functions/llGetPos)</code> doesn't return the position of the attachment but instead returns the position of the avatar's bounding box geometric center. Read [llGetPos](/functions/llGetPos) and [llParticleSystem Caveats](/functions/llParticleSystem) for more information.
+* If the object is unattached and the owner of the object does not have copy permission on **inventory**, the object will no longer be present in inventory after it is rezzed (so another attempt to rez (the same object) will fail); if the owner does have copy permission, then a copy is rezzed, and the original **inventory** remains in inventory.
+* If the object is attached and the owner of the object does not have copy permission on **inventory**, an error is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL): "Cannot rez no copy objects from an attached object."
+* Silently fails if you don't have offline building rights on the land. To have the right, your objects needs to *either*: 
+	* Be on land you own yourself.
+	* Be on land where anyone is allowed to build, e.g. a sandbox. 
+	* Be deeded to the group that owns the land.
+	* Be set to the same group that owns the land and the land have the parcel flag 'allow group to build' set.
+	* The group role "Always allow 'Create Objects'" will only work to override this when you are online, in the region, or have a child agent in the region.
+* See [object_rez](/events/object_rez) for examples on how to establish communications between the rezzing object and the new prim.
+
 
 ## Examples
 
-Examples, examples, examples!
+The list of parameters is entirely option. If you want to rez an object exactly where the rezzer is, you may call the function with an empty list:
+
+```lsl
+default
+{
+	touch_start(integer total_number)
+	{
+		llRezObjectWithParams("Object", []);
+		PRIM_CAST_SHADOWS
+		NULL_KEY
+	}
+}
+```
+
+The below example rezzes an object slightly above the rezzer, slowly spinning and with automatic cleanup.
+
+```lsl
+default
+{
+	touch_start(integer total_number)
+	{
+		llRezObjectWithParams("Object", [
+			REZ_POS, <0,0,1>, TRUE, TRUE,
+			REZ_OMEGA, <0,0,1>, TRUE, 0.5, PI,
+			REZ_FLAGS, REZ_FLAG_TEMP ~ REZ_FLAG_PHANTOM
+		]);
+	}
+}
+```
+
+
+
 
 
 {/* Full list of headings:

@@ -97,33 +97,10 @@ function generateItemFrontmatter(itemName, categoryName, itemData) {
 function generateFunctionStub(itemName, itemData, categoryName) {
 	const frontmatter = generateItemFrontmatter(itemName, categoryName, itemData);
 	const description = escapeForMDX(itemData.tooltip || itemData.description || 'No description available.');
-	const args = itemData.arguments || [];
-	
-	// Format arguments for the component - YAML structure is an array of objects
-	// where each object has one key (the parameter name) with type/tooltip properties
-	const argumentsArray = args.map(argObj => {
-		// Each argument is an object with one key (the parameter name)
-		const paramName = Object.keys(argObj)[0];
-		const paramData = argObj[paramName];
-		
-		return {
-			name: paramName,
-			type: paramData.type || 'unknown',
-			description: (paramData.tooltip || paramData.description)? escapeForMDX(paramData.tooltip || paramData.description) : undefined
-		};
-	});
-	
-	const sleep = 'mono_sleep' in itemData? itemData.mono_sleep : itemData.sleep;
 	
 	return `${frontmatter}import LSLFunction from '/src/content/templates/LSLFunction.astro'
 
-<LSLFunction
-	name="${itemName}"${
-	itemData.return && itemData.return != 'void'? `\n\treturnType="${itemData.return}"` : ''}${
-	argumentsArray.length? `\n\targuments={${JSON.stringify(argumentsArray, null, '\t')}}` : ''}${
-	itemData.energy != 10? `\n\tenergy={${itemData.energy}}` : ''}${
-	sleep != 0? `\n\tsleep={${sleep}}` : ''}
-/>
+<LSLFunction name="${itemName}"/>
 
 ${description.replace(/\n/g, '\n\n')}
 `;

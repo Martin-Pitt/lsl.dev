@@ -236,41 +236,8 @@ async function main() {
 		patternConstants.match = createOptimizedRegex(constants);
 		patternConstantsDeprecated.match = createOptimizedRegex(constantsDeprecated);
 		
-		
-		await writeFile('src/content/data/lsl_grammar.json', JSON.stringify(grammar, null, '\t'), 'utf8');
-		
-		
-		
-		/*
-		// Get existing files for reference
-		const existingFiles = await getExistingFiles();
-		console.log(`📁 Found ${existingFiles.size} existing documentation files`);
-		
-		// Process each category
-		let totalCreated = 0;
-		let totalUpdated = 0;
-		let totalSkipped = 0;
-		let totalDeleted = 0;
-		
-		for (const category of CONFIG.categories) {
-			if (definitions[category]) {
-				const result = await processCategory(definitions, category);
-				totalCreated += result.created;
-				totalUpdated += result.updated;
-				totalSkipped += result.skipped;
-				totalDeleted += result.deleted;
-			} else {
-				console.log(`\n⚠️  Category '${category}' not found in YAML definitions`);
-			}
-		}
-		
-		// Final summary
-		console.log('\n📊 Final Summary:');
-		console.log(`   Created: ${totalCreated} files`);
-		console.log(`   Updated: ${totalUpdated} files`);
-		console.log(`   Skipped: ${totalSkipped} files`);
-		console.log(`   Deleted: ${totalDeleted} files`);
-		*/
+		console.log(`📁 Writing to: ${CONFIG.grammarPath}`);
+		await writeFile(CONFIG.grammarPath, JSON.stringify(grammar, null, '\t'), 'utf8');
 		
 		console.log('\n✅ Grammar generation completed successfully!');
 		

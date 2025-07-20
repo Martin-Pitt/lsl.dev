@@ -1,6 +1,24 @@
 ---
 import { Code, FileTree } from "@astrojs/starlight/components";
-const { name, returnType = 'void', arguments: args = [], energy, sleep } = Astro.props;
+import * as definitions from '../data/lsl_definitions.json';
+
+const mapFunctionArguments = arg => {
+	const name = Object.keys(arg)[0];
+	const param = arg[name];
+	const type = param.type || 'unknown';
+	const description = param.tooltip || param.description? param.tooltip || param.description : undefined;
+	const index_semantics = param.index_semantics;
+	return { name, type, description, index_semantics };
+};
+
+const { name } = Astro.props;
+const definition = definitions.functions[name];
+const {
+	returnType = definition.return || 'void',
+	arguments: args = definition.arguments.map(mapFunctionArguments),
+	energy = definition.energy,
+	sleep = 'mono_sleep' in definition? definition.mono_sleep : definition.sleep
+} = Astro.props;
 ---
 
 <!-- Lazily using the FileTree here, but it's roughly what I'm trying to achieve UI wise -->

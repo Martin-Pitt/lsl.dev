@@ -66,7 +66,6 @@ export default defineConfig({
 						link: '/reference/',
 						icon: 'list-format',
 						items: [
-							// { label: 'Functions', link: '/functions/' },
 							{
 								label: 'Functions',
 								collapsed: true,
@@ -82,9 +81,16 @@ export default defineConfig({
 								collapsed: true,
 								autogenerate: { directory: 'constants' },
 							},
-							// { label: 'Constants', link: '/constants/' },
-							{ label: 'Types', link: '/types/' },
-							{ label: 'Flow Control', link: '/controls/' },
+							{
+								label: 'Types',
+								collapsed: true,
+								autogenerate: { directory: 'types' },
+							},
+							{
+								label: 'Flow Control',
+								collapsed: true,
+								autogenerate: { directory: 'controls' },
+							},
 						],
 					},
 					// { Link back to official LSL wiki?

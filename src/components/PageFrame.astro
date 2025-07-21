@@ -1,26 +1,36 @@
 ---
-import MobileMenuToggle from "@astrojs/starlight/components/MobileMenuToggle.astro";
+import MobileTableOfContents from '@astrojs/starlight/components/MobileTableOfContents.astro';
+import MobileMenuToggle from '@astrojs/starlight/components/MobileMenuToggle.astro';
+import SiteTitle from '@astrojs/starlight/components/SiteTitle.astro';
 import { Breadcrumbs } from "astro-breadcrumbs";
 import "astro-breadcrumbs/breadcrumbs.css";
 
 const { hasSidebar } = Astro.locals.starlightRoute;
 ---
 
+{/* (STARLIGHT-THEME-OBSIDIAN): Do not show header component if page has no sidebar, create a separate mobile-header component */}
 <div class="page sl-flex">
-	<header class="header"><slot name="header" /></header>
-	{
-		hasSidebar && (
-			<nav class="sidebar print:hidden" aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}>
-				<MobileMenuToggle />
-				<div id="starlight__sidebar" class="sidebar-pane">
-					<div class="sidebar-content sl-flex">
-						<slot name="sidebar" />
-					</div>
-				</div>
-			</nav>
-		)
-	}
-	<div class="main-frame">
+    {
+        hasSidebar ? (
+            <nav class="sidebar" aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}>
+                <div id="starlight__sidebar" class="sidebar-pane">
+                    <div class="sidebar-content sl-flex">
+                        <slot name="sidebar" />
+                    </div>
+                </div>
+            </nav>
+        ) : (<header class="header"><slot name="header" /></header>)
+    }
+    <div class="main-frame">
+        {hasSidebar && (
+            <div class="mobile-header">
+                <div class="title-wrapper ">
+                    <SiteTitle/>
+                </div>
+                <MobileTableOfContents/>
+                <MobileMenuToggle/>
+            </div>
+        )}
 		{Astro.url.pathname != '/' &&
 		<Breadcrumbs indexText="LSL Dev" debug={true}>
 			<svg
@@ -37,8 +47,8 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 				><polyline points="9 18 15 12 9 6"></polyline>
 			</svg>
 		</Breadcrumbs>}
-		<slot />
-	</div>
+        <slot />
+    </div>
 </div>
 
 <style>

@@ -33,6 +33,7 @@ export default defineConfig({
 			],
 			components: {
 				// PageFrame: './src/components/PageFrame.astro',
+				PageTitle: './src/components/PageTitle.astro',
 				Sidebar: './src/components/Sidebar.astro',
 			},
 			plugins: [

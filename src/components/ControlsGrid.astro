@@ -1,11 +1,20 @@
 ---
+import { Badge } from "@astrojs/starlight/components";
 const pages = Object.values(import.meta.glob('../content/docs/controls/*', { eager: true }));
 ---
 
 <div class="category-links">
-	{pages.filter(page => page.frontmatter?.sidebar?.order != -1).map(page =>
-		<a href={'/' + (page.frontmatter.slug || page.url.replace('src/content/docs', '').replace('.mdx', ''))}>
-			{page.frontmatter.title}
+	{pages
+	.filter(page => page.frontmatter?.sidebar?.order != -1)
+	.map(page =>
+		<a
+			class={[
+				'category-links__link',
+				page.frontmatter.editorial == 'stub' && 'is-stub',
+			].filter(Boolean).join(' ')}
+			href={'/' + (page.frontmatter.slug || page.url.replace('src/content/docs', '').replace('.mdx', ''))}
+		>
+			<span class="category-links__label">{page.frontmatter.title}</span>
 		</a>
 	)}
 </div>

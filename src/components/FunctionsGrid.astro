@@ -4,9 +4,23 @@ const pages = Object.values(import.meta.glob('../content/docs/functions/*', { ea
 ---
 
 <div class="category-links">
-	{pages.filter(page => page.frontmatter?.sidebar?.order != -1).map(page =>
-		<a href={'/' + (page.frontmatter.slug || page.url.replace('src/content/docs', '').replace('.mdx', ''))}>
-			{page.frontmatter.title}  {page.frontmatter.editorial == 'stub' && <Badge text="Stub" variant="caution"/>}
+	{pages
+	.filter(page => page.frontmatter?.sidebar?.order != -1)
+	.map(page =>
+		<a
+			class={[
+				'category-links__link',
+				page.frontmatter.editorial == 'stub' && 'is-stub',
+				page.frontmatter.implementation == 'deprecated' && 'is-deprecated',
+			].filter(Boolean).join(' ')}
+			href={'/' + (page.frontmatter.slug || page.url.replace('src/content/docs', '').replace('.mdx', ''))}
+		>
+			<span class="category-links__label">{page.frontmatter.title}</span>
+			{page.frontmatter.implementation == 'deprecated' && <Badge class="badge-deprecated" text="Deprecated" variant="danger" title="The function has been deprecated and must not be used"/>}
+			{page.frontmatter.godmode && <Badge class="badge-godmode" text="GodMode" variant="danger" title="GodMode is required to use this function"/>}
+			{page.frontmatter.experience == 'linden'? <Badge class="badge-linden-experience" text="Linden Experience" variant="danger" title="This functions requires a Linden-owned Experience to be compiled with"/>
+			:page.frontmatter.experience && <Badge class="badge-experience" text="Experience" variant="tip" title="This function needs to be compiled with an Experience"/>}
+			{/* {page.frontmatter.editorial == 'stub' && <Badge class="badge-stub" text="Stub" variant="caution" title="The page has only been automatically generated and is missing full documentation"/>} */}
 		</a>
 	)}
 </div>

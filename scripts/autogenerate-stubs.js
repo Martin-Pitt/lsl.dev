@@ -97,7 +97,6 @@ function generateItemFrontmatter(itemName, categoryName, itemData) {
 function generateFunctionStub(itemName, itemData, categoryName) {
 	const frontmatter = generateItemFrontmatter(itemName, categoryName, itemData);
 	const description = escapeForMDX(itemData.tooltip || itemData.description || 'No description available.');
-	
 	return `${frontmatter}import LSLFunction from '/src/content/templates/LSLFunction.astro'
 
 <LSLFunction name="${itemName}"/>
@@ -112,16 +111,9 @@ ${description.replace(/\n/g, '\n\n')}
 function generateConstantStub(itemName, itemData, categoryName) {
 	const frontmatter = generateItemFrontmatter(itemName, categoryName, itemData);
 	const description = escapeForMDX(itemData.tooltip || itemData.description || 'No description available.');
-	const value = itemData.value !== undefined ? String(itemData.value) : 'unknown';
-	const type = itemData.type || 'unknown';
-	
 	return `${frontmatter}import LSLConstant from '/src/content/templates/LSLConstant.astro'
 
-<LSLConstant
-	name="${itemName}"
-	type="${type}"
-	value="${escapeForMDX(value)}"
-/>
+<LSLConstant name="${itemName}"/>
 
 ${description.replace(/\n/g, '\n\n')}
 `;
@@ -133,25 +125,9 @@ ${description.replace(/\n/g, '\n\n')}
 function generateEventStub(itemName, itemData, categoryName) {
 	const frontmatter = generateItemFrontmatter(itemName, categoryName, itemData);
 	const description = escapeForMDX(itemData.tooltip || itemData.description || 'No description available.');
-	const args = itemData.arguments || [];
-	
-	// Format arguments for the component - YAML structure is an array of objects
-	// where each object has one key (the parameter name) with type/tooltip properties
-	const argumentsArray = args.map(argObj => {
-		// Each argument is an object with one key (the parameter name)
-		const name = Object.keys(argObj)[0];
-		const paramData = argObj[name];
-		const type = paramData.type || 'unknown';
-		const description = paramData.tooltip || paramData.description? escapeForMDX(paramData.tooltip || paramData.description) : undefined; // || 'No description available.'
-		return { name, type, description };
-	});
-	
 	return `${frontmatter}import LSLEvent from '/src/content/templates/LSLEvent.astro'
 
-<LSLEvent
-	name="${itemName}"
-	arguments={${JSON.stringify(argumentsArray, null, '\t')}}
-/>
+<LSLEvent name="${itemName}"/>
 
 ${description.replace(/\n/g, '\n\n')}
 `;
@@ -163,7 +139,6 @@ ${description.replace(/\n/g, '\n\n')}
 function generateTypeStub(itemName, itemData, categoryName) {
 	const frontmatter = generateItemFrontmatter(itemName, categoryName, itemData);
 	const description = escapeForMDX(itemData.tooltip || itemData.description || 'No description available.');
-	
 	return `${frontmatter}import LSLType from '/src/content/templates/LSLType.astro'
 
 <LSLType name="${itemName}"/>
@@ -178,7 +153,6 @@ ${description.replace(/\n/g, '\n\n')}
 function generateControlStub(itemName, itemData, categoryName) {
 	const frontmatter = generateItemFrontmatter(itemName, categoryName, itemData);
 	const description = escapeForMDX(itemData.tooltip || itemData.description || 'No description available.');
-	
 	return `${frontmatter}import LSLControl from '/src/content/templates/LSLControl.astro'
 
 <LSLControl name="${itemName}"/>

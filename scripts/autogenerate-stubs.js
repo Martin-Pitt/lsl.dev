@@ -80,13 +80,20 @@ function generateItemFrontmatter(itemName, categoryName, itemData) {
 		slug: `${categoryName}/${itemName}`,
 		editorial: CONFIG.stubEditorial,
 		category: categoryName,
-		...(itemData.deprecated && { deprecated: true }),
 		...(itemData.version && { version: itemData.version }),
 		...(itemData.tags && { tags: itemData.tags })
 	};
 	
 	// Hide godmode or deprecated functions from the sidebar (they can still show up on the overview)
 	if(itemData['god-mode'] || itemData.deprecated) frontmatter.sidebar = { hidden: true };
+	
+	// Implementation status
+	if(itemData.deprecated) frontmatter.implementation = 'deprecated';
+	
+	// Special attributes
+	if(itemData['linden-experience']) frontmatter.experience = 'linden';
+	else if(itemData.experience) frontmatter.experience = true;
+	if(itemData['god-mode']) frontmatter.godmode = true;
 	
 	return generateFrontmatter(frontmatter);
 }

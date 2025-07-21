@@ -61,6 +61,7 @@ Implementation Lifecycle for a function/event/constant:
 * Deprecated
 * Removed
 * Broken
+* Private?
 
 
 Editorial Lifecycle
@@ -74,6 +75,12 @@ i18n Lifecycle
 - Partially translated
 - Translation up to date
 - Content changed since translation
+
+
+Special attributes
+* GodMode
+* Experience / Linden Experience
+
 
 
 Script to backfill undocumented pages from keywords.xml?

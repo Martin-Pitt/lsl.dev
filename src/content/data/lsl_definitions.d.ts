@@ -50,9 +50,13 @@ interface LSLDefinitions {
 		}
 	}
 	types: {
-		tooltip?: string
+		[k: string]: {
+			tooltip?: string
+		}
 	}
 	controls: {
-		tooltip?: string
+		[k: string]: {
+			tooltip?: string
+		}
 	}
 }

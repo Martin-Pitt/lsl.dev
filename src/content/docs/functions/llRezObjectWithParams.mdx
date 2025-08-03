@@ -38,16 +38,10 @@ key object = llRezObjectWithParams("Object", []);
 
 ### Params List
 
-<dl>
-	<dt>[REZ_PARAM](/constants/REZ_PARAM)<InlineSyntax code=", integer param"/></dt>
-	<dd>Start parameter passed into the rezzed object's [on_rez](/events/on_rez) event. May also be read with [llGetStartParameter](/functions/llGetStartParameter)</dd>
-	
-	<dt>[REZ_PARAM_STRING](/constants/REZ_PARAM_STRING)<InlineSyntax code=", string param"/></dt>
-	<dd>Pass an initialization string to the root prim of the newly rezzed object that may be read with [llGetStartString](/functions/llGetStartString) from within the rezzed object. Maximum string length is 1024 bytes.</dd>
-	
-	<dt>[REZ_FLAGS](/constants/REZ_FLAGS)<InlineSyntax code=", integer flags"/></dt>
-	<dd>Flags applied to rezzed object when it is created in the world.</dd>
-	<dd>
+{/*
+
+{(() => {
+	global.REZ_FLAGS_ = (
 		<details>
 			<summary>REZ_FLAGS_*</summary>
 			<table>
@@ -91,71 +85,170 @@ key object = llRezObjectWithParams("Object", []);
 				</tbody>
 			</table>
 			<small>† Disabling collisions only disables collision events and damage. The object will still cause a physics collision and may push the objects.</small>
-		</details>
-	</dd>
-	
-	<dt>[REZ_POS](/constants/REZ_POS)<InlineSyntax code=", vector position, integer relative, integer at_root"/></dt>
-	<dd>Position to rez the new object in the world.</dd>
-	<dd>If **relative** is [TRUE](/constants/TRUE) the **position** will be relative to the rezzer, otherwise in absolute region coordinates.</dd>
-	<dd>If **at_root** is [TRUE](/constants/TRUE) the root prim of the rezzed object will be placed at **position** (like [llRezAtRoot](/functions/llRezAtRoot)), otherwise the center of the object will be placed at **position** (like [llRezObject](/functions/llRezObject)).</dd>
-	
-	<dt>[REZ_ROT](/constants/REZ_ROT)<InlineSyntax code=", rotation rot, integer relative"/></dt>
-	<dd>The initial rotation to apply to the object. If **relative** is [TRUE](/constants/TRUE), the rotation is relative to the rezzing object, otherwise it is absolute.</dd>
-	
-	<dt>[REZ_VEL](/constants/REZ_VEL)<InlineSyntax code=", vector velocity, integer local, integer inherit"/></dt>
-	<dd>The initial velocity to apply to the object.</dd>
-	<dd>If **local** is [TRUE](/constants/TRUE) the velocity is in the local object coordinate frame, otherwise it is in world coordinates.</dd>
-	<dd>If **inherit** is [TRUE](/constants/TRUE) the object also inherits it's rezzer's velocity.</dd>
-	
-	<dt>[REZ_ACCEL](/constants/REZ_ACCEL)<InlineSyntax code=", vector force, integer local"/></dt>
-	<dd>A constant force to apply to the object.</dd><dd>If **local** is [TRUE](/constants/TRUE), the force vector is in local coordinates, otherwise it is in world coordinates.</dd>
-	
-	<dt>[REZ_OMEGA](/constants/REZ_OMEGA)<InlineSyntax code=", vector axis, integer local, float spin, float gain"/></dt>
-	<dd>Spin the object around the specified axis.</dd><dd>If **local** is [TRUE](/constants/TRUE) that axis is in local coordinates, otherwise they are global.</dd>
-	
-	<dt>[REZ_LOCK_AXES](/constants/REZ_LOCK_AXES)<InlineSyntax code=", vector locks"/>      </dt>
-	<dd>Prevent the object from spinning on certain axes. Setting the vector's coordinate to non-zero will prevent the object from spinning on that axis. For instance <InlineSyntax code="REZ_LOCK_AXES, <1.0, 1.0, 0.0>"/> will allow the object to only rotate around its Z-axis.</dd>
-	
-	<dt>[REZ_DAMAGE](/constants/REZ_DAMAGE)<InlineSyntax code=", float damage"/>            </dt>
-	<dd>The amount of damage applied to an agent upon collision with this object.</dd>
-	
-	<dt>[REZ_DAMAGE_TYPE](/constants/REZ_DAMAGE_TYPE)<InlineSyntax code=", integer damage_type"/></dt>
-	<dd>The damage type to apply when this prim collides with another object. Can match one of the DAMAGE_TYPE_* constants, be a custom damage type or repurpose the damage field.</dd>
-	
-	<dt>[REZ_SOUND](/constants/REZ_SOUND)<InlineSyntax code=", string sound, float volume, integer loop"/></dt>
-	<dd>A sound to attach to this object. It will be played at the specified **volume**. The **sound** parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset.</dd>
-	<dd>If **loop** is [TRUE](/constants/TRUE) the sound will loop continuously for the life of the object.</dd>
-	
-	<dt>[REZ_SOUND_COLLIDE](/constants/REZ_SOUND_COLLIDE)<InlineSyntax code=", string sound, float volume"/></dt>
-	<dd>A sound to play upon collision with another object, the ground or an avatar. The **sound** parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset.</dd>
-</dl>
+		</details>)
+	}
+)()}
 
-{/*
+<div class="params-table">
+| Parameter | Description |
+| --- | --- |
+| [REZ_PARAM](/constants/REZ_PARAM)<InlineSyntax code={", integer param"}/> | Start parameter passed into the rezzed object's [on_rez](/events/on_rez) event |
+| [REZ_PARAM_STRING](/constants/REZ_PARAM_STRING)<InlineSyntax code={", string param"}/> | Pass an initialization string to the root prim of the newly rezzed object that may be read with llGetStartString from within the rezzed object. Maximum string length is 1024 bytes. |
+| [REZ_FLAGS](/constants/REZ_FLAGS)<InlineSyntax code={", integer flags"}/> | Flags applied to rezzed object when it is created in the world. {REZ_FLAGS_} |
+| [REZ_POS](/constants/REZ_POS)<InlineSyntax code={", vector pos, integer is_relative, integer at_root"}/> | Position to rez the new object in the world. If is_relative is [FALSE](/constants/FALSE) the position is in region coordinates. If is_relative is [TRUE](/constants/TRUE), the position will be relative to the rezzing object. If at_root is [FALSE](/constants/FALSE), the center of the object will be at the position specified by pos (equivalent to [llRezObject](/functions/llRezObject)). Set at_root to [TRUE](/constants/TRUE) to set the position of the root prim (equivalent to [llRezAtRoot](/functions/llRezAtRoot)). |
+| [REZ_ROT](/constants/REZ_ROT)<InlineSyntax code={", rotation rot, integer relative"}/> | The initial rotation to apply to the object. If relative is [TRUE](/constants/TRUE), the rotation is relative to the rezzing object, otherwise it is absolute. |
+| [REZ_VEL](/constants/REZ_VEL)<InlineSyntax code={", vector velocity, integer local, integer inherit"}/> | The initial velocity to apply to the object. If local is TRUE the velocity is in the local object coordinate frame, otherwise it is in world coordinates. If inherit is [TRUE](/constants/TRUE) the object also inherits it's rezzer's velocity. |
+| [REZ_ACCEL](/constants/REZ_ACCEL)<InlineSyntax code={", vector force, integer local"}/> | A constant force to apply to the object. If local is [TRUE](/constants/TRUE), the force vector is in local coordinates. |
+| [REZ_OMEGA](/constants/REZ_OMEGA)<InlineSyntax code={", vector axis, integer local, float spin, float gain"}/> | Spin the object around the specified axis. If local is [TRUE](/constants/TRUE) that axis is in local coordinates, otherwise they are global. |
+| [REZ_LOCK_AXES](/constants/REZ_LOCK_AXES)<InlineSyntax code={", vector locks"}/> | Prevent the object from spinning on certain axes. Setting the vector's coordinate to non-zero will prevent the object from spinning on that axis. For instance `REZ_LOCK_AXES, <1.0, 1.0, 0.0>` will allow the object to only rotate around its Z-axis. |
+| [REZ_DAMAGE](/constants/REZ_DAMAGE)<InlineSyntax code={", float damage"}/> | The amount of damage applied to an agent upon collision with this object. |
+| [REZ_DAMAGE_TYPE](/constants/REZ_DAMAGE_TYPE)<InlineSyntax code={", integer damage_type"}/> | The damage type to apply when this prim collides with another object. Can match one of the DAMAGE_TYPE_* constants, be a custom damage type or repurpose the damage field. |
+| [REZ_SOUND](/constants/REZ_SOUND)<InlineSyntax code={", string sound, float volume, integer loop"}/> | A sound to attach to this object. It will be played at the specified volume. If loop is [TRUE](/constants/TRUE) the sound will loop continuously for the life of the object. The sound parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset. |
+| [REZ_SOUND_COLLIDE](/constants/REZ_SOUND_COLLIDE)<InlineSyntax code={", string sound, float volume"}/> | A sound to play upon collision with another object, the ground or an avatar. The sound parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset. |
+</div>
 
-I tried a markdown table but might need to look at tweaking column widths to make this work
-They also don't support multiple lines and nesting tables can be awkward
--- Nexii
-
-| Parameter                                                                                        | Description                                                              |
-| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| [REZ_PARAM](/constants/REZ_PARAM)<InlineSyntax code=", integer param"/>                          | Start parameter passed into the rezzed object's [on_rez](/events/on_rez) event |
-| [REZ_PARAM_STRING](/constants/REZ_PARAM_STRING)<InlineSyntax code=", string param"/>             | Pass an initialization string to the root prim of the newly rezzed object that may be read with llGetStartString from within the rezzed object. Maximum string length is 1024 bytes. |
-| [REZ_FLAGS](/constants/REZ_FLAGS)<InlineSyntax code=", integer flags"/>                          | Flags applied to rezzed object when it is created in the world. {REZ_FLAGS_} |
-| [REZ_POS](/constants/REZ_POS)<InlineSyntax code=", vector pos, integer is_relative, integer at_root"/> | Position to rez the new object in the world. If is_relative is [FALSE](/constants/FALSE) the position is in region coordinates. If is_relative is [TRUE](/constants/TRUE), the position will be relative to the rezzing object. If at_root is [FALSE](/constants/FALSE), the center of the object will be at the position specified by pos (equivalent to [llRezObject](/functions/llRezObject)). Set at_root to [TRUE](/constants/TRUE) to set the position of the root prim (equivalent to [llRezAtRoot](/functions/llRezAtRoot)). |
-| [REZ_ROT](/constants/REZ_ROT)<InlineSyntax code=", rotation rot, integer relative"/>             | The initial rotation to apply to the object. If relative is [TRUE](/constants/TRUE), the rotation is relative to the rezzing object, otherwise it is absolute. |
-| [REZ_VEL](/constants/REZ_VEL)<InlineSyntax code=", vector velocity, integer local, integer inherit"/> | The initial velocity to apply to the object. If local is TRUE the velocity is in the local object coordinate frame, otherwise it is in world coordinates. If inherit is [TRUE](/constants/TRUE) the object also inherits it's rezzer's velocity. |
-| [REZ_ACCEL](/constants/REZ_ACCEL)<InlineSyntax code=", vector force, integer local"/>            | A constant force to apply to the object. If local is [TRUE](/constants/TRUE), the force vector is in local coordinates. |
-| [REZ_OMEGA](/constants/REZ_OMEGA)<InlineSyntax code=", vector axis, integer local, float spin, float gain"/> | Spin the object around the specified axis. If local is [TRUE](/constants/TRUE) that axis is in local coordinates, otherwise they are global. |
-| [REZ_LOCK_AXES](/constants/REZ_LOCK_AXES)<InlineSyntax code=", vector locks"/>                   | Prevent the object from spinning on certain axes. Setting the vector's coordinate to non-zero will prevent the object from spinning on that axis. For instance `REZ_LOCK_AXES, <1.0, 1.0, 0.0>` will allow the object to only rotate around its Z-axis. |
-| [REZ_DAMAGE](/constants/REZ_DAMAGE)<InlineSyntax code=", float damage"/>                         | The amount of damage applied to an agent upon collision with this object. |
-| [REZ_DAMAGE_TYPE](/constants/REZ_DAMAGE_TYPE)<InlineSyntax code=", integer damage_type"/>        | The damage type to apply when this prim collides with another object. Can match one of the DAMAGE_TYPE_* constants, be a custom damage type or repurpose the damage field. |
-| [REZ_SOUND](/constants/REZ_SOUND)<InlineSyntax code=", string sound, float volume, integer loop"/> | A sound to attach to this object. It will be played at the specified volume. If loop is [TRUE](/constants/TRUE) the sound will loop continuously for the life of the object. The sound parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset. |
-| [REZ_SOUND_COLLIDE](/constants/REZ_SOUND_COLLIDE)<InlineSyntax code=", string sound, float volume"/> | A sound to play upon collision with another object, the ground or an avatar. The sound parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset. |
 */}
+
+
+<table class="params-list">
+	<thead>
+		<th>Parameter</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+		<tr>
+			<td>[REZ_PARAM](/constants/REZ_PARAM)<InlineSyntax code=", integer param"/></td>
+			<td>Start parameter passed into the rezzed object's [on_rez](/events/on_rez) event. May also be read with [llGetStartParameter](/functions/llGetStartParameter)</td>
+		</tr>
+		<tr>
+			<td>[REZ_PARAM_STRING](/constants/REZ_PARAM_STRING)<InlineSyntax code=", string param"/></td>
+			<td>Pass an initialization string to the root prim of the newly rezzed object that may be read with [llGetStartString](/functions/llGetStartString) from within the rezzed object. Maximum string length is 1024 bytes.</td>
+		</tr>
+		<tr>
+			<td>[REZ_FLAGS](/constants/REZ_FLAGS)<InlineSyntax code=", integer flags"/></td>
+			<td>
+				Flags applied to rezzed object when it is created in the world.
+				<details>
+					<summary>REZ_FLAGS_*</summary>
+					<table>
+						<thead>
+							<th>Parameter</th>
+							<th>Description</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td><a href="/constants/REZ_FLAG_TEMP">REZ_FLAG_TEMP</a></td>
+								<td>Object is rezzed as temporary.</td>
+							</tr>
+							<tr>
+								<td><a href="/constants/REZ_FLAG_PHYSICAL">REZ_FLAG_PHYSICAL</a></td>
+								<td>Object is rezzed as physical.</td>
+							</tr>
+							<tr>
+								<td><a href="/constants/REZ_FLAG_PHANTOM">REZ_FLAG_PHANTOM</a></td>
+								<td>Object is rezzed as phantom</td>
+							</tr>
+							<tr>
+								<td><a href="/constants/REZ_FLAG_DIE_ON_COLLIDE">REZ_FLAG_DIE_ON_COLLIDE</a></td>
+								<td>The object will die after its first collision.</td>
+							</tr>
+							<tr>
+								<td><a href="/constants/REZ_FLAG_DIE_ON_NOENTRY">REZ_FLAG_DIE_ON_NOENTRY</a></td>
+								<td>Object will die if it attempts to enter a parcel that it can't.</td>
+							</tr>
+							<tr>
+								<td><a href="/constants/REZ_FLAG_NO_COLLIDE_OWNER">REZ_FLAG_NO_COLLIDE_OWNER</a></td>
+								<td>Object will not trigger a collision event if colliding with its owner.†</td>
+							</tr>
+							<tr>
+								<td><a href="/constants/REZ_FLAG_NO_COLLIDE_FAMILY">REZ_FLAG_NO_COLLIDE_FAMILY</a></td>
+								<td>Object will not trigger collision events when colliding with other object rezzed by the same rezzer.†</td>
+							</tr>
+							<tr>
+								<td><a href="/constants/REZ_FLAG_BLOCK_GRAB_OBJECT">REZ_FLAG_BLOCK_GRAB_OBJECT</a></td>
+								<td>Grabbing is disabled for this object.</td>
+							</tr>
+						</tbody>
+					</table>
+					<small>† Disabling collisions only disables collision events and damage. The object will still cause a physics collision and may push the objects.</small>
+				</details>
+			</td>
+		</tr>
+		<tr>
+			<td>[REZ_POS](/constants/REZ_POS)<InlineSyntax code=", vector position, integer relative, integer at_root"/></td>
+			<td>
+				Position to rez the new object in the world.
+				
+				If **relative** is [TRUE](/constants/TRUE) the **position** will be relative to the rezzer, otherwise in absolute region coordinates.
+				
+				If **at_root** is [TRUE](/constants/TRUE) the root prim of the rezzed object will be placed at **position** (like [llRezAtRoot](/functions/llRezAtRoot)), otherwise the center of the object will be placed at **position** (like [llRezObject](/functions/llRezObject)).
+			</td>
+		</tr>
+		<tr>
+			<td>[REZ_ROT](/constants/REZ_ROT)<InlineSyntax code=", rotation rot, integer relative"/></td>
+			<td>The initial rotation to apply to the object. If **relative** is [TRUE](/constants/TRUE), the rotation is relative to the rezzing object, otherwise it is absolute.</td>
+		</tr>
+		<tr>
+			<td>[REZ_VEL](/constants/REZ_VEL)<InlineSyntax code=", vector velocity, integer local, integer inherit"/></td>
+			<td>
+				The initial velocity to apply to the object.
+				
+				If **local** is [TRUE](/constants/TRUE) the velocity is in the local object coordinate frame, otherwise it is in world coordinates.
+				
+				If **inherit** is [TRUE](/constants/TRUE) the object also inherits it's rezzer's velocity.
+			</td>
+		</tr>
+		<tr>
+			<td>[REZ_ACCEL](/constants/REZ_ACCEL)<InlineSyntax code=", vector force, integer local"/></td>
+			<td>
+				A constant force to apply to the object.
+				
+				If **local** is [TRUE](/constants/TRUE), the force vector is in local coordinates, otherwise it is in world coordinates.
+			</td>
+		</tr>
+		<tr>
+			<td>[REZ_OMEGA](/constants/REZ_OMEGA)<InlineSyntax code=", vector axis, integer local, float spin, float gain"/></td>
+			<td>
+				Spin the object around the specified axis.
+				
+				If **local** is [TRUE](/constants/TRUE) that axis is in local coordinates, otherwise they are global.
+			</td>
+		</tr>
+		<tr>
+			<td>[REZ_LOCK_AXES](/constants/REZ_LOCK_AXES)<InlineSyntax code=", vector locks"/></td>
+			<td>Prevent the object from spinning on certain axes. Setting the vector's coordinate to non-zero will prevent the object from spinning on that axis. For instance <InlineSyntax code="REZ_LOCK_AXES, <1.0, 1.0, 0.0>"/> will allow the object to only rotate around its Z-axis.</td>
+		</tr>
+		<tr>
+			<td>[REZ_DAMAGE](/constants/REZ_DAMAGE)<InlineSyntax code=", float damage"/></td>
+			<td>The amount of damage applied to an agent upon collision with this object.</td>
+		</tr>
+		<tr>
+			<td>[REZ_DAMAGE_TYPE](/constants/REZ_DAMAGE_TYPE)<InlineSyntax code=", integer damage_type"/></td>
+			<td>The damage type to apply when this prim collides with another object. Can match one of the DAMAGE_TYPE_* constants, be a custom damage type or repurpose the damage field.</td>
+		</tr>
+		<tr>
+			<td>[REZ_SOUND](/constants/REZ_SOUND)<InlineSyntax code=", string sound, float volume, integer loop"/></td>
+			<td>
+				A sound to attach to this object. It will be played at the specified **volume**. The **sound** parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset.
+				
+				If **loop** is [TRUE](/constants/TRUE) the sound will loop continuously for the life of the object.
+			</td>
+		</tr>
+		<tr>
+			<td>[REZ_SOUND_COLLIDE](/constants/REZ_SOUND_COLLIDE)<InlineSyntax code=", string sound, float volume"/></td>
+			<td>A sound to play upon collision with another object, the ground or an avatar. The **sound** parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset.</td>
+		</tr>
+	</tbody>
+</table>
+
+
+
+
+
 
 ## Caveats
 
-* This function causes the script to sleep at least for 0.1s and uses 200.0 energy — this energy deficiency can cause scripts across the entire linkset to skip for two sim frames (0.022s)
+* This function causes the script to sleep at least for <InlineSyntax code="0.1"/>s and uses <InlineSyntax code="200.0"/> energy — this energy deficiency can cause scripts across the entire linkset to skip for two sim frames (<InlineSyntax code="0.022"/>s)
 	* In practice, using multiple scripts, it is possible to reach a maximum object creation speed of ~900 objects per minute per object, however with an active `control` event (user is constantly giving control input) this can be exceeded to double that amount
 	* Mind that there are some dynamic limits in place that are designed to prevent griefing
 * If **InventoryItem** is missing from the prim's inventory or it is not an object then an error is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL)

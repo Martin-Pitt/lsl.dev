@@ -13,6 +13,9 @@ const __dirname = dirname(__filename);
 const CONFIG = {
 	yamlPath: 'src/content/data/lsl_definitions.yml',
 	jsonPath: 'src/content/data/lsl_definitions.json',
+	jsonConstantsPath: 'src/content/data/lsl_definitions.constants.json',
+	jsonEventsPath: 'src/content/data/lsl_definitions.events.json',
+	jsonFunctionsPath: 'src/content/data/lsl_definitions.functions.json',
 };
 
 /**
@@ -55,6 +58,16 @@ async function main() {
 		// Write JSON version
 		console.log(`📁 Writing to: ${CONFIG.jsonPath}`);
 		await writeFile(CONFIG.jsonPath, JSON.stringify(definitions, null, '\t'), 'utf8');
+		
+		console.log(`📁 Writing to: ${CONFIG.jsonConstantsPath}`);
+		await writeFile(CONFIG.jsonConstantsPath, JSON.stringify(definitions.constants, null, '\t'), 'utf8');
+		
+		console.log(`📁 Writing to: ${CONFIG.jsonEventsPath}`);
+		await writeFile(CONFIG.jsonEventsPath, JSON.stringify(definitions.events, null, '\t'), 'utf8');
+		
+		console.log(`📁 Writing to: ${CONFIG.jsonFunctionsPath}`);
+		await writeFile(CONFIG.jsonFunctionsPath, JSON.stringify(definitions.functions, null, '\t'), 'utf8');
+		
 		
 		console.log('\n✅ JSON generation completed successfully!');
 		

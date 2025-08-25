@@ -21,14 +21,11 @@ const {
 } = Astro.props;
 ---
 
-<!-- Lazily using the FileTree here, but it's roughly what I'm trying to achieve UI wise -->
-<FileTree>
-	<ul>
-		<li>{name} {returnType}
-			{args && <ul>{args.map(({ name, type, description }) => (
-				<li>{name} {type} {description && ' — ' + description}</li>
-			))}
-			</ul>}
-		</li>
-	</ul>
-</FileTree>
+<div class="function-syntax not-content">
+	<small class="title">Function Syntax</small>
+	<div class="function"><span class="type">{returnType}</span> <span class="name">{name}</span>(</div>
+	{args && <ol class="arguments">{args.map(({ name, type, description }, index, array) => (
+		<li class="argument"><span class="type">{type}</span> <span class="name">{name}</span>{index < array.length - 1 && ','} {description && <span class="description">// {description}</span>}</li>
+	))}</ol>}
+	);
+</div>

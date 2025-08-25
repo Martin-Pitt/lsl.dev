@@ -3,8 +3,6 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 import starlightThemeObsidian from 'starlight-theme-obsidian';
-import { readFile } from 'fs/promises';
-
 
 
 // https://astro.build/config
@@ -109,14 +107,6 @@ export default defineConfig({
 				}),
 			],
 			tableOfContents: false,
-			expressiveCode: {
-				shiki: {
-					langs: [
-						JSON.parse(await readFile('./src/content/data/lsl_grammar.json', 'utf-8'))
-					],
-				},
-				tabWidth: 0,
-			},
 		}),
 	],
 });

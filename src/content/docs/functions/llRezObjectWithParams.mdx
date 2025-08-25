@@ -9,7 +9,6 @@ license: This work uses content from the Second Life® Wiki article [llRezObject
 ---
 import LSLFunction from '/src/content/templates/LSLFunction.astro';
 import InlineSyntax from '/src/content/templates/InlineSyntax.astro';
-import { Code } from '@astrojs/starlight/components';
 import { llRezObjectWithParams as definition } from '/src/content/data/lsl_definitions.functions.json';
 
 <LSLFunction
@@ -31,14 +30,20 @@ By default rezzes at the position of the object containing the script, unless [R
 
 Returns a key which will be the key of the object when it is successfully rezzed in the world.
 
-```lsl
-key object = llRezObjectWithParams("Object", []);
+```lsl title="How to use" frame="terminal"
+llRezObjectWithParams("Object", []);
 ```
 
-```lsl
-key object = llRezObjectWithParams("Object", [
-	REZ_POS, <128.0, 128.0, 32.0>, FALSE, TRUE
-]);
+```lsl title="Example" frame="terminal" collapse={1-4, 8-9}
+default {
+	touch_start(integer detected)
+	{
+		// When touched the script tries to rez an item named "Object" from object inventory at region position <128, 128, 32>
+		key object = llRezObjectWithParams("Object", [
+			REZ_POS, <128.0, 128.0, 32.0>, FALSE, TRUE
+		]);
+	}
+}
 ```
 
 

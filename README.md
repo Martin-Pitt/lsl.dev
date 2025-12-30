@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> Currently focusing efforts primarily on SLua.dev
+
+
 # LSL.dev
 
 LSL.dev is brand new home for LSL — focused on being a modernised version of the [LSL Portal of the SL Wiki](https://wiki.secondlife.com/wiki/LSL_Portal).

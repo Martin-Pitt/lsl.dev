@@ -1,140 +1,197 @@
-# Features index prototypes
+# Features index: decision and prototypes
 
-Status: **exploration, temporary.** The live Features Overview (`/features/`,
-`src/pages/features/index.astro`) is the baseline and is unchanged. Four alternatives live under
-`/prototypes/features/`. Each is marked with a dashed "Prototype" banner, is absent from the sidebar
-(the sidebar in `astro.config.mjs` is an explicit list), is left out of search (`pagefind: false`
-plus `data-pagefind-ignore`), carries `noindex`, and links back to the baseline and to the other variants.
+Status: **decided.** The live Features Overview (`/features/`) is now the C dashboard without
+its filter box, with the tightened B task list below it. The other variants are kept under
+`/prototypes/` for reference and for the next round (E and F). The prototype pages carry no
+banner, because they are opened by URL. They are absent from the sidebar (the sidebar in
+`astro.config.mjs` is an explicit list), left out of search (`pagefind: false` plus
+`data-pagefind-ignore`), and carry `noindex, nofollow`. The landing-page prototype F is described
+in [landing.md](landing.md).
 
-| Variant | URL | Source |
+| Page | URL | Source |
 | --- | --- | --- |
-| Baseline | http://localhost:4321/features/ | `src/pages/features/index.astro` |
-| A: By goal | http://localhost:4321/prototypes/features/a/ | `src/pages/prototypes/features/a.astro` |
-| B: Task-first | http://localhost:4321/prototypes/features/b/ | `src/pages/prototypes/features/b.astro` |
-| C: Dashboard | http://localhost:4321/prototypes/features/c/ | `src/pages/prototypes/features/c.astro` |
-| D: Search + groups | http://localhost:4321/prototypes/features/d/ | `src/pages/prototypes/features/d.astro` |
+| **Features Overview (live)**: C cards + B tasks | http://localhost:4321/features/ | `src/pages/features/index.astro` |
+| Previous baseline (A–Z LinkCards) | http://localhost:4321/prototypes/features/baseline/ | `src/pages/prototypes/features/baseline.astro` |
+| B: task-first, standalone | http://localhost:4321/prototypes/features/b/ | `src/pages/prototypes/features/b.astro` |
+| D: start here + goal groups | http://localhost:4321/prototypes/features/d/ | `src/pages/prototypes/features/d.astro` |
+| E: features by category (portal style) | http://localhost:4321/prototypes/features/e/ | `src/pages/prototypes/features/e.astro` |
+| F: landing page (portal style) | http://localhost:4321/prototypes/landing/ | `src/pages/prototypes/landing/index.astro` |
 
-Shared pieces: `src/components/prototypes/ProtoShell.astro` (banner, variant switcher, search
-exclusion) and `src/lib/prototypes/features-index.ts`. That module holds the editorial data: goal
-groups, tasks, usage order, one-line purposes and icons. Titles, descriptions and key APIs come
-from the feature MDX through `src/lib/features.ts`. The build fails if a grouping leaves out a
-feature or names one that does not exist, so a new feature page cannot go missing silently.
-"Key APIs" are the first names a feature page links (its `<ApiLinks>` come first), so authors
-already control them.
+Removed: **A (by goal)** and **C (dashboard with filter)**. C now lives on as the real page. The
+baseline+B, C+B and D+B comparison pages were planned, then dropped once the user picked C+B.
 
-Screenshots are in `docs/prototypes/img/`, captured from the dev server with headless Chrome over
-CDP using true device emulation: `<variant>-desktop-light.png` (1280 px, light) and
-`<variant>-375-dark.png` (375 px, dark). The capture script also checked all 5 pages at 1280 and
-375 px in both themes. None scrolls horizontally at 375 px, and each has one `h1`, a `main`
-landmark and `h2` per section. The filters in C and D announce their match count through a
-`role="status"` region.
+## Building blocks
 
-## Audit of the baseline
+- `src/lib/features-overview.ts`: the editorial data for the live page (usage order, purpose
+  lines, icons, tasks) plus the helpers `apiHref` and `keyApis`. Titles, descriptions and key
+  APIs come from the feature MDX through `src/lib/features.ts`.
+- `src/components/features/FeatureCards.astro`: the dashboard cards ("Most used" 6, then "More
+  features").
+- `src/components/features/TaskList.astro`: the "I want to…" list. It is a self-contained
+  `<section>` with optional `id`/`heading` props, so it can be embedded below any layout.
+- **Every feature appears on `/features/`, including future ones.** The cards come from all
+  feature pages. A feature that `usageOrder` does not rank yet is appended A–Z, a missing purpose
+  line falls back to the frontmatter `description`, and a missing icon falls back to a generic
+  one. An unknown id in the editorial data fails the build, and so does a card list that does not
+  contain every feature exactly once. (The new `inventory` page, added in parallel, already shows
+  up this way.)
+- Prototype-only: `src/components/prototypes/ProtoShell.astro` (no banner, noindex, search
+  exclusion, optional wide `splash` template), `src/lib/prototypes/features-index.ts` (D's goal
+  groups; unlisted features fall into an "Other" group), and `src/lib/prototypes/portal-topics.ts`
+  with `PortalTopics.astro` and `TopicList.astro` (E and F).
+- `/functions/` now has jump anchors `#from-a`, `#from-l` and `#from-t` on the first function of
+  each range (ignoring the `ll` prefix), so F can offer the portal's A–L / L–T / T–Z links.
 
-The baseline is an intro paragraph and a `CardGrid` of 23 `LinkCard`s (title + frontmatter
-description) in slug (A–Z) order.
+Screenshots are in `img/`: `<page>-desktop-light.png` (1280 px, light) and `<page>-375-dark.png`
+(375 px, dark), for `features`, `baseline`, `b`, `d`, `e` and `landing`. They were captured from
+the dev server with headless Chrome over CDP using device emulation. All six pages were checked
+at 1280 and 375 px in both themes. None scrolls horizontally at 375 px, none shows a prototype
+banner, and each has exactly one `h1` and a `main` landmark.
+
+## Audit of the old baseline
+
+The old page was an intro paragraph and a `CardGrid` of 23 `LinkCard`s in slug (A–Z) order.
 
 | Law | Finding |
 | --- | --- |
-| **Hick's Law** | 23 options of equal weight with no grouping. A reader must scan all of them to choose, and decision time grows with the count. |
-| **Miller's Law / Chunking** | One undivided run of 23 is well beyond the 7±2 items that are easy to hold in mind. Alphabetical order is not a meaningful chunk. |
-| **Law of Proximity** | Every card sits the same distance from its neighbours, so related areas (Movement, Physics, Pathfinding; Communications, Dialog) look no closer to each other than unrelated ones. |
-| **Law of Common Region** | Every card is its own region, and no region contains a set of features. The page expresses no structure above the item. |
-| **Law of Similarity** | All cards look the same: same size, same type, no icon or color. Nothing separates kinds of feature, and nothing marks the foundational ones. |
-| **Prägnanz** | The grid itself is simple and clean, a plus. But descriptions are 1–2 lines of uneven length, so card heights vary and the rhythm breaks. |
-| **Serial Position** | First and last get the most attention, and here they are Animesh and Textures. Animesh is niche. The most-used areas (Events, Communications, Input) sit in the unremarkable middle. |
-| **Jakob's Law** | Portals readers know (MDN's "Web APIs", Wikipedia portals, the slua.dev and Roblox docs) group by topic and offer "Getting started" or "How do I…". A flat A–Z of cards is closer to a tag cloud. |
-| **Fitts's Law** | Whole cards are large, easy targets, which works well. But the page has no direct targets for APIs, so reaching a function always takes a second page load. |
-| **Aesthetic-Usability** | It looks tidy and native to Starlight, which buys goodwill. That polish also hides the fact that the page does little work for the reader. |
-| **Doherty Threshold** | Static HTML loads instantly, so this law is satisfied. Any variant should stay static, with at most a tiny client-side filter. |
-| **Von Restorff** | Nothing stands out, so a newcomer gets no "start here" signal. |
-| **Tesler's Law** | The complexity of mapping "what I want to do" to a feature is pushed onto the reader. They must already know that touch handling lives under *Input* and rezzing under *Linksets*. |
-| **Goal-Gradient** | The page gives no sense of a path or progress, and the API is never closer than two clicks. |
+| **Hick's Law** | 23 options of equal weight, no grouping. Decision time grows with the count. |
+| **Miller's Law / Chunking** | One undivided run of 23, and A–Z is not a meaningful chunk. |
+| **Law of Proximity** | Every card is equidistant, so related areas look no closer than unrelated ones. |
+| **Law of Common Region** | No region contains a set of features, so the page has no structure above the item. |
+| **Law of Similarity** | All cards look the same, with nothing to tell kinds of feature apart. |
+| **Serial Position** | Animesh (niche) comes first. The most-used areas sit in the middle. |
+| **Jakob's Law** | Docs portals offer topics plus "How do I…". A flat A–Z reads like a tag cloud. |
+| **Fitts's Law** | Large card targets, but no direct API targets, so every API costs a second page load. |
+| **Tesler's Law** | The reader must already know that touch lives under *Input* and rezzing under *Linksets*. |
+| **Goal-Gradient** | The API is never closer than two clicks. |
 
-Concrete problems to solve: (1) choice overload from 23 flat items; (2) no meaningful grouping;
-(3) task-to-feature mapping left to the reader; (4) no starting point for newcomers; (5) no shortcut
-to the APIs people actually came for; (6) the intro paragraph spends the most valuable spot on
-meta-text.
+## Decision: C cards + B tasks (live `/features/`)
 
-## Variant A: by goal
+What the user liked about C: the cards, their key-API shortcuts and the information density.
+Its filter box was dropped because it duplicated the sidebar search. B's task list was liked as a
+*secondary* section, not as the whole page.
 
-Five common-region cards: *Script logic*, *Build the world*, *Interact with avatars*, *Talk to
-scripts & people*, *Look & sound*. Each holds 2–6 features, and each feature shows a short purpose
-line ("Play, loop and trigger sounds") in place of the longer frontmatter description. Jump pills
-with counts sit at the top.
+- **Serial Position:** the 6 most-used areas lead. The usage order is editorial until analytics
+  exist.
+- **Von Restorff / Similarity:** the icon tiles are easy to tell apart.
+- **Goal-Gradient / Fitts:** 4 key-API links per card put the API one click away, and each card
+  head is a large target.
+- **Jakob / Tesler:** the "I want to…" list maps tasks to APIs, so the reader no longer has to.
+- **Law of Proximity (B tightened):** each task row is now a single wrapped line, made of the task
+  text, a colon, its API links and the feature pill. Before, the task sat at the left edge and its
+  links at the right edge of a full-width row. Rows are shorter and sit in two columns at desktop
+  width, so the page stays dense.
+- **Doherty:** static HTML with no client JS. Removing the filter removed C's only script.
+- **Trade-offs:** about 90 API links across 23+ cards add many tab stops. The inline task links
+  are small targets (`code` size), which trades Fitts for density. The Starlight built-in icons
+  only roughly fit LSL concepts, and **a custom LSL icon set would improve them**.
 
-- **Why:** Hick and Miller (5 first-level choices, at most 6 inside each); Proximity and Common
-  Region (related features share a card); Prägnanz (short, even purpose lines); Jakob (a topic
-  portal like MDN).
-- **Trade-offs:** some features belong in two groups, and the page has to pick one: is Combat about
-  avatars or the world, is Data Storage logic or data? Group sizes are uneven (2 to 6). There are
-  still no direct API links. The cheapest change to adopt: no JS, same data.
-- Screenshots: `img/a-desktop-light.png`, `img/a-375-dark.png`.
+## Rejected: A (by goal)
 
-## Variant B: task-first
+Deleted. Reason recorded from the user: **the goal taxonomy and the heavy boxing don't fit the
+nature of scripting in Second Life.** Most real scripts cut across goals (a vendor uses touch,
+dialogs, money, inventory and chat at once), so any five-way split puts features in arguable
+buckets: Combat, Data Storage, Experience, Land. Five bordered boxes also add visual weight
+without helping anyone find an API. D still uses the same groups, which is a point against D.
 
-An "I want to…" list of 22 everyday tasks ("react when someone touches my object", "store data
-that survives a reset", "accept payment for a vendor"). Each row links the 1–3 APIs that do the job
-and the feature to read more. A compact multi-column A–Z of every feature follows.
+## B: task-first (standalone)
 
-- **Why:** Tesler (the site carries the task-to-feature mapping); Jakob ("How do I…" sections are
-  a familiar docs pattern); Goal-Gradient (one click to the API that does the job); Fitts (chips
-  are at least 2 rem tall). The A–Z keeps scanning by name fast.
-- **Trade-offs:** an editorial list goes stale and can never be complete, so readers whose task is
-  not listed fall back to the A–Z. Several tasks map to the same feature, so the page reads less as
-  an overview of all 23 areas. Rows are dense at 375 px. Best as a *section*, not the whole page.
-- Screenshots: `img/b-desktop-light.png`, `img/b-375-dark.png`.
+The shared `TaskList` followed by a compact multi-column A–Z of every feature. It is kept as a
+standalone page, and the same component is the secondary section on the live page.
 
-## Variant C: visual dashboard
+## D: start here + goal groups
 
-Icon tiles (3 rem icon, title, purpose line, 4 key-API chips). A "Most used" section of 6 comes
-first and "More features" follows, in an editorial usage order. A filter box matches titles,
-descriptions *and API names*: typing `llDialog` leaves Communications and Dialog.
+Unchanged apart from losing the banner. It inherits A's grouping, which the user rejected, so it
+is kept only for reference.
 
-- **Why:** Serial Position (the commonest areas lead); Von Restorff and Similarity (icons tell
-  tiles apart); Fitts (large tile heads, min-height chips); Doherty (instant client-side filter,
-  live status for screen readers); Goal-Gradient (APIs one click away).
-- **Trade-offs:** the busiest variant. 23 tiles with 4 chips each make about 90 more links, which
-  is a lot to scan and to tab through. Starlight's built-in icons only roughly fit LSL concepts and
-  would need a custom set. The usage order is a guess until analytics exist. The filter overlaps
-  with the site search.
-- Screenshots: `img/c-desktop-light.png`, `img/c-375-dark.png`.
+## E: features by category (LSL Portal style)
 
-## Variant D: search + groups (hybrid)
+Modelled on the LSL Portal's "LSL Features by category" column
+(`public/wiki-source/lsl-portal-079327e8.txt`). It has the same dual view: a flat **A–Z** of 36
+topics next to a **topic tree** (Avatar › Animation/Attachment/Camera/Controls/Sit,
+Communications › Chat/Dialog/HTTP/XML-RPC, Detection › Collision/Sensor/Touch, Inventory ›
+Creator/Notecard/Owner, Primitive › Effects › Light/Particles, Face › Alpha/Color/Texture,
+Region › Ground/Parcel/Security/Time, Script › Error/Keywords/Math/Types, …). A third column,
+"Also on lsl.dev", lists the features that no portal topic reaches (computed, so it stays
+correct).
 
-A highlighted "New to LSL? Start here" path (Events → Input → Communications), then a filter
-with a line of popular tasks, then A's goal groups as compact cards. Each row expands with a
-native `<details>` to show 5 key APIs.
+Each topic links to the best match: a feature page (bold), a category (plain), a constant group
+(`code`) or a reference page. A–Z rows add secondary links in small grey text, for example
+*Alpha* → Textures & Materials, plus `AlphaMode`. Category links go through `categoryLink()`, so
+a single-member category links straight to its member. Every ref is resolved at build time, and
+an unknown feature, category or group fails the build. Inventory topics use
+`f:inventory|c:prim_inventory`, which points at the feature page once it exists and at the
+category until then.
 
-- **Why:** Von Restorff and Goal-Gradient (one visually distinct, numbered starting path);
-  Hick and Chunking (5 groups); Common Region; Tesler done as progressive disclosure, with APIs
-  available but hidden until asked for (keeps the Aesthetic-Usability calm of A); Jakob
-  (filter + topic portal + "popular" links, as on MDN and Wikipedia); Doherty (static page,
-  small filter).
-- **Trade-offs:** more moving parts than A: three zones above the groups. The "Key APIs" toggles
-  add tab stops, though they are clearly labelled for screen readers ("Sound: Key APIs"). The
-  start path and popular tasks are editorial choices someone must maintain.
-- Screenshots: `img/d-desktop-light.png`, `img/d-375-dark.png`.
+- **Jakob's Law:** long-time scripters know this exact layout from the wiki portal.
+- **Law of Proximity / Common Region:** the tree's indentation and rules carry the grouping
+  without boxes, avoiding the heaviness that sank A.
+- **Miller / Chunking:** about 13 top-level tree nodes, each with 2–5 children.
+- **Similarity:** weight and font encode the target type (feature, category, group), and a
+  legend explains it.
+- **Trade-offs:** about 120 links on one page. The portal's taxonomy is old (it has Combat2 and
+  XML-RPC but no Pathfinding or Animesh), and several topics map to the same page, for example
+  Color, Texture and Face all go to Textures & Materials.
+
+### Gaps (portal topics with no lsl.dev page)
+
+Shown as plain grey text with a dashed "no page" tag.
+
+| Topic | Note |
+| --- | --- |
+| Group | No group category or feature. The group APIs (`llSameGroup`, `llDetectedGroup`, `OBJECT_GROUP`) are scattered. |
+| Communications › XML-RPC | Removed from SL. A deprecation note would do. |
+| Functions › God Mode | God-only functions, which the catalog omits. |
+| Inventory › Creator, Owner | No pages for the creator/owner APIs (`llGetCreator`, `llGetOwner`, `llGetInventoryCreator`). |
+| Movement › Physics › Damping, Hover | No pages for vehicle/hover damping (`llSetHoverHeight`, `llGroundRepel`, vehicle `*_TIMESCALE` params). |
+| Primitive › Effects › Light | Light lives in `PRIM_POINT_LIGHT` / `PRIM_REFLECTION_PROBE` but has no page. |
+| Script › Error, Math Errors | No page about runtime errors (stack-heap collision, math errors). |
+| Needs Example | Omitted on purpose: it is a wiki maintenance list, not a topic. |
+
+Weak matches worth improving: *Ground* → `GroundTextureParam` (no terraforming topic), *Video*
+→ the Parcel Media category, *World* → the Region category.
+
+## Missing: an object INVENTORY feature
+
+No feature page covers object (prim) inventory. A parallel task is adding one, so this list is
+input for it. It would cover the following (current home in brackets, from the committed feature
+pages):
+
+| APIs | Currently in |
+| --- | --- |
+| `llGetInventoryName`, `llGetInventoryNumber`, `llGetInventoryType`, `llGetInventoryKey`, `llGetInventoryCreator`, `llGetInventoryDesc`, `llGetInventoryAcquireTime` | Prims |
+| `llGetInventoryPermMask`, `llSetInventoryPermMask`, permission masks `MASK_*` / `PERM_*`, group `AssetPermission*` | Prims (Asset Permissions category) |
+| `llGiveInventory` | Avatars, Dialog, Money, Prims |
+| `llGiveInventoryList`, `llGiveAgentInventory` | Avatars (and Money) |
+| `llRemoveInventory`, `llAllowInventoryDrop`, `CHANGED_ALLOWED_DROP` | Prims |
+| `llRequestInventoryData` (dataserver) | Prims |
+| `llRezObject`, `llRezAtRoot`, `llRezObjectWithParams`, `object_rez` | Linksets (and Combat, Data Storage, Physics, Sound for `llRezObjectWithParams`) |
+| `changed` + `CHANGED_INVENTORY` | Events, Prims, Data Storage |
+| Notecards: `llGetNotecardLine`, `llGetNotecardLineSync`, `llGetNumberOfNotecardLines` | Data Storage |
+| `llFindNotecardTextCount`, `llFindNotecardTextSync`, `INVENTORY_NOTECARD` | **nowhere** |
+| `INVENTORY_*` (`InventoryType` group) | Prims (`INVENTORY_ALL` only) |
+| Script control: `llSetScriptState`, `llGetScriptState`, `llResetOtherScript`, `llGetScriptName` | Events |
+| Remote load: `llSetRemoteScriptAccessPin`, `llRemoteLoadScriptPin` | Prims |
+
+Relevant categories: `prim_inventory`, `avatar_inventory`, `notecard`, `asset_permissions`,
+`rez`.
 
 ## Recommendation
 
-Adopt **D**, built in two steps:
-
-1. Ship **A's grouping** first as the new `/features/`. It fixes the biggest problems (Hick,
-   Chunking, Proximity, Common Region) with no JS and little to maintain. The 5 groups could
-   also order the sidebar's Features section, so the two navigations agree (Jakob's Law within the
-   site).
-2. Add D's **Start here** strip and the **filter**, then the expandable key APIs. Use B's task list
-   as a trimmed "Popular tasks" line, not a whole page. Keep C's icons only if a custom LSL icon
-   set appears; the generic ones add noise rather than meaning.
-
-Open questions before adopting: settle the group names and borderline placements (Combat, Data
-Storage, Experience, Land). Decide whether the purpose lines should become a frontmatter field
-(e.g. `summary:`) on each feature page instead of living in the prototype module. Separately, the
-breadcrumb root renders as lowercase "features" on these routes. That comes from
-`src/lib/page-nav.ts`, which the prototypes did not touch.
+1. **Keep C+B as `/features/`** (done). Next steps: a custom LSL icon set, a `summary:`
+   frontmatter field to replace the purpose lines in `features-overview.ts`, and a rank and
+   purpose for `inventory` once that page lands.
+2. **Adopt E as a second view, not a replacement.** The cards answer "what are the main areas?"
+   and E answers "where is topic X?" with the portal's vocabulary. E fits as `/features/topics/`
+   or as a section of the Reference overview. It works best compactly inside F.
+3. **Use F as the basis of a new reference landing page** (see [landing.md](landing.md)). It
+   gives the site a portal-like hub that wiki users will recognise.
+4. **Fill the gaps** in priority order: Inventory feature (in progress), Operators, Variables and
+   Errors reference pages, then Group, Light and Creator/Owner topics.
+5. Delete D and the baseline prototype once nobody needs the comparison.
 
 ## Removing the prototypes
 
-Delete `src/pages/prototypes/`, `src/components/prototypes/`, `src/lib/prototypes/` and
-`docs/prototypes/`. Nothing else references them.
+Delete `src/pages/prototypes/`, `src/components/prototypes/`, `src/lib/prototypes/` and the
+prototype screenshots. `src/lib/features-overview.ts` and `src/components/features/` belong to
+the live page and stay. The `#from-*` anchors on `/functions/` are harmless to keep.

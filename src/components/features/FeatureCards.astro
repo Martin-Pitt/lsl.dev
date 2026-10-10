@@ -1,0 +1,48 @@
+---
+/**
+ * Feature dashboard cards for /features/: icon, title, purpose line and key-API shortcuts, with the
+ * most-used features first. Covers every feature page (src/lib/features-overview.ts).
+ */
+import { Icon } from '@astrojs/starlight/components';
+import { byUsage, mostUsedCount, icon, purpose, keyApis, featureHref, apiHref } from '../../lib/features-overview';
+const sections = [
+	{ id: 'most-used', heading: 'Most used', list: byUsage.slice(0, mostUsedCount) },
+	{ id: 'more-features', heading: 'More features', list: byUsage.slice(mostUsedCount) },
+];
+---
+<div class="feature-cards">
+	{sections.map(s => (
+		<section aria-labelledby={s.id}>
+			<h2 id={s.id}>{s.heading}</h2>
+			<ul class="tiles">
+				{s.list.map(f => (
+					<li class="tile">
+						<a class="head" href={featureHref(f.id)}>
+							<span class="icon"><Icon name={icon(f) as any} size="1.5rem" /></span>
+							<span><span class="t">{f.title}</span><span class="p">{purpose(f)}</span></span>
+						</a>
+						<ul class="apis" aria-label={`Key ${f.title} APIs`}>
+							{keyApis(f, 4).map(a => <li><a href={apiHref(a)}><code>{a}</code></a></li>)}
+						</ul>
+					</li>
+				))}
+			</ul>
+		</section>
+	))}
+</div>
+<style>
+	.feature-cards section { margin: 0; }
+	.feature-cards h2 { margin-top: 1.5rem; }
+	.tiles { list-style: none; padding: 0; margin: .75rem 0 0; display: grid; gap: .75rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
+	.tile { margin: 0; border: 1px solid var(--sl-color-gray-5); border-radius: .75rem; padding: .75rem; display: flex; flex-direction: column; gap: .5rem; }
+	.tile:hover { border-color: var(--sl-color-accent); }
+	.head { display: flex; gap: .75rem; align-items: center; text-decoration: none; color: inherit; min-height: 3rem; }
+	.icon { flex: none; display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: .625rem; background: var(--sl-color-accent-low); color: var(--sl-color-text-accent); }
+	.t { display: block; font-weight: 600; font-size: var(--sl-text-lg); color: var(--sl-color-white); }
+	.p { display: block; font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); line-height: 1.35; }
+	.apis { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .25rem; }
+	.apis li { margin: 0; }
+	.apis a { display: inline-flex; min-height: 1.75rem; align-items: center; text-decoration: none; }
+	.apis code { font-size: var(--sl-text-xs); }
+	.feature-cards a:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 2px; }
+</style>

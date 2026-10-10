@@ -6,12 +6,12 @@ import { byGoal, byTask, purpose, keyApis, featureHref, apiHref, featurePageMap 
 const start = ['events', 'input', 'communications'].map(id => featurePageMap.get(id)!);
 const quick = byTask.slice(0, 6);
 ---
-<ProtoShell variant="d" title="Search + groups" summary="One highlighted starting path, a filter, and goal groups whose rows expand to show key APIs.">
+<ProtoShell title="Features: start here and groups" summary="One highlighted starting path, a filter, and goal groups whose rows expand to show key APIs.">
 	<div class="proto">
 		<section class="start" aria-labelledby="start">
 			<h2 id="start">New to LSL? Start here</h2>
 			<ol>
-				{start.map((f, i) => <li><a href={featureHref(f.id)}><span class="n" aria-hidden="true">{i + 1}</span><span><strong>{f.title}</strong><span class="p">{purpose[f.id]}</span></span></a></li>)}
+				{start.map((f, i) => <li><a href={featureHref(f.id)}><span class="n" aria-hidden="true">{i + 1}</span><span><strong>{f.title}</strong><span class="p">{purpose(f)}</span></span></a></li>)}
 			</ol>
 		</section>
 		<div class="bar">
@@ -27,7 +27,7 @@ const quick = byTask.slice(0, 6);
 					<ul>
 						{g.pages.map(f => (
 							<li data-search={[f.title, f.description, ...f.items].join(' ').toLowerCase()}>
-								<a class="row" href={featureHref(f.id)}><span class="t">{f.title}</span><span class="p">{purpose[f.id]}</span></a>
+								<a class="row" href={featureHref(f.id)}><span class="t">{f.title}</span><span class="p">{purpose(f)}</span></a>
 								<details>
 									<summary><span class="sr-only">{f.title}: </span>Key APIs</summary>
 									<ul class="apis">{keyApis(f, 5).map(a => <li><a href={apiHref(a)}><code>{a}</code></a></li>)}</ul>

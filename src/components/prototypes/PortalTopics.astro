@@ -1,0 +1,39 @@
+---
+// PROTOTYPE: "Features by category" in the LSL Portal's dual view, an A-Z and a topic tree.
+// `compact` (landing page F) shows the tree only, without the secondary links.
+import TopicList from './TopicList.astro';
+import { topicsAZ, topicTree, unmappedFeatures } from '../../lib/prototypes/portal-topics';
+import { featureHref } from '../../lib/features';
+interface Props { compact?: boolean; idPrefix?: string }
+const { compact = false, idPrefix = 'topics' } = Astro.props;
+---
+<div class:list={['portal-topics', { compact }]}>
+	{!compact && (
+		<section aria-labelledby={`${idPrefix}-az`}>
+			<h2 id={`${idPrefix}-az`}>A–Z</h2>
+			<TopicList topics={topicsAZ} />
+		</section>
+	)}
+	<section aria-labelledby={`${idPrefix}-tree`}>
+		{compact ? <h3 id={`${idPrefix}-tree`} class="sr-only">By topic</h3> : <h2 id={`${idPrefix}-tree`}>By topic</h2>}
+		<TopicList topics={topicTree} showAlso={!compact} />
+	</section>
+	{unmappedFeatures.length > 0 && (
+		<section aria-labelledby={`${idPrefix}-more`}>
+			{compact ? <h3 id={`${idPrefix}-more`}>Also on lsl.dev</h3> : <h2 id={`${idPrefix}-more`}>Also on lsl.dev</h2>}
+			<ul class="more">{unmappedFeatures.map(f => <li><a href={featureHref(f.id)}>{f.title}</a></li>)}</ul>
+		</section>
+	)}
+</div>
+<style>
+	.portal-topics { display: grid; gap: 1rem 2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); align-items: start; font-size: var(--sl-text-sm); }
+	.portal-topics section { margin: 0; }
+	.portal-topics h2 { margin: 0 0 .375rem; font-size: var(--sl-text-base); text-transform: uppercase; letter-spacing: .04em; color: var(--sl-color-gray-3); }
+	.portal-topics h3 { margin: .5rem 0 .25rem; font-size: var(--sl-text-sm); color: var(--sl-color-gray-3); }
+	.portal-topics.compact { display: block; }
+	.portal-topics.compact > section:first-child { columns: 2 10rem; column-gap: 1.25rem; }
+	.portal-topics.compact :global(.topics > li) { break-inside: avoid; }
+	.more { list-style: none; padding: 0; margin: 0; }
+	.more li { margin: 0; }
+	.compact .more { display: flex; flex-wrap: wrap; gap: 0 .75rem; }
+</style>

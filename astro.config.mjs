@@ -31,7 +31,8 @@ const referenceCategories = features
 			return one ? { label: `${one.label} → ${one.name}`, link: one.href } : { label: categoryLabel.get(id) ?? id, link: `/categories/${id}/` };
 		}),
 	}));
-/** Flat, in slua.dev order: Features Overview, then one entry per feature page. */
+/** Flat, in slua.dev order (alphabetical by slug): Features Overview, then one entry per feature page.
+ * lsl.dev additions beyond slua.dev's set (Inventory) slot in alphabetically. */
 const featureItems = features.map(f => f.subpages.length === 0
 	? { label: f.title, link: `/features/${f.id}/` }
 	: {

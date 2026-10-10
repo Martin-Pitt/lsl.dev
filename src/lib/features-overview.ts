@@ -15,8 +15,12 @@ export function apiHref(name: string) {
 	const kind = /^ll/.test(name) ? 'functions' : /^[A-Z][A-Z0-9_]*$/.test(name) ? 'constants' : 'events';
 	return `/${kind}/${encodeURIComponent(name)}/`;
 }
-/** Key APIs: the first names a feature page links (its <ApiLinks> come first). */
-export function keyApis(f: FeaturePage, n = 4) { return f.items.slice(0, n); }
+/** Hand-picked key APIs, where the first names a page links are not the most useful shortcuts. */
+const keyApiNames: Record<string, string[]> = {
+	inventory: ['llGetInventoryName', 'llGiveInventory', 'llRezObjectWithParams', 'llDerezObject', 'llGetNotecardLineSync'],
+};
+/** Key APIs: `keyApiNames`, else the first names a feature page links (its <ApiLinks> come first). */
+export function keyApis(f: FeaturePage, n = 4) { return (keyApiNames[f.id] ?? f.items).slice(0, n); }
 
 function need(id: string, where: string): FeaturePage {
 	const f = featurePageMap.get(id);
@@ -38,6 +42,7 @@ const purposes: Record<string, string> = {
 	environments: 'Sky, water, sun, moon and day cycles',
 	events: 'States, handlers, timers and detection',
 	experience: 'One-time permissions and key-value storage',
+	inventory: 'Read, give, rez and derez the contents of a prim',
 	input: 'Touch, keyboard, mouse and gamepad',
 	land: 'Parcels, regions, estates and moderation',
 	linkset: 'Link numbers, linking and rezzing',
@@ -46,7 +51,7 @@ const purposes: Record<string, string> = {
 	movement: 'Position, rotate and glide objects',
 	pathfinding: 'Navmesh characters and path queries',
 	physics: 'Forces, collisions, materials and raycasts',
-	prims: 'Shape, size, params and inventory of prims',
+	prims: 'Shape, size and params of prims',
 	sound: 'Play, loop and trigger sounds',
 	textures: 'Textures, colors, alpha and PBR materials',
 };
@@ -59,14 +64,14 @@ export function purpose(f: FeaturePage) { return purposes[f.id] ?? f.description
 const icons: Record<string, string> = {
 	animesh: 'puzzle', avatar: 'star', camera: 'magnifier', combat: 'warning', communications: 'comment',
 	'data-storage': 'document', 'data-transmission': 'random', dialog: 'list-format', effects: 'sun',
-	environments: 'moon', events: 'setting', experience: 'approve-check', input: 'pencil', land: 'translate',
+	environments: 'moon', events: 'setting', experience: 'approve-check', input: 'pencil', inventory: 'seti:folder', land: 'translate',
 	linkset: 'external', math: 'seti:clock', money: 'seti:shell', movement: 'rocket', pathfinding: 'right-arrow',
 	physics: 'information', prims: 'seti:default', sound: 'seti:audio', textures: 'seti:image',
 };
 export function icon(f: FeaturePage) { return icons[f.id] ?? 'document'; }
 
 /** Editorial "most used" order, highest first (Serial Position). Replace with analytics when available. */
-const usageOrder = ['communications', 'events', 'input', 'prims', 'avatar', 'textures', 'data-storage', 'dialog',
+const usageOrder = ['communications', 'events', 'input', 'prims', 'inventory', 'avatar', 'textures', 'data-storage', 'dialog',
 	'movement', 'effects', 'sound', 'data-transmission', 'linkset', 'physics', 'math', 'money', 'land', 'experience',
 	'camera', 'combat', 'environments', 'animesh', 'pathfinding'];
 /** How many cards the "Most used" section shows. */
@@ -90,7 +95,9 @@ const tasks: { task: string; feature: string; apis: string[] }[] = [
 	{ task: 'Take keyboard controls (vehicles, weapons)', feature: 'input', apis: ['llTakeControls', 'control'] },
 	{ task: 'Deal damage or track health', feature: 'combat', apis: ['llDamage', 'llGetHealth'] },
 	{ task: 'Accept payment for a vendor', feature: 'money', apis: ['llSetPayPrice', 'money'] },
-	{ task: 'Rez an object from inventory', feature: 'linkset', apis: ['llRezObjectWithParams', 'object_rez'] },
+	{ task: 'Rez an object from inventory', feature: 'inventory', apis: ['llRezObjectWithParams', 'object_rez'] },
+	{ task: 'Give an item to an avatar', feature: 'inventory', apis: ['llGiveInventory', 'llGiveInventoryList'] },
+	{ task: 'Read settings from a notecard', feature: 'inventory', apis: ['llGetNotecardLine', 'dataserver'] },
 	{ task: 'Set prim size, shape or params in one call', feature: 'prims', apis: ['llSetLinkPrimitiveParamsFast'] },
 	{ task: 'Push, launch or make an object fall', feature: 'physics', apis: ['llSetStatus', 'llApplyImpulse'] },
 	{ task: 'Control the camera', feature: 'camera', apis: ['llSetCameraParams'] },
@@ -107,7 +114,7 @@ export const byUsage: FeaturePage[] = [
 export const byTask = tasks.map(t => ({ ...t, page: need(t.feature, `task "${t.task}"`) }));
 export const alphabetical = [...featurePages].sort((a, b) => a.title.localeCompare(b.title));
 
-for (const id of [...Object.keys(purposes), ...Object.keys(icons)]) need(id, 'purposes/icons');
+for (const id of [...Object.keys(purposes), ...Object.keys(icons), ...Object.keys(keyApiNames)]) need(id, 'purposes/icons/keyApiNames');
 if (byUsage.length !== featurePages.length || new Set(byUsage).size !== byUsage.length) {
 	throw new Error('features-overview: every feature must appear exactly once on /features/');
 }

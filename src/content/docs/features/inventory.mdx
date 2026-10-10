@@ -1,0 +1,207 @@
+---
+title: "Inventory"
+description: "A prim's contents: reading, giving, removing, rezzing and derezzing items, notecards, scripts, inventory drops and permission masks."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signature, Signatures } from '../../../components/features';
+
+Every prim has its own inventory, the Contents tab in the build window. It holds the scripts that run in the prim, plus objects to rez, notecards to read, and textures, sounds, animations, landmarks and other items for scripts to use or hand out. This page is about that prim inventory. It does not cover an avatar's own inventory, which scripts cannot browse; scripts can only [offer items to it](/functions/llGiveInventory/).
+
+Inventory sits underneath most other features. A vendor [gives](/functions/llGiveInventoryList/) a folder of goods, a gun [rezzes](/functions/llRezObjectWithParams/) bullets (see [Combat](/features/combat/)), a configurable product [reads a notecard](/functions/llGetNotecardLine/), and an updater [loads scripts](/functions/llRemoteLoadScriptPin/) into other prims. Every item carries permission masks, and those masks decide what a script may do with it.
+
+Inventory is an lsl.dev addition. It is not one of slua.dev's features.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Items are addressed by **name**; the [`INVENTORY_*` type](/constants/groups/InventoryType/) of an item narrows a search
+  - Scripts can [count the items](/functions/llGetInventoryNumber/) of a type and [read each name by index](/functions/llGetInventoryName/). Names are sorted alphabetically, not by the order they were added
+  - [Checking an item's type](/functions/llGetInventoryType/) is the way to test whether it exists: a missing item returns [`INVENTORY_NONE`](/constants/INVENTORY_NONE/)
+  - Each item has an [asset key](/functions/llGetInventoryKey/), a [creator](/functions/llGetInventoryCreator/), a [description](/functions/llGetInventoryDesc/) and the [time it was added](/functions/llGetInventoryAcquireTime/)
+  - The asset key is only returned for full-permission items, and is `NULL_KEY` otherwise
+- Items can be [given to an avatar or an object](/functions/llGiveInventory/), or [several at once as a folder](/functions/llGiveInventoryList/)
+  - An avatar gets an offer it can accept or decline. [`llGiveAgentInventory`](/functions/llGiveAgentInventory/) also picks the destination folder and reports [whether the transfer worked](/constants/groups/TransferError/)
+  - Giving a no-copy item moves the only copy out of the prim
+- A script can [delete an item](/functions/llRemoveInventory/), including itself
+- Rezzing from inventory: objects can be [rezzed into the world](/functions/llRezObject/), [placed by their root prim](/functions/llRezAtRoot/), or [rezzed with a list of parameters](/functions/llRezObjectWithParams/)
+  - The rezzer gets an [`object_rez`](/events/object_rez/) event with the new object's key
+- Derezzing to inventory: a script can [derez an object it rezzed](/functions/llDerezObject/) with [`DEREZ_TO_INVENTORY`](/constants/DEREZ_TO_INVENTORY/), which takes it back into the rezzer's inventory and saves its current state
+  - The object replaces the original item it was rezzed from, so changes made while it was in world are kept
+  - The same function can instead [delete the object](/constants/DEREZ_DIE/) or [mark it temporary](/constants/DEREZ_MAKE_TEMP/); neither of those puts it in an inventory
+  - The target must have been rezzed by this object, have the same owner, be copyable and not be an attachment. Taking it back also needs a modifiable rezzer that is not an attachment, and the original item must still be in the rezzer's inventory and must not be a coalesced object
+- Notecards are read line by line
+  - [Asynchronously](/functions/llGetNotecardLine/), with each line arriving in the [`dataserver`](/events/dataserver/) event, until [`EOF`](/constants/EOF/)
+  - [Synchronously](/functions/llGetNotecardLineSync/) from the region's cache, which returns [`NAK`](/constants/NAK/) when the notecard is not cached
+  - The [line count](/functions/llGetNumberOfNotecardLines/) is also asynchronous
+- Scripts in the same prim can be [stopped and started](/functions/llSetScriptState/), [checked](/functions/llGetScriptState/) and [reset](/functions/llResetOtherScript/)
+  - A script can be [loaded into another prim](/functions/llRemoteLoadScriptPin/), already running, if that prim has [set a matching PIN](/functions/llSetRemoteScriptAccessPin/)
+- Normally only people with modify rights can add items, but a prim can [accept drops from anyone](/functions/llAllowInventoryDrop/)
+  - The [`changed`](/events/changed/) event reports [`CHANGED_INVENTORY`](/constants/CHANGED_INVENTORY/) for changes made by someone with modify rights, and [`CHANGED_ALLOWED_DROP`](/constants/CHANGED_ALLOWED_DROP/) for drops allowed this way
+- Every item has [permission masks](/functions/llGetInventoryPermMask/): [copy, modify, transfer and move](/constants/groups/AssetPermission/), stored separately for [base, owner, group, everyone and next owner](/constants/groups/AssetPermissionCategory/)
+- [Landmarks can be read](/functions/llRequestInventoryData/) for the position they point to
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+These are the functions and events for working with a prim's inventory.
+
+<Signatures names={[
+  "llGetInventoryNumber", "llGetInventoryName", "llGetInventoryType", "llGetInventoryKey",
+  "llGetInventoryCreator", "llGetInventoryDesc", "llGetInventoryAcquireTime", "llGetInventoryPermMask",
+  "llGiveInventory", "llGiveInventoryList", "llGiveAgentInventory", "llRemoveInventory",
+  "llRezObject", "llRezAtRoot", "llRezObjectWithParams", "llDerezObject", "object_rez",
+  "llGetNotecardLine", "llGetNotecardLineSync", "llGetNumberOfNotecardLines",
+  "llSetScriptState", "llGetScriptState", "llResetOtherScript", "llRemoteLoadScriptPin",
+  "llSetRemoteScriptAccessPin", "llAllowInventoryDrop", "llRequestInventoryData",
+  "changed", "dataserver"
+]} />
+
+</Box>
+<Box title="Notecards as configuration">
+
+A notecard is the usual way for owners to configure a product without editing its script. Read it from `state_entry`, and read it again when [`changed`](/events/changed/) reports [`CHANGED_INVENTORY`](/constants/CHANGED_INVENTORY/). Notecards are also covered under [Data Storage](/features/data-storage/).
+
+</Box>
+<Box title="Vendors and givers">
+
+Selling and handing out items combines this feature with [Money](/features/money/) for payment, [Dialog](/features/dialog/) for menus and [`llGiveInventoryList`](/functions/llGiveInventoryList/) to deliver a folder.
+
+</Box>
+<Box title="Rezzers">
+
+Rezzing objects from inventory is also part of [Linksets](/features/linkset/), where the rezzed object's [`on_rez`](/events/on_rez/) event and start parameter are covered.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+Here are the functions and events in detail.
+
+### Reading items
+
+<Signatures>
+<Signature name="llGetInventoryNumber">Returns the number of items of a given type (`INVENTORY_*`, or [`INVENTORY_ALL`](/constants/INVENTORY_ALL/)) in the prim</Signature>
+<Signature name="llGetInventoryName">Returns the name of the item of a given type at **index**. Items are sorted alphabetically</Signature>
+<Signature name="llGetInventoryType">Returns the `INVENTORY_*` type of the named item, or [`INVENTORY_NONE`](/constants/INVENTORY_NONE/) if there is no such item</Signature>
+<Signature name="llGetInventoryKey">Returns the asset key of the item. Returns `NULL_KEY` unless the item is copy, modify and transfer; a notecard that has never been saved also has `NULL_KEY`</Signature>
+<Signature name="llGetInventoryCreator">Returns the key of the item's creator</Signature>
+<Signature name="llGetInventoryDesc">Returns the item's description</Signature>
+<Signature name="llGetInventoryAcquireTime">Returns when the item was placed in the prim, as a UTC timestamp `"YYYY-MM-DDThh:mm:ssZ"`</Signature>
+<Signature name="llGetInventoryPermMask">Returns the item's [`PERM_*` flags](/constants/groups/AssetPermission/) for the `MASK_*` category in **group**</Signature>
+</Signatures>
+
+### Giving and removing items
+
+<Signatures>
+<Signature name="llGiveInventory">Gives one item to an avatar or to an object in the same region. Scripts given to an object arrive disabled; send a running script with [`llRemoteLoadScriptPin`](/functions/llRemoteLoadScriptPin/) instead</Signature>
+<Signature name="llGiveInventoryList">Gives a list of items to an avatar as a new folder named **folder**. When the target is an object, the items go straight into its inventory and no folder is made</Signature>
+<Signature name="llGiveAgentInventory">Gives items to an avatar in the same region as a new folder, with **options** such as [`TRANSFER_DEST`](/constants/TRANSFER_DEST/), and returns a [`TRANSFER_*` status](/constants/groups/TransferError/). No-copy items are left out</Signature>
+<Signature name="llRemoveInventory">Permanently deletes the named item. If the script removes itself, it keeps running for a short time</Signature>
+</Signatures>
+
+### Rezzing from inventory
+
+<Signatures>
+<Signature name="llRezObject">Rezzes an inventory object with its bounding box centred on **pos**, passing **start_param** to the new object's [`on_rez`](/events/on_rez/) event</Signature>
+<Signature name="llRezAtRoot">Like `llRezObject`, but places the object's root prim at **pos**</Signature>
+<Signature name="llRezObjectWithParams">Rezzes an inventory object with a list of `REZ_*` parameters, and returns its key, or a blank key on failure</Signature>
+<Signature name="object_rez">Triggered in the rezzer when it has rezzed an object from inventory, with the new object's key</Signature>
+</Signatures>
+
+### Derezzing to inventory
+
+<Signatures>
+<Signature name="llDerezObject">With [`DEREZ_TO_INVENTORY`](/constants/DEREZ_TO_INVENTORY/) in **flags**, takes an object rezzed by this linkset back into the rezzer's inventory, saving its current state in place of the original item; other `DEREZ_*` flags delete it or mark it temporary. Returns `TRUE` on success. The target must have the same owner, be copyable and not be an attachment</Signature>
+</Signatures>
+
+### Notecards
+
+<Signatures>
+<Signature name="llGetNotecardLine">Requests line **line** (counting from 0) of a notecard. The text arrives in [`dataserver`](/events/dataserver/), or [`EOF`](/constants/EOF/) past the end. Only the first 1024 bytes of a long line are returned</Signature>
+<Signature name="llGetNotecardLineSync">Returns line **line** at once from the region's cache, without a `dataserver` event. Returns [`NAK`](/constants/NAK/) if the notecard is not cached, or [`EOF`](/constants/EOF/) past the end</Signature>
+<Signature name="llGetNumberOfNotecardLines">Requests the number of lines in a notecard; the count arrives in [`dataserver`](/events/dataserver/) as a string</Signature>
+</Signatures>
+
+### Scripts in inventory
+
+<Signatures>
+<Signature name="llSetScriptState">Sets another script in the prim running (`TRUE`) or stopped (`FALSE`). It cannot start a script that arrived through [`llGiveInventory`](/functions/llGiveInventory/)</Signature>
+<Signature name="llGetScriptState">Returns `TRUE` if the named script in the prim is running</Signature>
+<Signature name="llResetOtherScript">Resets the named script in the prim</Signature>
+<Signature name="llRemoteLoadScriptPin">Copies a script into **target**, running or not, with **start_param**. The owner needs modify rights on the target, and **pin** must match the PIN the target set</Signature>
+<Signature name="llSetRemoteScriptAccessPin">Sets this prim's PIN for [`llRemoteLoadScriptPin`](/functions/llRemoteLoadScriptPin/). A PIN of 0 disables remote loading</Signature>
+</Signatures>
+
+### Drops, changes and data
+
+<Signatures>
+<Signature name="llAllowInventoryDrop">With `TRUE`, anyone can drop items (but not scripts) into the prim. In a linkset it must be called from the root prim</Signature>
+<Signature name="llRequestInventoryData">Requests data for an inventory item through [`dataserver`](/events/dataserver/). Only landmarks are supported; they return the position they point to, relative to the current region</Signature>
+<Signature name="changed">Triggered when the object changes; the **changes** bitfield includes [`CHANGED_INVENTORY`](/constants/CHANGED_INVENTORY/) and [`CHANGED_ALLOWED_DROP`](/constants/CHANGED_ALLOWED_DROP/) for inventory changes</Signature>
+<Signature name="dataserver">Triggered when requested data arrives: notecard lines and counts, landmark data and other queries. Match **queryid** against the key the request returned</Signature>
+</Signatures>
+
+</Box>
+
+<Box title="Additional">
+
+- [`llGetInventoryNumber`](/functions/llGetInventoryNumber/), [`llGetInventoryName`](/functions/llGetInventoryName/) and [`llGetInventoryType`](/functions/llGetInventoryType/) — Item types
+  - [`INVENTORY_ALL`](/constants/INVENTORY_ALL/) — Every type, for counting or listing all items
+  - [`INVENTORY_NONE`](/constants/INVENTORY_NONE/) — Returned by `llGetInventoryType` when the item does not exist
+  - [`INVENTORY_TEXTURE`](/constants/INVENTORY_TEXTURE/), [`INVENTORY_SOUND`](/constants/INVENTORY_SOUND/), [`INVENTORY_LANDMARK`](/constants/INVENTORY_LANDMARK/), [`INVENTORY_CLOTHING`](/constants/INVENTORY_CLOTHING/), [`INVENTORY_OBJECT`](/constants/INVENTORY_OBJECT/), [`INVENTORY_NOTECARD`](/constants/INVENTORY_NOTECARD/), [`INVENTORY_SCRIPT`](/constants/INVENTORY_SCRIPT/), [`INVENTORY_BODYPART`](/constants/INVENTORY_BODYPART/), [`INVENTORY_ANIMATION`](/constants/INVENTORY_ANIMATION/), [`INVENTORY_GESTURE`](/constants/INVENTORY_GESTURE/), [`INVENTORY_SETTING`](/constants/INVENTORY_SETTING/), [`INVENTORY_MATERIAL`](/constants/INVENTORY_MATERIAL/) — One type each
+- [`llGetInventoryPermMask`](/functions/llGetInventoryPermMask/) — **group** selects which mask to read
+  - [`MASK_BASE`](/constants/MASK_BASE/) — The most permissive the item can ever be
+  - [`MASK_OWNER`](/constants/MASK_OWNER/), [`MASK_GROUP`](/constants/MASK_GROUP/), [`MASK_EVERYONE`](/constants/MASK_EVERYONE/) — What the current owner, the object's group and everyone may do
+  - [`MASK_NEXT`](/constants/MASK_NEXT/) — What the next owner will get
+  - The result is a bitfield of [`PERM_COPY`](/constants/PERM_COPY/), [`PERM_MODIFY`](/constants/PERM_MODIFY/), [`PERM_TRANSFER`](/constants/PERM_TRANSFER/) and [`PERM_MOVE`](/constants/PERM_MOVE/); [`PERM_ALL`](/constants/PERM_ALL/) is all of them
+- [`llGetObjectPermMask`](/functions/llGetObjectPermMask/) — The same masks for the object the script is in
+  - [`MASK_COMBINED`](/constants/MASK_COMBINED/) — Also takes the object's contents into account, combined with another mask (`MASK_OWNER | MASK_COMBINED`)
+- [`llGiveAgentInventory`](/functions/llGiveAgentInventory/) — **options** and return values
+  - [`TRANSFER_DEST`](/constants/TRANSFER_DEST/) — The root folder to put the new folder in
+  - [`TRANSFER_FLAGS`](/constants/TRANSFER_FLAGS/) — Flags that control the transfer
+  - [`TRANSFER_OK`](/constants/TRANSFER_OK/) — The offer was made; other `TRANSFER_*` codes such as [`TRANSFER_NO_ITEMS`](/constants/TRANSFER_NO_ITEMS/) and [`TRANSFER_THROTTLE`](/constants/TRANSFER_THROTTLE/) explain a failure
+- [`llRezObjectWithParams`](/functions/llRezObjectWithParams/) — Rezzing options that replace the positional arguments of `llRezObject`
+  - [`REZ_POS`](/constants/REZ_POS/) — Position, relative or in region coordinates, centred on the object or its root
+  - [`REZ_PARAM`](/constants/REZ_PARAM/) — The start parameter passed to [`on_rez`](/events/on_rez/)
+  - [`REZ_FLAGS`](/constants/REZ_FLAGS/) — `REZ_FLAG_*` options such as [`REZ_FLAG_TEMP`](/constants/REZ_FLAG_TEMP/) and [`REZ_FLAG_PHYSICAL`](/constants/REZ_FLAG_PHYSICAL/)
+- [`llDerezObject`](/functions/llDerezObject/) — **flags** chooses what happens to the object; only one of them puts it in an inventory
+  - [`DEREZ_TO_INVENTORY`](/constants/DEREZ_TO_INVENTORY/) — Returns the object to the derezzer's inventory and saves its current state, replacing the original item. The derezzer must be modifiable and not an attachment, and the object in its inventory must still exist and must not be a coalesced object
+  - [`DEREZ_DIE`](/constants/DEREZ_DIE/) — Deletes the object at once; it does not go to inventory
+  - [`DEREZ_MAKE_TEMP`](/constants/DEREZ_MAKE_TEMP/) — Marks the object temporary so the simulator removes it later; the object must not contribute to the navmesh
+- [`dataserver`](/events/dataserver/) — Special values in **data**
+  - [`EOF`](/constants/EOF/) — The requested notecard line is past the end
+  - [`NAK`](/constants/NAK/) — Returned by `llGetNotecardLineSync` when the notecard is not in the region's cache
+- [`changed`](/events/changed/) — Inventory flags in **changes**
+  - [`CHANGED_INVENTORY`](/constants/CHANGED_INVENTORY/) — The inventory was changed by someone with modify rights. Changes made by `llRemoveInventory` do not trigger it
+  - [`CHANGED_ALLOWED_DROP`](/constants/CHANGED_ALLOWED_DROP/) — Someone without modify rights added an item, which [`llAllowInventoryDrop`](/functions/llAllowInventoryDrop/) allowed
+- [`llGetScriptName`](/functions/llGetScriptName/) — The script's own name, so it can skip or remove itself when going through `INVENTORY_SCRIPT` items
+
+</Box>
+
+## Constant groups
+
+<ConstantGroups names={[
+  "InventoryType", "AssetPermission", "AssetPermissionCategory", "AssetPermissionCategoryFlag",
+  "GiveAgentInventoryParam", "TransferError", "DerezMode"
+]} />
+
+## Related
+
+- Second Life wiki: [Category:LSL Inventory](https://wiki.secondlife.com/wiki/Category:LSL_Inventory), [Category:LSL Notecard](https://wiki.secondlife.com/wiki/Category:LSL_Notecard)
+
+<SeeAlso items={[
+  "feature:prims", "feature:linkset", "feature:data-storage", "feature:avatar",
+  "category:prim_inventory", "category:avatar_inventory", "category:notecard", "category:asset_permissions"
+]}>
+  <Planned>Recipe: reading a configuration notecard</Planned>
+  <Planned>Recipe: a simple giver</Planned>
+</SeeAlso>
+
+<FeatureFooter
+  related={["prims", "linkset", "data-storage", "combat"]}
+  categories={["prim_inventory", "avatar_inventory"]}
+/>

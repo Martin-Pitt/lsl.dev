@@ -15,15 +15,15 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 - APIs: 1585
 - With a primary feature: 1506
   - override: 0
-  - main: 539
+  - main: 547
   - subpage: 2
-  - group: 930
+  - group: 924
   - prose: 14
-  - minor: 20
+  - minor: 18
   - category: 1
 - No feature (breadcrumb falls back to the category or constant group): 79
   - with neither category nor group (breadcrumb is section › name): 79
-- Ambiguous (tied on tier and category ownership, decided by size or id): 115
+- Ambiguous (tied on tier and category ownership, decided by size or id): 157
 
 ## Ambiguous choices
 
@@ -32,20 +32,27 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llApplyImpulse | movement | main | physics | smallest |
 | llApplyRotationalImpulse | movement | main | physics | smallest |
 | llCollisionSound | sound | main | physics | smallest |
+| llDerezObject | linkset | main | inventory | smallest |
 | llDialog | dialog | main | communications | smallest |
 | llGetAgentList | land | main | avatar | smallest |
 | llGetCenterOfMass | linkset | main | physics | smallest |
+| llGetInventoryPermMask | prims | main | inventory | smallest |
 | llGetKey | prims | main | data-transmission | smallest |
 | llGetLinkKey | linkset | main | data-transmission | smallest |
 | llGetObjectMass | linkset | main | physics | smallest |
 | llGetOwner | prims | main | avatar | smallest |
 | llGetOwnerKey | linkset | main | data-transmission | smallest |
+| llGetScriptState | events | main | inventory | smallest |
 | llGetVel | movement | main | physics | smallest |
 | llListStatistics | math | main | data-transmission | smallest |
 | llMapDestination | communications | main | avatar | smallest |
 | llReadKeyValue | experience | main | data-storage | smallest |
+| llRemoteLoadScriptPin | prims | main | inventory | smallest |
 | llReplaceAgentEnvironment | experience | main | environments | smallest |
-| llRezObjectWithParams | linkset | main | combat | smallest |
+| llResetOtherScript | events | main | inventory | smallest |
+| llRezAtRoot | linkset | main | inventory | smallest |
+| llRezObject | linkset | main | inventory | smallest |
+| llRezObjectWithParams | linkset | main | combat, inventory | smallest |
 | llSetAgentEnvironment | experience | main | environments | smallest |
 | llSetClickAction | money | main | dialog, input, prims | smallest |
 | llSetForce | movement | main | physics | smallest |
@@ -57,6 +64,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSetPayPrice | money | main | prims | smallest |
 | llSetPos | movement | main | prims | smallest |
 | llSetRot | movement | main | prims | smallest |
+| llSetScriptState | events | main | inventory | smallest |
 | llSetSitText | prims | main | avatar | smallest |
 | llSetText | effects | main | prims | smallest |
 | llSetTextureAnim | effects | main | textures | smallest |
@@ -68,7 +76,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llTextBox | dialog | main | communications | smallest |
 | llUpdateKeyValue | experience | main | data-storage | smallest |
 | llWorldPosToHUD | camera | main | avatar | smallest |
-| changed | linkset | main | events, textures, prims, avatar | smallest |
+| changed | linkset | main | events, textures, prims, inventory, avatar | smallest |
 | moving_end | pathfinding | main | movement | smallest |
 | moving_start | pathfinding | main | movement | smallest |
 | on_rez | linkset | main | events | smallest |
@@ -87,7 +95,32 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | CLICK_ACTION_TOUCH | dialog | group | input | smallest |
 | CLICK_ACTION_ZOOM | dialog | group | input | smallest |
 | DEBUG_CHANNEL | dialog | group | communications | smallest |
+| DEREZ_DIE | linkset | group | inventory | smallest |
+| DEREZ_MAKE_TEMP | linkset | group | inventory | smallest |
+| INVENTORY_ANIMATION | prims | group | inventory | smallest |
+| INVENTORY_BODYPART | prims | group | inventory | smallest |
+| INVENTORY_CLOTHING | prims | group | inventory | smallest |
+| INVENTORY_GESTURE | prims | group | inventory | smallest |
+| INVENTORY_LANDMARK | prims | group | inventory | smallest |
+| INVENTORY_MATERIAL | prims | group | inventory | smallest |
+| INVENTORY_NOTECARD | prims | group | inventory | smallest |
+| INVENTORY_OBJECT | prims | group | inventory | smallest |
+| INVENTORY_SCRIPT | prims | group | inventory | smallest |
+| INVENTORY_SETTING | prims | group | inventory | smallest |
+| INVENTORY_SOUND | prims | group | inventory | smallest |
+| INVENTORY_TEXTURE | prims | group | inventory | smallest |
 | JSON_ARRAY | combat | prose | data-transmission | smallest |
+| MASK_BASE | prims | group | inventory | smallest |
+| MASK_COMBINED | prims | group | inventory | smallest |
+| MASK_EVERYONE | prims | group | inventory | smallest |
+| MASK_GROUP | prims | group | inventory | smallest |
+| MASK_NEXT | prims | group | inventory | smallest |
+| MASK_OWNER | prims | group | inventory | smallest |
+| PERM_ALL | prims | group | inventory | smallest |
+| PERM_COPY | prims | group | inventory | smallest |
+| PERM_MODIFY | prims | group | inventory | smallest |
+| PERM_MOVE | prims | group | inventory | smallest |
+| PERM_TRANSFER | prims | group | inventory | smallest |
 | PERMISSION_ATTACH | experience | group | camera, avatar | smallest |
 | PERMISSION_CONTROL_CAMERA | experience | group | camera, avatar | smallest |
 | PERMISSION_GAME_CONTROL | experience | group | camera, avatar | smallest |
@@ -125,6 +158,15 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | SIM_STAT_SLEEP_MS | land | group | events | smallest |
 | SIM_STAT_SPARE_MS | land | group | events | smallest |
 | SIM_STAT_UNACKED_BYTES | land | group | events | smallest |
+| TRANSFER_BAD_OPTS | money | group | inventory | smallest |
+| TRANSFER_BAD_ROOT | money | group | inventory | smallest |
+| TRANSFER_FLAGS | inventory | group | avatar | smallest |
+| TRANSFER_NO_ATTACHMENT | money | group | inventory | smallest |
+| TRANSFER_NO_ITEMS | money | group | inventory | smallest |
+| TRANSFER_NO_PERMS | money | group | inventory | smallest |
+| TRANSFER_NO_TARGET | money | group | inventory | smallest |
+| TRANSFER_OK | money | group | inventory | smallest |
+| TRANSFER_THROTTLE | money | group | inventory | smallest |
 | XP_ERROR_EXPERIENCE_DISABLED | experience | group | data-storage | smallest |
 | XP_ERROR_EXPERIENCE_SUSPENDED | experience | group | data-storage | smallest |
 | XP_ERROR_EXPERIENCES_DISABLED | experience | group | data-storage | smallest |
@@ -240,7 +282,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llAdjustDamage | functions | Combat (combat) | main |
 | llAdjustSoundVolume | functions | Sound (sound) | main |
 | llAgentInExperience | functions | Experience (experience) | main |
-| llAllowInventoryDrop | functions | Prims (prims) | main |
+| llAllowInventoryDrop | functions | Inventory (inventory) | main + category |
 | llAngleBetween | functions | Math (math) | main |
 | llApplyImpulse | functions | Movement (movement) | main + smallest |
 | llApplyRotationalImpulse | functions | Movement (movement) | main + smallest |
@@ -276,7 +318,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llDeleteKeyValue | functions | Data Storage (data-storage) | main |
 | llDeleteSubList | functions | Data Transmission (data-transmission) | main |
 | llDeleteSubString | functions | Data Transmission (data-transmission) | main |
-| llDerezObject | functions | Linksets (linkset) | main + category |
+| llDerezObject | functions | Linksets (linkset) | main + smallest |
 | llDetachFromAvatar | functions | Avatars (avatar) | main |
 | llDetectedDamage | functions | Combat (combat) | main |
 | llDetectedGrab | functions | Events (events) | minor |
@@ -355,14 +397,14 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetGMTclock | functions | Events (events) | minor |
 | llGetHealth | functions | Combat (combat) | main |
 | llGetHTTPHeader | functions | Communications (communications) | main |
-| llGetInventoryAcquireTime | functions | Prims (prims) | main |
-| llGetInventoryCreator | functions | Prims (prims) | main |
-| llGetInventoryDesc | functions | Prims (prims) | main |
-| llGetInventoryKey | functions | Prims (prims) | main |
-| llGetInventoryName | functions | Prims (prims) | main |
-| llGetInventoryNumber | functions | Prims (prims) | main |
-| llGetInventoryPermMask | functions | Prims (prims) | main |
-| llGetInventoryType | functions | Prims (prims) | main |
+| llGetInventoryAcquireTime | functions | Inventory (inventory) | main + category |
+| llGetInventoryCreator | functions | Inventory (inventory) | main + category |
+| llGetInventoryDesc | functions | Inventory (inventory) | main + category |
+| llGetInventoryKey | functions | Inventory (inventory) | main + category |
+| llGetInventoryName | functions | Inventory (inventory) | main + category |
+| llGetInventoryNumber | functions | Inventory (inventory) | main + category |
+| llGetInventoryPermMask | functions | Prims (prims) | main + smallest |
+| llGetInventoryType | functions | Inventory (inventory) | main + category |
 | llGetKey | functions | Prims (prims) | main + smallest |
 | llGetLandOwnerAt | functions | Parcels & Regions (land) | main |
 | llGetLinkKey | functions | Linksets (linkset) | main + smallest |
@@ -384,9 +426,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetMoonDirection | functions | Environments (environments) | main |
 | llGetMoonRotation | functions | Environments (environments) | main |
 | llGetNextEmail | functions | Communications (communications) | main |
-| llGetNotecardLine | functions | Data Storage (data-storage) | main |
-| llGetNotecardLineSync | functions | Data Storage (data-storage) | main |
-| llGetNumberOfNotecardLines | functions | Data Storage (data-storage) | main |
+| llGetNotecardLine | functions | Data Storage (data-storage) | main + category |
+| llGetNotecardLineSync | functions | Data Storage (data-storage) | main + category |
+| llGetNumberOfNotecardLines | functions | Data Storage (data-storage) | main + category |
 | llGetNumberOfPrims | functions | Linksets (linkset) | main |
 | llGetNumberOfSides | functions | Prims (prims) | main |
 | llGetObjectAnimationNames | functions | Animesh (animesh) | main |
@@ -431,7 +473,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetRot | functions | Movement (movement) | main |
 | llGetScale | functions | Prims (prims) | main + category |
 | llGetScriptName | functions | Events (events) | main |
-| llGetScriptState | functions | Events (events) | main |
+| llGetScriptState | functions | Events (events) | main + smallest |
 | llGetSimStats | functions | Parcels & Regions (land) | main + category |
 | llGetSimulatorHostname | functions | Parcels & Regions (land) | main |
 | llGetSPMaxMemory | functions | Data Storage (data-storage) | main |
@@ -456,9 +498,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetVel | functions | Movement (movement) | main + smallest |
 | llGetVisualParams | functions | Avatars (avatar) | main |
 | llGetWallclock | functions | Events (events) | minor |
-| llGiveAgentInventory | functions | Avatars (avatar) | main + category |
-| llGiveInventory | functions | Avatars (avatar) | main + category |
-| llGiveInventoryList | functions | Avatars (avatar) | main |
+| llGiveAgentInventory | functions | Inventory (inventory) | main + category |
+| llGiveInventory | functions | Inventory (inventory) | main + category |
+| llGiveInventoryList | functions | Inventory (inventory) | main + category |
 | llGiveMoney | functions | Money (money) | main |
 | llGodLikeRezObject | functions | Linksets (linkset) | main |
 | llGround | functions | Parcels & Regions (land) | main |
@@ -568,10 +610,10 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llRegionSayTo | functions | Communications (communications) | main |
 | llReleaseControls | functions | Input (input) | main |
 | llReleaseURL | functions | Communications (communications) | main |
-| llRemoteLoadScriptPin | functions | Prims (prims) | main |
+| llRemoteLoadScriptPin | functions | Prims (prims) | main + smallest |
 | llRemoveFromLandBanList | functions | Parcels & Regions (land) | main |
 | llRemoveFromLandPassList | functions | Parcels & Regions (land) | main |
-| llRemoveInventory | functions | Prims (prims) | main |
+| llRemoveInventory | functions | Inventory (inventory) | main + category |
 | llRemoveVehicleFlags | functions | Movement (movement) | main |
 | llReplaceAgentEnvironment | functions | Experience (experience) | main + smallest |
 | llReplaceEnvironment | functions | Environments (environments) | main |
@@ -579,7 +621,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llRequestAgentData | functions | Avatars (avatar) | main + category |
 | llRequestDisplayName | functions | Avatars (avatar) | main |
 | llRequestExperiencePermissions | functions | Experience (experience) | main |
-| llRequestInventoryData | functions | Prims (prims) | main |
+| llRequestInventoryData | functions | Inventory (inventory) | main + category |
 | llRequestPermissions | functions | Avatars (avatar) | main + category |
 | llRequestSecureURL | functions | Communications (communications) | main |
 | llRequestSimulatorData | functions | Parcels & Regions (land) | main |
@@ -589,13 +631,13 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llResetAnimationOverride | functions | Avatars (avatar) | main |
 | llResetLandBanList | functions | Parcels & Regions (land) | main |
 | llResetLandPassList | functions | Parcels & Regions (land) | main |
-| llResetOtherScript | functions | Events (events) | main |
+| llResetOtherScript | functions | Events (events) | main + smallest |
 | llResetScript | functions | Events (events) | main |
 | llResetTime | functions | Events (events) | minor |
 | llReturnObjectsByID | functions | Parcels & Regions (land) | main |
 | llReturnObjectsByOwner | functions | Parcels & Regions (land) | main |
-| llRezAtRoot | functions | Linksets (linkset) | main |
-| llRezObject | functions | Linksets (linkset) | main |
+| llRezAtRoot | functions | Linksets (linkset) | main + smallest |
+| llRezObject | functions | Linksets (linkset) | main + smallest |
 | llRezObjectWithParams | functions | Linksets (linkset) | main + smallest |
 | llRot2Angle | functions | Math (math) | main |
 | llRot2Axis | functions | Math (math) | main |
@@ -660,11 +702,11 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSetPos | functions | Movement (movement) | main + smallest |
 | llSetPrimMediaParams | functions | Textures & Materials (textures) | main |
 | llSetRegionPos | functions | Movement (movement) | main |
-| llSetRemoteScriptAccessPin | functions | Prims (prims) | main |
+| llSetRemoteScriptAccessPin | functions | Inventory (inventory) | main + category |
 | llSetRenderMaterial | functions | Textures & Materials (textures) | main |
 | llSetRot | functions | Movement (movement) | main + smallest |
 | llSetScale | functions | Prims (prims) | main + category |
-| llSetScriptState | functions | Events (events) | main |
+| llSetScriptState | functions | Events (events) | main + smallest |
 | llSetSitText | functions | Prims (prims) | main + smallest |
 | llSetSoundQueueing | functions | Sound (sound) | main |
 | llSetSoundRadius | functions | Sound (sound) | main |
@@ -762,7 +804,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | no_sensor | events | Events (events) | main |
 | not_at_rot_target | events | Movement (movement) | main |
 | not_at_target | events | Movement (movement) | main |
-| object_rez | events | Linksets (linkset) | main |
+| object_rez | events | Linksets (linkset) | main + category |
 | on_damage | events | Combat (combat) | main |
 | on_death | events | Combat (combat) | main |
 | on_rez | events | Linksets (linkset) | main + smallest |
@@ -875,9 +917,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | CAMERA_POSITION_LAG | constants | Camera (camera) | group |
 | CAMERA_POSITION_LOCKED | constants | Camera (camera) | group |
 | CAMERA_POSITION_THRESHOLD | constants | Camera (camera) | group |
-| CHANGED_ALLOWED_DROP | constants | Events (events) | group |
+| CHANGED_ALLOWED_DROP | constants | Inventory (inventory) | main |
 | CHANGED_COLOR | constants | Events (events) | group |
-| CHANGED_INVENTORY | constants | Events (events) | group |
+| CHANGED_INVENTORY | constants | Inventory (inventory) | main |
 | CHANGED_LINK | constants | Linksets (linkset) | main |
 | CHANGED_MEDIA | constants | Events (events) | group |
 | CHANGED_OWNER | constants | Events (events) | group |
@@ -970,9 +1012,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | DEBUG_CHANNEL | constants | Dialog (dialog) | group + smallest |
 | DEG_TO_RAD | constants | Math (math) | main |
 | DENSITY | constants | Physics (physics) | group |
-| DEREZ_DIE | constants | Linksets (linkset) | group |
-| DEREZ_MAKE_TEMP | constants | Linksets (linkset) | group |
-| DEREZ_TO_INVENTORY | constants | Linksets (linkset) | group |
+| DEREZ_DIE | constants | Linksets (linkset) | group + smallest |
+| DEREZ_MAKE_TEMP | constants | Linksets (linkset) | group + smallest |
+| DEREZ_TO_INVENTORY | constants | Inventory (inventory) | main |
 | ENV_INVALID_AGENT | constants | Environments (environments) | group |
 | ENV_INVALID_RULE | constants | Environments (environments) | group |
 | ENV_NO_ENVIRONMENT | constants | Environments (environments) | group |
@@ -984,7 +1026,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | ENV_THROTTLE | constants | Environments (environments) | group |
 | ENV_VALIDATION_FAIL | constants | Environments (environments) | group |
 | ENVIRONMENT_DAYINFO | constants | Environments (environments) | group |
-| EOF | constants | Data Storage (data-storage) | minor |
+| EOF | constants | Inventory (inventory) | main |
 | ERR_GENERIC | constants | Parcels & Regions (land) | group |
 | ERR_MALFORMED_PARAMS | constants | Parcels & Regions (land) | group |
 | ERR_PARCEL_PERMISSIONS | constants | Parcels & Regions (land) | group |
@@ -1098,20 +1140,20 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | IMG_USE_BAKED_LOWER | constants | — (section only) | none |
 | IMG_USE_BAKED_SKIRT | constants | — (section only) | none |
 | IMG_USE_BAKED_UPPER | constants | — (section only) | none |
-| INVENTORY_ALL | constants | Prims (prims) | group |
-| INVENTORY_ANIMATION | constants | Prims (prims) | group |
-| INVENTORY_BODYPART | constants | Prims (prims) | group |
-| INVENTORY_CLOTHING | constants | Prims (prims) | group |
-| INVENTORY_GESTURE | constants | Prims (prims) | group |
-| INVENTORY_LANDMARK | constants | Prims (prims) | group |
-| INVENTORY_MATERIAL | constants | Prims (prims) | group |
-| INVENTORY_NONE | constants | Prims (prims) | group |
-| INVENTORY_NOTECARD | constants | Prims (prims) | group |
-| INVENTORY_OBJECT | constants | Prims (prims) | group |
-| INVENTORY_SCRIPT | constants | Prims (prims) | group |
-| INVENTORY_SETTING | constants | Prims (prims) | group |
-| INVENTORY_SOUND | constants | Prims (prims) | group |
-| INVENTORY_TEXTURE | constants | Prims (prims) | group |
+| INVENTORY_ALL | constants | Inventory (inventory) | main |
+| INVENTORY_ANIMATION | constants | Prims (prims) | group + smallest |
+| INVENTORY_BODYPART | constants | Prims (prims) | group + smallest |
+| INVENTORY_CLOTHING | constants | Prims (prims) | group + smallest |
+| INVENTORY_GESTURE | constants | Prims (prims) | group + smallest |
+| INVENTORY_LANDMARK | constants | Prims (prims) | group + smallest |
+| INVENTORY_MATERIAL | constants | Prims (prims) | group + smallest |
+| INVENTORY_NONE | constants | Inventory (inventory) | main |
+| INVENTORY_NOTECARD | constants | Prims (prims) | group + smallest |
+| INVENTORY_OBJECT | constants | Prims (prims) | group + smallest |
+| INVENTORY_SCRIPT | constants | Prims (prims) | group + smallest |
+| INVENTORY_SETTING | constants | Prims (prims) | group + smallest |
+| INVENTORY_SOUND | constants | Prims (prims) | group + smallest |
+| INVENTORY_TEXTURE | constants | Prims (prims) | group + smallest |
 | JSON_APPEND | constants | Data Transmission (data-transmission) | minor |
 | JSON_ARRAY | constants | Combat (combat) | prose + smallest |
 | JSON_DELETE | constants | — (section only) | none |
@@ -1169,13 +1211,13 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | LIST_STAT_SUM | constants | Data Transmission (data-transmission) | group |
 | LIST_STAT_SUM_SQUARES | constants | Data Transmission (data-transmission) | group |
 | LOOP | constants | Effects (effects) | group |
-| MASK_BASE | constants | Prims (prims) | group |
-| MASK_COMBINED | constants | Prims (prims) | group |
-| MASK_EVERYONE | constants | Prims (prims) | group |
-| MASK_GROUP | constants | Prims (prims) | group |
-| MASK_NEXT | constants | Prims (prims) | group |
-| MASK_OWNER | constants | Prims (prims) | group |
-| NAK | constants | Data Storage (data-storage) | minor |
+| MASK_BASE | constants | Prims (prims) | group + smallest |
+| MASK_COMBINED | constants | Prims (prims) | group + smallest |
+| MASK_EVERYONE | constants | Prims (prims) | group + smallest |
+| MASK_GROUP | constants | Prims (prims) | group + smallest |
+| MASK_NEXT | constants | Prims (prims) | group + smallest |
+| MASK_OWNER | constants | Prims (prims) | group + smallest |
+| NAK | constants | Inventory (inventory) | main |
 | NULL_KEY | constants | Communications (communications) | prose |
 | OBJECT_ACCOUNT_LEVEL | constants | Linksets (linkset) | group |
 | OBJECT_ANIMATED_COUNT | constants | Linksets (linkset) | group |
@@ -1321,11 +1363,11 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | PAY_HIDE | constants | Money (money) | group |
 | PAYMENT_INFO_ON_FILE | constants | Avatars (avatar) | group |
 | PAYMENT_INFO_USED | constants | Avatars (avatar) | group |
-| PERM_ALL | constants | Prims (prims) | group |
-| PERM_COPY | constants | Prims (prims) | group |
-| PERM_MODIFY | constants | Prims (prims) | group |
-| PERM_MOVE | constants | Prims (prims) | group |
-| PERM_TRANSFER | constants | Prims (prims) | group |
+| PERM_ALL | constants | Prims (prims) | group + smallest |
+| PERM_COPY | constants | Prims (prims) | group + smallest |
+| PERM_MODIFY | constants | Prims (prims) | group + smallest |
+| PERM_MOVE | constants | Prims (prims) | group + smallest |
+| PERM_TRANSFER | constants | Prims (prims) | group + smallest |
 | PERMISSION_ATTACH | constants | Experience (experience) | group + smallest |
 | PERMISSION_CHANGE_LINKS | constants | Linksets (linkset) | main |
 | PERMISSION_CONTROL_CAMERA | constants | Experience (experience) | group + smallest |
@@ -1719,19 +1761,19 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | TP_ROUTING_BLOCKED | constants | Parcels & Regions (land) | group |
 | TP_ROUTING_FREE | constants | Parcels & Regions (land) | group |
 | TP_ROUTING_LANDINGP | constants | Parcels & Regions (land) | group |
-| TRANSFER_BAD_OPTS | constants | Money (money) | group |
-| TRANSFER_BAD_ROOT | constants | Money (money) | group |
-| TRANSFER_DEST | constants | Avatars (avatar) | group |
+| TRANSFER_BAD_OPTS | constants | Money (money) | group + smallest |
+| TRANSFER_BAD_ROOT | constants | Money (money) | group + smallest |
+| TRANSFER_DEST | constants | Inventory (inventory) | main |
 | TRANSFER_FLAG_COPY | constants | Prims (prims) | group |
 | TRANSFER_FLAG_RESERVED | constants | Prims (prims) | group |
 | TRANSFER_FLAG_TAKE | constants | Prims (prims) | group |
-| TRANSFER_FLAGS | constants | Avatars (avatar) | group |
-| TRANSFER_NO_ATTACHMENT | constants | Money (money) | group |
-| TRANSFER_NO_ITEMS | constants | Money (money) | group |
-| TRANSFER_NO_PERMS | constants | Money (money) | group |
-| TRANSFER_NO_TARGET | constants | Money (money) | group |
-| TRANSFER_OK | constants | Money (money) | group |
-| TRANSFER_THROTTLE | constants | Money (money) | group |
+| TRANSFER_FLAGS | constants | Inventory (inventory) | group + smallest |
+| TRANSFER_NO_ATTACHMENT | constants | Money (money) | group + smallest |
+| TRANSFER_NO_ITEMS | constants | Money (money) | group + smallest |
+| TRANSFER_NO_PERMS | constants | Money (money) | group + smallest |
+| TRANSFER_NO_TARGET | constants | Money (money) | group + smallest |
+| TRANSFER_OK | constants | Money (money) | group + smallest |
+| TRANSFER_THROTTLE | constants | Money (money) | group + smallest |
 | TRAVERSAL_TYPE | constants | Pathfinding (pathfinding) | group |
 | TRAVERSAL_TYPE_FAST | constants | Pathfinding (pathfinding) | group |
 | TRAVERSAL_TYPE_NONE | constants | Pathfinding (pathfinding) | group |

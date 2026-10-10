@@ -26,6 +26,15 @@ LOCAL_REPLACEMENTS = {
 }
 
 
+# Feature pages added after the conversion (lsl.dev additions beyond slua.dev's set).
+ADDED_FEATURES = {'inventory'}
+# Home categories moved to an added feature: category -> (old home, new home).
+MOVED_CATEGORIES = {
+    'prim_inventory': ('prims', 'inventory'),
+    'avatar_inventory': ('avatar', 'inventory'),
+}
+
+
 def href_for(item, wiki_slugs):
     ref = item.split('|', 1)[0]
     if ref.startswith('/'):
@@ -49,7 +58,7 @@ def main():
     wiki_urls = {w['title']: w['source']['url'] for w in catalog['wiki']}
     after = {f['id']: f for f in load_features()}
     problems, rows = [], []
-    if [f['id'] for f in before['features']] != sorted(after):
+    if sorted([f['id'] for f in before['features']] + sorted(ADDED_FEATURES)) != sorted(after):
         problems.append('feature ids differ')
     for old in before['features']:
         new = after.get(old['id'])
@@ -68,7 +77,8 @@ def main():
 
         same('title', old['title'], new['title'])
         same('related', old.get('related', []), new['related'])
-        same('categories', old['categories'], new['categories'])
+        expected_cats = [c for c in old['categories'] if MOVED_CATEGORIES.get(c, (None,))[0] != old['id']]
+        same('categories', expected_cats, new['categories'])
         links = [l for s in old['sections'] for l in s.get('links', [])]
         new_hrefs = {href_for(i, wiki_slugs) for i in new['links']} | {h.split('#')[0] for h in new['hrefs']}
         if '](/wiki/' in new['body'] or '"/wiki/' in new['body']:
@@ -90,7 +100,10 @@ def main():
         lost('constant groups', sorted(groups_before), set(new['groups']))
         rows.append((old['id'], len(apis_before), len(set(new['items'])), apis_before <= set(new['items'])))
     # Retired slugs are no longer redirected (the site was never deployed); nothing may link to them.
-    retired = sorted(before['redirects'])
+    retired = sorted(set(before['redirects']) - ADDED_FEATURES)  # an added feature may reuse a retired slug
+    for c, (_, home) in MOVED_CATEGORIES.items():
+        if c not in after[home]['categories']:
+            problems.append(f"{home}: missing moved category {c}")
     for f in after.values():
         for old in retired:
             if f'/features/{old}/' in f['body'] or f'feature:{old}"' in f['body']:

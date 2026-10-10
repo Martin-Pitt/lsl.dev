@@ -18,6 +18,8 @@ class FeaturePageTests(unittest.TestCase):
         ('money', 'Money'), ('movement', 'Movement'), ('pathfinding', 'Pathfinding'), ('physics', 'Physics'),
         ('prims', 'Prims'), ('sound', 'Sound'), ('textures', 'Textures & Materials'),
     ]
+    # lsl.dev additions beyond slua.dev's set, slotted in alphabetically (slug order).
+    LSL_DEV_FEATURES = [('inventory', 'Inventory')]
     OLD_CLUSTERS = ['combat', 'avatars', 'input', 'communication', 'experiences', 'objects', 'appearance',
                     'physics', 'pathfinding', 'land', 'data', 'http', 'inventory', 'money', 'effects', 'sound',
                     'script', 'math', 'text', 'sensing']
@@ -33,7 +35,11 @@ class FeaturePageTests(unittest.TestCase):
         cls.groups = {g for f in cls.features for g in f['groups']}
 
     def test_slugs_titles_and_order_match_slua(self):
-        self.assertEqual([(f['id'], f['title']) for f in self.features], self.SLUA_FEATURES)
+        expected = sorted(self.SLUA_FEATURES + self.LSL_DEV_FEATURES)
+        self.assertEqual([(f['id'], f['title']) for f in self.features], expected)
+        # The slua.dev features alone keep slua.dev's order.
+        slua = [(f['id'], f['title']) for f in self.features if (f['id'], f['title']) in self.SLUA_FEATURES]
+        self.assertEqual(slua, self.SLUA_FEATURES)
 
     def test_every_category_has_exactly_one_home_feature(self):
         assigned = [c for f in self.features for c in f['categories']]

@@ -1,0 +1,105 @@
+---
+// The LSL Portal-style columns (language reference, features by category, developer resources),
+// shared by the homepage and the landing prototype. Modelled on the LSL Portal on the Second Life Wiki.
+import PortalTopics from '../prototypes/PortalTopics.astro';
+import { catalog } from '../../lib/catalog';
+
+type Item = { label: string; href?: string; note?: string; external?: boolean; sub?: Item[] };
+const flow = ['if', 'else', 'for', 'while', 'do', 'jump', 'return', 'state'].filter(n => catalog.controls.some(c => c.name === n));
+// Only entries with a page are listed (no placeholders for topics lsl.dev has no page for).
+const language: Item[] = ([
+	{ label: 'Constants', href: '/constants/', note: `${catalog.constants.length.toLocaleString('en')}`, sub: [{ label: 'By group', href: '/constants/groups/' }] },
+	{ label: 'Events', href: '/events/', note: `${catalog.events.length}` },
+	{ label: 'Flow control', href: '/controls/', sub: flow.map(n => ({ label: n === 'do' ? 'do-while' : n, href: `/controls/${n}/` })) },
+	{ label: 'Functions', href: '/functions/', note: `${catalog.functions.length}`, sub: [
+		{ label: 'A–L', href: '/functions/#from-a' }, { label: 'L–T', href: '/functions/#from-l' }, { label: 'T–Z', href: '/functions/#from-t' },
+	] },
+	{ label: 'Limits', href: '/reference/limits/', sub: [{ label: 'Scripting', href: '/reference/limits/#scripting' }, { label: 'Building', href: '/reference/limits/#building' }, { label: 'Communication', href: '/reference/limits/#communication' }] },
+	{ label: 'Operators', href: '/fundamentals/operators/' },
+	{ label: 'States', href: '/controls/state/', sub: [{ label: 'default', href: '/controls/default/' }] },
+	{ label: 'Types', href: '/types/', sub: catalog.types.map(t => ({ label: t.name, href: `/types/${t.name}/` })) },
+	{ label: 'Variables', href: '/fundamentals/variables/' },
+	{ label: 'Errors', href: '/fundamentals/errors/' },
+] as Item[]).filter(i => i.href);
+const resources: Item[][] = ([
+	[
+		{ label: 'Guides', href: '/guides/', note: 'articles and tutorials' },
+		{ label: 'Recipes', href: '/recipes/', note: 'step-by-step how-tos' },
+		{ label: 'Learn LSL', href: '/guides/learn-lsl/', note: 'tutorial path' },
+		{ label: 'Examples library' },
+		{ label: 'Style guide' },
+		{ label: 'Efficiency' },
+		{ label: 'Memory', href: '/fundamentals/memory/' },
+		{ label: 'Benchmarking' },
+	],
+	[
+		{ label: 'Reference overview', href: '/reference/' },
+		{ label: 'Categories', href: '/categories/' },
+		{ label: 'Features overview', href: '/features/' },
+		{ label: 'User-defined functions', href: '/fundamentals/functions/#user-defined-functions' },
+		{ label: 'Protocols & APIs' },
+	],
+	[
+		{ label: 'About these docs', href: '/about/' },
+		{ label: 'SLua.dev', href: 'https://slua.dev/', external: true },
+		{ label: 'create.secondlife.com', href: 'https://create.secondlife.com/', external: true },
+		{ label: 'LSL Portal (live wiki)', href: 'https://wiki.secondlife.com/wiki/LSL_Portal', external: true },
+	],
+] as Item[][]);
+// Developer resources keep their planned entries, marked as having no page yet.
+const gapTag = 'no page';
+---
+<div class="cols">
+	<section class="col" aria-labelledby="lang">
+		<h2 id="lang">Language reference</h2>
+		<ul class="ref">
+			{language.map(i => (
+				<li>
+					<a href={i.href}>{i.label}</a>
+					{i.note && <span class="count">{i.note}</span>}
+					{i.sub && <ul class="sub">{i.sub.map(s => <li><a href={s.href}>{/^[a-z]/.test(s.label) ? <code>{s.label}</code> : s.label}</a></li>)}</ul>}
+				</li>
+			))}
+		</ul>
+	</section>
+	<section class="col wide" aria-labelledby="feat">
+		<h2 id="feat"><a href="/features/">Features by category</a></h2>
+		<PortalTopics compact idPrefix="landing-topics" />
+	</section>
+	<section class="col" aria-labelledby="dev">
+		<h2 id="dev">Developer resources</h2>
+		{resources.map(group => (
+			<ul class="ref">
+				{group.map(i => (
+					<li>
+						{i.href ? <a href={i.href} rel={i.external ? 'noopener' : undefined}>{i.label}{i.external && <span class="ext" aria-label="(external)"> ↗</span>}</a> : <span class="gap">{i.label}<span class="gap-tag">{gapTag}</span></span>}
+						{i.note && <span class="count">{i.note}</span>}
+					</li>
+				))}
+			</ul>
+		))}
+	</section>
+</div>
+<style>
+	.cols { display: grid; gap: 1rem; margin-block: 1rem 2rem; grid-template-columns: minmax(0, 1fr); }
+	@media (min-width: 50rem) { .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .wide { grid-row: span 2; } }
+	@media (min-width: 72rem) { .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 1fr); } .wide { grid-row: auto; } }
+	.col { margin: 0; border: 1px solid var(--sl-color-gray-5); border-radius: .75rem; padding: .75rem 1rem; font-size: var(--sl-text-sm); }
+	.col h2 { margin: 0 0 .5rem; font-size: var(--sl-text-base); text-transform: uppercase; letter-spacing: .04em; color: var(--sl-color-gray-3); }
+	.col h2 a { color: inherit; }
+	.ref { list-style: none; padding: 0; margin: 0 0 .5rem; }
+	.ref + .ref { border-top: 1px solid var(--sl-color-hairline); padding-top: .5rem; }
+	.ref > li { margin: 0; padding: .125rem 0; }
+	/* Same scheme as the features-by-category lists: the accent colour is reserved for feature pages;
+	   reference and resource links are text-coloured, with the accent on hover. */
+	.ref a { text-decoration: none; color: var(--sl-color-gray-1); }
+	.ref a:hover { text-decoration: underline; color: var(--sl-color-text-accent); }
+	.ref > li > a { font-weight: 600; }
+	.count { margin-left: .375rem; font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); }
+	.sub { list-style: none; padding: 0; margin: .125rem 0 .25rem .75rem; display: flex; flex-wrap: wrap; gap: .125rem .625rem; }
+	.sub li { margin: 0; }
+	.sub code { font-size: var(--sl-text-xs); }
+	.gap { color: var(--sl-color-gray-3); }
+	.gap-tag { margin-left: .375rem; font-size: var(--sl-text-xs); padding: 0 .3rem; border: 1px dashed var(--sl-color-gray-4); border-radius: .25rem; }
+	a:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 2px; }
+</style>

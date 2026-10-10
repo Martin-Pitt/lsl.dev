@@ -1,0 +1,284 @@
+---
+title: "Interpolation and easing"
+description: "Rescale values between ranges, interpolate floats, vectors and rotations (linear, cosine, cubic, Catmull-Rom, Hermite, slerp), and step values or rotations towards a target at a fixed speed."
+sidebar:
+  order: 5
+---
+
+These functions blend between values. `Rescale` maps a number from one range to another. The
+interpolation functions take a parameter **t** that runs from 0.0 (the start) to 1.0 (the end)
+and return a value between the inputs, along a straight line, a cosine ease or a smooth curve
+through neighbouring points. `TargetStep` and `StepRotation` move a value towards a target by at
+most a fixed amount per call, for values driven over time, such as vehicle engine power.
+
+## Rescaling between ranges
+
+```lsl
+// Maps from, a value in the range from_min..from_max, to the range to_min..to_max.
+// Returns to_min when the input range is empty (from_min == from_max).
+float Rescale(float from_min, float from_max, float to_min, float to_max, float from)
+{
+    if (from_max == from_min) return to_min;
+    return to_min + ((to_max - to_min) * ((from - from_min) / (from_max - from_min)));
+}
+
+// The same, but the result never leaves the range to_min..to_max.
+float RescaleClamped(float from_min, float from_max, float to_min, float to_max, float from)
+{
+    from = Rescale(from_min, from_max, to_min, to_max, from);
+    if (to_min < to_max)
+    {
+        if (from < to_min) from = to_min; else if (from > to_max) from = to_max;
+    }
+    else
+    {
+        if (from < to_max) from = to_max; else if (from > to_min) from = to_min;
+    }
+    return from;
+}
+```
+
+Either range may run backwards: `Rescale(0.0, 10.0, 1.0, 0.0, 2.5)` returns 0.75. `Rescale`
+extrapolates past the ends of the range; `RescaleClamped` stops at **to_min** and **to_max**,
+whichever way round they are.
+
+## Floats and vectors
+
+Linear interpolation moves at a constant rate. The cosine version runs **t** through
+`(1 - cos(t * PI)) / 2` with [`llCos`](/functions/llCos/) first, so it starts and ends slowly.
+
+```lsl
+float InterpolateFloat(float a, float b, float t)
+{
+    return (a * (1.0 - t)) + (b * t);
+}
+
+float InterpolateFloatCosine(float a, float b, float t)
+{
+    t = (1.0 - llCos(t * PI)) / 2.0;
+    return (a * (1.0 - t)) + (b * t);
+}
+
+vector InterpolateVector(vector a, vector b, float t)
+{
+    return (a * (1.0 - t)) + (b * t);
+}
+
+vector InterpolateVectorCosine(vector a, vector b, float t)
+{
+    t = (1.0 - llCos(t * PI)) / 2.0;
+    return (a * (1.0 - t)) + (b * t);
+}
+```
+
+### Curves through four points
+
+The remaining functions take four points in order, **a**, **b**, **c** and **d**, and draw a curve
+from **b** (at **t** = 0.0) to **c** (at **t** = 1.0). **a** and **d** only bend the curve. To run
+a path through a list of points, interpolate each pair in turn with its two neighbours.
+
+The cubic uses [`llPow`](/functions/llPow/) for the powers of **t**:
+
+```lsl
+float InterpolateFloatCubic(float a, float b, float c, float d, float t)
+{
+    float P = (d - c) - (a - b);
+    return (P * llPow(t, 3)) + (((a - b) - P) * llPow(t, 2)) + ((c - a) * t) + b;
+}
+
+vector InterpolateVectorCubic(vector a, vector b, vector c, vector d, float t)
+{
+    vector P = (d - c) - (a - b);
+    return (P * llPow(t, 3)) + (((a - b) - P) * llPow(t, 2)) + ((c - a) * t) + b;
+}
+```
+
+The Catmull-Rom version packs its four floats into one `rotation` (**H**, with `H.x` = a,
+`H.y` = b, `H.z` = c and `H.s` = d), and also builds the coefficients and the powers of **t** as
+rotations, so each is one variable instead of four:
+
+```lsl
+float InterpolateFloatCatmullRom(rotation H, float t)
+{
+    rotation ABCD = <
+        (H.x * -0.5) + (H.y * 1.5) + (H.z * -1.5) + (H.s * 0.5),
+        (H.x * 1.0) + (H.y * -2.5) + (H.z * 2.0) + (H.s * -0.5),
+        (H.x * -0.5) + (H.z * 0.5),
+        H.y
+    >;
+    rotation T;
+    T.s = 1.0;
+    T.z = t;
+    T.y = T.z * T.z;
+    T.x = T.y * T.z;
+    return (T.x * ABCD.x) + (T.y * ABCD.y) + (T.z * ABCD.z) + (T.s * ABCD.s);
+}
+```
+
+```lsl
+float value = InterpolateFloatCatmullRom(<a, b, c, d>, t);
+```
+
+The Hermite version sets the slope of the curve at **b** and **c** from the neighbouring
+segments. **tens** (tension) scales both slopes by `(1 - tens)`: 0.0 leaves them as they are, 1.0
+flattens them to zero. **bias** shifts the weight between the segment before and the one after:
+0.0 weighs them equally, positive values favour the earlier segment and negative values the later
+one. With **tens** and **bias** both 0.0, the slopes are `(c - a) / 2` and `(d - b) / 2`, the same
+as Catmull-Rom.
+
+```lsl
+float InterpolateFloatHermite(float a, float b, float c, float d, float t, float tens, float bias)
+{
+    float t2 = t * t;
+    float t3 = t2 * t;
+    float m0 = ((b - a) * (1.0 + bias) * (1.0 - tens)) / 2.0;
+          m0 += ((c - b) * (1.0 - bias) * (1.0 - tens)) / 2.0;
+    float m1 = ((c - b) * (1.0 + bias) * (1.0 - tens)) / 2.0;
+          m1 += ((d - c) * (1.0 - bias) * (1.0 - tens)) / 2.0;
+    float h0 = ((2.0 * t3) - (3.0 * t2)) + 1.0;
+    float h1 = (t3 - (2.0 * t2)) + t;
+    float h2 = t3 - t2;
+    float h3 = (3.0 * t2) - (2.0 * t3);
+    return (h0 * b) + (h1 * m0) + (h2 * m1) + (h3 * c);
+}
+
+vector InterpolateVectorHermite(vector a, vector b, vector c, vector d, float t, float tens, float bias)
+{
+    float t2 = t * t;
+    float t3 = t2 * t;
+    vector m0 = (b - a) * (((1.0 + bias) * (1.0 - tens)) / 2.0);
+           m0 += (c - b) * (((1.0 - bias) * (1.0 - tens)) / 2.0);
+    vector m1 = (c - b) * (((1.0 + bias) * (1.0 - tens)) / 2.0);
+           m1 += (d - c) * (((1.0 - bias) * (1.0 - tens)) / 2.0);
+    float h0 = ((2.0 * t3) - (3.0 * t2)) + 1.0;
+    float h1 = (t3 - (2.0 * t2)) + t;
+    float h2 = t3 - t2;
+    float h3 = (3.0 * t2) - (2.0 * t3);
+    return (b * h0) + (m0 * h1) + (m1 * h2) + (c * h3);
+}
+```
+
+## Rotations
+
+`InterpolateRotation` turns from **a** towards **b** around a single axis, by the fraction **t**
+of the angle between them, taking the shorter way round. `delta` is the turn from **a** to **b**
+(`a * delta == b`); [`llRot2Axis`](/functions/llRot2Axis/) and
+[`llRot2Angle`](/functions/llRot2Angle/) split it into an axis and an angle, and
+[`llAxisAngle2Rot`](/functions/llAxisAngle2Rot/) rebuilds part of it.
+
+```lsl
+rotation InterpolateRotation(rotation a, rotation b, float t)
+{
+    rotation delta = (ZERO_ROTATION / a) * b;
+    // q and -q are the same rotation; pick the one with the smaller angle.
+    if (delta.s < 0.0) delta = <-delta.x, -delta.y, -delta.z, -delta.s>;
+    return a * llAxisAngle2Rot(llRot2Axis(delta), llRot2Angle(delta) * t);
+}
+
+rotation InterpolateRotationCosine(rotation a, rotation b, float t)
+{
+    return InterpolateRotation(a, b, (1.0 - llCos(t * PI)) / 2.0);
+}
+
+// Cubic rotation interpolation: two interpolations, a to b and c to d, blended with weight 2t(1 - t).
+// Starts at a and ends at b; c and d pull the middle of the path towards them.
+rotation InterpolateRotationCubic(rotation a, rotation b, rotation c, rotation d, float t)
+{
+    return InterpolateRotation(
+        InterpolateRotation(a, b, t),
+        InterpolateRotation(c, d, t),
+        (2.0 * t) * (1.0 - t)
+    );
+}
+```
+
+`InterpolateRotationCubic` does not pass through **c** or **d**: the weight of the second
+interpolation is 0.0 at both ends and peaks at 0.5 when **t** is 0.5.
+
+## Stepping towards a target
+
+`TargetStep` moves **current** towards **target** by **speed**, and returns the target itself
+once it is less than **speed** away. The result is kept between **min** and **max**.
+
+```lsl
+float TargetStep(float current, float target, float min, float max, float speed)
+{
+    if (llFabs(target - current) < speed)
+    {
+        if (target < min) return min;
+        if (target > max) return max;
+        return target;
+    }
+    if (current < target) current += speed; else current -= speed;
+    if (current < min) current = min; else if (current > max) current = max;
+    return current;
+}
+```
+
+For rotations, use `StepRotation` from
+[Constraining rotations](/guides/constraining-rotations/#usage). It turns **from** towards **to**
+by at most **maxAngle** radians per call, with the same `delta` as `InterpolateRotation`, and
+returns **to** once it is within **maxAngle**:
+
+```lsl
+rotation StepRotation(rotation from, rotation to, float maxAngle)
+{
+    rotation delta = (ZERO_ROTATION / from) * to;
+    if (delta.s < 0.0) delta = <-delta.x, -delta.y, -delta.z, -delta.s>;
+    if (llRot2Angle(delta) <= maxAngle) return to;
+    return from * llAxisAngle2Rot(llRot2Axis(delta), maxAngle);
+}
+```
+
+## Notes and limits
+
+- **t** is not clamped. Values outside 0.0 to 1.0 extrapolate along the line or curve, and the
+  cosine versions fold back.
+- **speed** in `TargetStep` and **maxAngle** in `StepRotation` are per call. For a speed per
+  second, multiply by the time between calls, as the turret in
+  [Constraining rotations](/guides/constraining-rotations/#usage) does.
+- If you only need to know how far apart two rotations are,
+  [`llAngleBetween`](/functions/llAngleBetween/) returns the angle between them.
+- Dividing by zero stops the script with a
+  [Math Error](/fundamentals/errors/), which is why `Rescale` checks for an empty input range.
+
+## Source and licence
+
+From [`interpolation.lsl`](https://github.com/Martin-Pitt/NexiiLSL/blob/996fbd7/interpolation.lsl)
+in [NexiiLSL](https://github.com/Martin-Pitt/NexiiLSL) by Martin Pitt, © 2026, under the
+[MIT licence](https://github.com/Martin-Pitt/NexiiLSL/blob/996fbd7/LICENSE), at commit `996fbd7`.
+
+Changes from the original:
+
+- Function names start with a capital letter (`rescale` is `Rescale`, `targetStep` is
+  `TargetStep` and so on), and every expression where operator order matters is bracketed. The
+  Hermite slopes `a0`, `a1` and weights `b0` to `b3` are renamed `m0`, `m1` and `h0` to `h3`, so
+  they don't look like the points **a** and **b**.
+- **`rescale` divided by zero when `from_min == from_max`**, which stops the script with a Math
+  Error. `Rescale` returns **to_min** in that case. Its formula,
+  `(from_min - from) / (from_min - from_max)`, is rewritten as the equal
+  `(from - from_min) / (from_max - from_min)`, and `RescaleClamped` calls `Rescale` instead of
+  repeating it.
+- **`interpolateVectorCubic` used a different convention from `interpolateFloatCubic`.** It
+  computed `P = (c - d) - (b - a)` and returned `... + (d - b) * t + a`, a curve from **a** at
+  **t** = 0 to **d** at **t** = 1, while the float version ran from **b** to **c**. Both now use
+  the float version's formula: the four-point cubic through **b** and **c**, with **t** from **b**
+  to **c**, so the two give the same curve for the same inputs.
+- The `if (ang > PI) ang -= TWO_PI` guard after each `llAngleBetween` call is gone, along with
+  `llAngleBetween` itself: the angle now comes from `llRot2Angle`, which returns at most PI. The
+  wiki's reference implementations of `llAngleBetween` also return 0 to PI, so the guard should
+  never have triggered, but its range isn't documented, so this is not counted as a bug fix.
+- **`interpolateRotation` and `interpolateRotationCosine` took the angle and the axis from
+  different places.** The angle came from `llAngleBetween`, which always measures the shorter way
+  round; the axis came from `llRot2Axis(b / a) * a`, which is the axis of the same turn rotated
+  into the world frame, but whose direction depends on which of the two equal quaternions `b / a`
+  happens to be. If `llRot2Axis` picks the other one, the turn goes the wrong way and does not end
+  at **b**. The new version
+  takes both from one `delta`, flipped to the shorter way first, as `StepRotation` does.
+  `InterpolateRotationCosine` now calls `InterpolateRotation` with the eased **t**.
+- **`stepRotation` had the same angle and axis problem, and when the angle equalled `speed`**
+  neither comparison matched, so it took a full step instead of returning **b** directly (this
+  landed on **b** anyway, so the step was redundant rather than wrong). It is
+  replaced by `StepRotation` from [Constraining rotations](/guides/constraining-rotations/), which
+  checks `<=` and uses the flipped `delta`.
+- Integer literals are written as floats (`2.0`, `1.0`) throughout.

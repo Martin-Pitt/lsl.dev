@@ -7,7 +7,8 @@ import { catalog } from '../../../lib/catalog';
 
 type Item = { label: string; href?: string; note?: string; external?: boolean; sub?: Item[] };
 const flow = ['if', 'else', 'for', 'while', 'do', 'jump', 'return', 'state'].filter(n => catalog.controls.some(c => c.name === n));
-const language: Item[] = [
+// Only entries with a page are listed (no placeholders for topics lsl.dev has no page for).
+const language: Item[] = ([
 	{ label: 'Constants', href: '/constants/', note: `${catalog.constants.length.toLocaleString('en')}`, sub: [{ label: 'By group', href: '/constants/groups/' }] },
 	{ label: 'Events', href: '/events/', note: `${catalog.events.length}` },
 	{ label: 'Flow control', href: '/controls/', sub: flow.map(n => ({ label: n === 'do' ? 'do-while' : n, href: `/controls/${n}/` })) },
@@ -19,8 +20,8 @@ const language: Item[] = [
 	{ label: 'Types', href: '/types/', sub: catalog.types.map(t => ({ label: t.name, href: `/types/${t.name}/` })) },
 	{ label: 'Variables' },
 	{ label: 'Errors' },
-];
-const resources: Item[][] = [
+] as Item[]).filter(i => i.href);
+const resources: Item[][] = ([
 	[
 		{ label: 'Learn LSL', href: '/guides/', note: 'tutorial path' },
 		{ label: 'Examples library' },
@@ -42,7 +43,8 @@ const resources: Item[][] = [
 		{ label: 'create.secondlife.com', href: 'https://create.secondlife.com/', external: true },
 		{ label: 'LSL Portal (live wiki)', href: 'https://wiki.secondlife.com/wiki/LSL_Portal', external: true },
 	],
-];
+] as Item[][]);
+// Developer resources keep their planned entries, marked as having no page yet.
 const gapTag = 'no page';
 ---
 <ProtoShell splash title="LSL Portal" summary="Unofficial reference for the Linden Scripting Language: language reference, features by category and developer resources.">
@@ -57,7 +59,7 @@ const gapTag = 'no page';
 				<ul class="ref">
 					{language.map(i => (
 						<li>
-							{i.href ? <a href={i.href}>{i.label}</a> : <span class="gap">{i.label}<span class="gap-tag">{gapTag}</span></span>}
+							<a href={i.href}>{i.label}</a>
 							{i.note && <span class="count">{i.note}</span>}
 							{i.sub && <ul class="sub">{i.sub.map(s => <li><a href={s.href}>{/^[a-z]/.test(s.label) ? <code>{s.label}</code> : s.label}</a></li>)}</ul>}
 						</li>
@@ -100,8 +102,10 @@ const gapTag = 'no page';
 	.ref { list-style: none; padding: 0; margin: 0 0 .5rem; }
 	.ref + .ref { border-top: 1px solid var(--sl-color-hairline); padding-top: .5rem; }
 	.ref > li { margin: 0; padding: .125rem 0; }
-	.ref a { text-decoration: none; }
-	.ref a:hover { text-decoration: underline; }
+	/* Same scheme as the features-by-category lists: the accent colour is reserved for feature pages;
+	   reference and resource links are text-coloured, with the accent on hover. */
+	.ref a { text-decoration: none; color: var(--sl-color-gray-1); }
+	.ref a:hover { text-decoration: underline; color: var(--sl-color-text-accent); }
 	.ref > li > a { font-weight: 600; }
 	.count { margin-left: .375rem; font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); }
 	.sub { list-style: none; padding: 0; margin: .125rem 0 .25rem .75rem; display: flex; flex-wrap: wrap; gap: .125rem .625rem; }

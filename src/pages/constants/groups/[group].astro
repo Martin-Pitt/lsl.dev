@@ -3,7 +3,7 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import ApiLinkList from '../../../components/reference/ApiLinkList.astro';
 import ConstantGroup from '../../../components/lsl/ConstantGroup.astro';
 import { catalog, apiHref, constantsInGroup } from '../../../lib/catalog';
-import { ruleGroupOrders } from '../../../data/rule-groups';
+import { ruleGroupOrders, getterGroups } from '../../../data/rule-groups';
 export function getStaticPaths() {
 	return Object.keys(catalog.enums).filter(g => constantsInGroup(g).length > 0).map(group => ({ params: { group }, props: { group } }));
 }
@@ -19,7 +19,7 @@ const users = catalog.functions.filter(f => JSON.stringify((f as any).parameters
 <StarlightPage frontmatter={{ title: group, description: info.tooltip || `${group} constants.`, editUrl: false }}>
 	<p>{info.tooltip || `Constants in the ${group} ${info.type === 'flag' ? 'flag set' : 'enum'}.`} {info.type === 'flag' && 'These are flags and can be combined with bitwise OR.'}</p>
 	<p><a href="/constants/groups/">All constant groups</a></p>
-	<ConstantGroup name={group} order={order} title="At a glance, from the LSL definitions" />
+	<ConstantGroup name={group} order={order} mode={getterGroups.has(group) ? 'get' : 'set'} title="At a glance, from the LSL definitions" />
 	<h2 id="constants">Constants</h2>
 	{sections.map(s => (<>
 		{s.title && <h3 id={s.id}>{s.title}</h3>}

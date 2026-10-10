@@ -36,7 +36,8 @@ const parseArgs = (s: string): Arg[] => s.split(',').map(a => a.trim()).filter(B
 function argsOf(c: any, explicit?: string): Arg[] {
 	if (explicit !== undefined) return parseArgs(explicit);
 	const vals = c?.definition?.values as any[] | undefined;
-	if (vals?.length) return vals.map(a => ({ type: lslType(a['value-type'] ?? a.type ?? ''), name: a.name, request: a.access === 'arg' }));
+	// Setter lines leave out read-only values (YAML `access: read`, e.g. SKY_SUN's direction).
+	if (vals?.length) return vals.filter(a => mode === 'get' || a.access !== 'read').map(a => ({ type: lslType(a['value-type'] ?? a.type ?? ''), name: a.name, request: a.access === 'arg' }));
 	const m = c && new RegExp(`\\[\\s*${c.name}\\s*,([^\\]]+)\\]`).exec(c.description ?? '');
 	return m ? parseArgs(m[1]).filter(a => a.name) : [];
 }
@@ -48,7 +49,8 @@ const fmt = (a: Arg) => `${a.type} ${a.name}`.trim();
 function ruleCode(head: string[], args: Arg[]) {
 	if (mode === 'get') {
 		const req = args.filter(isRequest), ret = args.filter(a => !isRequest(a));
-		return `${list([...head, ...req.map(fmt)])} → ${list(ret.map(fmt))}`;
+		const call = list([...head, ...req.map(fmt)]);
+		return ret.length ? `${call} → ${list(ret.map(fmt))}` : call;
 	}
 	return list([...head, ...args.map(fmt)]);
 }

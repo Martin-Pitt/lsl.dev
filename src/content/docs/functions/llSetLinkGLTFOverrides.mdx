@@ -17,6 +17,7 @@ source:
     - { wiki: "Template:LSL Function/link-face", revision: 1186827, date: 2014-01-12 }
 ---
 import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+import { gltfOverrides } from '~/data/rule-groups/gltf-overrides';
 
 <LSLFunction name="llSetLinkGLTFOverrides" description />
 
@@ -28,76 +29,8 @@ llSetLinkGLTFOverrides(0, 0, []);
 
 ## Specification
 
-<ConstantGroup name="GLTFOverride" />
-
-### Parameters
-
-<table>
-	<tr>
-		<th>parameter</th>
-		<th>value</th>
-		<th>type</th>
-		<th>description</th>
-	</tr>
-	<tr>
-		<td>[OVERRIDE_GLTF_BASE_COLOR_FACTOR](/constants/OVERRIDE_GLTF_BASE_COLOR_FACTOR/)</td>
-		<td>1</td>
-		<td>vector</td>
-		<td>Set the tinting color used for the base color. Color is specified in linear RGB. Use [llsRGB2Linear](/functions/llsRGB2Linear/) to convert colors from Blinn-Phong to PBR.</td>
-	</tr>
-	<tr>
-		<td>[OVERRIDE_GLTF_BASE_ALPHA](/constants/OVERRIDE_GLTF_BASE_ALPHA/)</td>
-		<td>2</td>
-		<td>float</td>
-		<td>Sets the alpha for the face(s). Only impacts the rendering when the alpha mode is set to [PRIM_GLTF_ALPHA_MODE_BLEND](/constants/PRIM_GLTF_ALPHA_MODE_BLEND/).</td>
-	</tr>
-	<tr>
-		<td>[OVERRIDE_GLTF_BASE_ALPHA_MODE](/constants/OVERRIDE_GLTF_BASE_ALPHA_MODE/)</td>
-		<td>3</td>
-		<td>integer</td>
-		<td>
-
-			Set the alpha mode on the face(s). Must be one of the valid blend modes
-
-			| GLTF Alpha Mode | value | description |
-			| --- | --- | --- |
-			| [PRIM_GLTF_ALPHA_MODE_OPAQUE](/constants/PRIM_GLTF_ALPHA_MODE_OPAQUE/) | 0 | Ignore the alpha value and render the material as opaque. |
-			| [PRIM_GLTF_ALPHA_MODE_BLEND](/constants/PRIM_GLTF_ALPHA_MODE_BLEND/) | 1 | Render the material with transparency determined by the alpha value. Blending is done in linear color space. As is the case for Blinn-Phong as well, this mode suffers from depth sorting and performance issues. Use alpha mask instead when possible. |
-			| [PRIM_GLTF_ALPHA_MODE_MASK](/constants/PRIM_GLTF_ALPHA_MODE_MASK/) | 2 | Render the material as fully opaque where the alpha value is greater than the alpha cutoff, and otherwise render the material as fully transparent. |
-
-		</td>
-	</tr>
-	<tr>
-		<td>[OVERRIDE_GLTF_BASE_ALPHA_MASK](/constants/OVERRIDE_GLTF_BASE_ALPHA_MASK/)</td>
-		<td>4</td>
-		<td>float</td>
-		<td>Sets the alpha cutoff level on the face(s) when alpha mode is set to mask.</td>
-	</tr>
-	<tr>
-		<td>[OVERRIDE_GLTF_BASE_DOUBLE_SIDED](/constants/OVERRIDE_GLTF_BASE_DOUBLE_SIDED/)</td>
-		<td>5</td>
-		<td>integer</td>
-		<td>If set to **[TRUE](/constants/TRUE/)** then the texture on the face(s) will be rendered as double sided.</td>
-	</tr>
-	<tr>
-		<td>[OVERRIDE_GLTF_METALLIC_FACTOR](/constants/OVERRIDE_GLTF_METALLIC_FACTOR/)</td>
-		<td>6</td>
-		<td>float</td>
-		<td>Adjusts the metallic factor on the specified face(s). Value should be between 0 and 1.</td>
-	</tr>
-	<tr>
-		<td>[OVERRIDE_GLTF_ROUGHNESS_FACTOR](/constants/OVERRIDE_GLTF_ROUGHNESS_FACTOR/)</td>
-		<td>7</td>
-		<td>float</td>
-		<td>Adjust the roughness factor on the specified face(s). Value should be between 0 and 1.</td>
-	</tr>
-	<tr>
-		<td>[OVERRIDE_GLTF_EMISSIVE_FACTOR](/constants/OVERRIDE_GLTF_EMISSIVE_FACTOR/)</td>
-		<td>8</td>
-		<td>vector</td>
-		<td>Set the tint used for the emissive texture on the face(s). Note that this is specified in linear RGB.</td>
-	</tr>
-</table>
+{/* Sorted/grouped based on everyday usage and related functionality. Order and groups: src/data/rule-groups/gltf-overrides.ts */}
+<ConstantGroup name="GLTFOverride" order={gltfOverrides} />
 
 Passing an empty string ("") as the override value will clear that override.
 

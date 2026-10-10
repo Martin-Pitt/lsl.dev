@@ -151,10 +151,12 @@ worked example.
    uses the same block and splits its constants table under the same `###` ids.
 5. **Check.** `bun run test:links` fails if a header link has no matching section.
 
-Candidates not converted yet: [llParticleSystem](/functions/llParticleSystem/) (PSYS_*),
-[llRezObjectWithParams](/functions/llRezObjectWithParams/) (REZ_*),
-[llGetObjectDetails](/functions/llGetObjectDetails/) (OBJECT_*), [llSetPrimMediaParams](/functions/llSetPrimMediaParams/) (PRIM_MEDIA_*),
-[llSetCameraParams](/functions/llSetCameraParams/) (CAMERA_*), [llGetParcelDetails](/functions/llGetParcelDetails/) (PARCEL_DETAILS_*).
+Converted so far: `PrimParam`, `ParticleParam`, `GLTFOverride`, `PrimMediaParam`, `ObjectDetailsParam`,
+`ParcelDetailsParam`, `CameraParam`, `RezParam`, `CharacterParam`, `HTTPRequestParam`, `GroundTextureParam`,
+`EnvironmentParam` / `EnvironmentParamReadOnly` and `ParcelMediaCommand` / `ParcelMediaQuery`. Getter groups
+(listed in `getterGroups` in `index.ts`) use getter notation on their group page too. Where the wiki gives a type
+but no name, the line carries the type only (`PARCEL_DETAILS_AREA → integer`). `bun run test:data`
+(`scripts/lib/test_rule_groups.py`) checks every order.
 
 ## Adding a page
 

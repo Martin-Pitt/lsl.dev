@@ -12,7 +12,7 @@ from lib.mdx_convert import Converter  # noqa: E402
 def entry(name, kind='function', params=(('integer', 'a'),), ret='void'):
     ps = [{'name': n, 'type': t, 'description': ''} for t, n in params]
     sig = (ret + ' ' if ret != 'void' else '') + f"{name}({', '.join(t + ' ' + n for t, n in params)})"
-    return {'name': name, 'kind': kind, 'signature': sig, 'returnType': ret, 'parameters': ps, 'categories': [], 'definition': {},
+    return {'name': name, 'kind': kind, 'description': f'Does {name} things.', 'signature': sig, 'returnType': ret, 'parameters': ps, 'categories': [], 'definition': {},
             'wiki': {'slug': name.lower(), 'title': name, 'rawPath': f'/wiki-source/{name.lower()}.txt',
                      'source': {'title': name, 'url': f'https://wiki.secondlife.com/wiki/{name}', 'revisionId': '1', 'timestamp': '2024-01-01T00:00:00Z', 'contributor': 'X'}}}
 

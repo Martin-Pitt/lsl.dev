@@ -1,0 +1,111 @@
+---
+title: "Constraining rotations"
+description: "Reduce a rotation to its yaw around a mount's normal or remove its roll, for turrets that follow the camera: ConstrainYaw, ConstrainPitch, ConstrainTopDown, NormalizeRot and StepRotation."
+sidebar:
+  order: 4
+  attrs:
+    data-sidebar-group-link: 'Constraining rotations'
+---
+
+A turret follows a rotation such as the camera's, but its ring only turns around its mount (yaw)
+and its barrel only tilts (pitch), often each at its own speed. These functions take any rotation
+and keep only the part you want, relative to a normal **N** (the "up" direction of the mount). They build new axes with cross products and turn them back into a rotation
+with [`llAxes2Rot`](/functions/llAxes2Rot/).
+
+## The functions
+
+```lsl
+// Yaw only: turns around N to face where R faces, with N as up.
+rotation ConstrainYaw(rotation R, vector N)
+{
+    vector U = N;
+    vector L = llRot2Fwd(R) % U;
+    vector F = llVecNorm(U % L);
+           L = llVecNorm(U % F);
+    return llAxes2Rot(F, L, U);
+}
+
+// No roll: faces exactly where R faces, with its left axis kept level with N.
+rotation ConstrainPitch(rotation R, vector N)
+{
+    vector F = llRot2Fwd(R);
+    vector L = llVecNorm(F % N);
+    vector U = -llVecNorm(F % L);
+           L = U % F;
+    return llAxes2Rot(F, L, U);
+}
+
+// Yaw only, taken from R's left axis instead of its forward axis.
+// Unlike ConstrainYaw, this still works when R looks straight along N (e.g. a camera looking down).
+rotation ConstrainTopDown(rotation R, vector N)
+{
+    vector L = llVecNorm((N % llRot2Left(R)) % N);
+    return llAxes2Rot(L % N, L, N);
+}
+
+// Scales a quaternion to unit length. Zero-length input is returned unchanged.
+rotation NormalizeRot(rotation Q)
+{
+    float magnitude = llSqrt((Q.x * Q.x) + (Q.y * Q.y) + (Q.z * Q.z) + (Q.s * Q.s));
+    if (magnitude == 0.0) return Q;
+    return <Q.x / magnitude, Q.y / magnitude, Q.z / magnitude, Q.s / magnitude>;
+}
+
+// Turns from towards to by at most maxAngle radians, taking the shorter way round.
+rotation StepRotation(rotation from, rotation to, float maxAngle)
+{
+    rotation delta = (ZERO_ROTATION / from) * to;
+    // q and -q are the same rotation; pick the one with the smaller angle.
+    if (delta.s < 0.0) delta = <-delta.x, -delta.y, -delta.z, -delta.s>;
+    if (llRot2Angle(delta) <= maxAngle) return to;
+    return from * llAxisAngle2Rot(llRot2Axis(delta), maxAngle);
+}
+```
+
+`StepRotation` turns one rotation towards another by at most a given angle per step, so each part
+can move at its own top speed; see [Interpolation and easing](/guides/interpolation/) for more ways
+to blend rotations.
+
+## Usage
+
+[Turret rotation](/guides/constraining-rotations/turret/) puts these functions to work in a
+complete script: a turret ring (`Turret`) that turns only around the vehicle's up axis and a barrel
+(`Barrel`) that only tilts, each at its own top speed, following the camera of whoever sits on the
+root prim.
+
+## Notes and limits
+
+- **N** must be a unit vector for `ConstrainYaw` and `ConstrainTopDown`; pass it through
+  [`llVecNorm`](/functions/llVecNorm/) if it comes from a calculation.
+- `ConstrainYaw` has no answer when **R** looks exactly along **N** (straight up or down): the
+  cross product is zero, `llVecNorm` returns `ZERO_VECTOR`, and the axes
+  passed to `llAxes2Rot` are not valid. Use `ConstrainTopDown` for cameras that can
+  look straight down, or keep the previous result in that case. `ConstrainPitch` has the same
+  problem, since it also crosses **R**'s forward axis with **N**.
+- `ConstrainPitch` keeps **R**'s forward direction, including any yaw. To get the tilt alone,
+  remove the yaw first with `R / ConstrainYaw(R, N)`, as the
+  [turret](/guides/constraining-rotations/turret/) does with `localRot / targetYaw`.
+- `StepRotation` moves at a fixed angular speed: at most **maxAngle** per call, measured with
+  [`llRot2Angle`](/functions/llRot2Angle/).
+- [`llGetCameraRot`](/functions/llGetCameraRot/) needs
+  [`PERMISSION_TRACK_CAMERA`](/constants/PERMISSION_TRACK_CAMERA/) and returns the camera of the
+  avatar that granted it.
+
+## Source and licence
+
+From [`rotations.lsl`](https://github.com/Martin-Pitt/NexiiLSL/blob/996fbd7/rotations.lsl) in
+[NexiiLSL](https://github.com/Martin-Pitt/NexiiLSL) by Martin Pitt, © 2026, under the
+[MIT licence](https://github.com/Martin-Pitt/NexiiLSL/blob/996fbd7/LICENSE), at commit `996fbd7`.
+
+Changes from the original:
+
+- **`ConstrainTopDown` passed axes that were not unit length** to `llAxes2Rot`, which needs
+  mutually orthogonal unit vectors. The left axis is now normalised, and the unused intermediate
+  forward vector is folded into it.
+- **`NormalizeRot`'s `val >= 0.0` check was always true**, because a sum of squares cannot be
+  negative. It is removed; only the zero-length check remains, and the function now returns a
+  new rotation instead of assigning to the components of **Q**.
+- `StepRotation` is added, written for this page: the original turret example called
+  `stepRotation`, which was not defined.
+- The turret example is on its own page, [Turret rotation](/guides/constraining-rotations/turret/),
+  with its changes listed there.

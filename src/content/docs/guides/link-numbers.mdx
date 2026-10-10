@@ -254,13 +254,14 @@ LinksetResourceReset(string kv, list reset)
     while (index--)
     {
         params += [PRIM_LINK_TARGET, llOrd(links, index)] + reset;
-        // Send in batches of 32 prims so a large pool does not run the script out of memory.
-        if (index % 32 == 0)
+        // Send the batch early only when memory runs low, so each call carries as many prims as fit.
+        if (llGetFreeMemory() < 1500)
         {
             llSetLinkPrimitiveParamsFast(LINK_THIS, params);
             params = [];
         }
     }
+    if (params) llSetLinkPrimitiveParamsFast(LINK_THIS, params);
 }
 
 // Returns the link number at position index in the resource, or FALSE (0) if there is none.
@@ -399,12 +400,12 @@ Changes for linkset resources:
 - **Lookup past the end returned 1.** [`llOrd`](/functions/llOrd/) returns 0 for an index outside
   the string, so the original `1 + llOrd(links, index)` returned link 1 instead of `FALSE`. With
   links stored directly, `LinksetResourceLookup` returns 0.
-- **Reset batches by count.** The original sent its parameter list early when
-  [`llGetFreeMemory`](/functions/llGetFreeMemory/) fell below 1500 bytes. That figure includes
-  memory waiting for garbage collection, so it is not a reliable trigger; the list is now sent
-  every 32 prims; the batch that ends at index 0 is always sent, so the original's final
-  `if (params)` flush is gone. It also passes `LINK_THIS` instead of link 0; each batch starts
-  with `PRIM_LINK_TARGET`, which picks the prim the parameters apply to.
+- **Reset batches by free memory, as in the original.** The list is sent early when
+  [`llGetFreeMemory`](/functions/llGetFreeMemory/) falls below 1500 bytes, then flushed at the end.
+  Batching by memory rather than every N prims lets each call carry far more prims, which made
+  large resets much faster in testing. (Under Mono the figure also counts memory still waiting for
+  garbage collection, so it errs on the side of sending early.) It now passes `LINK_THIS` instead
+  of link 0; each batch starts with `PRIM_LINK_TARGET`, which picks the prim the parameters apply to.
 - `LinksetResourceFree`, which moves one specific link back to the pool, is new; the original
   listed it as a to-do.
 - Setup counts down link numbers directly instead of an offset counter.

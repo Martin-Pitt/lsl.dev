@@ -179,10 +179,10 @@ rotation InterpolateRotationCosine(rotation a, rotation b, float t)
     return InterpolateRotation(a, b, (1.0 - llCos(t * PI)) / 2.0);
 }
 
-// Cubic rotation interpolation, matching the other cubic functions: runs from b (t = 0) to c (t = 1),
+// Blended rotation interpolation, a cubic-like curve in the same point order as the cubics: runs from b (t = 0) to c (t = 1),
 // with the neighbouring rotations a and d bending the path. It blends the interpolation b to c with
 // the interpolation a to d, weighted 2t(1 - t).
-rotation InterpolateRotationCubic(rotation a, rotation b, rotation c, rotation d, float t)
+rotation InterpolateRotationBlend(rotation a, rotation b, rotation c, rotation d, float t)
 {
     return InterpolateRotation(
         InterpolateRotation(b, c, t),
@@ -192,7 +192,7 @@ rotation InterpolateRotationCubic(rotation a, rotation b, rotation c, rotation d
 }
 ```
 
-`InterpolateRotationCubic` passes through **b** and **c** at the ends; **a** and **d** only bend the
+`InterpolateRotationBlend` passes through **b** and **c** at the ends; **a** and **d** only bend the
 path between them. The weight of the a-to-d interpolation is 0.0 at both ends and peaks at 0.5
 when **t** is 0.5.
 
@@ -259,7 +259,8 @@ Changes from the original:
   `(from_min - from) / (from_min - from_max)`, is rewritten as the equal
   `(from - from_min) / (from_max - from_min)`, and `RescaleClamped` calls `Rescale` instead of
   repeating it.
-- **`interpolateRotationCubic` now uses the same point order as the other cubics.** The original
+- **`interpolateRotationCubic` is renamed `InterpolateRotationBlend`** (it blends two
+  interpolations) and **uses the same point order as the cubics.** The original
   ran from **a** to **b**, with **c** and **d** pulling the middle. It now runs from **b** to **c**,
   with **a** and **d** bending the path, by blending b-to-c with a-to-d (same construction and
   weight).

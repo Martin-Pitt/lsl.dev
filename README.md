@@ -48,7 +48,7 @@ scripts/
   import-datasets.py       offline importer: sources -> derived data
   lib/wiki_render.py       safe partial wikitext -> HTML renderer
   lib/wiki_fields.py       template field extraction helpers
-  lib/test_import.py       15 unittest tests for importer + renderer
+  lib/test_import.py       unittest tests for importer + renderer
   check-built-links.py     offline audit of dist/ (local links, remote assets)
   requirements.txt         Python deps (PyYAML==6.0.3)
   legacy/                  archived JS generators (unsupported)
@@ -115,7 +115,7 @@ npm run dev                                  # http://localhost:4321
 | `npm run preview` | Serve the built `dist/` |
 | `npm run check` | `astro check` type/diagnostic pass |
 | `npm run import:data` | `python scripts/import-datasets.py`: regenerate derived data from `data/sources` |
-| `npm run test:data` | `python -m unittest discover -s scripts/lib -p "test_*.py"` (15 tests) |
+| `npm run test:data` | `python -m unittest discover -s scripts/lib -p "test_*.py"` (38 tests) |
 | `npm run test:links` | `python scripts/check-built-links.py`: needs a prior build. Checks local `href`s in `dist/` and fails on remote assets. Writes `data/reports/built-links.json` |
 
 Importer options: `python scripts/import-datasets.py --wiki PATH --definitions PATH`
@@ -170,8 +170,17 @@ routes), code blocks (kept verbatim and inert), lists, basic tables, known inlin
 parameter helpers, `LSL Function/Headless` shared pages, and the static set/get branches
 of the primitive-parameter tables.
 
-It does not handle parser functions, dynamic transclusion, conditional or variable
-template logic, nested table layouts, images, or arbitrary HTML. Unknown templates are
+It expands transclusions of **local** pages only: `{{:Page}}` includes and the
+`LSL Constants …` / `LSL Constant/…` templates, read from the export (following redirects;
+`<noinclude>`, `<includeonly>` and `<onlyinclude>` honoured, `{{{n|default}}}`
+parameters substituted, headings demoted one level). The `#var` values set by
+`{{LSL Const}}` rows, `{{#if:}}`/`{{#ifeq:}}` with plain-text operands, and a few simple
+formatting templates (`LSL PL`, `LSL Hex`, `GetSet`, `Interval`, `Unicode`, `w`) are
+resolved. On function pages the wiki's `spec` and `constants` fields form the
+"Specification" section, as the wiki template places them together.
+
+It does not handle other parser functions, conditional or variable logic in general
+templates, images, or arbitrary HTML. Unknown templates are
 shown as escaped invocations that link to their archived template page, so no content
 is invented. Injected helper templates appear under "Shared wiki helpers" with their
 original source and a note that their conditionals were not evaluated. Wiki HTML,

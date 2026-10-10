@@ -1,0 +1,68 @@
+---
+/**
+ * Signature block in the style of the hand-written pages' LSLFunction template: return type and
+ * name, one parameter per line with its definition text as a trailing comment.
+ */
+import { inlineLsl, enhanceText } from '../../lib/inline-lsl';
+const { entry } = Astro.props;
+const self = entry.name;
+const params = entry.parameters as { name: string; type: string; description?: string; 'enum-semantics'?: string }[];
+const kindLabel = { function: 'Function syntax', event: 'Event syntax', constant: 'Constant' }[entry.kind as string];
+const literal = (type: string, value: unknown) => {
+	const v = String(value ?? '');
+	return (type === 'string' || type === 'key') && !/^".*"$/.test(v) ? JSON.stringify(v) : v;
+};
+let head = '', tail = '';
+if (entry.kind === 'function') {
+	head = await inlineLsl(`${entry.returnType && entry.returnType !== 'void' ? entry.returnType + ' ' : ''}${entry.name}(${params.length ? '' : ');'}`, { self });
+	tail = params.length ? await inlineLsl(');', { self }) : '';
+} else if (entry.kind === 'event') {
+	head = await inlineLsl(`${entry.name}(${params.length ? '' : ') { … }'}`, { self });
+	tail = params.length ? await inlineLsl(') { … }', { self }) : '';
+} else {
+	head = await inlineLsl(`${entry.type} ${entry.name} = ${literal(entry.type, entry.value)};`, { self });
+}
+const rows = await Promise.all(params.map(async (p, i) => ({
+	code: await inlineLsl(`${p.type} ${p.name}${i < params.length - 1 ? ',' : ''}`, { self }),
+	description: p.description ? await enhanceText(p.description, { self }) : '',
+	values: p['enum-semantics'] ? await enhanceText(String(p['enum-semantics']), { self }) : '',
+})));
+---
+<div class="api-syntax not-content">
+	<small class="api-syntax-title">{kindLabel}</small>
+	<div class="api-syntax-line"><Fragment set:html={head} /></div>
+	{rows.length > 0 && (
+		<ol class="api-syntax-params">
+			{rows.map(r => (
+				<li>
+					<span class="api-syntax-param"><Fragment set:html={r.code} /></span>
+					{r.description && <span class="api-syntax-comment">// <Fragment set:html={r.description} />{r.values && <> <span class="api-syntax-values">Values: <Fragment set:html={r.values} /></span></>}</span>}
+				</li>
+			))}
+		</ol>
+	)}
+	{tail && <div class="api-syntax-line"><Fragment set:html={tail} /></div>}
+</div>
+<style>
+	.api-syntax {
+		padding: .85rem 1rem 1rem;
+		border: 1px solid var(--sl-color-hairline);
+		border-radius: .6rem;
+		background: var(--sl-color-gray-7, var(--sl-color-black));
+		font-family: var(--__sl-font-mono);
+		font-size: var(--sl-text-sm);
+		line-height: 1.65;
+		overflow-wrap: anywhere;
+	}
+	.api-syntax-title { display: block; margin-bottom: .2rem; font-family: var(--__sl-font); font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); user-select: none; }
+	.api-syntax-params { list-style: none; margin: 0; padding: 0 0 0 1.5rem; }
+	.api-syntax-params li { display: flex; flex-wrap: wrap; column-gap: 1rem; margin: .1rem 0; }
+	.api-syntax-param { white-space: nowrap; }
+	.api-syntax-comment { flex: 1 1 18rem; color: var(--sl-color-gray-3); font-family: var(--__sl-font); }
+	.api-syntax-values { display: block; font-size: var(--sl-text-xs); }
+	.api-syntax :global(code.lsl-inline) { padding: 0; background: none; border: 0; font-size: inherit; }
+	@media (max-width: 40rem) {
+		.api-syntax-params { padding-inline-start: 1rem; }
+		.api-syntax-comment { flex-basis: 100%; }
+	}
+</style>

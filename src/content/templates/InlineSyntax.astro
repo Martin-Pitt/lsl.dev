@@ -1,5 +1,12 @@
 ---
-import { Code } from '@astrojs/starlight/components';
-const { code } = Astro.props;
+/**
+ * Syntax-highlighted inline LSL, e.g. <InlineSyntax code="REZ_POS, vector position" />.
+ * Highlighted at build time with the code blocks' grammar and themes (see src/lib/inline-lsl.ts);
+ * API names link to their reference pages unless link={false}.
+ */
+import { inlineLsl } from '../../lib/inline-lsl';
+interface Props { code: string; link?: boolean; self?: string }
+const { code, link = true, self } = Astro.props;
+const html = await inlineLsl(code, { link, self });
 ---
-<Code lang="lsl" class="is-inline" code={code}/>
+<Fragment set:html={html} />

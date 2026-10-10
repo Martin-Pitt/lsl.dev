@@ -63,6 +63,48 @@ class RenderTests(unittest.TestCase):
         archive=''.join(x['html'] for x in page_sections(text,self.r))
         self.assertIn('Plain A text.',archive); self.assertIn('Protected A text.',archive)
 
+class TransclusionTests(unittest.TestCase):
+    """Local template pages are expanded in place; nothing is ever fetched."""
+    def setUp(self):
+        page=lambda title,text,ns=0:({'title':title,'namespace':ns},text)
+        pages=[
+            page('LSL Constants/Shared','<noinclude>Docs only.</noinclude>==Parameters==\n{| {{Prettytable}}\n|-{{Hl2}}\n!name\n!value\n!comment\n|-\n| {{LSL Const|DEMO_A|integer|7|c=First [[llSay]] value.}}\n| {{#var:value}}\n| {{#var:comment}}\n|-\n| {{LSL Const|DEMO_B|integer|8|c=Second value.}}\n| {{#var:value}}\n| {{#var:comment}}\n{{:LSL Constants/Shared_Flags}}\n|}'),
+            page('LSL Constants/Shared Flags','===Flags===\n* FLAG_ONE is {{{1|the default}}}'),
+            page('Template:LSL Constants Demo Returns','<includeonly>{{{!}} class="sortable" {{Prettytable}}\n{{!}}-\n{{!}} [[DEMO_OK]]\n{{!}} 0\n{{!}} {{#if:{{{note|}}}|{{{note}}}|Written.}}\n{{!}}}</includeonly><noinclude>Usage notes.</noinclude>',10),
+            page('Template:LSL Constants Alias','#REDIRECT [[Template:LSL Constants Demo Returns]]',10),
+            page('LSL Constants/Loop','{{:LSL Constants/Loop}}'),
+        ]
+        self.r=Renderer({'llsay':'/functions/llSay/','demo a':'/constants/DEMO_A/','demo ok':'/constants/DEMO_OK/'},{t['title'].casefold():(t,x) for t,x in pages})
+    def test_page_transclusion_with_vars_nested_page_and_demoted_headings(self):
+        result=self.r.render('{{:LSL Constants/Shared}}')
+        self.assertNotIn('Docs only',result); self.assertNotIn('{{',result)
+        self.assertIn('<h3 id="parameters">Parameters</h3>',result)
+        self.assertIn('<h4 id="flags">Flags</h4>',result)
+        self.assertIn('<td> 7</td><td> First <a href="/functions/llSay/">llSay</a> value.</td>',result)
+        self.assertIn('<td> 8</td><td> Second value.',result)
+        self.assertIn('<li>FLAG_ONE is the default</li>',result)
+        self.assertEqual(self.r.transcluded,{'LSL Constants/Shared','LSL Constants/Shared Flags'})
+    def test_lsl_constants_template_with_escaped_table_and_parameters(self):
+        result=self.r.render('{{LSL Constants Demo Returns}} {{LSL_Constants_Alias|note=Custom.}}')
+        self.assertNotIn('wiki-template',result); self.assertNotIn('Usage notes',result)
+        self.assertEqual(result.count('<a href="/constants/DEMO_OK/">DEMO_OK</a>'),2)
+        self.assertIn('Written.',result); self.assertIn('Custom.',result)
+    def test_missing_and_recursive_transclusions_stay_inspectable(self):
+        missing=self.r.render('{{LSL Constants Not Local}}')
+        self.assertIn('wiki-template',missing); self.assertIn('{{LSL Constants Not Local}}',missing)
+        self.assertIn('wiki-template',self.r.render('{{:LSL Constants/Loop}}'))
+    def test_spec_and_constants_fields_form_one_specification(self):
+        text='{{LSL_Function|func=llDemo|return_type=integer|return_text=a status code.|spec=Intro.|constants={{LSL Constants Demo Returns}}|caveats=None.}}'
+        sections={x['id']:x for x in page_sections(text,self.r)}
+        self.assertEqual(list(sections),['return-value-notes','specification','caveats'])
+        self.assertIn('Intro.',sections['specification']['html']); self.assertIn('DEMO_OK',sections['specification']['html'])
+        self.assertIn('<span id="constants"></span>',sections['specification']['html'])
+        self.assertIn('Returns an ',sections['return-value-notes']['html'])
+    def test_constant_page_fields_are_sections_not_raw_template(self):
+        text='{{LSL Constant|name=DEMO_A|type=integer|value=7|desc=Demo value.|functions={{LSL DefineRow||[[llSay]]|}}}}'
+        sections={x['id']:x['html'] for x in page_sections(text,self.r)}
+        self.assertIn('Demo value.',sections['wiki-description']); self.assertIn('/functions/llSay/',sections['see-also-functions'])
+
 class DatasetTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls): cls.c=json.loads((ROOT/'src/data/catalog.json').read_text(encoding='utf8'))
@@ -71,6 +113,16 @@ class DatasetTests(unittest.TestCase):
         self.assertEqual(len(self.c['functions']),501)
         for kind in ('functions','events','constants'):
             self.assertTrue(all(not x['definition'].get('private') and not x['definition'].get('deprecated') for x in self.c[kind]))
+    def test_transcluded_specifications_render(self):
+        api={e['name']:e for k in ('functions','events','constants') for e in self.c[k]}
+        spec=lambda n:next(s['html'] for s in api[n]['wiki']['sections'] if s['id']=='specification')
+        rez=spec('llRezObjectWithParams')
+        for text in ('/constants/REZ_POS/','REZ_FLAG_BLOCK_GRAB_OBJECT','0x0080','Maximum string length is 1024 bytes.','Disabling collisions only disables collision events'):
+            self.assertIn(text,rez)
+        self.assertIn('/constants/LINKSETDATA_NOUPDATE/',spec('llLinksetDataWrite'))
+        for k in ('functions','events','constants'):
+            for e in self.c[k]:
+                self.assertNotRegex((e['wiki'] or {}).get('html',''),r'<code>\{\{:?LSL[ _]Constants',e['name'])
     def test_source_coverage_and_original_revision(self):
         for page in self.c['wiki']:
             self.assertTrue((ROOT/'public'/page['rawPath'].lstrip('/')).is_file())
@@ -98,8 +150,8 @@ class DatasetTests(unittest.TestCase):
         page=next(e for e in self.c['wiki'] if e['title']=='LlSetPrimitiveParams')
         sections={s['id']:s['html'] for s in page['sections']}
         self.assertIn('fails silently on physical prims/links',sections['caveats'])
-        self.assertIn('Sets the prim',sections['related-constants'])
-        self.assertGreater(sections['related-constants'].count('<tr>'),30)
+        self.assertIn('Sets the prim',sections['specification'])
+        self.assertGreater(sections['specification'].count('<tr>'),30)
         fast=next(e for e in self.c['functions'] if e['name']=='llSetLinkPrimitiveParamsFast')
         self.assertIn('shared-article',[s['id'] for s in fast['wiki']['sections']])
     def test_injected_helpers_and_footnote_not_silently_lost(self):

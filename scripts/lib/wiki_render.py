@@ -3,6 +3,46 @@ import re, html
 from urllib.parse import quote
 from .wiki_fields import templates
 
+# Templates that only contribute table attributes (colours, borders); they produce no visible text.
+ATTRIBUTE_TEMPLATES={'prettytable','hl1','hl2','hl3'}
+PARAM=re.compile(r'\{\{\{([^{}|]*)(?:\|([^{}]*))?\}\}\}')
+HEADING_LINE=re.compile(r'^(=+)([^\n]*?)\1[ \t]*$',re.M)
+
+def template_body(text):
+    """The text MediaWiki transcludes from a page: <noinclude> removed, <onlyinclude> honoured."""
+    text=re.sub(r'<!--.*?-->','',text,flags=re.S)
+    only=re.findall(r'<onlyinclude>(.*?)</onlyinclude>',text,flags=re.S|re.I)
+    if only: text=''.join(only)
+    text=re.sub(r'<noinclude>.*?(?:</noinclude>|$)','',text,flags=re.S|re.I)
+    return re.sub(r'</?includeonly>','',text,flags=re.I)
+
+def substitute(body,params):
+    """Replace {{{name|default}}} parameter references; unresolved ones without a default stay literal."""
+    while True:
+        new=PARAM.sub(lambda m:params[m[1].strip()] if m[1].strip() in params else (m[2] if m[2] is not None else m[0]),body)
+        if new==body: return new
+        body=new
+
+def conditionals(text):
+    """Evaluate {{#if:}} and {{#ifeq:}} whose operands are already plain text, innermost first."""
+    for _ in range(50):
+        nodes=templates(text)
+        # Only the condition operands must be plain text; branches may hold further templates.
+        plain=lambda n:'{{' not in n['parts'][0][2] and (not n['name'].lower().startswith('#ifeq:') or (len(n['parts'])>1 and '{{' not in n['parts'][1][2]))
+        candidates=[n for n in nodes if n['name'].lower().startswith(('#if:','#ifeq:')) and plain(n)]
+        leaves=[n for n in candidates if not any(c is not n and c['start']<=n['start'] and n['end']<=c['end'] for c in candidates)]
+        if not leaves: return text
+        for n in sorted(leaves,key=lambda n:n['start'],reverse=True):
+            head=n['name'].split(':',1)[1].strip(); args=[x[2] for x in n['parts'][1:]]
+            if n['name'].lower().startswith('#ifeq:'):
+                other=args[0].strip() if args else ''
+                branches=args[1:]; truth=head==other
+            else:
+                branches=args; truth=bool(head)
+            pick=(branches[0] if truth else branches[1]) if len(branches)>(0 if truth else 1) else ''
+            text=text[:n['start']]+pick.strip()+text[n['end']:]
+    return text
+
 def anchor(s):
     return re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-') or 'section'
 
@@ -14,6 +54,7 @@ class Renderer:
         self.public = set()
         self.api = False  # API pages reference large shared tables instead of inlining them
         self.missing = set()
+        self.transcluded = set()  # titles of local pages expanded in place
 
     def link(self, target, label=None):
         target, _, fragment = target.strip().partition('#')
@@ -35,8 +76,67 @@ class Renderer:
         if r.startswith(w) and r.endswith('</div>') and r.count(w)==1 and '\n' not in r: return r[len(w):-6]
         return r
 
+    def transclusion_source(self, name):
+        """Local page transcluded by {{:Page}} or a {{LSL Constants ...}} template, following redirects."""
+        name=name.strip()
+        if name.startswith(':'): key=name[1:].replace('_',' ').strip().casefold()
+        elif name.replace('_',' ').casefold().startswith(('lsl constants','lsl constant/')): key='template:'+name.replace('_',' ').strip().casefold()
+        else: return None
+        if key=='template:lsl constants/primitiveparams': return None  # shared set/get table, handled separately
+        for _ in range(3):
+            source=self.sources.get(key)
+            if not source: return None
+            redirect=re.match(r'\s*#redirect\s*\[\[:?([^\]#|]+)',source[1],re.I)
+            if not redirect: return source
+            key=redirect[1].replace('_',' ').strip().casefold()
+        return None
+
+    def expand(self, text, depth=0):
+        """Expand transclusions of local pages, as MediaWiki would, before rendering."""
+        if depth > 4: return text
+        nodes = templates(text)
+        outer = [n for n in nodes if not any(p['start'] < n['start'] and p['end'] >= n['end'] for p in nodes)]
+        changed=False
+        for n in sorted(outer, key=lambda n:n['start'], reverse=True):
+            source=self.transclusion_source(n['name'])
+            if not source: continue
+            params={}; position=0
+            for _,_,value in n['parts'][1:]:
+                named=re.match(r'\s*([^=|{}\[\]<>]+?)\s*=',value)
+                if named: params[named[1]]=value[named.end():].strip()
+                else: position+=1; params[str(position)]=value.strip()
+            body=self.expand(substitute(template_body(source[1]),params),depth+1)
+            self.transcluded.add(source[0]['title'])
+            text=text[:n['start']]+'\n'+body.strip('\n')+'\n'+text[n['end']:]; changed=True
+        if changed and depth==0:
+            # Transcluded pages sit inside a section of the including page; keep their headings below it.
+            text=HEADING_LINE.sub(lambda m:'='+m[1]+m[2]+m[1]+'=' if len(m[1])<6 else m[0],text)
+        return text
+
+    def variables(self, text):
+        """Resolve {{#var:x}} from preceding {{LSL Const}} rows and literal {{#vardefine:x|value}}s."""
+        if '#var:' not in text: return text
+        defs=[]
+        for n in templates(text):
+            name=n['name'].strip(); lower=name.lower()
+            if lower=='lsl const':
+                pos=[p[2].strip() for p in n['parts'][1:] if not re.match(r'\s*[A-Za-z]+\s*=',p[2])]
+                pos+=['']*(4-len(pos))
+                hexv=n['fields'].get('hex',{}).get('value',''); ihex=n['fields'].get('ihex',{}).get('value','')
+                cvalue=ihex or pos[2]
+                for var,value in (('hvalue',hexv),('cvalue',cvalue),('value',hexv or cvalue),('comment',n['fields'].get('c',{}).get('value','')),('type',pos[1]),('cname',pos[3] or pos[0])):
+                    defs.append((n['start'],var,value))
+            elif lower.startswith('#vardefine:') and len(n['parts'])>1 and '{{#' not in n['parts'][1][2]:
+                defs.append((n['start'],name.split(':',1)[1].strip(),n['parts'][1][2].strip()))
+        def value(m):
+            found=[v for start,var,v in defs if var==m[1].strip() and start<m.start()]
+            return found[-1] if found else m[0]
+        return re.sub(r'\{\{\s*#var:\s*([^{}|]+?)\s*\}\}',value,text)
+
     def render(self, text, depth=0):
         if depth > 8: return html.escape(text)
+        text = self.variables(self.expand(text))
+        if '{{#if' in text: text = conditionals(text)
         tokens = []
         def token(s):
             tokens.append(s)
@@ -70,13 +170,33 @@ class Renderer:
                     rendered='<p>Archived '+html.escape(args[0])+' parameter table from '+self.link(source[0]['title'])+'. Variable-based or conditional cells retain their original syntax.</p>'+self.render(body,depth+1)
                 else:
                     rendered=self.link('Template:'+name)+': <code>'+html.escape(text[n['start']:n['end']])+'</code>'
+            elif name.lower() in ATTRIBUTE_TEMPLATES or name.lower()=='pbr':
+                rendered=''
+            elif name.lower()=='lsl pl' and args:
+                label=n['fields'].get('disp',{}).get('value') or next((a for a in args if '=' not in a),'')
+                rendered='<code>'+html.escape(label)+'</code>'
+            elif name.lower()=='interval':
+                # Interval/Text: [gte or (gt, then lte] or lt).
+                f=lambda k:n['fields'].get(k,{}).get('value','')
+                left='['+f('gte') if f('gte') else '('+f('gt'); right=f('lte')+']' if f('lte') else f('lt')+')'
+                rendered=self.inline(left,depth)+',&nbsp;'+self.inline(right,depth)
+            elif name.lower()=='interval/footnote':
+                rendered=''  # explains interval notation only
+            elif name.lower()=='unicode':
+                rendered='U+'+html.escape((args[0] if args and args[0] else '0').rjust(4,'0'))
+            elif name.lower()=='getset' and len(args)>2:
+                mode=args[0]
+                pick=args[1] if mode=='get' else args[2] if mode=='set' else args[1]+(args[3] if len(args)>3 else ' / ')+args[2]
+                rendered=self.inline(pick,depth)
+            elif name.lower()=='lsl hex' and args and (args[0] or len(args)>1):
+                rendered='<code>'+html.escape(args[0] or args[1])+'</code>'
             elif name.lower() in ('lsl tip','lsl warning','lsl note') and args:
                 rendered='<aside class="wiki-note">'+self.render(args[0],depth+1)+'</aside>'
             elif name.lower() in ('lsl constrow','lsl consttb') and args:
                 rendered='<div class="wiki-constant-row">'+self.link(args[0])+''.join('<span> '+self.inline(a,depth)+'</span>' for a in args[1:] if a)+'</div>'
             elif name.lower() in ('lslg','lslgc') and args:
                 rendered=self.link(('Category:LSL ' if name.lower()=='lslgc' else '')+args[0],args[1] if len(args)>1 and args[1] else args[0])
-            elif name.lower()=='wikipedia' and args:
+            elif name.lower() in ('wikipedia','w') and args:
                 rendered='<a href="https://en.wikipedia.org/wiki/'+quote(args[0].replace(' ','_'),safe='')+'" rel="noreferrer">'+html.escape(args[1] if len(args)>1 and '=' not in args[1] else args[0])+'</a>'
             elif name.lower()=='lsl const' and args:
                 rendered=self.link(args[0],args[3] if len(args)>3 and '=' not in args[3] else args[0])
@@ -140,6 +260,16 @@ class Renderer:
         for line in text.splitlines():
             heading=re.match(r'^(={1,6})\s*(.*?)\s*\1\s*$',line)
             item=re.match(r'^[*#]+\s*(.*)',line)
+            if frames and frames[-1]['cells'] and (heading or item):
+                # Block content transcluded into a table cell stays in that cell.
+                cell=frames[-1]['cells'][-1]
+                if heading:
+                    level=min(6,max(2,len(heading[1])))
+                    plain=re.sub(r'<[^>]+>','',resolve(heading[2]))
+                    cell[2]+=f'<h{level} id="{anchor(html.unescape(plain))}">{heading[2]}</h{level}>'
+                elif cell[2].endswith('</ul>'): cell[2]=cell[2][:-5]+'<li>'+item[1]+'</li></ul>'
+                else: cell[2]+='<ul><li>'+item[1]+'</li></ul>'
+                continue
             if listing and not item: lines.append('</ul>'); listing=False
             if heading:
                 level=min(6,max(2,len(heading[1])))
@@ -166,7 +296,13 @@ class Renderer:
         result='\n'.join(lines)
         return resolve(result)
 
-SECTION_FIELDS = {'summary':'Overview','head':'Function variants','func_desc':'Wiki description','func_footnote':'Function notes','func_footer':'Function guidance','event_footnote':'Event notes','const_footnote':'Constant notes','event_desc':'Wiki description','const_desc':'Wiki description','return_text':'Return value notes','spec':'Specification','constants':'Related constants','caveats':'Caveats','examples':'Examples','helpers':'Helper functions','notes':'Notes','also_functions':'See also: functions','also_events':'See also: events','also_articles':'See also: articles','also_tests':'Tests','comments':'Comments','history':'History','issues':'Known issues'}
+SECTION_FIELDS = {'summary':'Overview','head':'Function variants','func_desc':'Wiki description','func_footnote':'Function notes','func_footer':'Function guidance','event_footnote':'Event notes','const_footnote':'Constant notes','event_desc':'Wiki description','const_desc':'Wiki description','return_text':'Return value notes','spec':'Specification','constants':'Specification','caveats':'Caveats','examples':'Examples','helpers':'Helper functions','notes':'Notes','also_functions':'See also: functions','also_events':'See also: events','also_articles':'See also: articles','also_tests':'Tests','comments':'Comments','history':'History','issues':'Known issues'}
+
+# Descriptive fields that read as the entry's lead prose; API pages show them without a heading.
+PROSE_IDS = {'overview','wiki-description','return-value-notes','function-notes','event-notes','constant-notes','function-guidance','function-details'}
+
+# {{LSL Constant}} pages use their own field names; there constants/functions/events are related-entry lists.
+CONSTANT_FIELDS = {'desc':'Wiki description','caveats':'Caveats','examples':'Examples','helpers':'Helper functions','notes':'Notes','constants':'See also: constants','functions':'See also: functions','events':'See also: events','articles':'See also: articles','history':'History','issues':'Known issues','deepnotes':'Deep notes'}
 
 def tname(name):
     return name.replace('_',' ').strip()
@@ -192,7 +328,7 @@ def page_sections(text, renderer, depth=0, variant=None):
         return []
     node=max(candidates,key=lambda n:n['end']-n['start'])
     sections=[]; siblings=[]
-    for field,title in SECTION_FIELDS.items():
+    for field,title in (CONSTANT_FIELDS if tname(node['name'])=='LSL Constant' else SECTION_FIELDS).items():
         value=node['fields'].get(field,{}).get('value','').strip()
         if value:
             if field=='head':
@@ -206,12 +342,24 @@ def page_sections(text, renderer, depth=0, variant=None):
                     parts=page_sections(value[head['start']:head['end']],renderer,depth+1)
                     if own:
                         # Single-function page: the function's own block, without a variant heading.
-                        sub.append(''.join('<h3 id="'+x['id']+'">'+x['title']+'</h3>'+x['html'] for x in parts))
+                        sub.append(''.join(('' if x['id'] in PROSE_IDS else '<h3 id="'+x['id']+'">'+x['title']+'</h3>')+x['html'] for x in parts))
                     else:
                         sub.append('<h3 id="'+anchor(name)+'">'+html.escape(name)+'</h3>'+''.join('<h4>'+x['title']+'</h4>'+x['html'] for x in parts))
                 rendered=''.join(sub) or renderer.render(value)
                 if own: title='Function details'
             else: rendered=renderer.render(value)
+            if field=='return_text':
+                # The wiki template prefixes the return text with "Returns a <type>".
+                rtype=node['fields'].get('return_type',{}).get('value','').strip()
+                if rtype:
+                    lead='Returns '+('an' if rtype[0].lower() in 'aeiou' else 'a')+' '+renderer.link(rtype)+' '
+                    w='<div class="wiki-line">'
+                    rendered=rendered.replace(w,w+lead,1) if rendered.startswith(w) else '<p>'+lead+'</p>'+rendered
+            if field=='constants':
+                # The wiki prints the constants field directly after the specification, without its own heading.
+                rendered='<span id="constants"></span>'+rendered
+                if sections and sections[-1]['title']==title:
+                    sections[-1]['html']+=rendered; continue
             sections.append({'id':anchor(title),'title':title,'html':rendered})
     injections=[v['value'] for k,v in node['fields'].items() if k.startswith('inject') and v.get('value')]
     if injections:
@@ -226,7 +374,7 @@ def page_sections(text, renderer, depth=0, variant=None):
                 issue=re.match(r'Issues/([A-Za-z]+-\d+)$',tname(helper['name']))
                 content='<p'+(' id="'+anchor(issue[1])+'"' if issue else '')+'>'+renderer.link(label)+'</p>'
                 if source:
-                    content+='<details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre><code>'+html.escape(source[1])+'</code></pre></details>'
+                    content+='<details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>'+html.escape(source[1])+'</code></pre></details>'
                 helpers.append(content)
         sections.append({'id':'shared-wiki-helpers','title':'Shared wiki helpers','html':'<p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p>'+''.join(helpers)})
     remainder=text[:node['start']]+text[node['end']:]

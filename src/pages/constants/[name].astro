@@ -2,10 +2,11 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import ApiDetail from '../../components/reference/ApiDetail.astro';
 import { catalog } from '../../lib/catalog';
+import { apiHeadings, breadcrumbBanner } from '../../lib/api-page';
 export function getStaticPaths() { return catalog.constants.map(entry=>({params:{name:entry.name},props:{entry}})); }
 const { entry } = Astro.props;
-const headings = [...(entry.parameters.length ? [{depth:2,slug:'parameters',text:'Parameters'}] : []), ...(entry.wiki?.sections||[]).map(s=>({depth:2,slug:s.id,text:s.title}))];
+const headings = apiHeadings(entry);
 ---
-<StarlightPage frontmatter={{title:entry.name,description:entry.description.slice(0,160),editUrl:false,lastUpdated:false}} headings={headings}>
+<StarlightPage frontmatter={{title:entry.name,description:entry.description.slice(0,160),editUrl:false,lastUpdated:false,banner:{content:breadcrumbBanner(entry)}}} headings={headings}>
 <ApiDetail entry={entry}/>
 </StarlightPage>

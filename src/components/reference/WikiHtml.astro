@@ -1,0 +1,42 @@
+---
+/**
+ * Renders imported wiki HTML: inline code and API references are syntax-highlighted, and
+ * `<pre><code>` blocks become expressive-code blocks. With `examples`, every code block becomes
+ * a collapsible example whose summary is the sentence that introduced it on the wiki.
+ */
+import { Code } from '@astrojs/starlight/components';
+import { enhanceHtml, unescapeHtml, collapseMeta } from '../../lib/inline-lsl';
+interface Props { html: string; focus?: string; examples?: boolean }
+const { html, focus, examples = false } = Astro.props;
+const enhanced = await enhanceHtml(html, { self: focus });
+// Odd indexes hold block code, even indexes the HTML between blocks.
+// A block that sat alone on a wiki line keeps no empty wrapper around it.
+const parts = enhanced.split(/(?:<div class="wiki-line">)?<pre><code>([\s\S]*?)<\/code><\/pre>(?:<\/div>)?/);
+const code = (i: number) => unescapeHtml(parts[i]).replace(/\s+$/, '');
+type Item = { summary: string; intro: string; code: string };
+const items: Item[] = []; let trailing = '';
+if (examples) {
+	for (let i = 0; i < parts.length; i += 2) {
+		if (i + 1 >= parts.length) { trailing = parts[i]; break; }
+		let intro = parts[i].trim(), summary = '';
+		// The first plain line of introductory prose becomes the summary.
+		const first = intro.match(/^<div class="wiki-line">([\s\S]*?)<\/div>/);
+		if (first && !first[1].includes('<div')) { summary = first[1]; intro = intro.slice(first[0].length); }
+		if (code(i + 1).trim()) items.push({ summary, intro, code: code(i + 1) });
+		else trailing += intro;  // an empty block on the wiki has nothing to show
+	}
+}
+const plainSummary = (s: string) => s.replace(/<[^>]+>/g, '').trim();
+---
+{examples ? (
+	<>
+		{items.map((item, n) => (
+			<details class="api-example" open={n === 0}>
+				<summary>{item.summary && plainSummary(item.summary) ? <Fragment set:html={item.summary} /> : `Example ${n + 1}`}</summary>
+				{item.intro && <div class="api-example-intro" set:html={item.intro} />}
+				<Code code={item.code} lang="lsl" meta={collapseMeta(item.code, focus)} />
+			</details>
+		))}
+		{trailing.trim() && <Fragment set:html={trailing} />}
+	</>
+) : parts.map((part, i) => i % 2 ? (code(i).trim() && <Code code={code(i)} lang="lsl" meta={collapseMeta(code(i), focus)} />) : <Fragment set:html={part} />)}

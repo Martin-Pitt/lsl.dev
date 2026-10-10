@@ -14,7 +14,17 @@ const links = (entries: Entry[]): Extract<Entry, { type: 'link' }>[] => entries.
 export const onRequest = defineRouteMiddleware((context) => {
 	const route = context.locals.starlightRoute;
 	const all = links(route.sidebar as Entry[]);
-	if (all.some(l => l.isCurrent)) return;
+	const current = all.filter(l => l.isCurrent);
+	// The same page can be linked twice (Fundamentals › Language types and Reference › Types both link
+	// /types/). Keep only the most deeply nested match, so the page opens in its own section.
+	if (current.length > 1) {
+		const depth = new Map<Entry, number>();
+		const walk = (es: Entry[], d: number) => es.forEach(e => e.type === 'link' ? depth.set(e, d) : walk(e.entries, d + 1));
+		walk(route.sidebar as Entry[], 0);
+		const keep = current.reduce((a, b) => (depth.get(b)! > depth.get(a)! ? b : a));
+		for (const l of current) if (l !== keep) l.isCurrent = false;
+	}
+	if (current.length) return;
 	const path = context.url.pathname;
 	const { sidebar } = pageNav(path, route.entry.data.title);
 	const candidates = [...sidebar, ...(path.startsWith('/wiki/') ? ['/wiki/'] : [])];

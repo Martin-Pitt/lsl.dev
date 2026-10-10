@@ -1,18 +1,20 @@
-<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Gets the <code>line</code> of the notecard <code>name</code> from the region's notecard cache immediately without raising a dataserver event.</div></section>
-<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Returns <a href="/constants/EOF/">EOF</a> if <code>line</code> is past the end of the notecard.</div></section>
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Gets the <span class="wiki-param"><code>line</code></span> of the notecard <span class="wiki-param"><code>name</code></span> from the region's notecard cache immediately without raising a dataserver event.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Returns <a href="/constants/EOF/">EOF</a> if <span class="wiki-param"><code>line</code></span> is past the end of the notecard.</div></section>
 <section><h2 id="specification">Specification</h2><div class="wiki-line">This function returns a string containing the requested line from a notecard in prim inventory, without the need for an asynchronous dataserver event, if the notecard is cached/known in its entirety by the simulator. This speeds up acessing notecard lines tremendously, and allows for near instantaneous random access.</div>
 <div class="wiki-line">If the notecard does not exist it returns the constant <a href="/constants/NAK/">NAK</a> and will shout a message to the debug channel.  If the notecard has not been previously cached on the simulator it will return the <a href="/constants/NAK/">NAK</a> constant.</div>
 <div class="wiki-line">Notecards are cached into a fixed-size buffer, with the oldest (least-recently read) notecard getting removed first. It is not safe to assume a notecard has been previously cached. Data for a previously cached notecard may be dropped from the cache at any time, especially on a busy server.</div></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>If notecard contains embedded inventory items (such as textures and landmarks), <a href="/constants/EOF/">EOF</a> will be returned, regardless of the line requested.</li>
-<li>If the requested line is longer than 1024 bytes (<em>not</em> characters), <a href="/functions/llGetNotecardLineSync/">llGetNotecardLineSync</a> will only return the first 1024 <em>bytes</em> of the line.</li>
-<li>To check that the returned line has not been truncated, use the example snippet on <a href="/functions/llStringToBase64/">llStringToBase64</a> to check the number of bytes returned by <a href="/functions/llGetNotecardLineSync/">llGetNotecardLineSync</a>. If the string is exactly 1024 bytes, it <em>may</em> have been truncated.</li>
-<li>Do not use <a href="/functions/llStringLength/">llStringLength</a> for this, because strings in LSL support multi-byte characters (UTF-8 for LSL-2, UTF-16 for Mono).</li>
-<li>A <a href="/events/dataserver/">dataserver</a> event does <strong>not</strong> get raised. Therefore, other scripts in the linkset are unaware of the processed notecard lines.</li>
-<li>Since this function does not idle the script while waiting for a <a href="/events/dataserver/">dataserver</a> event, garbage collection will not run while loading an entire notecard by calling llGetNotecardLineSync in a loop. For large notecards, you can quickly run out of free memory, even if you overwrite each line as you read it.</li>
-<li>This does not occur with <a href="/functions/llGetNotecardLine/">llGetNotecardLine</a>, which runs garbage collection while waiting for the <a href="/events/dataserver/">dataserver</a> event.</li>
-<li>This can be mitigated using <a href="/events/timer/">timer</a>s (any length will do), but not <a href="/functions/llSleep/">llSleep</a>, which also blocks garbage collection.</li>
-</ul></section>
+<section><h2 id="caveats">Caveats</h2><ul><li>If notecard contains embedded inventory items (such as textures and landmarks), <a href="/constants/EOF/">EOF</a> will be returned, regardless of the line requested.
+</li><li>If the requested line is longer than 1024 bytes (<em>not</em> characters), <a href="/functions/llGetNotecardLineSync/">llGetNotecardLineSync</a> will only return the first 1024 <em>bytes</em> of the line.
+<ul><li>To check that the returned line has not been truncated, use the example snippet on <a href="/functions/llStringToBase64/">llStringToBase64</a> to check the number of bytes returned by <a href="/functions/llGetNotecardLineSync/">llGetNotecardLineSync</a>. If the string is exactly 1024 bytes, it <em>may</em> have been truncated.
+<ul><li>Do not use <a href="/functions/llStringLength/">llStringLength</a> for this, because strings in LSL support multi-byte characters (UTF-8 for LSL-2, UTF-16 for Mono).
+</li></ul>
+</li></ul>
+</li><li>A <a href="/events/dataserver/">dataserver</a> event does <strong>not</strong> get raised. Therefore, other scripts in the linkset are unaware of the processed notecard lines.
+</li><li>Since this function does not idle the script while waiting for a <a href="/events/dataserver/">dataserver</a> event, garbage collection will not run while loading an entire notecard by calling llGetNotecardLineSync in a loop. For large notecards, you can quickly run out of free memory, even if you overwrite each line as you read it.
+<ul><li>This does not occur with <a href="/functions/llGetNotecardLine/">llGetNotecardLine</a>, which runs garbage collection while waiting for the <a href="/events/dataserver/">dataserver</a> event.
+</li><li>This can be mitigated using <a href="/events/timer/">timer</a>s (any length will do), but not <a href="/functions/llSleep/">llSleep</a>, which also blocks garbage collection.
+</li></ul>
+</li></ul></section>
 <section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>string NOTECARD_NAME = &quot;notecard&quot;;
 key READ_KEY = NULL_KEY;
 

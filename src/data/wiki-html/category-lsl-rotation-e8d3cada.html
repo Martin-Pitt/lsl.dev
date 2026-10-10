@@ -1,4 +1,4 @@
-<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Types}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
 <div class="wiki-line">A rotation is a data <a href="/wiki/category-lsl-types-67643027/">type</a> that contains a set of four <a href="/wiki/category-lsl-float-1e4a2060/">float</a> values.</div>
 <h3 id="components">Components</h3>
 <div class="wiki-line">Each element can be accessed individually by appending .x, .y, .z or .s to the variable name.</div>
@@ -25,9 +25,8 @@ rotation r3 = r1*r2; // &lt;0.5, 0.5, 0.5, 0.5&gt;
 rotation r4 = r1/r2; // &lt;0.5, -0.5, -0.5, 0.5&gt;
 // note the non-commutativity: different result from r1*r2
 rotation r5 = r2*r1; // &lt;0.5, -0.5, 0.5, 0.5&gt;</code></pre></div>
-<ul>
-<li>Rotation multiplication is always true <a href="https://wiki.secondlife.com/wiki/quaternion">quaternion</a> multiplication, but division is multiplication by the <a href="https://en.wikipedia.org/wiki/Quaternion%23Conjugation%2C_the_norm%2C_and_reciprocal" rel="noreferrer">conjugate</a> instead. This will not produce true quaternion results unless the rotation is normalized.&lt;ref name="division"&gt;I.e. rotation division is <code>q/p = qp̅</code>. To get true quaternion division <code>q/p = qp̅/‖p‖²</code> even for non-normalized rotations, the result must be divided by the squared magnitude of the divisor <code>m = ‖p‖² = p.x*p.x+p.y*p.y+p.z*p.z+p.s*p.s</code>. Since LSL doesn't support multiplying/dividing a rotation by a float, the scaling must be done componentwise, e.g. <code>p = &lt;p.x/m, p.y/m, p.z/m, p.s/m&gt;</code> or by multiplying by a scalar rotation <code>p = p*&lt;0, 0, 0, 1.0/m&gt;</code>.&lt;/ref&gt;</li>
-</ul>
+<ul><li>Rotation multiplication is always true <a href="https://wiki.secondlife.com/wiki/quaternion">quaternion</a> multiplication, but division is multiplication by the <a href="https://en.wikipedia.org/wiki/Quaternion%23Conjugation%2C_the_norm%2C_and_reciprocal" rel="noreferrer">conjugate</a> instead. This will not produce true quaternion results unless the rotation is normalized.<sup class="wiki-footnote">I.e. rotation division is <code>q/p = qp̅</code>. To get true quaternion division <code>q/p = qp̅/‖p‖²</code> even for non-normalized rotations, the result must be divided by the squared magnitude of the divisor <code>m = ‖p‖² = p.x*p.x+p.y*p.y+p.z*p.z+p.s*p.s</code>. Since LSL doesn't support multiplying/dividing a rotation by a float, the scaling must be done componentwise, e.g. <code>p = &lt;p.x/m, p.y/m, p.z/m, p.s/m&gt;</code> or by multiplying by a scalar rotation <code>p = p*&lt;0, 0, 0, 1.0/m&gt;</code>.</sup>
+</li></ul>
 <h4 id="vector-rotation-operators-and">Vector Rotation, Operators "*" and "/"</h4>
 <div class="wiki-line">Produces a rotated vector. "/" rotates in the opposite direction to "*".</div>
 <div class="wiki-line">Vectors can be rotated only from the right side: rotation*vector is illegal.</div>
@@ -45,12 +44,10 @@ vector vr4 = v*r5; // &lt;-2, 0, 1&gt; - rotated 90 degrees around z, then 90 de
 rotation rs = &lt;1, 2, 3, 4&gt; - &lt;0.5, 0.5, 0.5, 0.5&gt;; // &lt;0.5, 1.5, 2.5, 3.5&gt;</code></pre></div>
 <h2 id="uses">Uses</h2>
 <div class="wiki-line">Functions in this category fall into two categories: rotations in the purely mathematical sense and rotations as in prim / object rotation. The <a href="https://wiki.secondlife.com/wiki/rotation">rotation</a> page has detailed information about how to work with rotations. <a href="https://wiki.secondlife.com/wiki/Quaternion">Quaternion</a> is an alias for variables of rotation type, and the article explains some further mathematical details behind them.</div>
-<ul>
-<li>Rotations are also the most memory-efficient way of storing non-rotation related bundles of 4 <a href="https://wiki.secondlife.com/wiki/float">float</a> values, especially inside <a href="https://wiki.secondlife.com/wiki/list">list</a>s.</li>
-<li>Rotations can substitute for <a href="https://en.wikipedia.org/wiki/Complex_number" rel="noreferrer">complex numbers</a>: by choosing one of the x/y/z components to represent the complex imaginary part, the s component to represent the real part and leaving the others at 0, the rotation operations behave like their complex equivalents, other than division that requires adjustment&lt;ref name="division"/&gt;.</li>
-</ul>
+<ul><li>Rotations are also the most memory-efficient way of storing non-rotation related bundles of 4 <a href="https://wiki.secondlife.com/wiki/float">float</a> values, especially inside <a href="https://wiki.secondlife.com/wiki/list">list</a>s.
+</li><li>Rotations can substitute for <a href="https://en.wikipedia.org/wiki/Complex_number" rel="noreferrer">complex numbers</a>: by choosing one of the x/y/z components to represent the complex imaginary part, the s component to represent the real part and leaving the others at 0, the rotation operations behave like their complex equivalents, other than division that requires adjustment.
+</li></ul>
 <h2 id="useful-snippets">Useful Snippets</h2>
 <div class="wiki-line">To reverse a rotation (say something is facing north and you want it to face south, e.g. 180 degrees difference), add pi to the z value of the euler vector:</div>
 <div class="wiki-line"><pre><code>llEuler2Rot(&lt;0.0, 0.0, PI&gt;) * llGetRot()</code></pre></div>
 <h2 id="footnotes">Footnotes</h2>
-<div class="wiki-line">&lt;references/&gt;</div>

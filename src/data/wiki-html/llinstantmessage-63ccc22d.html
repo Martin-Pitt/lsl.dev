@@ -1,15 +1,15 @@
-<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sends an Instant Message specified in the <a href="https://wiki.secondlife.com/wiki/string">string</a> <code>message</code> to the user specified by <code>user</code>.</div></section>
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sends an Instant Message specified in the <a href="https://wiki.secondlife.com/wiki/string">string</a> <span class="wiki-param"><code>message</code></span> to the user specified by <span class="wiki-param"><code>user</code></span>.</div></section>
 <section><h2 id="function-guidance">Function guidance</h2><div class="wiki-line">To send a message directly to an <a href="https://wiki.secondlife.com/wiki/object">object</a>, use <a href="/functions/llRegionSayTo/">llRegionSayTo</a>.</div></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>All <a href="https://wiki.secondlife.com/wiki/object">object</a> IMs are throttled at a maximum of 2500 per 30mins, per owner, per <a href="https://wiki.secondlife.com/wiki/region">region</a>, in a rolling window. This includes IMs sent after the throttle is in place.</li>
-<li>Throttled IMs are dropped. for implementation see <a href="/functions/llInstantMessage/#notes">notes</a> below.</li>
-<li>Messages longer than 1023 bytes will be truncated to 1023 bytes<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|As of Feb 26th, 2013, in all sims, instant messages are now truncated to 1023 bytes to prevent certain types of delivery failure. (See [https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13.02.15.270481 Release Notes for Second Life Server 13.02.15.270481]).}}</code></span>. This can convey 1023 ASCII characters, or fewer<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|Around 512 UTF-8 characters such as &#x27;&#x27;&#x27;á&#x27;&#x27;&#x27;.}}</code></span> if non-ASCII characters are present.</li>
-</ul>
-<ul>
-<li>If the specified user is logged in, <code>message</code> will appear in the chat window and will not logged by the InstantMessage logging facility.</li>
-<li>If the specified user is not signed in, the messages will be delivered to their email just like a regular instant message, if the user has enabled email for their account.</li>
-<li>If messages are sent to the same user by the same object within about 65 seconds, they will be bundled together in a single email.</li>
-</ul></section>
+<section><h2 id="caveats">Caveats</h2><ul><li>All <a href="https://wiki.secondlife.com/wiki/object">object</a> IMs are throttled at a maximum of 2500 per 30mins, per owner, per <a href="https://wiki.secondlife.com/wiki/region">region</a>, in a rolling window. This includes IMs sent after the throttle is in place.
+<ul><li>Throttled IMs are dropped. for implementation see <a href="/functions/llInstantMessage/#notes">notes</a> below.
+</li></ul>
+</li><li>Messages longer than 1023 bytes will be truncated to 1023 bytes<sup class="wiki-footnote">As of Feb 26th, 2013, in all sims, instant messages are now truncated to 1023 bytes to prevent certain types of delivery failure. (See <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13.02.15.270481" rel="noreferrer">Release Notes for Second Life Server 13.02.15.270481</a>).</sup>. This can convey 1023 ASCII characters, or fewer<sup class="wiki-footnote">Around 512 UTF-8 characters such as <strong>á</strong>.</sup> if non-ASCII characters are present.
+</li></ul>
+<ul><li>If the specified user is logged in, <span class="wiki-param"><code>message</code></span> will appear in the chat window and will not logged by the InstantMessage logging facility.
+</li><li>If the specified user is not signed in, the messages will be delivered to their email just like a regular instant message, if the user has enabled email for their account.
+<ul><li>If messages are sent to the same user by the same object within about 65 seconds, they will be bundled together in a single email.
+</li></ul>
+</li></ul></section>
 <section><h2 id="examples">Examples</h2><div class="wiki-line">Tell the owner somebody touched the object:</div>
 <div class="wiki-line"><pre><code>default
 {
@@ -26,17 +26,17 @@
         llInstantMessage( llDetectedKey(0), &quot;Hands Off!&quot;);
     }
 }</code></pre></div></section>
-<section><h2 id="notes">Notes</h2><ul>
-<li><a href="/functions/llRegionSayTo/">llRegionSayTo</a> may be a better choice if the target is in the same region as the object sending the message, as it has no built-in delay and can communicate directly with objects, as well as with avatars and their attachments.</li>
-<li>Instant Messaging allows communication from an object to an avatar anywhere on the Grid. However, an object cannot receive an Instant Message. </li>
-<li>Using <a href="/functions/llInstantMessage/">llInstantMessage</a> from one or more child scripts will avoid delays in the main script. Child scripts will still be subject to delays, <a href="https://wiki.secondlife.com/wiki/LSL_Event_Queue">message queue</a> limits, and region throttles.</li>
-<li>Throttling Implementation (Kelly Linden):</li>
-<li>The throttle is on all IMs from the object owner. It does not disable all IMs in the region, but does disable all IMs from the owner of the object.</li>
-<li>The throttle is not per object, but per owner. Splitting the spamming object into multiple objects will not help unless owned by different people. This also means that owning multiple almost too spammy objects will cause you to hit the limit.</li>
-<li>2500 IMs in 30 minutes will trigger the block.</li>
-<li>IMs that are blocked continue to count against the throttle. The IM count must drop below 2500 before any IMs will be delivered.</li>
-<li>The IM count of the previous window is used to approximate the rolling window. If it is 20% into the current window the IM count will be the current count + 80% of the previous count. This allows us to approximate a rolling average, however it has the behavior that a flood of IMs can have an effect on the throttle for double the window length. This is why in practice the throttle behaves more like 5k in 1hr than 2.5k in 30min.</li>
-</ul></section>
+<section><h2 id="notes">Notes</h2><ul><li><a href="/functions/llRegionSayTo/">llRegionSayTo</a> may be a better choice if the target is in the same region as the object sending the message, as it has no built-in delay and can communicate directly with objects, as well as with avatars and their attachments.
+</li><li>Instant Messaging allows communication from an object to an avatar anywhere on the Grid. However, an object cannot receive an Instant Message. 
+</li><li>Using <a href="/functions/llInstantMessage/">llInstantMessage</a> from one or more child scripts will avoid delays in the main script. Child scripts will still be subject to delays, <a href="https://wiki.secondlife.com/wiki/LSL_Event_Queue">message queue</a> limits, and region throttles.
+</li><li>Throttling Implementation (Kelly Linden):
+<ul><li>The throttle is on all IMs from the object owner. It does not disable all IMs in the region, but does disable all IMs from the owner of the object.
+</li><li>The throttle is not per object, but per owner. Splitting the spamming object into multiple objects will not help unless owned by different people. This also means that owning multiple almost too spammy objects will cause you to hit the limit.
+</li><li>2500 IMs in 30 minutes will trigger the block.
+</li><li>IMs that are blocked continue to count against the throttle. The IM count must drop below 2500 before any IMs will be delivered.
+</li><li>The IM count of the previous window is used to approximate the rolling window. If it is 20% into the current window the IM count will be the current count + 80% of the previous count. This allows us to approximate a rolling average, however it has the behavior that a flood of IMs can have an effect on the throttle for double the window length. This is why in practice the throttle behaves more like 5k in 1hr than 2.5k in 30min.
+</li></ul>
+</li></ul></section>
 <section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llOwnerSay/">llOwnerSay</a> — Sends chat region wide to owner</div></div>
 <div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRegionSay/">llRegionSay</a> — Sends chat region wide</div></div>
 <div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRegionSayTo/">llRegionSayTo</a> — Sends chat region wide to a specific prim/avatar</div></div>

@@ -1,30 +1,25 @@
-<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">If <code>detect</code> is <a href="/constants/TRUE/">TRUE</a>, VolumeDetect is enabled, physical object and avatars can pass through the object.</div></section>
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">If <span class="wiki-param"><code>detect</code></span> is <a href="/constants/TRUE/">TRUE</a>, VolumeDetect is enabled, physical object and avatars can pass through the object.</div></section>
 <section><h2 id="function-notes">Function notes</h2><div class="wiki-line">This works much like Phantom, but unlike Phantom, VolumeDetect objects trigger <a href="/events/collision_start/">collision_start</a> and <a href="/events/collision_end/">collision_end</a> events when interpenetrating. Collision events will trigger in any script in the object.</div></section>
 <section><h2 id="specification">Specification</h2><table><caption> Events queued depending on type</caption><tr><th></th><th> VolumeDetect</th><th> Phantom</th></tr><tr><th> Events<br/>Supported</th><td> <a href="/events/collision_start/">collision_start</a><br/><br/><a href="/events/collision_end/">collision_end</a></td><td> <a href="/events/land_collision_start/">land_collision_start</a><br/><a href="/events/land_collision/">land_collision</a><br/><a href="/events/land_collision_end/">land_collision_end</a></td></tr></table>
 <h4 id="differences">Differences</h4>
 <div class="wiki-line">There are a couple differences in how Phantom and VolumeDetect handle collisions; specifically which events are supported and how they handle the ground.</div>
-<div class="wiki-line">&lt;div style="clear:left;"&gt;</div>
 <h6 id="volumedetect">VolumeDetect</h6>
-<ul>
-<li>When physical they fall through the ground with the risk of going off-world.</li>
-<li><a href="/events/collision/">collision</a> events are not triggered</li>
-</ul>
+<ul><li>When physical they fall through the ground with the risk of going off-world.
+</li><li><a href="/events/collision/">collision</a> events are not triggered
+</li></ul>
 <h6 id="phantom">Phantom</h6>
-<ul>
-<li>When physical they collide with the ground but will not pass through (normal physical object behavior), <a href="/wiki/category-lsl-land-collision-41c8bc40/">land collision</a> events are queued.</li>
-</ul>
-<div class="wiki-line">&lt;/div&gt;</div></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>It can only be applied to the root prim (which will make the entire object VolumeDetect).</li>
-<li>If the volume detecting object is <em>not</em> physical, it can only detect physical objects and avatars. If the object <em>is</em> physical, it can detect its collisions with static and <a href="/functions/llSetKeyframedMotion/">keyframed motion</a> objects as well.</li>
-</ul>
+<ul><li>When physical they collide with the ground but will not pass through (normal physical object behavior), <a href="/wiki/category-lsl-land-collision-41c8bc40/">land collision</a> events are queued.
+</li></ul></section>
+<section><h2 id="caveats">Caveats</h2><ul><li>It can only be applied to the root prim (which will make the entire object VolumeDetect).
+</li><li>If the volume detecting object is <em>not</em> physical, it can only detect physical objects and avatars. If the object <em>is</em> physical, it can detect its collisions with static and <a href="/functions/llSetKeyframedMotion/">keyframed motion</a> objects as well.
+</li></ul>
 <h3 id="attachments">Attachments</h3>
-<div class="wiki-line"><strong>Note:</strong> Attachments are not included in the avatar's bounding box. <a href="/wiki/category-lsl-collision-579d074c/">Collision events</a> received by attachments are collisions the avatar is having with the world, not collisions the attachment is having. Nothing actually can collide with an attachment<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|Even if attachments were included in an avatars bounding box, you would not like the outcome, the avatars bounding box is not deformed by animations.}}</code></span>. </div>
-<ul>
-<li>It is meaningless to enabled on attachments. Attachments cannot collide with anything.</li>
-<li>Attachments do not receive collision events for avatar collisions with VolumeDetect objects.</li>
-<li>Attachments do receive collision events for avatar collisions with non-VolumeDetect, non-phantom objects.</li>
-</ul></section>
+<div class="wiki-line"><strong>Note:</strong> Attachments are not included in the avatar's bounding box. <a href="/wiki/category-lsl-collision-579d074c/">Collision events</a> received by attachments are collisions the avatar is having with the world, not collisions the attachment is having. Nothing actually can collide with an attachment<sup class="wiki-footnote">Even if attachments were included in an avatars bounding box, you would not like the outcome, the avatars bounding box is not deformed by animations.</sup>. </div>
+<ul><li>It is meaningless to enabled on attachments. Attachments cannot collide with anything.
+</li><li>Attachments do not receive collision events for avatar collisions with VolumeDetect objects.
+<ul><li>Attachments do receive collision events for avatar collisions with non-VolumeDetect, non-phantom objects.
+</li></ul>
+</li></ul></section>
 <section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
 {
     state_entry()

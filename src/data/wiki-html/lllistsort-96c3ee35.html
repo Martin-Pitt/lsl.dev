@@ -1,4 +1,4 @@
-<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> that is <code>src</code> sorted by <code>stride</code>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> that is <span class="wiki-param"><code>src</code></span> sorted by <span class="wiki-param"><code>stride</code></span>.</div></section>
 <section><h2 id="specification">Specification</h2><div class="wiki-line">The sort order is affected by type. For strings and keys, it is case sensitive and sorts by Unicode character code.<br/></div>
 <div class="wiki-line"><pre><code>llListSort([&quot;a&quot;, &quot;á&quot;, &quot;B&quot;, &quot;C&quot;, &quot;d&quot;, &quot;e&quot;], 1, TRUE) // returns [&quot;B&quot;, &quot;C&quot;, &quot;a&quot;, &quot;d&quot;, &quot;e&quot;, &quot;á&quot;]</code></pre></div>
 <div class="wiki-line">For ascending sort, each type is sorted individually and then feathered to have the same order of types.</div>
@@ -12,17 +12,17 @@ llListSort([&quot;2ae&quot;, &quot;ah5&quot;, &quot;1ag&quot;, &quot;aa6&quot;, 
 // returns [&quot;1ag&quot;, &quot;2ae&quot; ,&quot;3ac&quot; ,&quot;4af&quot; ,&quot;aa6&quot; ,&quot;ab8&quot; ,&quot;ad7&quot; ,&quot;ah5&quot; ,&quot;ai9&quot;]</code></pre></div>
 <div class="wiki-line">As a reminder, although floats and integers are both numeric and comparable, they too are treated separately.</div>
 <div class="wiki-line"><pre><code>llListSort([1, 3, 5, 2.0, 4.0, 6.0], 1, TRUE) // returns the list unchanged</code></pre></div></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>It uses an unoptimized selection sort algorithm, which is an algorithm with a Big O of N². A <a href="https://wiki.secondlife.com/wiki/JIRA">JIRA</a> issue exists to improve this function, <a href="https://jira.secondlife.com/browse/SVC-2988" rel="noreferrer">SVC-2988</a>.</li>
-<li>Originally the wiki stated that non-zero values for the "ascending" parameter would produce an ascending sort.  That was incorrect.  For this function, the value must be exactly 1 (or TRUE) for an ascending sort.</li>
-<li><a href="https://wiki.secondlife.com/wiki/Vector">Vector</a>s are sorted by magnitude. <a href="https://jira.secondlife.com/browse/SVC-5643" rel="noreferrer">SVC-5643</a></li>
-<li><a href="https://wiki.secondlife.com/wiki/Rotation">Rotation</a>s are not sorted. An ascending sort will simply leave any rotations unchanged, and a descending sort will reverse their order.</li>
-<li>For special <a href="https://wiki.secondlife.com/wiki/float">float</a> values: having <a href="https://en.wikipedia.org/wiki/NaN" rel="noreferrer">NaN</a>s in a list can confuse the sort order, as they are uncomparable. Negative zeroes are retained, but their positions with regard to ordinary zeroes depend on the list. Infinities behave as expected.</li>
-<li>For descending sort, if there are mixed types, the final order is deterministic (the same input will always produce the same output) but it can be completely useless. <pre><code>llListSort([2, &quot;B&quot;, &quot;C&quot;, 3, 1, &quot;A&quot;], 1, FALSE) // returns [&quot;A&quot;, 3, 1, &quot;C&quot;, &quot;B&quot;, 2]</code></pre> If there are no mixed types, however, the descending sort works just fine.</li>
-<li>When the stride is greater than 1, if the list length is not a multiple of the stride, the list will be returned unchanged.</li>
-<li>When strings contain numbers, the numbers are still sorted left-to-right like any other character, which may not necessarily match numeric order: <pre><code>llListSort([&quot;127&quot;, &quot;3&quot;, &quot;25&quot;], 1, TRUE) // returns [&quot;127&quot;, &quot;25&quot;, &quot;3&quot;] because the 1 in 127 is before the 2 in 25 which is before the 3</code></pre> To sort them in numeric order, numbers in strings can be padded with zeros: <pre><code>llListSort([&quot;127&quot;, &quot;003&quot;, &quot;025&quot;], 1, TRUE) // returns [&quot;003&quot;, &quot;025&quot;, &quot;127&quot;]</code></pre></li>
-<li>This order differs from the order of items in a prim's inventory, which is "natural order" (e.g "New Script 2" is sorted before "New Script 11").</li>
-</ul></section>
+<section><h2 id="caveats">Caveats</h2><ul><li>It uses an unoptimized selection sort algorithm, which is an algorithm with a Big O of N². A <a href="https://wiki.secondlife.com/wiki/JIRA">JIRA</a> issue exists to improve this function, <a href="https://jira.secondlife.com/browse/SVC-2988" rel="noreferrer">SVC-2988</a>.
+</li><li>Originally the wiki stated that non-zero values for the "ascending" parameter would produce an ascending sort.  That was incorrect.  For this function, the value must be exactly 1 (or TRUE) for an ascending sort.
+</li><li><a href="https://wiki.secondlife.com/wiki/Vector">Vector</a>s are sorted by magnitude. <a href="https://jira.secondlife.com/browse/SVC-5643" rel="noreferrer">SVC-5643</a>
+</li><li><a href="https://wiki.secondlife.com/wiki/Rotation">Rotation</a>s are not sorted. An ascending sort will simply leave any rotations unchanged, and a descending sort will reverse their order.
+</li><li>For special <a href="https://wiki.secondlife.com/wiki/float">float</a> values: having <a href="https://en.wikipedia.org/wiki/NaN" rel="noreferrer">NaN</a>s in a list can confuse the sort order, as they are uncomparable. Negative zeroes are retained, but their positions with regard to ordinary zeroes depend on the list. Infinities behave as expected.
+</li><li>For descending sort, if there are mixed types, the final order is deterministic (the same input will always produce the same output) but it can be completely useless. <pre><code>llListSort([2, &quot;B&quot;, &quot;C&quot;, 3, 1, &quot;A&quot;], 1, FALSE) // returns [&quot;A&quot;, 3, 1, &quot;C&quot;, &quot;B&quot;, 2]</code></pre> If there are no mixed types, however, the descending sort works just fine.
+</li><li>When the stride is greater than 1, if the list length is not a multiple of the stride, the list will be returned unchanged.
+</li><li>When strings contain numbers, the numbers are still sorted left-to-right like any other character, which may not necessarily match numeric order: <pre><code>llListSort([&quot;127&quot;, &quot;3&quot;, &quot;25&quot;], 1, TRUE) // returns [&quot;127&quot;, &quot;25&quot;, &quot;3&quot;] because the 1 in 127 is before the 2 in 25 which is before the 3</code></pre> To sort them in numeric order, numbers in strings can be padded with zeros: <pre><code>llListSort([&quot;127&quot;, &quot;003&quot;, &quot;025&quot;], 1, TRUE) // returns [&quot;003&quot;, &quot;025&quot;, &quot;127&quot;]</code></pre>
+<ul><li>This order differs from the order of items in a prim's inventory, which is "natural order" (e.g "New Script 2" is sorted before "New Script 11").
+</li></ul>
+</li></ul></section>
 <section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>list numbers = [3, &quot;three&quot;, 2, &quot;two&quot;, 1, &quot;one&quot;];
 default
 {
@@ -57,7 +57,7 @@ llSay(0, llList2CSV(tmplist));</code></pre></div>
 list newlist = llListSort(myList, 1, TRUE);// Okay. You&#x27;ve captured the results.
 
 llSay(0,llList2CSV(llListSort(myList, 1, TRUE))); // No need to capture, using the results right away.</code></pre></div>
-<h3 id="stride-parameter"><code>Stride</code> parameter</h3>
+<h3 id="stride-parameter"><span class="wiki-param"><code>Stride</code></span> parameter</h3>
 <div class="wiki-line">Most times, you will want to set "integer stride" to 1 (0 also works) to tell it to sort each item in the list on its own basis. (If you are working with a strided list, though, see the special section below on sorting strides.)</div>
 <h3 id="sort-order">Sort Order</h3>
 <div class="wiki-line">Setting the parameter "integer ascending" to <a href="/constants/TRUE/">TRUE</a> returns a sorted list that is in ascending order. <br/></div>

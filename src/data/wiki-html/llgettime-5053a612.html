@@ -1,18 +1,18 @@
 <section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/float">float</a> that is script time in seconds with subsecond precision since the script started, was last reset, or call to either <a href="/functions/llResetTime/">llResetTime</a> or <a href="/functions/llGetAndResetTime/">llGetAndResetTime</a>.</div></section>
 <section><h2 id="specification">Specification</h2><div class="wiki-line">Script time matches normal time, it is unaffected by time dilation.  For example, if you call llResetTime on two objects in separate simulators at the same time, and later call llGetTime on both at the same time, their values will be equal regardless of differences in dilation.</div></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>Script time is the amount of real-world time that the script has been in a running state. It is unaffected by time dilation, but it does not count time while the script is suspended, the user is offline (when in an attachment), the object is in inventory rather than rezzed, etc.</li>
-<li>Script time resets when...</li>
-<li>Script reset (user or <a href="/functions/llResetScript/">llResetScript</a> or <a href="/functions/llResetOtherScript/">llResetOtherScript</a>)</li>
-<li>Call to either <a href="/functions/llResetTime/">llResetTime</a> or <a href="/functions/llGetAndResetTime/">llGetAndResetTime</a></li>
-<li>Due to (32 bit) floating point number limitations, the accuracy of this function is 1</sup>/<sub>64</sub>sec up to ~3 days, 1</sup>/<sub>32</sub>sec up to ~6 days, etc... doubling each time, e.g. it's only 1 second at ~194 days. Use <a href="/functions/llResetTime/">llResetTime</a> or <a href="/functions/llGetAndResetTime/">llGetAndResetTime</a> whenever practical to maintain the accuracy you require:</li>
-</ul>
+<section><h2 id="caveats">Caveats</h2><ul><li>Script time is the amount of real-world time that the script has been in a running state. It is unaffected by time dilation, but it does not count time while the script is suspended, the user is offline (when in an attachment), the object is in inventory rather than rezzed, etc.
+</li><li>Script time resets when...
+<ul><li>Script reset (user or <a href="/functions/llResetScript/">llResetScript</a> or <a href="/functions/llResetOtherScript/">llResetOtherScript</a>)
+</li><li>Call to either <a href="/functions/llResetTime/">llResetTime</a> or <a href="/functions/llGetAndResetTime/">llGetAndResetTime</a>
+</li></ul>
+</li><li>Due to (32 bit) floating point number limitations, the accuracy of this function is 1</sup>/<sub>64</sub>sec up to ~3 days, 1</sup>/<sub>32</sub>sec up to ~6 days, etc... doubling each time, e.g. it's only 1 second at ~194 days. Use <a href="/functions/llResetTime/">llResetTime</a> or <a href="/functions/llGetAndResetTime/">llGetAndResetTime</a> whenever practical to maintain the accuracy you require:
+</li></ul>
 <table><caption> Floating Point Precision Thesholds</caption><tr><th> Precision </th><th> Up to Seconds </th><th> Hours </th><th> Days</th></tr><tr><td> 0.016=2<sup>-6</sup> </td><td>   262144=2<sup>18</sup> </td><td>   72.82 </td><td>   3.03</td></tr><tr><td> 0.022=<sup>1</sup>/<sub>45</sub> </td><td colspan="3"> 1 simulator frame</td></tr><tr><td> 0.031=2<sup>-5</sup> </td><td>   524288=2<sup>19</sup> </td><td>  145.63 </td><td>   6.06</td></tr><tr><td> 0.063=2<sup>-4</sup> </td><td>  1048576=2<sup>20</sup> </td><td>  291.27 </td><td>  12.13</td></tr><tr><td> 0.125=2<sup>-3</sup> </td><td>  2097152=2<sup>21</sup> </td><td>  582.54 </td><td>  24.27</td></tr><tr><td> 0.250=2<sup>-2</sup> </td><td>  4194304=2<sup>22</sup> </td><td> 1165.08 </td><td>  48.54</td></tr><tr><td> 0.500=2<sup>-1</sup> </td><td>  8388608=2<sup>23</sup> </td><td> 2330.16 </td><td>  97.09</td></tr><tr><td> 1.000=2<sup>-0</sup> </td><td> 16777216=2<sup>24</sup> </td><td> 4660.33 </td><td> 194.18</td></tr></table>
-<ul>
-<li>Note that this precision caveat does not apply to scripts written in SLua, only to LSL scripts. In SLua:</li>
-<li>the timer precision is 64-bit, and will maintain 1</sup>/<sub>64</sub>sec precision for ~4.4million years.</li>
-<li><a href="/functions/llResetTime/">llResetTime</a> and <a href="/functions/llGetAndResetTime/">llGetAndResetTime</a> have been removed</li>
-</ul></section>
+<ul><li>Note that this precision caveat does not apply to scripts written in SLua, only to LSL scripts. In SLua:
+<ul><li>the timer precision is 64-bit, and will maintain 1</sup>/<sub>64</sub>sec precision for ~4.4million years.
+</li><li><a href="/functions/llResetTime/">llResetTime</a> and <a href="/functions/llGetAndResetTime/">llGetAndResetTime</a> have been removed
+</li></ul>
+</li></ul></section>
 <section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default {
     state_entry()
     {
@@ -71,4 +71,5 @@ while (llGetTime() &lt; time);</code></pre></div></section>
 <section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llResetTime/">llResetTime</a></div></div>
 <div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAndResetTime/">llGetAndResetTime</a></div></div>
 <div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRegionTimeDilation/">llGetRegionTimeDilation</a></div></div></section>
-<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-issues-svc-3293-374bfa8b/">Issues/SVC-3293</a>: <code>{{Issues/SVC-3293}}</code></span></div></section>
+<section><h2 id="wiki-issues">Known issues</h2><ul><li><a href="https://jira.secondlife.com/browse/SVC-3293" rel="noreferrer">SVC-3293</a>: <a href="/functions/llGetTime/">llGetTime</a> doesn't reset on admin requested sim restart
+</li></ul></section>

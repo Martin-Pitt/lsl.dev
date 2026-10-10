@@ -1,15 +1,14 @@
-<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Says&lt;ref name="send"&gt;In this context, <em>saying</em> or <em>speaking</em> means that a message is being <em>sent</em> to the recipient (object or avatar); it's not about audio/voice chat!&lt;/ref&gt; the text supplied in string <code>msg</code> on channel supplied in <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>channel</code> to the <a href="https://wiki.secondlife.com/wiki/object">object</a> or <a href="/wiki/avatar-ca8e826d/">avatar</a> specified by <code>target</code></div></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>Text is spoken&lt;ref name="send" /&gt; directly to the <a href="https://wiki.secondlife.com/wiki/object">object</a> or <a href="/wiki/avatar-ca8e826d/">avatar</a> within the same <a href="https://wiki.secondlife.com/wiki/region">region</a> as the <a href="/wiki/script-102acc10/">script</a>.</li>
-<li>Script in tasks other than <code>target</code> can neither listen for&lt;ref&gt;In this context, this means waiting to <em>receive</em> a message.&lt;/ref&gt;, nor receive these text messages, with an exception for attachments as described below.</li>
-<li><code>msg</code> can be a maximum of 1024 bytes. This can convey 1024 ASCII characters, or 256-512 multibyte UTF-8 characters such as <code>á</code> (2 bytes), <code>ℋ</code> (3 bytes) or <code>🧡</code> (4 bytes).</li>
-<li>A <a href="https://wiki.secondlife.com/wiki/prim">prim</a> cannot hear itself, to prevent problems with recursion. Use <a href="/functions/llMessageLinked/">llMessageLinked</a> instead for intra-prim messaging.</li>
-<li>Sending text on <code>DEBUG_CHANNEL</code> is not supported.</li>
-<li>Text sent to an avatar's <a href="https://wiki.secondlife.com/wiki/UUID">ID</a> on channel <a href="/constants/PUBLIC_CHANNEL/">zero</a> will be sent to the receiver's viewer.</li>
-<li>Text sent to an avatar's ID on non-zero channels can be heard&lt;ref&gt;I.e., <em>received</em>&lt;/ref&gt; by any attachment on the avatar.</li>
-<li>A quick series of messages sent by <a href="/functions/llRegionSayTo/">llRegionSayTo</a> cannot be relied on to arrive at their destination in the same order as sent.</li>
-<li>There is a per-destination throttle of 200 messages sent over 10 seconds on channel <a href="/constants/PUBLIC_CHANNEL/">zero</a>.   Thereafter, there is also a per-sending-object throttle of 100 messages on channel zero over 300 seconds (5 minutes).  This throttle is relevant only after the first throttle is activated.  Messages sent on channels other than zero do not trigger the throttle but, once it is triggered, the block applies to <em>all</em> channels. The block is region-wide and applies to all objects with the same <a href="/wiki/category-lsl-owner-d1b87734/">owner</a>. The block apparently lasts until the region is restarted.</li>
-</ul></section>
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Says<sup class="wiki-footnote">In this context, <em>saying</em> or <em>speaking</em> means that a message is being <em>sent</em> to the recipient (object or avatar); it's not about audio/voice chat!</sup> the text supplied in string <span class="wiki-param"><code>msg</code></span> on channel supplied in <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <span class="wiki-param"><code>channel</code></span> to the <a href="https://wiki.secondlife.com/wiki/object">object</a> or <a href="/wiki/avatar-ca8e826d/">avatar</a> specified by <span class="wiki-param"><code>target</code></span></div></section>
+<section><h2 id="caveats">Caveats</h2><ul><li>Text is spoken directly to the <a href="https://wiki.secondlife.com/wiki/object">object</a> or <a href="/wiki/avatar-ca8e826d/">avatar</a> within the same <a href="https://wiki.secondlife.com/wiki/region">region</a> as the <a href="/wiki/script-102acc10/">script</a>.
+</li><li>Script in tasks other than <span class="wiki-param"><code>target</code></span> can neither listen for<sup class="wiki-footnote">In this context, this means waiting to <em>receive</em> a message.</sup>, nor receive these text messages, with an exception for attachments as described below.
+</li><li><span class="wiki-param"><code>msg</code></span> can be a maximum of 1024 bytes. This can convey 1024 ASCII characters, or 256-512 multibyte UTF-8 characters such as <code>á</code> (2 bytes), <code>ℋ</code> (3 bytes) or <code>🧡</code> (4 bytes).
+</li><li>A <a href="https://wiki.secondlife.com/wiki/prim">prim</a> cannot hear itself, to prevent problems with recursion. Use <a href="/functions/llMessageLinked/">llMessageLinked</a> instead for intra-prim messaging.
+</li><li>Sending text on <span class="wiki-param"><code>DEBUG_CHANNEL</code></span> is not supported.
+</li><li>Text sent to an avatar's <a href="https://wiki.secondlife.com/wiki/UUID">ID</a> on channel <a href="/constants/PUBLIC_CHANNEL/">zero</a> will be sent to the receiver's viewer.
+</li><li>Text sent to an avatar's ID on non-zero channels can be heard<sup class="wiki-footnote">I.e., <em>received</em></sup> by any attachment on the avatar.
+</li><li>A quick series of messages sent by <a href="/functions/llRegionSayTo/">llRegionSayTo</a> cannot be relied on to arrive at their destination in the same order as sent.
+</li><li>There is a per-destination throttle of 200 messages sent over 10 seconds on channel <a href="/constants/PUBLIC_CHANNEL/">zero</a>.   Thereafter, there is also a per-sending-object throttle of 100 messages on channel zero over 300 seconds (5 minutes).  This throttle is relevant only after the first throttle is activated.  Messages sent on channels other than zero do not trigger the throttle but, once it is triggered, the block applies to <em>all</em> channels. The block is region-wide and applies to all objects with the same <a href="/wiki/category-lsl-owner-d1b87734/">owner</a>. The block apparently lasts until the region is restarted.
+</li></ul></section>
 <section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
 {
     touch_start(integer num_detected)
@@ -24,14 +23,12 @@
         llRegionSayTo(id, -12345, &quot;Hello there attachments!&quot;);
     }
 }</code></pre></div></section>
-<section><h2 id="notes">Notes</h2><ul>
-<li>If one object 'says'&lt;ref name="send" /&gt; something to another object (<em>e.g.</em>, a button that, when touched, turns on a lamp), consider using a very negative <code>channel</code>, <em>e.g.</em>,</li>
-</ul>
+<section><h2 id="notes">Notes</h2><ul><li>If one object 'says' something to another object (<em>e.g.</em>, a button that, when touched, turns on a lamp), consider using a very negative <span class="wiki-param"><code>channel</code></span>, <em>e.g.</em>,
+</li></ul>
 <div class="wiki-line">:<pre><code>llRegionSayTo(&quot;55499a64-45c3-4b81-8880-8ffb5a7c251b&quot;, -5243212, &quot;turn on&quot;);</code></pre></div>
-<div class="wiki-line">:Using negative channels for script communications remains a common practice because, prior to September 2016, the standard Second Life Viewer was unable to chat directly on those channels (&lt;kbd&gt;/-xxxx message&lt;/kbd&gt; wouldn't chat <code>message</code> on <code>channel</code> <code>-xxxx</code>). </div>
-<ul>
-<li>Messages sent on channel zero via <a href="/functions/llRegionSayTo/">llRegionSayTo</a>() are blocked after 200 messages on to the same destination in a 10 second period.  After this throttle is activated, there is a further throttle, on objects belonging to the owner of the object that triggered the first throttle, of 100 messages per object over 5 minutes (see <a href="https://jira.secondlife.com/browse/BUG-5457" rel="noreferrer">BUG-5457</a>). The block is region-wide and applies to all objects belonging to the owner, so if a script triggers the throttle, all objects in the same region belonging to the same owner will also be blocked. Messages sent on channels other than zero do not trigger the throttles.  The throttles apparently reset only when the region is restarted. </li>
-</ul>
+<div class="wiki-line">:Using negative channels for script communications remains a common practice because, prior to September 2016, the standard Second Life Viewer was unable to chat directly on those channels (<kbd>/-xxxx message</kbd> wouldn't chat <code>message</code> on <span class="wiki-param"><code>channel</code></span> <code>-xxxx</code>). </div>
+<ul><li>Messages sent on channel zero via <a href="/functions/llRegionSayTo/">llRegionSayTo</a>() are blocked after 200 messages on to the same destination in a 10 second period.  After this throttle is activated, there is a further throttle, on objects belonging to the owner of the object that triggered the first throttle, of 100 messages per object over 5 minutes (see <a href="https://jira.secondlife.com/browse/BUG-5457" rel="noreferrer">BUG-5457</a>). The block is region-wide and applies to all objects belonging to the owner, so if a script triggers the throttle, all objects in the same region belonging to the same owner will also be blocked. Messages sent on channels other than zero do not trigger the throttles.  The throttles apparently reset only when the region is restarted. 
+</li></ul>
 <div class="wiki-line">Therefore, <a href="/functions/llRegionSayTo/">llRegionSayTo</a>() is unsuitable for (say) verbose script debugging, and even moderate use can break users' content completely unrelated to the script for an indeterminate (and potentially very long) period of time.   Consider using <a href="/functions/llOwnerSay/">llOwnerSay</a>() for debugging instead or, if this is not appropriate, try <code>llRegionSayTo(avatar, non-zero-channel, message)</code> and have an attachment relay the message using <a href="/functions/llOwnerSay/">llOwnerSay</a>().</div></section>
 <section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line">|-</div>
 <div class="wiki-line">||| style="width:9em;" |</div>
@@ -74,4 +71,3 @@
 |{{#var:p_{{{1|none}}}_hover}}
 |}
 &lt;/noinclude&gt;</code></pre></details></section>
-<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><a href="/wiki/category-lsl-chat-72477c0b/">Category:LSL_Chat</a></div></section>

@@ -1,14 +1,12 @@
 <div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
-<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-righttoc-d8e1769b/">RightToc</a>: <code>{{RightToc}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Types}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-righttoc-d8e1769b/">RightToc</a>: <code>{{RightToc}}</code></span></div>
 <div class="wiki-line">The LSL "float" type is a <a href="https://en.wikipedia.org/wiki/Floating_point" rel="noreferrer">floating point</a> data type that uses 32 bit in <a href="https://en.wikipedia.org/wiki/IEEE_floating_point" rel="noreferrer">IEEE-754</a> form. </div>
 <div class="wiki-line">If a number is written with a decimal point in LSL, then it is taken to be a float.</div>
 <div class="wiki-line">The valid range is 1.401298464E-45 to 3.402823466E+38 </div>
 <div class="wiki-line">Floats can be specified in scientific notation such as 2.6E-5.</div>
 <div class="wiki-line">If a function requires a float as a parameter, and the number is an integer (e.g. 5), you can add the .0 to clearly indicate it's a float, but omitting the .0 is equally valid and actually saves bytecode space in the compiled code.</div>
 <div class="wiki-line">When dividing 2 constants, defining them as floats will avoid the chance of unwanted rounding down. Better still, do the math on your calculator and save the server some cycles.</div>
-<div class="wiki-line">&lt;div id="box"&gt;</div>
 <h2 id="examples">Examples</h2>
-<div class="wiki-line">&lt;div style="padding: 0.5em"&gt;</div>
 <div class="wiki-line"><pre><code>float min = 1.175494351E-38;
 float max = 3.402823466E+38;
 float sci = 2.6E-5;
@@ -23,22 +21,18 @@ float cast = (float)&quot;42&quot;; //explicit typecast to a float
 float hex_float = (float)&quot;0x1.5p5&quot;; // C99 style hex floats are allowed when cast from strings, but not as direct literals
 float Infintity = (float)&quot;inf&quot;; //-- may be negative, will cause a math error if evaluated in LSO, see &#x27;caveats&#x27; below
 float NotANumber = (float)&quot;nan&quot;; //-- may be negative, will cause a math error if evaluated in LSO, see &#x27;caveats&#x27; bleow</code></pre></div>
-<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
-<div class="wiki-line">&lt;div id="box"&gt;</div>
 <h2 id="useful-snippets">Useful Snippets</h2>
-<div class="wiki-line">&lt;div style="padding: 0.5em"&gt;</div>
 <div class="wiki-line">If you need to validate an arbitrary float without limitations then the following function is ideal:</div>
 <div class="wiki-line"><pre><code>integer isValidFloat(string s) { return (string)((float)s) != (string)((float)(&quot;-&quot; + llStringTrim(s, STRING_TRIM_HEAD))); }</code></pre></div>
 <div class="wiki-line">However, the following is more efficient, but comes with the noted caveats. If these are not an issue to you then it is the recommended option, particularly under Mono:</div>
 <div class="wiki-line"><pre><code>integer isValidFloat(string s) { return (float)(s + &quot;1&quot;) != 0.0; }</code></pre></div>
 <div class="wiki-line"><strong>Caveats</strong>:</div>
-<ul>
-<li>LSO-LSL scientific notation with an exponent greater than 38 will fail (throw a Math Error). Mono is unaffected as it supports <code>infinity</code></li>
-<li>Under both Mono and LSO-LSL you may find strange results if dealing with strings containing more than 9 decimal places. Remember that string casting in LSL only gives up to 6 so is safe, and human input is rarely going to be that accurate, plus values that small are not usually all that useful.</li>
-<li>Due to the limited precision with which floats are stored, not all integer values can be accurately held in a float: only the values between -16,777,216 and 16,777,216 are precise. Between +/-16,777,216 and +/-33,554,432 values are rounded to even numbers, beyond +/-33,544,432 they are rounded to multiples of 4, etc. The rounding is towards the nearest value, or towards zero if both are equally far.</li>
-<li>"nan" (not-a-number), "inf" (infinity) and their negatives are special text values that can be cast from a string (with any leading spaces or trailing characters). those values will cause a math error when the variable is evaluated in LSO. If you are parsing user data, by casting a string to a float, use the following code (replacing vStrDta with your string variable name) see <a href="https://jira.secondlife.com/browse/SVC-6847" rel="noreferrer">SVC-6847</a>: <pre><code>(float)llList2String( llParseStringKeepNulls( llToLower( llStringTrim( vStrDta, STRING_TRIM ) ), [&quot;inf&quot;, &quot;nan&quot;], [] ), 0 )</code></pre></li>
-<li>Under both Mono and LSO-LSL, equality comparisons between two float values are not recommended.  Instead, consider comparison with a small tolerance value, such as: <pre><code>llAbs(a - b) &lt; epsilon</code></pre> </li>
-</ul>
+<ul><li>LSO-LSL scientific notation with an exponent greater than 38 will fail (throw a Math Error). Mono is unaffected as it supports <code>infinity</code>
+</li><li>Under both Mono and LSO-LSL you may find strange results if dealing with strings containing more than 9 decimal places. Remember that string casting in LSL only gives up to 6 so is safe, and human input is rarely going to be that accurate, plus values that small are not usually all that useful.
+</li><li>Due to the limited precision with which floats are stored, not all integer values can be accurately held in a float: only the values between -16,777,216 and 16,777,216 are precise. Between +/-16,777,216 and +/-33,554,432 values are rounded to even numbers, beyond +/-33,544,432 they are rounded to multiples of 4, etc. The rounding is towards the nearest value, or towards zero if both are equally far.
+</li><li>"nan" (not-a-number), "inf" (infinity) and their negatives are special text values that can be cast from a string (with any leading spaces or trailing characters). those values will cause a math error when the variable is evaluated in LSO. If you are parsing user data, by casting a string to a float, use the following code (replacing vStrDta with your string variable name) see <a href="https://jira.secondlife.com/browse/SVC-6847" rel="noreferrer">SVC-6847</a>: <pre><code>(float)llList2String( llParseStringKeepNulls( llToLower( llStringTrim( vStrDta, STRING_TRIM ) ), [&quot;inf&quot;, &quot;nan&quot;], [] ), 0 )</code></pre>
+</li><li>Under both Mono and LSO-LSL, equality comparisons between two float values are not recommended.  Instead, consider comparison with a small tolerance value, such as: <pre><code>llAbs(a - b) &lt; epsilon</code></pre> 
+</li></ul>
 <div class="wiki-line">However, both of the above snippets will stop validating at the first character that is not valid in a float string. The following code rigorously validates the whole of a string to ensure it represents a float (and nothing else), at the cost of speed and memory footprint.</div>
 <div class="wiki-line"><pre><code>// Validate a string containing a float value
 // Does not handle scientific notation, or hex floats (!!)
@@ -63,13 +57,9 @@ integer  ValidateSimpleFloat(string sin)
     }
     return TRUE;
 }</code></pre></div>
-<div class="wiki-line">&lt;/div&gt;</div>
 <h2 id="float-to-string">Float-to-String</h2>
-<div class="wiki-line">&lt;div style="padding: 0.5em"&gt;</div>
 <div class="wiki-line">There are several ways to convert a float to a string. The first of which is to typecast it to a string <code>(string)(1.0)</code>. This however has the disadvantage of rounding and being limited to six decimal places. Several functions have been written to provide more options. They fall into two categories, lossless and lossy.</div>
 <table><caption> Lossy functions</caption><tr><th> Name </th><th> inf/nan</th><th> Rounding</th><th> Truncation</th><th> Notes</th></tr><tr><td> Typecast</td><td> Yes</td><td> Yes</td><td> No</td><td> <code>(string)float_value</code><br>Mono only gives <a href="https://jira.secondlife.com/browse/SCR-397?focusedCommentId=340847&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-340847" rel="noreferrer">6 digits of precision</a>.</td></tr><tr><td> <a href="/wiki/format-decimal-54214cb8/">Format Decimal</a></td><td> No</td><td> Yes</td><td> No</td><td></td></tr><tr><td> <a href="/wiki/float2string-98c89af5/">Float2String</a></td><td> No</td><td> Yes</td><td> Yes</td><td> </td></tr></table>
 <table><caption> Lossless functions</caption><tr><th> Name </th><th> Speed</th><th> Reversible</th><th> inf/nan support</th><th> <a href="/constants/PI/">PI</a></th><th> Notes</th></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/Float2Hex">Float2Hex</a></td><td> Fast</td><td> <code>(float)</code></td><td> No</td><td> 0x6487ED5p-25</td><td> Since the output is in the Hexadecimal Scientific Notation, it's not really human readable.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/Float2Sci">Float2Sci</a></td><td> Slow</td><td> <code>(float)</code></td><td> No</td><td> 3.1415925</td><td> Useful when you want the result to be lossless but also human readable, comes at the cost of speed.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/User:Strife_Onizuka/Float_Functions#base64-float">FUIS</a></td><td> Fastest</td><td> <a href="https://wiki.secondlife.com/wiki/User:Strife_Onizuka/Float_Functions#base64-float">SIUF</a></td><td> No</td><td> "QEkP2g"</td><td> Not at all human readable. Guarantied to always use six characters.</td></tr></table>
-<ul>
-<li>Infinity is only accessible in Mono. </li>
-</ul>
-<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<ul><li>Infinity is only accessible in Mono. 
+</li></ul>

@@ -1,22 +1,25 @@
-<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets a <a href="http://foldoc.org/index.cgi?query=handle" rel="noreferrer">handle</a> for <code>msg</code> on <code>channel</code> from <code>name</code> and <code>id</code>.</div></section>
-<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>msg</code>, <code>name</code> or <code>id</code> are blank (i.e. <code>""</code>) they are not used to filter incoming messages.</div>
-<div class="wiki-line">If <code>id</code> is an invalid key or assigned the value <a href="/constants/NULL_KEY/">NULL_KEY</a>, it is considered blank as well.<br/></div></section>
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets a <a href="http://foldoc.org/index.cgi?query=handle" rel="noreferrer">handle</a> for <span class="wiki-param"><code>msg</code></span> on <span class="wiki-param"><code>channel</code></span> from <span class="wiki-param"><code>name</code></span> and <span class="wiki-param"><code>id</code></span>.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <span class="wiki-param"><code>msg</code></span>, <span class="wiki-param"><code>name</code></span> or <span class="wiki-param"><code>id</code></span> are blank (i.e. <code>""</code>) they are not used to filter incoming messages.</div>
+<div class="wiki-line">If <span class="wiki-param"><code>id</code></span> is an invalid key or assigned the value <a href="/constants/NULL_KEY/">NULL_KEY</a>, it is considered blank as well.<br/></div></section>
 <section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that can be used to <a href="/functions/llListenControl/">deactivate</a> or <a href="/functions/llListenRemove/">remove</a> the listen.</div></section>
-<section><h2 id="specification">Specification</h2><div class="wiki-line">For the <a href="/events/listen/">listen</a> <a href="https://wiki.secondlife.com/wiki/event">event</a> to be triggered it must first match the criteria set forth by the filters; only when all the criteria have been met is a listen event generated. First the message must have been transmitted on <code>channel</code>. If <code>id</code> is both a <a href="https://wiki.secondlife.com/wiki/key#valid">valid</a> key and not a <a href="https://wiki.secondlife.com/wiki/key#null-key">null</a> key, then the speaker's key must be equivalent<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|In general terms this means the matching for {{LSLP|id}} is not case sensitive. See [[key#equivalency]] for details on key equivalency.|In general terms this means the matching for id is not case sensitive.}}</code></span> to <code>id</code>. If <code>name</code> is set, then the speaker's <a href="/wiki/category-lsl-avatar-name-1fcd5f3e/">legacy name</a> must match <code>name</code> exactly (case sensitive). If <code>msg</code> is set, then the spoken message must match <code>msg</code> exactly (case sensitive).</div></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>On <a href="https://wiki.secondlife.com/wiki/state">state</a> change or <a href="/functions/llResetScript/">script reset</a> all listens are removed automatically.</li>
-<li>A <a href="https://wiki.secondlife.com/wiki/state">state</a> change can be used as a shortcut to releasing listens.</li>
-<li>Only 65 listens can simultaneously be open in any single script.</li>
-<li>If this number is exceeded <em>Script run-time error</em> and <em>Too Many Listens</em> errors occur.</li>
-<li>For some time, the official SL viewer and several third-party viewers can use negative channels from the chat bar directly just as any other non-zero channel. Formerly, the standard SL viewer could only send chat on negative channels through <a href="/functions/llDialog/">llDialog</a> or <a href="/functions/llTextBox/">llTextBox</a> responses, meaning negative channels were best suited for applications that did not require direct avatar chat.</li>
-<li>Be aware that if you mistakenly use an integer literal bigger than the maximum or smaller than the minimum, LSL will treat it as -1, <em>without</em> giving any compilation error. This means that all scripts listening to an out-of-range integer will be listening to channel -1 instead, or if the number has a minus sign in front, to channel 1. A safe rule is to never use more than 9 digits. If the channel number comes from a conversion from float (for example from <a href="/functions/llFrand/">llFrand</a>), if the float is out of range for an integer, it will be converted to the number -2147483648 regardless of its sign or value.</li>
-<li>Messages sent by script on positive and negative channels are truncated to 1024 bytes. Messages sent by chat on positive channels are truncated to 1023 bytes. Messages sent by chat from negative channels are truncated to 254 bytes.</li>
-<li>Once a <a href="/events/listen/">listen</a> is registered its filters cannot be updated, if the listen is registered to <a href="/functions/llGetOwner/">llGetOwner</a>, the listen will remain registered to the previous owner upon owner change.</li>
-<li><a href="/constants/CHANGED_OWNER/">Owner change</a> can be detected with the <a href="/events/changed/">changed</a> event.</li>
-<li>To work around this the old listen will need to be closed and a new one opened for the new owner.</li>
-<li>A prim cannot hear/listen to chat it generates. It can, however, hear a linked prim.</li>
-<li>Chat indirectly generated (as a result of <a href="/functions/llDialog/">llDialog</a>, <a href="/functions/llTextBox/">llTextBox</a> or from a <a href="https://wiki.secondlife.com/wiki/Link">linked prim</a>) can be heard if in range.</li>
-</ul></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">For the <a href="/events/listen/">listen</a> <a href="https://wiki.secondlife.com/wiki/event">event</a> to be triggered it must first match the criteria set forth by the filters; only when all the criteria have been met is a listen event generated. First the message must have been transmitted on <span class="wiki-param"><code>channel</code></span>. If <span class="wiki-param"><code>id</code></span> is both a <a href="https://wiki.secondlife.com/wiki/key#valid">valid</a> key and not a <a href="https://wiki.secondlife.com/wiki/key#null-key">null</a> key, then the speaker's key must be equivalent<sup class="wiki-footnote">In general terms this means the matching for <span class="wiki-param"><code>id</code></span> is not case sensitive. See <a href="https://wiki.secondlife.com/wiki/key#equivalency">key</a> for details on key equivalency.</sup> to <span class="wiki-param"><code>id</code></span>. If <span class="wiki-param"><code>name</code></span> is set, then the speaker's <a href="/wiki/category-lsl-avatar-name-1fcd5f3e/">legacy name</a> must match <span class="wiki-param"><code>name</code></span> exactly (case sensitive). If <span class="wiki-param"><code>msg</code></span> is set, then the spoken message must match <span class="wiki-param"><code>msg</code></span> exactly (case sensitive).</div></section>
+<section><h2 id="caveats">Caveats</h2><ul><li>On <a href="https://wiki.secondlife.com/wiki/state">state</a> change or <a href="/functions/llResetScript/">script reset</a> all listens are removed automatically.
+<ul><li>A <a href="https://wiki.secondlife.com/wiki/state">state</a> change can be used as a shortcut to releasing listens.
+</li></ul>
+</li><li>Only 65 listens can simultaneously be open in any single script.
+<ul><li>If this number is exceeded <em>Script run-time error</em> and <em>Too Many Listens</em> errors occur.
+</li></ul>
+</li><li>For some time, the official SL viewer and several third-party viewers can use negative channels from the chat bar directly just as any other non-zero channel. Formerly, the standard SL viewer could only send chat on negative channels through <a href="/functions/llDialog/">llDialog</a> or <a href="/functions/llTextBox/">llTextBox</a> responses, meaning negative channels were best suited for applications that did not require direct avatar chat.
+</li><li>Be aware that if you mistakenly use an integer literal bigger than the maximum or smaller than the minimum, LSL will treat it as -1, <em>without</em> giving any compilation error. This means that all scripts listening to an out-of-range integer will be listening to channel -1 instead, or if the number has a minus sign in front, to channel 1. A safe rule is to never use more than 9 digits. If the channel number comes from a conversion from float (for example from <a href="/functions/llFrand/">llFrand</a>), if the float is out of range for an integer, it will be converted to the number -2147483648 regardless of its sign or value.
+</li><li>Messages sent by script on positive and negative channels are truncated to 1024 bytes. Messages sent by chat on positive channels are truncated to 1023 bytes. Messages sent by chat from negative channels are truncated to 254 bytes.
+</li><li>Once a <a href="/events/listen/">listen</a> is registered its filters cannot be updated, if the listen is registered to <a href="/functions/llGetOwner/">llGetOwner</a>, the listen will remain registered to the previous owner upon owner change.
+<ul><li><a href="/constants/CHANGED_OWNER/">Owner change</a> can be detected with the <a href="/events/changed/">changed</a> event.
+</li><li>To work around this the old listen will need to be closed and a new one opened for the new owner.
+</li></ul>
+</li><li>A prim cannot hear/listen to chat it generates. It can, however, hear a linked prim.
+<ul><li>Chat indirectly generated (as a result of <a href="/functions/llDialog/">llDialog</a>, <a href="/functions/llTextBox/">llTextBox</a> or from a <a href="https://wiki.secondlife.com/wiki/Link">linked prim</a>) can be heard if in range.
+</li></ul>
+</li></ul></section>
 <section><h2 id="examples">Examples</h2><div class="wiki-line">Trivial example to listen to any chat from the object owner and respond once.</div>
 <table><tr><th> <strong>Single listen handle</strong></th></tr><tr><td><pre><code>//  Says beep to owner the first-time owner says something in main chat
 //  and then stops listening
@@ -100,34 +103,32 @@ default
         remove_listen_handles();
     }
 }</code></pre></td></tr></table></section>
-<section><h2 id="notes">Notes</h2><ul>
-<li>Avoid channel zero (<a href="/constants/PUBLIC_CHANNEL/">PUBLIC_CHANNEL</a>) and set <code>name</code> or <code>id</code> where possible to avoid lag. <code>llListen(0, "", NULL_KEY,"")</code> can be laggy as it listens to all chat from everyone in chat range and so should be avoided.</li>
-</ul>
-<ul>
-<li>In November 2007, <a href="https://wiki.secondlife.com/wiki/User:Kelly_Linden">Kelly Linden</a> offered <a href="https://lists.secondlife.com/pipermail/secondlifescripters/2007-November/001993.html" rel="noreferrer">this explanation</a> to help scripters plan listeners more efficiently:</li>
-</ul>
+<section><h2 id="notes">Notes</h2><ul><li>Avoid channel zero (<a href="/constants/PUBLIC_CHANNEL/">PUBLIC_CHANNEL</a>) and set <span class="wiki-param"><code>name</code></span> or <span class="wiki-param"><code>id</code></span> where possible to avoid lag. <code>llListen(0, "", NULL_KEY,"")</code> can be laggy as it listens to all chat from everyone in chat range and so should be avoided.
+</li></ul>
+<ul><li>In November 2007, <a href="https://wiki.secondlife.com/wiki/User:Kelly_Linden">Kelly Linden</a> offered <a href="https://lists.secondlife.com/pipermail/secondlifescripters/2007-November/001993.html" rel="noreferrer">this explanation</a> to help scripters plan listeners more efficiently:
+</li></ul>
 <div class="wiki-line">:#Chat that is said gets added to a history.</div>
 <div class="wiki-line">:#A script that is running and has a <a href="/events/listen/">listen</a> <a href="https://wiki.secondlife.com/wiki/event">event</a> will ask the history for a chat message during its slice of run time.</div>
 <div class="wiki-line">:# When the script asks the history for a chat message the checks are done in this order:</div>
-<div class="wiki-line">:#* <code>channel</code></div>
+<div class="wiki-line">:#* <span class="wiki-param"><code>channel</code></span></div>
 <div class="wiki-line">:#* self chat (prims can't hear themselves)</div>
 <div class="wiki-line">:#* distance/<a href="/functions/llRegionSay/">RegionSay</a></div>
-<div class="wiki-line">:#* <code>id</code></div>
-<div class="wiki-line">:#* <code>name</code></div>
-<div class="wiki-line">:#* <code>msg</code></div>
-<div class="wiki-line">:# If a <code>msg</code> is found then a <a href="/events/listen/">listen</a> <a href="https://wiki.secondlife.com/wiki/event">event</a> is added to the <a href="https://wiki.secondlife.com/wiki/event">event</a> queue.</div>
+<div class="wiki-line">:#* <span class="wiki-param"><code>id</code></span></div>
+<div class="wiki-line">:#* <span class="wiki-param"><code>name</code></span></div>
+<div class="wiki-line">:#* <span class="wiki-param"><code>msg</code></span></div>
+<div class="wiki-line">:# If a <span class="wiki-param"><code>msg</code></span> is found then a <a href="/events/listen/">listen</a> <a href="https://wiki.secondlife.com/wiki/event">event</a> is added to the <a href="https://wiki.secondlife.com/wiki/event">event</a> queue.</div>
 <div class="wiki-line">:</div>
-<div class="wiki-line">:The <code>id</code>/<code>name</code>/<code>msg</code> checks only happen at all if those are specified of course.</div>
+<div class="wiki-line">:The <span class="wiki-param"><code>id</code></span>/<span class="wiki-param"><code>name</code></span>/<span class="wiki-param"><code>msg</code></span> checks only happen at all if those are specified of course.</div>
 <div class="wiki-line">:</div>
-<div class="wiki-line">:So, the most efficient communication method is <a href="/functions/llRegionSay/">llRegionSay</a> on a rarely used <code>channel</code>.</div>
+<div class="wiki-line">:So, the most efficient communication method is <a href="/functions/llRegionSay/">llRegionSay</a> on a rarely used <span class="wiki-param"><code>channel</code></span>.</div>
 <div class="wiki-line">:Nowadays, <a href="/functions/llRegionSayTo/">llRegionSayTo</a> is to be preferred, where appropriate.</div>
-<ul>
-<li>The integer returned can be assigned to a variable (then called a handle) and used to control the listen via <a href="/functions/llListenRemove/">llListenRemove</a> or <a href="/functions/llListenControl/">llListenControl</a>. These handles are assigned sequentially starting at <code>+1</code> through to <code>+2,147,483,647</code>, going beyond which, according to <a href="https://wiki.secondlife.com/wiki/User:Simon_Linden">Simon Linden</a>, will roll the returned integer over to <code>−2,147,483,648</code>, when positive incrementation resumes. If an <a href="/functions/llListen/">llListen</a> is repeated with the exact same filters as a currently active listener, then the same handle number is returned. If an <a href="/functions/llListen/">llListen&#x27;s</a> filters do not match any currently active listener, then the next handle in sequence is allocated (it will not re-allocate a recently removed handle).</li>
-<li>If you are using multiple listens in one script, each listen can be assigned its own handle with which to control it.</li>
-<li>Scripts can listen to and speak on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>. Script errors generated by the server are broadcast the same distance as <a href="/functions/llSay/">llSay</a>, but any chat command can be used to speak on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</li>
-<li>Messages received on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a> in the viewer are hidden unless the message is sent by an object owned by the current user.</li>
-<li>Users may just see script errors as the hovering 'script error' icon depending on their viewer settings, and in any case will be able to read errors regardless of whether they are errors thrown by the scripting engine or your own debugging messages.</li>
-</ul></section>
+<ul><li>The integer returned can be assigned to a variable (then called a handle) and used to control the listen via <a href="/functions/llListenRemove/">llListenRemove</a> or <a href="/functions/llListenControl/">llListenControl</a>. These handles are assigned sequentially starting at <code>+1</code> through to <code>+2,147,483,647</code>, going beyond which, according to <a href="https://wiki.secondlife.com/wiki/User:Simon_Linden">Simon Linden</a>, will roll the returned integer over to <code>−2,147,483,648</code>, when positive incrementation resumes. If an <a href="/functions/llListen/">llListen</a> is repeated with the exact same filters as a currently active listener, then the same handle number is returned. If an <a href="/functions/llListen/">llListen&#x27;s</a> filters do not match any currently active listener, then the next handle in sequence is allocated (it will not re-allocate a recently removed handle).
+</li><li>If you are using multiple listens in one script, each listen can be assigned its own handle with which to control it.
+</li><li>Scripts can listen to and speak on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>. Script errors generated by the server are broadcast the same distance as <a href="/functions/llSay/">llSay</a>, but any chat command can be used to speak on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.
+<ul><li>Messages received on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a> in the viewer are hidden unless the message is sent by an object owned by the current user.
+</li><li>Users may just see script errors as the hovering 'script error' icon depending on their viewer settings, and in any case will be able to read errors regardless of whether they are errors thrown by the scripting engine or your own debugging messages.
+</li></ul>
+</li></ul></section>
 <section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llListenRemove/">llListenRemove</a> — Removes a listen</div></div>
 <div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llListenControl/">llListenControl</a> — Enables/Disables a listen</div></div>
 <div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llWhisper/">llWhisper</a> — Sends chat limited to 10 meters</div></div>

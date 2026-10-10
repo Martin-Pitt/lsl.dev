@@ -1,23 +1,25 @@
-<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Give <code>inventory</code> to <code>destination</code>.</div></section>
-<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>destination</code> is an object then it must be in the same <a href="https://wiki.secondlife.com/wiki/region">region</a>.<br/>If <code>destination</code> is an avatar they do not have to be in the same region.</div></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>There is no way to know if the transaction failed.  Unless you send a message when inventory is given to a prim and prim's script checks its inventory and sends a message back using llRegionSay.</li>
-<li>Scripts reach <code>destination</code> disabled (not running, and cannot be made to run unless the destination object is taken to inventory and rezzed again, or the script is recompiled). To send a running script to a prim use <a href="/functions/llSetRemoteScriptAccessPin/">llSetRemoteScriptAccessPin</a> and <a href="/functions/llRemoteLoadScriptPin/">llRemoteLoadScriptPin</a>.</li>
-<li>If <code>destination</code> is locked then <code>inventory</code> is not transferred and a <strong>Blocked by permissions</strong> error is shouted on the <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</li>
-<li>If <code>destination</code> object is not modifiable then <code>inventory</code> is not transferred and a <strong>Blocked by permissions</strong> error is shouted on the <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</li>
-<li>If <code>inventory</code> is no-copy it is transfered to <code>destination</code> without copying it. Since it is no-copy the only copy is given to <code>destination</code>; removing it from the source prim's inventory.</li>
-<li>the <a href="/events/changed/">changed</a> event does <strong>not</strong> fire in this case</li>
-<li>To avoid this problem use <a href="/functions/llGetInventoryPermMask/">llGetInventoryPermMask</a> to check the permissions of <code>inventory</code>.</li>
-<li><a href="/wiki/attachment-040d2b36/">Attachments</a> cannot give or receive no-copy inventory. When attempted an error is shouted on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</li>
-<li>When giving to an attachment that is not owned by the script owner, the receiving attachment must have <a href="/functions/llAllowInventoryDrop/">llAllowInventoryDrop</a> set to TRUE.</li>
-<li>If <code>destination</code> is an avatar that refuses to accept it (by manual decline or muting), is in busy mode, or is offline with instant messages capped, it is not returned to the prim's inventory; it is deleted.</li>
-<li>It is not returned to the owner. It does not show up in their lost and found or any other inventory folder.</li>
-<li>It is not put in the target's trash folder. </li>
-<li>A successful send to an offline avatar by means of llGiveInventory() counts as an IM against that avatar’s IM cap.</li>
-<li>As of 31th January 2012, llGiveInventory now has similar throttle to instant messages. A throttle of 5k per hour per owner per region; with a maximum burst of 2.5k. This throttle only affects gives to agents, not to non-agents.</li>
-<li>"With 3k subscribers you will want to send slow enough that it takes ~45 minutes to send 1 item to each subscriber. A general safe way would be to send ~2k as fast as you can, then wait 31 minutes and send another 2k." <a href="https://jira.secondlife.com/browse/SVC-7631?focusedCommentId=308665&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-308665" rel="noreferrer">Kelly Linden on SVC-7631</a></li>
-<li>Be aware that while you script a system to handle the top of these limits that other busy scripted objects can be adding up to the throttle as well, such as vendors.</li>
-</ul></section>
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Give <span class="wiki-param"><code>inventory</code></span> to <span class="wiki-param"><code>destination</code></span>.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <span class="wiki-param"><code>destination</code></span> is an object then it must be in the same <a href="https://wiki.secondlife.com/wiki/region">region</a>.<br/>If <span class="wiki-param"><code>destination</code></span> is an avatar they do not have to be in the same region.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul><li>There is no way to know if the transaction failed.  Unless you send a message when inventory is given to a prim and prim's script checks its inventory and sends a message back using llRegionSay.
+</li><li>Scripts reach <span class="wiki-param"><code>destination</code></span> disabled (not running, and cannot be made to run unless the destination object is taken to inventory and rezzed again, or the script is recompiled). To send a running script to a prim use <a href="/functions/llSetRemoteScriptAccessPin/">llSetRemoteScriptAccessPin</a> and <a href="/functions/llRemoteLoadScriptPin/">llRemoteLoadScriptPin</a>.
+</li><li>If <span class="wiki-param"><code>destination</code></span> is locked then <span class="wiki-param"><code>inventory</code></span> is not transferred and a <strong>Blocked by permissions</strong> error is shouted on the <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.
+</li><li>If <span class="wiki-param"><code>destination</code></span> object is not modifiable then <span class="wiki-param"><code>inventory</code></span> is not transferred and a <strong>Blocked by permissions</strong> error is shouted on the <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.
+</li><li>If <span class="wiki-param"><code>inventory</code></span> is no-copy it is transfered to <span class="wiki-param"><code>destination</code></span> without copying it. Since it is no-copy the only copy is given to <span class="wiki-param"><code>destination</code></span>; removing it from the source prim's inventory.
+<ul><li>the <a href="/events/changed/">changed</a> event does <strong>not</strong> fire in this case
+</li><li>To avoid this problem use <a href="/functions/llGetInventoryPermMask/">llGetInventoryPermMask</a> to check the permissions of <span class="wiki-param"><code>inventory</code></span>.
+</li></ul>
+</li><li><a href="/wiki/attachment-040d2b36/">Attachments</a> cannot give or receive no-copy inventory. When attempted an error is shouted on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.
+</li><li>When giving to an attachment that is not owned by the script owner, the receiving attachment must have <a href="/functions/llAllowInventoryDrop/">llAllowInventoryDrop</a> set to TRUE.
+</li><li>If <span class="wiki-param"><code>destination</code></span> is an avatar that refuses to accept it (by manual decline or muting), is in busy mode, or is offline with instant messages capped, it is not returned to the prim's inventory; it is deleted.
+<ul><li>It is not returned to the owner. It does not show up in their lost and found or any other inventory folder.
+</li><li>It is not put in the target's trash folder. 
+</li></ul>
+</li><li>A successful send to an offline avatar by means of llGiveInventory() counts as an IM against that avatar’s IM cap.
+</li><li>As of 31th January 2012, llGiveInventory now has similar throttle to instant messages. A throttle of 5k per hour per owner per region; with a maximum burst of 2.5k. This throttle only affects gives to agents, not to non-agents.
+<ul><li>"With 3k subscribers you will want to send slow enough that it takes ~45 minutes to send 1 item to each subscriber. A general safe way would be to send ~2k as fast as you can, then wait 31 minutes and send another 2k." <a href="https://jira.secondlife.com/browse/SVC-7631?focusedCommentId=308665&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-308665" rel="noreferrer">Kelly Linden on SVC-7631</a>
+</li><li>Be aware that while you script a system to handle the top of these limits that other busy scripted objects can be adding up to the throttle as well, such as vendors.
+</li></ul>
+</li></ul></section>
 <section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
 {
     touch_start(integer n)

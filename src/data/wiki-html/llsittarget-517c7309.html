@@ -1,34 +1,34 @@
 <section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Set the sit location for the prim. The sit location is relative to the prim's position and rotation.</div></section>
-<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>offset</code> == <a href="/constants/ZERO_VECTOR/"><span class="wiki-template"><a href="/wiki/template-lsl-vr-76baeca7/">LSL VR</a>: <code>{{LSL VR|0.0|0.0|0.0}}</code></span></a> then the sit target is removed.</div></section>
-<section><h2 id="specification">Specification</h2><div class="wiki-line">llSitTarget sets the position for the Agent Target (Advanced -&gt; Character -&gt; View Agent Target). The position of the target is based on <code>rot</code> and the <code>offset</code><span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|It is widely considered that the {{LSLP|rot}} should not affect the position, unfortunately the sit target code is a {{Wikipedia|Lava flow (programming)|lava-flow}}. ~ {{JIRA|SVC-2277}}|It is widely considered that the &#x27;&#x27;rot&#x27;&#x27; should not affect the position, unfortunately the sit target code is a lava-flow. - SVC-2277|handle=rot-offset}}</code></span>.</div></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>Once a sit target is removed <a href="/functions/llAvatarOnSitTarget/">llAvatarOnSitTarget</a> will only return </li>
-</ul>
-<div class="wiki-line"><a href="/constants/NULL_KEY/">NULL_KEY</a></div>
-<div class="wiki-line">.</div>
-<ul>
-<li>Removing or deactivating the script that sets the sit target will not remove the prim's sit target.</li>
-<li>Sit target is a prim property and not dependent on a script for its continued existence. </li>
-<li>To remove sit target, use the following: </li>
-</ul>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <span class="wiki-param"><code>offset</code></span> == <a href="/constants/ZERO_VECTOR/"><code>&lt;0.0, 0.0, 0.0&gt;</code></a> then the sit target is removed.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">llSitTarget sets the position for the Agent Target (Advanced -&gt; Character -&gt; View Agent Target). The position of the target is based on <span class="wiki-param"><code>rot</code></span> and the <span class="wiki-param"><code>offset</code></span><sup class="wiki-footnote">It is widely considered that the <span class="wiki-param"><code>rot</code></span> should not affect the position, unfortunately the sit target code is a <a href="https://en.wikipedia.org/wiki/Lava_flow_%28programming%29" rel="noreferrer">lava-flow</a>. ~ <a href="https://jira.secondlife.com/browse/SVC-2277" rel="noreferrer">SVC-2277</a></sup>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul><li>Once a sit target is removed <a href="/functions/llAvatarOnSitTarget/">llAvatarOnSitTarget</a> will only return <a href="/constants/NULL_KEY/">NULL_KEY</a>.
+</li><li>Removing or deactivating the script that sets the sit target will not remove the prim's sit target.
+<ul><li>Sit target is a prim property and not dependent on a script for its continued existence. 
+</li></ul>
+</li><li>To remove sit target, use the following: 
+</li></ul>
 <div class="wiki-line"><pre><code>llSitTarget(ZERO_VECTOR, ZERO_ROTATION);</code></pre></div>
-<ul>
-<li>Shift-copying a prim with a sit target, without a script that will set the sit target again, will not keep the sit target on the copy. (The copy is in the original location when shift-copying.)</li>
-<li>There is no way to remove the Sit option from the menu.</li>
-<li>It will appear to be removed if the <a href="/functions/llSetSitText/">llSetSitText</a> is set to a space "&nbsp;" or similar transparent string.</li>
-<li>Attachments cannot be sat upon (see <a href="https://jira.secondlife.com/browse/SVC-6100" rel="noreferrer">SVC-6100</a> to vote for such a feature).</li>
-<li><code>rot</code> affects the position of the sit target in a buggy way.</li>
-<li>To correct for the <em>rot</em> bug, simply subtract &lt;0,0,0.4&gt; from the position when <em>rot</em> is zero. See example below.</li>
-<li><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a> is a more difficult work-around.</li>
-<li>Animations are relative to the Agent Target, but the Agent Target isn't described by the animation.</li>
-<li><a href="/functions/llSitTarget/">llSitTarget</a> does not update position of an already seated avatar.</li>
-<li><a href="#updatesittarget">UpdateSitTarget</a> described below works around this problem. It works by converting the sit target information into a link position that is passed along to <a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a>. </li>
-<li><code>offset</code> is limited to 300.0 meters on each axis. The <em>x</em>, <em>y</em> and <em>z</em> components must be in the range [-300,&nbsp;300.0]<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|handle=interval}}</code></span>.</li>
-<li>If they are outside the acceptable range they are rounded to the closest limit.</li>
-<li>If an object has multiple seats (each seat has a script that sets a sit target, or the <a href="https://wiki.secondlife.com/wiki/Link_Messages">linkset</a> has a script that assigns several <a href="/functions/llLinkSitTarget/">llLinkSitTarget</a>s), the following method determines which sit target an avatar ends up at:</li>
-<li>If the prim that is clicked on <em>has</em> a sit target and that sit target is not full, that sit target is used.</li>
-<li>If the prim that is clicked on <em>has no sit target</em>, and one or more other linked prims have sit targets that are not full, the sit target of the prim with the lowest link number will be used.</li>
-</ul></section>
+<ul><li>Shift-copying a prim with a sit target, without a script that will set the sit target again, will not keep the sit target on the copy. (The copy is in the original location when shift-copying.)
+</li><li>There is no way to remove the Sit option from the menu.
+<ul><li>It will appear to be removed if the <a href="/functions/llSetSitText/">llSetSitText</a> is set to a space "&nbsp;" or similar transparent string.
+</li></ul>
+</li><li>Attachments cannot be sat upon (see <a href="https://jira.secondlife.com/browse/SVC-6100" rel="noreferrer">SVC-6100</a> to vote for such a feature).
+</li><li><span class="wiki-param"><code>rot</code></span> affects the position of the sit target in a buggy way.
+<ul><li>To correct for the <em>rot</em> bug, simply subtract &lt;0,0,0.4&gt; from the position when <em>rot</em> is zero. See example below.
+</li><li><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a> is a more difficult work-around.
+</li><li>Animations are relative to the Agent Target, but the Agent Target isn't described by the animation.
+</li></ul>
+</li><li><a href="/functions/llSitTarget/">llSitTarget</a> does not update position of an already seated avatar.
+<ul><li><a href="#updatesittarget">UpdateSitTarget</a> described below works around this problem. It works by converting the sit target information into a link position that is passed along to <a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a>. 
+</li></ul>
+</li><li><span class="wiki-param"><code>offset</code></span> is limited to 300.0 meters on each axis. The <em>x</em>, <em>y</em> and <em>z</em> components must be in the range [-300,&nbsp;300.0]<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|handle=interval}}</code></span>.
+<ul><li>If they are outside the acceptable range they are rounded to the closest limit.
+</li></ul>
+</li><li>If an object has multiple seats (each seat has a script that sets a sit target, or the <a href="https://wiki.secondlife.com/wiki/Link_Messages">linkset</a> has a script that assigns several <a href="/functions/llLinkSitTarget/">llLinkSitTarget</a>s), the following method determines which sit target an avatar ends up at:
+<ul><li>If the prim that is clicked on <em>has</em> a sit target and that sit target is not full, that sit target is used.
+</li><li>If the prim that is clicked on <em>has no sit target</em>, and one or more other linked prims have sit targets that are not full, the sit target of the prim with the lowest link number will be used.
+</li></ul>
+</li></ul></section>
 <section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
 {
     state_entry()

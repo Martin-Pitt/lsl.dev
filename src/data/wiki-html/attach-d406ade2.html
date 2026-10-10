@@ -1,37 +1,33 @@
 <section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered in an object when the object <a href="/wiki/attachment-040d2b36/">attaches</a> or detaches from agent.</div></section>
 <section><h2 id="specification">Specification</h2><h4 id="triggered">Triggered</h4>
-<ul>
-<li>When the object is attached to an avatar</li>
-<li>From the ground</li>
-<li>From inventory</li>
-<li>When the avatar wearing the object logs in</li>
-<li>When object is detached (<strong>id</strong> == </li>
-</ul>
-<div class="wiki-line"><a href="/constants/NULL_KEY/">NULL_KEY</a></div>
-<div class="wiki-line">)</div>
-<ul>
-<li>Dropped to the ground</li>
-<li>Derezzed to inventory</li>
-<li>&lt;s&gt;When the avatar wearing the object logs out&lt;/s&gt; <em>(does not occur with current versions, but scripters should anticipate the possibility)</em></li>
-</ul>
+<ul><li>When the object is attached to an avatar
+<ul><li>From the ground
+</li><li>From inventory
+</li><li>When the avatar wearing the object logs in
+</li></ul>
+</li><li>When object is detached (<strong>id</strong> == <a href="/constants/NULL_KEY/">NULL_KEY</a>)
+<ul><li>Dropped to the ground
+</li><li>Derezzed to inventory
+</li><li><s>When the avatar wearing the object logs out</s> <em>(does not occur with current versions, but scripters should anticipate the possibility)</em>
+</li></ul>
+</li></ul>
 <h4 id="not-triggered">Not Triggered</h4>
-<ul>
-<li>When the avatar wearing the object teleports</li>
-<li>Use <a href="/constants/CHANGED_TELEPORT/">CHANGED_TELEPORT</a> to detect when the avatar teleports</li>
-<li>When the avatar wearing the object moves from one region to another</li>
-<li>Use <a href="/constants/CHANGED_REGION/">CHANGED_REGION</a> to detect when the avatar changes region</li>
-<li>When the attachment is detached after being attached with <a href="/functions/llAttachToAvatarTemp/">llAttachToAvatarTemp</a>.</li>
-<li>There is no way to detect this at this moment.</li>
-</ul></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>When detached to inventory, an object is only given limited time to execute its attach events. If these events are active when the script derezzes but have not completed, execution will finish when the object is next rezzed. <sup><a href="http://forums-archive.secondlife.com/54/8b/65518/1.html#post689314" rel="noreferrer">http://forums-archive.secondlife.com/54/8b/65518/1.html#post689314</a></sup> If the script is busy handling a <em>different</em> event at detach time, an attach event with id=NULL_KEY can happen on the next rez, followed by one with the wearer's key. To verify a real detach, check that id == NULL_KEY <em>AND</em> llGetAttached() == 0.</li>
-<li>If the script is busy with a complex event handler before it is taken to inventory, the <a href="/wiki/category-lsl-events-733e3928/">event queue</a> can overflow, leaving no room to capture new events. The queue is preserved, so attach and on_rez may not be triggered the next time the object is rezzed. To guard against this possibility, <a href="/functions/llGetAttached/">llGetAttached</a> can be checked in other events.</li>
-<li>When detaching an object, <a href="/functions/llGetAttached/">llGetAttached</a>() returns 0, but the same happens when dropping an object from an attachment point to the ground. No other indicative event is triggered in the latter case; in particular, the <a href="/events/on_rez/">on_rez</a> event is not triggered for attachment drops. If you need to distinguish a drop from a detach, a possible hack is to check <a href="/functions/llGetObjectPrimCount/">llGetObjectPrimCount</a>(<a href="/functions/llGetKey/">llGetKey</a>()). If it's zero, it can be assumed that the object is being detached; otherwise, that it is being dropped.</li>
-<li>There is a bug when an attach event is in a script in a child prim.  When the object is attached, a detached event is first triggered, and then an attached event is triggered.  When the object is detached, no event is triggered.</li>
-</ul></section>
-<section><h2 id="examples">Examples</h2><div class="wiki-line">The following is a simplified example of the attach event. The variable id will be the key of the avatar the scripted object is attached to otherwise it will take on the value of </div>
-<div class="wiki-line"><a href="/constants/NULL_KEY/">NULL_KEY</a></div>
-<div class="wiki-line">. The conditional <a href="https://wiki.secondlife.com/wiki/if">if</a> statement is used to determine the value of the variable id.</div>
+<ul><li>When the avatar wearing the object teleports
+<ul><li>Use <a href="/constants/CHANGED_TELEPORT/">CHANGED_TELEPORT</a> to detect when the avatar teleports
+</li></ul>
+</li><li>When the avatar wearing the object moves from one region to another
+<ul><li>Use <a href="/constants/CHANGED_REGION/">CHANGED_REGION</a> to detect when the avatar changes region
+</li></ul>
+</li><li>When the attachment is detached after being attached with <a href="/functions/llAttachToAvatarTemp/">llAttachToAvatarTemp</a>.
+<ul><li>There is no way to detect this at this moment.
+</li></ul>
+</li></ul></section>
+<section><h2 id="caveats">Caveats</h2><ul><li>When detached to inventory, an object is only given limited time to execute its attach events. If these events are active when the script derezzes but have not completed, execution will finish when the object is next rezzed. <sup><a href="http://forums-archive.secondlife.com/54/8b/65518/1.html#post689314" rel="noreferrer">http://forums-archive.secondlife.com/54/8b/65518/1.html#post689314</a></sup> If the script is busy handling a <em>different</em> event at detach time, an attach event with id=NULL_KEY can happen on the next rez, followed by one with the wearer's key. To verify a real detach, check that id == NULL_KEY <em>AND</em> llGetAttached() == 0.
+</li><li>If the script is busy with a complex event handler before it is taken to inventory, the <a href="/wiki/category-lsl-events-733e3928/">event queue</a> can overflow, leaving no room to capture new events. The queue is preserved, so attach and on_rez may not be triggered the next time the object is rezzed. To guard against this possibility, <a href="/functions/llGetAttached/">llGetAttached</a> can be checked in other events.
+</li><li>When detaching an object, <a href="/functions/llGetAttached/">llGetAttached</a>() returns 0, but the same happens when dropping an object from an attachment point to the ground. No other indicative event is triggered in the latter case; in particular, the <a href="/events/on_rez/">on_rez</a> event is not triggered for attachment drops. If you need to distinguish a drop from a detach, a possible hack is to check <a href="/functions/llGetObjectPrimCount/">llGetObjectPrimCount</a>(<a href="/functions/llGetKey/">llGetKey</a>()). If it's zero, it can be assumed that the object is being detached; otherwise, that it is being dropped.
+</li><li>There is a bug when an attach event is in a script in a child prim.  When the object is attached, a detached event is first triggered, and then an attached event is triggered.  When the object is detached, no event is triggered.
+</li></ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">The following is a simplified example of the attach event. The variable id will be the key of the avatar the scripted object is attached to otherwise it will take on the value of <a href="/constants/NULL_KEY/">NULL_KEY</a>. The conditional <a href="https://wiki.secondlife.com/wiki/if">if</a> statement is used to determine the value of the variable id.</div>
 <div class="wiki-line"><pre><code>default
 {
     attach(key id)

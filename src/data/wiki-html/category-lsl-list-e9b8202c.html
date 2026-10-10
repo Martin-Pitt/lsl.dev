@@ -1,4 +1,4 @@
-<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Types}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
 <div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-righttoc-d8e1769b/">RightToc</a>: <code>{{RightToc}}</code></span></div>
 <div class="wiki-line">A list is a special kind of data type which can contain zero or more elements of any of the other data types recognised in LSL.</div>
 <div class="wiki-line">Lists are signified by square brackets surrounding their elements; the elements inside are separated by commas.</div>
@@ -59,26 +59,26 @@
 string LastButOne = llList2String(mylist, -2);   // etc.</code></pre></div>
 <h4 id="adding-an-element-to-a-list">Adding an Element to a list</h4>
 <div class="wiki-line">There are several ways used to add an element to an existing list via prepending/appending:</div>
-<ul>
-<li><pre><code>myList = [new_item] + myList;   // Best method for pre-pending in Mono-LSL. Note: a single new item is presented as a list</code></pre></li>
-<li><pre><code>myList = myList + new_item;     // Best method for appending a single new entry in Mono. Note the new item is NOT presented as a list</code></pre></li>
-<li><pre><code>myList += new_item;             // appended item with simplified syntax</code></pre></li>
-<li><pre><code>myList = myList + [new1, new2]; // appended list concatenation (less efficient in Mono for a single new item)</code></pre></li>
-<li><pre><code>myList += [new1, new2];         // appended list concatenation with simplified syntax</code></pre></li>
-<li><pre><code>myList = (myList=[]) + myList + [new_item]; // Recommended for LSO. Appended list concatenation with memory fragmentation optimization</code></pre></li>
-<li><pre><code>myList = (myList=[]) + myList + new_item;   // Recommended for LSO-LSL: appended item with memory fragmentation optimization</code></pre></li>
-</ul>
+<ul><li><pre><code>myList = [new_item] + myList;   // Best method for pre-pending in Mono-LSL. Note: a single new item is presented as a list</code></pre>
+</li><li><pre><code>myList = myList + new_item;     // Best method for appending a single new entry in Mono. Note the new item is NOT presented as a list</code></pre>
+</li><li><pre><code>myList += new_item;             // appended item with simplified syntax</code></pre>
+</li><li><pre><code>myList = myList + [new1, new2]; // appended list concatenation (less efficient in Mono for a single new item)</code></pre>
+</li><li><pre><code>myList += [new1, new2];         // appended list concatenation with simplified syntax</code></pre>
+</li><li><pre><code>myList = (myList=[]) + myList + [new_item]; // Recommended for LSO. Appended list concatenation with memory fragmentation optimization</code></pre>
+</li><li><pre><code>myList = (myList=[]) + myList + new_item;   // Recommended for LSO-LSL: appended item with memory fragmentation optimization</code></pre>
+</li></ul>
 <h5 id="notes">Notes</h5>
-<ul>
-<li>Method 1 is the most memory efficient under Mono-LSL.  But not under LSO.</li>
-<li>Note that prepending the new_item <strong>without</strong> brackets <strong>negates</strong> any memory savings in Mono-LSL.</li>
-<li>Method 1 will consume more memory than other methods in LSO-LSL.</li>
-<li>As of 8/8/2009 Method 7 returns the best memory savings in LSO-LSL.</li>
-<li>Methods 2 &amp; 3 compile to the same thing.</li>
-<li>Methods 4 &amp; 5 compile to the same thing.</li>
-<li>Methods 6 &amp; 7 can result in a considerable memory savings in LSO-LSL over methods though there is an LSO-LSL VM bug that causes the string &amp; key typecasts to not stick properly: <a href="https://jira.secondlife.com/browse/SVC-1710" rel="noreferrer">SVC-1710</a>. (It helps reduce heap fragmentation, which would otherwise result in unusable blocks of heap memory)<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|This method was invented and popularized by {{User|Strife Onizuka}}|This method was invented and popularized by Strife Onizuka}}</code></span>. In Mono-LSL it provides no significant memory advantage or disadvantage.</li>
-<li>Depending upon the situation (in LSO-LSL) this method may not provide any advantage whatsoever. If in doubt profile the script with and without using this method.</li>
-</ul>
+<ul><li>Method 1 is the most memory efficient under Mono-LSL.  But not under LSO.
+<ul><li>Note that prepending the new_item <strong>without</strong> brackets <strong>negates</strong> any memory savings in Mono-LSL.
+</li><li>Method 1 will consume more memory than other methods in LSO-LSL.
+</li></ul>
+</li><li>As of 8/8/2009 Method 7 returns the best memory savings in LSO-LSL.
+</li><li>Methods 2 &amp; 3 compile to the same thing.
+</li><li>Methods 4 &amp; 5 compile to the same thing.
+</li><li>Methods 6 &amp; 7 can result in a considerable memory savings in LSO-LSL over methods though there is an LSO-LSL VM bug that causes the string &amp; key typecasts to not stick properly: <a href="https://jira.secondlife.com/browse/SVC-1710" rel="noreferrer">SVC-1710</a>. (It helps reduce heap fragmentation, which would otherwise result in unusable blocks of heap memory)<sup class="wiki-footnote">This method was invented and popularized by Strife Onizuka</sup>. In Mono-LSL it provides no significant memory advantage or disadvantage.
+<ul><li>Depending upon the situation (in LSO-LSL) this method may not provide any advantage whatsoever. If in doubt profile the script with and without using this method.
+</li></ul>
+</li></ul>
 <h4 id="joining-lists-aka-concatenation">Joining Lists (aka Concatenation)</h4>
 <div class="wiki-line">Lists can be joined simply by using the + sign:</div>
 <div class="wiki-line"><pre><code>newlist = list01 + list02;
@@ -143,11 +143,10 @@ for (; i &lt; x; ++i) {
 <div class="wiki-line">It should be noted that when manipulating extremely large strided lists, that if you expect to be editing the lists that you may wish to use one list for each "column", this may be more complex but significantly reduces the amount of memory required when manipulating the lists, though it will be a lot more difficult to sort.</div>
 <div class="wiki-line">Here are the tools we do have for strided lists:</div>
 <div class="wiki-line">The following three (as of July 2008) native LSL functions can be used with strided lists:</div>
-<ul>
-<li><a href="/functions/llList2ListStrided/">llList2ListStrided</a></li>
-<li><a href="/functions/llListRandomize/">llListRandomize</a></li>
-<li><a href="/functions/llListSort/">llListSort</a></li>
-</ul>
+<ul><li><a href="/functions/llList2ListStrided/">llList2ListStrided</a>
+</li><li><a href="/functions/llListRandomize/">llListRandomize</a>
+</li><li><a href="/functions/llListSort/">llListSort</a>
+</li></ul>
 <div class="wiki-line">The function <a href="/functions/llListStatistics/">llListStatistics</a> can, with care, be used for strided lists as it will silently ignore non integer and non float items. </div>
 <div class="wiki-line">Here are some additional, user-created functions for working with strided lists:</div>
 <table><caption></caption><tr><th>function</th><th>purpose</th></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListStridedMove">ListStridedMove</a> </td><td> Moves something in a strided list to another place in the strided list.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListStridedRemove">ListStridedRemove</a> </td><td> Removes part of a strided list.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListStridedUpdate">ListStridedUpdate</a> </td><td> Updates part of a strided list.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListStridedReorder">ListStridedReorder</a> </td><td> Reorder the contents of every stride or reorder entire strides.</td></tr></table>

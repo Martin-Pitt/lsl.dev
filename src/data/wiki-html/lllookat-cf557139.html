@@ -1,13 +1,12 @@
-<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Cause object to point its <code>up</code> axis (positive z) towards <code>target</code>, while keeping its <code>forward</code> axis (positive x) below the horizon.</div>
-<div class="wiki-line">Continues to track <code>target</code> until <a href="/functions/llStopLookAt/">llStopLookAt</a> is called.</div></section>
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Cause object to point its <span class="wiki-param"><code>up</code></span> axis (positive z) towards <span class="wiki-param"><code>target</code></span>, while keeping its <span class="wiki-param"><code>forward</code></span> axis (positive x) below the horizon.</div>
+<div class="wiki-line">Continues to track <span class="wiki-param"><code>target</code></span> until <a href="/functions/llStopLookAt/">llStopLookAt</a> is called.</div></section>
 <section><h2 id="function-notes">Function notes</h2><div class="wiki-line">To change the position in the same manner use <a href="/functions/llMoveToTarget/">llMoveToTarget</a>.</div></section>
 <section><h2 id="specification">Specification</h2><div class="wiki-line">Strength is an inverse value meaning lower values cause the object to turn faster. Damping smooths the objects movements out preventing jitter or sharp movements. Object size, mass, and shape do not effect the function other than a large physical object that is resting on or colliding with other objects might not be able to turn correctly or fully.</div></section>
-<section><h2 id="caveats">Caveats</h2><ul>
-<li>Object must be physical or this will do nothing.</li>
-<li>If the prim is not the root, then <code>target</code> will need correction for the root prim's rotation (see example below).</li>
-<li>If the object is an attachment, then <code>target</code> will need correction for the wearer's rotation.</li>
-<li>Low strength values paired with low damping can cause the object to wobble and never fully face the <code>target</code>.</li>
-</ul></section>
+<section><h2 id="caveats">Caveats</h2><ul><li>Object must be physical or this will do nothing.
+</li><li>If the prim is not the root, then <span class="wiki-param"><code>target</code></span> will need correction for the root prim's rotation (see example below).
+</li><li>If the object is an attachment, then <span class="wiki-param"><code>target</code></span> will need correction for the wearer's rotation.
+</li><li>Low strength values paired with low damping can cause the object to wobble and never fully face the <span class="wiki-param"><code>target</code></span>.
+</li></ul></section>
 <section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//Causes Object to look at nearest Avatar.
 default
 {
@@ -37,9 +36,8 @@ default
         llLookAt(p + (llDetectedPos(0) + &lt;0.0, 0.0, 1.0&gt; - p) / llGetRootRotation(), 3.0, 1.0);
     }
 }</code></pre></div></section>
-<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><ul>
-<li>If you want a (mostly) smooth, one time, constant rate of motion, (using the <code>x</code> axis) in a non-physical object try this instead...</li>
-</ul>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><ul><li>If you want a (mostly) smooth, one time, constant rate of motion, (using the <span class="wiki-param"><code>x</code></span> axis) in a non-physical object try this instead...
+</li></ul>
 <div class="wiki-line"><pre><code>//-- rotate objects x axis toward vPosTarget (local offset), at vFltRate (in radians per second)
 //-- vFltRate &lt; ~0.00000003rad/sec, (~0.00002deg/sec) will result in errors (and is just too slow anyway)
 //-- vFltRate &gt;= (PI * 5.0)rad/sec, (900deg/sec) will result in a single snap move to vRotTarget
@@ -56,9 +54,8 @@ uSteppedLookAt( vector vPosTarget, float vFltRate ){
 	}
 	llSetLocalRot( vRotTarget );
 } //-- for fixed time on any rotation try llKeyframeMotion</code></pre></div>
-<ul>
-<li>If you want to use the LookAt function on a linked object...</li>
-</ul>
+<ul><li>If you want to use the LookAt function on a linked object...
+</li></ul>
 <div class="wiki-line"><pre><code>LinkedLookAt( vector Target){
     rotation rotvec = llRotBetween(&lt;0,1,0&gt;,llVecNorm((Target - llGetPos())));
     rotation rotbet = rotvec/llGetRootRotation();

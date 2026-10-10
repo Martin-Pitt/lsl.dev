@@ -1,61 +1,75 @@
 <h2 id="followcam">FollowCam</h2>
 <div class="wiki-line"><a href="/wiki/followcam-0f6dab63/">FollowCam</a> functionality allows <a href="/wiki/script-102acc10/">scripts</a> to <a href="/events/control/">control</a> the <a href="/wiki/category-lsl-camera-343c0992/">camera</a>.</div>
-<ul>
-<li>Scripts on <a href="/wiki/category-lsl-attachment-f1f26364/">attachments</a> and <a href="/wiki/category-lsl-vehicle-e75ea465/">vehicles</a> can now control camera behavior through a call to <a href="/functions/llSetCameraParams/">llSetCameraParams</a>(), once they have acquired the <a href="/constants/PERMISSION_CONTROL_CAMERA/">PERMISSION_CONTROL_CAMERA</a> <a href="/wiki/category-lsl-permissions-script-73bcf8a7/">permission</a></li>
-<li>The script will control the <a href="https://wiki.secondlife.com/wiki/user">user&#x27;s</a> camera as long as the resident doesn't override it (use Alt-zoom or enter <a href="https://wiki.secondlife.com/wiki/mouselook">mouselook</a>, for example) and the <a href="https://wiki.secondlife.com/wiki/object">object</a> remains attached or the <a href="/wiki/category-lsl-avatar-cded8328/">avatar</a> continues to <a href="/wiki/category-lsl-sit-c1a7a493/">sit</a> on it:</li>
-<li>When multiple scripts attempt to control the camera, the last script to set the <a href="/constants/CAMERA_ACTIVE/">CAMERA_ACTIVE</a> <a href="https://wiki.secondlife.com/wiki/bitflags">flag</a> will have control</li>
-<li>Older scripts will regain control as soon as the newer one is deactivated</li>
-<li>The new <a href="/wiki/followcam-0f6dab63/">FollowCam</a> scripts enable a huge variety of vehicle-following behaviors:</li>
-<li>For instance, a loose camera setting allows sudden changes in vehicle acceleration to happen without causing dizzying jolts in the camera</li>
-<li>By turning off the "behindness" feature, the camera will be simply dragged along, but it will not try to stay exactly behind the vehicle</li>
-<li>Other parameters, like pitch (the angle at which it "looks down" at the vehicle), distance, and others, allow you to customize the cinematics of vehicular fun</li>
-</ul>
+<ul><li>Scripts on <a href="/wiki/category-lsl-attachment-f1f26364/">attachments</a> and <a href="/wiki/category-lsl-vehicle-e75ea465/">vehicles</a> can now control camera behavior through a call to <a href="/functions/llSetCameraParams/">llSetCameraParams</a>(), once they have acquired the <a href="/constants/PERMISSION_CONTROL_CAMERA/">PERMISSION_CONTROL_CAMERA</a> <a href="/wiki/category-lsl-permissions-script-73bcf8a7/">permission</a>
+</li><li>The script will control the <a href="https://wiki.secondlife.com/wiki/user">user&#x27;s</a> camera as long as the resident doesn't override it (use Alt-zoom or enter <a href="https://wiki.secondlife.com/wiki/mouselook">mouselook</a>, for example) and the <a href="https://wiki.secondlife.com/wiki/object">object</a> remains attached or the <a href="/wiki/category-lsl-avatar-cded8328/">avatar</a> continues to <a href="/wiki/category-lsl-sit-c1a7a493/">sit</a> on it:
+<ul><li>When multiple scripts attempt to control the camera, the last script to set the <a href="/constants/CAMERA_ACTIVE/">CAMERA_ACTIVE</a> <a href="https://wiki.secondlife.com/wiki/bitflags">flag</a> will have control
+</li><li>Older scripts will regain control as soon as the newer one is deactivated
+</li></ul>
+</li><li>The new <a href="/wiki/followcam-0f6dab63/">FollowCam</a> scripts enable a huge variety of vehicle-following behaviors:
+</li><li>For instance, a loose camera setting allows sudden changes in vehicle acceleration to happen without causing dizzying jolts in the camera
+<ul><li>By turning off the "behindness" feature, the camera will be simply dragged along, but it will not try to stay exactly behind the vehicle
+</li><li>Other parameters, like pitch (the angle at which it "looks down" at the vehicle), distance, and others, allow you to customize the cinematics of vehicular fun
+</li></ul>
+</li></ul>
 <h3 id="followcam-family-of-camera-functions"><a href="/wiki/followcam-0f6dab63/">FollowCam</a> family of camera functions</h3>
-<ul>
-<li><a href="/functions/llRequestPermissions/">llRequestPermissions</a>(agent_key, <a href="/constants/PERMISSION_CONTROL_CAMERA/">PERMISSION_CONTROL_CAMERA</a>)</li>
-<li>Requests permissions</li>
-<li>Note, <a href="/constants/PERMISSION_CONTROL_CAMERA/">PERMISSION_CONTROL_CAMERA</a> permissions are only supported for attachments and vehicles at this time</li>
-<li>Accepting permissions via a dialog is not currently implemented.</li>
-</ul>
-<ul>
-<li><a href="/functions/llClearCameraParams/">llClearCameraParams</a>(): Resets all camera values to their default.</li>
-</ul>
-<ul>
-<li><a href="/functions/llSetCameraParams/">llSetCameraParams</a>([]): sets up the camera movement rules based on the parameter list</li>
-<li><a href="/constants/CAMERA_ACTIVE/">CAMERA_ACTIVE</a> (<a href="/constants/TRUE/">TRUE</a> or <a href="/constants/FALSE/">FALSE</a>) Default = <a href="/constants/FALSE/">FALSE</a></li>
-<li>Turns on or off scripting control of Scripted Camera</li>
-<li><a href="/constants/CAMERA_DISTANCE/">CAMERA_DISTANCE</a> (0.5 to ? meters) Default = 3.0</li>
-<li>Sets how far away the Scripted Camera wants to be from its subject</li>
-<li><a href="/constants/CAMERA_PITCH/">CAMERA_PITCH</a> (-45.0 to 80.0 degrees) Default = 0.0</li>
-<li>Adjusts the angular amount that the Scripted Camera aims straight ahead vs. straight down, maintaining the same distance. Analogous to 'incidence'</li>
-<li><a href="/constants/CAMERA_FOCUS_OFFSET/">CAMERA_FOCUS_OFFSET</a> (&lt;-10,-10,-10&gt; to &lt;10,10,10&gt; meters) Default = &lt;0.0, 0.0, 0.0&gt;</li>
-<li>Adjusts the position of the Scripted Camera focus position relative to the subject</li>
-<li><a href="/constants/CAMERA_POSITION_LAG/">CAMERA_POSITION_LAG</a> (0.0 to 3.0 seconds) Default = 0.1</li>
-<li>How much the Scripted Camera lags as it tries to move towards its 'ideal' position</li>
-<li><a href="/constants/CAMERA_FOCUS_LAG/">CAMERA_FOCUS_LAG</a> (0.0 to 3.0 seconds) Default = 0.1</li>
-<li>How much the Scripted Camera lags as it tries to aim towards the subject</li>
-<li><a href="/constants/CAMERA_BEHINDNESS_ANGLE/">CAMERA_BEHINDNESS_ANGLE</a> (0.0 to 180.0 degrees) Default = 10.0</li>
-<li>Sets the angle in degrees within which the Scripted Camera is not constrained by changes in subject rotation. 180 effectively turns behindness off.</li>
-<li><a href="/constants/CAMERA_BEHINDNESS_LAG/">CAMERA_BEHINDNESS_LAG</a> (0.0 to 3.0 seconds) Default = 0.0</li>
-<li>How much the Scripted Camera lags as it tries to stay behind the target if outside of behindness angle</li>
-<li><a href="/constants/CAMERA_POSITION_THRESHOLD/">CAMERA_POSITION_THRESHOLD</a> (0.0 to 4.0 meters) Default = 1.0</li>
-<li>Sets the radius of a sphere around the Scripted Camera's ideal position within which it is not affected by subject motion</li>
-<li><a href="/constants/CAMERA_FOCUS_THRESHOLD/">CAMERA_FOCUS_THRESHOLD</a> (0.0 to 4.0 meters) Default = 1.0</li>
-<li>Sets the radius of a sphere around the Scripted Camera's subject position within which its focus is not affected by subject motion</li>
-<li><a href="/constants/CAMERA_POSITION/">CAMERA_POSITION</a> (vector position within the region)</li>
-<li>Sets the position of the Scripted Camera</li>
-<li><a href="/constants/CAMERA_FOCUS/">CAMERA_FOCUS</a> (vector position within the region)</li>
-<li>Sets the focus position of the Scripted Camera</li>
-<li><a href="/constants/CAMERA_POSITION_LOCKED/">CAMERA_POSITION_LOCKED</a> (<a href="/constants/TRUE/">TRUE</a> or <a href="/constants/FALSE/">FALSE</a>) Default = <a href="/constants/FALSE/">FALSE</a></li>
-<li>Locks the camera position so it will not move</li>
-<li><a href="/constants/CAMERA_FOCUS_LOCKED/">CAMERA_FOCUS_LOCKED</a> (<a href="/constants/TRUE/">TRUE</a> or <a href="/constants/FALSE/">FALSE</a>) Default = <a href="/constants/FALSE/">FALSE</a></li>
-<li>Locks the camera focus so it will not move</li>
-</ul>
+<ul><li><a href="/functions/llRequestPermissions/">llRequestPermissions</a>(agent_key, <a href="/constants/PERMISSION_CONTROL_CAMERA/">PERMISSION_CONTROL_CAMERA</a>)
+<ul><li>Requests permissions
+<ul><li>Note, <a href="/constants/PERMISSION_CONTROL_CAMERA/">PERMISSION_CONTROL_CAMERA</a> permissions are only supported for attachments and vehicles at this time
+</li><li>Accepting permissions via a dialog is not currently implemented.
+</li></ul>
+</li></ul>
+</li></ul>
+<ul><li><a href="/functions/llClearCameraParams/">llClearCameraParams</a>(): Resets all camera values to their default.
+</li></ul>
+<ul><li><a href="/functions/llSetCameraParams/">llSetCameraParams</a>([]): sets up the camera movement rules based on the parameter list
+<ul><li><a href="/constants/CAMERA_ACTIVE/">CAMERA_ACTIVE</a> (<a href="/constants/TRUE/">TRUE</a> or <a href="/constants/FALSE/">FALSE</a>) Default = <a href="/constants/FALSE/">FALSE</a>
+<ul><li>Turns on or off scripting control of Scripted Camera
+</li></ul>
+</li><li><a href="/constants/CAMERA_DISTANCE/">CAMERA_DISTANCE</a> (0.5 to ? meters) Default = 3.0
+<ul><li>Sets how far away the Scripted Camera wants to be from its subject
+</li></ul>
+</li><li><a href="/constants/CAMERA_PITCH/">CAMERA_PITCH</a> (-45.0 to 80.0 degrees) Default = 0.0
+<ul><li>Adjusts the angular amount that the Scripted Camera aims straight ahead vs. straight down, maintaining the same distance. Analogous to 'incidence'
+</li></ul>
+</li><li><a href="/constants/CAMERA_FOCUS_OFFSET/">CAMERA_FOCUS_OFFSET</a> (&lt;-10,-10,-10&gt; to &lt;10,10,10&gt; meters) Default = &lt;0.0, 0.0, 0.0&gt;
+<ul><li>Adjusts the position of the Scripted Camera focus position relative to the subject
+</li></ul>
+</li><li><a href="/constants/CAMERA_POSITION_LAG/">CAMERA_POSITION_LAG</a> (0.0 to 3.0 seconds) Default = 0.1
+<ul><li>How much the Scripted Camera lags as it tries to move towards its 'ideal' position
+</li></ul>
+</li><li><a href="/constants/CAMERA_FOCUS_LAG/">CAMERA_FOCUS_LAG</a> (0.0 to 3.0 seconds) Default = 0.1
+<ul><li>How much the Scripted Camera lags as it tries to aim towards the subject
+</li></ul>
+</li><li><a href="/constants/CAMERA_BEHINDNESS_ANGLE/">CAMERA_BEHINDNESS_ANGLE</a> (0.0 to 180.0 degrees) Default = 10.0
+<ul><li>Sets the angle in degrees within which the Scripted Camera is not constrained by changes in subject rotation. 180 effectively turns behindness off.
+</li></ul>
+</li><li><a href="/constants/CAMERA_BEHINDNESS_LAG/">CAMERA_BEHINDNESS_LAG</a> (0.0 to 3.0 seconds) Default = 0.0
+<ul><li>How much the Scripted Camera lags as it tries to stay behind the target if outside of behindness angle
+</li></ul>
+</li><li><a href="/constants/CAMERA_POSITION_THRESHOLD/">CAMERA_POSITION_THRESHOLD</a> (0.0 to 4.0 meters) Default = 1.0
+<ul><li>Sets the radius of a sphere around the Scripted Camera's ideal position within which it is not affected by subject motion
+</li></ul>
+</li><li><a href="/constants/CAMERA_FOCUS_THRESHOLD/">CAMERA_FOCUS_THRESHOLD</a> (0.0 to 4.0 meters) Default = 1.0
+<ul><li>Sets the radius of a sphere around the Scripted Camera's subject position within which its focus is not affected by subject motion
+</li></ul>
+</li><li><a href="/constants/CAMERA_POSITION/">CAMERA_POSITION</a> (vector position within the region)
+<ul><li>Sets the position of the Scripted Camera
+</li></ul>
+</li><li><a href="/constants/CAMERA_FOCUS/">CAMERA_FOCUS</a> (vector position within the region)
+<ul><li>Sets the focus position of the Scripted Camera
+</li></ul>
+</li><li><a href="/constants/CAMERA_POSITION_LOCKED/">CAMERA_POSITION_LOCKED</a> (<a href="/constants/TRUE/">TRUE</a> or <a href="/constants/FALSE/">FALSE</a>) Default = <a href="/constants/FALSE/">FALSE</a>
+<ul><li>Locks the camera position so it will not move
+</li></ul>
+</li><li><a href="/constants/CAMERA_FOCUS_LOCKED/">CAMERA_FOCUS_LOCKED</a> (<a href="/constants/TRUE/">TRUE</a> or <a href="/constants/FALSE/">FALSE</a>) Default = <a href="/constants/FALSE/">FALSE</a>
+<ul><li>Locks the camera focus so it will not move
+</li></ul>
+</li></ul>
+</li></ul>
 <h3 id="known-issues">Known issues</h3>
-<ul>
-<li>The camera appears to jitter back and forth. This is a problem with our avatar motion model that will be worse at lower framerate. We are continuing to investigate potential solutions.</li>
-<li>Free standing objects cannot control the user camera. This will continue to be the case until we can implement a robust mechanism for letting residents cancel scripted camera behaviors.</li>
-</ul>
+<ul><li>The camera appears to jitter back and forth. This is a problem with our avatar motion model that will be worse at lower framerate. We are continuing to investigate potential solutions.
+</li><li>Free standing objects cannot control the user camera. This will continue to be the case until we can implement a robust mechanism for letting residents cancel scripted camera behaviors.
+</li></ul>
 <div class="wiki-line"><pre><code>//Linden Lab
 //Dan Linden
 integer CHANNEL; // dialog channel
@@ -463,4 +477,3 @@ default
         }
     }
 }</code></pre></div>
-<div class="wiki-line"><a href="/wiki/category-lsl-examples-d1aa2221/">Category:LSL Examples</a></div>

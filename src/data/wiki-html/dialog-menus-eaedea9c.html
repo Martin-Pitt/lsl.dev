@@ -1,6 +1,6 @@
 <div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-multi-lang-72ead56b/">Multi-lang</a>: <code>{{Multi-lang}}</code></span></div>
-<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Dialog}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Communications}}</code></span></div>
-<div class="wiki-line">In Second Life, a dialog menu is a dialog box that appears on the corner of your screen <span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|There are also hud prim-based items that one could call menu systems, but this article concerns itself with Second Life&#x27;s native dialog system.}}</code></span> when a <a href="https://wiki.secondlife.com/wiki/ScriptDialog">ScriptDialog</a> message is received.</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<div class="wiki-line">In Second Life, a dialog menu is a dialog box that appears on the corner of your screen <sup class="wiki-footnote">There are also hud prim-based items that one could call menu systems, but this article concerns itself with Second Life's native dialog system.</sup> when a <a href="https://wiki.secondlife.com/wiki/ScriptDialog">ScriptDialog</a> message is received.</div>
 <div class="wiki-line">Note: Technically the box that people get is a "Dialog Box", not a menu, but for the purpose of simplicity in this article we will refer to it as a menu.</div>
 <div class="wiki-line">The box has on it a message and choice buttons, as well as an ignore button.</div>
 <div class="wiki-line">When you press a button, the script that generated the menu acts on the choice and performs the operation that the user chose by sending a <a href="https://wiki.secondlife.com/wiki/ScriptDialogReply">ScriptDialogReply</a> message.</div>
@@ -8,19 +8,18 @@
 <div class="wiki-line">In this article, we are going to build a dialog menu step by step. Advanced scripters will consider this primitive, but this article is not for them :} and it will do the job while illustrating all the key principles involved.</div>
 <h2 id="components-involved-in-generating-a-menu">Components Involved in Generating a Menu</h2>
 <div class="wiki-line">At its most basic, you have to draw on the following tools to generate a menu, and make it work:</div>
-<ul>
-<li>A message to appear on the dialog box;</li>
-<li>A list of menu choices;</li>
-<li>A Channel that the menu communication will happen on;</li>
-<li>The llDetectedKey() function to determine whom to present the menu to;</li>
-<li>The llDialog function to present the menu to that user;</li>
-<li>A llListen to hear what choice the user made;</li>
-<li>A Listen Event to Capture the Listen;</li>
-<li>The llListenRemove function to eventually remove the listen.</li>
-<li>A timer to make sure the listen does eventually get removed.</li>
-</ul>
+<ul><li>A message to appear on the dialog box;
+</li><li>A list of menu choices;
+</li><li>A Channel that the menu communication will happen on;
+</li><li>The llDetectedKey() function to determine whom to present the menu to;
+</li><li>The llDialog function to present the menu to that user;
+</li><li>A llListen to hear what choice the user made;
+</li><li>A Listen Event to Capture the Listen;
+</li><li>The llListenRemove function to eventually remove the listen.
+</li><li>A timer to make sure the listen does eventually get removed.
+</li></ul>
 <h2 id="the-message">The Message</h2>
-<div class="wiki-line">The message must be less than 512 bytes <span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|It is problematic to give you with any certainly how many characters that is, but you should be able to get at least a paragraph in, if you really have that much to say in a menu message!}}</code></span> and must not be empty. That is to say, "" won't work. If it is empty, llDialog will shout "llDialog: must supply a message" on the DEBUG_CHANNEL. If it is greater than or equal to 512 bytes, it shouts (again on the debug channel): "llDialog: message too long, must be less than 512 characters".  In both instances, the dialog box will not be created for avatar.</div>
+<div class="wiki-line">The message must be less than 512 bytes <sup class="wiki-footnote">It is problematic to give you with any certainly how many characters that is, but you should be able to get at least a paragraph in, if you really have that much to say in a menu message!</sup> and must not be empty. That is to say, "" won't work. If it is empty, llDialog will shout "llDialog: must supply a message" on the DEBUG_CHANNEL. If it is greater than or equal to 512 bytes, it shouts (again on the debug channel): "llDialog: message too long, must be less than 512 characters".  In both instances, the dialog box will not be created for avatar.</div>
 <div class="wiki-line">If the text of your message requires more than eight lines to display it, a vertical scroll bar will appear in the dialog box.</div>
 <div class="wiki-line">The message text can be formatted somewhat using "\n" (for newline) and "\t" (for tab). You can do nothing, though, to influence the font face, size or weight.</div>
 <h2 id="the-list-of-choices">The List of Choices</h2>
@@ -31,11 +30,10 @@
 <div class="wiki-line">Example:</div>
 <div class="wiki-line"><pre><code>list colourchoices = [&quot;Red&quot;, &quot;Green&quot;, &quot;Yellow&quot;];</code></pre></div>
 <div class="wiki-line">llDialog is picky about the lists it is fed. It will shout an error if it is unhappy about anything of the following things in a list:</div>
-<ul>
-<li>If any element in the list is anything other than a string;&lt;blockquote&gt;BAD example # 1:<pre><code>[1, &quot;Green&quot;, &lt;0.0, 0.0, 0.0&gt;];</code></pre>Only "Green" is a string in the list.&lt;/blockquote&gt;</li>
-<li>If a button list contains more than 12 entries;</li>
-<li>If any item in the list is a null string;&lt;blockquote&gt;BAD example # 2:<pre><code>[&quot;&quot;, &quot;Green&quot;, &quot;Yellow&quot;];</code></pre>&lt;/blockquote&gt;. But a blank button is OK, i.e. " ";</li>
-</ul>
+<ul><li>If any element in the list is anything other than a string;&lt;blockquote&gt;BAD example # 1:<pre><code>[1, &quot;Green&quot;, &lt;0.0, 0.0, 0.0&gt;];</code></pre>Only "Green" is a string in the list.&lt;/blockquote&gt;
+</li><li>If a button list contains more than 12 entries;
+</li><li>If any item in the list is a null string;&lt;blockquote&gt;BAD example # 2:<pre><code>[&quot;&quot;, &quot;Green&quot;, &quot;Yellow&quot;];</code></pre>&lt;/blockquote&gt;. But a blank button is OK, i.e. " ";
+</li></ul>
 <div class="wiki-line">All that aside, it IS okay to feed the menu a completely empty list. (When fed an empty list, the menu will generate just an ["OK"] button (along with the ever present Ignore button too, of course.)</div>
 <div class="wiki-line"><pre><code>list colourchoices = [];</code></pre></div>
 <div class="wiki-line">Tip! Often people like to create a place holder button to line buttons on menus up in a  </div>
@@ -66,7 +64,7 @@ integer channel_dialog;
 <div class="wiki-line">We now have all the components we need to present the menu.</div>
 <div class="wiki-line">This is done by the llDialog function. It builds a dialog box from the message and button choices you feed it, and presents that dialog box to the avatar UUID that you supplied to it.</div>
 <div class="wiki-line">Tip! Reminder to non-Americans; Dialog has to be spelt the American way.</div>
-<div class="wiki-line">We'll start putting our example together now:<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|In this example, we really don&#x27;t need to capture and store the UUID of the toucher -- we could just use it right away. But as there will be many instances in which you want to pass the ToucherID along to other menus, or other scripts, we&#x27;re showing you how to in this example. As well, we could just type the list of choices right into the llDialog parameters, but often you&#x27;ll draw on them from other sources, such as a notecard, for instance.}}</code></span></div>
+<div class="wiki-line">We'll start putting our example together now:<sup class="wiki-footnote">In this example, we really don't need to capture and store the UUID of the toucher -- we could just use it right away. But as there will be many instances in which you want to pass the ToucherID along to other menus, or other scripts, we're showing you how to in this example. As well, we could just type the list of choices right into the llDialog parameters, but often you'll draw on them from other sources, such as a notecard, for instance.</sup></div>
 <div class="wiki-line"><pre><code>list colorChoices = [&quot;-&quot;, &quot;Red&quot;, &quot;Green&quot;, &quot;Yellow&quot;];
 string message = &quot;\nPlease make a choice.&quot;;   // The newline (\n) helps to visually separate this text from the dialog heading line 
 
@@ -144,14 +142,13 @@ default
         }
     }</code></pre></div>
 <div class="wiki-line">We just threw a lot at you above. Don't panic, though, here are some notes on it:</div>
-<ul>
-<li>Some scripters may refer to the "string choice" seen above in the listen event as string msg, string message, etc. It doesn't matter what it's referred to -- string banana would work equally well, and you can call it what you want. Whatever you call it is what you define in the last part of the list() statement itself, and you refer to that same name each time you evaluate to see what the user chose.</li>
-<li>Above, we use if / else if etc to figure out what the user chose. <span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|In a listen event in a dialog menu situation, the &quot;key id&quot; part gives the UUID of the person who clicked a button. But, in this example, there is no need to try to further filter the listen event with &quot;ifs&quot; evaluating to see if that person was our ToucherID. We did that when we set up the listen. To do the further test would just waste script memory.}}</code></span></li>
-<li>If our budding Einstein user chooses the "-" placeholder, we cycle the dialog menu back to him/her with another llDialog. Note that because we had defined all the parameters as variables, it is easy for us to keep on shooting the menu back to them until they get tired and pick something we can use.</li>
-<li>Note that comparisons are done by using == NOT =  In evaluating dialog box choices, this is one of the more common mistakes that tired fingers can make, and tired eyes can miss. In theory, the compiler should catch this when you go to save the script, but there are situations when it won't always. So if you're not picking up the answer that you think you should, check your == signs.</li>
-<li>When you have a really elaborate set of choices going, you may need to step through many else if's. There is a limit, however, to how many else if's you can have. When you reach the limit and go to save your script, it will give you -- unhelpfully -- a "syntax" error that will have you tearing your hair out looking everywhere else in the script but here. Generally, you are considered safe having 23 or under chained together -- but it's not unknown for the error to occur with fewer. Watch out for this.</li>
-<li>And finally, note that there is NO WAY to know if the user hit the ignore button to make the menu go away.</li>
-</ul>
+<ul><li>Some scripters may refer to the "string choice" seen above in the listen event as string msg, string message, etc. It doesn't matter what it's referred to -- string banana would work equally well, and you can call it what you want. Whatever you call it is what you define in the last part of the list() statement itself, and you refer to that same name each time you evaluate to see what the user chose.
+</li><li>Above, we use if / else if etc to figure out what the user chose. <sup class="wiki-footnote">In a listen event in a dialog menu situation, the "key id" part gives the UUID of the person who clicked a button. But, in this example, there is no need to try to further filter the listen event with "ifs" evaluating to see if that person was our ToucherID. We did that when we set up the listen. To do the further test would just waste script memory.</sup>
+</li><li>If our budding Einstein user chooses the "-" placeholder, we cycle the dialog menu back to him/her with another llDialog. Note that because we had defined all the parameters as variables, it is easy for us to keep on shooting the menu back to them until they get tired and pick something we can use.
+</li><li>Note that comparisons are done by using == NOT =  In evaluating dialog box choices, this is one of the more common mistakes that tired fingers can make, and tired eyes can miss. In theory, the compiler should catch this when you go to save the script, but there are situations when it won't always. So if you're not picking up the answer that you think you should, check your == signs.
+</li><li>When you have a really elaborate set of choices going, you may need to step through many else if's. There is a limit, however, to how many else if's you can have. When you reach the limit and go to save your script, it will give you -- unhelpfully -- a "syntax" error that will have you tearing your hair out looking everywhere else in the script but here. Generally, you are considered safe having 23 or under chained together -- but it's not unknown for the error to occur with fewer. Watch out for this.
+</li><li>And finally, note that there is NO WAY to know if the user hit the ignore button to make the menu go away.
+</li></ul>
 <div class="wiki-line">Now, let's update our example by bringing the above listen event into it:</div>
 <div class="wiki-line"><pre><code>list buttons = [&quot;-&quot;, &quot;Red&quot;, &quot;Green&quot;, &quot;Yellow&quot;];
 string dialogInfo = &quot;\nPlease make a choice.&quot;;
@@ -349,4 +346,3 @@ default
 <table></table>
 <h3 id="footnotes">Footnotes</h3>
 <div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-footnotes-a8dfdabc/">Footnotes</a>: <code>{{Footnotes}}</code></span></div>
-<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Tutorials}}</code></span></div>

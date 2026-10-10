@@ -1,16 +1,11 @@
 <div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
-<div class="wiki-line">&lt;div style="float:right;"&gt;__TOC__&lt;/div&gt;</div>
-<div class="wiki-line">&lt;div id="box"&gt;</div>
+<div class="wiki-line">__TOC__</div>
 <h2 id="introduction">Introduction</h2>
-<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
 <div class="wiki-line">(http://www.gnu.org/copyleft/fdl.html) in the spirit of which this script is GPL'd. Copyright (C) 2010 <a href="https://wiki.secondlife.com/wiki/User:Xaviar_Czervik">Xaviar Czervik</a></div>
 <div class="wiki-line">This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</div>
 <div class="wiki-line">What follows is my feeble attempt to create a working BigNum library for LSL. The purpose I designed it for was modular exponentiation; however all of the helper functions (add, subtract, multiply, divide, modulus) work just fine on their own. I say feeble because while working, it is quite slow. It is, however, faster at modular exponentiation than any other LSL function that I have seen.</div>
 <div class="wiki-line">While this is exactly what RSA is, I did not call it an RSA Library because it can be used for many other encryption techniques -- I am currently using it for <a href="http://en.wikipedia.org/wiki/Paillier_cryptosystem" rel="noreferrer">Paillier encryption</a>.</div>
-<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
-<div class="wiki-line">&lt;div id="box"&gt;</div>
 <h2 id="explanation">Explanation</h2>
-<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
 <h3 id="getting-started">Getting Started</h3>
 <div class="wiki-line">Using this script is quite simple. To get started, simply copy the code below into a script and save it. By default, it will use RSA to encrypt and decrypt a message using a 128 bit key (encryption takes about three and a half minutes; decryption, longer). However, that is probably not what you will want it to do. What follows is an explanation of how to use this script.</div>
 <h3 id="creating-bignums">Creating BigNums</h3>
@@ -29,31 +24,20 @@
 <div class="wiki-line">This MontStep function does a single Montgomery step, based off of the inputs.</div>
 <h3 id="modpow2">ModPow2</h3>
 <div class="wiki-line">The ModPow2 function is quite similar to the ModPow function, except that it also takes xp as a parameter. Xp is the value obtained from the Extended Euclidean algorithm, which along with the modulus and exponent are fixed. This means that it can be pre-calculated and saved as part of the public key. This can result in savings of up to 60% for 128 bit keys, but slowly drops down to 30% for 512 bit keys.</div>
-<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
-<div class="wiki-line">&lt;div id="box"&gt;</div>
 <h2 id="revision-history">Revision History</h2>
-<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
 <div class="wiki-line">Version 1.1</div>
-<ul>
-<li>Achieved 40% (or higher) increase in speed with moduli larger than 50 bits. (Changed Montgomery Reduction to pick R a multiple of 16 bits.)</li>
-<li>Fixed example code to actually work...</li>
-</ul>
+<ul><li>Achieved 40% (or higher) increase in speed with moduli larger than 50 bits. (Changed Montgomery Reduction to pick R a multiple of 16 bits.)
+</li><li>Fixed example code to actually work...
+</li></ul>
 <div class="wiki-line">Version 1.0</div>
-<ul>
-<li>First release.</li>
-</ul>
-<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
-<div class="wiki-line">&lt;div id="box"&gt;</div>
+<ul><li>First release.
+</li></ul>
 <h2 id="to-do">To Do</h2>
-<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
 <div class="wiki-line">Below are a list of tasks that need to be done to make this script more useful. If you know how to do any of the below, and have some extra time, feel free to add in any of these. (Or anything you may think of on your own!)</div>
 <div class="wiki-line"><strong>Optimize Code:</strong> This code has not been optimized in the slightest! I still use a O(n^2) algorithm for multiplication and it just gets worse for division (which, thanks to the Montgomery Reductions, is almost never used). Not to mention the micro-optimizations that could be made.</div>
 <div class="wiki-line"><strong>1024+ Bit Key Sizes:</strong> This can only encrypt using an key size of 512 bits, or a stack-heap collision is imminent! This is pathetically low in terms of security. </div>
 <div class="wiki-line"><strong>Floating-Point Number Support:</strong> This script only works with integer values, allowing infinite precision floats would be nice (but not required for cryptography).</div>
-<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
-<div class="wiki-line">&lt;div id="box"&gt;</div>
 <h2 id="the-code">The Code</h2>
-<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
 <div class="wiki-line"><pre><code>integer compare(list a, list b) {
     integer an;
     integer bn;
@@ -505,11 +489,8 @@ default {
         llOwnerSay(&quot;It took &quot; + (string)(llGetWallclock()-t) + &quot; seconds to complete this calculation.&quot;);
     }
 }</code></pre></div>
-<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
-<div class="wiki-line">&lt;div id="box"&gt;</div>
 <h2 id="generalized-bases">Generalized Bases</h2>
 <div class="wiki-line">Be warned that this is VERY slow, about 1 second per digit.</div>
-<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
 <div class="wiki-line"><pre><code>list fromBase(string in, integer base){
     integer i = llStringLength(in)-1;
     list mul = fromHex(&quot;1&quot;);
@@ -535,5 +516,3 @@ string toBase(list in, integer base){
     }
     return out;
 }</code></pre></div>
-<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
-<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library|BigNum}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Encryption}}</code></span></div>

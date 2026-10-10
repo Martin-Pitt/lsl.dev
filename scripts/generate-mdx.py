@@ -31,9 +31,10 @@ from __future__ import annotations
 import argparse, hashlib, json, re, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib.mdx_convert import Converter, fence, esc  # noqa: E402
+from lib.mdx_convert import Converter, code_span, fence, esc  # noqa: E402
 from lib.desc_review import classify, compare_param, plain  # noqa: E402
 from lib.wiki_fields import templates  # noqa: E402
+from lib.wiki_cleanup import DroppedLog, blocks, merge_section, norm, novel, strip_leaks  # noqa: E402
 
 PLURAL = {'function': 'functions', 'event': 'events', 'constant': 'constants'}
 COMPONENT = {'function': 'LSLFunction', 'event': 'LSLEvent', 'constant': 'LSLConstant'}
@@ -145,13 +146,17 @@ def shared_helpers(html: str) -> str:
     issues, others = [], []
     for href, title, src in HELPER.findall(html):
         src = unescape(src or '')
-        m = re.fullmatch(r'\{\{Issues\|([^|}]+)\|(.*?)((?:\|[a-z]+=[^|}]*)*)\}\}', src.strip(), re.S)
-        if m:
-            text = re.sub(r'\[\[(?:[^\]|]*\|)?([^\]]*)\]\]', lambda w: w[1], m[2])
-            fixed = '<del>' in text or 'status=vfix' in m[3] or 'status=fixed' in m[3]
-            text = re.sub(r'</?del>', '', text).strip()
-            kind = re.search(r'type=([a-z]+)', m[3])
-            line = f"- {m[1]}{' (' + kind[1] + ')' if kind else ''}: {esc(text)}"
+        node = next((t for t in templates(src) if t['name'].strip() == 'Issues'), None)
+        if node and src.strip().startswith('{{Issues'):
+            # {{Issues|ID|text|type=..|status=..}}: named arguments may come in any position.
+            named = {k: v['value'] for k, v in node['fields'].items() if not v.get('bare')}
+            pos = [p[2] for p in node['parts'][1:] if not re.match(r'\s*[a-z]+\s*=', p[2])]
+            ident, text = (pos + ['', ''])[:2]
+            text = re.sub(r'\[\[(?:[^\]|]*\|)?([^\]]*)\]\]', lambda w: w[1], text)
+            fixed = '<del>' in text or named.get('status') in ('vfix', 'fixed')
+            text = issue_md(re.sub(r'<[^>]+>', '', text).strip())
+            kind = named.get('type')
+            line = f"- {ident.strip()}{' (' + kind + ')' if kind else ''}: {text}"
             issues.append(line + (' *(fixed)*' if fixed else ''))
         else:
             others.append(f'[{esc(title)}]({LINKER(href) if LINKER else href})')
@@ -159,6 +164,31 @@ def shared_helpers(html: str) -> str:
     if issues: parts.append('## Known issues\n\nFrom the issue templates included by the wiki article:\n\n' + '\n'.join(issues))
     if others: parts.append(('' if issues else '## Shared wiki templates\n\n') + 'The wiki article also includes shared templates whose conditional content is not reproduced here: ' + ', '.join(others) + '.')
     return '\n\n'.join(parts)
+
+
+def issue_md(text: str) -> str:
+    """Markdown for the short wikitext of an issue summary: the simple templates seen there are
+    rendered (parameter names bold, strings quoted, category/Wikipedia links as their label),
+    wiki bold/italic converted, the rest escaped."""
+    out = []
+    def put(md):
+        out.append(md); return f'\x00{len(out) - 1}\x00'
+    def template(m):
+        name, *args = [a.strip() for a in m[1].split('|')]
+        low = name.lower().replace('_', ' ')
+        label = args[-1] if args else ''
+        if low in ('lslp', 'lslpt', 'lsl param'): return put(f'**{esc(args[0] if args else "")}**')
+        if low == 'string': return put(code_span(f'"{args[0] if args else ""}"'))
+        if low in ('lslgc', 'lslg', 'wikipedia', 'w', 'em', 'hovertext', 'nowrap'): return put(esc(args[1] if low in ('lslgc', 'lslg', 'wikipedia', 'w') and len(args) > 1 else args[0] if args else ''))
+        if low == '=': return '='
+        return put(esc(label))
+    for _ in range(3):
+        text = re.sub(r'\{\{([^{}]*)\}\}', template, text)
+    parts = re.split(r"('''.+?'''|''.+?'')", text)
+    md = ''.join(f"**{esc(p[3:-3])}**" if p.startswith("'''") else f"*{esc(p[2:-2])}*" if p.startswith("''") else esc(p) for p in parts)
+    for _ in range(3):
+        md = re.sub(r'\x00(\d+)\x00', lambda m: out[int(m[1])], md)
+    return md
 
 
 def archive_linker(catalog):
@@ -325,8 +355,16 @@ def render_page(entry, sections) -> str:
             if text: part.append(text)
         body.append('\n\n'.join(part))
     see_also = []
+    page = f"{PLURAL[entry['kind']]}/{entry['name']}"
+    extracted = []  # (section title, Markdown) of wiki text found outside the page's own fields
     for s in rest:
         if s['id'] == 'specification': continue
+        if s.get('extracted'):
+            extracted.append((s['title'], conv.convert(s['html']))); continue
+        if s['id'] == 'additional':
+            # Text outside the wiki page template: never a section of its own. Readable text the
+            # page does not already have goes to Notes; everything else is dropped and logged.
+            extracted.append(('Notes', strip_leaks(conv.convert(s['html']), DROPPED, page, 'outside the page template'))); continue
         if s['id'] in SEE_ALSO:
             text = conv.convert(s['html'])
             if text: see_also.append(f"### {SEE_ALSO[s['id']]}\n\n{text}")
@@ -338,6 +376,14 @@ def render_page(entry, sections) -> str:
         text = conv.examples(s['html']) if s['id'] in ('examples',) else conv.convert(s['html'])
         if text: body.append(f"## {esc(s['title'])}\n\n{text}")
     if see_also: body.append('## See also\n\n' + '\n\n'.join(see_also))
+    body = [strip_leaks(b, DROPPED, page, b.split('\n', 1)[0] if b.startswith('## ') else 'lead') if not b.startswith('<') else b for b in body]
+    body = [b for b in body if b.strip() and not re.fullmatch(r'## [^\n]*', b.strip())]
+    joined = '\n\n'.join(body)
+    for title, md in extracted:
+        joined = merge_section(joined, title, add_extracted(md, joined, page, title))
+    body = [joined]
+    for reason, snippet in conv.dropped + [(f'wiki {k}', v) for k, v in (sections[0].get('dropped', []) if sections else [])]:
+        DROPPED.add(page, '-', reason, snippet)
     if not entry.get('wiki'):
         body.append(':::note[Documentation]\nThis entry is documented in the LSL definitions. No matching wiki article is present in this local collection. Its inclusion here does not establish availability on every simulator.\n:::')
     body.append('<WikiSource />')
@@ -345,6 +391,27 @@ def render_page(entry, sections) -> str:
     DESCRIPTION_STATS['inline'] = DESCRIPTION_STATS.get('inline', 0) + conv.inline_code
     if conv.refs: PARAM_LOG[f"{PLURAL[entry['kind']]}/{entry['name']}"] = conv.refs
     return frontmatter(entry) + '\n' + imports + '\n\n' + '\n\n'.join(body) + '\n', conv.stats
+
+
+DROPPED = DroppedLog()
+DROPPED_HEADER = ('Wiki markup that `scripts/generate-mdx.py` and `scripts/repair-wiki-markup.py` left out of API pages because it '
+                  'could not be turned into readable text (template logic, unexpanded templates), and extracted wiki text that was not '
+                  'added because the page already says it. Review by hand; nothing here is shown on the site. Format: '
+                  '`- where | reason: snippet`.')
+
+
+def add_extracted(md: str, page_text: str, page: str, title: str) -> list[str]:
+    """Blocks of extracted wiki text worth adding: readable (not a lone word), free of wiki markup,
+    and not already on the page (normalised near-match). Others are logged."""
+    keep = []
+    for b in blocks(strip_leaks(md, DROPPED, page, title)):
+        if not re.match(r'^(\[\^|#)', b) and len(norm(b)) < 20:
+            DROPPED.add(page, title, 'too short to stand alone', b); continue
+        keep.append(b)
+    new = novel(keep, page_text, DROPPED, page, title)
+    for b in new:
+        if not re.match(r'^\[\^', b): DROPPED.add(page, title, 'EXTRACTED and added to the page', b)
+    return new
 
 
 def write_param_report(root: Path):
@@ -468,6 +535,8 @@ def main(argv=None) -> int:
         print(f"  tables converted: {stats['markdownTables']} Markdown, {stats['htmlTables']} HTML")
         write_param_report(root)
         write_description_review(root)
+        DROPPED.write(root / 'data/reports/dropped-wiki-markup.md', DROPPED_HEADER)
+        print(f"  wiki markup dropped or extracted on {len(DROPPED.entries)} pages; see data/reports/dropped-wiki-markup.md")
         print(f"  inline LSL added to plain prose (code fragments, API names, rule shapes): {DESCRIPTION_STATS.get('inline', 0)}")
         print(f"  descriptions: (a) {DESCRIPTION_STATS['a']} equivalent, (b) {DESCRIPTION_STATS['b']} definitions add, (c) {DESCRIPTION_STATS['c']} conflict, (d) {DESCRIPTION_STATS['d']} one side; see data/reports/description-review.md")
     for label, items in (('missing (no page yet)', missing), ('orphaned (no public API; move or delete by hand)', orphans)):

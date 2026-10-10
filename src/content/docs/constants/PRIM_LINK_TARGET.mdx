@@ -19,6 +19,24 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 
 Used to get or set multiple links with a single PrimParameters call.
 
+## Caveats
+
+- If [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/)'s **link_target** describes a seated avatar...
+  - Flags not explicitly mentioned have obvious values.
+  - [PRIM_NAME](/constants/PRIM_NAME/) will return the avatar's [legacy name](https://wiki.secondlife.com/wiki/Category:LSL_Legacy_Name).
+  - [PRIM_DESC](/constants/PRIM_DESC/) will return `""`.
+  - [PRIM_TYPE](/constants/PRIM_TYPE/) will return `[PRIM_TYPE_BOX, PRIM_HOLE_DEFAULT, <0., 1., 0.>, 0., ZERO_VECTOR, <1., 1., 0.>, ZERO_VECTOR]`
+  - [PRIM_SLICE](/constants/PRIM_SLICE/) will return `[<0., 1., 0.>]`
+  - [PRIM_MATERIAL](/constants/PRIM_MATERIAL/) will return `PRIM_MATERIAL_FLESH`.
+  - [PRIM_TEMP_ON_REZ](/constants/PRIM_TEMP_ON_REZ/) will return `FALSE`.
+  - [PRIM_PHANTOM](/constants/PRIM_PHANTOM/) will return `FALSE`.
+  - [PRIM_SIZE](/constants/PRIM_SIZE/) will return `llGetAgentSize(llGetLinkKey(link))`.
+  - [PRIM_TEXT](/constants/PRIM_TEXT/) will return `["", ZERO_VECTOR, 1.]`.
+  - [PRIM_POINT_LIGHT](/constants/PRIM_POINT_LIGHT/) will return `[FALSE, ZERO_VECTOR, 0., 0., 0.]`.
+  - [PRIM_FLEXIBLE](/constants/PRIM_FLEXIBLE/) will return `[FALSE, 0, 0., 0., 0., 0., ZERO_VECTOR]`.
+  - [PRIM_COLOR](/constants/PRIM_COLOR/), [PRIM_TEXTURE](/constants/PRIM_TEXTURE/), [PRIM_GLOW](/constants/PRIM_GLOW/), [PRIM_FULLBRIGHT](/constants/PRIM_FULLBRIGHT/), [PRIM_BUMP_SHINY](/constants/PRIM_BUMP_SHINY/), [PRIM_TEXGEN](/constants/PRIM_TEXGEN/)
+    - will return `[]` and report a script error to the owner: "texture info cannot be accessed for avatars."
+
 ## Examples
 
 <details open>
@@ -85,15 +103,7 @@ default
 
 </details>
 
-## Additional wiki content
-
-&lt;noinclude>`{{#if: HACK! {{:PRIM_NAME|{{{1|}}}}} {{:PRIM_DESC|{{{1|}}}}} {{:PRIM_SLICE|{{{1|}}}}} {{:PRIM_COLOR|{{{1|}}}}} {{:PRIM_GLOW|{{{1|}}}}} {{:PRIM_TEXGEN|{{{1|}}}}} {{:PRIM_TEXTURE|{{{1|}}}}} {{:PRIM_TEXT|{{{1|}}}}} {{:PRIM_FULLBRIGHT|{{{1|}}}}} {{:PRIM_BUMP_SHINY|{{{1|}}}}} {{:PRIM_MATERIAL|{{{1|}}}}} {{:PRIM_TYPE|{{{1|}}}}} {{:PRIM_TYPE_BOX|{{{1|}}}}} {{:PRIM_TYPE_SCULPT|{{{1|}}}}} {{:PRIM_PHANTOM|{{{1|}}}}} {{:PRIM_TEMP_ON_REZ|{{{1|}}}}} {{:PRIM_PHYSICS|{{{1|}}}}} {{:PRIM_SIZE|{{{1|}}}}} {{:PRIM_POSITION|{{{1|}}}}} {{:PRIM_POS_LOCAL|{{{1|}}}}} {{:PRIM_ROTATION|{{{1|}}}}} {{:PRIM_ROT_LOCAL|{{{1|}}}}} {{:PRIM_FLEXIBLE|{{{1|}}}}} {{:PRIM_POINT_LIGHT|{{{1|}}}}} {{:PRIM_OMEGA|{{{1|}}}}} {{:PRIM_PHYSICS_SHAPE_TYPE|{{{1|}}}}} }}`&lt;onlyinclude>`{{#if: I don't know what the restrictions should be so I'm going to silently emit the group flags (via nogroup and nocaveats). {{LSL Function/link|link_target|nogroup=*|nocaveats=*}} {{#vardefine:link_target_const|{{LSL Const|PRIM_LINK_TARGET|integer|34|c=Used to set the link target of {{GetSet|{{{1|}}}|llGetPrimitiveParams|llSetPrimitiveParams}}}}}} {{#ifeq:{{{1|}}}|set|| Only run this if it's a get. {{#vardefine:caveats|{{#var:caveats}} *If {{#ifeq:{{{2}}}|link|{{LSLP|link}} (or}} {{#var:link_target_const}}'s {{LSLP|link_target}}{{#ifeq:{{{2}}}|link|)}} describes a seated avatar... ** Flags not explicitly mentioned have obvious values. ** {{#var:name_const}} will return the avatar's {{LSLGC|Legacy Name|legacy name}}. ** {{#var:desc_const}} will return <code>{{HoverText|{{String}}|An empty string}}</code>. ** {{#var:type_const}} will return <code>[[[PRIM_TYPE_BOX]], [[PRIM_HOLE_DEFAULT]], <0., 1., 0.>, 0., [[ZERO_VECTOR]], <1., 1., 0.>, [[ZERO_VECTOR]]]</code> ** {{#var:slice_const}} will return <code>[<0., 1., 0.>]</code> ** {{#var:material_const}} will return <code>[[PRIM_MATERIAL_FLESH]]</code>. ** {{#var:temponrez_const}} will return <code>[[FALSE]]</code>. ** {{#var:phantom_const}} will return <code>[[FALSE]]</code>. ** {{#var:size_const}} will return <code>[[llGetAgentSize]]([[llGetLinkKey]]({{LSLP|link}}))</code>. ** {{#var:text_const}} will return <code>["", [[ZERO_VECTOR]], 1.]</code>. ** {{#var:light_const}} will return <code>[[[FALSE]], [[ZERO_VECTOR]], 0., 0., 0.]</code>. ** {{#var:flexible_const}} will return <code>[[[FALSE]], 0, 0., 0., 0., 0., [[ZERO_VECTOR]]]</code>. ** {{#var:color_const}}, {{#var:texture_const}}, {{#var:glow_const}}, {{#var:fullbright_const}}, {{#var:bumpshiny_const}}, {{#var:texgen_const}} *** will return <code>[]</code> and report a script error to the owner: "texture info cannot be accessed for avatars." }} }} }}`&lt;/onlyinclude>
-
 ## See also
-
-### Constants
-
-`{{#var:constants_nb}}`
 
 ### Functions
 

@@ -19,6 +19,13 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 
 Used to make the object spin at the specified axis and rate, or retrieve spin settings. See [llTargetOmega](/functions/llTargetOmega/) for specification.
 
+## Caveats
+
+- [PRIM_OMEGA](/constants/PRIM_OMEGA/) on nonphysical objects, and child prims of physical objects, is only a client side effect; the object or prim will collide as non-moving geometry.
+- [PRIM_OMEGA](/constants/PRIM_OMEGA/) cannot be used on avatars sitting on the object. It will emit the error message "`PRIM_OMEGA` disallowed on agent".
+- If [PRIM_OMEGA](/constants/PRIM_OMEGA/) does not appear to be working, make sure that that Develop > Network > Velocity Interpolate Objects is enabled on the viewer.
+- In the parameters returned by `llGetPrimitiveParams([PRIM_OMEGA])`, the vector is normalized, and the spinrate is multiplied by the magnitude of the original vector.
+
 ## Examples
 
 <details open>
@@ -68,10 +75,6 @@ default
 
 - Introduced in [Second Life RC BlueSteel 11.06.20.233291](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_RC_BlueSteel/11#11-06-20-233291), June 22, 2011
 - Rolled to main server channel the week of 7/11/2011
-
-## Additional wiki content
-
-&lt;onlyinclude>`{{#if: {{#vardefine:omega_const|{{LSL Const|PRIM_OMEGA|integer|18|c=Used to {{GetSet|{{{1|}}}|get the object's llTargetOmega settings|rotate the object at on the given axis at the given rate|/}} }}}} {{#vardefine:caveats|{{#var:caveats}} *[[PRIM_OMEGA]] on nonphysical objects, and child prims of physical objects, is only a client side effect; the object or prim will collide as non-moving geometry. *[[PRIM_OMEGA]] cannot be used on avatars sitting on the object. It will emit the error message "PRIM_OMEGA disallowed on agent". *If [[PRIM_OMEGA]] does not appear to be working, make sure that that Develop > Network > Velocity Interpolate Objects is enabled on the viewer. *In the parameters returned by <code>llGetPrimitiveParams([PRIM_OMEGA])</code>, the vector is normalized, and the spinrate is multiplied by the magnitude of the original vector.}} {{#vardefine:p_axis_desc|arbitrary axis to rotate the object around}} {{#vardefine:p_spinrate_desc|rate of rotation in radians per second}} {{#vardefine:p_gain_desc|also modulates the final spinrate and disables the rotation behavior if zero}} }}`&lt;/onlyinclude>
 
 ## See also
 

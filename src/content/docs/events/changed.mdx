@@ -34,7 +34,7 @@ changed(integer changes)
 
 | Flag |  | Description | Scope |
 | --- | --- | --- | --- |
-| [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/) | `0x001` | Prim inventory has changed`{{Footnote\|[[CHANGED_INVENTORY]] won't be triggered if the inventory change was caused by a {{LSLGC\|Inventory\|script function}} or a user taking advantage of [[llAllowInventoryDrop]]}}`. | prim |
+| [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/) | `0x001` | Prim inventory has changed[^wiki-8b07d5]. | prim |
 | [CHANGED_COLOR](/constants/CHANGED_COLOR/) | `0x002` | Prim color or alpha parameters have changed. | prim |
 | [CHANGED_SHAPE](/constants/CHANGED_SHAPE/) | `0x004` | Prim shape has changed. | prim |
 | [CHANGED_SCALE](/constants/CHANGED_SCALE/) | `0x008` | Prim scale has changed. | prim |
@@ -47,6 +47,8 @@ changed(integer changes)
 | [CHANGED_REGION_START](/constants/CHANGED_REGION_START/) | `0x400` | The region this object is in has just come online. | region |
 | [CHANGED_MEDIA](/constants/CHANGED_MEDIA/) | `0x800` | [Prim Media](/categories/prim_media/) has changed. | prim |
 | [CHANGED_RENDER_MATERIAL](/constants/CHANGED_RENDER_MATERIAL/) | `0x1000` | [Render Material](https://wiki.secondlife.com/wiki/Category:GlTF) has changed. | prim |
+
+[^wiki-8b07d5]: [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/) won't be triggered if the inventory change was caused by a [script function](https://wiki.secondlife.com/wiki/Category:LSL_Inventory) or a user taking advantage of [llAllowInventoryDrop](/functions/llAllowInventoryDrop/)
 
 ## Caveats
 
@@ -133,14 +135,14 @@ default
 
 ## Notes
 
-- Always test the value of `change` for the specific `CHANGED_*` flags you are interested in, unless you want your script to act upon any change that can cause a changed event to trigger.
-- New `CHANGED_*` flags, bugs and bug fixes could conceivably be added by LL at any time. Scripts should be written under the assumption that they will receive *changed* events not expected at the time or place of writing. For future proof scripts, use bitwise conditions as in the examples.
+- Always test the value of **change** for the specific `CHANGED_*` flags you are interested in, unless you want your script to act upon any change that can cause a changed event to trigger.
+  - New `CHANGED_*` flags, bugs and bug fixes could conceivably be added by LL at any time. Scripts should be written under the assumption that they will receive *changed* events not expected at the time or place of writing. For future proof scripts, use bitwise conditions as in the examples.
 - See [llGetOwner](/functions/llGetOwner/) for a full discussion on
 
   ```lsl
   (change & CHANGED_OWNER)
   ```
-- [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/) will also trigger when inventory permissions are changed, a new feature request for a [CHANGED_PERMISSIONS](https://wiki.secondlife.com/wiki/CHANGED_PERMISSIONS) flag to trigger when the object permissions are changed can be voted for at [SCR-411](https://jira.secondlife.com/browse/SCR-411)&lt;ref>Remember, as of 2024, this may be an archived vote.&lt;/ref>
+- [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/) will also trigger when inventory permissions are changed, a new feature request for a [CHANGED_PERMISSIONS](https://wiki.secondlife.com/wiki/CHANGED_PERMISSIONS) flag to trigger when the object permissions are changed can be voted for at [SCR-411](https://jira.secondlife.com/browse/SCR-411)[^wiki-3e8013]
 - If leaving a [state](https://wiki.secondlife.com/wiki/state) from within a [changed](/events/changed/) event that registers a change just before the [state](https://wiki.secondlife.com/wiki/state) change, on return to that state, the changed event will trigger. For example —
 
 ```lsl collapse={20-29}
@@ -175,6 +177,8 @@ state whatever
 }
 ```
 
+[^wiki-3e8013]: Remember, as of 2024, this may be an archived vote.
+
 ## Known issues
 
 From the issue templates included by the wiki article:
@@ -182,8 +186,3 @@ From the issue templates included by the wiki article:
 - SCR-411 (nf): CHANGED_PERMISSIONS new feature request.
 - SVC-2549 (bug): &lt;code>changed(CHANGED_SCALE)&lt;/code> is triggered only in root prim instead of rescaled prim.
 
-## Additional wiki content
-
-`{{LSLC|Region}}``{{LSLC|Owner}}``{{LSLC|Prim}}`
-
-<WikiSource />

@@ -70,9 +70,9 @@ The `message` is prefixed with information about the [prim](https://wiki.secondl
 - There is a limit to the number of email messages an object can send in a given amount of time.
 - There is a limit of 500 messages from a single [agent](/constants/AGENT/)'s objects in a one-hour period.
 - The 4096-byte size limit includes the **subject** line and automatically added text. The practical maximum body size is approximately 3600 bytes.
-- (Sept-2008) The Email Throttle was modified slightly, Per `{{User|Prospero Linden}}`'s comments:
+- (Sept-2008) The Email Throttle was modified slightly, Per Prospero Linden's comments:
 
-`{{quote|"there has long been a throttle that makes a single script sleep for 20 seconds after sending an email. The new throttle is per user... some were using many, many different [[scripts]] to send spam. (the new throttle applies) when the destination is outside of Second Life. I know that messages within the same [[region]] were not throttled (beyond the 20-second delay), and I *believe* that messages between different [[simulator|sims]] were not throttled (between the 20-second delay)."}}`
+> "there has long been a throttle that makes a single script sleep for 20 seconds after sending an email. The new throttle is per user... some were using many, many different [scripts](https://wiki.secondlife.com/wiki/scripts) to send spam. (the new throttle applies) when the destination is outside of Second Life. I know that messages within the same [region](https://wiki.secondlife.com/wiki/region) were not throttled (beyond the 20-second delay), and I \*believe\* that messages between different [sims](https://wiki.secondlife.com/wiki/simulator) were not throttled (between the 20-second delay)."
 
 - Due to the bug [SVC-23](https://jira.secondlife.com/browse/SVC-23) (present since 2005), objects may stop receiving emails completely until either the region is restarted or the object crosses a region boundary (resetting the script doesn't help). Emails sent may eventually be received after a restart/region-cross. Hence, don't rely on this function for reliable inter-region messaging.
 - Due to bug [BUG-229767](https://jira.secondlife.com/browse/BUG-229767), an object's email queue can still become suspended until the object crosses a region border (neither a region restart nor a script reset helps). First analysis has revealed a potential workaround, by implementing a delay of about 30 seconds before first trying to send email to a freshly rezzed script - apparently registering the [email(...)](/events/email/) event handler can take quite some time, and emails arriving prior to said registry process is what gets the entire queue stuck. Official Linden Lab response still pending.
@@ -127,8 +127,8 @@ vector position = (vector) ("<" + llList2String(llParseString2List(message, ["Lo
 
 - Because of the long delay on this function, it is often called from a second script triggered by [link_message](/events/link_message/).
 - If you are sending email to a prim within Second Life, its address is `''[key]''@lsl.secondlife.com`
-- Which means if the key returned by [llGetKey](/functions/llGetKey/) is "`a2e76fcd-9360-4f6d-a924-000000000003`", then its email address is "`a2e76fcd-9360-4f6d-a924-000000000003@lsl.secondlife.com`".
-- Agents do not have fixed email addresses, use [llInstantMessage](/functions/llInstantMessage/) or [llOwnerSay](/functions/llOwnerSay/)&lt;ref>If the agent or object are *known* to be in the same region, then you can use [llRegionSayTo](/functions/llRegionSayTo/) instead.&lt;/ref>.
+  - Which means if the key returned by [llGetKey](/functions/llGetKey/) is "`a2e76fcd-9360-4f6d-a924-000000000003`", then its email address is "`a2e76fcd-9360-4f6d-a924-000000000003@lsl.secondlife.com`".
+  - Agents do not have fixed email addresses, use [llInstantMessage](/functions/llInstantMessage/) or [llOwnerSay](/functions/llOwnerSay/)[^wiki-5a8d27].
 
 ### Prim2Prim Email
 
@@ -219,9 +219,11 @@ default
 }
 ```
 
+[^wiki-5a8d27]: If the agent or object are *known* to be in the same region, then you can use [llRegionSayTo](/functions/llRegionSayTo/) instead.
+
 ## Tests
 
-- [internal test](https://osiris.lindenlab.com/mediawiki/index.php/Email_Test)&lt;ref>Probably broken (last tested Feb 2023); the server still exists but is password-protected.&lt;/ref>
+- [internal test](https://osiris.lindenlab.com/mediawiki/index.php/Email_Test)[internal test](https://osiris.lindenlab.com/mediawiki/index.php/Email_Test)
 
 ## Known issues
 
@@ -229,7 +231,7 @@ From the issue templates included by the wiki article:
 
 - SVC-23 (bug): Region incoming email queue for objects becomes suspended
 - SVC-391 (bug): llEmail and llHTTPRequest do not handle non-ASCII characters
-- SVC-412 (bug): Include "Content-Type: text/plain; charset\{\{=\}\}UTF-8" header in the messages forwarded from second life.
+- SVC-412 (bug): Include "Content-Type: text/plain; charset=UTF-8" header in the messages forwarded from second life.
 - SCR-499 (bug): llEmails to objects not in the same region arrive without a body or do not arrive at all.
 - BUG-229767 (bug): Object-to-object email sporadically fails
 

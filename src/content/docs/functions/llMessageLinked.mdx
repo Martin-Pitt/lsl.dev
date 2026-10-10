@@ -19,7 +19,9 @@ import { LSLFunction, WikiSource } from '~/components/lsl';
 
 The purpose of this function is to allow scripts in the same object to communicate. It triggers a [link_message](/events/link_message/) [event](https://wiki.secondlife.com/wiki/event) with the same parameters **num**, **str**, and **id** in all scripts in the prim(s) described by **link**.
 
-You can use **id** as a second string field`{{Footnote|In LSL the [[key]] type is implemented as a [[string]] (but with different operators and restrictions). [[typecast|Typecasting]] between string and key types has no effect on the data contained.}}`. The sizes of **str** and **id** are only limited by available script memory.
+You can use **id** as a second string field[^wiki-b9e66c]. The sizes of **str** and **id** are only limited by available script memory.
+
+[^wiki-b9e66c]: In LSL the [key](https://wiki.secondlife.com/wiki/key) type is implemented as a [string](https://wiki.secondlife.com/wiki/string) (but with different operators and restrictions). [Typecasting](https://wiki.secondlife.com/wiki/typecast) between string and key types has no effect on the data contained.
 
 ```lsl title="How to use" frame="terminal"
 llMessageLinked(0, 0, "", NULL_KEY);
@@ -27,14 +29,16 @@ llMessageLinked(0, 0, "", NULL_KEY);
 
 ## Caveats
 
-- A script can hear its own linked messages if **link** targets the prim it is in`{{Footnote|There are four ways for a script to target itself: by [[llGetLinkNumber|precise link number]], [[LINK_THIS]], [[LINK_SET]] and [[LINK_ALL_CHILDREN]] (if the prim is a child prim).}}`. This creates the possibility of an infinite loop (a bad thing); be very careful about how messages are handled and passed along.
+- A script can hear its own linked messages if **link** targets the prim it is in[^wiki-e5e00f]. This creates the possibility of an infinite loop (a bad thing); be very careful about how messages are handled and passed along.
 - Messages sent via [llMessageLinked](/functions/llMessageLinked/) to a script that is [sleeping](/functions/llSleep/), [delayed](https://wiki.secondlife.com/wiki/LSL_Delay), or [lagged](https://wiki.secondlife.com/wiki/lag), are queued until the end of the delay. The [event](https://wiki.secondlife.com/wiki/event) queue can hold 64 [events](https://wiki.secondlife.com/wiki/event).
-- If an [event](https://wiki.secondlife.com/wiki/event) is received and the queue is full the [event](https://wiki.secondlife.com/wiki/event) is silently dropped.
-- Avoid sending link_messages to large numbers of scripts simultaneously as it can cause lag spike. This most often happens when using the multi-prim `LINK_*` flags and can cause script execution to slow or halts.
-- Avoid sending link_messages to a target faster than they can be handled. Doing so risks filling the [event](https://wiki.secondlife.com/wiki/event) queue and subsequent messages being silently discarded.
+  - If an [event](https://wiki.secondlife.com/wiki/event) is received and the queue is full the [event](https://wiki.secondlife.com/wiki/event) is silently dropped.
+  - Avoid sending link_messages to large numbers of scripts simultaneously as it can cause lag spike. This most often happens when using the multi-prim `LINK_*` flags and can cause script execution to slow or halts.
+  - Avoid sending link_messages to a target faster than they can be handled. Doing so risks filling the [event](https://wiki.secondlife.com/wiki/event) queue and subsequent messages being silently discarded.
 - When a script [state](https://wiki.secondlife.com/wiki/state) changes, all pending [events](https://wiki.secondlife.com/wiki/event) are deleted, including queued link_messages.
 - If **link** is an invalid link number then the function silently fails.
 - If **str** & **id** exceed the available memory of a script that catches the resulting [link_message](/events/link_message/) [event](https://wiki.secondlife.com/wiki/event), that script will crash with a [Stack-Heap Collision](https://wiki.secondlife.com/wiki/LSL_Errors#script-run-time-error-stack-heap-collision).
+
+[^wiki-e5e00f]: There are four ways for a script to target itself: by [precise link number](/functions/llGetLinkNumber/), [LINK_THIS](/constants/LINK_THIS/), [LINK_SET](/constants/LINK_SET/) and [LINK_ALL_CHILDREN](/constants/LINK_ALL_CHILDREN/) (if the prim is a child prim).
 
 ## Examples
 

@@ -30,172 +30,100 @@ key result = llHTTPRequest("", [], "");
 
 <ConstantGroup name="HTTPRequestParam" />
 
-`{{#if: {{LSL Function/boolean|verify|if=*|td=the server SSL certificate must be verifiable using one of the standard certificate authorities|fd=any server SSL certificate will be accepted.}} {{LSL Function/boolean|noisy|if=*|td=shout error messages to DEBUG_CHANNEL if the outgoing request rate exceeds the server limit|fd=the error messages are suppressed.}} {{LSL Function/boolean|send_header|if=when|td=the {{String|Pragma: no-cache}} header is sent|fd=no {{String|Pragma}} header is sent.}} {{#vardefine:p_method_hover|A valid HTTP method, such as {{String|GET}}, {{String|POST}}, {{String|PUT}} and {{String|DELETE}}}} {{#vardefine:p_name_hover|The name of the header to be set.}} {{#vardefine:p_value_hover|The value of the header to be set.}} {{#vardefine:p_length_hover|The maximum length allowed for an HTTP body, this is also capped by the VM in use.}} {{#vardefine:p_MIME_type_hover|}} }}`\{| class="sortable"
-
-|-
-
-! **Flag**
-
-! title="Value" |
-
-! class="unsortable" | **Parameter(s)**
-
-! class="unsortable" | **Default Parameter Value(s)**
-
-! class="unsortable" | **Description**
-
-|-
-
-| [HTTP_METHOD](/constants/HTTP_METHOD/)
-
-| 0
-
-| \[[string](https://wiki.secondlife.com/wiki/string) `method`\]
-
-| \["GET"\]
-
-| "GET", "POST", "PUT" and "DELETE"
-
-|-
-
-| [HTTP_MIMETYPE](/constants/HTTP_MIMETYPE/)
-
-| 1
-
-| \[[string](https://wiki.secondlife.com/wiki/string) `MIME_type`\]
-
-| \["text/plain;charset=utf-8"\]
-
-| text/\* MIME types should specify a charset. To emulate HTML forms use application/x-www-form-urlencoded. This allows you to set the body to a properly escaped ([llEscapeURL](/functions/llEscapeURL/)) sequence of &lt;name,value> pairs in the form var=value&var2=value2 and have them automatically parsed by web frameworks.
-
-:MIME types must be specified in the format: *type*/*subtype*\[**;***option*=*value*\]
-
-;Some valid examples are:
-
-: "text/html"
-
-: "text/plain;charset=utf-8"
-
-: "application/xhtml+xml"
-
-: "application/json"
-
-: "application/x-www-form-urlencoded"
-
-: "application/rss+xml"
-
-: "multipart/mixed; boundary="---1234567890---""
-
-|-
-
-| [HTTP_BODY_MAXLENGTH](/constants/HTTP_BODY_MAXLENGTH/)
-
-| 2
-
-| \[[integer](https://wiki.secondlife.com/wiki/integer) `length`\]
-
-| \[`{{BytesHover|2048}}`\]
-
-| Sets the maximum (UTF-8 encoded) byte length of the HTTP response body. The maximum that can be set depends upon which VM is used.
-
-- **[Mono](https://wiki.secondlife.com/wiki/Mono) Max:** `{{BytesHover|16384}}`
-- **[LSO](https://wiki.secondlife.com/wiki/LSO) Max:** `{{BytesHover|4096}}`
-
-`{{KBwarning|width=75%|Applies to the [[:Category:LSL HTTP#Understanding_LSL_HTTP_Communications | Outgoing]] pipeline only (HTTP calls invoked by [[llHTTPRequest]],and responses from [[http_response]]).}}`
-
-`{{KBtip|When you only need to request a small amount of data from a remote source, consider using the [https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Range Content-Range header] instead.}}`
-
-|-
-
-| [HTTP_VERIFY_CERT](/constants/HTTP_VERIFY_CERT/)
-
-| 3
-
-| \[[integer](https://wiki.secondlife.com/wiki/integer) `verify`\]
-
-| \[[TRUE](/constants/TRUE/)\]
-
-| If [TRUE](/constants/TRUE/), the server SSL certificate must be verifiable using one of the standard certificate authorities`{{Footnote|A list of acceptable certificate authorities can be found at {{Jira|SCR-473}}.|A list of acceptable certificate authorities can be found at SCR-473.}}` when making HTTPS requests. If [FALSE](/constants/FALSE/), any server SSL certificate will be accepted.
-
-|-
-
-| [HTTP_VERBOSE_THROTTLE](/constants/HTTP_VERBOSE_THROTTLE/)
-
-| 4
-
-| \[[integer](https://wiki.secondlife.com/wiki/integer) `noisy`\]
-
-| \[[TRUE](/constants/TRUE/)\]
-
-| If [TRUE](/constants/TRUE/), shout error messages to [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) if the outgoing request rate exceeds the server limit. If [FALSE](/constants/FALSE/), the error messages are suppressed (`llHTTPRequest` will still return [NULL_KEY](/constants/NULL_KEY/)).
-
-|-
-
-| [HTTP_CUSTOM_HEADER](/constants/HTTP_CUSTOM_HEADER/)
-
-| 5
-
-| \[[string](https://wiki.secondlife.com/wiki/string) `name`, [string](https://wiki.secondlife.com/wiki/string) `value`\]
-
-| NA
-
-| Add an extra custom HTTP header to the request. The first string is the name of the parameter to change, e.g. "Pragma", and the second string is the value, e.g. "no-cache". Multiple custom headers may be configured per request, as long as the combined custom header length is no greater than 4096 characters. Note that certain headers, such as the default headers, are blocked for security reasons.
-
-|-
-
-| [HTTP_PRAGMA_NO_CACHE](/constants/HTTP_PRAGMA_NO_CACHE/)
-
-| 6
-
-| \[[integer](https://wiki.secondlife.com/wiki/integer) `send_header`\]
-
-| \[[TRUE](/constants/TRUE/)\]
-
-| Sends "Pragma: no-cache" header ([TRUE](/constants/TRUE/)), or does not send a "Pragma" header ([FALSE](/constants/FALSE/)).
-
-|-
-
-| [HTTP_USER_AGENT](/constants/HTTP_USER_AGENT/)
-
-| 7
-
-| \[[string](https://wiki.secondlife.com/wiki/string) `user agent value`\]
-
-| \[*(none)*\]
-
-|The user agent value is appended to the one generated by LSL itself. It should follow the syntax from the HTTP standard like: "My-Script-Name/1.0 (Mozilla compatible)".
-
-**Note:** Spaces are not allowed in HTTP User Agent token values, so "My Script Name/1.0" will produce a script error; change the spaces to hyphens ("-")
-
-|-
-
-| [HTTP_ACCEPT](/constants/HTTP_ACCEPT/)
-
-| 8
-
-| \[[string](https://wiki.secondlife.com/wiki/string) `MIME_type`\]
-
-| \["text/plain;charset=utf-8"\]
-
-| [HTTP_ACCEPT](/constants/HTTP_ACCEPT/) parameters can be passed to limit the number of mime types that are sent in the Accept: header of the HTTP request. Specified mime types may include character set and q parameters. This parameter may be specified multiple times.
-
-The specified mime type must be one already recognized by `llHTTPRequest`. These include any text/ mime type, or the following application mime types: “application/xhtml+xml”, “application/atom+xml”, “application/json”, “application/xml”, “application/llsd+xml”, “application/x-javascript”, “application/javascript”, “application/x-www-form-urlencoded”, or “application/rss+xml”.
-
-The Content-Type header in the response is checked against the specified [HTTP_ACCEPT](/constants/HTTP_ACCEPT/) parameters. If the value of the header is not in the list of acceptable mime types, `llHTTPRequest` will return 415 as a result code and the body will be "Unsupported or unknown Content-Type."
-
-|-
-
-| [HTTP_EXTENDED_ERROR](/constants/HTTP_EXTENDED_ERROR/)
-
-| 9
-
-| \[[integer](https://wiki.secondlife.com/wiki/integer) `extended`\]
-
-| \[[FALSE](/constants/FALSE/)\]
-
-| If [TRUE](/constants/TRUE/) `llHTTPRequest` will always return a [key](https://wiki.secondlife.com/wiki/key). If there was an error making the HTTP request. Detailed error information will be returned through the [http_response](/events/http_response/) event using the provided key. Error information is delivered in a JSON block as described in [RFC&amp;nbsp;7807](https://tools.ietf.org/html/rfc7807). Details about extended return codes can be found below.
-
-|\}
+<table>
+	<tr>
+		<th>**Flag**</th>
+		<th></th>
+		<th>**Parameter(s)**</th>
+		<th>**Default Parameter Value(s)**</th>
+		<th>**Description**</th>
+	</tr>
+	<tr>
+		<td>[HTTP_METHOD](/constants/HTTP_METHOD/)</td>
+		<td>0</td>
+		<td>\[[string](https://wiki.secondlife.com/wiki/string) **method**\]</td>
+		<td>\["GET"\]</td>
+		<td>"GET", "POST", "PUT" and "DELETE"</td>
+	</tr>
+	<tr>
+		<td>[HTTP_MIMETYPE](/constants/HTTP_MIMETYPE/)</td>
+		<td>1</td>
+		<td>\[[string](https://wiki.secondlife.com/wiki/string) **MIME_type**\]</td>
+		<td>\["text/plain;charset=utf-8"\]</td>
+		<td>text/\* MIME types should specify a charset. To emulate HTML forms use application/x-www-form-urlencoded. This allows you to set the body to a properly escaped ([llEscapeURL](/functions/llEscapeURL/)) sequence of &lt;name,value> pairs in the form var=value&var2=value2 and have them automatically parsed by web frameworks. :MIME types must be specified in the format: *type*/*subtype*\[**;***option*=*value*\] ;Some valid examples are: : "text/html" : "text/plain;charset=utf-8" : "application/xhtml+xml" : "application/json" : "application/x-www-form-urlencoded" : "application/rss+xml" : "multipart/mixed; boundary="---1234567890---""</td>
+	</tr>
+	<tr>
+		<td>[HTTP_BODY_MAXLENGTH](/constants/HTTP_BODY_MAXLENGTH/)</td>
+		<td>2</td>
+		<td>\[[integer](https://wiki.secondlife.com/wiki/integer) **length**\]</td>
+		<td>\[2048 bytes\]</td>
+		<td>
+
+			Sets the maximum (UTF-8 encoded) byte length of the HTTP response body. The maximum that can be set depends upon which VM is used.
+
+			- **[Mono](https://wiki.secondlife.com/wiki/Mono) Max:** 16384 bytes
+			- **[LSO](https://wiki.secondlife.com/wiki/LSO) Max:** 4096 bytes
+
+			:::note
+			Applies to the [Outgoing](https://wiki.secondlife.com/wiki/Category:LSL_HTTP) pipeline only (HTTP calls invoked by [llHTTPRequest](/functions/llHTTPRequest/),and responses from [http_response](/events/http_response/)).
+			:::
+
+			:::note
+			When you only need to request a small amount of data from a remote source, consider using the [Content-Range header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Range) instead.
+			:::
+
+		</td>
+	</tr>
+	<tr>
+		<td>[HTTP_VERIFY_CERT](/constants/HTTP_VERIFY_CERT/)</td>
+		<td>3</td>
+		<td>\[[integer](https://wiki.secondlife.com/wiki/integer) **verify**\]</td>
+		<td>\[[TRUE](/constants/TRUE/)\]</td>
+		<td>If [TRUE](/constants/TRUE/), the server SSL certificate must be verifiable using one of the standard certificate authorities[^wiki-8621b7] when making HTTPS requests. If [FALSE](/constants/FALSE/), any server SSL certificate will be accepted.</td>
+	</tr>
+	<tr>
+		<td>[HTTP_VERBOSE_THROTTLE](/constants/HTTP_VERBOSE_THROTTLE/)</td>
+		<td>4</td>
+		<td>\[[integer](https://wiki.secondlife.com/wiki/integer) **noisy**\]</td>
+		<td>\[[TRUE](/constants/TRUE/)\]</td>
+		<td>If [TRUE](/constants/TRUE/), shout error messages to [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) if the outgoing request rate exceeds the server limit. If [FALSE](/constants/FALSE/), the error messages are suppressed (`llHTTPRequest` will still return [NULL_KEY](/constants/NULL_KEY/)).</td>
+	</tr>
+	<tr>
+		<td>[HTTP_CUSTOM_HEADER](/constants/HTTP_CUSTOM_HEADER/)</td>
+		<td>5</td>
+		<td>\[[string](https://wiki.secondlife.com/wiki/string) **name**, [string](https://wiki.secondlife.com/wiki/string) **value**\]</td>
+		<td>NA</td>
+		<td>Add an extra custom HTTP header to the request. The first string is the name of the parameter to change, e.g. "Pragma", and the second string is the value, e.g. "no-cache". Multiple custom headers may be configured per request, as long as the combined custom header length is no greater than 4096 characters. Note that certain headers, such as the default headers, are blocked for security reasons.</td>
+	</tr>
+	<tr>
+		<td>[HTTP_PRAGMA_NO_CACHE](/constants/HTTP_PRAGMA_NO_CACHE/)</td>
+		<td>6</td>
+		<td>\[[integer](https://wiki.secondlife.com/wiki/integer) **send_header**\]</td>
+		<td>\[[TRUE](/constants/TRUE/)\]</td>
+		<td>Sends "Pragma: no-cache" header ([TRUE](/constants/TRUE/)), or does not send a "Pragma" header ([FALSE](/constants/FALSE/)).</td>
+	</tr>
+	<tr>
+		<td>[HTTP_USER_AGENT](/constants/HTTP_USER_AGENT/)</td>
+		<td>7</td>
+		<td>\[[string](https://wiki.secondlife.com/wiki/string) **user agent value**\]</td>
+		<td>\[*(none)*\]</td>
+		<td>The user agent value is appended to the one generated by LSL itself. It should follow the syntax from the HTTP standard like: "My-Script-Name/1.0 (Mozilla compatible)". **Note:** Spaces are not allowed in HTTP User Agent token values, so "My Script Name/1.0" will produce a script error; change the spaces to hyphens ("-")</td>
+	</tr>
+	<tr>
+		<td>[HTTP_ACCEPT](/constants/HTTP_ACCEPT/)</td>
+		<td>8</td>
+		<td>\[[string](https://wiki.secondlife.com/wiki/string) **MIME_type**\]</td>
+		<td>\["text/plain;charset=utf-8"\]</td>
+		<td>[HTTP_ACCEPT](/constants/HTTP_ACCEPT/) parameters can be passed to limit the number of mime types that are sent in the Accept: header of the HTTP request. Specified mime types may include character set and q parameters. This parameter may be specified multiple times. The specified mime type must be one already recognized by `llHTTPRequest`. These include any text/ mime type, or the following application mime types: “application/xhtml+xml”, “application/atom+xml”, “application/json”, “application/xml”, “application/llsd+xml”, “application/x-javascript”, “application/javascript”, “application/x-www-form-urlencoded”, or “application/rss+xml”. The Content-Type header in the response is checked against the specified [HTTP_ACCEPT](/constants/HTTP_ACCEPT/) parameters. If the value of the header is not in the list of acceptable mime types, `llHTTPRequest` will return 415 as a result code and the body will be "Unsupported or unknown Content-Type."</td>
+	</tr>
+	<tr>
+		<td>[HTTP_EXTENDED_ERROR](/constants/HTTP_EXTENDED_ERROR/)</td>
+		<td>9</td>
+		<td>\[[integer](https://wiki.secondlife.com/wiki/integer) **extended**\]</td>
+		<td>\[[FALSE](/constants/FALSE/)\]</td>
+		<td>If [TRUE](/constants/TRUE/) `llHTTPRequest` will always return a [key](https://wiki.secondlife.com/wiki/key). If there was an error making the HTTP request. Detailed error information will be returned through the [http_response](/events/http_response/) event using the provided key. Error information is delivered in a JSON block as described in [RFC&amp;nbsp;7807](https://tools.ietf.org/html/rfc7807). Details about extended return codes can be found below.</td>
+	</tr>
+</table>
 
 <table>
 	<caption>Headers sent by the simulator in the course of calling [llHTTPRequest](/functions/llHTTPRequest/).</caption>
@@ -310,13 +238,23 @@ The Content-Type header in the response is checked against the specified [HTTP_A
 		<td>secondlife.com</td>
 	</tr>
 	<tr>
-		<td colspan="3">`{{KBtip|Certain server environments (CGI) place headers into variables by capitalizing the entire name, replacing dashes with underscores, and prefixing the name with "HTTP_", e.g. "X-SecondLife-Object-Name" becomes "HTTP_X_SECONDLIFE_OBJECT_NAME". This depends solely on the HTTP server used to process the request and cannot be controlled via LSL.}}` `{{KBwarning|width=75%|[https://datatracker.ietf.org/doc/html/rfc2616#section-4.2 RFC 2616 § 4.2] defines HTTP header field names as case-insensitive. The capitalization of header field names shown above is not guaranteed; for example, "X-SecondLife-Object-Name" may be received as "X-Secondlife-Object-Name". See {{JIRA|BUG-5094}} for an instance of ISPs recapitalizing headers. This behavior was also observed when testing in 2026.}}`</td>
+		<td colspan="3">
+
+			:::note
+			Certain server environments (CGI) place headers into variables by capitalizing the entire name, replacing dashes with underscores, and prefixing the name with "HTTP\_", e.g. "X-SecondLife-Object-Name" becomes "HTTP_X_SECONDLIFE_OBJECT_NAME". This depends solely on the HTTP server used to process the request and cannot be controlled via LSL.
+			:::
+
+			:::note
+			[RFC 2616 § 4.2](https://datatracker.ietf.org/doc/html/rfc2616#section-4.2) defines HTTP header field names as case-insensitive. The capitalization of header field names shown above is not guaranteed; for example, "X-SecondLife-Object-Name" may be received as "X-Secondlife-Object-Name". See [BUG-5094](https://jira.secondlife.com/browse/BUG-5094) for an instance of ISPs recapitalizing headers. This behavior was also observed when testing in 2026.
+			:::
+
+		</td>
 		<td></td>
 		<td></td>
 	</tr>
 </table>
 
-`{{LSL_Extended_Error_HTTP}}`
+[^wiki-8621b7]: A list of acceptable certificate authorities can be found at [SCR-473](https://jira.secondlife.com/browse/SCR-473).
 
 ## Caveats
 
@@ -325,12 +263,12 @@ The Content-Type header in the response is checked against the specified [HTTP_A
 - Requests must fully complete after 60 seconds, or else the response will be thrown away and the [http_response](/events/http_response/) status code will be 499.
 - The response body is limited to 2048 bytes by default, see [HTTP_BODY_MAXLENGTH](/constants/HTTP_BODY_MAXLENGTH/) above to increase it. If the response is longer, it will be truncated.
 - The request body size (e.g., of POST and PUT requests) is limited only by available script memory. Scripts can hold at most 32k characters in a string, under [Mono](https://wiki.secondlife.com/wiki/Mono), as characters are two bytes each, so, scripts cannot upload over 32k UTF-8 characters
-- Cannot be used to load textures or images from the internet, &lt;strike>for more information see [Web Textures](https://wiki.secondlife.com/wiki/Web_Textures)&lt;/strike>`{{Footnote|'''Note:''' Web textures have been made obsolete for many reasons, and the link has been archived; nevertheless, the reference might be interesting for historical reasons.}}`.
+- Cannot be used to load textures or images from the internet, &lt;strike>for more information see [Web Textures](https://wiki.secondlife.com/wiki/Web_Textures)&lt;/strike>[^wiki-295a14].
 - If the accessed site is relying on the LSL script to report [L$](https://wiki.secondlife.com/wiki/L%24) transactions, then it **must** check the `X-SecondLife-Shard` header to see if the script is running on the beta grid.
 - Some servers will return a `405` error if you send POST to a file that can't accept metadata, such as a text or HTML file. Make sure you use the GET method to ensure success in any environment.
 - While the HTTP status code from the server is provided to the script, redirect codes such as `302` will result in the redirect being automatically and transparently followed ONLY IF the [HTTP_METHOD](/constants/HTTP_METHOD/) is GET, with the resulting response being returned. If the [HTTP_METHOD](/constants/HTTP_METHOD/) is anything other than GET then you'll get back an [http_response](/events/http_response/) with a status code of `302`, but without any way to view the headers, you can't know where you were being redirected to unless that was also included in the body.
 - The following applies when making a request to a script using HTTP-In:
-- When appending a query string to a cap URL there **MUST** be a trailing slash between the cap guid and the query string token `"?"`. For example: [`{{HoverTextStyle|style=color:green;|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322|2={{String|x-script-url}} = {{String|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322}}}}`?`{{HoverTextStyle|style=color:red;|1=arg=gra|2={{String|x-query-string}} = {{String|1=arg=gra}}}}`](https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322?arg=gra) will return a 500 HTTP status [Server Error code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes%235xx_Server_Error), but [`{{HoverTextStyle|style=color:green;|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322|2={{String|x-script-url}} = {{String|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322}}}}``{{HoverTextStyle|style=color:blue;|/|2={{String|x-path-info}} = {{String|/}}}}`?`{{HoverTextStyle|style=color:red;|1=arg=gra|2={{String|x-query-string}} = {{String|1=arg=gra}}}}`](https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322/?arg=gra) will succeed.
+  - When appending a query string to a cap URL there **MUST** be a trailing slash between the cap guid and the query string token `"?"`. For example: [https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322?arg=gra](https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322?arg=gra) will return a 500 HTTP status [Server Error code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes%235xx_Server_Error), but [https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322/?arg=gra](https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322/?arg=gra) will succeed.
 - `X-SecondLife-Owner-Name` may return `"(Loading...)"` instead of owner name (still true, 30th of March, 2022)
 - Requests made at approx 0625 SLT may fail with a `503` status code, with `"ERROR: The requested URL could not be retrieved"`, and `"(111) Connection refused"` in the body of the response. This has been confirmed as expected behavior by Kelly, due to the nightly maintenance and log rotation. It does reliably impact object to object HTTP at that time, and quite probably may impact object to/from web around the same time. The interruption in service is fairly brief, and the precise timing may vary as LL adjust their nightly maintenance processes, or due to server load.
 - Use `HTTP_MIMETYPE` to set the `Content-Type` header. Attempts to use `HTTP_CUSTOM_HEADER` to set it will cause a runtime script error.
@@ -367,6 +305,8 @@ The calling script must check for the [NULL_KEY](/constants/NULL_KEY/) result an
 - See [this thread](http://forums-archive.secondlife.com/139/72/108960/1.html) and [this thread](http://forums-archive.secondlife.com/139/2c/109571/1.html) for older details.
 
 ---
+
+[^wiki-295a14]: **Note:** Web textures have been made obsolete for many reasons, and the link has been archived; nevertheless, the reference might be interesting for historical reasons.
 
 ## Examples
 
@@ -501,7 +441,6 @@ $regiontmp  = explode ("(",$regiondata);            // cut coords off
 $regionname = substr($regiontmp[0],0,-1);           // cut last space from region name
 $regiontmp  = explode (")",$regiontmp[1]);
 $regionpos  = $regiontmp[0];
-
 
 // FETCH HEADERS END
 ?>

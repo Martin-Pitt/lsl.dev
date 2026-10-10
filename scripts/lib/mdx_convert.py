@@ -9,6 +9,7 @@ with Markdown kept inside them, so a sentence can still be fixed in a text edito
 Nothing here invents or rewrites prose; text is escaped for MDX and whitespace is normalised.
 """
 from __future__ import annotations
+import hashlib
 import re
 from html.parser import HTMLParser
 
@@ -146,6 +147,8 @@ class Converter:
         # Optional href rewriter, e.g. archive links (/wiki/...) to a local page or the live wiki.
         self.link = link or (lambda href: href)
         self.stats = {'htmlTables': 0, 'markdownTables': 0}
+        self.notes = {}  # footnote label -> Markdown text
+        self.dropped = []  # (reason, snippet) of wiki markup left out of the page
 
     # ---- parameter references
     # Parameter names of the page's own signature are written in bold, as on the hand-written
@@ -258,11 +261,20 @@ class Converter:
                     lead = ' ' if inner[:1].isspace() else ''; trail = ' ' if inner[-1:].isspace() else ''
                     out.append(f'{lead}{mark}{core}{mark}{trail}')
                 else: out.append(inner)
-            elif t in ('sup', 'sub', 'kbd', 'small', 'u'):
+            elif t in ('sup', 'sub', 'kbd', 'small', 'u') and 'wiki-footnote' not in n.cls:
                 out.append(f'<{t}>{self.inline(n.children, table).strip()}</{t}>')
             elif t == 'span' and 'wiki-template' in n.cls:
+                # A wiki template the renderer could not expand: never shown as raw markup.
                 code = n.find('code')
-                out.append(code_span(code.text(), table) if code else self.inline(n.children, table))
+                self.dropped.append(('unexpanded template', code.text() if code else n.text()))
+            elif t == 'span' and 'wiki-param' in n.cls:
+                out.append(f'**{esc(n.text().strip(), table)}**')
+            elif t == 'sup' and 'wiki-footnote' in n.cls:
+                note = self.inline(n.children).strip()
+                if note:
+                    label = 'wiki-' + hashlib.sha1(note.encode('utf8')).hexdigest()[:6]
+                    self.notes.setdefault(label, note)
+                    out.append(f'[^{label}]')
             elif t == 'span' and n.attrs.get('id') and not n.text().strip(): pass
             elif t == 'img': pass
             else: out.append(self.inline(n.children, table))
@@ -448,7 +460,14 @@ class Converter:
         return ''.join(out)
 
     def convert(self, html: str) -> str:
-        return self.render(self.blocks(parse(html).children)).strip()
+        text = self.render(self.blocks(parse(html).children)).strip()
+        return self.with_notes(text)
+
+    def with_notes(self, text: str) -> str:
+        """Footnote definitions for the references in text, appended after it."""
+        used = [l for l in dict.fromkeys(re.findall(r'\[\^(wiki-[0-9a-f]{6})\]', text)) if l in self.notes]
+        if not used: return text
+        return text + '\n\n' + '\n'.join(f'[^{l}]: {self.notes[l]}' for l in used)
 
     # ---- examples: one collapsible per code block, summarised by the sentence before it
     def examples(self, html: str) -> str:
@@ -481,4 +500,4 @@ class Converter:
             out.append(f'<details{open_attr}>\n<summary>{summary or f"Example {i + 1}"}</summary>\n\n{body}\n\n</details>')
         trailing = self.render(self.blocks(pending))
         if trailing: out.append(trailing)
-        return '\n\n'.join(out)
+        return self.with_notes('\n\n'.join(out))

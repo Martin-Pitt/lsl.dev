@@ -18,7 +18,9 @@ import { LSLFunction, WikiSource } from '~/components/lsl';
 
 <LSLFunction name="llRegionSayTo" />
 
-Says&lt;ref name="send">In this context, *saying* or *speaking* means that a message is being *sent* to the recipient (object or avatar); it's not about audio/voice chat!&lt;/ref> the text supplied in string **msg** on channel supplied in [integer](https://wiki.secondlife.com/wiki/integer) **channel** to the [object](https://wiki.secondlife.com/wiki/object) or [avatar](https://wiki.secondlife.com/wiki/Avatar) specified by **target**
+Says[^wiki-0569f2] the text supplied in string **msg** on channel supplied in [integer](https://wiki.secondlife.com/wiki/integer) **channel** to the [object](https://wiki.secondlife.com/wiki/object) or [avatar](https://wiki.secondlife.com/wiki/Avatar) specified by **target**
+
+[^wiki-0569f2]: In this context, *saying* or *speaking* means that a message is being *sent* to the recipient (object or avatar); it's not about audio/voice chat!
 
 ```lsl title="How to use" frame="terminal"
 llRegionSayTo(NULL_KEY, 0, "");
@@ -26,15 +28,18 @@ llRegionSayTo(NULL_KEY, 0, "");
 
 ## Caveats
 
-- Text is spoken&lt;ref name="send" /> directly to the [object](https://wiki.secondlife.com/wiki/object) or [avatar](https://wiki.secondlife.com/wiki/Avatar) within the same [region](https://wiki.secondlife.com/wiki/region) as the [script](https://wiki.secondlife.com/wiki/Script).
-- Script in tasks other than **target** can neither listen for&lt;ref>In this context, this means waiting to *receive* a message.&lt;/ref>, nor receive these text messages, with an exception for attachments as described below.
+- Text is spoken directly to the [object](https://wiki.secondlife.com/wiki/object) or [avatar](https://wiki.secondlife.com/wiki/Avatar) within the same [region](https://wiki.secondlife.com/wiki/region) as the [script](https://wiki.secondlife.com/wiki/Script).
+- Script in tasks other than **target** can neither listen for[^wiki-70220d], nor receive these text messages, with an exception for attachments as described below.
 - **msg** can be a maximum of 1024 bytes. This can convey 1024 ASCII characters, or 256-512 multibyte UTF-8 characters such as `á` (2 bytes), `ℋ` (3 bytes) or `🧡` (4 bytes).
 - A [prim](https://wiki.secondlife.com/wiki/prim) cannot hear itself, to prevent problems with recursion. Use [llMessageLinked](/functions/llMessageLinked/) instead for intra-prim messaging.
-- Sending text on `DEBUG_CHANNEL` is not supported.
+- Sending text on **DEBUG_CHANNEL** is not supported.
 - Text sent to an avatar's [ID](https://wiki.secondlife.com/wiki/UUID) on channel [zero](/constants/PUBLIC_CHANNEL/) will be sent to the receiver's viewer.
-- Text sent to an avatar's ID on non-zero channels can be heard&lt;ref>I.e., *received*&lt;/ref> by any attachment on the avatar.
+- Text sent to an avatar's ID on non-zero channels can be heard[^wiki-395aab] by any attachment on the avatar.
 - A quick series of messages sent by [llRegionSayTo](/functions/llRegionSayTo/) cannot be relied on to arrive at their destination in the same order as sent.
 - There is a per-destination throttle of 200 messages sent over 10 seconds on channel [zero](/constants/PUBLIC_CHANNEL/). Thereafter, there is also a per-sending-object throttle of 100 messages on channel zero over 300 seconds (5 minutes). This throttle is relevant only after the first throttle is activated. Messages sent on channels other than zero do not trigger the throttle but, once it is triggered, the block applies to *all* channels. The block is region-wide and applies to all objects with the same [owner](https://wiki.secondlife.com/wiki/Category:LSL_Owner). The block apparently lasts until the region is restarted.
+
+[^wiki-70220d]: In this context, this means waiting to *receive* a message.
+[^wiki-395aab]: I.e., *received*
 
 ## Examples
 
@@ -62,7 +67,7 @@ default
 
 ## Notes
 
-- If one object 'says'&lt;ref name="send" /> something to another object (*e.g.*, a button that, when touched, turns on a lamp), consider using a very negative **channel**, *e.g.*,
+- If one object 'says' something to another object (*e.g.*, a button that, when touched, turns on a lamp), consider using a very negative **channel**, *e.g.*,
 
 :
 
@@ -70,7 +75,7 @@ default
 llRegionSayTo("55499a64-45c3-4b81-8880-8ffb5a7c251b", -5243212, "turn on");
 ```
 
-:Using negative channels for script communications remains a common practice because, prior to September 2016, the standard Second Life Viewer was unable to chat directly on those channels (&lt;kbd>/-xxxx message&lt;/kbd> wouldn't chat `message` on **channel** `-xxxx`).
+:Using negative channels for script communications remains a common practice because, prior to September 2016, the standard Second Life Viewer was unable to chat directly on those channels (<kbd>/-xxxx message</kbd> wouldn't chat `message` on **channel** `-xxxx`).
 
 - Messages sent on channel zero via [llRegionSayTo](/functions/llRegionSayTo/)() are blocked after 200 messages on to the same destination in a 10 second period. After this throttle is activated, there is a further throttle, on objects belonging to the owner of the object that triggered the first throttle, of 100 messages per object over 5 minutes (see [BUG-5457](https://jira.secondlife.com/browse/BUG-5457)). The block is region-wide and applies to all objects belonging to the owner, so if a script triggers the throttle, all objects in the same region belonging to the same owner will also be blocked. Messages sent on channels other than zero do not trigger the throttles. The throttles apparently reset only when the region is restarted.
 
@@ -84,11 +89,7 @@ Date of Release [26/04/2011](https://wiki.secondlife.com/wiki/Release_Notes/Seco
 
 From the issue templates included by the wiki article:
 
-- SCR-66 (bug): '''llRegionSayTo'''() Fails to send messages to attachments on sitting avatars
-
-## Additional wiki content
-
-[Category:LSL_Chat](/categories/chat/)
+- SCR-66 (bug): **llRegionSayTo**() Fails to send messages to attachments on sitting avatars
 
 ## See also
 

@@ -28,13 +28,15 @@ key result = llRequestURL();
 ## Caveats
 
 - HTTP-in is not on the usual [HTTP](https://wiki.secondlife.com/wiki/HTTP) port number; the URL it provided in the [http_request](/events/http_request/) event includes the correct port number.
-- Your script (and any client that uses it) should not "validate" the provided URL; in particular, do not assume that it maps to any particular address, or is in any particular domain. These will change during the uplift of Second Life to the cloud, and may be more dynamic following that uplift&lt;ref>Occurred *ca.* 2020.&lt;/ref>.
+- Your script (and any client that uses it) should not "validate" the provided URL; in particular, do not assume that it maps to any particular address, or is in any particular domain. These will change during the uplift of Second Life to the cloud, and may be more dynamic following that uplift[^wiki-4f28b9].
 - Use of this function is [throttled](/reference/limits/). Although it has no forced sleep time, too many requests (5-ish) in a short period will cause all further requests to be denied until the script stops requesting URLs for at least 1 second. Using an [llSleep](/functions/llSleep/) of 0.6 seconds or greater between each request will prevent you from being throttled.
 - When a region is (re)started all [HTTP server](/events/http_request/) URLs are automatically released and invalidated.
-- Use [CHANGED_REGION_START](/constants/CHANGED_REGION_START/) to detect this so new URL can be requested.
+  - Use [CHANGED_REGION_START](/constants/CHANGED_REGION_START/) to detect this so new URL can be requested.
 - The number of available URLs is a limited resource, that is to say, a script can only have so many open URLs. See [LSL http_server](https://wiki.secondlife.com/wiki/LSL_http_server#resource-limitations) for details.
 - When abandoning a URL, release it with [llReleaseURL](/functions/llReleaseURL/), to avoid leaks. Resetting the script, or deleting the prim, will also suffice to release URLs.
 - Unlike [listeners](/functions/llListen/), URLs persist across state changes
+
+[^wiki-4f28b9]: Occurred *ca.* 2020.
 
 ## Examples
 
@@ -147,11 +149,13 @@ Just store the old URL in a global variable and release it with [llReleaseURL](/
 
 ## Notes
 
-`{{Quote|Another comment on resilient programming: getting a global resource, an HTTP listener in this case, should always be considered an operation that can fail for transitory reasons (as well as permanent ones). In this case, LSL folds retryable and permanent errors into the same error status and there's no opportunity for a script writer to distinguish the two cases. But a reasonable way to handle this is sleeping with limited retries before failing hard in the LSL code.|2=[https://jira.secondlife.com/browse/BUG-3813?focusedCommentId=399955&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-399955 Monty Linden]}}`
+> Another comment on resilient programming: getting a global resource, an HTTP listener in this case, should always be considered an operation that can fail for transitory reasons (as well as permanent ones). In this case, LSL folds retryable and permanent errors into the same error status and there's no opportunity for a script writer to distinguish the two cases. But a reasonable way to handle this is sleeping with limited retries before failing hard in the LSL code.
+>
+> — [Monty Linden](https://jira.secondlife.com/browse/BUG-3813?focusedCommentId=399955&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-399955)
 
 ## History
 
-- `{{SVN|1836|rev=112899 |trunk=*|anchor=file22|ver=|ser=}}`
+- SVN:1836 r112899 Trunk
 
 ## Known issues
 

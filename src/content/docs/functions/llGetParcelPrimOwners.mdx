@@ -32,17 +32,15 @@ list result = llGetParcelPrimOwners(ZERO_VECTOR);
 #### Ownership
 
 - If the parcel owner and object owner are the same (including if the object and parcel are both group owned):
-- All object owners are returned.
+  - All object owners are returned.
 - If the parcel is group owned but the object is owned by a member of the group, the function return depends upon what powers they have been granted:
-- If resident has the '`return group owned objects`' power:
-- The return list includes the group and the LI of objects it owns on the parcel.
-- If the resident has the 'return group set objects' power:
-- The return list includes all owners who have objects set to the group on the parcel
-- If the resident has the 'return non-group objects' power
-- The return list includes all owners of objects that don't fall into the above two categories.
+  - If resident has the 'return group owned objects' power:
+    - The return list includes the group and the LI of objects it owns on the parcel.
+  - If the resident has the 'return group set objects' power:
+    - The return list includes all owners who have objects set to the group on the parcel
+  - If the resident has the 'return non-group objects' power
+    - The return list includes all owners of objects that don't fall into the above two categories.
 - If none of the above cases match, an empty list will be returned.
-
-[Collapsible Table](https://wiki.secondlife.com/wiki/Template:Collapsible_Table): `{{Collapsible_Table|collapsed=*|table-style=width:100%;|title-style=text-align:left;|title=<h5 style="margin-top:0;">Pseudocode</h5>|content={{!}} Pseudocode written in Javascript if(parcel_owner == object_owner) return all; var r = []; if((parcel_owner is Group) && (object_owner in parcel_owner.members)) { if("return group owned objects" in parcel_owner.members[object_owner].powers) r = r.concat(group_owned_stride); if("return group set objects" in parcel_owner.members[object_owner].powers) r = r.concat(group_set_strides); if("return non-group objects" in parcel_owner.members[object_owner].powers) r = r.concat(non_group_strides); } return r; }}`
 
 ## Caveats
 

@@ -18,11 +18,11 @@ source:
 ---
 import { LSLFunction, WikiSource } from '~/components/lsl';
 
-<LSLFunction name="llSitTarget" />
+<LSLFunction name="llSitTarget" description />
 
 Set the sit location for the prim. The sit location is relative to the prim's position and rotation.
 
-If **offset** == [`{{LSL VR|0.0|0.0|0.0}}`](/constants/ZERO_VECTOR/) then the sit target is removed.
+If **offset** == [`<0.0, 0.0, 0.0>`](/constants/ZERO_VECTOR/) then the sit target is removed.
 
 ```lsl title="How to use" frame="terminal"
 llSitTarget(ZERO_VECTOR, ZERO_ROTATION);
@@ -30,18 +30,15 @@ llSitTarget(ZERO_VECTOR, ZERO_ROTATION);
 
 ## Specification
 
-`llSitTarget` sets the position for the Agent Target (Advanced -> Character -> View Agent Target). The position of the target is based on **rot** and the **offset**`{{Footnote|It is widely considered that the {{LSLP|rot}} should not affect the position, unfortunately the sit target code is a {{Wikipedia|Lava flow (programming)|lava-flow}}. ~ {{JIRA|SVC-2277}}|It is widely considered that the ''rot'' should not affect the position, unfortunately the sit target code is a lava-flow. - SVC-2277|handle=rot-offset}}`.
+`llSitTarget` sets the position for the Agent Target (Advanced -> Character -> View Agent Target). The position of the target is based on **rot** and the **offset**[^wiki-6405c7].
+
+[^wiki-6405c7]: It is widely considered that the **rot** should not affect the position, unfortunately the sit target code is a [lava-flow](https://en.wikipedia.org/wiki/Lava_flow_%28programming%29). ~ [SVC-2277](https://jira.secondlife.com/browse/SVC-2277)
 
 ## Caveats
 
-- Once a sit target is removed [llAvatarOnSitTarget](/functions/llAvatarOnSitTarget/) will only return
-
-[NULL_KEY](/constants/NULL_KEY/)
-
-.
-
+- Once a sit target is removed [llAvatarOnSitTarget](/functions/llAvatarOnSitTarget/) will only return [NULL_KEY](/constants/NULL_KEY/).
 - Removing or deactivating the script that sets the sit target will not remove the prim's sit target.
-- Sit target is a prim property and not dependent on a script for its continued existence.
+  - Sit target is a prim property and not dependent on a script for its continued existence.
 - To remove sit target, use the following:
 
 ```lsl
@@ -50,19 +47,19 @@ llSitTarget(ZERO_VECTOR, ZERO_ROTATION);
 
 - Shift-copying a prim with a sit target, without a script that will set the sit target again, will not keep the sit target on the copy. (The copy is in the original location when shift-copying.)
 - There is no way to remove the Sit option from the menu.
-- It will appear to be removed if the [llSetSitText](/functions/llSetSitText/) is set to a space " " or similar transparent string.
+  - It will appear to be removed if the [llSetSitText](/functions/llSetSitText/) is set to a space " " or similar transparent string.
 - Attachments cannot be sat upon (see [SVC-6100](https://jira.secondlife.com/browse/SVC-6100) to vote for such a feature).
 - **rot** affects the position of the sit target in a buggy way.
-- To correct for the **rot** bug, simply subtract `<0,0,0.4>` from the position when **rot** is zero. See example below.
-- [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams) is a more difficult work-around.
-- Animations are relative to the Agent Target, but the Agent Target isn't described by the animation.
+  - To correct for the **rot** bug, simply subtract `<0,0,0.4>` from the position when **rot** is zero. See example below.
+  - [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams) is a more difficult work-around.
+  - Animations are relative to the Agent Target, but the Agent Target isn't described by the animation.
 - [llSitTarget](/functions/llSitTarget/) does not update position of an already seated avatar.
-- [UpdateSitTarget](#updatesittarget) described below works around this problem. It works by converting the sit target information into a link position that is passed along to [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams).
-- **offset** is limited to 300.0 meters on each axis. The *x*, *y* and *z* components must be in the range \[-300, 300.0\]`{{Footnote|handle=interval}}`.
-- If they are outside the acceptable range they are rounded to the closest limit.
+  - [UpdateSitTarget](#updatesittarget) described below works around this problem. It works by converting the sit target information into a link position that is passed along to [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams).
+- **offset** is limited to 300.0 meters on each axis. The *x*, *y* and *z* components must be in the range \[-300, 300.0\].
+  - If they are outside the acceptable range they are rounded to the closest limit.
 - If an object has multiple seats (each seat has a script that sets a sit target, or the [linkset](https://wiki.secondlife.com/wiki/Link_Messages) has a script that assigns several [llLinkSitTarget](/functions/llLinkSitTarget/)s), the following method determines which sit target an avatar ends up at:
-- If the prim that is clicked on *has* a sit target and that sit target is not full, that sit target is used.
-- If the prim that is clicked on *has no sit target*, and one or more other linked prims have sit targets that are not full, the sit target of the prim with the lowest link number will be used.
+  - If the prim that is clicked on *has* a sit target and that sit target is not full, that sit target is used.
+  - If the prim that is clicked on *has no sit target*, and one or more other linked prims have sit targets that are not full, the sit target of the prim with the lowest link number will be used.
 
 ## Examples
 
@@ -184,7 +181,7 @@ list GetSitTarget(integer prim, key av)
 
 From the issue templates included by the wiki article:
 
-- SVC-924 (nf): '''llSit'''() - scriptable ability to force an avatar to sit on an object
+- SVC-924 (nf): **llSit**() - scriptable ability to force an avatar to sit on an object
 - SVC-6100 (nf): Ability to sit on prims attached to avatars
 
 ## See also

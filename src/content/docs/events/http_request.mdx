@@ -32,14 +32,14 @@ See [LSL_http_server](https://wiki.secondlife.com/wiki/LSL_http_server) for full
 ## Caveats
 
 - **body** is [limit](https://wiki.secondlife.com/wiki/limit)ed to 2048 bytes; anything longer will be truncated to 2048 bytes.
-- As per the above, this function is unaffected by any values passed to [llHTTPRequest](/functions/llHTTPRequest/) via [HTTP_BODY_MAXLENGTH](/constants/HTTP_BODY_MAXLENGTH/), as they reside on the [Outgoing](https://wiki.secondlife.com/wiki/Category:LSL_HTTP) pipeline, and this function is on the [Incoming](https://wiki.secondlife.com/wiki/Category:LSL_HTTP) pipeline.
+  - As per the above, this function is unaffected by any values passed to [llHTTPRequest](/functions/llHTTPRequest/) via [HTTP_BODY_MAXLENGTH](/constants/HTTP_BODY_MAXLENGTH/), as they reside on the [Outgoing](https://wiki.secondlife.com/wiki/Category:LSL_HTTP) pipeline, and this function is on the [Incoming](https://wiki.secondlife.com/wiki/Category:LSL_HTTP) pipeline.
 - headers (accessed with [llGetHTTPHeader](/functions/llGetHTTPHeader/)) are limited to 255 bytes.
 - There is a limit of 64 pending http_request
-- Be mindful of the event queue (64) in general as well. http_request events may be discarded if your script's queue is filled by other events, such as incoming [listen](/events/listen/) messages.
-- **body** is not sent with the request unless the method is set to `String: {{String|POST}}`, `String: {{String|PUT}}`, or [URL_REQUEST_GRANTED](/constants/URL_REQUEST_GRANTED/).
+  - Be mindful of the event queue (64) in general as well. http_request events may be discarded if your script's queue is filled by other events, such as incoming [listen](/events/listen/) messages.
+- **body** is not sent with the request unless the method is set to `"POST"`, `"PUT"`, or [URL_REQUEST_GRANTED](/constants/URL_REQUEST_GRANTED/).
 - Requests may fail with a [503 status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_Server_Error) for at least two possible reasons:
-- if the returned body is `ERROR: The requested URL could not be retrieved`, and `(111) Connection refused`, the problem will normally last only a few minutes - this is th nightly maint & log rotation. It does reliably impact object to object HTTP at that time, and quite probably may impact object to/from web around the same time. The interruption in service is fairly brief, and the precise timing may vary as LL adjust their nightly maint processes, or due to server load.
-- this response can also happen if too many requests are received by scripts in the region owned by the same owner. In this case, a Retry-After header is returned with a number of seconds to wait before retrying. Note that if you have many requestors, some of them may have to wait longer. A good general strategy is to wait the suggested number of seconds (possibly with a little randomness added in) before retrying, and if that fails increase how long you wait by multiplying by a small number before retrying again. If all your requestors follow some method like this, eventually they'll get through.
+  - if the returned body is `ERROR: The requested URL could not be retrieved`, and `(111) Connection refused`, the problem will normally last only a few minutes - this is th nightly maint & log rotation. It does reliably impact object to object HTTP at that time, and quite probably may impact object to/from web around the same time. The interruption in service is fairly brief, and the precise timing may vary as LL adjust their nightly maint processes, or due to server load.
+  - this response can also happen if too many requests are received by scripts in the region owned by the same owner. In this case, a Retry-After header is returned with a number of seconds to wait before retrying. Note that if you have many requestors, some of them may have to wait longer. A good general strategy is to wait the suggested number of seconds (possibly with a little randomness added in) before retrying, and if that fails increase how long you wait by multiplying by a small number before retrying again. If all your requestors follow some method like this, eventually they'll get through.
 
 ## Examples
 
@@ -165,7 +165,7 @@ default
 
 ## Known issues
 
-`{{Issue/V1|SVC-1086|Design: LSL http_server|type=fs|status=ip}}`
+[SVC-1086](https://jira.secondlife.com/browse/SVC-1086): Design: LSL http_server
 
 ## See also
 

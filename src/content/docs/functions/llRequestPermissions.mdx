@@ -99,7 +99,7 @@ llRequestPermissions(NULL_KEY, 0);
 		<td>`0x1000`</td>
 		<td>[teleport](/functions/llTeleportAgent/) the agent</td>
 		<td>[Teleport](/categories/teleport/)</td>
-		<td>Anyone`{{Footnote|handle=teleport|[[PERMISSION_TELEPORT]] cannot be held by [[llAttachToAvatarTemp|temporary attachments]].|PERMISSION_TELEPORT cannot be held be attachments.}}`</td>
+		<td>Anyone[^wiki-fa1a5b]</td>
 		<td></td>
 	</tr>
 	<tr>
@@ -144,9 +144,9 @@ llRequestPermissions(NULL_KEY, 0);
 	</tr>
 </table>
 
-## Caveats
+[^wiki-fa1a5b]: [PERMISSION_TELEPORT](/constants/PERMISSION_TELEPORT/) cannot be held by [temporary attachments](/functions/llAttachToAvatarTemp/).
 
-&lt;div>
+## Caveats
 
 - A dialog is presented to the agent to grant these permissions except when granted automatically as shown in the table above.
 - If object is attached to agent, "automatic" permissions are granted without notification upon request.
@@ -154,14 +154,12 @@ llRequestPermissions(NULL_KEY, 0);
 - Regardless of whether granting is automatic, you should always use the [run_time_permissions](/events/run_time_permissions/) event. Granting permissions takes time, and you shouldn't assume it's completed until the [run_time_permissions](/events/run_time_permissions/) handler gets invoked.
 - The menu-option "Stop Animating Me" will release certain permissions ([PERMISSION_TRIGGER_ANIMATION](/constants/PERMISSION_TRIGGER_ANIMATION/) and [PERMISSION_OVERRIDE_ANIMATIONS](/constants/PERMISSION_OVERRIDE_ANIMATIONS/)), if the script which holds these permissions is in the same region as the agent, and the script is not attached to the permission granter.
 - Permissions do not accumulate.
-- If a permission was requested with a previous call to this function and granted, then in subsequent call was not requested, that permission is released (lost).
-- To request two or more permissions at the same time, use the bitwise OR (|) operator, e.g.:
+  - If a permission was requested with a previous call to this function and granted, then in subsequent call was not requested, that permission is released (lost).
+  - To request two or more permissions at the same time, use the bitwise OR (|) operator, e.g.:
 
-  ```lsl
-  llRequestPermissions(AvatarID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION)
-  ```
-
-&lt;/div>
+    ```lsl
+    llRequestPermissions(AvatarID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION)
+    ```
 
 - Permissions are requested and granted separately for each script, even if they are located in the same object.
 - It is currently not possible to request no permissions at all (see Issues below); as a workaround [llResetScript](/functions/llResetScript/) can be used.
@@ -171,8 +169,8 @@ llRequestPermissions(NULL_KEY, 0);
 - If a script makes two permission requests, whichever response is last is considered the granted permissions.
 - The viewer limits permission requests from any agent to any other agent to 5 dialogs in 10 seconds.
 - Permission requests and changing state ...
-- Requesting a permission in one state, then changing state before the agent response, will cause [run_time_permissions](/events/run_time_permissions/) to be fired in the new state once the agent responds.
-- Requesting only auto-granted permissions in one state, then immediately changing state, will never fire [run_time_permissions](/events/run_time_permissions/).
+  - Requesting a permission in one state, then changing state before the agent response, will cause [run_time_permissions](/events/run_time_permissions/) to be fired in the new state once the agent responds.
+  - Requesting only auto-granted permissions in one state, then immediately changing state, will never fire [run_time_permissions](/events/run_time_permissions/).
 
 ## Examples
 

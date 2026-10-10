@@ -27,9 +27,11 @@ vector result = llGetAgentSize(NULL_KEY);
 
 ## Caveats
 
-- The returned vector is an estimate calculated from the avatar's current shape including shoes. x is a constant 0.45`{{Footnote|1={{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=88|text=const F32 DEFAULT_AGENT_DEPTH = 0.45f;}}|2=const F32 DEFAULT_AGENT_DEPTH = 0.45f;}}`, y is a constant 0.60`{{Footnote|1={{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=92|text=const F32 DEFAULT_AGENT_WIDTH = 0.60f;}}|2=const F32 DEFAULT_AGENT_WIDTH = 0.60f;}}`, z is the approximate total height of all avatar's bones, with an arbitrary amount added or subtracted based on the current shape's "Hover" setting. Reported height is constrained to the range 1.1 to 2.45 meters, and does not include animation or mesh bone offsets. `{{Footnote|2=llGetAgentSize returns the same value as LLVOAvatar::computeBodySize(). See llcommon/indra_constants.h for defaults and limits.|1=llGetAgentSize returns the same value as {{SourceLink/github|viewer|indra/llappearance/llavatarappearance.cpp|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=433|text=LLVOAvatar::computeBodySize()}}. See {{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=86|text=indra/llcommon/indra_constants.h}} for defaults and limits.}}`
-- Due to the shape Hover setting, and mesh and animation offsets, it is not possible to use this function to determine the rendered height of an avatar with any degree of confidence.
+- The returned vector is an estimate calculated from the avatar's current shape including shoes. x is a constant 0.45, y is a constant 0.60, z is the approximate total height of all avatar's bones, with an arbitrary amount added or subtracted based on the current shape's "Hover" setting. Reported height is constrained to the range 1.1 to 2.45 meters, and does not include animation or mesh bone offsets. [^wiki-3cc672]
+  - Due to the shape Hover setting, and mesh and animation offsets, it is not possible to use this function to determine the rendered height of an avatar with any degree of confidence.
 - As of Second Life Server 13.11.19.284082, the return value is the avatar's reported [bounding box](/functions/llGetBoundingBox/) - `<0.1, 0.1, 0.2>` when standing. (Avatar bounding boxes have historically been redefined with major physics upgrades.) An avatar's bounding box changes when an avatar sits, while [llGetAgentSize](/functions/llGetAgentSize/) is constant for as long as the shape does not change.
+
+[^wiki-3cc672]: `llGetAgentSize` returns the same value as . See for defaults and limits.
 
 ## Examples
 
@@ -66,8 +68,8 @@ default
 ## Notes
 
 - This function is a good way to quickly test...
-- if an avatar is in the same region.
-- if a UUID known to be in the region is an avatar.
+  - if an avatar is in the same region.
+  - if a UUID known to be in the region is an avatar.
 
 To use this function to test either case use as follows
 
@@ -79,7 +81,7 @@ if(llGetAgentSize(uuid)) {
 }
 ```
 
-- `DEFAULT_AGENT_HEIGHT` in `{{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=0ca239e469b3|line=96|text=indra/llcommon/indra_constants.h}}` is 1.9. This will be the z value if an avatar's shape has [not loaded yet](https://wiki.secondlife.com/wiki/Ruth). It is possible but extremely rare to see a fully loaded avatar with this exact size, so:
+- `DEFAULT_AGENT_HEIGHT` in is 1.9. This will be the z value if an avatar's shape has [not loaded yet](https://wiki.secondlife.com/wiki/Ruth). It is possible but extremely rare to see a fully loaded avatar with this exact size, so:
 
 ```lsl
 vector agentSize = llGetAgentSize(uuid);

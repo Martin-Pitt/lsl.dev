@@ -54,17 +54,28 @@ const categoryItem = (/** @type {string} */ id) => {
 	const one = singleMember.get(id);
 	return one ? { label: `${one.label} → ${one.name}`, link: one.href } : { label: categoryLabel.get(id) ?? id, link: `/categories/${id}/` };
 };
+/** A feature's own category: the one named like the group (Effects › Effects, Math › Math) or its
+ * "<Singular> Target" category (Avatars › Avatar Target, Linksets › Linkset Target, Prims › Prim Target). */
+const ownCategory = (/** @type {any} */ f) => {
+	const singular = f.title.replace(/s$/, '');
+	return f.categories.find((/** @type {string} */ id) => [f.title, `${singular} Target`].includes(categoryLabel.get(id)));
+};
+/** A group of a feature's categories. With an own category, it is a split control: the label opens
+ * that category and the chevron lists the others; otherwise a plain collapsible. */
+const categoryGroup = (/** @type {any} */ f) => {
+	const own = ownCategory(f);
+	const rest = f.categories.filter((/** @type {string} */ id) => id !== own).map(categoryItem);
+	return own
+		? { label: f.title, collapsed: true, items: [{ ...categoryItem(own), attrs: { 'data-sidebar-group-link': '' } }, ...rest] }
+		: { label: f.title, collapsed: true, items: rest };
+};
 /** Categories grouped by their home feature. A feature with only one category gets a plain link,
  * not a collapsible holding a single item; the list is then sorted by label. */
 const referenceCategories = features
 	.filter(f => f.categories.length > 0)
 	.map(f => f.categories.length === 1
 		? categoryItem(f.categories[0])
-		: { label: f.title, collapsed: true, items: [
-			// Split control: the label opens the feature page (the overview), the chevron lists its categories.
-			{ label: 'Overview', link: `/features/${f.id}/`, attrs: { 'data-sidebar-group-link': '' } },
-			...f.categories.map(categoryItem),
-		] })
+		: categoryGroup(f))
 	.sort((a, b) => a.label.localeCompare(b.label));
 /** Flat, in slua.dev order (alphabetical by slug): Features Overview, then one entry per feature page.
  * lsl.dev additions beyond slua.dev's set (Inventory) slot in alphabetically. */

@@ -21,16 +21,18 @@ const categoryLabel = new Map(catalog.categories.map((/** @type {any} */ c) => [
  * member instead (the one allowed sidebar link to an individual API). */
 const singleMember = singleMemberCategories(catalog);
 
+const categoryItem = (/** @type {string} */ id) => {
+	const one = singleMember.get(id);
+	return one ? { label: `${one.label} → ${one.name}`, link: one.href } : { label: categoryLabel.get(id) ?? id, link: `/categories/${id}/` };
+};
+/** Categories grouped by their home feature. A feature with only one category gets a plain link,
+ * not a collapsible holding a single item; the list is then sorted by label. */
 const referenceCategories = features
 	.filter(f => f.categories.length > 0)
-	.map(f => ({
-		label: f.title,
-		collapsed: true,
-		items: f.categories.map(id => {
-			const one = singleMember.get(id);
-			return one ? { label: `${one.label} → ${one.name}`, link: one.href } : { label: categoryLabel.get(id) ?? id, link: `/categories/${id}/` };
-		}),
-	}));
+	.map(f => f.categories.length === 1
+		? categoryItem(f.categories[0])
+		: { label: f.title, collapsed: true, items: f.categories.map(categoryItem) })
+	.sort((a, b) => a.label.localeCompare(b.label));
 /** Flat, in slua.dev order (alphabetical by slug): Features Overview, then one entry per feature page.
  * lsl.dev additions beyond slua.dev's set (Inventory) slot in alphabetically. */
 const featureItems = features.map(f => f.subpages.length === 0

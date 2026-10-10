@@ -1,0 +1,43 @@
+---
+// PROTOTYPE B: task-first "I want to…" list plus a compact A–Z (temporary; docs/prototypes/features-index.md).
+import ProtoShell from '../../../components/prototypes/ProtoShell.astro';
+import { byTask, alphabetical, featureHref, apiHref } from '../../../lib/prototypes/features-index';
+---
+<ProtoShell variant="b" title="Task-first" summary="Common tasks lead straight to a feature and the API that does the job; every feature is still listed A–Z below.">
+	<div class="proto">
+		<section aria-labelledby="tasks">
+			<h2 id="tasks">I want to…</h2>
+			<ul class="tasks">
+				{byTask.map(t => (
+					<li>
+						<span class="task">{t.task}</span>
+						<span class="how">
+							{t.apis.map(a => <a class="api" href={apiHref(a)}><code>{a}</code></a>)}
+							<a class="feat" href={featureHref(t.page.id)}>{t.page.title} →</a>
+						</span>
+					</li>
+				))}
+			</ul>
+		</section>
+		<section aria-labelledby="az">
+			<h2 id="az">All features A–Z</h2>
+			<ul class="az">
+				{alphabetical.map(f => <li><a href={featureHref(f.id)} title={f.description}>{f.title}</a></li>)}
+			</ul>
+		</section>
+	</div>
+</ProtoShell>
+<style>
+	.tasks { list-style: none; padding: 0; margin: 1rem 0 0; border-top: 1px solid var(--sl-color-gray-5); }
+	.tasks li { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem 1rem; align-items: center; padding: .625rem 0; border-bottom: 1px solid var(--sl-color-gray-5); }
+	.task { font-weight: 600; }
+	.task::first-letter { text-transform: uppercase; }
+	.how { display: flex; flex-wrap: wrap; gap: .375rem; justify-content: flex-end; align-items: center; }
+	.api, .feat { display: inline-flex; align-items: center; min-height: 2rem; text-decoration: none; }
+	.api code { font-size: var(--sl-text-xs); }
+	.feat { padding: 0 .625rem; border-radius: 999px; background: var(--sl-color-accent-low); color: var(--sl-color-text-accent); font-size: var(--sl-text-sm); font-weight: 600; }
+	@media (max-width: 40rem) { .tasks li { grid-template-columns: 1fr; } .how { justify-content: flex-start; } }
+	.az { list-style: none; padding: 0; margin: 1rem 0 0; columns: 3 10rem; column-gap: 1.5rem; }
+	.az li { margin: 0; break-inside: avoid; }
+	.az a { display: block; padding: .375rem 0; }
+</style>

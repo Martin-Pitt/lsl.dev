@@ -1,0 +1,42 @@
+---
+// PROTOTYPE A: features chunked into 5 goal groups (temporary; docs/prototypes/features-index.md).
+import ProtoShell from '../../../components/prototypes/ProtoShell.astro';
+import { byGoal, purpose, featureHref } from '../../../lib/prototypes/features-index';
+---
+<ProtoShell variant="a" title="Features by goal" summary="The 23 features are sorted into 5 goal groups, each in its own card.">
+	<div class="proto">
+		<p class="lead">Pick what you are trying to do, then the feature.</p>
+		<nav class="jump" aria-label="Goal groups">
+			{byGoal.map(g => <a href={`#${g.id}`}>{g.title} <span>{g.pages.length}</span></a>)}
+		</nav>
+		<div class="groups">
+			{byGoal.map(g => (
+				<section class="group" aria-labelledby={g.id}>
+					<h2 id={g.id}>{g.title}</h2>
+					<p class="blurb">{g.blurb}</p>
+					<ul>
+						{g.pages.map(f => (
+							<li><a href={featureHref(f.id)}><span class="t">{f.title}</span><span class="p">{purpose[f.id]}</span></a></li>
+						))}
+					</ul>
+				</section>
+			))}
+		</div>
+	</div>
+</ProtoShell>
+<style>
+	.lead { font-size: var(--sl-text-lg); }
+	.jump { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+	.jump a { padding: .375rem .75rem; border-radius: 999px; background: var(--sl-color-gray-6); color: var(--sl-color-white); text-decoration: none; font-size: var(--sl-text-sm); min-height: 2rem; display: inline-flex; align-items: center; gap: .375rem; }
+	.jump a span { color: var(--sl-color-gray-3); }
+	.groups { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); margin-top: 1.5rem; }
+	.group { margin: 0; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-7, var(--sl-color-gray-6)); border-radius: .75rem; padding: 1rem; }
+	.group h2 { margin: 0; font-size: var(--sl-text-h4); scroll-margin-top: calc(var(--sl-nav-height) + 1rem); }
+	.blurb { margin: .25rem 0 .75rem; color: var(--sl-color-gray-3); font-size: var(--sl-text-sm); }
+	.group ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .125rem; }
+	.group li { margin: 0; }
+	.group li a { display: block; padding: .5rem .625rem; margin: 0 -.625rem; border-radius: .5rem; text-decoration: none; color: inherit; }
+	.group li a:hover { background: var(--sl-color-gray-6); }
+	.t { display: block; font-weight: 600; color: var(--sl-color-text-accent); }
+	.p { display: block; font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); }
+</style>

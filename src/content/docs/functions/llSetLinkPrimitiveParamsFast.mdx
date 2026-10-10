@@ -21,27 +21,9 @@ import { primParams } from '~/data/rule-groups/prim-params';
 
 <LSLFunction name="llSetLinkPrimitiveParamsFast" />
 
-These functions are almost entirely identical. For almost all situations we recommend you use [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/).
-
-These are very `powerful` & `sharp` functions. Each PRIM\_\* rule takes at least one parameter and has its own quirks and its own dedicated article with specific information.
-
-There are two differences:
-
-- How long does it force the script to sleep?
-- : **Zero**: [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
-- : **200 milliseconds**: [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams)
-- Does it have a **link** parameter?
-- : **No**: [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams)
-- : **Yes**: [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams) [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+This is a very powerful & sharp function. Each `PRIM_*` rule takes at least one parameter and has its own quirks and its own dedicated article with specific information.
 
 Sets the prims parameters according to **rules**.
-
-This function is fast compared to the above variations, not other LSL functions.
-
-### Caveats
-
-- Sometimes `llSetLinkPrimitiveParamsFast` is *too fast*, i.e. the function returns and the next line of code executes & returns before the update has been processed, resulting in the updates being out of order. In most situations, there is no difference in behavior but sometimes there is. In those cases, you need to use [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) or [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams).
-- This occurs because the [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) payload is being executed asynchronously, while [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) and [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams) payloads are executed synchronously (or the delay makes it appear synchronous).
 
 ```lsl title="How to use" frame="terminal"
 llSetLinkPrimitiveParamsFast(0, []);
@@ -51,150 +33,6 @@ llSetLinkPrimitiveParamsFast(0, []);
 
 {/* Sorted/grouped based on everyday usage and related functionality. Order and groups: src/data/rule-groups/prim-params.ts */}
 <ConstantGroup name="PrimParam" order={primParams} />
-
-### Link targeting
-
-<table class="params-list">
-	<tr>
-		<th>Rule</th>
-		<th>Description</th>
-	</tr>
-	<tr>
-		<td>[PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/)<InlineSyntax code=", integer link_target" /></td>
-		<td>Sets the next linknumber to use in the linkset. Special: the rules after it apply to **link_target** instead of the link given to the function, so one call can change several prims.</td>
-	</tr>
-</table>
-
-### Position and orientation
-
-<table class="params-list">
-	<tr>
-		<th>Rule</th>
-		<th>Description</th>
-	</tr>
-	<tr>
-		<td>[PRIM_POSITION](/constants/PRIM_POSITION/)<InlineSyntax code=", vector position" /></td>
-		<td>Sets the prim's position. Same as [llSetPos](/functions/llSetPos/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_ROTATION](/constants/PRIM_ROTATION/)<InlineSyntax code=", rotation rot" /></td>
-		<td>Sets the prim's global rotation. Same as [llSetRot](/functions/llSetRot/). Broken for child prims; see the helper functions below for workarounds with PRIM_ROT_LOCAL.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_SIZE](/constants/PRIM_SIZE/)<InlineSyntax code=", vector size" /></td>
-		<td>Sets the prim's size. Same as [llSetScale](/functions/llSetScale/). Fails silently on physical prims, like [llSetScale](/functions/llSetScale/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_POS_LOCAL](/constants/PRIM_POS_LOCAL/)<InlineSyntax code=", vector position" /></td>
-		<td>Sets the prim's local position. Same as [llSetPos](/functions/llSetPos/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_ROT_LOCAL](/constants/PRIM_ROT_LOCAL/)<InlineSyntax code=", rotation rot" /></td>
-		<td>Sets the prim's local rotation. Same as [llSetLocalRot](/functions/llSetLocalRot/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_OMEGA](/constants/PRIM_OMEGA/)<InlineSyntax code=", vector axis, float spinrate, float gain" /></td>
-		<td>Sets the prim's spin to the specified axis and rate. Same as [llTargetOmega](/functions/llTargetOmega/).</td>
-	</tr>
-</table>
-
-### Appearance
-
-<table class="params-list">
-	<tr>
-		<th>Rule</th>
-		<th>Description</th>
-	</tr>
-	<tr>
-		<td>[PRIM_COLOR](/constants/PRIM_COLOR/)<InlineSyntax code=", integer face, vector color, float alpha" /></td>
-		<td>Sets the face's color. Same as [llSetColor](/functions/llSetColor/). Alpha alone: [llSetAlpha](/functions/llSetAlpha/) / [llGetAlpha](/functions/llGetAlpha/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_ALPHA_MODE](/constants/PRIM_ALPHA_MODE/)<InlineSyntax code=", integer face, integer alpha_mode, integer mask_cutoff" /></td>
-		<td>Sets the prim's diffuse texture alpha rendering mode attributes. **alpha_mode** is one of [PRIM_ALPHA_MODE_*](/constants/groups/AlphaMode/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_TEXTURE](/constants/PRIM_TEXTURE/)<InlineSyntax code=", integer face, string texture, vector repeats, vector offsets, float rotation_in_radians" /></td>
-		<td>Sets the prim's texture attributes. Same as [llSetTexture](/functions/llSetTexture/). Repeats, offset and rotation: [llScaleTexture](/functions/llScaleTexture/), [llOffsetTexture](/functions/llOffsetTexture/), [llRotateTexture](/functions/llRotateTexture/). The sign of each **repeats** component is the face's "Flip" attribute.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_FULLBRIGHT](/constants/PRIM_FULLBRIGHT/)<InlineSyntax code=", integer face, integer boolean" /></td>
-		<td>Sets the face's full bright flag.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_GLOW](/constants/PRIM_GLOW/)<InlineSyntax code=", integer face, float intensity" /></td>
-		<td>Sets the face's glow attribute.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_POINT_LIGHT](/constants/PRIM_POINT_LIGHT/)<InlineSyntax code=", integer boolean, vector linear_color, float intensity, float radius, float falloff" /></td>
-		<td>Sets the prim as a point light. **linear_color** takes color in linear space: use [llsRGB2Linear](/functions/llsRGB2Linear/) to convert a regular LSL color.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_BUMP_SHINY](/constants/PRIM_BUMP_SHINY/)<InlineSyntax code=", integer face, integer shiny, integer bump" /></td>
-		<td>Sets the face's shiny & bump. **shiny** is one of [PRIM_SHINY_*](/constants/groups/PrimShiny/); **bump** is one of [PRIM_BUMP_*](/constants/groups/PrimBump/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_TEXGEN](/constants/PRIM_TEXGEN/)<InlineSyntax code=", integer face, integer mode" /></td>
-		<td>Sets the face's texture mode. **mode** is one of [PRIM_TEXGEN_*](/constants/groups/PrimTexgen/). In planar mode texture **repeats** are per half meter, not per face.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_RENDER_MATERIAL](/constants/PRIM_RENDER_MATERIAL/)<InlineSyntax code=", integer face, string render_material" /></td>
-		<td>Sets the prim's **render_material**. Setting this param will also clear most PRIM_GLTF_* properties on the face, with the exceptions of repeats, offsets, and rotation_in_radians. Same as [llSetRenderMaterial](/functions/llSetRenderMaterial/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_GLTF_BASE_COLOR](/constants/PRIM_GLTF_BASE_COLOR/)<InlineSyntax code=", integer face, string texture, vector repeats, vector offsets, float rotation_in_radians, vector linear_color, float alpha, integer gltf_alpha_mode, float alpha_mask_cutoff, integer double_sided" /></td>
-		<td>Sets the prim's GLTF Material Base Color map attributes. A glTF material override on the face; see [llSetRenderMaterial](/functions/llSetRenderMaterial/). **linear_color** takes color in linear space: use [llsRGB2Linear](/functions/llsRGB2Linear/) to convert a regular LSL color. **gltf_alpha_mode** is one of [PRIM_GLTF_ALPHA_MODE_*](/constants/groups/GLTFAlphaMode/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_GLTF_NORMAL](/constants/PRIM_GLTF_NORMAL/)<InlineSyntax code=", integer face, string texture, vector repeats, vector offsets, float rotation_in_radians" /></td>
-		<td>Sets the prim's GLTF Material Normal map attributes. A glTF material override on the face; see [llSetRenderMaterial](/functions/llSetRenderMaterial/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_GLTF_METALLIC_ROUGHNESS](/constants/PRIM_GLTF_METALLIC_ROUGHNESS/)<InlineSyntax code=", integer face, string texture, vector repeats, vector offsets, float rotation_in_radians, float metallic_factor, float roughness_factor" /></td>
-		<td>Sets the prim's GLTF ORM map attributes (Occlusion, Roughness, Metallic). A glTF material override on the face; see [llSetRenderMaterial](/functions/llSetRenderMaterial/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_GLTF_EMISSIVE](/constants/PRIM_GLTF_EMISSIVE/)<InlineSyntax code=", integer face, string texture, vector repeats, vector offsets, float rotation_in_radians, vector linear_emissive_tint" /></td>
-		<td>Sets the prim's GLTF Material Emissive map attributes. A glTF material override on the face; see [llSetRenderMaterial](/functions/llSetRenderMaterial/). The emissive tint takes color in linear space: use [llsRGB2Linear](/functions/llsRGB2Linear/) to convert a regular LSL color.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_NORMAL](/constants/PRIM_NORMAL/)<InlineSyntax code=", integer face, string texture, vector repeats, vector offsets, float rotation_in_radians" /></td>
-		<td>Sets the prim's normal map attributes. Blinn-Phong (legacy) material.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_SPECULAR](/constants/PRIM_SPECULAR/)<InlineSyntax code=", integer face, string texture, vector repeats, vector offsets, float rotation_in_radians, vector color, integer glossiness, integer environment" /></td>
-		<td>Sets the prim's specular map attributes. Blinn-Phong (legacy) material.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_PROJECTOR](/constants/PRIM_PROJECTOR/)<InlineSyntax code=", string texture, float fov, float focus, float ambiance" /></td>
-		<td>Light projector settings for this prim. The texture may be [NULL_KEY](/constants/NULL_KEY/). Write only, for now.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_REFLECTION_PROBE](/constants/PRIM_REFLECTION_PROBE/)<InlineSyntax code=", integer boolean, float ambiance, float clip_distance, integer flags" /></td>
-		<td>Sets the prim as a reflection probe. **flags** combines [PRIM_REFLECTION_PROBE_*](/constants/groups/ReflectionProbeType/).</td>
-	</tr>
-</table>
-
-### Text and naming
-
-<table class="params-list">
-	<tr>
-		<th>Rule</th>
-		<th>Description</th>
-	</tr>
-	<tr>
-		<td>[PRIM_TEXT](/constants/PRIM_TEXT/)<InlineSyntax code=", string text, vector color, float alpha" /></td>
-		<td>Sets the prim's floating text. Same as [llSetText](/functions/llSetText/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_NAME](/constants/PRIM_NAME/)<InlineSyntax code=", string name" /></td>
-		<td>Sets the prim's name. Same as [llSetObjectName](/functions/llSetObjectName/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_DESC](/constants/PRIM_DESC/)<InlineSyntax code=", string description" /></td>
-		<td>Sets the prim's description. Same as [llSetObjectDesc](/functions/llSetObjectDesc/).</td>
-	</tr>
-</table>
 
 ### Shape
 
@@ -207,87 +45,7 @@ llSetLinkPrimitiveParamsFast(0, []);
 		<td>[PRIM_TYPE](/constants/PRIM_TYPE/)<InlineSyntax code=", integer flag, …" /></td>
 		<td>Sets the prim's shape. The PRIM_TYPE_* flag picks the shape and the arguments that follow it. **hole_shape** is one of [PRIM_HOLE_*](/constants/groups/PrimTypeHole/); a sculpt's **type** is one of [PRIM_SCULPT_TYPE_*](/constants/groups/PrimTypeSculptType/), optionally combined with [PRIM_SCULPT_FLAG_*](/constants/groups/PrimTypeSculptFlag/). Has no effect on mesh. Forms:<ul><li><InlineSyntax code="PRIM_TYPE, PRIM_TYPE_BOX, integer hole_shape, vector cut, float hollow, vector twist, vector top_size, vector top_shear" /></li><li><InlineSyntax code="PRIM_TYPE, PRIM_TYPE_CYLINDER, integer hole_shape, vector cut, float hollow, vector twist, vector top_size, vector top_shear" /></li><li><InlineSyntax code="PRIM_TYPE, PRIM_TYPE_PRISM, integer hole_shape, vector cut, float hollow, vector twist, vector top_size, vector top_shear" /></li><li><InlineSyntax code="PRIM_TYPE, PRIM_TYPE_SPHERE, integer hole_shape, vector cut, float hollow, vector twist, vector dimple" /></li><li><InlineSyntax code="PRIM_TYPE, PRIM_TYPE_TORUS, integer hole_shape, vector cut, float hollow, vector twist, vector hole_size, vector top_shear, vector advanced_cut, vector taper, float revolutions, float radius_offset, float skew" /></li><li><InlineSyntax code="PRIM_TYPE, PRIM_TYPE_TUBE, integer hole_shape, vector cut, float hollow, vector twist, vector hole_size, vector top_shear, vector advanced_cut, vector taper, float revolutions, float radius_offset, float skew" /></li><li><InlineSyntax code="PRIM_TYPE, PRIM_TYPE_RING, integer hole_shape, vector cut, float hollow, vector twist, vector hole_size, vector top_shear, vector advanced_cut, vector taper, float revolutions, float radius_offset, float skew" /></li><li><InlineSyntax code="PRIM_TYPE, PRIM_TYPE_SCULPT, string map, integer type" /></li></ul></td>
 	</tr>
-	<tr>
-		<td>[PRIM_SLICE](/constants/PRIM_SLICE/)<InlineSyntax code=", vector slice" /></td>
-		<td>Sets the prim's slice (a shape attribute).</td>
-	</tr>
 </table>
-
-### Physics and behaviour
-
-<table class="params-list">
-	<tr>
-		<th>Rule</th>
-		<th>Description</th>
-	</tr>
-	<tr>
-		<td>[PRIM_PHYSICS](/constants/PRIM_PHYSICS/)<InlineSyntax code=", integer boolean" /></td>
-		<td>Sets the object's physics status. Same as [llSetStatus](/functions/llSetStatus/). Applies to the entire object.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_PHANTOM](/constants/PRIM_PHANTOM/)<InlineSyntax code=", integer boolean" /></td>
-		<td>Sets the object's phantom status. Same as [llSetStatus](/functions/llSetStatus/). Applies to the entire object.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_TEMP_ON_REZ](/constants/PRIM_TEMP_ON_REZ/)<InlineSyntax code=", integer boolean" /></td>
-		<td>Sets the object's temporary attribute. Applies to the entire object.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_PHYSICS_SHAPE_TYPE](/constants/PRIM_PHYSICS_SHAPE_TYPE/)<InlineSyntax code=", integer type" /></td>
-		<td>Sets the prim's physics shape type. **type** is one of [PRIM_PHYSICS_SHAPE_*](/constants/groups/PhysicsShapeType/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_MATERIAL](/constants/PRIM_MATERIAL/)<InlineSyntax code=", integer material" /></td>
-		<td>Sets the prim's material. **material** is one of [PRIM_MATERIAL_*](/constants/groups/PhysicsMaterialPreset/). The material determines the default collision sound, sprite, friction coefficient and restitution coefficient.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_FLEXIBLE](/constants/PRIM_FLEXIBLE/)<InlineSyntax code=", integer boolean, integer softness, float gravity, float friction, float wind, float tension, vector force" /></td>
-		<td>Sets the prim as flexible.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_COLLISION_SOUND](/constants/PRIM_COLLISION_SOUND/)<InlineSyntax code=", string sound, float volume" /></td>
-		<td>Sets the collision sound UUID and volume level for the prim. Same as [llCollisionSound](/functions/llCollisionSound/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_DAMAGE](/constants/PRIM_DAMAGE/)<InlineSyntax code=", float damage, integer damage_type" /></td>
-		<td>Sets the damage and damage type delivered by a prim on collision. Same as [llSetDamage](/functions/llSetDamage/). **damage_type** is one of [DAMAGE_TYPE_*](/constants/groups/DamageType/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_HEALTH](/constants/PRIM_HEALTH/)<InlineSyntax code=", float health" /></td>
-		<td>Sets the health value for this prim.</td>
-	</tr>
-</table>
-
-### Clicking and sitting
-
-<table class="params-list">
-	<tr>
-		<th>Rule</th>
-		<th>Description</th>
-	</tr>
-	<tr>
-		<td>[PRIM_CLICK_ACTION](/constants/PRIM_CLICK_ACTION/)<InlineSyntax code=", integer action" /></td>
-		<td>Sets the default action to take when a user clicks on this prim. Same as [llSetClickAction](/functions/llSetClickAction/). **action** is one of [CLICK_ACTION_*](/constants/groups/ClickAction/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_SIT_TARGET](/constants/PRIM_SIT_TARGET/)<InlineSyntax code=", integer boolean, vector offset, rotation rot" /></td>
-		<td>The sit target, if any defined for this prim. The position can be [ZERO_VECTOR](/constants/ZERO_VECTOR/). Same as [llSitTarget](/functions/llSitTarget/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_SIT_FLAGS](/constants/PRIM_SIT_FLAGS/)<InlineSyntax code=", integer flags" /></td>
-		<td>Sets the flags on the prim's sit target. **flags** combines [SIT_FLAG_*](/constants/groups/SitFlag/).</td>
-	</tr>
-	<tr>
-		<td>[PRIM_SCRIPTED_SIT_ONLY](/constants/PRIM_SCRIPTED_SIT_ONLY/)<InlineSyntax code=", integer boolean" /></td>
-		<td>Avatars are not permitted to manually sit on this prim. Only [llSitOnLink](/functions/llSitOnLink/) can seat avatars.</td>
-	</tr>
-	<tr>
-		<td>[PRIM_ALLOW_UNSIT](/constants/PRIM_ALLOW_UNSIT/)<InlineSyntax code=", integer boolean" /></td>
-		<td>Avatars are allowed to manually stand up when seated on this prim. Only valid for prims in a valid experience.</td>
-	</tr>
-</table>
-
-Wording from the wiki's [Template:LSL Constants/PrimitiveParams](https://wiki.secondlife.com/wiki/Template:LSL_Constants/PrimitiveParams), which also covers the deprecated PRIM_CAST_SHADOWS and the legacy PRIM_TYPE value 1.
 
 ## Shared wiki article
 
@@ -593,6 +351,7 @@ From the issue templates included by the wiki article:
 - [llSetColor](/functions/llSetColor/) — Simpler way to set color
 - [llSetScale](/functions/llSetScale/) — Simpler way to set scale
 - [llSetStatus](/functions/llSetStatus/) — Simpler way to set physics and phantom
+- [llSetLinkGLTFOverrides](/functions/llSetLinkGLTFOverrides/) — Set or remove individual glTF material overrides on a face
 
 ### Articles
 

@@ -1,0 +1,84 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Inventory}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Communications}}</code></span></div>
+<h2 id="notecards-parameters">Notecards &amp; Parameters</h2>
+<div class="wiki-line">In public domain scripts released with modify privileges, operational parameters (e.g. opening sounds for drawers, etc.) are usually set and changed right in the script by editing the script.</div>
+<div class="wiki-line">Scripted products that are sold, however, often use instead a notecard as the place where customers can change parameters to meet their individual needs. Doing this negates both the need to distribute proprietary scripts with modify privileges, and the need for customers to edit scripts (which most find frightening.)</div>
+<div class="wiki-line">To pull information from a notecard, you use the <a href="/functions/llGetNotecardLine/">llGetNotecardLine</a> function. As it comes into the script, it is captured in the <a href="/events/dataserver/">dataserver</a> event, during which event you parse the information and assign it to variables. There is an illustration of the procedure here: <a href="https://wiki.secondlife.com/wiki/Notecard_reading">Notecard_reading</a>.</div>
+<h2 id="limits">Limits</h2>
+<div class="wiki-line">Notecards are limited in several ways:</div>
+<ul>
+<li>64KiB </li>
+<li>When read by script:</li>
+<li>Only the first 255 bytes of each line are returned.</li>
+<li>Cannot contain embedded assets.</li>
+<li>Immutability.  (They don't appear to be immutable, but they really are.)  </li>
+</ul>
+<h2 id="notecard-immutability">Notecard Immutability</h2>
+<div class="wiki-line">If you create a notecard, then you can easily edit the notecard and save changes.  However internally within the Second Life asset server, notecard objects are immutable.  This means that when you are editing the notecard, you are actually creating a new notecard with an entirely different key than the original notecard.  (The avatar's or object's inventory will not contain a reference to the old notecard any more -- it is updated to reference the key of the new notecard.)  The user probably thinks it is the same notecard object, but it is really an entirely new object.  </div>
+<div class="wiki-line">This can be exploited in a script, to detect changes to a notecard and ignore other changes in an object's inventory.  The following script illustrates this technique.  The configuration notecard is read when the script is started, or when the configuration notecard itself changes.  (It will have a new key, and this will trigger reading it to get the changes.)  If something else changes in the object's inventory, then the change is ignored and the configuration notecard is not re-read.  This can save a lot of overhead.  </div>
+<div class="wiki-line">This script assumes that there is a notecard named "Configuration" in the object's inventory, and that one or more lines of text are stored in the notecard.  </div>
+<div class="wiki-line"><pre><code>key kQuery;
+integer iLine = 0;
+string notecard_name = &quot;Configuration&quot;;
+key notecard_key = NULL_KEY;
+
+config_init()
+{
+    key nc_key = llGetInventoryKey(notecard_name);
+    if (nc_key == notecard_key)
+    {
+        // Some other inventory item changed, not the configuration notecard.
+        return; // Skip reading the notecard in this case.
+    }
+    // Remember the new notecard key from now on.
+    notecard_key = nc_key;
+    iLine = 0;
+    kQuery = llGetNotecardLine(notecard_name, iLine);
+}
+
+default
+{
+    state_entry()
+    {
+        // Read the notecard once at startup.
+        config_init();
+    }
+
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_INVENTORY)         
+        {
+            // Read the notecard when the inventory has changed.
+            config_init();
+        }
+    }
+    
+    dataserver(key query_id, string data) 
+    {
+        if (query_id == kQuery) 
+        {
+            // this is a line of our notecard
+            if (data == EOF) 
+            {
+                llOwnerSay(&quot;Finished reading configuration.&quot;);
+            } 
+            else 
+            {
+                // TODO: handle notecard line here.  For not just inform the owner.
+                llOwnerSay(&quot;Read notecard line: &quot; + data);
+                // increment line count
+                ++iLine;
+                //request next line of notecard.
+                kQuery = llGetNotecardLine(notecard_name, iLine);
+            }
+        }
+    }
+}</code></pre></div>
+<h2 id="sharing-notecard-access">Sharing Notecard Access</h2>
+<div class="wiki-line">In the course of shared projects, you may often need to let team members access notecards in objects owned by you, or need yourself to access notecards in objects owned by them.</div>
+<div class="wiki-line">To enable this, see: <a href="https://wiki.secondlife.com/wiki/Editing_someone_else%27s_scripts_and_notecards">Editing someone else&#x27;s scripts and notecards</a>.</div>
+<h2 id="embedded-assets-in-notecards">Embedded Assets in Notecards</h2>
+<div class="wiki-line">Notecards can contain embedded assets, such as textures, landmarks, etc.</div>
+<div class="wiki-line">These cannot be accessed via script.</div>
+<div class="wiki-line">Tip! While it appears that the contents of one notecard, text and embedded objects, can manually be copied from one notecard to a second notecard, in fact you won't be able to save that second notecard. What you must do is drag the embedded objects to your inventory, and then from there drag into the second notecard.</div>
+<div class="wiki-line"><a href="/wiki/category-assets-27a8abfb/">Category:Assets</a></div>

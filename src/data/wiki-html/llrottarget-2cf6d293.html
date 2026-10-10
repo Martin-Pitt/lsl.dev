@@ -1,0 +1,58 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">This function is to have the script know when it has reached a rotation.<br/>It registers a <code>rot</code> with a <code>error</code> that triggers <a href="/events/at_rot_target/">at_rot_target</a> and <a href="/events/not_at_rot_target/">not_at_rot_target</a> events continuously until unregistered.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">A similar function exists for positions: <a href="/functions/llTarget/">llTarget</a><br/>This function does not rotate the object, to do that use <a href="/functions/llSetRot/">llSetRot</a>, <a href="/functions/llRotLookAt/">llRotLookAt</a> or <a href="/functions/llLookAt/">llLookAt</a>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> to unregister the target with <a href="/functions/llRotTargetRemove/">llRotTargetRemove</a></div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>vector standrot = &lt;0.0, 0.0, 0.0&gt;;
+vector fliprot = &lt;45.0, 0.0, 0.0&gt;;
+
+// simple two-state rot target detection and rotation by Hypatia Callisto
+// works, to detect a rotation target. An example I wrote
+// since there is almost zilch for clean examples for 
+// at_rot_target, not_at_rot_target, llRotTarget, llRotTargetRemove
+
+integer rottarget;
+
+default
+{
+
+    state_entry(){ 
+        rottarget = llRotTarget(llEuler2Rot(fliprot*DEG_TO_RAD), 0.1);
+        llSetPrimitiveParams ([PRIM_ROTATION, llEuler2Rot(standrot*DEG_TO_RAD)]); // rotate to starting point
+    }
+
+    not_at_rot_target()
+    { 
+        llRotTargetRemove( rottarget );
+        llOwnerSay(&quot;not there&quot;); //not at target
+    }
+        
+    touch_start (integer total_number)
+    {
+        state rotatestate; // change to state for new position
+    }
+}
+             
+      
+state rotatestate 
+{ 
+    state_entry(){ 
+        rottarget = llRotTarget(llEuler2Rot(fliprot*DEG_TO_RAD), 0.1);
+        llSetPrimitiveParams ([PRIM_ROTATION, llEuler2Rot(fliprot*DEG_TO_RAD)]); // rotate to new point
+    }
+    
+    at_rot_target(integer tnum, rotation targetrot, rotation ourrot)
+    { 
+        llRotTargetRemove( rottarget );
+        llOwnerSay(&quot;there&quot;); //reached the target
+    }
+
+    touch_start(integer touched){ 
+        state default; 
+    }
+    
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRotTargetRemove/">llRotTargetRemove</a> — Cancel a target rotation</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTarget/">llTarget</a> — Register a target position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTargetRemove/">llTargetRemove</a> — Cancel a target position</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/at_rot_target/">at_rot_target</a> — <a href="/events/not_at_rot_target/">not_at_rot_target</a> — rotational target events</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/at_target/">at_target</a> — <a href="/events/not_at_target/">not_at_target</a> — positional target events</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="https://wiki.secondlife.com/wiki/Template:LSL_Function/rotation">Template:LSL Function/rotation</a></p></section>

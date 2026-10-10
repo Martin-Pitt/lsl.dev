@@ -1,0 +1,41 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sends an email to the owner (selected by <code>target</code>) of an object with <code>subject</code> and <code>message</code>.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">The entire message (including the address, subject and other miscellaneous fields) can't be longer than 4096 bytes combined.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">The target parameter selects which agent the email is sent to</div>
+<table><tr><th> Constant</th><th> <code>Val</code></th><th> Select the email destination</th></tr><tr><td><a href="/constants/TARGETED_EMAIL_OBJECT_OWNER/">TARGETED_EMAIL_OBJECT_OWNER</a></td><td>2</td><td>send email to the owner of the current object</td></tr></table>
+<div class="wiki-line">The <code>message</code> is prefixed with information about the prim sending the email.</div>
+<table><tr><th>Template</th><th>Example</th></tr><tr><td><pre><code>Object-Name: *prim*
+Region: *simname* (*simpos.x*, *simpos.y*)
+Local-Position: (*primpos.x*, *primpos.y*, *primpos.z*)
+
+*message*</code></pre></td><td> <pre><code>Object-Name: Object
+Region: Gibson (254976, 256000)
+Local-Position: (117, 129, 50)
+
+The real message starts here.</code></pre></td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Originally this function was intended to enable sending email to either the object owner or creator; however, the ability to email creators was removed to avoid abuse scenarios.</li>
+<li>There is a limit to the number of email messages an object can send in a given amount of time. </li>
+<li>There is a limit of 500 messages from a single agent's objects in a one hour period.</li>
+<li>The 4096 byte size limit includes the subject line and automatically added text.  The practical maximum body size is approximately 3600 bytes.</li>
+<li>(Sept-2008) The Email Throttle was modified slightly, Per <span class="wiki-template"><a href="/wiki/template-user-204f53d2/">User</a>: <code>{{User|Prospero Linden}}</code></span>'s comments: "there has long been a throttle that makes a single script sleep for 20 seconds after sending an email. The new throttle is per user... some were using many, many different scripts to send spam. (the new throttle applies) when the destination is outside of Second Life. I know that messages within the same region were not throttled (beyond the 20-second delay), and I *believe* that messages between different sims were not throttled (between the 20-second delay)."</li>
+<li>Due to the bug <a href="https://jira.secondlife.com/browse/SVC-23" rel="noreferrer">SVC-23</a> (present since 2005), objects may stop receiving emails completely until either the region is restarted or the object crosses a region boundary (resetting the script doesn't help).  Emails sent may eventually be received after a restart/region-cross.  Hence, don't rely on this function for reliable inter-region messaging. </li>
+<li>Due to the bug <a href="https://jira.secondlife.com/browse/SVC-391" rel="noreferrer">SVC-391</a> llEmail will silently fail (no mail will arrive) when non-ascii characters are present in the subject. However, non-ascii characters in the message body will be replaced by "?".</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>string emailSubject = &quot;Someone touched me!&quot;;
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        // llSay(PUBLIC_CHANNEL, &quot;Sending eMail report now, this will take ~20 seconds.&quot;);
+
+        key id = llDetectedKey(0);
+        string name = llDetectedName(0);
+
+        llTargetedEmail(TARGETED_EMAIL_OBJECT_OWNER, emailSubject,
+            &quot;I was touched by: &#x27;&quot; + name + &quot;&#x27; (&quot; + (string)id + &quot;).&quot;);
+
+        // llSay(PUBLIC_CHANNEL, &quot;Email has been sent.&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llEmail/">llEmail</a></div></div></section>

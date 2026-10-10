@@ -1,0 +1,72 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is <code>src</code> with leading and/or trailing white space (spaces, tabs, and line feeds) trimmed from it.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><th> Constant</th><th></th><th> Description</th></tr><tr><td><a href="/constants/STRING_TRIM_HEAD/">STRING_TRIM_HEAD</a></td><td>0x1</td><td>Trims white space off the beginning.</td></tr><tr><td><a href="/constants/STRING_TRIM_TAIL/">STRING_TRIM_TAIL</a></td><td>0x2</td><td>Trims white space off the end.</td></tr><tr><td><a href="/constants/STRING_TRIM/">STRING_TRIM</a></td><td>0x3</td><td>Trims white space off the beginning and end.</td></tr></table></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Whenever you are accepting unstructured input from a user -- whether via chat or via a notecard -- it is a good idea to always full trim it:</div>
+<div class="wiki-line"><pre><code>llStringTrim(&quot;User input&quot;, STRING_TRIM);</code></pre></div>
+<div class="wiki-line">This example returns the number of leading and trailing 'white space' characters on a string that were removed (not particularly useful but shows how to use the function).</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llListen(4, &quot;&quot;, llGetOwner(), &quot;&quot;);
+    }
+
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {       
+        //track the length
+        integer length = llStringLength(message);
+        
+        //trim message (not necessary to store these to variables but makes reading easier)
+        string trim_left  = llStringTrim(message, STRING_TRIM_HEAD);
+        string trim_right = llStringTrim(message, STRING_TRIM_TAIL);
+        string trim_both  = llStringTrim(message, STRING_TRIM);
+
+        //output the results
+        llOwnerSay(&quot;Initial length  = &quot; + (string)length +
+                 &quot;\nLeading Spaces  = &quot; + (string)(length - llStringLength(trim_left))+
+                 &quot;\nTrailing Spaces = &quot; + (string)(length - llStringLength(trim_right))+
+                 &quot;\nTrimmed Message = \&quot;&quot; + trim_both + &quot;\&quot;&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>The exact set of characters stripped are 0x09 (tab), line feed (0x0a, "\n"), vertical tab (0x0b), form feed (0x0c), carriage return (0x0d) and space (0x20, " ").</li>
+<li>Only line feed and space function as true whitespace within SL, the others will produce some manner of a printable character.</li>
+<li>The "\t" escape code doesn't actually represent the tab character, but several spaces instead.</li>
+<li>Other whitespace characters defined in Unicode, such as non-breaking space (0xa0) or specific-width spaces in the 0x2000 range are not stripped.</li>
+<li>Aside from white space at the beginning and / or end, the actual string will be unaffected. This means too, though, that extraneous spaces within the string -- for instance, a mistaken double-space type -- will not be corrected. </li>
+<li>The following will remove all doubled (or further multiplied), leading and trailing spaces with iterated <a href="/functions/llReplaceSubString/">llReplaceSubString</a>:</li>
+</ul>
+<div class="wiki-line"><pre><code>while(llStringLength(s) != llStringLength(s = llReplaceSubString(s, &quot;  &quot;, &quot; &quot;, 0)));
+s = llStringTrim(s, STRING_TRIM);</code></pre></div>
+<ul>
+<li>llReplaceSubString is also the easiest way to remove all spaces from a string:</li>
+</ul>
+<div class="wiki-line"><pre><code>llReplaceSubString(&quot;some words to remove the spaces from&quot;, &quot; &quot;, &quot;&quot;, 0);</code></pre></div>
+<ul>
+<li><a href="/functions/llList2Json/">llList2Json</a> also trims strings contained in the list. Thus, an easy way to trim an entire list of strings is:</li>
+</ul>
+<div class="wiki-line"><pre><code>list l = [&quot;  a  &quot;, &quot; b&quot;, &quot;c &quot;, &quot; d &quot;];
+list trimmedList = llJson2List(llList2Json(JSON_ARRAY, l));</code></pre></div>
+<ul>
+<li>Some old, less efficient methods, no longer recommended for use:</li>
+</ul>
+<div class="wiki-line">:* Intra-string space trimming:</div>
+<div class="wiki-line">::<pre><code>llDumpList2String(llParseString2List(src, [&quot; &quot;], []), &quot; &quot;); //works but can use a large quantity of memory</code></pre></div>
+<div class="wiki-line">:* An method to strip spaces from the sentence:</div>
+<div class="wiki-line">::<pre><code>//Added By To-mos Codewarrior
+string str1 = &quot;some words to remove the spaces from&quot;;
+integer index;
+while(~index=llSubStringIndex(str1,&quot; &quot;)) {
+    data=llDeleteSubString(str1,index,index);
+}</code></pre></div>
+<div class="wiki-line">:* Variant of above:</div>
+<div class="wiki-line">::<pre><code>(string)llParseString2List(src, [&quot; &quot;], []); //works but can use a large quantity of memory</code></pre></div></section>
+<section><h2 id="history">History</h2><ul>
+<li>Introduced in 1.13.4</li>
+</ul>
+<div class="wiki-line">Date of release <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.15#release-notes-for-second-life-1-15-0-282-29-april-25-2c-2007"> 25-04-2007 </a></div></section>
+<section><h2 id="additional">Additional wiki content</h2></section>

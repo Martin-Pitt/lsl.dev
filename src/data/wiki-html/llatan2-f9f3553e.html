@@ -1,0 +1,50 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Similar to the &lt;span class="plainlinks"&gt;<a href="https://en.wikipedia.org/wiki/Inverse_trigonometric_functions" rel="noreferrer">arctangent</a>&lt;/span&gt;(<code>y</code>/<code>x</code>) except it utilizes the signs of <code>x</code> &amp; <code>y</code> to determine the quadrant and avoids  division by zero. <br /></div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/float">float</a> that is the <a href="https://en.wikipedia.org/wiki/Atan2" rel="noreferrer">arctangent2</a> of <code>y</code>, <code>x</code>.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">If <code>x</code> is positive zero and...</div>
+<ul>
+<li><code>y</code> is zero, <strong>zero</strong> is returned.</li>
+<li><code>y</code> is positive, <strong>PI/2</strong> is returned.</li>
+<li><code>y</code> is negative, <strong>-PI/2</strong> is returned.</li>
+</ul>
+<div class="wiki-line">If <code>x</code> is negative zero and...</div>
+<ul>
+<li><code>y</code> is positive zero, <strong>PI</strong> is returned.</li>
+<li><code>y</code> is negative zero, <strong>-PI</strong> is returned.</li>
+<li><code>y</code> is positive, <strong>PI/2</strong> is returned.</li>
+<li><code>y</code> is negative, <strong>-PI/2</strong> is returned.</li>
+</ul>
+<div class="wiki-line">Or</div>
+<div class="wiki-line"><pre><code>if((string)x != (string)0.0 &amp;&amp; y == 0.0)//negative zero
+    return PI * ~-2*((string)y != (string)0.0));
+return ((y &gt; 0) - (y &lt; 0)) * PI_BY_TWO;</code></pre></div>
+<div class="wiki-line">The returned value is in the range [-<a href="/constants/PI/">PI</a>,&nbsp;PI].</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+  state_entry()
+  {
+    float num1 = llFrand(100.0);
+    float num2 = llFrand(100.0);
+
+    llOwnerSay(&quot;y = &quot; + (string)num1);
+    llOwnerSay(&quot;x = &quot; + (string)num2);
+
+    llOwnerSay(&quot;The arctangent of y divided by x is &quot; + (string)llAtan2(num1, num2));
+  }
+}</code></pre><pre><code>//Function with input of a vector determining the position of a target and returning
+//a string with the literal compass-direction of that target towards your position
+//by Ramana Sweetwater 2009/01, any use allowed license :-)
+//corrected by Patrick Muggins
+
+string compass (vector target) 
+{
+    vector source = llGetPos();
+    list DIRS =[&quot;W&quot;,&quot;NW&quot;,&quot;N&quot;,&quot;NE&quot;,&quot;E&quot;,&quot;SE&quot;,&quot;S&quot;,&quot;SW&quot;,&quot;W&quot;];
+    integer index = llCeil(3.5 - (4 * llAtan2(target.y - source.y, target.x - source.x) / PI));
+    return llList2String(DIRS, index);
+}</code></pre></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki//Compass_QA">/Compass QA</a></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSin/">llSin</a> — <a href="/functions/llAsin/">llAsin</a> — sine &amp; inverse Sine</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llCos/">llCos</a> — <a href="/functions/llAcos/">llAcos</a> — cosine &amp; inverse cosine</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTan/">llTan</a> — tangent</div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://en.wikipedia.org/wiki/Atan2" rel="noreferrer">Atan2</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://en.wikipedia.org/wiki/Inverse_trigonometric_function" rel="noreferrer">Inverse trigonometric function</a></div></div></section>

@@ -1,0 +1,47 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">This function takes a string of values separated by commas, and turns it into a list.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">To convert a list into a comma-separated string use <a href="/functions/llList2CSV/">llList2CSV</a>.<br/></div>
+<div class="wiki-line">Do not confuse this function with the <a href="https://en.wikipedia.org/wiki/Comma-separated_values" rel="noreferrer">CSV</a> format, it is <em>not</em> the CSV format.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> made by parsing <strong>src</strong>, a string of comma separated values.</div></section>
+<section><h2 id="specification">Specification</h2><h3 id="vectors-rotations">Vectors &amp; Rotations</h3>
+<div class="wiki-line">Anything between "&lt;" and "&gt;" is considered a single value regardless of the existence of a comma between. </div>
+<div class="wiki-line">This ensures that <a href="https://wiki.secondlife.com/wiki/vector">vector</a>s and <a href="https://wiki.secondlife.com/wiki/rotation">rotation</a>s get treated as a single value, with no additional cleanup needed afterward.</div>
+<div class="wiki-line">Note, though, that for every "&lt;" there needs to be a corresponding "&gt;" or it will consume the rest of the string. For example,</div>
+<div class="wiki-line"><div class="wiki-related-row">&#32;<code>llCSV2List("&lt;&gt;,&gt;,a")</code> — returns <code>["&lt;&gt;", "&gt;", "a"]</code> — (Second "&gt;" is isolated)</div></div>
+<div class="wiki-line"><div class="wiki-related-row">&#32;<code>llCSV2List("&lt;&lt;&gt;,&gt;,a")</code> — returns <code>["&lt;&lt;&gt;,&gt;", "a"]</code> — (Regularly paired)</div></div>
+<div class="wiki-line"><div class="wiki-related-row">&#32;<code>llCSV2List("&lt;&lt;&lt;&gt;,&gt;,a")</code> — returns <code>["&lt;&lt;&lt;&gt;,&gt;,a"]</code> — (Third "&lt;" lost its opposite one)</div></div>
+<table></table>
+<h3 id="types">Types</h3>
+<div class="wiki-line">The function makes no assumptions about what the list entry types should be, all elements in the resulting list will be strings. It is important to know that the llList2* functions implicit typecasts do not work the same as explicit typecast. The following table gives code examples for each type that will yield the best results.</div>
+<table><tr><th> Target</th><th> Code</th><th> Description</th></tr><tr><td><a href="https://wiki.secondlife.com/wiki/integer">integer</a></td><td><code>(integer)<a href="/functions/llList2String/">llList2String</a>(mlist, mint)</code></td><td><a href="/functions/llList2Integer/">llList2Integer</a> does not support the hex format</td></tr><tr><td><a href="https://wiki.secondlife.com/wiki/float">float</a></td><td><code>(float)<a href="/functions/llList2String/">llList2String</a>(mlist, mint)</code></td><td><a href="/functions/llList2Float/">llList2Float</a> does not support the scientific or hexadecimal notations</td></tr><tr><td><a href="https://wiki.secondlife.com/wiki/string">string</a></td><td><code><a href="/functions/llList2String/">llList2String</a>(mlist, mint)</code></td><td>Always Safe</td></tr><tr><td><a href="https://wiki.secondlife.com/wiki/key">key</a></td><td><code><a href="/functions/llList2Key/">llList2Key</a>(mlist, mint)</code></td><td>Always Safe</td></tr><tr><td><a href="https://wiki.secondlife.com/wiki/vector">vector</a></td><td><code>(vector)<a href="/functions/llList2String/">llList2String</a>(mlist, mint)</code></td><td><a href="/functions/llList2Vector/">llList2Vector</a> will return a zero vector</td></tr><tr><td><a href="https://wiki.secondlife.com/wiki/rotation">rotation</a></td><td><code>(rotation)<a href="/functions/llList2String/">llList2String</a>(mlist, mint)</code></td><td><a href="/functions/llList2Rot/">llList2Rot</a> will return a zero rotation</td></tr></table>
+<h3 id="whitespace">Whitespace</h3>
+<div class="wiki-line"><a href="/functions/llCSV2List/">llCSV2List</a> consumes the first leading space from all values :</div>
+<div class="wiki-line"><pre><code>list tmp = llCSV2List(&quot;first , second , third&quot;);
+//returns [&quot;first &quot;,&quot;second &quot;,&quot;third&quot;]
+//not [&quot;first &quot;,&quot; second &quot;,&quot; third&quot;]</code></pre></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If a "&lt;" does not have a matching "&gt;", the remainder of the string will be a single value, even if the "&lt;" is in the middle of the value, see <a href="#vectors-rotations">Vectors &amp; Rotations</a> for further details.</li>
+<li>All items in the returned list are strings.</li>
+<li>If an empty string is parsed, the result will a list containing an empty string: [""] (not an empty list).</li>
+<li>When used with lists that are generated based off assets in inventory, <a href="/functions/llCSV2List/">llCSV2List</a> should not be used, as inventory assets can contain commas as part of their names.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        string csv = &quot;first,second,third&quot;;
+        list my_list = llCSV2List(csv);
+        llOwnerSay(&quot;CSV: &quot; + csv);
+        integer i;
+        integer num_list=llGetListLength(my_list);
+        for (i=0; i&lt;num_list; ++i)
+        {
+            llOwnerSay(&quot;my_list[&quot; + (string)i + &quot;]: &quot; + llList2String(my_list,i));
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">To use separators other than commas (especially if you can't predict when a user might have sneaked a comma into data they supply the script), use <a href="/functions/llParseString2List/">llParseString2List</a> instead, which allows you to specify separators other than commas. <a href="/functions/llParseString2List/">llParseString2List</a> unfortunately does not support the special parsing required for handling rotations and vectors, nor does it consume leading and trailing whitespace.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llList2CSV/">llList2CSV</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDumpList2String/">llDumpList2String</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llParseString2List/">llParseString2List</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llParseStringKeepNulls/">llParseStringKeepNulls</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Typecast">Typecast</a></div></div></section>

@@ -1,0 +1,156 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Set the sit location for the prim. The sit location is relative to the prim's position and rotation.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>offset</code> == <a href="/constants/ZERO_VECTOR/"><span class="wiki-template"><a href="/wiki/template-lsl-vr-76baeca7/">LSL VR</a>: <code>{{LSL VR|0.0|0.0|0.0}}</code></span></a> then the sit target is removed.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">llSitTarget sets the position for the Agent Target (Advanced -&gt; Character -&gt; View Agent Target). The position of the target is based on <code>rot</code> and the <code>offset</code><span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|It is widely considered that the {{LSLP|rot}} should not affect the position, unfortunately the sit target code is a {{Wikipedia|Lava flow (programming)|lava-flow}}. ~ {{JIRA|SVC-2277}}|It is widely considered that the &#x27;&#x27;rot&#x27;&#x27; should not affect the position, unfortunately the sit target code is a lava-flow. - SVC-2277|handle=rot-offset}}</code></span>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Once a sit target is removed <a href="/functions/llAvatarOnSitTarget/">llAvatarOnSitTarget</a> will only return </li>
+</ul>
+<div class="wiki-line"><a href="/constants/NULL_KEY/">NULL_KEY</a></div>
+<div class="wiki-line">.</div>
+<ul>
+<li>Removing or deactivating the script that sets the sit target will not remove the prim's sit target.</li>
+<li>Sit target is a prim property and not dependent on a script for its continued existence. </li>
+<li>To remove sit target, use the following: </li>
+</ul>
+<div class="wiki-line"><pre><code>llSitTarget(ZERO_VECTOR, ZERO_ROTATION);</code></pre></div>
+<ul>
+<li>Shift-copying a prim with a sit target, without a script that will set the sit target again, will not keep the sit target on the copy. (The copy is in the original location when shift-copying.)</li>
+<li>There is no way to remove the Sit option from the menu.</li>
+<li>It will appear to be removed if the <a href="/functions/llSetSitText/">llSetSitText</a> is set to a space "&nbsp;" or similar transparent string.</li>
+<li>Attachments cannot be sat upon (see <a href="https://jira.secondlife.com/browse/SVC-6100" rel="noreferrer">SVC-6100</a> to vote for such a feature).</li>
+<li><code>rot</code> affects the position of the sit target in a buggy way.</li>
+<li>To correct for the <em>rot</em> bug, simply subtract &lt;0,0,0.4&gt; from the position when <em>rot</em> is zero. See example below.</li>
+<li><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a> is a more difficult work-around.</li>
+<li>Animations are relative to the Agent Target, but the Agent Target isn't described by the animation.</li>
+<li><a href="/functions/llSitTarget/">llSitTarget</a> does not update position of an already seated avatar.</li>
+<li><a href="#updatesittarget">UpdateSitTarget</a> described below works around this problem. It works by converting the sit target information into a link position that is passed along to <a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a>. </li>
+<li><code>offset</code> is limited to 300.0 meters on each axis. The <em>x</em>, <em>y</em> and <em>z</em> components must be in the range [-300,&nbsp;300.0]<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|handle=interval}}</code></span>.</li>
+<li>If they are outside the acceptable range they are rounded to the closest limit.</li>
+<li>If an object has multiple seats (each seat has a script that sets a sit target, or the <a href="https://wiki.secondlife.com/wiki/Link_Messages">linkset</a> has a script that assigns several <a href="/functions/llLinkSitTarget/">llLinkSitTarget</a>s), the following method determines which sit target an avatar ends up at:</li>
+<li>If the prim that is clicked on <em>has</em> a sit target and that sit target is not full, that sit target is used.</li>
+<li>If the prim that is clicked on <em>has no sit target</em>, and one or more other linked prims have sit targets that are not full, the sit target of the prim with the lowest link number will be used.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSitTarget(&lt;0.0, 0.0, 1.0&gt;, ZERO_ROTATION); //The vector&#x27;s components must not all be set to 0 for effect to take place.
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>default     //example with work-around for llSetTarget rot bug
+{           //place in any prim large enough to sit on at any angle
+            //click once to choose a place to sit, a second time to sit there
+    touch_start(integer num)
+    {
+        vector pos   = llDetectedTouchPos(0);        //use touch to set sit target
+        vector lft   = llDetectedTouchBinormal(0);   //use normals to rotate avatar to
+        vector up    = llDetectedTouchNormal(0);     //sit upright
+        rotation rot = llAxes2Rot(lft % up, lft, up) / llGetRot();  //rotate avatar to stand there
+        vector siz   = llGetAgentSize(llDetectedKey(0));
+        pos += 0.65 * siz.z * up;       //this places MY avatars feet close to the surface
+        pos = (pos - llGetPos()) / llGetRot();  //llSetTarget expects local co-ordinates
+        if (rot != ZERO_ROTATION) pos -=&lt;0.0, 0.0, 0.4&gt;;  //here is the workaround
+        llSitTarget(pos, rot);
+        llSetClickAction(CLICK_ACTION_SIT);   //switch to sit for second click
+    }
+    changed(integer change)
+    {
+        if (llAvatarOnSitTarget() == NULL_KEY)      //if they unsit,
+            llSetClickAction(CLICK_ACTION_TOUCH);   //go back to click mode
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><h3 id="updatesittarget">UpdateSitTarget</h3>
+<div class="wiki-line">This function is primarily for use in objects that need to move seated avatars. It is most useful in poseballs, furniture and vehicles (just not while they are moving). There is also a <code>UpdateLinkSitTarget()</code> version of the function that can be found at: <a href="https://wiki.secondlife.com/wiki/User:Strife_Onizuka/UpdateLinkSitTarget">User:Strife_Onizuka/UpdateLinkSitTarget</a>.</div>
+<div class="wiki-line"><pre><code>//Sets / Updates the sit target moving the avatar on it if necessary.
+UpdateSitTarget(vector pos, rotation rot)
+{//Using this while the object is moving may give unpredictable results.
+    llSitTarget(pos, rot);//Set the sit target
+    key user = llAvatarOnSitTarget();
+    if (user)//true if there is a user seated on the sit target; if so, update their position
+    {
+        vector size = llGetAgentSize(user);
+        if (size)//This tests to make sure the user really exists.
+        {
+            //We need to make the position and rotation local to the current prim
+            rotation localrot = ZERO_ROTATION;
+            vector   localpos = ZERO_VECTOR;
+            if (llGetLinkNumber() &gt; 1)//only need the local rot if it&#x27;s not the root.
+            {
+                localrot = llGetLocalRot();
+                localpos = llGetLocalPos();
+            }
+            integer linkNum = llGetNumberOfPrims();
+            do
+			{
+                if (user == llGetLinkKey(linkNum))//just checking to make sure the index is valid.
+                {
+                    //&lt;0.008906, -0.049831, 0.088967&gt; are the coefficients for a parabolic curve that best fits real avatars. It is not a perfect fit.
+                    float fAdjust = ((((0.008906 * size.z) + -0.049831) * size.z) + 0.088967) * size.z;
+                    llSetLinkPrimitiveParamsFast(linkNum,
+                        [PRIM_POS_LOCAL, (pos + &lt;0.0, 0.0, 0.4&gt; - (llRot2Up(rot) * fAdjust)) * localrot + localpos,
+                         PRIM_ROT_LOCAL, rot * localrot]);
+                    jump end;//cheaper but a tad slower than return
+                }
+            } while(--linkNum);
+        }
+        else
+        {//It is rare that the sit target will bork, but if it does happen, this can help to fix it.
+            llUnSit(user);
+        }
+    }
+    @end;
+}//Written by Strife Onizuka, size adjustment and improvements provided by Talarus Luan</code></pre></div>
+<h3 id="getsittarget">GetSitTarget</h3>
+<div class="wiki-line">This function is primarily for configuring sittargets for furniture. Sit an avatar on a box, position the box where you want them and use this function to read the sittarget so that it can be coded into the furniture. See <a href="https://wiki.secondlife.com/wiki//GetSitTarget">/GetSitTarget</a> for an example.</div>
+<div class="wiki-line"><pre><code>list GetSitTarget(integer prim, key av)
+{//WARNING: This function is very good but not perfect. Do not repeatedly pass GetSitTarget to llSitTarget or UpdateSitTarget.
+ //Do not use this on moving avatars or objects, the results will very likely be wrong.
+    vector tp = llGetAgentSize(av);
+    if (tp)
+    {//llGetObjectDetails is used so the av is not required to be seated on the object with the sit target.
+        list details = llGetLinkPrimitiveParams(prim, [PRIM_POSITION, PRIM_ROTATION]) + llGetObjectDetails(av, [OBJECT_POS, OBJECT_ROT]);
+        rotation f = llList2Rot(details, 1);
+        rotation r = llList2Rot(details, 3) / f;
+        float fAdjust = ((((0.008906 * tp.z) + -0.049831) * tp.z) + 0.088967) * tp.z;
+        return [((llList2Vector(details, 2) - llList2Vector(details, 0)) / f) + (llRot2Up(r) * fAdjust) - &lt;0.0, 0.0, 0.4&gt;, r];
+    }
+    return [];
+}//Written by Strife Onizuka, size adjustment provided by Talarus Luan</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinkSitTarget/">llLinkSitTarget</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetSitText/">llSetSitText</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llAvatarOnSitTarget/">llAvatarOnSitTarget</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llAvatarOnLinkSitTarget/">llAvatarOnLinkSitTarget</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llUnSit/">llUnSit</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/changed/">changed</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-924"><a href="/wiki/template-issues-svc-924-a5dbd89a/">Template:Issues/SVC-924</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-924|&#x27;&#x27;&#x27;llSit&#x27;&#x27;&#x27;() - scriptable ability to force an avatar to sit on an object|type=nf}}</code></pre></details><p id="svc-6100"><a href="/wiki/template-issues-svc-6100-d3d34180/">Template:Issues/SVC-6100</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-6100|Ability to sit on prims attached to avatars|type=nf}}</code></pre></details><p><a href="/wiki/template-lsl-function-offset-46e653b3/">Template:LSL Function/offset</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|}}}_desc|offset relative to the {{#switch:{{{local|}}}|*|=prim&#x27;s|#default={{{local|}}}|object=object&#x27;s}} position and expressed in [[Viewer coordinate frames#Local|local coordinates]]{{#if:{{{dead|}}}|&amp;#32;and is completely ignored.}}{{{desc|}}}}}
+
+{{#vardefine:p_{{{1|}}}_hover|offset relative to the {{#switch:{{{local|}}}|*|=prim&#x27;s|#default={{{local|}}}|object=object&#x27;s}} position and expressed in local coordinates{{#if:{{{dead|}}}|&amp;#32;and is completely ignored.}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+{{#if:{{{dead|}}}|{{#vardefine:caveats|{{#var:caveats}}
+*{{LSLP|{{{1|}}}}} functionality {{#switch:{{{dead|}}}|never=has not been implemented|*|#default=has been removed}}, any value provided is completely ignored. For future proofing purposes, you should use a [[ZERO_VECTOR]] for it&#x27;s value.}}
+}}
+
+{{#if:{{{sim|}}}{{{region|}}}|
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+The requested position needs to be in the same region.}}
+}}
+
+{{#if:{{{noZ|}}}|
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+Only the {{LSLP|x}} and {{LSLP|y}} coordinates in {{LSLP|offset}} are important, the {{lSLP|z}} component is ignored.}}
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

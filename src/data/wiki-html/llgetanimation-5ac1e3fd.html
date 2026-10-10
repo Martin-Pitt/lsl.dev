@@ -1,0 +1,97 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line"><a href="/functions/llGetAgentInfo/">llGetAgentInfo</a> provides information on some animation states not covered by this function (typing, away, busy). <a href="/functions/llGetAnimationList/">llGetAnimationList</a> provides more detailed information about the running animations, but may not reflect avatar state as accurately as llGetAnimation.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the name of the currently playing locomotion animation for avatar <code>id</code>. See the table below.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><caption> <strong>Complete list of return values as of August 15, 2011.</strong><span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|With the successful conclusion of {{jira|SCR-26}}, a complete list of values was posted; however no indication was given as to which of the previously undocumented codes are active but just uncommon.|With the successful conclusion of SCR-26, a complete list of values was posted; however no indication was given as to which of the previously undocumented codes are active but just uncommon.}}</code></span></caption><tr><td> <span class="wiki-template"><a href="/wiki/template-lsl-animation-states-0e5a90b2/">LSL Animation States</a>: <code>{{LSL Animation States|title={{LSLGC|Animation/Override|Overridable}} values}}</code></span></td><td><table><caption>Other Common/Active values</caption><tr><th>Value</th><th>Description</th></tr><tr><td>""</td><td>During logout</td></tr><tr><td>"Init"</td><td>At login and after teleports.</td></tr></table></td><td><table><caption>Uncommon/Inactive return values</caption><tr><th>Value</th><th>Description</th></tr><tr><td>"Crouch"</td><td></td></tr><tr><td>"Epsilon"</td><td></td></tr><tr><td>"Fall Down Land"</td><td></td></tr><tr><td>"Finish Animation"</td><td></td></tr><tr><td>"Fly"</td><td></td></tr><tr><td>"FlySlow"</td><td></td></tr><tr><td>"Hard Land"</td><td></td></tr><tr><td>"Hover Down"</td><td></td></tr><tr><td>"Hover Up"</td><td></td></tr><tr><td>"Hover"</td><td></td></tr><tr><td>"Medium Land"</td><td></td></tr><tr><td>"PreFlying"</td><td></td></tr><tr><td>"PreJump"</td><td></td></tr><tr><td>"Prep For Teleport"</td><td></td></tr><tr><td>"Run"</td><td></td></tr><tr><td>"Sit on Ground"</td><td></td></tr><tr><td>"Sit"</td><td></td></tr><tr><td>"Soft Land"</td><td></td></tr><tr><td>"Stand"</td><td></td></tr><tr><td>"Stride"</td><td></td></tr><tr><td>"Take Off"</td><td></td></tr><tr><td>"Turn Done"</td><td></td></tr><tr><td>"Turn Left"</td><td></td></tr><tr><td>"Turn Right"</td><td></td></tr><tr><td>"Uncrouch"</td><td></td></tr><tr><td>"Walk"</td><td></td></tr></table></td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>This function can return an empty string while the avatar is logging out.</li>
+<li>New return values could conceivably be added at any time and this list may not in-fact be complete. Scripts should be written under the assumption that they may receive a value they won't recognize.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// A simple animation override example.
+// Make the avatar run in mid-air when jumping.
+
+key gOwner; // the wearer&#x27;s key
+string gLastAnimation; // last llGetAnimation value seen
+
+// User functions
+
+Initialize(key id) {
+    if (id == NULL_KEY) { // detaching
+        llSetTimerEvent(0.0); // stop the timer
+    }
+    else { // attached, or reset while worn
+        llRequestPermissions(id, PERMISSION_TRIGGER_ANIMATION);
+        gOwner = id;
+    }
+}
+
+
+// Event handlers
+
+default
+{
+    state_entry() {
+        // in case the script was reset while already attached
+        if (llGetAttached() != 0) {
+            Initialize(llGetOwner());
+        }
+    }
+
+    attach(key id) {
+        Initialize(id);
+    }
+
+    run_time_permissions(integer perm) {
+        if (perm &amp; PERMISSION_TRIGGER_ANIMATION) {
+            llSetTimerEvent(0.25); // start polling
+        }
+    }
+
+    timer() {
+        string newAnimation = llGetAnimation(gOwner);
+
+        if (gLastAnimation != newAnimation) { // any change?
+            if (newAnimation == &quot;Jumping&quot;) {
+                
+                // You can stop the built-in animation if you like, if
+                // it might interfere with your own. Be aware that an
+                // avatar can become stuck, and some llGetAgentInfo results
+                // can be inaccurate, if you stop built-ins indiscriminately.
+                // Always test.
+                //
+                // llStopAnimation(&quot;jump&quot;);
+    
+                llStartAnimation(&quot;run&quot;);
+            }
+            else if (gLastAnimation == &quot;Jumping&quot;)  { // just finished jumping
+                // &quot;run&quot; is looped, so we have to stop it when we are done.
+                llStopAnimation(&quot;run&quot;);
+            }
+            
+            gLastAnimation = newAnimation; // store away for  next time
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAgentInfo/">llGetAgentInfo</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAnimationList/">llGetAnimationList</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

@@ -1,0 +1,104 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">If a prim exists in the link set at <code>link</code>, set <a href="https://wiki.secondlife.com/wiki/PBR_Materials#nomenclature-changes">Blinn-Phong</a> diffuse <code>texture</code> on <code>face</code> of that prim.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Cover a link set in the texture "bark" (from the library)</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer detected)
+    {
+        llSetLinkTexture(LINK_SET, &quot;66bf4030-04f9-a808-43ab-b48b6aeb6456&quot;, ALL_SIDES);
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><h3 id="setlinktexturefast">SetLinkTextureFast</h3>
+<div class="wiki-line">This function doesn't have the 0.2 second delay. It's not very fast anyway though, but faster than <strong>llSetLinkTexture</strong>.</div>
+<div class="wiki-line"><pre><code>SetLinkTextureFast(integer link, string texture, integer face)
+{
+    // Obtain the current texture parameters and replace the texture only.
+    // If we are going to apply the texture to ALL_SIDES, we need
+    // to adjust the returned parameters in a loop, so that each face
+    // keeps its current repeats, offsets and rotation.
+    list Params = llGetLinkPrimitiveParams(link, [PRIM_TEXTURE, face]);
+    integer idx;
+    face *= face &gt; 0; // Make it zero if it was ALL_SIDES
+    // This part is tricky. The list returned by llGLPP has a 4 element stride
+    // (texture, repeats, offsets, angle). But as we modify it, we add two
+    // elements to each, so the completed part of the list has 6 elements per
+    // stride.
+    integer NumSides = llGetListLength(Params) / 4; // At this point, 4 elements per stride
+    for (idx = 0; idx &lt; NumSides; ++idx)
+    {
+        // The part we&#x27;ve completed has 6 elements per stride, thus the *6.
+        Params = llListReplaceList(Params, [PRIM_TEXTURE, face++, texture], idx*6, idx*6);
+    }
+    llSetLinkPrimitiveParamsFast(link, Params);
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLinkAlpha/">llSetLinkAlpha</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLinkColor/">llSetLinkColor</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Internal_Textures">Internal Textures</a></div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li>Date of release <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.13#release-notes-for-second-life-1-13-4-281-29-february-21-2c-2007"> 21-02-2007 </a></li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-1500"><a href="/wiki/template-issues-svc-1500-4f702f96/">Template:Issues/SVC-1500</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-1500|[[llSetLinkTexture]] fails and reports an error on textures created by someone else without full permissions|type=bug}}</code></pre></details><p id="svc-3199"><a href="/wiki/template-issues-svc-3199-bf381023/">Template:Issues/SVC-3199</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-3199|&lt;code&gt;[[llSetLinkTexture]]([[LINK_THIS]], foo, bar)&lt;/code&gt; does not work for non-full-perm textures.|type=bug}}</code></pre></details><p id="svc-914"><a href="/wiki/template-issues-svc-914-7d1b7665/">Template:Issues/SVC-914</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-914|[[CHANGED_TEXTURE]] is not triggered when texture is changed via script|type=bug|resolution=wont}}</code></pre></details><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-link-face-a7ffc876/">Template:LSL Function/link-face</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:{{{1|}}}|{{LSL Function/link|{{{1}}}|nogroup={{{nogroup|}}}}}}}{{#if:{{{2|}}}|{{LSL_Function/face|{{{2}}}}}}}{{#if:
+
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetLinkNumberOfSides]]|Returns the number of faces of the linked prim.}}}}
+
+}}</code></pre></details></section>

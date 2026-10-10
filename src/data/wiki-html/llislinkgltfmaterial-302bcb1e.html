@@ -1,0 +1,30 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is <a href="/constants/TRUE/">TRUE</a> if the material is PBR and <a href="/constants/FALSE/">FALSE</a> if it is <a href="https://wiki.secondlife.com/wiki/PBR_Materials#nomenclature-changes">Blinn-Phong</a> diffuse texture on <strong>face</strong></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Returns <a href="/constants/FALSE/">FALSE</a> if link does not exist or refers to a multi-link target (such as <a href="/constants/LINK_SET/">LINK_SET</a>).</li>
+<li>Returns <a href="/constants/FALSE/">FALSE</a> if face does not exist.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//Tells (on chat) if the materials are PBR
+default
+{
+    state_entry()
+    {
+        integer link = LINK_THIS;
+        integer i;
+        for(; i &lt; llGetLinkNumberOfSides(link); ++i)
+        {
+            string message = &quot;Side &quot; + (string)i + &quot; material is &quot;;
+            if (llIsLinkGLTFMaterial(link, i))
+                message += &quot;glTF/PBR&quot;;
+            else
+                message += &quot;Blinn-Phong&quot;;
+            llSay(0, message);
+        }
+
+        if (llIsLinkGLTFMaterial(link, ALL_SIDES))
+            llSay(0, &quot;All sides are PBR.&quot;);
+        else
+            llSay(0, &quot;Some sides are Blinn-Phong (not PBR).&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetNumberOfSides/">llGetNumberOfSides</a> — Gets the number of faces on the prim</div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><a href="/wiki/category-gltf-06c4ba99/">Category:glTF</a></div></section>

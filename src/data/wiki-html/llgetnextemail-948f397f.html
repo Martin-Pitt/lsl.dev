@@ -1,0 +1,32 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Get the next queued <a href="/events/email/">email</a> that comes from <strong>address</strong>, with specified <strong>subject</strong>.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <strong>address</strong> or <strong>subject</strong> an <code>empty string</code>, then that parameter will be treated as a <code>wildcard</code>.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">The <a href="/events/email/">email</a> <a href="https://wiki.secondlife.com/wiki/event">event</a> will be triggered only if <strong>address</strong> and <strong>subject</strong> match</div>
+<ul>
+<li>Neither parameter is case sensitive.</li>
+<li>If a parameter is an <code>empty string</code>, then that parameter will be treated as a wildcard, matches anything.</li>
+<li>If both parameters are empty strings then the first email in the queue will be matched.</li>
+<li>The email queue is <code>FIFO</code>.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llOwnerSay(&quot;My email address is: &quot; + (string)llGetKey() + &quot;@lsl.secondlife.com&quot;);
+
+        // check every half minute
+        llSetTimerEvent(30.0);
+    }
+ 
+    timer()
+    {
+        //Check for emails
+        llGetNextEmail(&quot;&quot;, &quot;&quot;);
+    }
+ 
+    email(string time, string address, string subj, string message, integer num_left)
+    {
+          llOwnerSay(&quot;I got an email: &quot; + subj + &quot;\n&quot; + message);
+     }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llEmail/">llEmail</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/email/">email</a></div></div></section>

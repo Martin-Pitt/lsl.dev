@@ -1,0 +1,117 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Start animation for the current object.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Unlike with <a href="/functions/llStartAnimation/">llStartAnimation</a>, Animesh non-looping animations must explicitly be removed from the <a href="/functions/llGetObjectAnimationNames/">llGetObjectAnimationNames</a> list with <a href="/functions/llStopObjectAnimation/">llStopObjectAnimation</a>, and cannot be started again until they are removed. This persists through script resets. <a href="https://jira.secondlife.com/browse/BUG-215954" rel="noreferrer">BUG-21594</a></li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//This script animates the object for as long as it is touched.
+default
+{
+    state_entry()
+    {
+    }
+
+    // This assumes that an animation called &quot;MyFancyWalk&quot; is present in the inventory of the current object.
+    touch_start(integer total_number)
+    {
+        llSay(0, &quot;Starting animation&quot;);
+        llStartObjectAnimation(&quot;MyFancyWalk&quot;);
+    }
+    
+    touch_end(integer total_number)
+    {
+        llSay(0, &quot;Stopping animation&quot;);
+        llStopObjectAnimation(&quot;MyFancyWalk&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>//This script creates a menu of animations to play for your Animesh.
+list animations = [&quot;*STOP*&quot;, &quot;Running Man&quot;, &quot;Guitar Dance&quot;, &quot;YMCA Dance&quot;]; //list of up to 11 animations (inside the contents of the Animesh) w/ the stop button.
+integer dialogChannel = -100; //Choose a more &quot;random&quot; if you want.
+
+string latestAnimation = &quot;&quot;; //used to stop animation when selecting new one
+integer listenHandler; //Always create your listener when needed and remove when done
+default
+{
+    touch_start(integer total_number)
+    {
+        key owner = llGetOwner(); //initialize the variable owner storing llGetOwner because we use it 3 times within this event
+        if(llDetectedKey(0) == owner)
+        {
+            llListenRemove(listenHandler);  //If having touched the object but not select a dialog option the listener will still be active, so remove just in case
+            listenHandler = llListen(dialogChannel, &quot;&quot;, owner, &quot;&quot;); //Listen to the owner on the dialog channel selected on line 1
+            llDialog(owner, &quot;Select an animation.&quot;, animations, dialogChannel); //Show a dialog menu to the owner with the animations list (line 0) as the buttons
+                                                                                //Only 12 buttons can fit one menu, to do more buttons look into DialogPlus on the wiki
+        }
+    }
+    
+    listen(integer channel, string name, key id, string text)
+    {
+        //Typically you add checks to make sure the right id or channel is used but we clear out any existing ghost listeners prior to listening which prevents us from having to
+        
+        if(latestAnimation != &quot;&quot; &amp;&amp; latestAnimation != &quot;*STOP*&quot;) llStopObjectAnimation(latestAnimation); //If latestAnimation isn&#x27;t blank AND isn&#x27;t *STOP*, stop the latestAnimation
+        if(text != &quot;*STOP*&quot;) llStartObjectAnimation(text); //If the button pressed was not *STOP*, play the animation selected
+        latestAnimation = text; //Set the latestAnimation to the button pressed so when this event is ran again we can stop the animation
+        llListenRemove(listenHandler); //Remove the listener since we are done
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Animated objects work by associating a skeleton with a linkset containing one or more rigged mesh primitives. When animations are played by a script in any of the prims in the linkset, the skeleton will animate and any rigged meshes in the linkset will move accordingly. A script running in any prim of the linkset can start, stop or query animations using the new commands. The typical usage of these functions is to do all object animation scripting in the root prim of the linkset; in this scenario, the animations and scripts would all be part of the inventory of this prim, and so of the object as a whole. However, if scripts and animations are present in multiple prims of a linkset, it is important to understand that animations are started, stopped and tracked independently in each prim.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llStopObjectAnimation/">llStopObjectAnimation</a> — Stop playing an animation in the current object</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectAnimationNames/">llGetObjectAnimationNames</a> — List currently playing animations in the current object</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="bug-215954"><a href="https://wiki.secondlife.com/wiki/Template:Issues/BUG-215954">Template:Issues/BUG-215954</a></p><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details></section>

@@ -1,0 +1,268 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<div class="wiki-line">Almost every function in Second Life has a delay associated with it. Ranging from 20 seconds to .2 seconds - delays can get on anyones' nerves. Even the most basic scripters know the easy way to get around this is to have a script and use llMessageLinked to tell it to do something. Below is a more advanced version of that code - that allows for one script to handle almost any type of function with a delay.</div>
+<div class="wiki-line">How To Use:</div>
+<div class="wiki-line">Use llMessageLinked - the integer is -123, the string is the list of arguments seperated by &quot;~~~&quot;, and the key is the name of the function.</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+        string ownerKeyAsString = (string)llGetOwner();
+
+        llMessageLinked(LINK_SET, -123,
+            ownerKeyAsString + &quot;~~~This is a dialog~~~With, Three, Options~~~0&quot;, &quot;dialog&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+        vector currentPosition = llGetPos();
+        vector targetPosition =  &lt;128, 128, 300&gt;;
+
+        float vectorDistance = ( llVecDist(currentPosition, targetPosition) / 5) + 1;
+
+        integer index;
+        do
+        {
+            llMessageLinked(LINK_SET, -123, (string)vectorDistance, &quot;setpos&quot;);
+        }
+        while (++index &lt; vectorDistance);
+    }
+}</code></pre></div>
+<div class="wiki-line">And now for the full and complete power of this code *drum roll*. Only 2 scripts are needed for the following code to work.</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+        string ownerKeyAsString = (string)llGetOwner();
+        float sleepPeriodInSeconds = 1.0;
+
+        llMessageLinked(LINK_SET, -123, ownerKeyAsString + &quot;~~~This is a dialog~~~With, Three, Options~~~0&quot;, &quot;dialog&quot;);
+        llMessageLinked(LINK_SET, -123, &quot;youemail@theaddress.com~~~Subj~~~Body&quot;, &quot;email&quot;);
+
+        llSleep(sleepPeriodInSeconds);
+
+        llMessageLinked(LINK_SET, -123, ownerKeyAsString + &quot;~~~This is a dialog~~~With, Three, Options~~~0&quot;, &quot;dialog&quot;);
+
+        llSleep(sleepPeriodInSeconds);
+
+        llMessageLinked(LINK_SET, -123, &quot;youemail@theaddress.com~~~Subj~~~Body&quot;, &quot;email&quot;);
+        
+    }
+}</code></pre></div>
+<div class="wiki-line">The code to make it all work:</div>
+<div class="wiki-line">AntiDelay Node Manager:</div>
+<div class="wiki-line"><pre><code>list l;
+
+list functions = [&quot;email&quot;, &quot;loadurl&quot;, &quot;teleportagenthome&quot;, &quot;remoteloadscriptpin&quot;,
+                    &quot;remotedatareply&quot;, &quot;giveinventorylist&quot;, &quot;setparcelmusicurl&quot;, &quot;instantmessage&quot;,
+                    &quot;preloadsound&quot;, &quot;mapdestination&quot;, &quot;dialog&quot;, &quot;createlink&quot;,
+                    &quot;setpos&quot;, &quot;setrot&quot;, &quot;settexture&quot;, &quot;rezobject&quot;];
+
+list delays = [20000, 10000, 5000, 3000,
+                3000, 2000, 2000, 1000,
+                1000, 1000, 1000, 1000,
+                200, 200, 200, 100];
+
+integer count = 1;
+
+integer time()
+{
+    string stamp = llGetTimestamp();
+
+    return (integer) llGetSubString(stamp, 11, 12) * 3600000 +
+           (integer) llGetSubString(stamp, 14, 15) * 60000 +
+           llRound((float)llGetSubString(stamp, 17, -2) * 1000000.0)/1000;
+}
+
+integer nextFreeScript()
+{
+    integer curTime = llList2Integer(l, i) - time();
+
+    integer index;
+    do
+    {
+        if (timeLeft &lt;= 0)
+//      {
+            return index;
+//      }
+    }
+    while (++index &lt; llGetListLength(l));
+
+    return -1;
+}
+
+default
+{
+    state_entry()
+    {
+        llMessageLinked(LINK_SET, -112, &quot;&quot;, &quot;&quot;);
+
+        llSleep(1.0);
+
+        llMessageLinked(LINK_SET, -111, &quot;&quot;, &quot;&quot;);
+    }
+
+    link_message(integer sender_num, integer num, string str, key id)
+    {
+        if (num == -2)
+        {
+            llMessageLinked(LINK_SET, (integer)str, (string)count, &quot;&quot;);
+
+            ++count;
+
+            l += [time()];
+
+            llSetTimerEvent(6.0);
+        }
+    }
+
+    timer()
+    {
+        state run;
+    }
+}
+
+state run
+{
+//  state_entry()
+//  {
+//      ;
+//  }
+
+    link_message(integer sender_num, integer num, string str, key id)
+    {
+        if (num == -123)
+        {
+            llOwnerSay(&quot;A&quot;);
+
+            integer d = llList2Integer(delays, llListFindList(functions, [(string)id]));
+            integer ii = nextFreeScript();
+
+            l = llListReplaceList(l, [time() + d], ii, ii);
+
+            llMessageLinked(LINK_SET, ii + 1, str, id);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">AntiDelay Node:</div>
+<div class="wiki-line"><pre><code>integer myId;
+
+default
+{
+    link_message(integer sender_num, integer num, string str, key id)
+    {
+        if (num == -111)
+        {
+            myId = (integer)llFrand(0x7FFFFFFF);
+
+            llSleep(llFrand(5.0));
+
+            llMessageLinked(LINK_SET, -2, (string)myId, &quot;&quot;);
+        }
+        else if (num == myId &amp;&amp; myId)
+        {
+            myId = (integer)str;
+            state run;
+        }
+    }
+}
+
+state run
+{
+    link_message(integer sender_num, integer num, string str, key id)
+    {
+        list params = llParseString2List(str, [&quot;~~~&quot;], []);
+
+        if (num == -112)
+        {
+            llResetScript();
+            return;
+        }
+
+        if (num != myId || !myId)
+            return;
+
+        string lowerId = llToLower( (string)id );
+        string firstParam = llList2String(params, 0);
+        string secondParam = llList2String(params, 1);
+        string thirdParam = llList2String(params, 2);
+        string fourthParam = llList2String(params, 3);
+        string fifthParam = llList2String(params, 4);
+
+        if (lowerId == &quot;email&quot;)
+        {
+            llEmail(firstParam, secondParam, thirdParam);
+        }
+        else if (lowerId == &quot;loadurl&quot;)
+        {
+            llLoadURL((key)firstParam, secondParam, thirdParam);
+        }
+        else if (lowerId == &quot;teleportagenthome&quot;)
+        {
+            llTeleportAgentHome((key)firstParam);
+        }
+        else if (lowerId == &quot;remoteloadscriptpin&quot;)
+        {
+            llRemoteLoadScriptPin((key)firstParam, secondParam,
+                (integer)thirdParam,
+                (integer)fourthParam,
+                (integer)fifthParam);
+        }
+        else if (lowerId == &quot;remotedatareply&quot;)
+        {
+            llRemoteDataReply((key)firstParam, (key)secondParam,
+                thirdParam, (integer)fourthParam);
+        }
+        else if (lowerId == &quot;giveinventorylist&quot;)
+        {
+            llGiveInventoryList((key)firstParam,
+                secondParam, llCSV2List(thirdParam));
+        }
+        else if (lowerId == &quot;setparcelmusicurl&quot;)
+        {
+            llSetParcelMusicURL(firstParam);
+        }
+        else if (lowerId == &quot;instantmessage&quot;)
+        {
+            llInstantMessage((key)firstParam, secondParam);
+        }
+        else if (lowerId == &quot;preloadsound&quot;)
+        {
+            llPreloadSound(firstParam);
+        }
+        else if (lowerId == &quot;mapdestination&quot;)
+        {
+            llMapDestination(firstParam,
+                (vector)secondParam,
+                (vector)thirdParam);
+        }
+        else if (lowerId == &quot;dialog&quot;)
+        {
+            llDialog((key)firstParam, secondParam,
+                llCSV2List(thirdParam), (integer)fourthParam);
+        }
+        else if (lowerId == &quot;createlink&quot;)
+        {
+            llCreateLink((key)firstParam, (integer)secondParam);
+        }
+        else if (lowerId == &quot;setpos&quot;)
+        {
+            llSetPos((vector)firstParam);
+        }
+        else if (lowerId == &quot;setrot&quot;)
+        {
+            llSetRot((rotation)firstParam);
+        }
+        else if (lowerId == &quot;settexture&quot;)
+        {
+            llSetTexture(firstParam, (integer)secondParam);
+        }
+        else if (lowerId == &quot;rezobject&quot;)
+        {
+            llRezObject(firstParam, (vector)secondParam, (vector)thirdParam,
+                (rotation)fourthParam, (integer)fifthParam);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library}}</code></span></div>

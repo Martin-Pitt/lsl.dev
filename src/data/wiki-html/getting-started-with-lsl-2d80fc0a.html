@@ -1,0 +1,221 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-help-f9a95ca3/">Help</a>: <code>{{Help}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<h2 id="getting-started-in-lsl-scripting-in-second-life">Getting started in LSL scripting in Second Life</h2>
+<div class="wiki-line">LSL stands for "Linden Scripting Language" and is used to script the objects you will encounter and make in Second Life.</div>
+<div class="wiki-line"><strong>FOR WHOM IS THIS TUTORIAL:</strong></div>
+<div class="wiki-line">This tutorial is intended for those who have never programmed before, Second Life or elsewhere. However, this tutorial will make little sense outside of Second Life. LSL is very specific to Second Life.</div>
+<div class="wiki-line">You will begin by running the standard "Hello, Avatar!" script and eventually move towards making your own. You will need to be familiar with the basic principles of Second Life and have general building skills <strong>before</strong> you can make use of everything in this tutorial.</div>
+<h2 id="what-is-lsl">What is LSL?</h2>
+<div class="wiki-line">LSL is the Linden Scripting Language. This is the language all scripts in Second Life are written in. The structure of LSL is largely based on Java and C, both of which are widely used programming languages in the real world. A script in Second Life is a set of instructions that can be placed inside any primitive object in the world, but not inside an avatar. Avatars, however, can wear scripted objects. LSL scripts are written with a built-in editor/compiler which we will access in "Running Your First Script".</div>
+<div class="wiki-line"><strong>NOTE:</strong> LSL is interpreted and executed on the Second Life servers (sims), not the client (Viewer). Although the script editor is part of the SL Viewer, the script itself runs on the server, which sends the results over the network to the Viewer, where you can see them.</div>
+<div class="wiki-line">One thing that makes LSL unique is its emphasis on "<a href="https://wiki.secondlife.com/wiki/state">States</a>" and "<a href="/wiki/category-lsl-events-733e3928/">event</a>". A door can be "open" or "closed" and a light can be "on" or "off". A person can be "awake" or "asleep". Many real life behaviors can be modeled with "states" and the same can be true for LSL programs. Minimally a script will have one <a href="https://wiki.secondlife.com/wiki/state">state</a>, the default <a href="https://wiki.secondlife.com/wiki/state">state</a>.</div>
+<div class="wiki-line">An event can be thought of as a "Trigger". Events are not user defined in Second Life, but rather predefined. They are either caused by objects and avatars interacting in the world, or they are created in a script. Events trigger event handlers (sometimes just called "events" as well). For example, when an avatar touches an object, a <em>touch_start</em> message is sent to the object, which causes the <a href="/events/touch_start/">touch_start</a>() event handler to begin executing. So the minimum LSL program must have one <a href="https://wiki.secondlife.com/wiki/state">state</a> with one event handler in it. Here is a look at a minimal program written in LSL that can loosely be translated as...."When I am in the default state, and I am touched, say "Hello, Avatar!" on channel zero".</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><strong>WHAT CAN I DO WITH SCRIPTS?</strong></div>
+<div class="wiki-line">Scripts can make an object move, listen, talk, operate as a vehicle or weapon, change color, size or shape. A script can make an object listen to your words as well as talk back to you, scripts even let objects talk to each other.</div>
+<div class="wiki-line">The most basic object in Second Life is the "Prim" or primitive, the basic building block of all objects you can <a href="https://wiki.secondlife.com/wiki/Good_Building_Practices">build in Second Life</a>. When several prims are linked, they can each contain a script which speaks to the rest of the object via Link Messages. These are faster and more private than having objects "chat" or email each other. These are beyond the scope of this tutorial and we will instead focus on single scripts in a single prim.</div>
+<div class="wiki-line">Scripting is harder to learn than basic object manipulation, but is very rewarding once you make progress. For creating scripts it can be helpful to have a local copy of them on your local harddrive as they're basically just text and edit them with one of the <a href="https://wiki.secondlife.com/wiki/LSL_Alternate_Editors">alternate editors</a>.</div>
+<div class="wiki-line">If you have built in Second Life, everything you can define in the edit window can be defined in a script. All interaction you see between objects or between avatars and objects is via scripts.</div>
+<div class="wiki-line">Learning more about the world and building model is <strong>vital to some aspects</strong> of scripting, thus I would recommend a good foundation in building as you learn to script.</div>
+<h2 id="running-your-first-script">Running Your First Script</h2>
+<div class="wiki-line">Traditionally one starts by writing the smallest program possible to print "Hello, Avatar!". Since LSL only runs inside objects, you must know how to create an object and put a script inside it.</div>
+<div class="wiki-line">You must be on land which allows building. Either your own land, or land where you have permission to build, such as a sandbox. Right click on the ground and choose <strong>Build</strong> (for one button macs use command+click).</div>
+<div class="wiki-line">By default, you should see a <strong>wand</strong> icon with which you can click and create a cube on the ground.</div>
+<div class="wiki-line">You will automatically enter <strong>Edit</strong> mode and an <a href="https://wiki.secondlife.com/wiki/Edit_window#edit-tool">edit window</a> will pop up. To place a script in an existing object, right click the object and click <strong>Edit</strong> to open the edit window.</div>
+<div class="wiki-line">In the edit window you may see a button marked <strong>More&gt;&gt;</strong> click it to reveal five tabs marked <strong>General</strong>, <strong>Object</strong>, <strong>Features</strong>, <strong>Texture</strong>, and <strong>Content</strong>. Choose the <strong>Content</strong> tab.</div>
+<div class="wiki-line">This tab shows the contents of an object which can hold scripts, notecards, textures, sounds, even other objects. Press <strong>New Script</strong> to add a new script.</div>
+<div class="wiki-line">This will open the LSL editor with a default script. This editor will color code your syntax and provide some info about keywords when you hold your mouse over them. It will also do basic syntax checking. Alternatively you can use one of the <a href="https://wiki.secondlife.com/wiki/LSL_Alternate_Editors">alternate editors</a> to write your scripts on your local harddrive and copy them to Second Life whenever you feel like it.</div>
+<div class="wiki-line">Before explaining the code, let's run it. Hit <strong>Save</strong> and close your <a href="https://wiki.secondlife.com/wiki/Edit_window#edit-tool">edit window</a> (not the LSL editor window).</div>
+<div class="wiki-line">You should see the words <code>Hello, Avatar!</code> from your object named "Object".</div>
+<div class="wiki-line">If you touch the object, it will say <code>Touched.</code> The <a href="https://wiki.secondlife.com/wiki/Edit_window#edit-tool">edit window</a> must be closed for touching to work.</div>
+<div class="wiki-line">Congratulations! You have compiled and run your first LSL script!</div>
+<h2 id="development-cycle">Development Cycle</h2>
+<div class="wiki-line">(aka Wash / Rinse / Repeat)</div>
+<div class="wiki-line">We now have a running script, however most scripts you make will not run the first time you run them. It will take many tries as you correct errors and make improvements. When you hit "Save" on a script, the LSL editor "compiles" the code to something LSL can understand. It will stop however if it finds an error.</div>
+<div class="wiki-line">Brackets (or Braces, if you prefer), parentheses, and semicolons must all be perfectly in place before a script will run. If you are new to programing this can be one of the most infuriating steps and lead you to screaming DWIM (Do what I mean!). Part of becoming a programmer in ANY language is learning how to precisely define steps and correctly type them into the language you are working in. Thus you will find yourself writing, running, then <strong>RE-writing</strong> your code several times.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">The <a href="http://en.wikipedia.org/wiki/Pareto_principle" rel="noreferrer">pareto principle</a> applies. <strong>At least (if not more than)</strong> 80% of the time you're spending on writing scripts you're actually not writing them but fixing stuff you messed up during the first 20% of the time. Having a look at the <a href="https://wiki.secondlife.com/wiki/LSL_Style_Guide">Style Guide</a> certainly helps with being more productive cause you can read your own code.</div></aside></div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/File:Pareto_principle_scripting.gif">Alternate Editors do help, too.</a> ]]</div>
+<div class="wiki-line">The script you made runs the instant you hit save. If you take it into inventory, it will "suspend" what it was doing but will continue from that exact point when rezzed (resurrected) again. (If you are not familiar with "taking" and "rezzing" an object you may need to revisit your building skills).</div>
+<div class="wiki-line">Each time you amend your code and save it, it is reset.  You can also reset a script inside a prim in the following ways:</div>
+<ul>
+<li>Press Reset in the script window.</li>
+<li>Select the object and choose BUILD &gt; SCRIPTS &gt; RESET SCRIPTS (for older viewers TOOLS&gt;RESET SCRIPTS IN SELECTION)</li>
+<li>By checking and unchecking the "Running" check-box</li>
+<li>Choose BUILD &gt; SCRIPTS &gt; SET SCRIPTS TO NOT RUNNING (for older viewers TOOLS&gt;SET SCRIPTS TO NOT RUNNING IN SELECTION) and then BUILD &gt; SCRIPTS &gt; SET SCRIPTS TO RUNNING (for older viewers TOOLS&gt;SET SCRIPTS TO RUNNING IN SELECTION).</li>
+</ul>
+<div class="wiki-line">Once you get comfortable with stopping, starting, and resetting a script, try changing the words "Hello, Avatar!" and see what else you can make it say.... for goodness sakes keep it PG.</div>
+<h3 id="why-stop-and-start">WHY STOP AND START?</h3>
+<div class="wiki-line">Scripting in Second Life can be a little bit like fixing your car...while going 60mph down the freeway. Thus you need ways to stop the programs for they may affect others.</div>
+<div class="wiki-line">Objects can hold more than one script and they will all run at once. This can be used in the following manner. Say you write a script that makes a prim change color every few seconds. You also write one to make it follow you. Put them both in one object and it will follow you while changing colors!</div>
+<div class="wiki-line">For simplicity's sake, the following examples will all be used individually so be sure not to put two or more into the same object.</div>
+<h2 id="dissecting-hello-avatar">Dissecting "Hello, Avatar!"</h2>
+<div class="wiki-line">Let's take a look at the default code.</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+
+    touch_start(integer total_number)
+    {
+        llSay(0, &quot;Touched.&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line">The code above contains 1 <a href="https://wiki.secondlife.com/wiki/state">state</a>, 2 <a href="/wiki/category-lsl-events-733e3928/">event</a> and 2 <a href="/wiki/category-lsl-functions-83ba2c38/">functions</a>. Let's look at them individually.</div>
+<div class="wiki-line">Any line starting with two forward slashes <code>//</code> is a comment. It will not run and is used to help you document your code.</div>
+<div class="wiki-line"><pre><code>// This is a comment</code></pre></div>
+<div class="wiki-line">You can also use block comments, although it's not recommended for sake of better readability. Block comments start with <code>/*</code> and end with <code>*/</code>.</div>
+<div class="wiki-line"><pre><code>/* this   *
+* is      *
+* a       *
+* block   *
+* comment */</code></pre></div>
+<h3 id="states">STATES</h3>
+<div class="wiki-line">A <a href="https://wiki.secondlife.com/wiki/state">state</a> in LSL is a section that is running, and waiting for events. Only one <a href="https://wiki.secondlife.com/wiki/state">state</a> can be active at any one time per script. Every script must have a default <a href="https://wiki.secondlife.com/wiki/state">state</a> with at least one event in it. Except for the default <a href="https://wiki.secondlife.com/wiki/state">state</a>, each <a href="https://wiki.secondlife.com/wiki/state">state</a> is defined by the word <em>state</em> followed by the name of the <a href="https://wiki.secondlife.com/wiki/state">state</a>. The contents of the <a href="https://wiki.secondlife.com/wiki/state">state</a> are enclosed in two curly brackets.</div>
+<div class="wiki-line"><pre><code>default
+{
+    // contents of state go here
+}
+
+state playing
+{
+    // this is a state called &quot;playing&quot;
+}</code></pre></div>
+<h3 id="events">EVENTS</h3>
+<div class="wiki-line"><a href="/wiki/category-lsl-events-733e3928/">event</a> are inside of <a href="https://wiki.secondlife.com/wiki/state">states</a>. By "inside" I mean it is between the open and closed curly brackets that represent the body of the <a href="https://wiki.secondlife.com/wiki/state">state</a>. When that <a href="https://wiki.secondlife.com/wiki/state">state</a> is active, those events wait to be triggered and run the code inside them. We have seen "<a href="/events/state_entry/">state_entry</a>" which is triggered by the <a href="https://wiki.secondlife.com/wiki/state">state</a> being entered, and "<a href="/events/touch_start/">touch_start</a>" which is triggered when you, or anyone, touches an object.</div>
+<div class="wiki-line">Let's take a look at the default code.</div>
+<div class="wiki-line"><pre><code>// state begins
+default
+{
+    // event begins
+    touch_start(integer num_detected)
+    {
+        // this is the content of the event (between curly brackets)
+    }
+    // event ends
+}
+// state ends</code></pre></div>
+<h3 id="functions">FUNCTIONS</h3>
+<div class="wiki-line"><a href="/wiki/category-lsl-functions-83ba2c38/">Functions</a> lay inside of events and are either defined by you or built-in. Those built in to LSL all start with two lowercase L's. We have seen <a href="/functions/llSay/">llSay</a>() so far. <a href="/wiki/category-lsl-functions-83ba2c38/">Functions</a> take "arguments" or values in the parentheses that follow it. If you hover over the function in the editor, a pop-up will show that tells you what the function is expecting. In the case of <a href="/functions/llSay/">llSay</a> it expects a number and a string. We send it the number zero and the string "Hello, Avatar!" separated by a comma. The function is "expecting" a number and strings and will not take anything else.</div>
+<h3 id="putting-it-all-together">Putting it all together</h3>
+<div class="wiki-line">Line by line, here is the hello avatar script.</div>
+<div class="wiki-line"><pre><code>default // All Scripts need a Default State
+
+{ // this open curly bracket denotes the start of the state
+    state_entry() // an event
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;); // a function inside the event&#x27;s curly brackets
+    } // closed curly bracket closes the state_entry event
+
+    touch_start(integer total_number)  // another event inside default state
+    {
+        llSay(0, &quot;Touched.&quot;); // a function between the brackets of the touch_start body
+    } // end of touch start
+} // Code end</code></pre></div>
+<div class="wiki-line">The instant you save your script, it enters default state, which in turn runs the "<a href="/events/state_entry/">state_entry</a>" event which in turn runs the function <a href="/functions/llSay/">llSay</a>() which makes the object talk.</div>
+<div class="wiki-line">After this, the program waits idle in the default state until a new event is called.</div>
+<div class="wiki-line">Touching the box triggers the event "<a href="/events/touch_start/">touch_start</a>" which also makes the object speak.</div>
+<h2 id="introducing-states-and-events">Introducing States and Events</h2>
+<div class="wiki-line">LSL scripts will not run beginning to end. Instead, they will look for a default state and wait for an event. Within those <a href="/wiki/category-lsl-events-733e3928/">event</a>, there can be a call to go to a new state.</div>
+<div class="wiki-line">All programs must contain the default state, inside of which must be at least one event.  <a href="/wiki/category-lsl-events-733e3928/">event</a> are triggered either by actions happening to or around the object the script resides in, or are triggered from the script itself.</div>
+<h3 id="on-off-example-using-states">On/Off Example Using States</h3>
+<div class="wiki-line">Let us look at a script with two states with two <a href="/wiki/category-lsl-events-733e3928/">event</a> in each.</div>
+<div class="wiki-line"><pre><code>default //default state is mandatory
+{
+    state_entry() // runs each time the state is entered
+    {
+        llSay(0, &quot;turning on!&quot;); //object speaks!
+        llSetColor(&lt;1.0, 1.0, 1.0&gt;, ALL_SIDES); // sets no tint (white)
+        // note the semicolons at the end of each instruction
+        // (do not put them at the end of &quot;if&quot; statements)
+    }
+
+    // Note: for technical reasons discussed elsewhere, we use a touch_end event rather than touch_start when state changes are involved
+    touch_end(integer total_number) // another event with only one function inside
+    {
+        state off; // sets the script to a new &quot;state&quot; and starts running &quot;state off&quot;
+    }
+} // this curly bracket ends the body of the default state.
+
+state off // a second state besides &quot;default&quot;
+{
+    state_entry() // this is run as soon as the state is entered
+    {
+        llSay(0, &quot;turning off!&quot;);
+        llSetColor(&lt;0.0, 0.0, 0.0&gt;, ALL_SIDES); // sets black tint
+    }
+
+    touch_end(integer total_number)
+    {
+        state default;
+    }
+}</code></pre></div>
+<div class="wiki-line">A simplification of this would be</div>
+<div class="wiki-line"><pre><code> default
+ {
+ //set color to light and, if touched, enter the &quot;off&quot; state.
+ }
+
+ state off
+ {
+ //set color to dark and, if touched, enter the &quot;default&quot; state.
+ }</code></pre></div>
+<div class="wiki-line">Note that after "<a href="https://wiki.secondlife.com/wiki/default">default</a>" all new states begin with the word "<a href="https://wiki.secondlife.com/wiki/state">state</a>". Also, while the object has a texture, the color will affect the "tint" more than the true color.</div>
+<h3 id="default-state">Default State</h3>
+<div class="wiki-line">Let us examine the default state.</div>
+<div class="wiki-line">First we see the "<a href="/events/state_entry/">state_entry</a>" event, which gets triggered each time the default state is entered. Which in this case is entered the first time the script is run.</div>
+<div class="wiki-line"><strong>SPEAK TO ME!</strong></div>
+<div class="wiki-line">The first line in the event state_entry is...</div>
+<div class="wiki-line"><pre><code>llSay(0, &quot;turning on!&quot;);</code></pre></div>
+<div class="wiki-line">This makes the object speak "turning on!" on channel zero. What is channel zero? It is the same channel you see all public chat on.</div>
+<div class="wiki-line">A semicolon ends the line and yet another instruction follows.</div>
+<div class="wiki-line"><pre><code>llSetColor(&lt;1.0, 1.0, 1.0&gt;, ALL_SIDES);</code></pre></div>
+<div class="wiki-line">This turns the prim to its brightest tint. If you take the texture off the prim, you would see it as bright white but with a texture, it looks "normal." The three ones stand for the Red, Green, and Blue values of the tint.</div>
+<div class="wiki-line">At this point the event is finished with the two lines of commands.  Then the script waits idle in the default state for more events to happen.</div>
+<div class="wiki-line"><strong>TOUCHED BY AN AVATAR</strong></div>
+<div class="wiki-line">While idle in the default state a touch will trigger the "<a href="/events/touch_end/">touch_end</a>" event.</div>
+<div class="wiki-line">Inside of the "touch_end" event is only one command:</div>
+<div class="wiki-line"><pre><code>state off;</code></pre></div>
+<div class="wiki-line">This is a command to move immediately to a new state named "off".</div>
+<div class="wiki-line">This state is defined after the default state and nearly mirrors the default state, except that it turns the prim dark and, when touched, will put the script back into default mode, thus creating a loop.</div>
+<ul>
+<li>Enters default state</li>
+<li>Runs code in "state entry"</li>
+<li>Waits to be touched</li>
+<li>When touched enters "state off"</li>
+<li>Enters "state off"</li>
+<li>Runs code in "state entry" (note in the "off" state's body)</li>
+<li>Waits to be touched</li>
+<li>When touched enters "default" state</li>
+</ul>
+<div class="wiki-line">Then the whole thing starts over.</div>
+<h2 id="a-final-word-on-words">A Final Word on Words</h2>
+<div class="wiki-line">Making your object speak is a great way to know what a script is doing, but everyone can hear it for 20m all around you. As you get into more complex scripts this can get pretty noisy! Three alternative ways to see what is going on exist.</div>
+<div class="wiki-line"><strong>SHHHH WHISPER</strong></div>
+<div class="wiki-line"><a href="/functions/llWhisper/">llWhisper</a>( ) is just like <a href="/functions/llSay/">llSay</a>( ) but only broadcasts at half the distance (10m). You still must state what channel. So...</div>
+<div class="wiki-line"><pre><code>llWhisper(0, &quot;turning on!&quot;);</code></pre></div>
+<div class="wiki-line">...might work a bit to save the sanity of your neighbors.</div>
+<div class="wiki-line">Using <a href="/functions/llShout/">llShout</a>( ) increases the distance heard to a radius of 100m, but can cut the amount of friends you have in half.</div>
+<div class="wiki-line"><a href="/functions/llOwnerSay/">llOwnerSay</a>( ) uses no channel, and is seen in chat only by the object's owner. Very useful and can triple the amount of friends you have!</div>
+<div class="wiki-line"><pre><code>llOwnerSay(&quot;turning on!&quot;);</code></pre></div>
+<div class="wiki-line"><strong>THE SOUND OF SILENCE</strong></div>
+<div class="wiki-line">You can make a totally silent message via <a href="/functions/llSetText/">llSetText</a>( ) like this.</div>
+<div class="wiki-line"><pre><code>llSetText(&quot;I am on&quot;, &lt;1.0, 1.0, 1.0&gt;, 1.0);</code></pre></div>
+<div class="wiki-line">What do the numbers mean? The &lt;1.0, 1.0, 1.0&gt; we have seen before. It represents the values for red, green, and blue. For now just know that &lt;1.0, 1.0, 1.0&gt; means "white" and &lt;0.0, 0.0, 0.0&gt; means "black".</div>
+<div class="wiki-line">Replace the</div>
+<div class="wiki-line"><pre><code>llSay(0, &quot;turning off!&quot;);</code></pre></div>
+<div class="wiki-line">with...</div>
+<div class="wiki-line"><pre><code>llSetText(&quot;I am off&quot;, &lt;0.0, 0.0, 0.0&gt;, 1.0);</code></pre></div>
+<div class="wiki-line">The 1.0 is the alpha setting. 1.0 means fully opaque, and 0.0 would be completely transparent (invisible).</div>
+<h2 id="next-steps">Next steps</h2>
+<div class="wiki-line">Now that you can edit and run LSL code, move on to one of the more advanced <a href="https://wiki.secondlife.com/wiki/LSL_Tutorial">LSL Tutorial</a>s.</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Tutorials}}</code></span></div>

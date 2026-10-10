@@ -1,0 +1,110 @@
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">Never ever forget to release a URL again which you have requested! URLs are region resources just like prims. If you take them all you can get into big trouble with the sim owner and/or estate managers.</div></aside></div>
+<div class="wiki-line">This script requests a new URL after region restart:</div>
+<div class="wiki-line"><pre><code>string url;
+key urlRequestId;
+key selfCheckRequestId;
+
+request_url()
+{
+    llReleaseURL(url);
+    url = &quot;&quot;;
+
+    urlRequestId = llRequestURL();
+}
+
+throw_exception(string inputString)
+{
+    key owner = llGetOwner();
+    llInstantMessage(owner, inputString);
+
+    // yeah, bad way to handle exceptions by restarting.
+    // However this is just a demo script...
+
+    llResetScript();
+}
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    changed(integer change)
+    {
+        if (change &amp; (CHANGED_OWNER | CHANGED_INVENTORY))
+        {
+            llReleaseURL(url);
+            url = &quot;&quot;;
+
+            llResetScript();
+        }
+
+        if (change &amp; (CHANGED_REGION | CHANGED_REGION_START | CHANGED_TELEPORT))
+            request_url();
+    }
+
+    state_entry()
+    {
+        request_url();
+    }
+
+    http_request(key id, string method, string body)
+    {
+        integer responseStatus = 400;
+        string responseBody = &quot;Unsupported method&quot;;
+
+        if (method == URL_REQUEST_DENIED)
+            throw_exception(&quot;The following error occurred while attempting to get a free URL for this device:\n \n&quot; + body);
+
+        else if (method == URL_REQUEST_GRANTED)
+        {
+            url = body;
+            key owner = llGetOwner();
+            llLoadURL(owner, &quot;Click to visit my URL!&quot;, url);
+
+            // check every 5 mins for dropped URL
+            llSetTimerEvent(300.0);
+        }
+        else if (method == &quot;GET&quot;)
+        {
+            responseStatus = 200;
+            responseBody = &quot;Hello world!&quot;;
+        }
+        // else if (method == &quot;POST&quot;) ...;
+        // else if (method == &quot;PUT&quot;) ...;
+        // else if (method == &quot;DELETE&quot;) { responseStatus = 403; responseBody = &quot;forbidden&quot;; }
+
+        llHTTPResponse(id, responseStatus, responseBody);
+    }
+
+    http_response(key id, integer status, list metaData, string body)
+    {
+        if (id == selfCheckRequestId)
+        {
+            // If you&#x27;re not usually doing this,
+            // now is a good time to get used to doing it!
+            selfCheckRequestId = NULL_KEY;
+
+            if (status != 200)
+                request_url();
+        }
+
+        else if (id == NULL_KEY)
+            throw_exception(&quot;Too many HTTP requests too fast!&quot;);
+    }
+
+    timer()
+    {
+        selfCheckRequestId = llHTTPRequest(url,
+                                [HTTP_METHOD, &quot;GET&quot;,
+                                    HTTP_VERBOSE_THROTTLE, FALSE,
+                                    HTTP_BODY_MAXLENGTH, 16384],
+                                &quot;&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-constants">See also: constants</h2><span id="constants"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/constants/URL_REQUEST_GRANTED/">URL_REQUEST_GRANTED</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/events/http_request/">http_request</a></div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li><span class="wiki-template"><a href="/wiki/template-svn-6879a543/">SVN</a>: <code>{{SVN|1836|rev=112899 |trunk=*|anchor=file15|ver=|ser=}}</code></span></li>
+</ul></section>

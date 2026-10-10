@@ -49,20 +49,31 @@ scripts/
   lib/wiki_render.py       safe partial wikitext -> HTML renderer
   lib/wiki_fields.py       template field extraction helpers
   lib/test_import.py       unittest tests for importer + renderer
-  check-built-links.py     offline audit of dist/ (local links, remote assets)
+  generate-mdx.py          creates missing API pages (MDX) and reports drift; never overwrites
+  lib/mdx_convert.py       wiki HTML -> readable MDX (Markdown first, HTML only where needed)
+  lib/desc_review.py       compares definitions and wiki descriptions (data/reports/description-review.md)
+  check-built-links.py     offline audit of dist/ (local links, remote assets, no /wiki/ links from API pages)
   feature-index.mjs        reads feature pages for astro.config; writes the generated feature index
   check-feature-migration.py  confirms the feature pages kept everything from the old JSON
   lib/feature_mdx.py       Python reader for feature pages (tests)
   lib/test_features.py     feature page tests (coverage, links, structure)
   requirements.txt         Python deps (PyYAML==6.0.3)
   legacy/                  archived JS generators (unsupported)
-src/data/catalog.json    DERIVED: full catalog consumed by the site
+src/data/catalog.json    DERIVED: catalog index (definitions, categories, enums, slim wiki references)
+src/data/wiki-html/      DERIVED: rendered archive pages, one file each, loaded lazily by /wiki/[slug]/
+data/derived/api-wiki.json  DERIVED: per-API wiki sections, input of the MDX generator only
+src/content/docs/{functions,events,constants}/  HAND-EDITED MDX: one page per public API (see docs/editing-api-pages.md)
+src/data/mdx-pages.json  generator state: signature and wiki revision each page was generated from
 src/data/topic-guides.json  hand-curated category summaries and task links
 public/wiki-source/*.txt DERIVED: raw wikitext per archived page (downloadable)
 data/reports/            DERIVED/diagnostic: import, link and dependency reports
 src/lib/catalog.ts       typed access to catalog.json
 src/pages/               data-driven routes (see below)
-src/components/reference ApiDetail, CatalogList, WikiContent, WikiAttribution
+src/components/lsl       API page components: LSLFunction/LSLEvent/LSLConstant, ConstantGroup, WikiSource
+src/components/reference ApiSignature, CatalogList, WikiContent, WikiAttribution
+src/route-middleware.ts, src/routeData.ts  meta descriptions; the current sidebar entry on deep pages
+src/lib/page-nav.ts      breadcrumbs and chips under the title (PageTitle override)
+src/lib/rehype-inline-lsl.ts  highlights inline `code` and API links in Markdown/MDX as LSL
 src/components/starlight Header, Hero, PageFrame (from slua.dev) and Footer overrides
 src/styles/slua-base.css slua.dev's theme CSS, copied verbatim; custom.css adds lsl.dev rules
 src/content/docs/features/  hand-written feature pages (slua.dev slugs); drive /features/, the sidebar, redirects and API feature chips
@@ -74,8 +85,11 @@ docs/                    contributor guides (not published)
 src/legacy/              pre-modernization MDX/components (excluded from the build)
 ```
 
-Routes built from the catalog: `/reference/`, `/functions/` and `/functions/[name]/`,
-`/events/` and `/events/[name]/`, `/constants/` and `/constants/[name]/`,
+API pages `/functions/<name>/`, `/events/<name>/` and `/constants/<name>/` are the MDX files in
+`src/content/docs/{functions,events,constants}/` (one page per API; see
+[docs/editing-api-pages.md](docs/editing-api-pages.md) for editing, adding pages and what the
+generator does and does not overwrite).
+Routes built from the catalog: `/reference/`, `/functions/`, `/events/`, `/constants/`,
 `/categories/` and `/categories/[id]/`, `/constants/groups/` and `/constants/groups/[group]/`,
 `/features/` (feature pages themselves are MDX in `src/content/docs/features/`), `/wiki/` and `/wiki/[slug]/`. The sidebar links only to
 feature areas, categories and indexes, never to individual functions or constants. Search uses Starlight's built-in Pagefind index.
@@ -87,7 +101,8 @@ feature areas, categories and indexes, never to individual functions or constant
 | Source | `data/sources/*` | Replaced deliberately when refreshing snapshots |
 | Curated | `src/data/topic-guides.json`, `src/content/docs/**` | Edited by hand |
 | Generated index | `src/data/feature-clusters.json` | `node scripts/feature-index.mjs` after editing feature pages |
-| Derived | `src/data/catalog.json`, `public/wiki-source/*.txt`, `data/reports/import-report.json` | Written by `npm run import:data`, never edited by hand |
+| Curated, generated once | `src/content/docs/{functions,events,constants}/*.mdx` | Created by `npm run generate:mdx` when missing, then edited by hand; never overwritten |
+| Derived | `src/data/catalog.json`, `src/data/wiki-html/`, `data/derived/`, `public/wiki-source/*.txt`, `data/reports/import-report.json` | Written by `npm run import:data`, never edited by hand |
 | Diagnostic | `data/reports/built-links.json`, `data/reports/npm-audit*.json`, `data/reports/dependency-audit.md` | Written by checks/audits |
 
 Derived files are committed so that `astro build` needs only Node, not Python or the
@@ -132,7 +147,8 @@ npm run dev                                  # http://localhost:4321
 | `npm run check` | `astro check` type/diagnostic pass |
 | `npm run features:index` | Regenerate `src/data/feature-clusters.json` from the feature pages |
 | `npm run import:data` | `python scripts/import-datasets.py`: regenerate derived data from `data/sources` |
-| `npm run test:data` | `python -m unittest discover -s scripts/lib -p "test_*.py"` (38 tests) |
+| `npm run generate:mdx` | `python scripts/generate-mdx.py`: create missing API pages, report drift (`--check`, `--force NAME`, `--accept NAME`) |
+| `npm run test:data` | `python -m unittest discover -s scripts/lib -p "test_*.py"` |
 | `npm run test:links` | `python scripts/check-built-links.py`: needs a prior build. Checks local `href`s in `dist/` and fails on remote assets. Writes `data/reports/built-links.json` |
 
 Importer options: `python scripts/import-datasets.py --wiki PATH --definitions PATH`
@@ -151,7 +167,9 @@ git diff --stat         # derived output should change only where the sources ch
 CI (`.github/workflows/lsl-sync.yml`, on pull requests touching `data/`, `scripts/`
 or `src/data/`, and on manual dispatch) installs `scripts/requirements.txt` and runs
 the unit tests. It then reruns the importer and fails if `src/data/catalog.json`,
-`public/wiki-source` or `data/reports` differ from what is committed. The workflow makes
+`src/data/wiki-html`, `data/derived`, `public/wiki-source` or `data/reports/import-report.json`
+differ from what is committed, and runs `generate-mdx.py --check`, which fails if a public API has
+no page or a page has no public API. The hand-edited MDX is never regenerated in CI. The workflow makes
 no network requests to the wiki and pushes nothing. Deployment
 (`.github/workflows/astro.yml`) runs only on pushes to `main` or manual dispatch.
 
@@ -165,11 +183,14 @@ Top-level keys:
 - `functions`, `events`, `types`, `controls`: arrays of entries with `name`, `kind`,
   `slug`, `description`, `signature`, `returnType`, `parameters[]` (`name`, `type`,
   `description`), `categories[]`, `definition` (the full original YAML record:
-  energy, sleep, func-id, flags, etc.), and `wiki` (the matched archive page or null).
+  energy, sleep, func-id, flags, etc.), `wiki` (a reference to the matched archive page: `id`,
+  `slug`, `title`, `source`, `rawPath`, `sharedWith`; or null) and, on modern entries, `replaces`
+  (deprecated names whose `deprecated.use` points here in the same context).
 - `constants`: the same fields plus `type`, `value` and `groups`.
 - `categories`: `id`, `label`, and lists of `functions`, `events`, `constants`.
-- `wiki`: archive pages with `id`, `slug`, `title`, `namespace`, `html` (rendered),
-  `sections`, `rawPath` (link to `public/wiki-source/<slug>.txt`), and `source`
+- `deprecated`: deprecated entries with a same-context replacement (`name`, `kind`, `use`).
+- `wiki`: archive pages with `id`, `slug`, `title`, `namespace`, `headings` (the rendered HTML
+  is in `src/data/wiki-html/<slug>.html`), `rawPath` (link to `public/wiki-source/<slug>.txt`), and `source`
   (`title`, `url`, `revisionId`, `timestamp`, `contributor`, `revisionUrl`, `historyUrl`).
 - `enums`: enum groups from the definitions (for example `AgentInfo`, `AttachPoint`).
 

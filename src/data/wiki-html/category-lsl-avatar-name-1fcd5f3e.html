@@ -1,0 +1,69 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Avatar}}</code></span><a href="/wiki/category-display-names-c93ef3b5/">Category:Display Names</a></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-righttoc-d8e1769b/">RightToc</a>: <code>{{RightToc}}</code></span></div>
+<h3 id="names">Names</h3>
+<div class="wiki-line">From an LSL standpoint avatars can have 3 different names.</div>
+<table><tr><th> Naming </th><th> Description</th><th> Unique</th><th> Get (in region)</th><th> Request (<a href="/events/dataserver/">dataserver</a>)</th><th> <a href="/functions/llSensor/">llSensor</a>(<a href="/functions/llSensorRepeat/">Repeat</a>) flags</th><th> <a href="/wiki/category-lsl-detected-a60bd5c2/">detected</a> events</th></tr><tr><th> <a href="/wiki/category-lsl-display-name-eb239ef2/">Display Name</a></th><td> The name that is displayed on the screen.</td><td> No</td><td> <a href="/functions/llGetDisplayName/">llGetDisplayName</a></td><td> <a href="/functions/llRequestDisplayName/">llRequestDisplayName</a></td><td> <a href="https://wiki.secondlife.com/wiki/Display_Names/LSL#what-about-an-agent-by-display-name-flag-for-llsensor">N/A</a></td><td> <code>N/A</code></td></tr><tr><th> <a href="/wiki/category-lsl-username-125522d0/">Username</a></th><td> The name the users logs in with.</td><td> Yes</td><td> <a href="/functions/llGetUsername/">llGetUsername</a></td><td> <a href="/functions/llRequestUsername/">llRequestUsername</a></td><td> <a href="/constants/AGENT_BY_USERNAME/">AGENT_BY_USERNAME</a></td><td> <code>N/A</code></td></tr><tr><th> <a href="/wiki/category-lsl-legacy-name-97d24b19/">Legacy Name</a></th><td> An interface predating <a href="https://wiki.secondlife.com/wiki/Display_Names">Display Names</a>.</td><td> Yes</td><td> <a href="/functions/llKey2Name/">llKey2Name</a></td><td> <a href="/functions/llRequestAgentData/">llRequestAgentData</a></td><td> <a href="/constants/AGENT_BY_LEGACY_NAME/">AGENT_BY_LEGACY_NAME</a></td><td> <a href="/functions/llDetectedName/">llDetectedName</a></td></tr></table>
+<table><caption> Name Formats by Account Type</caption><tr><th> Naming</th><th> Modern</th><th> Legacy</th></tr><tr><th> Default <a href="/wiki/category-lsl-display-name-eb239ef2/">Display Name</a></th><td> "FirstName"</td><td> "FirstName LastName"</td></tr><tr><th> <a href="/wiki/category-lsl-username-125522d0/">Username</a></th><td> "firstname"</td><td> "firstname.lastname"</td></tr><tr><th> <a href="/wiki/category-lsl-legacy-name-97d24b19/">Legacy Name</a></th><td> "FirstName Resident"</td><td> "FirstName LastName"</td></tr></table>
+<h3 id="modern-and-legacy-accounts">Modern and Legacy Accounts</h3>
+<ul>
+<li>Modern accounts are created by choosing a user name, which consists of one name (no spaces).</li>
+<li>Legacy accounts were created by choosing two names: first and last names. These two names are used together to form the username.</li>
+</ul>
+<div class="wiki-line">To maintain compatibility with legacy scripts (that expect two names), modern accounts are given the legacy last name "Resident".</div>
+<h4 id="default-display-name">Default Display Name</h4>
+<div class="wiki-line">The default value of the Display Name depends upon the type of the account. For modern accounts, it is the first part of the Legacy Name (without the space and last name "Resident"; this is the same as the Username with capitalization used at registration time preserved). For legacy accounts, it is the full Legacy Name.</div>
+<div class="wiki-line"><pre><code>string agentDefaultName(string agentUsername, string agentLegacyName) {
+    integer i = llStringLength(agentUsername);
+    if (i &lt; llStringLength(agentLegacyName)) {
+        // modern account
+        return llDeleteSubString(agentLegacyName, i, -1);
+    } else {
+        // legacy account
+        return agentLegacyName;
+    }
+}</code></pre></div>
+<h4 id="legacy-name-to-username">Legacy Name to Username</h4>
+<div class="wiki-line">The relationship between the Username and Legacy Name is simple. The Username for a specific Legacy Name is the Legacy Name in lowercase with the space replaced with a period. If the last name of the Legacy Name is "Resident", then the username is just the Legacy Name first name in lowercase (without the last name or the period).</div>
+<div class="wiki-line"><pre><code>string agentUsername(string agentLegacyName) {
+    return llDumpList2String(llParseString2List(llToLower(agentLegacyName)+&quot; &quot;, [&quot; resident &quot;, &quot; &quot;],[]), &quot;.&quot;);
+}</code></pre></div>
+<div class="wiki-line"><em>If a Username is passed into this function instead of a Legacy Name, the Username will still be returned.</em></div>
+<h3 id="changed-names">Changed names</h3>
+<div class="wiki-line">If your script has stored an avatar name and someone claims to be that avatar but they have changed their name, it is possible to combine two functions to find out if that is true.</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-kbtip-2cd35faf/">KBtip</a>: <code>{{KBtip|custom=Avoid this problem|&lt;br/&gt;Don&#x27;t store avatars by name because names can change; to remember an avatar, store the key}}</code></span></div>
+<div class="wiki-line">Get the key for the name they claim to have used in the past using <a href="/functions/llRequestUserKey/">llRequestUserKey</a>. You can compare that to any key for them you already have, or you can convert that key to its current name using <a href="/functions/llRequestUsername/">llRequestUsername</a>. An example script that does this is <a href="https://wiki.secondlife.com/wiki/NameTest">NameTest</a>.</div>
+<ul>
+<li><em>Please</em> don't use LSL to provide these translations from outside Second Life using http requests; we have an <a href="https://wiki.secondlife.com/wiki/Name_to_agent_ID_API">externally accessible API</a> that provides the same capability and does not contribute to simulator lag.</li>
+</ul>
+<h3 id="other-names">Other names</h3>
+<h4 id="complete-name">Complete Name</h4>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Viewer_URI_Name_Space">Viewer URI Name Space</a> apparently also defines something called a Complete Name, which seems to be just the Display Name made unique by appending the Username in parenthesis when the Display Name is not set to its default value (and just the Display Name when it is set to its default value).</div>
+<div class="wiki-line"><pre><code>string agentCompleteName(string agentDisplayName, string agentUsername, string agentLegacyName) {
+    if (agentDisplayName == agentDefaultName(agentUsername, agentLegacyName)) {
+        return agentDisplayName;
+    } else {
+        return agentDisplayName + &quot; (&quot; + agentUsername + &quot;)&quot;;
+    }
+}</code></pre></div>
+<h4 id="web-name">Web Name</h4>
+<div class="wiki-line">Some Second Life web pages (e.g., friends online: https://secondlife.com/my/account/friends.php or search results from: http://search.secondlife.com/) seem to return another form of naming similar to the Complete Name. This name is also just the Display Name made unique by appending a unique name in parenthesis when the Display Name is not set to its default value. The difference seems to be that the appended unique value is the default Display Name, instead of the Username, so this name always contains the default Display Name (with the current Display Name prepended).</div>
+<div class="wiki-line"><pre><code>string agentWebName(string agentDisplayName, string agentUsername, string agentLegacyName) {
+    string agentDefaultName = agentDefaultName(agentUsername, agentLegacyName);
+    if (agentDisplayName == agentDefaultName) {
+        return agentDisplayName;
+    } else {
+        return agentDisplayName + &quot; (&quot; + agentDefaultName + &quot;)&quot;;
+    }
+}</code></pre></div>
+<h3 id="legacy-name-only-functions">Legacy-Name Only Functions</h3>
+<div class="wiki-line">These functions only take Legacy Names and there are no alternative functions available.</div>
+<ul>
+<li><a href="/functions/llCollisionFilter/">llCollisionFilter</a></li>
+<li><a href="/functions/llListen/">llListen</a> - likewise the <a href="/events/listen/">listen</a> <a href="/wiki/category-lsl-events-733e3928/">event</a> only has a Legacy Name parameter.</li>
+</ul>
+<h3 id="faqs">FAQs</h3>
+<div class="wiki-line">There are a couple of FAQs that go into much more detail about this:</div>
+<ul>
+<li>LSL FAQ: <a href="https://wiki.secondlife.com/wiki/Display_Names/LSL">Display Names/LSL</a></li>
+<li>General FAQ: <a href="https://wiki.secondlife.com/wiki/Display_Names">Display Names</a></li>
+</ul>

@@ -1,0 +1,63 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets the given permission <code>category</code> to the new <code>value</code> on the inventory <code>item</code>.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><td><table><tr><th> <code>category</code></th><th></th><th> Description</th></tr><tr><td> <a href="/constants/MASK_BASE/">MASK_BASE</a></td><td> 0</td><td> The base permissions.</td></tr><tr><td> <a href="/constants/MASK_OWNER/">MASK_OWNER</a></td><td> 1</td><td> Current owner permissions.</td></tr><tr><td> <a href="/constants/MASK_GROUP/">MASK_GROUP</a></td><td> 2</td><td> Active group permissions.</td></tr><tr><td> <a href="/constants/MASK_EVERYONE/">MASK_EVERYONE</a></td><td> 3</td><td> Permissions everyone has.</td></tr><tr><td> <a href="/constants/MASK_NEXT/">MASK_NEXT</a></td><td> 4</td><td> Permissions the next owner will have.</td></tr><tr><td> <a href="/constants/MASK_COMBINED/">MASK_COMBINED</a></td><td> 16</td><td> Include object inventory contents when calculating perms.<br> Combine with other mask flags, for instance MASK_OWNER|MASK_COMBINED</td></tr></table></td><td><table><tr><th> Permissions</th><th> Value</th><th> Description</th></tr><tr><td> <a href="/constants/PERM_ALL/">PERM_ALL</a></td><td> 0x7FFFFFFF</td><td> Move/Modify/Copy/Transfer permissions</td></tr><tr><td> <a href="/constants/PERM_COPY/">PERM_COPY</a></td><td> 0x00008000</td><td> Copy permission</td></tr><tr><td> <a href="/constants/PERM_MODIFY/">PERM_MODIFY</a></td><td> 0x00004000</td><td> Modify permission</td></tr><tr><td> <a href="/constants/PERM_MOVE/">PERM_MOVE</a></td><td> 0x00080000</td><td> Move permission</td></tr><tr><td> <a href="/constants/PERM_TRANSFER/">PERM_TRANSFER</a></td><td> 0x00002000</td><td> Transfer permission</td></tr></table></td></tr></table></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryPermMask/">llGetInventoryPermMask</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details></section>

@@ -1,0 +1,91 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">This function is to have the script know when it has reached a position.<br/>It registers a <code>position</code> with a <code>range</code> that triggers <a href="/events/at_target/">at_target</a> and <a href="/events/not_at_target/">not_at_target</a> events continuously until unregistered.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">A similar function exists for rotations: <a href="/functions/llRotTarget/">llRotTarget</a><br/>This function does not move the object, to do that use <a href="/functions/llSetPos/">llSetPos</a> or <a href="/functions/llMoveToTarget/">llMoveToTarget</a>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> to unregister the target with <a href="/functions/llTargetRemove/">llTargetRemove</a>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The position always references the current region. If you set llTarget to &lt;100, 100, 100&gt; while in Region A and then move the object to region B, the target automatically becomes &lt;100, 100, 100&gt; in Region B.</li>
+<li>The position can be set outside the region boundaries, but <a href="/events/at_target/">at_target</a> can only happen if the range extends into the current region.  The part of the range outside the current region will not activate <a href="/events/at_target/">at_target</a>.</li>
+<li>Only 8 targets can be active to a script. Additional llTarget will remove the oldest target set.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>integer target_id;
+vector target_pos;
+
+default
+{
+    state_entry()
+    {
+        target_pos = llGetPos() + &lt;1.0, 0.0, 0.0&gt;;
+        target_id = llTarget(target_pos, 0.5);
+    }
+    at_target(integer tnum, vector targetpos, vector ourpos)
+    {
+        if (tnum == target_id)
+        {
+            llOwnerSay(&quot;object is within range of target&quot;);
+            llOwnerSay(&quot;target position: &quot; + (string)targetpos + &quot;, object is now at: &quot; + (string)ourpos);
+            llOwnerSay(&quot;this is &quot; + (string)llVecDist(targetpos, ourpos) + &quot; meters from the target&quot;);
+            llTargetRemove(target_id);
+        }
+    }
+    not_at_target()
+    {
+        llOwnerSay(
+            &quot;not there yet - object is at &quot; + (string)llGetPos() + 
+            &quot;, which is &quot; + (string)llVecDist(target_pos, llGetPos()) + 
+            &quot; meters from the target (&quot; + (string)target_pos + &quot;)&quot;
+        );
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTargetRemove/">llTargetRemove</a> — Cancel a target position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRotTarget/">llRotTarget</a> — Register a target rotation</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRotTargetRemove/">llRotTargetRemove</a> — Cancel a target rotation</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/at_target/">at_target</a> — <a href="/events/not_at_target/">not_at_target</a> — positional target events</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/at_rot_target/">at_rot_target</a> — <a href="/events/not_at_rot_target/">not_at_rot_target</a> — rotational target events</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-position-a2dae76f/">Template:LSL Function/position</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+This template is to be used to specify setup the description for position like parameters (offsets, positions, points, etc.).
+
+Right now it&#x27;s pretty basic and easy to edit. I&#x27;m wondering if these functions should be in a position parameter specific category.
+
+====TODO====
+* add clamping flag and verbiage for out of region/range coordinates.
+&lt;/noinclude&gt;{{#if:
+
+{{#if:{{{region|}}}|
+  {{#if:{{{local|}}}|
+
+    {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region}} or [[Viewer coordinate frames#Local|local coordinates]] depending upon the situation{{{desc|}}}}}
+
+    {{#vardefine:p_{{{1|}}}_hover|position in region or local coordinates depending upon the situation{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+  |
+    {{#ifeq:{{{1|}}}|point|
+
+      {{#vardefine:p_{{{1|}}}_desc|A point in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region-local}} space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|A point in region-local space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region coordinates}}{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in region coordinates{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+|
+  {{#if:{{{local|}}}|
+
+    {{#ifeq:{{{1|}}}|offset|
+
+      {{LSL Function/offset|{{{1|}}}|local={{{local}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in [[Viewer coordinate frames#Local|local coordinates]]{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in local coordinates{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+}}
+
+}}</code></pre></details></section>

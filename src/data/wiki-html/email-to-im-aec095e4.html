@@ -1,0 +1,82 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<h2 id="email-to-im">Email-to-IM</h2>
+<div class="wiki-line">This is a basic script to translate emails into IMs.  When initiated, the script says an email address, which is the <a href="https://wiki.secondlife.com/wiki/UUID">UUID</a> for the <a href="https://wiki.secondlife.com/wiki/prim">prim</a> containing the script along with the lsl email domain.  The body of any email sent to the address will be relayed as an object IM to the owner in SL.  And a timestamp is included which is the time LL received the email (as opposed to the time the email is transmitted via IM).</div>
+<div class="wiki-line">The prim containing this script must have a stable UUID for longterm continued usage.  This means, the object can not be taken into inventory and re-rezed.</div>
+<div class="wiki-line">You are welcome to correct, add features or otherwise improve the script.</div>
+<div class="wiki-line"><pre><code>// Email-to-IM
+// DoteDote Edison
+
+///////// constants /////////
+// how often to check for new email when owner is online (seconds)
+float FAST = 60.0;
+// how often to check owner online status when owner is offline (seconds)
+float SLOW = 300.0; 
+// timezone offset from UTC
+integer OFFSET = -4;
+
+////////// globals //////////
+key request;
+key owner;
+integer owner_online;
+
+string GetStamp(string time) {
+    list weekdays = [&quot;THU&quot;, &quot;FRI&quot;, &quot;SAT&quot;, &quot;SUN&quot;, &quot;MON&quot;, &quot;TUE&quot;, &quot;WED&quot;];
+    integer a = (integer)time + (OFFSET*3600);
+    integer hours = a/3600;
+    integer mins = a/60;
+    string day  = llList2String(weekdays, (hours/24)%7);
+    return (string)(hours%24) + &quot;:&quot; + (string)(mins%60) + &quot; &quot; + day;
+}
+
+default {
+    state_entry() {
+        owner = llGetOwner();
+        string address = (string)llGetKey() + &quot;@lsl.secondlife.com&quot;;
+        llSetText(&quot;Email Server\nOnline&quot;, &lt;0.25, 1.0, 0.25&gt;, 1.0);
+        llOwnerSay(&quot;Now online.  The Email-to-IM address for &quot; + llKey2Name(owner) + &quot; is:\n&quot; + address);
+        llSetTimerEvent(FAST);
+    }
+    on_rez(integer start_param) {
+        llResetScript();
+    }
+    touch_start(integer num_detect) {
+        if (llDetectedKey(0) == owner) state off;
+    }
+    email(string time, string sender, string subject, string body, integer num_remain) {
+        llInstantMessage(owner, &quot;Email Received from: &quot; + sender + &quot; -- &quot; + GetStamp(time));
+        llInstantMessage(owner, body);
+        if (num_remain &gt; 0) llGetNextEmail(&quot;&quot;, &quot;&quot;);
+    }
+    dataserver(key query, string data) {
+        if (query == request) {
+            request = &quot;&quot;;
+            if (data == &quot;1&quot;) {
+                owner_online = TRUE;
+                llSetTimerEvent(FAST);
+            }
+            else {
+                owner_online = FALSE;
+                llSetTimerEvent(SLOW);
+            }
+        }
+    }
+    timer() {
+        request = llRequestAgentData(owner, DATA_ONLINE);
+        if (owner_online) llGetNextEmail(&quot;&quot;, &quot;&quot;);
+    }
+    state_exit() {
+        llSetTimerEvent(0.0);
+        llSetText(&quot;Email Server\nOffline&quot;, &lt;1.0, 0.25, 0.25&gt;, 1.0);
+    }
+}
+
+state off {
+    touch_start(integer num_detect) {
+        if (llDetectedKey(0) == owner) state default;
+    }
+    on_rez(integer start_param) {
+        llResetScript();
+    }
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library}}</code></span></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-email-fecbfc70/">category:LSL Email</a></div>

@@ -1,0 +1,45 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> containing a single Unicode character whose code is <strong>ord</strong>.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line"><pre><code>// Chr() function, written by Pedro Oval, 2010-05-28
+
+// Auxiliary function UrlCode, which returns the hex code of the given integer
+// (which must be in range 0-255) with a &quot;%&quot; prepended.
+string UrlCode(integer b)
+{
+    string hexd = &quot;0123456789ABCDEF&quot;;
+    return &quot;%&quot; + llGetSubString(hexd, b&gt;&gt;4, b&gt;&gt;4)
+               + llGetSubString(hexd, b&amp;15, b&amp;15);
+}
+
+// Chr function itself, which implements Unicode to UTF-8 conversion and uses
+// llUnescapeURL to do its job.
+string Chr(integer ord)
+{
+    if (ord &lt;= 0)
+        return &quot;&quot;;
+    if (ord &lt; 0x80)
+        return llUnescapeURL(UrlCode(ord));
+    if (ord &lt; 0x800)
+        return llUnescapeURL(UrlCode((ord &gt;&gt; 6) | 0xC0)
+                            +UrlCode(ord &amp; 0x3F | 0x80));
+    if (ord &lt; 0x10000)
+        return llUnescapeURL(UrlCode((ord &gt;&gt; 12) | 0xE0)
+                            +UrlCode((ord &gt;&gt; 6) &amp; 0x3F | 0x80)
+                            +UrlCode(ord &amp; 0x3F | 0x80));
+    return llUnescapeURL(UrlCode((ord &gt;&gt; 18) | 0xF0)
+                        +UrlCode((ord &gt;&gt; 12) &amp; 0x3F | 0x80)
+                        +UrlCode((ord &gt;&gt; 6) &amp; 0x3F | 0x80)
+                        +UrlCode(ord &amp; 0x3F | 0x80));
+}</code></pre></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Code 0 will return an empty string instead of the NUL character. In general, LSL does not allow NUL characters to appear in strings.</li>
+<li>Codes 0xD800-0xDFFF are not legal Unicode characters.</li>
+<li>For some "ill" cases, behaviour can vary between using Mono or not.</li>
+<li>At the time of writing this article, the performance of this function is very low, because the performance of the underlying llUnescapeURL function is also very low. Use it only if there's no alternative.</li>
+<li>The function is not prepared to deal with codes beyond 0xFFFFFF. Anyway, Unicode codes don't go beyond 0x10FFFF at the time of writing this. If Unicode is extended, using codes beyond 0x10FFFF isn't guaranteed to work.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>string heart = Chr(0x2665); // sets &#x27;heart&#x27; to &quot;♥&quot;
+string space = Chr(32); // sets &#x27;space&#x27; to the space character &quot; &quot;</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><ul>
+<li><a href="https://wiki.secondlife.com/wiki/Ord">Ord</a></li>
+<li><a href="https://wiki.secondlife.com/wiki/Combined_Library#unicode-functions">Combined Library</a></li>
+</ul></section>

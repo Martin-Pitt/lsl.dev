@@ -1,0 +1,176 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Gives <strong>inventory</strong> items to <strong>target</strong>, creating a new <strong>folder</strong> to put them in.</div></section>
+<section><h2 id="specification">Specification</h2><h3 id="target-types">target types</h3>
+<div class="wiki-line">Depending upon the type of <strong>target</strong> this function works differently.</div>
+<ul>
+<li>Avatar</li>
+<li>Must be in or able to see into the same Region as the sending object, or recently have been so. <a href="#svc-868">SVC-868</a></li>
+<li>Places the inventory items in a newly created folder in the avatars inventory (even if there is a folder by the same name, a new one is created).</li>
+<li>Prim / Object</li>
+<li>The prim <em>must</em> be in the same region.</li>
+<li>Does <em>not</em> create a folder.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer n)
+    {
+        key toucher = llDetectedKey(0);
+        string folder = &quot;Item Folder&quot;;
+        list inventory = [&quot;item&quot;, &quot;another item&quot;];
+        llGiveInventoryList(toucher, folder, inventory);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>//  when the prim is touched, the script checks all other inventory items whether or not they&#x27;re copiable
+//  copiable items are added to a list, if the list is not empty when all items have been checked
+//  the prim gives them to the touching avatar within a single folder
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        string thisScript = llGetScriptName();
+        list inventoryItems;
+        integer inventoryNumber = llGetInventoryNumber(INVENTORY_ALL);
+
+        integer index;
+        for ( ; index &lt; inventoryNumber; ++index )
+        {
+            string itemName = llGetInventoryName(INVENTORY_ALL, index);
+
+            if (itemName != thisScript)
+            {
+                if (llGetInventoryPermMask(itemName, MASK_OWNER) &amp; PERM_COPY)
+                {
+                    inventoryItems += itemName;
+                }
+                else
+                {
+                    llSay(0, &quot;Unable to copy the item named &#x27;&quot; + itemName + &quot;&#x27;.&quot;);
+                }
+            }
+        }
+
+        if (inventoryItems == [] )
+        {
+            llSay(0, &quot;No copiable items found, sorry.&quot;);
+        }
+        else
+        {
+            llGiveInventoryList(llDetectedKey(0), llGetObjectName(), inventoryItems);    // 3.0 seconds delay
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>//  script gives items to owner only
+//  all copiable items are given within a single folder
+//  all no-copy items are transferred separately (only one time, right? right!)
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        key owner = llGetOwner();
+        if (llDetectedKey(0) != owner)
+            return;
+
+        list inventoryItems;
+        integer inventoryNumber = llGetInventoryNumber(INVENTORY_ALL);
+
+        integer index;
+        for ( ; index &lt; inventoryNumber; ++index )
+        {
+            string itemName = llGetInventoryName(INVENTORY_ALL, index);
+            if (itemName != llGetScriptName() )
+            {
+                if (llGetInventoryPermMask(itemName, MASK_OWNER) &amp; PERM_COPY)
+                {
+                    inventoryItems += itemName;
+                }
+                else
+                {
+                    llGiveInventory(owner, itemName);    // 2.0 seconds delay
+                }
+            }
+        }
+
+        if (inventoryItems != [] )
+            llGiveInventoryList(owner, llGetObjectName(), inventoryItems);    // 3.0 seconds delay
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGiveInventory/">llGiveInventory</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGiveAgentInventory/">llGiveAgentInventory</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/changed/">changed</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-868"><a href="/wiki/template-issues-svc-868-6622fcd8/">Template:Issues/SVC-868</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-868|[[llGiveInventoryList]] should be able to work gridwide|type=fs}}</code></pre></details><p><a href="/wiki/template-lsl-function-give-3e3c21e6/">Template:LSL Function/give</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;includeonly&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:target-type|~{{#expr:{{#if:{{{avatar|}}}|1|0}}+{{#if:{{{prim|}}}{{{object|}}}|2|0}}+{{#if:{{{link|}}}|4|0}}}}}}
+
+{{#vardefine:pcaveats|{{#var:caveats}}}}
+{{#vardefine:caveats}}
+
+{{LSL Function/{{#switch:{{#var:target-type}}|~1=avatar|~2=prim|~4=link|uuid}}|group=|object={{{object|}}}|sim={{{sim|}}}|{{{1|}}}|}}
+
+{{LSL Function/inventory|{{{2|}}}|type={{{type|}}}|uuid={{{uuid|}}}|full={{{full|}}}|insert={{{insert|}}}|}}
+
+{{#vardefine:caveats|{{#var:pcaveats}}{{#ifeq:{{#var:target-type}}|~4||
+* If &#x27;&#x27;&#x27;{{LSL Param|{{{1}}}}}&#x27;&#x27;&#x27; is {{#switch:{{#var:target-type}}|~1=not the owner|~2=not owned by the same person|not the owner nor shares the same owner}}, {{#ifeq:{{{uuid|}}}|true|&#x27;&#x27;&#x27;{{LSL Param|{{{2}}}}}&#x27;&#x27;&#x27; is not a [[UUID]]}} and &#x27;&#x27;&#x27;{{LSL Param|{{{2}}}}}&#x27;&#x27;&#x27; does not have transfer permissions, an error is shouted on {{#var:DEBUG_CHANNEL}}.
+{{#if:{{{copyok|}}}||
+* If &#x27;&#x27;&#x27;{{LSL Param|{{{2}}}}}&#x27;&#x27;&#x27; {{#if:{{{full|}}}|is not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}|permissions do not allow copy}}, the transfer fails and an error is shouted on {{#var:DEBUG_CHANNEL}}.{{#switch:{{#var:target-type}}
+|~1=|* If &#x27;&#x27;&#x27;{{LSL Param|{{{1}}}}}&#x27;&#x27;&#x27; {{#ifeq:{{#var:target-type}}|~2||is a prim that}} is not in the same region an error is shouted on {{#var:DEBUG_CHANNEL}}.}}}}}}
+{{#switch:{{{type|}}}|script|=* When scripts are copied or moved between inventories, their state does not survive the transfer. Memory, event queue and execution position are all discarded.|#default=}}
+{{#var:caveats}}}}
+
+{{#vardefine:pcaveats}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+{{#vardefine:caveats}}{{#vardefine:p_target_desc}}{{#vardefine:p_target_hover}}{{#vardefine:p_item_desc}}{{#vardefine:p_item_hover}}
+{| {{Prettytable}} {{#vardefine:caveats}}
+|+&lt;code&gt;&lt;nowiki&gt;{{&lt;/nowiki&gt;{{FULLPAGENAMEE}}&lt;nowiki&gt;|target|item|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|target|item|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_target_desc}}
+|-
+{{VarPair|p_target_hover}}
+|-
+{{VarPair|p_item_desc}}
+|-
+{{VarPair|p_item_hover}}
+|}
+{{#vardefine:caveats}}{{#vardefine:p_target_desc}}{{#vardefine:p_target_hover}}{{#vardefine:p_item_desc}}{{#vardefine:p_item_hover}}
+{| {{Prettytable}} {{#vardefine:caveats}}
+|+&lt;code&gt;&lt;nowiki&gt;{{&lt;/nowiki&gt;{{FULLPAGENAMEE}}&lt;nowiki&gt;|target|item|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|target|item|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_target_desc}}
+|-
+{{VarPair|p_target_hover}}
+|-
+{{VarPair|p_item_desc}}
+|-
+{{VarPair|p_item_hover}}
+|}
+{{#vardefine:caveats}}{{#vardefine:p_target_desc}}{{#vardefine:p_target_hover}}{{#vardefine:p_item_desc}}{{#vardefine:p_item_hover}}
+{| {{Prettytable}} {{#vardefine:caveats}}
+|+&lt;code&gt;&lt;nowiki&gt;{{&lt;/nowiki&gt;{{FULLPAGENAMEE}}&lt;nowiki&gt;|target|item|type=script|uuid=true|link=*}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|target|item|type=script|uuid=true|link=*}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_target_desc}}
+|-
+{{VarPair|p_target_hover}}
+|-
+{{VarPair|p_item_desc}}
+|-
+{{VarPair|p_item_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

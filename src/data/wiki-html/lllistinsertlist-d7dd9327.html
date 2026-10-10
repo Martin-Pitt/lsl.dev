@@ -1,0 +1,126 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> that contains all the elements from <code>dest</code> but with the elements from <code>src</code> inserted at position <code>start</code>.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>list numbers = [3, &quot;three&quot;, 2, &quot;two&quot;, 1, &quot;one&quot;];
+default
+{
+    state_entry()
+    {
+        llOwnerSay(llDumpList2String(numbers, &quot;,&quot;));
+        // Object: 3,three,2,two,1,one
+        integer index = llListFindList(numbers, [2]);
+        if (index != -1)
+        {
+            numbers = llListInsertList(numbers, [2.5, &quot;two and a half&quot;], index);
+            llOwnerSay(llDumpList2String(numbers, &quot;,&quot;));
+            // Object: 3,three,2.500000,two and a half,2,two,1,one
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Bear in mind that the source list will remain unchanged. Instead, a new list will be produced. So, it's important that you capture this with a variable (unless you are acting directly on the results.)</div>
+<div class="wiki-line">Tip! To insert something at the start of a list, you can just add the two lists (putting the list with the new item(s) first)</div>
+<div class="wiki-line"><pre><code>list oldList = [&quot;B&quot;, &quot;C&quot;, &quot;D&quot;];
+list newItem = [&quot;A&quot;];
+list newlist = newItem + oldList;</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDeleteSubList/">llDeleteSubList</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llList2List/">llList2List</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llListReplaceList/">llListReplaceList</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lslp-7ff6581f/">Template:LSLP</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSLPT|{{{1|}}}|{{{2|}}}|{{{3|}}}}}&lt;noinclude&gt;
+
+Same exact syntax as [[Template:LSL Param]].
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lslgc-36716c81/">Template:LSLGC</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>[[:Category:LSL {{{1}}}|{{#if:{{{2|}}}|{{{2}}}|{{{1}}}}}]]&lt;noinclude&gt;
+{{Documentation}}
+&lt;/noinclude&gt;</code></pre></details><p><a href="https://wiki.secondlife.com/wiki/Template:#vardefine-spec-between">Template:</a></p><p><a href="/wiki/template-lsl-function-negative-index-2a0eb411/">Template:LSL Function/negative index</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+Format:
+&lt;nowiki&gt;{{LSL Function/negative index|boolean|p1|p2|p3}}&lt;/nowiki&gt;&lt;br/&gt;
+Exclude p1, p2, or p3 if not used.
+
+{{#vardefine:also_articles|{{LSL DefineRow||Test}}}}
+{{#vardefine:ni_mode|true}}
+{{#vardefine:ni_nc|}}
+{{#vardefine:ni_p1|number}}
+{{#vardefine:ni_p2|p2}}
+&lt;!--{{#vardefine:ni_p3|p3}}--&gt;
+
+&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:ni_c|{{#if:{{{2|{{#var:ni_p1}}}}}|{{#if:{{{3|{{#var:ni_p2}}}}}|{{#if:{{{4|{{#var:ni_p3}}}}}|3|2}}|1}}|0}}}}
+
+{{#vardefine:t|{{#ifeq:{{{1|{{#var:ni_mode}}}}}|true|{{#switch:{{#var:ni_c}}|3|2=LSL_Function/negative_index/range|1=LSL_Function/negative_index/single}}}}}}
+
+{{{{#var:t}}|{{{2|{{#var:ni_p1}}}}}|{{{3|{{#var:ni_p2}}}}}|{{{4|{{#var:ni_p3}}}}}|noExclude={{{noExclude|}}}}}
+
+{{#if:{{{noSpec|}}}||
+{{#vardefine:spec|{{#var:spec}}
+{{#if:{{#var:t}}|
+{{{!}} {{Prettytable|style=float:left;}}
+{{!}}-{{Hl2}}
+! Index
+! Positive
+! Negative
+{{!}}-
+{{!}} First
+{{!}} &lt;code&gt;0&lt;/code&gt;
+{{!}} &lt;code&gt;-{{{length|length}}}&lt;/code&gt;
+{{!}}-
+{{!}} Last
+{{!}} &lt;code&gt;{{{length|length}}} - 1&lt;/code&gt;
+{{!}} &lt;code&gt;-1&lt;/code&gt;
+{{!}}}
+=== Indexes ===
+&lt;div style=&quot;display:table;&quot;&gt;&lt;div style=&quot;display:block;&quot;&gt;
+*Positive indexes count from the beginning, the first item being indexed as &lt;code&gt;0&lt;/code&gt;, the last as &lt;code&gt;({{{length|length}}} - 1)&lt;/code&gt;.
+&lt;/div&gt;&lt;/div&gt;
+&lt;div style=&quot;display:table;&quot;&gt;&lt;div style=&quot;display:block;&quot;&gt;
+*Negative indexes count from the far end, the first item being indexed as &lt;code&gt;-{{{length|length}}}&lt;/code&gt;, the last as &lt;code&gt;-1&lt;/code&gt;. 
+&lt;/div&gt;&lt;/div&gt;
+}}
+}}
+}}
+
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{#if:{{#var:t}}|{{LSL_DefineRow||{{LSLGC|Negative_Index{{#var:lang}}|Negative Index}}|}}}}}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+{{#vardefineecho:ni_ps|{{#switch:{{#var:ni_c}}
+  |0=This function
+  |1={{LSLP|{{{2}}}}}
+  |2={{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}}
+  |3={{LSLP|{{{2}}}}}, {{LSLP|{{{3}}}}} &amp; {{LSLP|{{{4}}}}}
+ }}}} {{#if:{{#var:t}}| support{{#ifexpr:{{#var:ni_c}}&gt;1||s}}| &#x27;&#x27;do{{#ifexpr:{{#var:ni_c}}&gt;1||es}} not&#x27;&#x27; support }} {{LSLGC|Negative_Index{{#var:lang}}|negative indexes}}.{{PBR}}
+}}
+
+{{#vardefine:footer|{{#var:footer}}
+{{#if:{{#var:t}}|{{#ifeq:{{NAMESPACE}}|Template||{{#if:{{#var:self}}{{{self|}}}{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Negative Index{{#var:lang}}}}}}}}|
+{{#if:{{#var:self}}{{{self|}}}{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Positive_Index_Only{{#var:lang}}}}}}
+}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#if:{{{nc|{{#var:ni_nc}}}}}||
+* If {{#switch:{{#var:ni_c}}
+ |3=either {{LSLP|{{{2}}}}}, {{LSLP|{{{3}}}}} or {{LSLP|{{{4}}}}} are
+ |2=either {{LSLP|{{{2}}}}} or {{LSLP|{{{3}}}}} are
+ |1={{LSLP|{{{2}}}}} is}} out of bounds {{#if:{{{oob-return|}}}|this function returns {{{oob-return|}}} and}} the script continues to execute without an error message.
+{{#if:{{#var:t}}|{{#ifexpr:{{#var:ni_c}}&gt;1|{{#if:{{{noExclude|}}}|* {{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}} will not form an [[#exclusion_range|exclusion range]] when {{LSLP|{{{2}}}}} is past {{LSLP|{{{3}}}}} (Approximately: {{LSLP|{{{2}}}}} &gt; {{LSLP|{{{3}}}}}), instead it will act as if {{LSLP|{{{2}}}}} was zero &amp; {{LSLP|{{{3}}}}} was -1.|* {{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}} will form an [[#exclusion_range|exclusion range]] when {{LSLP|{{{2}}}}} is past {{LSLP|{{{3}}}}} (Approximately: {{LSLP|{{{2}}}}} &gt; {{LSLP|{{{3}}}}}). }}}}}}
+}}}}
+
+}}&lt;noinclude&gt;
+==Debugging==
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|spec}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|notes}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPairTable|also_articles}}
+|-
+{{VarPair|footer}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

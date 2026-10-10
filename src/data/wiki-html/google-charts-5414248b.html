@@ -1,0 +1,92 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<div class="wiki-line">This script allows you to take an existing list of values and represent it as a chart using <a href="http://code.google.com/apis/chart/" rel="noreferrer">Google&#x27;s Chart API</a>. The example here takes a list of visitors per hour and represents it as a bar chart. The simpleEncoding method provided by Google has been converted to LSL script.</div>
+<div class="wiki-line"><a href="http://chart.apis.google.com/chart?chs=200x125&amp;chd=s:99WPHmWPPWHetWe1mtmmemmte&amp;cht=lc&amp;chxt=x,y&amp;chxl=0:|4AM|4PM|4AM|1:||8" rel="noreferrer">Example</a></div>
+<div class="wiki-line"><pre><code>string simpleEncode(list values, float min, float max)
+{
+    string text = &quot;&quot;;
+    float range = 244 / (min - max);//4 * 61
+    integer index = -llGetListLength(values);
+
+    do
+    {
+        integer type = llGetListEntryType(values, index);
+        if(type == TYPE_FLOAT || type == TYPE_INTEGER)
+            text = llGetSubString(llIntegerToBase64((integer)(range * (min - llList2Float(values, index)))), 4, 4) + text;
+        else
+            text = &quot;_&quot; + text;
+
+        ++index;
+    }
+    while (index);
+
+    return text;
+}
+
+string cleanup(float value)
+{
+    string str = (string)value;
+    if(value &gt;= 10.0)
+        return llGetSubString(str, 0, -8);
+
+    integer i = -1;
+    while(llGetSubString(str, i, i) == &quot;0&quot;)
+        --i;
+
+    if(llGetSubString(str, i, i) == &quot;.&quot;)
+        --i;
+
+    return llGetSubString(str, 0, i);
+}
+
+string chartUrl(list values, list captions, integer yDivisions)
+{
+    integer min = llFloor(llListStatistics(LIST_STAT_MIN, values));
+    integer max = llCeil(llListStatistics(LIST_STAT_MAX, values));
+
+    string url = &quot;http://chart.apis.google.com/chart&quot;
+               + &quot;?chs=200x125&quot;
+               + &quot;&amp;chd=s:&quot; + simpleEncode(values, min, max)
+               + &quot;&amp;cht=lc&quot;
+               + &quot;&amp;chxt=x,y&quot;
+               + &quot;&amp;chxl=0:&quot;;
+
+    integer index = -llGetListLength(captions);
+    do
+    {
+        url += &quot;|&quot; + llEscapeURL(llList2String(captions, index));
+        ++index;
+    }
+    while (index);
+
+    url += &quot;|1:&quot;;
+    ++yDivisions;
+    float range = max - min;
+
+    index = 1;
+    do
+    {
+        url += &quot;|&quot; + cleanup(((index * range) / yDivisions) + min);
+        ++index;
+    }
+    while (index &lt;= yDivisions);
+
+    return url;
+}
+
+default
+{
+    state_entry()
+    {
+        // PUBLIC_CHANNEL has the integer value 0
+        llSay(PUBLIC_CHANNEL,
+            chartUrl([8,8,3,2,1,5,3,2,2,3,1,4,6,3,4,7,5,6,5,5,4,5,5,6,4], [&quot;4AM&quot;, &quot;4PM&quot;, &quot;4AM&quot;], 0));
+    }
+
+    touch_start(integer total_number)
+    {
+        llSay(PUBLIC_CHANNEL,
+            chartUrl([8,8,3,2,1,5,3,2,2,3,1,4,6,3,4,7,5,6,5,5,4,5,5,6,4], [&quot;4AM&quot;, &quot;4PM&quot;, &quot;4AM&quot;], 0));
+    }
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library|Google Charts}}</code></span> </div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples|Google Charts}}</code></span></div>

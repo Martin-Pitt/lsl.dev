@@ -1,0 +1,65 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is at <code>index</code> in <code>src</code>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>When using this function to typecast a list element to a string it will truncated float based types to 6 decimal places.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//This code demonstrates the differences in typecasting in LSL (and demonstrates how to use the llList2* functions).
+// Best viewed in Chat History (ctrl-h)
+default
+{
+    state_entry()
+    {
+        list my_list = [&quot;a&quot;, &quot;0xFF&quot;, &quot;0xFF.FF&quot;, &quot;1.0e3&quot;, 1, 2.0, &lt;1,2,3&gt;, &lt;1,2,3,4&gt;, llGetOwner()];
+        integer i = 0;
+        integer end = llGetListLength(my_list);
+        for (; i&lt;end; ++i)
+        {
+            llOwnerSay(&quot;string=&quot; + llList2String(my_list,i)
+                        + &quot;\n   integer=&quot; + (string)llList2Integer(my_list,i) + &quot; OR &quot; +(string)((integer)llList2String(my_list,i))
+                        + &quot;\n   float=&quot; + (string)llList2Float(my_list,i) + &quot; OR &quot; +(string)((float)llList2String(my_list,i))
+                        + &quot;\n   vector=&quot; + (string)llList2Vector(my_list,i) + &quot; OR &quot; +(string)((vector)llList2String(my_list,i))
+                        + &quot;\n   rot=&quot; + (string)llList2Rot(my_list,i) + &quot; OR &quot; +(string)((rotation)llList2String(my_list,i))
+                        + &quot;\n   key=&quot; + (string)llList2Key(my_list,i) + &quot; OR &quot; +(string)((key)llList2String(my_list,i)) );
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>If you wish to extract a string from a list that you know will contain only a single item (for example if you extract a single entry from a list using <a href="/functions/llList2List/">llList2List()</a>), then instead of using <code>llList2String(myList, 0)</code> you may wish to considering using the more efficient <code>(string)myList</code> as it will produce the same result for single-entry lists with less memory usage due to eliminating a function-call.</li>
+<li>To convert a string of hexadecimal notation to integer, call <a href="/functions/llList2Integer/">llList2Integer</a> and it will automatically cast the value as decimal integer. To convert that integer back to a string of hexadecimal notation, use a user function like <a href="https://wiki.secondlife.com/wiki/hex">hex</a>.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDumpList2String/">llDumpList2String</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetListEntryType/">llGetListEntryType</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llList2Float/">llList2Float</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llList2Integer/">llList2Integer</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llList2Key/">llList2Key</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-hovertext-9304821d/">Template:HoverText</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;span title=&quot;{{{2}}}&quot; style=&quot;border-bottom:1px dotted; cursor:help;&quot;&gt;{{#if:{{{3|}}}|{{{3|}}}|{{{1}}}}}&lt;/span&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-list-element-546442c8/">Template:LSL Function/list/element</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{LSL_Function/negative index|true|{{{2|none_}}}}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|List containing the element of interest.}}
+
+{{#vardefine:p_{{{2|none_}}}_desc|Index of the element of interest.}}
+
+{{#vardefine:header_footnote|{{#if:{{{return|}}}|{{#if:{{#var:header_footnote}}|{{#var:header_footnote}}&lt;br/&gt;}}
+If {{LSLP|{{{2|none}}}}} describes a location not in {{LSLP|{{{1|none}}}}} then {{{return|}}} is returned.{{#if:{{{3|}}}|&lt;br/&gt;
+{{#if:{{{nc|}}}
+|If the type of the element at {{LSLP|{{{2|none}}}}} in {{LSLP|{{{1|none}}}}} is not a [[{{{3|}}}{{#var:lang}}|{{{3|}}}]] then {{{return|}}} is returned. &lt;br/&gt;
+Here is a workaround: &lt;code&gt;([[{{{3|}}}{{#var:lang}}|{{{3|}}}]])[[llList2String{{#var:lang}}|llList2String]]({{LSL Param|{{{1|none}}}}}, {{LSL Param|{{{2|none}}}}});&lt;/code&gt;
+|If the type of the element at {{LSLP|{{{2|none}}}}} in {{LSLP|{{{1|none}}}}} is not a [[{{{3|}}}{{#var:lang}}|{{{3|}}}]] it is [[typecast]] to a [[{{{3|}}}{{#var:lang}}|{{{3|}}}]]. {{#if:{{{nf|}}}||If it cannot be typecast {{{return|}}} is returned.}}}}}}|{{#var:header_footnote}}}}}}
+
+}}&lt;includeonly&gt;{{LSLC|List/Read Element{{#var:lang}}}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none_}}}_desc}}
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|spec}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPairTable|also_articles}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

@@ -1,0 +1,222 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is the total <a href="http://community.secondlife.com/t5/English-Knowledge-Base/Calculating-land-impact/ta-p/974163" rel="noreferrer">land impact</a> of objects on the parcel at <code>pos</code> of the given <code>category</code></div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">If <code>sim_wide</code> is...</div>
+<ul>
+<li><span class="wiki-template"><code>{{#var:TRUE}}</code></span> then the return is the combined object land impact used on all parcels in the sim owned by the specified parcel's owner of the category requested.<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|handle=non-zero}}</code></span></li>
+<li><span class="wiki-template"><code>{{#var:FALSE}}</code></span> then the return is the object land impact used of the category requested on the parcel specified.</li>
+</ul><span id="constants"></span><table><tr><th>Category</th><th></th><th>Description</th></tr><tr><td><a href="/constants/PARCEL_COUNT_TOTAL/">PARCEL_COUNT_TOTAL</a></td><td>0</td><td>All objects on the parcel(s). Does not include temp on rez objects.</td></tr><tr><td><a href="/constants/PARCEL_COUNT_OWNER/">PARCEL_COUNT_OWNER</a></td><td>1</td><td>Objects owned by the parcel owner.</td></tr><tr><td><a href="/constants/PARCEL_COUNT_GROUP/">PARCEL_COUNT_GROUP</a></td><td>2</td><td>Objects not owned by the owner, but set to or owned by the group of the parcel.</td></tr><tr><td><a href="/constants/PARCEL_COUNT_OTHER/">PARCEL_COUNT_OTHER</a></td><td>3</td><td>Objects not set to group or owned by the owner.</td></tr><tr><td><a href="/constants/PARCEL_COUNT_SELECTED/">PARCEL_COUNT_SELECTED</a></td><td>4</td><td>All objects selected or sat on.</td></tr><tr><td><a href="/constants/PARCEL_COUNT_TEMP/">PARCEL_COUNT_TEMP</a></td><td>5</td><td>All temp on rez objects.</td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Temp mesh is not included in totals for PARCEL_COUNT_TEMP</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//  gives prim usage information when touched
+
+string primCountThisParcel(integer flag)
+{
+    vector currentPosition = llGetPos();
+
+    return
+        (string)llGetParcelPrimCount(currentPosition, flag, FALSE);
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        llSay(PUBLIC_CHANNEL,
+            &quot;The total land impact of objects on this parcel is &quot; + primCountThisParcel(PARCEL_COUNT_TOTAL) + &quot;.&quot;);
+
+        llSay(PUBLIC_CHANNEL,
+            primCountThisParcel(PARCEL_COUNT_OWNER) + &quot; LI for objects owned by the parcel owner.&quot;);
+
+        llSay(PUBLIC_CHANNEL,
+            primCountThisParcel(PARCEL_COUNT_GROUP) + &quot; LI for objects set to or owned by the parcel&#x27;s group.&quot;);
+
+        llSay(PUBLIC_CHANNEL,
+            primCountThisParcel(PARCEL_COUNT_OTHER) + &quot; LI for objects not set to the parcel group or owned by the parcel owner.&quot;);
+
+        llSay(PUBLIC_CHANNEL,
+            primCountThisParcel(PARCEL_COUNT_SELECTED) + &quot; LI for selected objects.&quot;);
+
+        llSay(PUBLIC_CHANNEL,
+            primCountThisParcel(PARCEL_COUNT_TEMP) + &quot; LI for temp-on-rez objects.&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>//Sim-wide scanner to count prim use in each parcel
+list gPrclID;
+integer gTotPrims;
+float gX;
+float gY;
+string gObjName;
+integer gNUM;
+
+default
+{
+    state_entry()
+    {
+        gObjName = llGetObjectName();
+        gPrclID = [];
+        gTotPrims = 0;
+        // Begin scanning at the SW &lt;0.0,0.0,0.0&gt; corner of the sim
+        gX = 4.0;
+        gY = 4.0;
+    }
+    
+    on_rez(integer start)
+    {
+        llSetPos(llGetPos() + &lt;0.0,0.0,0.5&gt;);
+        llSetText(&quot;Touch to start scan&quot;,&lt;1.0,1.0,0.0&gt;,1.0);
+    }
+
+    touch_start(integer total_number)
+    {
+        llSetText(&quot;Scanning ....&quot;,&lt;1.0,1.0,0.0&gt;,1.0);
+        gNUM = 0;
+        llRegionSayTo(llGetOwner(),0,&quot;Scan started on &quot; + llGetRegionName());
+        llSetTimerEvent(0.1);
+    }
+        
+    timer()
+    {
+        //Grab the parcel&#x27;s ID and name at position &lt;gX, gY, 100.0&gt;
+        list parcel = llGetParcelDetails(&lt;gX,gY,100.0&gt;,[PARCEL_DETAILS_ID,PARCEL_DETAILS_NAME]);
+        key temp = llList2Key(parcel,0);
+        string parcel_name = llList2String(parcel,1);
+        if (parcel_name == &quot;&quot;)
+        {
+            parcel_name = &quot;(no name)&quot;;
+        }
+        if (!~llListFindList(gPrclID,[temp]))   //Scan at this location if this parcel was not scanned earlier
+        {
+            ++gNUM;
+            llSetObjectName((string)gNUM);
+            integer Count = llGetParcelPrimCount(&lt;gX,gY,100&gt;,PARCEL_COUNT_TOTAL,FALSE); //Do not include other parcels owned by llGetOwner()
+            gTotPrims += Count;
+            llRegionSayTo(llGetOwner(),0, &quot;/me &quot;+ parcel_name + &quot; @ &lt;&quot;+(string)gX+&quot;,&quot;+(string)gY+&quot;,Z&gt;  = &quot; + (string)Count);
+            gPrclID += [temp];  //Add this parcel to the &quot;previously scanned&quot; list
+        }
+        // Increment X and Y in successive scans to look at the entire sim in 8m square blocks
+        if (gX &lt; 256.0)
+        {
+            gX +=8.0;
+        }
+        if (gX &gt; 256.0)
+        {
+            gY += 8.0;
+            gX = 4.0;
+        }
+        if (gY &gt; 256.0) // Reached NE corner
+        {
+            llSetObjectName(gObjName);
+            llRegionSayTo(llGetOwner(),0,&quot;Scan finished.  Total land impact = &quot; + (string)gTotPrims + &quot; in &quot; + (string)llGetListLength(gPrclID) + &quot; parcels (not counting temp rez prims).&quot;);
+            llSetText(&quot;Touch to start scan&quot;,&lt;1.0,1.0,0.0&gt;,1.0);
+            llResetScript();
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelMaxPrims/">llGetParcelMaxPrims</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line">For a detailed explanation on how the land impact is calculated, see also <a href="https://community.secondlife.com/forums/topic/83294-prims-prim-equivalent-land-impact-a-too-long-guide/" rel="noreferrer">Jenni Darkwatch&#x27;s post</a> from late 2011.</div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-position-a2dae76f/">Template:LSL Function/position</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+This template is to be used to specify setup the description for position like parameters (offsets, positions, points, etc.).
+
+Right now it&#x27;s pretty basic and easy to edit. I&#x27;m wondering if these functions should be in a position parameter specific category.
+
+====TODO====
+* add clamping flag and verbiage for out of region/range coordinates.
+&lt;/noinclude&gt;{{#if:
+
+{{#if:{{{region|}}}|
+  {{#if:{{{local|}}}|
+
+    {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region}} or [[Viewer coordinate frames#Local|local coordinates]] depending upon the situation{{{desc|}}}}}
+
+    {{#vardefine:p_{{{1|}}}_hover|position in region or local coordinates depending upon the situation{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+  |
+    {{#ifeq:{{{1|}}}|point|
+
+      {{#vardefine:p_{{{1|}}}_desc|A point in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region-local}} space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|A point in region-local space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region coordinates}}{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in region coordinates{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+|
+  {{#if:{{{local|}}}|
+
+    {{#ifeq:{{{1|}}}|offset|
+
+      {{LSL Function/offset|{{{1|}}}|local={{{local}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in [[Viewer coordinate frames#Local|local coordinates]]{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in local coordinates{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+}}
+
+}}</code></pre></details><p><a href="/wiki/template-lsl-function-boolean-c769e8e3/">Template:LSL Function/boolean</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:nbdv|{{#switch:{{uc:{{{default|}}}}}|T|TRUE=true|F|FALSE=false}}}}
+
+{{#vardefine:p_{{{1|}}}_desc|{{#if:{{{bool|}}}|{{HoverLink|boolean{{#var:lang}}|A type that can only be true or false|boolean}},}} {{{pd|}}} {{#if:{{{bool|}}}{{{pd|}}}|{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}|{{ucfirst:{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}}}}} {{#vardefineecho:TRUE|{{LSL Const{{#var:lang}}|TRUE|integer|1}}}}{{#vardefine:FALSE|{{LSL Const{{#var:lang}}|FALSE|integer|0}}}}{{#if:{{{non-zero|}}}|{{Footnote|handle=non-zero|Any value that is not zero/{{#var:FALSE}} is treated the same as {{#var:TRUE}}. This behavior should not be depended upon.|Any value that is not zero/FALSE is treated the same as TRUE. This behavior should not be depended upon.}}}}{{#ifeq:{{#var:nbdv}}|true|&amp;#32;({{HoverText|default|default for new objects etc}})}} {{#if:{{{td|}}}|{{{td|}}}|enables}}, {{#ifeq:{{{if|}}}|*|if|{{{if|}}}}} {{#var:FALSE}}{{#ifeq:{{#var:nbdv}}|false|&amp;#32;({{HoverText|default|default for new objects etc}})}} {{#if:{{{fd|}}}|{{{fd|}}}|disables}}}}
+
+{{#vardefine:p_{{{1|}}}_hover|{{#if:{{{bool|}}}|boolean,}} {{#if:{{{ph|}}}|{{{ph|}}}|{{{pd|}}}}} {{#if:{{{bool|}}}{{{pd|}}}{{{ph|}}}|{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}|{{ucfirst:{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}}}}} TRUE{{#ifeq:{{#var:nbdv}}|true|&amp;#32;(default)}} {{#if:{{{th|}}}|{{{th|}}}|{{#if:{{{td|}}}|{{{td|}}}|enables}}}}, {{#ifeq:{{{if|}}}|*|if|{{{if|}}}}} FALSE{{#ifeq:{{#var:nbdv}}|false|&amp;#32;(default)}} {{#if:{{{fh|}}}|{{{fh|}}}|{{#if:{{{fd|}}}|{{{fd|}}}|disables}}}}}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|default=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|default=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|if=*|non-zero=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|if=*|non-zero=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|if=when|non-zero=*|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|if=when|non-zero=*|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

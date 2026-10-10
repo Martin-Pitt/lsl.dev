@@ -1,0 +1,73 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">PRIM_GLOW is used to get or set the glow status of the <code>face</code>. Use the integer number 25 if the compiler rejects the named constant.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">basic syntax to set glow</div>
+<div class="wiki-line"><pre><code>// adjust as desired .3 to a float number from 0 to 1.0 inclusive
+// adjust as desired ALL_SIDES to specific prim faces if desired
+
+llSetPrimitiveParams( [ PRIM_GLOW, ALL_SIDES, .3 ] ) ; </code></pre></div>
+<div class="wiki-line">basic syntax to get glow status</div>
+<div class="wiki-line"><pre><code>list mylist = llGetPrimitiveParams([ PRIM_GLOW,ALL_SIDES] );
+llSay(0, llList2CSV(mylist));
+
+//Assuming for this example that all sides are set to the same float of .3 
+//In a box, which has 6 sides, the above example returns 0.300000, 0.300000, 0.300000, 0.300000, 0.300000, 0.300000
+//In a prism, which has 5 sides, returns 0.300000, 0.300000, 0.300000, 0.300000, 0.300000
+//In a sphere, which has only 1 side (as it were), returns 0.300000
+//change ALL_SIDES to a specific prim face if desired.</code></pre></div>
+<div class="wiki-line"><pre><code>//Each time the prim is touched, the intensity of the glow is increased (until it maxes out and cycles back to zero).
+integer steps = 10;
+integer counter = 0;
+
+default 
+{
+    touch_start(integer total_number) 
+    { 
+        llSetPrimitiveParams( [ PRIM_GLOW, ALL_SIDES,  counter / (steps - 1.0) ]);
+        counter = (counter + 1) % steps;
+    } 
+}</code></pre><pre><code>//Each time the prim is touched, the intensity of the glow is decreased (until it hits zero and cycles back to one).
+integer steps = 10;
+integer counter = 0;
+
+default 
+{
+    touch_start(integer total_number) 
+    { 
+        llSetPrimitiveParams( [ PRIM_GLOW, ALL_SIDES,  counter / (steps - 1.0) ]);
+        counter = (counter + steps - 1) % steps;
+    } 
+}</code></pre></div></section>
+<section><h2 id="see-also-constants">See also: constants</h2><span id="constants"></span><div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/CHANGED_TEXTURE/">CHANGED_TEXTURE</a></div></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimitiveParams/">llGetPrimitiveParams</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/changed/">changed</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Added in <span class="wiki-template"><a href="/wiki/template-svn-6879a543/">SVN</a>: <code>{{SVN|337|rev=81900|branch=Release|ver=1.20.0|anchor=file6|date=Monday, 10 March 2008}}</code></span></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-primitiveparam-categorize-1ca2b81a/">Template:LSL PrimitiveParam Categorize</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#ifexist:Template:LSLC{{#var:lang}}|
+ {{LSLC{{#var:lang}}|PrimitiveParams}}
+ {{LSLC{{#var:lang}}|PrimitiveParams/{{{1}}}}}
+ {{LSLC{{#var:lang}}|{{{1}}}}}
+|
+ {{LSLC|PrimitiveParams{{#var:lang}}}}
+ {{LSLC|PrimitiveParams/{{{1}}}{{#var:lang}}}}
+ {{LSLC|{{{1}}}{{#var:lang}}}}
+}}
+}}}}</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line">&lt;onlyinclude&gt;<span class="wiki-template"><code>{{#if:
+
+{{#vardefine:p_intensity_desc|ranges from 0.0 to 1.0}}
+
+{{#vardefine:return|[&amp;nbsp;{{HoverText|0.0|float intensity}}&amp;nbsp;]}}
+
+{{#vardefine:glow_const|{{LSL Const|PRIM_GLOW|integer|25|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the glow of a prim&#x27;s face}}}}
+
+{{#vardefine:facetable|{{#var:facetable}}
+{{!}}-
+{{!}} [ {{#var:glow_const}} ]
+{{!}} [&amp;nbsp;{{HoverText|0.0|float intensity}}&amp;nbsp;] }}
+
+}}</code></span>&lt;/onlyinclude&gt;<span class="wiki-template"><code>{{#if:
+
+{{LSL_Function/face|face|{{#var:glow_const}}|!footer=*|return=[&amp;nbsp;{{HoverText|0.0|float intensity}}&amp;nbsp;]}}
+
+}}</code></span></div></section>

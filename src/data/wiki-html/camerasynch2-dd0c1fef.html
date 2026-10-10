@@ -1,0 +1,242 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
+<h2 id="camerasynch2-v1-0-0">CameraSynch2 v1.0.0</h2>
+<div class="wiki-line">Synchronization of multiple avatar cameras.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">This script initially needs to be dropped individually into numerous linked prims.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">However because the script adds a PIN, after its been added once the owner can issue the "update" command to automatically propogate any changes made to the root script into the child prims/scripts.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">TO USE:</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">1] Rez a bunch of prims, one for each bum you want to sit on them.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">2] Link them together.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">3] Drop a copy of this script in each prim.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">4] Sit one person on the controller seat, and some persons on the other seats.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">5] Read the spam when you sit down.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><pre><code>//
+// BELOG Hax
+// AEST 20071221 0452 [SLT:  20071220 1152]
+//  https://wiki.secondlife.com/wiki/CameraSynch2
+//
+// VERSION:
+//  v1.0.0 revised and wikified from my previous: &#x27;CameraSynch v0.3.1&#x27;
+//      Not really well tested, but seems good. 
+//      Timer frequency could do with some moderation... Possibly with dynamic adjustment.
+//
+// CREDITS:
+//  Meyermagic Salome and Nomad Padar for
+//  http://wiki.secondlife.com/wiki/Camera_Sync
+//  I drew some inspiration from theirs some time after I wrote the first iteration of this script.
+//  I don&#x27;t think I actually derived anything from it... 
+//  but theirs was the original..and Nomad is awesome.
+//=========================================================================
+// ---LICENCE START---
+// http://creativecommons.org/licenses/by-sa/3.0/
+// ie: Attribution licence:
+//   Give me credit by leaving it in the script I created.
+//   Supply my original script with your modified version.
+//   Refer to the wiki URL from which you copied this script.
+//      https://wiki.secondlife.com/wiki/CameraSynch2
+// ---LICENCE END---
+//=========================================================================
+
+// SHARED CONFIGURATION
+integer     gPayloadPIN         = 89876847;
+//----------------------------------
+// CONFIGURATION
+float       gFrequency          = 0.02;
+integer     gChan               = 0;
+//----------------------------------
+// CORE CODE - controller
+string      gCamController              = NULL_KEY;
+vector      gOldCamPos;
+rotation    gOldCamRot;
+string      gOldDesc;
+integer     gTog;
+// CORE CODE -  spectator
+//--------------------------------------
+f_camDefault()
+{   llSetCameraParams([
+        CAMERA_ACTIVE, FALSE, //1 is active, 0 is inactive
+        CAMERA_BEHINDNESS_ANGLE, 10.0, //(0 to 180) degrees
+        CAMERA_BEHINDNESS_LAG, 0.0, //(0 to 3) seconds
+        CAMERA_DISTANCE, 3.0, //(0.5 to 10) meters
+        CAMERA_FOCUS_LAG, 0.1 , //(0 to 3) seconds
+        CAMERA_FOCUS_LOCKED, FALSE, //(TRUE or FALSE)
+        CAMERA_FOCUS_THRESHOLD, 1.0, //(0 to 4) meters
+        CAMERA_PITCH, 0.0, //(-45 to 80) degrees
+        CAMERA_POSITION_LAG, 0.1, //(0 to 3) seconds
+        CAMERA_POSITION_LOCKED, FALSE, //(TRUE or FALSE)
+        CAMERA_POSITION_THRESHOLD, 1.0, //(0 to 4) meters
+        CAMERA_FOCUS_OFFSET, ZERO_VECTOR //&lt;-10,-10,-10&gt; to &lt;10,10,10&gt; meters
+    ]);
+}
+//----------------------------------
+default
+{   
+    on_rez(integer start_param)
+    {   llResetScript();
+    }    
+
+    state_entry()
+    {   if (gPayloadPIN)    llSetRemoteScriptAccessPin(gPayloadPIN);
+        llSitTarget(&lt;0.2, 0.0, 0.5&gt;, &lt;0.0, 0.0, 0.0, 1.0&gt;);                 
+        integer link = llGetLinkNumber();
+        if (link&gt;1)
+        {   string name = &quot;Spectator#&quot;+(string)(link-1);
+            llSetObjectName(name);
+            llSetColor(&lt;0.0, 1.0, 1.0&gt;, ALL_SIDES);            
+            llSetText(name, &lt;1.0, 1.0, 1.0&gt;, 1.0);
+            state repeater;
+        }
+        llSetColor(&lt;1.0, 1.0, 0.0&gt;, ALL_SIDES);
+        llSetObjectName(llGetScriptName());        
+        llSetText(&quot;CONTROLLER&quot;, &lt;1.0, 1.0, 1.0&gt;,1.0);        
+        if (gPayloadPIN)
+            llListen(gChan, &quot;&quot;, llGetOwner(), &quot;update&quot;);        
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {   integer cc;
+        integer c = cc = llGetNumberOfPrims();
+        llOwnerSay(&quot;WAIT: Propogating scripts...&quot;);    
+        while(c&gt;1)
+        {   llSetText(&quot;Updating: &quot;+(string)(cc-c+1)+&quot;/&quot;+(string)(cc-1)
+                , &lt;1.0, 1.0, 1.0&gt;, 1.0);
+            llRemoteLoadScriptPin(llGetLinkKey(c--), llGetScriptName(), gPayloadPIN, TRUE, 1);   
+        }
+        llSetText(&quot;CONTROLLER&quot;, &lt;1.0, 1.0, 1.0&gt;, 1.0); 
+        llOwnerSay(&quot;OK: Script propogation completed.&quot;);
+    }
+
+    changed(integer change)
+    {   if (change &amp; CHANGED_LINK)
+        {   gCamController = llAvatarOnSitTarget();
+            if (gCamController != NULL_KEY)
+            {   llRequestPermissions(gCamController
+                    , PERMISSION_TRACK_CAMERA|PERMISSION_TAKE_CONTROLS
+                );
+            }
+            else
+            {   llSetTimerEvent(0.0);
+                llSetObjectDesc(gOldDesc);
+                llResetScript();
+            }
+        }
+    }
+
+    run_time_permissions(integer perm)
+    {   if(perm &amp; PERMISSION_TAKE_CONTROLS)        
+        {   llTakeControls(0| CONTROL_LBUTTON,TRUE, TRUE); //work anywhere
+            llInstantMessage(llGetPermissionsKey(), 
+                &quot;\nThis device allows the spectator cameras to be controlled by YOU.&quot;
+                +&quot;\nUseful Tips:&quot;
+                +&quot;\n1] Ensure you are NOT in mouselook.&quot;
+                +&quot;\n2] Spectators cameras track yours with a short delay, and do not move quite as smoothly &quot;
+                +&quot;as yours does, so go slowly and avoid any sudden or disconcerting movements.&quot;
+                +&quot;\nREMEMBER: If your drawdistance is greater than a spectators, their camera may be left &quot;
+                +&quot;behind at some point. So if you hear people say &#x27;did we stop moving?&#x27; you should move &quot;
+                +&quot;your camera closer to where you are all sitting.&quot;
+            );
+            llSetTimerEvent(gFrequency);
+        }
+        else //never
+            llUnSit(gCamController);
+    }
+
+    timer()
+    {   vector camPos = llGetCameraPos();
+        rotation camRot = llGetCameraRot();
+        if (llVecDist(camPos, gOldCamPos) &gt; 0.001 
+        || llAngleBetween(camRot, gOldCamRot) &gt;= 0.0008)
+        {   gTog = !gTog;
+            gOldCamPos = camPos;
+            gOldCamRot = camRot;
+            llSetText(&quot;RELAYING..&quot;,&lt;0.0, (float)gTog, 1.0-gTog&gt;,1.0);
+            llSetObjectDesc((string)camPos+&quot;#&quot;+(string)camRot);      
+        }
+    }
+}
+//=========================================================================
+state repeater
+{   
+    on_rez(integer start_param)
+    {   llResetScript();
+    }
+
+    state_entry()
+    {   llSetTimerEvent(0.0);
+    }
+
+    changed(integer change)
+    {   if (change &amp; CHANGED_LINK)
+        {   if (llGetLinkNumber() == 0)
+                llResetScript();
+            key av = llAvatarOnSitTarget();
+            if (av != NULL_KEY &amp;&amp; llGetPermissionsKey() == NULL_KEY)
+            {   llRequestPermissions(av, PERMISSION_CONTROL_CAMERA);
+            }
+        }
+    }
+
+    run_time_permissions(integer perms)
+    {   if (perms &amp; PERMISSION_CONTROL_CAMERA)
+        {   llInstantMessage(llGetPermissionsKey(), 
+                &quot;This device allows the spectator cameras to be centrally controlled.&quot;
+                +&quot;\nPlease : &quot;
+                +&quot;\n1] Ensure you are NOT in mouselook.&quot;
+                +&quot;\n2] Reset your camera by pushing the escape button 3 or 4 times.&quot;
+                +&quot;\nNOTE: If the controller avatar&#x27;s drawdistance is greater than yours, &quot;
+                +&quot;you may experience being &#x27;left behind&#x27; at some point. Either increase &quot;
+                +&quot;your draw distance, or reset your camera again  (hit escape a few times) &quot;
+                +&quot;after a short while and hopefully the controllers camera is closer and &quot;
+                +&quot;tracking will resume.\nObviously it helps to let the controller know if &quot;
+                +&quot;they are too far away, but perhaps your drawdistance could also be higher.&quot;
+                +&quot;\n[ctrl-P.... graphics tab...&#x27;custom&#x27; checkbox... &#x27;drawdistance&#x27; slider... increase it a bit]&quot;
+            );
+            llSetTimerEvent(gFrequency);
+        }
+    }
+
+    timer()
+    {   if (llGetPermissionsKey())
+        {   string desc = llList2String(llGetObjectDetails(llGetLinkKey(LINK_ROOT), [OBJECT_DESC]),0); 
+            integer index = llSubStringIndex(desc, &quot;#&quot;);
+            vector pos = (vector)llGetSubString(desc, 0, index-1);
+            if (pos == ZERO_VECTOR)
+            {   f_camDefault();
+                return;
+            }
+            rotation rot = (rotation)llGetSubString(desc, index+1, -1);
+            llSetCameraParams([
+                CAMERA_ACTIVE, 1 //1 is active, 0 is inactive
+                ,CAMERA_BEHINDNESS_ANGLE, 0.0 //(0 to 180) degrees
+              //,CAMERA_BEHINDNESS_LAG, 0.05 //(0 to 3) seconds
+                ,CAMERA_DISTANCE, 0.0 //(0.5 to 10) meters
+                ,CAMERA_FOCUS, pos + llRot2Fwd(rot) //Region-relative
+                ,CAMERA_FOCUS_LAG, 0.05 //(0 to 3) seconds
+                ,CAMERA_FOCUS_LOCKED, TRUE //(TRUE or FALSE)
+                ,CAMERA_FOCUS_THRESHOLD, 0.0 //(0 to 4) meters
+                ,CAMERA_POSITION, pos //Region-relative position
+                ,CAMERA_POSITION_LAG, 0.05 //(0 to 3) seconds
+                ,CAMERA_POSITION_LOCKED, TRUE //(TRUE or FALSE)
+                ,CAMERA_POSITION_THRESHOLD, 0.0 //(0 to 4) meters
+                ,CAMERA_FOCUS_OFFSET, ZERO_VECTOR //&lt;-10,-10,-10&gt; to &lt;10,10,10&gt; meters
+            ]);
+        }
+        else
+        {   llSetTimerEvent(0.0);
+        }
+    }
+}
+//=========================================================================
+  </code></pre></div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples|CameraSynch2}}</code></span></div>

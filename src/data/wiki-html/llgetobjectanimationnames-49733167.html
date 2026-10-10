@@ -1,0 +1,57 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> of names of animations playing in the current object</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>stop_all_animations()
+{
+    list curr_anims = llGetObjectAnimationNames();
+    llSay(0,&quot;stopping all, curr_anims are &quot; + (string) curr_anims);
+    integer length = llGetListLength(curr_anims);
+    integer index = 0;
+    while (index &lt; length)
+    {
+        string anim = llList2String(curr_anims, index);
+        llSay(0, &quot;Stopping &quot; + anim);
+        llStopObjectAnimation(anim);
+        // This check isn&#x27;t really needed, just included to demonstrate is_animation_running()
+        if (is_animation_running(anim))
+        {
+            llSay(0, &quot;ERROR - failed to stop &quot; + anim + &quot;!&quot;);
+        }
+        ++index;
+    }
+}
+
+integer is_animation_running(string anim)
+{
+    list curr_anims = llGetObjectAnimationNames();
+    return ~llListFindList(curr_anims, (list)anim);
+}
+
+default
+{
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+
+    touch_start(integer total_number)
+    {
+        // Assumes there is an animation with this name in the current object.
+        string anim_name = &quot;MyFancyWalk&quot;;
+        llSay(0, &quot;Touched.&quot;);
+        llStartObjectAnimation(anim_name);
+        if (is_animation_running(anim_name))
+        {
+            llSay(0,anim_name + &quot; is playing, which is good&quot;);
+        }
+        llSleep(5.0);
+        stop_all_animations();
+        if (is_animation_running(anim_name))
+        {
+            llSay(0,anim_name + &quot; is playing, which is an error!&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">The typical uses for this function are to stop all currently playing animations, or to check whether a particular animation is currently playing.</div>
+<div class="wiki-line">This function allows you to see all currently playing animations in this object. Normally the returned values will be the names of animations within the object's inventory. In the unusual case that the animation can't be found, the key for the animation will be returned instead (as a string). In either case, the result can be sent to <a href="/functions/llStopObjectAnimation/">llStopObjectAnimation</a></div>
+<div class="wiki-line">Animated objects work by associating a skeleton with a linkset containing one or more rigged mesh primitives. When animations are played by a script in any of the prims in the linkset, the skeleton will animate and any rigged meshes in the linkset will move accordingly. A script running in any prim of the linkset can start, stop or query animations using the new commands. The typical usage of these functions is to do all object animation scripting in the root prim of the linkset; in this scenario, the animations and scripts would all be part of the inventory of this prim, and so of the object as a whole. However, if scripts and animations are present in multiple prims of a linkset, it is important to understand that animations are started, stopped and tracked independently in each prim.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llStartObjectAnimation/">llStartObjectAnimation</a> — Start playing an animation in the current object</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llStopObjectAnimation/">llStopObjectAnimation</a> — Stop playing an animation in the current object</div></div></section>

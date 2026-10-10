@@ -1,0 +1,67 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Used to get or set the object's <a href="/wiki/category-lsl-floating-text-979b1c2b/">floating text</a>.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        // a string to display
+        string displayMessage = llGetDisplayName( llGetOwner() ) + &quot;, test number &quot;; 
+        
+        // just so could test changing the displayMessage
+        integer loopControl;
+        for( loopControl = 1; loopControl &lt; 3; ++loopControl )
+        {
+            // on first iteration set the text 
+            if( loopControl == 1 )
+            {
+                llSetPrimitiveParams([PRIM_TEXT, displayMessage + (string)loopControl + &quot;.&quot;, &lt;1, 0, 0&gt;, 1.0]);
+            }
+            
+            // on second iteration get the text and say it. 
+            else if( loopControl == 2 )
+            {
+                llSay(0, llDumpList2String(llGetPrimitiveParams([PRIM_TEXT]), &quot; &quot;));
+            }
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLinkPrimitiveParamsFast/">llSetLinkPrimitiveParamsFast</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimitiveParams/">llGetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLinkPrimitiveParams/">llGetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetText/">llSetText</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-primitiveparam-categorize-1ca2b81a/">Template:LSL PrimitiveParam Categorize</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#ifexist:Template:LSLC{{#var:lang}}|
+ {{LSLC{{#var:lang}}|PrimitiveParams}}
+ {{LSLC{{#var:lang}}|PrimitiveParams/{{{1}}}}}
+ {{LSLC{{#var:lang}}|{{{1}}}}}
+|
+ {{LSLC|PrimitiveParams{{#var:lang}}}}
+ {{LSLC|PrimitiveParams/{{{1}}}{{#var:lang}}}}
+ {{LSLC|{{{1}}}{{#var:lang}}}}
+}}
+}}}}</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line">&lt;onlyinclude&gt;<span class="wiki-template"><code>{{#if:
+
+{{LSL Function/limits}}
+{{LSL Function/color|color}}
+{{LSL Function/alpha|alpha}}
+
+{{#vardefine:p_text_set_hover|floating text to display}}
+{{#vardefine:p_text_get_hover|floating text displayed}}
+{{#vardefine:p_text_hover|{{#switch:{{{1|}}}|get={{#var:p_text_get_hover}}|set={{#var:p_text_set_hover}}|floating text}}}}
+
+{{#vardefine:p_text_set_desc|[[:Category:LSL Floating Text|floating text]] to display}}
+{{#vardefine:p_text_get_desc|[[:Category:LSL Floating Text|floating text]] displayed}}
+{{#vardefine:p_text_desc|{{#switch:{{{1|}}}|get={{#var:p_text_get_desc}}|set={{#var:p_text_set_desc}}|[[:Category:LSL Floating Text|floating text]]}}}}
+
+{{#vardefine:text_const|{{LSL Const|PRIM_TEXT|integer|26|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the object&#x27;s floating text}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+* Do not rely on [[:Category:LSL Floating Text|Floating Text]] as a storage medium; it is neither secure nor finalized.
+** Floating text has been altered in past server updates, breaking existing content; future changes may occur.
+** Even &quot;invisible&quot;{{Footnote|1=Floating text with an {{LSLP|alpha}} set to 0.0 is rendered &quot;invisible&quot;|2=Floating text with an alpha set to 0.0 is rendered {{String|invisible}}}} floating text is transmitted to the client.
+*** It can be viewed by anyone with a client that is capable of rendering text that is supposed to be invisible.
+*** The network packets that contain the text can be sniffed and the text read.}}
+
+}}</code></span>&lt;/onlyinclude&gt;</div></section>

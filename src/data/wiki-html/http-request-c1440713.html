@@ -1,0 +1,130 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered when task receives an HTTP request.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">See <a href="https://wiki.secondlife.com/wiki/LSL_http_server">LSL_http_server</a> for full specification.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><code>body</code> is <a href="https://wiki.secondlife.com/wiki/limit">limit</a>ed to 2048 bytes; anything longer will be truncated to 2048 bytes.</li>
+<li>As per the above, this function is unaffected by any values passed to <a href="/functions/llHTTPRequest/">llHTTPRequest</a> via <a href="/constants/HTTP_BODY_MAXLENGTH/">HTTP_BODY_MAXLENGTH</a>, as they reside on the <a href="/wiki/category-lsl-http-218669ab/#understanding-lsl-http-communications"> Outgoing</a> pipeline, and this function is on the <a href="/wiki/category-lsl-http-218669ab/#understanding-lsl-http-communications"> Incoming</a> pipeline.</li>
+<li>headers (accessed with <a href="/functions/llGetHTTPHeader/">llGetHTTPHeader</a>) are limited to 255 bytes.</li>
+<li>There is a limit of 64 pending http_request</li>
+<li>Be mindful of the event queue (64) in general as well. http_request events may be discarded if your script's queue is filled by other events, such as incoming <a href="/events/listen/">listen</a> messages.</li>
+<li><code>body</code> is not sent with the request unless the method is set to <code><span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|POST}}</code></span></code>, <code><span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|PUT}}</code></span></code>, or <a href="/constants/URL_REQUEST_GRANTED/">URL_REQUEST_GRANTED</a>.</li>
+<li>Requests may fail with a <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_Server_Error" rel="noreferrer">503 status code</a> for at least two possible reasons:</li>
+<li>if the returned body is <code>ERROR: The requested URL could not be retrieved</code>, and <code>(111) Connection refused</code>, the problem will normally last only a few minutes - this is th nightly maint &amp; log rotation.  It does reliably impact object to object HTTP at that time, and quite probably may impact object to/from web around the same time.  The interruption in service is fairly brief, and the precise timing may vary as LL adjust their nightly maint processes, or due to server load.</li>
+<li>this response can also happen if too many requests are received by scripts in the region owned by the same owner. In this case, a Retry-After header is returned with a number of seconds to wait before retrying. Note that if you have many requestors, some of them may have to wait longer. A good general strategy is to wait the suggested number of seconds (possibly with a little randomness added in) before retrying, and if that fails increase how long you wait by multiplying by a small number before retrying again. If all your requestors follow some method like this, eventually they'll get through.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">See <a href="https://wiki.secondlife.com/wiki/LSL_http_server/examples">LSL_http_server/examples</a> for some examples from the feature design phase.</div>
+<div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">Never ever forget to release a URL again which you have requested! URLs are region resources just like prims. If you take them all you can get into big trouble with the sim owner and/or estate managers.</div></aside></div>
+<div class="wiki-line"><pre><code>string url;
+key urlRequestId;
+key selfCheckRequestId;
+
+request_url()
+{
+    llReleaseURL(url);
+    url = &quot;&quot;;
+
+    urlRequestId = llRequestURL();
+}
+
+throw_exception(string inputString)
+{
+    key owner = llGetOwner();
+    llInstantMessage(owner, inputString);
+
+    // yeah, bad way to handle exceptions by restarting.
+    // However this is just a demo script...
+
+    llResetScript();
+}
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    changed(integer change)
+    {
+        if (change &amp; (CHANGED_OWNER | CHANGED_INVENTORY))
+        {
+            llReleaseURL(url);
+            url = &quot;&quot;;
+
+            llResetScript();
+        }
+
+        if (change &amp; (CHANGED_REGION | CHANGED_REGION_START | CHANGED_TELEPORT))
+            request_url();
+    }
+
+    state_entry()
+    {
+        request_url();
+    }
+
+    http_request(key id, string method, string body)
+    {
+        integer responseStatus = 400;
+        string responseBody = &quot;Unsupported method&quot;;
+
+        if (method == URL_REQUEST_DENIED)
+            throw_exception(&quot;The following error occurred while attempting to get a free URL for this device:\n \n&quot; + body);
+
+        else if (method == URL_REQUEST_GRANTED)
+        {
+            url = body;
+            key owner = llGetOwner();
+            llLoadURL(owner, &quot;Click to visit my URL!&quot;, url);
+
+            // check every 5 mins for dropped URL
+            llSetTimerEvent(300.0);
+        }
+        else if (method == &quot;GET&quot;)
+        {
+            responseStatus = 200;
+            responseBody = &quot;Hello world!&quot;;
+        }
+        // else if (method == &quot;POST&quot;) ...;
+        // else if (method == &quot;PUT&quot;) ...;
+        // else if (method == &quot;DELETE&quot;) { responseStatus = 403; responseBody = &quot;forbidden&quot;; }
+
+        llHTTPResponse(id, responseStatus, responseBody);
+    }
+
+    http_response(key id, integer status, list metaData, string body)
+    {
+        if (id == selfCheckRequestId)
+        {
+            // If you&#x27;re not usually doing this,
+            // now is a good time to get used to doing it!
+            selfCheckRequestId = NULL_KEY;
+
+            if (status != 200)
+                request_url();
+        }
+
+        else if (id == NULL_KEY)
+            throw_exception(&quot;Too many HTTP requests too fast!&quot;);
+    }
+
+    timer()
+    {
+        selfCheckRequestId = llHTTPRequest(url,
+                                [HTTP_METHOD, &quot;GET&quot;,
+                                    HTTP_VERBOSE_THROTTLE, FALSE,
+                                    HTTP_BODY_MAXLENGTH, 16384],
+                                &quot;&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>When triggered by either <a href="/functions/llRequestURL/">llRequestURL</a> or <a href="/functions/llRequestSecureURL/">llRequestSecureURL</a> the method will be either <a href="/constants/URL_REQUEST_GRANTED/">URL_REQUEST_GRANTED</a> or <a href="/constants/URL_REQUEST_DENIED/">URL_REQUEST_DENIED</a></li>
+<li>If the method is <a href="/constants/URL_REQUEST_GRANTED/">URL_REQUEST_GRANTED</a> The body will contain the full url, minus the trailing forward slash.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestURL/">llRequestURL</a> — Request a new LSL Server public URL</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestSecureURL/">llRequestSecureURL</a> — Request a new LSL Server public URL</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llReleaseURL/">llReleaseURL</a> — Release a URL</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llHTTPResponse/">llHTTPResponse</a> — For replying to HTTP requests</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetHTTPHeader/">llGetHTTPHeader</a> — Returns the requested HTTP header's value</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llEscapeURL/">llEscapeURL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llUnescapeURL/">llUnescapeURL</a></div></div></section>
+<section><h2 id="known-issues">Known issues</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-issue-v1-197477c5/">Issue/V1</a>: <code>{{Issue/V1|SVC-1086|Design: LSL http_server|type=fs|status=ip}}</code></span></div></section>

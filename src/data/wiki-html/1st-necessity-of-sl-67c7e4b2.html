@@ -1,0 +1,112 @@
+<div class="wiki-line">Ever since I noticed that many sims contain 1000's of wonderful objects with fancy effects and 1000's active scripts that use valuable simresources while no-one is around to enjoy it, I wanted to script something simple to offload those resources and give the visitor a better experience.</div>
+<div class="wiki-line">That's why I made this little script: '1st necessity of SL' that could and should be used in any project that doesn't need to be active all the time.</div>
+<div class="wiki-line">We are building a better place, together :) </div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/https://wiki.secondlife.com/wiki/User:Beer_Dailey_Beer_Dailey">https://wiki.secondlife.com/wiki/User:Beer_Dailey Beer Dailey</a></div>
+<div class="wiki-line"><pre><code>// Improve SecondLife&#x27;s performance!
+// Start with your own(ned) modifyable scripts/objects.
+//
+// This will disable your rootprim&#x27;s script(s) when no-one is around to use/admire it
+// thus stop wasting valuable sim-resources
+// 
+// Measured script time is 0.002 ms on average. 
+//
+// - don&#x27;t use it for rental stuff or sorts, not everything is suitable -
+//
+// Free to use, please use it. Improvements are welcome.
+// // Thank you Norton Burns for the testing and feedback :)
+//
+// Beer Dailey
+//
+// Don&#x27;t reset this script or take it back in inventory when you&#x27;re not within the set distance 
+// or you&#x27;ll get unpredictable results !!
+// 
+// modify below to suit your needs
+
+//////////////////////////////////
+float   distance = 48;   // scan range 
+integer delay = 10;      // repeat scan every 10 seconds.
+
+// added 
+// (gnore specific scripts, some scripts need to be off after initial setups
+// There&#x27;s a bug that resets scripts in off state after a sim restart, so when activated again they re-initialise.
+// I&#x27;ve no fix for that.
+//
+list ignore_scripts = [&quot;major script&quot;, &quot;even worse script&quot;]; 
+
+integer debug = FALSE;   // for debugging purposes, set it to TRUE to see what it&#x27;s controlling
+
+
+//////////////////////////////////////
+// no need to modify the code below //
+//////////////////////////////////////
+
+integer g_active = FALSE;  // if FALSE disable all other scripts  
+                           // changed TRUE into FALSE cos of some bug with rezzing, thank you LordGregGreg Back :)
+list control_scripts;      // list for all scriptnames
+ 
+active_scripts( integer active )
+{
+    if(g_active == active) return; else g_active = active;  //flip TRUE/FALSE
+ 
+    integer a;
+    for ( a = 0; a &lt; llGetListLength(control_scripts); a++)
+    {
+        llSetScriptState(llList2String(control_scripts, a), g_active); //(de)activate scripts 
+        
+    }  
+    if (debug) llOwnerSay(&quot;Changed: &quot; + llList2CSV(control_scripts) + &quot; to: &quot; + (string)g_active );  
+}
+ 
+default
+{
+    state_entry()
+    {
+        string myname = llGetScriptName(); //don&#x27;t add myself into the list 
+        control_scripts = [];  
+        
+        integer i;
+        integer n = llGetInventoryNumber(INVENTORY_SCRIPT); //count scripts
+        
+        if (n == 1) { llOwnerSay(&quot;No other scripts found!&quot;); } else //dont be silly ;)
+        
+        for(i = 0; i &lt; n; ++i)
+        {
+            string name = llGetInventoryName(INVENTORY_SCRIPT, i); //parse scriptnames 
+            if(name != myname) //not my name then continue
+            {
+               //catch states
+               if ( llGetScriptState(name) == TRUE) //not on ignore list &amp; running add it
+               {
+                   control_scripts += [name];  
+               }
+               else ignore_scripts += [name];
+            }
+        }
+        if (debug) llOwnerSay(&quot;Controlling: &quot; + llList2CSV(control_scripts) + &quot;\nIgnoring: &quot; + llList2CSV(ignore_scripts));
+        llSensorRepeat(&quot;&quot;, NULL_KEY, AGENT, distance, PI, delay); // how far and how often we scan for avatars
+    }
+ 
+    on_rez(integer s) 
+    { 
+        if (llGetListLength(control_scripts)== 0 &amp;&amp; g_active == TRUE) llResetScript(); 
+        //first time use or reset only when scripts are still active or they&#x27;ll be added to the ignorelist
+    } 
+ 
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_OWNER) llResetScript(); // catch new owner
+        if (change &amp; CHANGED_INVENTORY) llResetScript(); // catch new scripts
+    }
+ 
+    sensor(integer num_detected)
+    {
+       active_scripts(TRUE); //activate the scripts
+    }
+ 
+    no_sensor()  //no-one around? turn off all controlled scripts except myself
+    {
+       active_scripts(FALSE); //deactivate the scripts
+    }
+ 
+}
+  </code></pre></div>

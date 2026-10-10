@@ -1,0 +1,35 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span><span class="wiki-template"><a href="https://wiki.secondlife.com/wiki/Template:LSLC%7B%7B#var-lang">LSLC{{#var:lang}}</a>: <code>{{LSLC{{#var:lang}}|}}</code></span></div>
+<div class="wiki-line">Negative indexes count backwards from the end.</div>
+<div class="wiki-line">For <em>string s = "Hello World"</em></div>
+<ul>
+<li>Index 0 is 'H' (<em>llGetSubString(s,0,0)</em>)</li>
+<li>Index -1 is 'd' (<em>llGetSubString(s,-1,-1)</em>)</li>
+<li>Index -5 is 'W' (<em>llGetSubString(s,-5,-5)</em>)</li>
+</ul>
+<div class="wiki-line">Negative indexes are very straight forward, LSL treats negative indexes as if they were their positive counterpart.<br/></div>
+<div class="wiki-line">Say <em>n_ind</em> is a negative index for <em>str</em> then the positive form of <em>n_ind</em> would be <code>n_ind + llStringLength(str);</code><br/></div>
+<div class="wiki-line">Say <em>p_ind</em> is a positive index for <em>str</em> then the negative form of <em>p_ind</em> would be <code>p_ind - llStringLength(str);</code></div>
+<div class="wiki-line">Care must be taken when using the results of <a href="/functions/llListFindList/">llListFindList</a> and <a href="/functions/llSubStringIndex/">llSubStringIndex</a> in combination with the functions in this category.  Those functions will return an index of -1 to indicate 'not found', which if used in these functions is a valid index - but probably not the one you want.</div>
+<div class="wiki-line"><pre><code>string s = &quot;Hello World&quot;;
+
+integer index = llSubStringIndex(s, &quot;t&quot;);//index == -1
+if(~index)//same as doing (index != -1) but a bit faster, &#x27;~&#x27; inverts the bits (-1 == all on) so (~-1 == all off)
+{
+    s = llDeleteSubString(s, index, index);
+}</code></pre></div>
+<h2 id="range-functions">Range Functions</h2>
+<table><tr><td> <strong>List</strong><ul><li><a href="/functions/llList2List/">llList2List</a></li><li><a href="/functions/llDeleteSubList/">llDeleteSubList</a></li><li><a href="/functions/llListInsertList/">llListInsertList</a></li><li><a href="/functions/llListReplaceList/">llListReplaceList</a></li></ul></td><td> <strong>String</strong><ul><li><a href="/functions/llGetSubString/">llGetSubString</a></li><li><a href="/functions/llDeleteSubString/">llDeleteSubString</a></li></ul></td></tr></table>
+<div class="wiki-line">To complicate things range functions take two indexes and operator on a range of indexes. They have <em>start</em> and <em>end</em> index parameters. Negative indexes are treated as if they are their positive counterparts. </div>
+<ul>
+<li>If <em>start</em> &lt;= <em>end</em> then the range of indexes the function works with are [<em>start</em>, <em>end</em>].</li>
+<li>If <em>start</em> &gt; <em>end</em> then the range of indexes the function works with is [0, <em>end</em>] + [<em>start</em>, &lt;span title="infinity"&gt;∞&lt;/span&gt;]</li>
+</ul>
+<div class="wiki-line">Things can get tricky when using mixed indexes with variable length strings and lists. The mode of ranges operated upon can switch back and forth dependent upon the length. It is important to keep this in mind when mixing indexes that count from the beginning and those that count from the end.</div>
+<div class="wiki-line"><pre><code>string bad(string in)
+{
+    return llGetSubString(in, 5, -5);
+}
+
+bad(&quot;Hello World!&quot;);//returns &quot; Wo&quot; resulting range [5, 8]
+bad(&quot;Hello Cat!&quot;);//returns &quot; &quot; resulting range [5, 5]
+bad(&quot;Hello !&quot;);//returns &quot;Hel !&quot; resulting range [0, 2] + [5 , 6]</code></pre></div>

@@ -1,0 +1,75 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Plays attached <code>sound</code> looping indefinitely at <code>volume</code></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>A call to llLoopSound replaces any other sound (so that only one sound can be played at the same time from the same prim, except sounds started with the deprecated <a href="/wiki/llsound-6e1f7512/">llSound</a> which always plays sound files till the end. An object can play 2 sounds with llLoopSound if the function is called from different prims</li>
+<li>If a second call to loop the same sound at a different volume is made from within the same script NO volume change is made.</li>
+<li><a href="/functions/llStopSound/">llStopSound</a> set just previous to the second call for a new volume allows the volume change with no discernible pause.</li>
+<li>When call made from HUD attachment sound is only heard by agent the task is attached to.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>llLoopSound(&quot;ambient.wav&quot;, 0.5);</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLoopSoundMaster/">llLoopSoundMaster</a> — 3=Plays a sound <code>attached</code> indefinitely.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLoopSoundSlave/">llLoopSoundSlave</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llStopSound/">llStopSound</a> — 3=Stops playing a looped sound.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llPlaySound/">llPlaySound</a> — 3=Plays a sound <code>attached</code> once.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTriggerSound/">llTriggerSound</a> — 3=Plays a sound <code>unattached</code>.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTriggerSoundLimited/">llTriggerSoundLimited</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-added-c4a824ad/">LSL Added</a>: <code>{{LSL Added|0.2.0|remote=http://secondlife.wikia.com/wiki/Version_0.2.0}}</code></span></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-4897"><a href="/wiki/template-issues-svc-4897-d4de8d22/">Template:Issues/SVC-4897</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-4897|&#x27;&#x27;&#x27;llSetSyncTime&#x27;&#x27;&#x27;() - a function for synchronising client side effects|type=nf}}</code></pre></details><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details></section>

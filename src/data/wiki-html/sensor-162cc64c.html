@@ -1,0 +1,40 @@
+<section><h2 id="event-notes">Event notes</h2><div class="wiki-line">The results are ordered from nearest to furthest.</div>
+<div class="wiki-line"><br/><strong>num_detected</strong> is always greater than zero, the <a href="/events/no_sensor/">no_sensor</a> event is triggered if no objects/avatars were found.</div></section>
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Results from a call to either <a href="/functions/llSensor/">llSensor</a> or <a href="/functions/llSensorRepeat/">llSensorRepeat</a>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><a href="https://wiki.secondlife.com/wiki/Linden">Linden</a>s in <a href="https://wiki.secondlife.com/wiki/God_Mode">administrative mode</a> cannot be sensed by sensors in the same region as the Linden.</li>
+<li>Sensors placed in attachments will use the direction the avatar is facing as their forward vector. In mouselook, this means that it will be wherever the avatar is looking, while out of mouselook, this means whichever way the avatar is pointing. This does not include where the avatar's head is pointing, or what animation the avatar is doing, just the direction the avatar would move in if you walked forward. This is the case, regardless of where the object is attached. </li>
+<li>A sensor running in an attachment will not detect the avatar wearing it.</li>
+<li>Only 32 objects will be scanned each time. (Increased from 16 with Release 2024-03-18.8333615376 on Tuesday, March 19, 2024)</li>
+<li>This event is not executed when nothing is detected, means, you never get the result 0 returned. Use <a href="/events/no_sensor/">no_sensor</a> for that.</li>
+<li>on logout all avatars leave a Ghost for a few moments, this results in Failures in llDetected functions in sensor events.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+    //  do a 10m spherical sweep
+        llSensor(&quot;&quot;, NULL_KEY, AGENT_BY_LEGACY_NAME, 10.0, PI);
+    }
+
+    sensor (integer num_detected)
+    {
+        string message = &quot;Detected &quot; + (string)num_detected + &quot; avatar(s): &quot; + llDetectedName(0);
+
+    //  we already added the first avatar above, so continue from index 1
+        integer index = 1;
+        while (index &lt; num_detected)
+            message += &quot;, &quot; + llDetectedName(index++);
+
+        llWhisper(PUBLIC_CHANNEL, message);
+    }
+
+    no_sensor()
+    {
+        llWhisper(PUBLIC_CHANNEL, &quot;Nobody is near me at present.&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">You might want to use <a href="/functions/llGetAgentList/">llGetAgentList</a> instead of using sensors to get a list of all avatars within the same parcel or region.</div></aside></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSensor/">llSensor</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSensorRepeat/">llSensorRepeat</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/category-lsl-detected-a60bd5c2/">Detected</a></div></div></section>

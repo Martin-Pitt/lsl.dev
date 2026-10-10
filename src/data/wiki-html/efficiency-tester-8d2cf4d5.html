@@ -1,0 +1,104 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<div class="wiki-line"><strong>Q1: Want to see how small some code compiles?</strong></div>
+<div class="wiki-line"><strong>A:</strong> See the <a href="/wiki/code-sizer-9919bcf5/">Code Sizer</a> harness for <a href="/functions/llGetFreeMemory/">llGetFreeMemory</a>.</div>
+<div class="wiki-line"><strong>Q2: Want to discover quickly if a change to code makes the code run faster?</strong></div>
+<div class="wiki-line"><strong>A:</strong> See the <a href="/wiki/code-racer-526264b3/">Code Racer</a> harness for <a href="/functions/llGetTimestamp/">llGetTimestamp</a>.</div>
+<div class="wiki-line"><strong>Q3: Want to see approximately how fast some code runs?</strong></div>
+<div class="wiki-line"><strong>A:</strong> Run your code inside code like this example to call your code time and again to measure the consequent change in <a href="/functions/llGetTimestamp/">llGetTimestamp</a>.</div>
+<div class="wiki-line">Sample Results:</div>
+<div class="wiki-line"><pre><code>15249 free bytes of code at default.state_entry
+0.177314+-??% ms may have elapsed on average in each of
+10000 trials of running the code in the loop
+0.176341+-??% ms may have elapsed on average in each of
+10000 trials of running the code in the loop
+0.201925+-??% ms may have elapsed on average in each of
+10000 trials of running the code in the loop</code></pre></div>
+<div class="wiki-line">Code:</div>
+<div class="wiki-line"><pre><code>// IMPORTANT:
+// Only perform tests in an empty region.
+// To reduce contamination and be sure to wearing no attachments.
+// Preferably do tests in a private sim with one on it.
+// Don&#x27;t move while performing the test.
+// There is a margin of error so run the tests multiple times to determine it.
+
+// (16384 - (15267 - 18)) was the well-known byte code size of this llGetTime/ llGetTimestamp harness
+
+// Measure the race instead
+// in calendar milliseconds elapsed since the day began,
+// if called in place of llGetTime.
+
+integer getTime() // count milliseconds since the day began
+{
+    string stamp = llGetTimestamp(); // &quot;YYYY-MM-DDThh:mm:ss.ff..fZ&quot;
+    return (integer) llGetSubString(stamp, 11, 12) * 3600000 + // hh
+           (integer) llGetSubString(stamp, 14, 15) * 60000 +  // mm
+           llRound((float)llGetSubString(stamp, 17, -2) * 1000000.0)/1000; // ss.ff..f
+}
+
+default
+{
+    state_entry()
+    {
+
+        // always measure how small, not only how fast
+
+        llOwnerSay((string) llGetFreeMemory() + &quot; free bytes of code at default.state_entry&quot;);
+
+        // always take more than one measurement
+
+        integer repeateds;
+        for (repeateds = 0; repeateds &lt; 3; ++repeateds)
+        {
+
+            // declare test variables
+
+            float counter;
+
+            // declare framework variables
+
+            float i = 0;
+            float j = 0;
+            integer max = 10000; // 2ms of work takes 20 seconds to repeat 10,000 times, plus overhead
+
+            // begin
+
+            float t0 = llGetTime();
+
+            // loop to measure elapsed time to run sample code
+
+            do
+            {
+
+              // test once or more
+
+              counter += 1; // 18 bytes is the well-known byte code size of this sourceline
+      
+            } while (++i &lt; max);
+
+            float t1 = llGetTime();
+
+            // loop to measure elapsed time to run no code
+
+            do ; while (++j &lt; max);
+
+            float t2 = llGetTime();
+
+            // complain if time ran backwards
+            
+            if (!((t0 &lt;= t1) &amp;&amp; (t1 &lt;= t2)))
+            {
+                llOwnerSay(&quot;MEANINGLESS RESULT -- SIMULATED TIME RAN BACKWARDS -- TRY AGAIN&quot;);
+            }
+            
+            // report average time elapsed per run
+
+            float elapsedms = 1000.0 * (((t1 - t0) - (t2 - t1)) / max);
+            llOwnerSay((string) elapsedms + &quot;+-??% ms may have elapsed on average in each of&quot;);
+            llOwnerSay((string) max + &quot; trials of running the code in the loop&quot;);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">Launched by <a href="https://wiki.secondlife.com/wiki/User:Xaviar_Czervik">Xaviar Czervik</a>, then modified by <a href="https://wiki.secondlife.com/wiki/User:Strife_Onizuka">Strife Onizuka</a>, then further edited as the history of this article shows.</div>
+<div class="wiki-line">Try the empty test of deleting the { counter += 1; } source line to see the astonishing inaccuracy of this instrument. The time cost of no code, as measured here, isn't always zero!</div>
+<div class="wiki-line">See the <a href="https://wiki.secondlife.com/wiki/LSL_Script_Efficiency">LSL Script Efficiency</a> article for a less brief discussion. Please understand, we don't mean to be arguing for many different ways to measure the costs of code. Here we do mean to be building a consensus on best practices, in one considerately short article constructed from a neutral point of view.</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples}}</code></span></div>

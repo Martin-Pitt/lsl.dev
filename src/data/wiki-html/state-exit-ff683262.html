@@ -1,0 +1,39 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered on a qualifying <a href="https://wiki.secondlife.com/wiki/state">state</a> transition.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Events queued during <a href="/events/state_exit/">state_exit</a>, are dumped before the next state is entered. use <a href="/events/state_entry/">state_entry</a> to avoid this, when possible. See <a href="https://wiki.secondlife.com/wiki/state">state</a> for further caveats.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llOwnerSay(&quot;Entering default state&quot;);
+    }
+    touch_end(integer detected)
+    {
+        // Note: NEVER do a state change from a touch_start event -
+        // - this can result in a missed touch_start on re-entering this state
+        // Here we do the state change safely from within touch_end
+        state other;
+    }
+    state_exit()
+    {
+        llOwnerSay(&quot;leaving default state&quot;);
+    }
+}
+
+state other
+{
+    state_entry()
+    {
+        llOwnerSay(&quot;Entering state \&quot;other\&quot;&quot;);
+    }
+    touch_end(integer detected)
+    {
+        state default;
+    }
+    state_exit()
+    {
+        llOwnerSay(&quot;leaving state \&quot;other\&quot;&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">While the <a href="https://wiki.secondlife.com/wiki/default">default</a> <a href="/events/state_entry/">state_entry</a> is triggered on script reset, state_exit is not triggered prior to the reset.</div></section>

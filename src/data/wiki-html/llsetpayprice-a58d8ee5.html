@@ -1,0 +1,58 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Suggest default amounts for the pay text field and pay buttons of the appearing dialog when someone chooses to pay this object.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><td><table><tr><th colspan="2"> Constant</th><th> <code>Alt</code></th><th> Description</th></tr><tr><td> <a href="/constants/PAY_HIDE/">PAY_HIDE</a></td><td> -1</td><td> &lt;center&gt;0&lt;/center&gt;</td><td> Hides this quick pay button.</td></tr><tr><td> <a href="/constants/PAY_DEFAULT/">PAY_DEFAULT</a></td><td> -2</td><td> </td><td> Use the default value for this quick pay button.</td></tr></table></td><td><table><tr><th colspan="2"> Button Order</th></tr><tr><td> &lt;center&gt;1&lt;/center&gt;</td><td> &lt;center&gt;2&lt;/center&gt;</td></tr><tr><td> &lt;center&gt;3&lt;/center&gt;</td><td> &lt;center&gt;4&lt;/center&gt;</td></tr></table></td><td><table><tr><th colspan="2"> Defaults</th></tr><tr><td>$1</td><td>$5</td></tr><tr><td>$10</td><td>$20</td></tr></table></td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>This function should not be trusted to limit the values of money payable to the object; <em>always</em> verify the amount paid is the amount expected.</li>
+<li>Use only one call to this function in all the scripts on an object to prevent confusion about which values are used.   You still need to check in the money event that the amount is as expected.</li>
+<li>This function only works when called from the root prim of an object. Its effect applies to all the prims in the object. Calling it from a child prim has no effect.</li>
+<li>There is currently a <a href="https://feedback.secondlife.com/slua-alpha/p/child-prim-in-linkset-cannot-be-paid-if-previously-a-root-prim-with-llsetpaypric" rel="noreferrer">viewer bug</a> where calls from child prims will <strong>prevent</strong> payment to the object.</li>
+<li>Payment to a prim can be blocked by the llSetPayPrice() setting in the prim, which persists even if the script with llSetPayPrice() is removed.</li>
+<li><strong>Caution:</strong> Calling this function will enable payment on the prim (or the whole object if it is the root prim) for the current state, even when this state has no money event.</li>
+<li>Otherwise, the pay option will only be shown in prims having a running script with a <a href="/events/money/">money</a> event (or in all the prims of the object if the root has a running script with a money event).</li>
+<li>The effect seems to persist even if the script is recompiled with out the <a href="/functions/llSetPayPrice/">llSetPayPrice</a> function, even if the script is replaced with another one which includes a <a href="/events/money/">money</a> event, but not <a href="/functions/llSetPayPrice/">llSetPayPrice</a>.</li>
+<li>Money cannot be paid to an attachment; "Pay" will go directly to the wearer instead.</li>
+<li>If <strong>quick_pay_buttons</strong> contains a negative value or zero, the button will not be shown at all.</li>
+<li>However, zero is allowed for <strong>price</strong>, which is used to set the custom text field's value within the Pay window.</li>
+<li>If <em>price</em> is <a href="/constants/PAY_HIDE/">PAY_HIDE</a> and a payment is made that does not match any value in <em>quick_pay_buttons</em>, then the simulator will block the payment and the payer will receive an error message.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">This will give the user a dialog box without the <strong>price</strong> field and only one button with a value of 150.</div>
+<div class="wiki-line"><pre><code>llSetPayPrice(PAY_HIDE, [150,PAY_HIDE,PAY_HIDE,PAY_HIDE])</code></pre></div>
+<div class="wiki-line"><pre><code>integer price = 10;
+
+default
+{
+    state_entry()
+    {
+        llSetPayPrice(PAY_HIDE, [PAY_HIDE ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+        llRequestPermissions(llGetOwner(), PERMISSION_DEBIT);
+    }
+    run_time_permissions(integer perm)
+    {
+        if(perm &amp; PERMISSION_DEBIT)
+            state cash;
+    }
+}
+
+state cash
+{
+    state_entry()
+    {
+        llSetPayPrice(price, [price ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+    }
+    money(key id, integer amount)
+    {
+        if(amount != price)
+        {
+            llGiveMoney(id, amount);
+            llInstantMessage(id, &quot;You paid &quot;+(string)amount+&quot;, which is the wrong price, the price is: &quot;+(string)price);
+        }
+        else
+        {
+            //insert your give code here.
+            llInstantMessage(id, &quot;You paid the right price&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGiveMoney/">llGiveMoney</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/money/">money</a></div></div></section>
+<section><h2 id="tests">Tests</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/llSetPayPrice_Test">llSetPayPrice Test</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="vwr-3048"><a href="/wiki/template-issues-vwr-3048-e052de12/">Template:Issues/VWR-3048</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|VWR-3048|type=bug|[[llSetPayPrice]] doesn&#x27;t work on Child Prims, default box used instead.}}</code></pre></details><p id="vwr-8744"><a href="/wiki/template-issues-vwr-8744-3aeed862/">Template:Issues/VWR-8744</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|VWR-8744|type=bug|[[llSetPayPrice]] causes &quot;When Left Clicked: Pay Object&quot; to break|status=res|resolution=fixed}}</code></pre></details></section>

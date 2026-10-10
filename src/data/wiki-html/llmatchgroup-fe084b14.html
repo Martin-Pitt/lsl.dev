@@ -1,0 +1,115 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">(Also suggested to be called as <em>llIsGroupActive</em> or <em>llCheckGroupActive</em>).</div>
+<div class="wiki-line">This function is a request from several scripters to reach what <a href="/functions/llDetectedGroup/">llDetectedGroup</a> and <a href="/functions/llSameGroup/">llSameGroup</a> is not able to provide. It would not cause any security and/or privacy issues due the fact it will return an integer as <code>boolean</code> instead of any information about the group.</div>
+<div class="wiki-line">Furthermore, this function will <em>only</em> check against an agent's current active group, something which can be readily discovered by most residents using the standard viewer even if the group is marked as hidden.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>boolean</code>; <a href="/constants/TRUE/">TRUE</a> if the agent has <strong>group</strong> as active group, otherwise <a href="/constants/FALSE/">FALSE</a>.</div></section>
+<section><h2 id="specification">Specification</h2><ul>
+<li>Still unknow.</li>
+</ul></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Can still check the agent's active group even if it is hidden.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>list group_keys = [&quot;cd505f45-a33c-dcd5-eb7e-cad27847a4af&quot;, &quot;a7729bfc-674b-10c7-edc0-461a3ee55ef4&quot;]; //group keys
+key toucher;     // Key of person who touches the object
+
+default
+{
+    touch_start( integer total_number )
+    {
+        toucher = llGetDetected( 0 );
+
+        // It checks if the agent (avatar) has one of the groups in &quot;group_keys&quot; as active group
+        if( llMatchGroup( toucher, group_keys ) == TRUE )
+        {
+            llSay( 0, &quot;You belong to the group&quot; );
+        }
+        else
+        {
+            llSay( 0, &quot;You don&#x27;t belong to the group&quot; );
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">Only one group:</div>
+<div class="wiki-line"><pre><code>list group_key = [&quot;cd505f45-a33c-dcd5-eb7e-cad27847a4af&quot;];
+key toucher;    // Key of person who touches the object
+
+default
+{
+    touch_start( integer total_number )
+    {
+        toucher = llGetDetected( 0 );
+
+        // It checks if the agent (avatar) has one of the groups in &quot;group_keys&quot; as active group
+        if( llMatchGroup( toucher, group_key ) == TRUE )
+        {
+            llSay( 0, &quot;You belong to the group secondlife:///app/group/&quot; +
+                       (string)llList2String( group_key, 0 ) + &quot;/about&quot; );
+        }
+        else
+        {
+            llSay( 0, &quot;You don&#x27;t belong to the group secondlife:///app/group/&quot; +
+                       (string)llList2String( group_key, 0 ) + &quot;/about&quot; );
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">----</div>
+<div class="wiki-line">Please go vote if this feature is important to you. <a href="https://jira.secondlife.com/browse/SCR-79" rel="noreferrer">Jira (SCR-79)</a></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedGroup/">llDetectedGroup</a> — Used in conjunction with <a href="/wiki/category-lsl-detected-a60bd5c2/">detection</a> events</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSameGroup/">llSameGroup</a></div></div></section>
+<section><h2 id="comments">Comments</h2><div class="wiki-line">"A function, tentatively titled llMatchGroup(), which takes two parameters: an agent/object key and a group key, and returns a boolean result. (e.g. integer llMatchGroup(key target, key group); ) The function simply checks "target"'s active group against the key "group", returns a 1 if the two match and returns a 0 if they do not. For the purposes this is intended to cover it would only need to work for targets located within the same sim. (Though it would be nice if it could check targets 96m within adjacent sims, a la llGetObjectDetails().)</div>
+<div class="wiki-line">I believe this function would satisfy both needs for the most part; it would allow scripters to set up multi-group authorization systems, but would not allow them to potentially breach resident privacy by in essence "fishing" for group information as implementing <a href="https://jira.secondlife.com/browse/SVC-1612" rel="noreferrer">SVC-1612</a> would allow. Any scripts using it would have to know the key of the group in advance to get any meaningful information out of this.</div>
+<div class="wiki-line">It should also be noted that this functionality is strongly desired, to the point where designers use rather complex methods to accomplish this despite the heavy overhead required. I've seen a few security/etc. setups where the system relied on multiple objects set to different groups, each using llSameGroup() within intercommunicating scripts in order to allow multiple-group access checking. Implementing this would allow developers to use self-contained scripts to accomplish the same thing."</div>
+<div class="wiki-line">----</div>
+<div class="wiki-line">"<strong>IF</strong> this idea is implemented, I'd much rather see the function called llIsGroupActive or llCheckGroupActive as llMatchGroup is too vague."</div>
+<div class="wiki-line">----</div>
+<div class="wiki-line">"The best will be llMatchGroup(key avat, list group_keys), allowing to check more than one group at once. Function will return TRUE if avat active group is one of the list.</div>
+<div class="wiki-line">For instance in RP sims, doors have to check access for the main group but also for ally groups, sub-groups, etc. So it will make one call instead of many.</div>
+<div class="wiki-line">I hope LL sees that as long such function is missing we have to implement heavy workarounds (making one scripted object per group to check, another script to communicate with each object, and dealing with auto-return). This would save server script time and memory."</div>
+<ul>
+<li>Texts extracted from <a href="https://jira.secondlife.com/browse/SCR-79" rel="noreferrer">Jira (SCR-79)</a></li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="scr-79"><a href="/wiki/template-issues-scr-79-410a7aa4/">Template:Issues/SCR-79</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SCR-79|Request for &#x27;&#x27;&#x27;llMatchGroup&#x27;&#x27;&#x27;() function|type=nf|status=await|resolution=unres}}</code></pre></details><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-group-1d804f40/">Template:LSL Function/group</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{Issues/VWR-5044}}
+
+{{#vardefine:notes|{{#var:notes}}{{PBR}}
+==== Child Prims ====
+It is possible for the group of a child prim to differ from that of the root prim. To build such an object it must first be unlinked, the groups set, and then relinked. Rezzing an object resets the group of the object to that of the group that the user currently has activated. Changing the group of an object changes the group for the entire object. This may only be an artifact or manifestation of [[#VWR-5044|VWR-5044]].}}
+
+}}&lt;noinclude&gt;{{#vardefine:notes}}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|notes}}
+|-
+{{VarPairTable|issues}}
+|-
+{{VarPair|BugCounter}}
+|-
+{{VarPair|IssueCounter}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

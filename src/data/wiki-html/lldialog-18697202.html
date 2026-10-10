@@ -1,0 +1,404 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Shows a dialog box in the lower right corner of the <code>avatar</code>'s screen (upper right in Viewer 1.x) with a <code>message</code> and choice <code>buttons</code>, as well as an ignore button. This has many uses ranging from simple message delivery to complex menu systems.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">When a button is pressed, the <code>avatar</code> says the text of the button label on <code>channel</code>.<br/>The position where the chat is generated is where the root prim of the dialog generating object was when the dialog button was pressed.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><td><table><tr><th colspan="4"> Button Order</th></tr><tr><td>9&nbsp;&nbsp;</td><td>10</td><td>11</td></tr><tr><td>6</td><td>7</td><td>8&nbsp;&nbsp;</td></tr><tr><td>3</td><td>4</td><td>5</td></tr><tr><td>0</td><td>1</td><td>2</td></tr></table></td><td></td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>This function <strong>only</strong> opens a dialog box. The script must then also register a listener on the same <em>channel</em> using <a href="/functions/llListen/">llListen</a> and have a <a href="/events/listen/">listen</a> event handler to receive the response.</li>
+<li>There is no way by script to kill a dialog box.</li>
+<li>There is no way for the script to detect if the user clicked the small <code>["Ignore"]</code> button (no chat is generated as a result of pressing this button).</li>
+<li>There is no way to distinguish the input from a dialog box and regular chat made by the same user.</li>
+<li>It is important to expect that the response may not be one of the buttons.</li>
+<li>In most cases, the listener will be in the same script as the llDialog, however if not, the distance between the root prim of the <a href="/events/listen/">listen</a>ing object and the dialog generating prim becomes a factor. If this distance is greater than 20 meters when a button is pressed, the response will not be heard. See <a href="#limits"></a>.</li>
+<li>This limitation affects attachments too if the wearer moves more than 20 meters from where the listener is located. See <a href="#limits"></a>.</li>
+<li>If the <a href="/events/listen/">listen</a>er resides in the same script that created the dialog, then the dialog button is heard sim-wide.</li>
+<li>By default, only one dialog can be displayed per object in the Second Life Viewer.  This can be overridden by the <a href="https://wiki.secondlife.com/wiki/Debug_Settings">ScriptDialogLimitations debug setting</a> in the Viewer.</li>
+</ul>
+<div class="wiki-line">----</div>
+<ul>
+<li>The <strong>dialog response</strong> (the generated chat) has its in world location at the <strong>root prim's global position</strong>.</li>
+</ul>
+<div class="wiki-line">: It can generate a listen event within 20 meters from that position.</div>
+<ul>
+<li>The listening location for a child prim in the object is either at the child prim's location or at the root prim's location</li>
+</ul>
+<div class="wiki-line">: see bugtrace JIRA <a href="https://jira.secondlife.com/browse/SCR-43" rel="noreferrer">SCR-43</a></div>
+<h3 id="message-limits"><code>message</code> limits</h3>
+<ul>
+<li><code>message</code> must be fewer than 512 bytes in length and be not empty. If it is empty, <a href="/functions/llDialog/">llDialog</a> will shout <code>"<a href="/functions/llDialog/">llDialog</a>: must supply a message"</code> on the <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>. If you want to create an empty message, however, you can do it legally by using a line feed as your message, as in  <pre><code>llDialog(avatar_key,&quot; \n&quot;,button_list,dialog_channel);</code></pre> If the message length is greater than or equal to 512 bytes, it shouts (again on the <a href="/constants/DEBUG_CHANNEL/">debug channel</a>): <code>"<a href="/functions/llDialog/">llDialog</a>: message too long, must be less than 512 characters"</code>; in both instances, the dialog box will not be created for <code>avatar</code>.</li>
+<li>The client only displays 20 lines of <code>message</code> at a time, not counting the top line containing the owner and name of the object. If there are more than 20 lines the dialog displays a scroll bar. See <a href="#appearance"></a>.</li>
+</ul>
+<h3 id="buttons-limits"><code>buttons</code> limits</h3>
+<ul>
+<li>If <code>buttons</code> is an empty list, it will default to as if it were <code>["OK"]</code></li>
+<li>Buttons named "Client_Side_Mute" or "Client_Side_Ignore" will be interpreted by the viewer as if the user click the special "Mute" or "Ignore" buttons, respectively.</li>
+<li>Prior to <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/3.3.1">SL viewer 3.3.1</a> (released in 2012) the viewer treated the buttons with values of "Mute" and "Ignore" as being equivalent to the dialogs special buttons "Mute" and "Ignore". This was changed as a result of <a href="https://jira.secondlife.com/browse/STORM-1718" rel="noreferrer">STORM-1718</a>. Some very old versions of some viewer, especially those with a V1-style interface, could still have this old behavior and should be tested.</li>
+<li>If you need a button in your menu that will collide with one of these special values, please consider adding spaces in the button name (e.g. <code>[" Ignore "]</code>).</li>
+<li>An error will be shouted on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>, if...</li>
+<li>there are more than 12 buttons.</li>
+<li>any list item is not a string.</li>
+<li>any list item string length (measured in bytes, using UTF-8 encoding) is zero or greater than 24.</li>
+<li>In other words, a button's text when encoded as UTF-8 cannot be longer than 24 bytes or a empty string.</li>
+<li>The following function can be used to truncate the string without giving an error: <pre><code>string buttonLabel(string label) { //crop to valid UTF-8 of at most 24 bytes
+    string  encoded = llStringToBase64(label);
+    if (llStringLength(encoded) &lt;= 32) {
+        return label; }
+    integer end = 31;
+    //note: if we don&#x27;t do this, llBase64ToString might add a &quot;?&quot; for the character we cut in half
+    string  tailEnc = llGetSubString(encoded, 28, 33);
+    integer tail    = llBase64ToInteger(tailEnc);
+    while ((tail &amp; 0xc0) == 0x80) {
+        if (end % 4 == 1) {
+            end -= 2; }
+        else {
+            end--; } 
+        tail = tail &gt;&gt; 8; }
+    return llBase64ToString(llGetSubString(encoded, 0, end)); }</code></pre></li>
+<li>The client will not display all the characters of a button if the text is wider than the text space of the button. See <a href="#appearance"></a>.</li>
+<li>If the script generates button labels from outside sources like inventory or object names, take care to avoid the special string <code>"!!llTextBox!!"</code>. This text, used as any button label, will cause <a href="/functions/llDialog/">llDialog</a> to behave as <a href="/functions/llTextBox/">llTextBox</a> instead.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">The following is a simple example that displays a dialog menu for the owner of the object when the script starts. The script will also listen for messages (the selected button, which is spoken by the avatar) and repeat it in chat. The example uses <a href="/constants/PUBLIC_CHANNEL/">PUBLIC_CHANNEL</a> to illustrate the avatar's behavior, but generally you'd want to use a private channel instead.</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        integer dialog_channel = PUBLIC_CHANNEL;
+
+        llDialog(llGetOwner(), &quot;This is a message&quot;, [&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;], dialog_channel);
+
+        llListen(dialog_channel, &quot;&quot;, llGetOwner(), &quot;&quot;);
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        llOwnerSay(&quot;Heard: &quot; + message);
+    }
+}</code></pre></div>
+<div class="wiki-line">The following example shows how you might offer a menu to any user interacting with an object, one user at a time, as well as timing-out if that user doesn't use the menu (by closing it instead).</div>
+<div class="wiki-line"><pre><code>// When the prim is touched, give the toucher the option of killing the prim.
+
+integer gListener; // Identity of the listener associated with the dialog, so we can clean up when not needed
+
+default
+{
+    touch_start(integer total_number)
+    {
+        // Kill off any outstanding listener, to avoid any chance of multiple listeners being active
+        llListenRemove(gListener);
+
+        // get the UUID of the person touching this prim
+        key user = llDetectedKey(0);
+
+        // Listen to any reply from that user only, and only on the same channel to be used by llDialog
+        // It&#x27;s best to set up the listener before issuing the dialog
+        gListener = llListen(-99, &quot;&quot;, user, &quot;&quot;);
+
+        // Send a dialog to that person. We&#x27;ll use a fixed negative channel number for simplicity
+        llDialog(user, &quot;\nDo you wish for this prim to die?&quot;, [&quot;Yes&quot;, &quot;No&quot;] , -99);
+
+        // Start a one-minute timer, after which we will stop listening for responses
+        llSetTimerEvent(60.0);
+    }
+
+    listen(integer chan, string name, key id, string msg)
+    {
+        // If the user clicked the &quot;Yes&quot; button, kill this prim.
+        if (msg == &quot;Yes&quot;)
+            llDie();
+
+        // The user did not click &quot;Yes&quot; ...
+        // Make the timer fire immediately, to do clean-up actions
+        llSetTimerEvent(0.1);
+    }
+
+    timer()
+    {
+        // Stop listening. It&#x27;s wise to do this to reduce lag
+        llListenRemove(gListener);
+        // Stop the timer now that its job is done
+        llSetTimerEvent(0);
+    }
+}</code></pre></div>
+<div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">Please make sure that you close open listeners where possible. You'll make the Second Life experience so much better when paying attention to details here.</div></aside></div>
+<div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">There are no built-in submenus nor pagination (like in a list with "previous" and "next") when using <a href="/functions/llDialog/">llDialog</a>. You simply get one page with a max of 12 buttons, that's it. If you want a different dialog menu layout (other info and/or other buttons), you'll have to build that functionality into your script as the example below demonstrates.</div></aside></div>
+<div class="wiki-line"><pre><code>string mainMenuDialog = &quot;\nWhich settings would you like to access?\nClick \&quot;Close\&quot; to close the menu.\n\nYou are here:\nMainmenu&quot;;
+list mainMenuButtons = [&quot;sub 01&quot;, &quot;sub 02&quot;, &quot;Close&quot;];
+
+string subMenu_01_Dialog = &quot;\nClick \&quot;Close\&quot; to close the menu.\nClick \&quot;-Main-\&quot; to return to the main menu.\n\nYou are here:\nMainmenu &gt; sub 01&quot;;
+list subMenu_01_Buttons = [&quot;action 01a&quot;, &quot;action 01b&quot;, &quot;Close&quot;, &quot;-Main-&quot;];
+
+string subMenu_02_Dialog = &quot;\nClick \&quot;Close\&quot; to close the menu.\nClick \&quot;-Main-\&quot; to return to the main menu.\n\nYou are here:\nMainmenu &gt; sub 02&quot;;
+
+list subMenu_02_Buttons = [&quot;action 02a&quot;, &quot;action 02b&quot;, &quot;Close&quot;, &quot;-Main-&quot;];
+
+integer dialogChannel;
+integer dialogHandle;
+
+open_menu(key inputKey, string inputString, list inputList)
+{
+    dialogChannel = (integer)llFrand(DEBUG_CHANNEL)*-1;
+    dialogHandle = llListen(dialogChannel, &quot;&quot;, inputKey, &quot;&quot;);
+    llDialog(inputKey, inputString, inputList, dialogChannel);
+    llSetTimerEvent(30.0);
+}
+
+close_menu()
+{
+    llSetTimerEvent(0.0);// you can use 0 as well to save memory
+    llListenRemove(dialogHandle);
+}
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    touch_start(integer total_number)
+    {
+        key id = llDetectedKey(0);
+        // Ensure any outstanding listener is removed before creating a new one
+        close_menu();
+        open_menu(id, mainMenuDialog, mainMenuButtons);
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        if(channel != dialogChannel)
+            return;
+
+        close_menu();
+
+        if(message == &quot;-Main-&quot;)
+            open_menu(id, mainMenuDialog, mainMenuButtons);
+
+        else if(message == &quot;sub 01&quot;)
+            open_menu(id, subMenu_01_Dialog, subMenu_01_Buttons);
+
+        else if(message == &quot;sub 02&quot;)
+            open_menu(id, subMenu_02_Dialog, subMenu_02_Buttons);
+
+        else if (message == &quot;action 01a&quot;)
+        {
+            //do something
+            open_menu(id, subMenu_01_Dialog, subMenu_01_Buttons);
+        }
+        else if (message == &quot;action 01b&quot;)
+        {
+            //do something else
+
+            //maybe not re-open the menu for this option?
+            //open_menu(id, subMenu_01_Dialog, subMenu_01_Buttons);
+        }
+        else if (message == &quot;action 02a&quot;)
+        {
+            //do something
+            open_menu(id, subMenu_02_Dialog, subMenu_02_Buttons);
+        }
+        else if (message == &quot;action 02b&quot;)
+        {
+            //do something else
+            open_menu(id, subMenu_02_Dialog, subMenu_02_Buttons);
+        }
+    }
+
+    timer()
+    {
+        close_menu();
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><pre><code>// Compact function to put buttons in &quot;correct&quot; human-readable order
+integer channel;
+
+list order_buttons(list buttons)
+{
+    return llList2List(buttons, -3, -1) + llList2List(buttons, -6, -4)
+         + llList2List(buttons, -9, -7) + llList2List(buttons, -12, -10);
+}
+
+default
+{
+    state_entry()
+    {
+        // Create random channel within range [-1000000000,-2000000000]
+        channel = (integer)(llFrand(-1000000000.0) - 1000000000.0);
+
+        llListen(channel,&quot;&quot;, &quot;&quot;,&quot;&quot;);
+    }
+    
+    touch_start(integer total_number)
+    {
+        llDialog(llDetectedKey(0),&quot;\nPlease choose an option:\n&quot;,
+        order_buttons([&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;, &quot;10&quot;]),channel);
+    }
+    
+    listen(integer _chan, string _name, key _id, string _option)
+    {
+        llSay(0, _name + &quot; selected option &quot; + _option);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>list make_ordered_buttons(integer input)
+{
+    string output;
+
+    if      (input == 12) output = &quot;10, 11, 12, 7, 8, 9, 4, 5, 6, 1, 2, 3&quot;;
+    else if (input == 11) output = &quot;10, 11, 7, 8, 9, 4, 5, 6, 1, 2, 3&quot;;
+    else if (input == 10) output = &quot;10, 7, 8, 9, 4, 5, 6, 1, 2, 3&quot;;
+    else if (input == 9)  output = &quot;7, 8, 9, 4, 5, 6, 1, 2, 3&quot;;
+    else if (input == 8)  output = &quot;7, 8, 4, 5, 6, 1, 2, 3&quot;;
+    else if (input == 7)  output = &quot;7, 4, 5, 6, 1, 2, 3&quot;;
+    else if (input == 6)  output = &quot;4, 5, 6, 1, 2, 3&quot;;
+    else if (input == 5)  output = &quot;4, 5, 1, 2, 3&quot;;
+    else if (input == 4)  output = &quot;4, 1, 2, 3&quot;;
+    else if (input == 3)  output = &quot;1, 2, 3&quot;;
+    else if (input == 2)  output = &quot;1, 2&quot;;
+    else if (input == 1)  output = &quot;1&quot;;
+
+//  when we want to return [] avoid returning [&quot;&quot;] here
+
+    if (output == &quot;&quot;) return [];
+/*  else convert output */      return llCSV2List(output);
+}
+
+//  Usage:
+
+llDialog(id, &quot;dialog message&quot;, make_ordered_buttons(5), -37812);
+
+//  Output:
+
+//    -     -     -
+//    -     -     -
+//    -   [ 4 ] [ 5 ]
+//  [ 1 ] [ 2 ] [ 3 ]</code></pre></div>
+<h3 id="helper-functions">Helper Functions</h3>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/User:Void_Singer/Functions#udlgbtnpaglist">uDlgBtnPagList</a> — Compact Pagination for <a href="/functions/llDialog/">llDialog</a> lists, remenu, and multi-user support</div></div>
+<table></table></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">To use dialog boxes to make menu systems, see <a href="/wiki/dialog-menus-eaedea9c/">Dialog Menus: A step by step guide</a> (aimed at learners).</div>
+<h3 id="tips">Tips</h3>
+<div class="wiki-line">It is a good idea to use a very negative channel (if never more negative than the most negative 32-bit integer that is -2,147,483,648), <em>e.g.</em>,</div>
+<div class="wiki-line"><pre><code>// Create random channel within range [-1000000000,-2000000000]
+integer channel = (integer)(llFrand(-1000000000.0) - 1000000000.0);
+
+llDialog(llDetectedKey(0), &quot;Please choose one of the below options:&quot;,
+    [&quot;Yes&quot;, &quot;No&quot;, &quot;0&quot;, &quot;1&quot;], channel);</code></pre></div>
+<div class="wiki-line">Negative channels are popular for script communications because for years the standard SL client was unable to chat directly on those channels. However, since late 2016 both third party and the Linden Lab viewer can use negative channels from the chat bar. Previously, the only way for viewers to use negative channels prior to <a href="/functions/llTextBox/">llTextBox</a> was to use <a href="/functions/llDialog/">llDialog</a>, which was limited to 24 bytes. </div>
+<div class="wiki-line">You can be reasonably confident that all of your scripted objects have a unique chat channel with this small function:</div>
+<div class="wiki-line"><pre><code>integer dialog_channel; // top of script in variables
+
+integer channel() { // top of script in functions
+    return (integer)(&quot;0x&quot;+llGetSubString((string)llGetKey(),-8,-1));
+}
+
+dialog_channel = channel(); // somewhere in actual script execution, such as state_entry()</code></pre></div>
+<div class="wiki-line"><strong>Note:</strong> Since this function uses public information to generate the channel number it should by no means considered secret.</div>
+<div class="wiki-line">The preceding code can produce both positive and negative channels, depending on the 8th to last character of the key.</div>
+<div class="wiki-line">The following examples will always produce negative channels:-</div>
+<div class="wiki-line"><pre><code>    gChannel = 0x80000000 | (integer)(&quot;0x&quot;+(string)llGetKey());
+    gChannel = 0x80000000 | (integer)(&quot;0x&quot;+(string)llGetOwner());</code></pre> </div>
+<div class="wiki-line">This next version returns a channel number between -1073741823 (0xBFFFFFFF) and -2147483648 (0x80000000).  It is also only one line of code.</div>
+<div class="wiki-line"><pre><code>privchan = ((integer)(&quot;0x&quot;+llGetSubString((string)llGetKey(),-8,-1)) &amp; 0x3FFFFFFF) ^ 0xBFFFFFFF;</code></pre></div>
+<h3 id="appearance">Appearance</h3>
+<div class="wiki-line">If <code>message</code> requires more than 8 lines, a vertical scroll bar will appear in the dialog.</div>
+<div class="wiki-line">: In viewer 3 there is no scroll bar, only the 512 chars message limit is effective, so you may show more than 40 short lines in the message</div>
+<div class="wiki-line">: Too many lines will hide some of the buttons or all of them outside the window though</div>
+<div class="wiki-line">The message text can be formatted somewhat using "\n" (for newline) and "\t" (for tab). If URLs are in the text, they will appear as clickable links, and some <a href="https://wiki.secondlife.com/wiki/Viewer_URI_Name_Space">viewer application URLs</a> will receive special formatting. (Clickable links were not available before Viewer 2.) You can do nothing though to influence the font face, size or weight.</div>
+<div class="wiki-line">There is no way to change the actual size of the dialog, nor change its color.</div>
+<div class="wiki-line">The average number of characters that can be displayed on a dialog line is about 35 characters per line in ASCII7 characters. It depends upon the width of the characters, the viewer version, and font settings.</div>
+<div class="wiki-line">The number of characters that can be displayed in a button depends upon the width of the characters. You should expect around 10 chars, give or take, not the full 24 in the button definition. The full button definition IS said, up to 24 chars, into the chat channel even though fewer characters may be displayed in the button itself.</div>
+<h3 id="limits">Limits</h3>
+<div class="wiki-line">My testing shows the a Dialog box now works anywhere in the same Region as the object OR any region it hands you off to (e.g. the region you teleport to). It will not work for any subsequent hand offs. I have tested this with teleport only, I haven't tested it walking between regions.  </div>
+<div class="wiki-line">I've tested from the next SIM with an Alt, and from 2 SIMs away myself. Both worked without restriction apart from some lag on the messages. (OQ).</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llListen/">llListen</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTextBox/">llTextBox</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRegionSay/">llRegionSay</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llWhisper/">llWhisper</a> — Sends chat limited to 10 meters</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSay/">llSay</a> — Sends chat limited to 20 meters</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llShout/">llShout</a> — Sends chat limited to 100 meters</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llInstantMessage/">llInstantMessage</a> — Sends chat to the specified user</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llOwnerSay/">llOwnerSay</a> — Sends chat to the owner only</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/listen/">listen</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/dialog-menus-eaedea9c/">Dialog Menus: A step by step guide</a> — A walk through of the entire dialog menu process (aimed at learners).</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="vwr-17064"><a href="/wiki/template-issues-vwr-17064-39714b45/">Template:Issues/VWR-17064</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|VWR-17064|Only the latest of multiple dialogs remains available (Viewer 2.0 Beta)|type=bug}}</code></pre></details><p id="vwr-14537"><a href="/wiki/template-issues-vwr-14537-c4c44265/">Template:Issues/VWR-14537</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|VWR-14537|&lt;del&gt;[[llDialog]] user button with text &quot;Ignore&quot; is treated like client &quot;Ignore&quot; button and is dropped when clicked.&lt;/del&gt;|type=bug|status=vfix}}</code></pre></details><p id="svc-1815"><a href="/wiki/template-issues-svc-1815-860788d2/">Template:Issues/SVC-1815</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-1815|&lt;del&gt;[[llDialog]] menus can fail when an object is deeded to a group&lt;/del&gt;|type=bug|status=vfix}}</code></pre></details><p id="scr-43"><a href="https://wiki.secondlife.com/wiki/Template:Issues/SCR-43">Template:Issues/SCR-43</a></p><p id="storm-1718"><a href="/wiki/template-issues-storm-1718-cf38303f/">Template:Issues/STORM-1718</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|STORM-1718|[[llDialog]] button values can be interpreted as the notification commands &#x27;Mute&#x27; and &#x27;Ignore&#x27; causing unexpected behavior|type=bug|status=vfix}}</code></pre></details><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-chat-144925b5/">Template:LSL Function/chat</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}{{LSLC|Communications{{#var:lang}}}}}}}}&lt;/includeonly&gt;
+
+{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}{{LSLC|Chat{{#var:lang}}}}}}}}&lt;/includeonly&gt;
+
+{{#vardefine:fc-neither|{{#ifeq:{{#if:{{{np|}}}|*}}{{#if:{{{nd|}}}|*}}|**|*}}}}
+
+{{#if:{{#var:fc-neither}}|{{LSL Constants/Chat}}|
+{{#vardefine:constants_nb|{{LSL Constants/Chat|np={{{np|}}}|nd={{{nd|}}}|direct={{{direct|}}}}}
+{{#var:constants_nb}}}}}}
+
+{{#if:{{{np|}}}||{{Footnote|handle=channel_zero|Channel zero is also known as: {{#var:PUBLIC_CHANNEL}}, open chat, local chat and public chat|Channel zero is also known as: PUBLIC_CHANNEL, open chat, local chat and public chat}}}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{input|}}}|input|output}} {{LSLGC|Chat|chat}} channel, any integer value {{#if:{{#var:fc-neither}}|except zero{{Footnote|handle=channel_zero}} and {{#var:DEBUG_CHANNEL}}|{{#if:{{{np|}}}|except zero{{Footnote|handle=channel_zero}}}}{{#if:{{{nd|}}}|except {{#var:DEBUG_CHANNEL}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{input|}}}|input|output}} chat channel, any integer value {{#if:{{#var:fc-neither}}|except zero (PUBLIC_CHANNEL) and DEBUG_CHANNEL|{{#if:{{{np|}}}|except zero (PUBLIC_CHANNEL)}}{{#if:{{{nd|}}}|except DEBUG_CHANNEL}}}}}}
+
+{{#ifeq:{{#var:fc-neither}}{{{1|&lt;noinclude&gt;{{{1}}}&lt;/noinclude&gt;}}}{{{dialog|}}}|{{{1}}}|
+{{#vardefine:caveats|{{#var:caveats}}
+*Messages sent on {{#if:{{{np|}}}||channel zero{{Footnote|handle=channel_zero}} {{#if:{{{nd|}}}||and}}}} {{#if:{{{nd|}}}||{{#var:DEBUG_CHANNEL}}}} are throttled to a rate of &lt;200/10sec, per region, per owner/user.
+**Once the rate is exceeded, all following messages on {{#if:{{{np|}}}||channel zero {{#if:{{{nd|}}}||or}}}} {{#if:{{{nd|}}}||{{#var:DEBUG_CHANNEL}}}} will be dropped until the send rate is again below 200/10sec for the previous 10 sec. Dropped messages, despite being dropped still count against the limit.}}
+}}
+
+}}
+
+{{#if:{{{2|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|
+
+{{#if:{{{input|}}}|
+{{#vardefine:p_{{{2|none_}}}_desc|{{#if:{{{ph|}}}|{{{ph|}}}|{{{pd|}}}}} message}}
+|
+{{#if:{{{dialog|}}}|
+{{#vardefine:p_{{{2|none_}}}_desc|message to be displayed in the {{{dialog|}}}}}
+|
+{{#vardefine:p_{{{2|none_}}}_desc|message to be transmitted}}
+}}
+}}
+
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|-
+{{VarPair|p_{{{2|none_}}}_desc}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPair|examples}}
+|-
+{{VarPairTable|footnotes}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

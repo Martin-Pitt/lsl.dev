@@ -1,0 +1,69 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
+<div class="wiki-line">Operators are used to cause an operation (or mathematical action) to be performed on one (such as !) or two operands. The easy and common example is 1 + 2 where 1 and 2 are operands, and the <strong>+</strong> is the operator. This concept can be extended much further with LSL since operands can be variables with the special case of the assignment operators requiring that the left hand side be a variable.</div>
+<div class="wiki-line">The following table lists the operators in descending order of evaluation, i.e. higher in the table means higher evaluation precedence. Multiple operators on the same line share evaluation precedence. Parenthesize an expression if you need to force an evaluation order.</div>
+<table><tr><th> Operator</th><th> Description</th><th> Usage Example</th></tr><tr><td> <code>()</code></td><td> parentheses: grouping and evaluation precedence</td><td> <code>integer val = a * (b + c);</code></td></tr><tr><td> <code>[]</code></td><td> brackets: list constructor</td><td> <code>list lst = [a, 2, "this", 0.01];</code></td></tr><tr><td> <code>(<em>type</em>)</code></td><td> typecasting</td><td> <code>string message = "The result is:" + (string)result;</code></td></tr><tr><td> <code>!</code> <code>~</code> <code>++</code> <code>--</code></td><td> logical NOT, bitwise NOT, increment, decrement</td><td> <code>counter++;</code></td></tr><tr><td> <code>*</code> <code>/</code> <code>%</code></td><td> multiply/dot product, divide, modulus/cross product</td><td> <code>integer rollover = (count + 1) % 5;</code></td></tr><tr><td> <code>-</code></td><td> subtraction, negation</td><td> <code>integer one = 3 - 2;</code> <code>integer neg_one = -1;</code></td></tr><tr><td> <code>+</code></td><td> addition, string concatenation</td><td> <code>integer two = 1 + 1;</code> <code>string text = "Hello" + " world";</code></td></tr><tr><td> <code>+</code></td><td> list concatenation</td><td> <code>list myList = [1, 2, 3] + [4, 5];</code> <code>list newList = oldList + addList;</code></td></tr><tr><td> <code>&lt;&lt;</code> <code>&gt;&gt;</code></td><td> <a href="https://en.wikipedia.org/wiki/Arithmetic_shift" rel="noreferrer">arithmetic</a> left shift, <a href="https://en.wikipedia.org/wiki/Arithmetic_shift" rel="noreferrer">arithmetic</a> right shift</td><td> <code>integer eight = 4 &lt;&lt; 1;</code> <code>integer neg_one = -2 &gt;&gt; 1;</code></td></tr><tr><td> <code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code></td><td> less than, less than or equal to, greater than, greater than or equal to</td><td> <code>integer isFalse = (6 &lt;= 4);</code></td></tr><tr><td> <code>==</code> <code>!=</code></td><td> comparison: equal, not equal</td><td> <code>integer isFalse = ("this" == "that");</code></td></tr><tr><td> <code>&amp;</code></td><td> bitwise AND</td><td> <code>integer zero = 4 &amp; 2;</code> <code>integer four = 4 &amp; 4;</code></td></tr><tr><td> <code>^</code></td><td> bitwise XOR</td><td> <code>integer zero = 4 ^ 4;</code> <code>integer six = 4 ^ 2;</code></td></tr><tr><td> <code>|</code></td><td> bitwise OR</td><td> <code>integer four = 4 | 4;</code> <code>integer six = 4 | 2;</code></td></tr><tr><td> <code>&amp;&amp;</code> <code>||</code></td><td> logical AND, logical OR</td><td> <code>integer isFalse = (FALSE &amp;&amp; TRUE);</code> <code>integer isTrue = (FALSE || TRUE);</code></td></tr><tr><td> <code>=</code> <code>+=</code> <code>-=</code> <code>*=</code> <code>/=</code> <code>%=</code></td><td> assignment</td><td> <code>integer four = 4;</code> <code>integer eight = four; eight *= 2;</code></td></tr></table>
+<div class="wiki-line"><strong>Note:</strong> Unlike most other languages that use the C-style <code>&amp;&amp;</code> and <code>||</code> operators, <strong>both</strong> operands are <strong>always</strong> evaluated.  For example,</div>
+<div class="wiki-line"><pre><code>if (TRUE || 1/0) llSay(PUBLIC_CHANNEL, &quot;Aha!&quot;);</code></pre> </div>
+<div class="wiki-line">: will cause a Math Error rather than say "Aha!"</div>
+<div class="wiki-line"><strong>Note:</strong> The <code>++</code> (increment) and <code>--</code> (decrement) operators have two versions, pre- and post-. The <em>pre</em>-increment (or <em>pre</em>-decrement) operator increments (or decrements) its operand by 1; the value of the expression is the incremented (or decremented) value. The <em>post</em>-increment (or <em>post</em>-decrement) operator increases (or decreases) the value of its operand by 1, but the value of the expression is the operand's original value <em>prior</em> to the operation.</div>
+<div class="wiki-line"><pre><code>integer count = 0;
+if( ++count == 1 ) // &#x27;count&#x27; is incremented then evaluated.
+    llSay(PUBLIC_CHANNEL, &quot;Aha&quot;); // message will be said.</code></pre></div>
+<div class="wiki-line"><pre><code>integer count = 0;
+if( count++ == 1 ) // &#x27;count&#x27; is evaluated then incremented.
+    llSay(PUBLIC_CHANNEL, &quot;Aha&quot;); // message will not be said.</code></pre></div>
+<div class="wiki-line"><strong>Note:</strong> In most programming languages, and in the LSL bitwise operators, the AND operator has greater precedence than the OR operator. However, the LSL logical operators || and &amp;&amp; have <em>the same</em> precedence. For example:</div>
+<div class="wiki-line"><pre><code>1 || 1 &amp;&amp; 0  // result: 0 because it&#x27;s the same as (1 || 1) &amp;&amp; 0</code></pre></div>
+<div class="wiki-line"><pre><code>1 | 1 &amp; 0    // result: 1 because it&#x27;s the same as 1 | (1 &amp; 0)</code></pre></div>
+<div class="wiki-line"><strong>Note:</strong> The order of evaluation is from right to left.  If the value of x starts as 1 then the first two conditions below evaluate false and the second two evaluate true:</div>
+<div class="wiki-line"><pre><code>(x &amp;&amp; (x = 0) == 0 &amp;&amp; x)</code></pre></div>
+<div class="wiki-line"><pre><code>(x &amp;&amp; (x = 0) == 0 &amp;&amp; x == 0)</code></pre></div>
+<div class="wiki-line"><pre><code>(x == 0 &amp;&amp; (x = 0) == 0)</code></pre></div>
+<div class="wiki-line"><pre><code>(x == 0 &amp;&amp; (x = 0) == 0 &amp;&amp; x)</code></pre></div>
+<div class="wiki-line">Both sides are evaluated regardless of the the truth of either side.</div>
+<h2 id="modulus">% Modulus</h2>
+<div class="wiki-line"><strong>Note:</strong> Modulus (<code>%</code>), like division, cause a <em>Script run-time error. Math Error</em> when its second operand equals zero.</div>
+<div class="wiki-line"><strong>Note:</strong> The <code>%</code> operator only accepts integer (<code>%</code> as modulus) and vector (<code>%</code> as cross product) operands.</div>
+<div class="wiki-line">The modulus, also known as <a href="https://en.wikipedia.org/wiki/Modulo" rel="noreferrer">Modulo</a>, produces the remainder after the first operand is divided by the second. Mathematically <code>a % b</code> is equivalent to <code>a - (a/b) * b</code>, since integer division <code>a/b</code> is truncated. This is also why the second operand cannot be zero.</div>
+<div class="wiki-line">The operator can be confusing, even to veteran scripters. The following example(s) may prove useful in understanding how modulus can be used:</div>
+<ul>
+<li>Determine if an integer <strong><em>input</strong></em> is even or odd:</li>
+</ul>
+<div class="wiki-line"><pre><code>if (input % 2 == 0) // input is even
+{
+    // do even things
+}
+else // it&#x27;s odd
+{
+    // do odd things
+}</code></pre></div>
+<ul>
+<li>In the LSL implementation, the result always has the same sign as the first operand.</li>
+<li>-7 divided by 3 is -2 with a remainder of -1 (3 * -2 = -6, so the difference is -7 - -6 = -7 + 6 = -1), <code>-7 % 3 == -1</code>.</li>
+<li>Conversely, 7 divided by -3 is -2 with a remainder of 1 (-3 * -2 = 6, so the difference is 7 - 6 = 1), <code>7 % -3 == 1</code>.</li>
+<li>If the second operand is known to be a positive power of two, the modulus <code>a % b</code> can be replaced with the bitwise AND operator <code>a &amp; (b-1)</code> which is more efficient.</li>
+<li><code>7 % 4</code> and <code>7 &amp; 3</code> are both 3.</li>
+<li>However, AND always returns a positive value: <code>-7 % 4 == -3</code>, but <code>-7 &amp; 3 == 1</code>, which is 4 greater than the modulus putting it in the positive. This may or may not be desirable depending on the situation.</li>
+<li>Sometimes taking a modulus of floating point numbers is useful. The formula from the introduction works as long as the quotient is cast to an integer: <code>a - (integer)(a/b) * b</code>.</li>
+<li>Take the fractional part of <code>a</code> (<code>b</code> is 1.0 and can be left out): <code>7.8813 - (integer)(7.8813) == 0.8813</code>.</li>
+<li>Limit an angle <code>a</code> within TWO_PI radians, i.e. a full circle: <code>7.8813 - (integer)(7.8813/TWO_PI) * TWO_PI == 1.598114</code>.</li>
+</ul>
+<h2 id="operator">+ Operator</h2>
+<div class="wiki-line"><strong>Note:</strong> Equality test on lists does not compare contents, only the length.</div>
+<div class="wiki-line"><code>result = left + right</code></div>
+<table><caption></caption><tr><th>Left Type</th><th>Right Type</th><th>Result Type</th><th>Description</th></tr><tr><td>integer</td><td>integer</td><td>integer</td><td>Adds <strong>left</strong> and <strong>right</strong></td></tr><tr><td>integer</td><td>float</td><td>float</td><td>Adds <strong>left</strong> and <strong>right</strong></td></tr><tr><td>float</td><td>integer</td><td>float</td><td>Adds <strong>left</strong> and <strong>right</strong></td></tr><tr><td>string</td><td>string</td><td>string</td><td>Concatenates <strong>right</strong> onto the end of <strong>left</strong>.</td></tr><tr><td>list</td><td>*</td><td>list</td><td>Concatenates <strong>right</strong> onto the end of <strong>left</strong>.</td></tr><tr><td>*</td><td>list</td><td>list</td><td>Affixes <strong>left</strong> onto the start of <strong>right</strong>.</td></tr><tr><td>vector</td><td>vector</td><td>vector</td><td>Adds <strong>left</strong> and <strong>right</strong></td></tr><tr><td>rotation</td><td>rotation</td><td>rotation</td><td>Adds <strong>left</strong> and <strong>right</strong><br/>Not useful for combining rotations, use <a href="#operator">*</a> or <a href="#operator">/</a> instead.</td></tr></table>
+<h2 id="shorthand-operators">Shorthand Operators</h2>
+<div class="wiki-line">Alternatives to the simple '=' operator...</div>
+<table><caption></caption><tr><th>Simple assignment operator</th><th>Shorthand operator</th></tr><tr><td>a = a + 1</td><td>a += 1</td></tr><tr><td>a = a – 1</td><td>a -= 1</td></tr><tr><td>a = a * (n+1)</td><td>a *= (n+1)</td></tr><tr><td>a = a / (n+1)</td><td>a /= (n+1)</td></tr><tr><td>a = a % b</td><td>a %= b</td></tr></table>
+<h2 id="de-morgan-s-laws"><a href="https://en.wikipedia.org/wiki/De_Morgan%27s_laws" rel="noreferrer">De Morgan&#x27;s laws</a></h2>
+<table><caption> Bitwise Equivalencies</caption><tr><th>AND</th><th>OR</th></tr><tr><td> <code>~(a &amp; b)</code> </td><td> <code>~a &#124; ~b</code></td></tr><tr><td> <code>~a &amp; ~b</code> </td><td> <code>~(a &#124; b)</code></td></tr><tr><td colspan="2"></td></tr><tr><td> <code>a &amp; ~b</code> </td><td> <code>~(~a &#124; b)</code></td></tr><tr><td> <code>~(a &amp; ~b)</code> </td><td> <code>~a &#124; b</code></td></tr></table>
+<table><caption> Boolean Equivalencies</caption><tr><th>AND</th><th>OR</th></tr><tr><td> <code>!(a &amp;&amp; b)</code> </td><td> <code>!a &#124;&#124; !b</code></td></tr><tr><td> <code>!a &amp;&amp; !b</code> </td><td> <code>!(a &#124;&#124; b)</code></td></tr><tr><td colspan="2"></td></tr><tr><td> <code>a &amp;&amp; !b</code> </td><td> <code>!(!a &#124;&#124; b)</code></td></tr><tr><td> <code>!(a &amp;&amp; !b)</code> </td><td> <code>!a &#124;&#124; b</code></td></tr></table>
+<div class="wiki-line">Due to <a href="https://en.wikipedia.org/wiki/De_Morgan%27s_laws" rel="noreferrer">De Morgan&#x27;s laws</a>, by row, code in the <strong>AND</strong> column is logically equivalent to code in the <strong>OR</strong>. <strong>a</strong> and <strong>b</strong> need not be variables, they can be expressions. In certain circumstances these equivalencies can be used to simplify complex code. It is important not to confuse the two sets when using them. The first two rows depict De Morgan's laws as it is formulated, the second two build upon it.</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-clear-707f7763/">clear</a>: <code>{{clear}}</code></span></div>
+<h2 id="useful-snippets">Useful Snippets</h2>
+<div class="wiki-line">Typecasting can also be used if you have to concatenate many parts into a string:</div>
+<div class="wiki-line"><pre><code>// the following twp statements are equivalent:
+string message1 = (string)[&quot;I have &quot;, 5, &quot; children at the average age of &quot;, 8.2, &quot; years&quot;];
+string message2 = &quot;I have 5 children at the average age of 8.200000 years&quot;;</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Syntax}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Keywords}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|FixMe}}</code></span></div>

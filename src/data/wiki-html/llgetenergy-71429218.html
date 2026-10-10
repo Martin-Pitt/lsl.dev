@@ -1,0 +1,121 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/float">float</a> that is how much energy is in the object as a percentage of maximum</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// This script tests the energy use of most of the physics functions
+// Last version: 07 October 2009 by Gianni Lupindo
+ 
+vector homePos;
+integer timerCount = 0;
+integer testCount = 0;
+string space = &quot;  &quot;; 
+ 
+// move more than 10m
+moveTo(vector origin, vector destination) {
+    float dist = llVecDist(origin, destination);
+    integer passes = llCeil( llLog(dist/10.0) / llLog(2.0) );
+    integer i;
+    list params = [PRIM_POSITION, destination];
+    for (i=0; i&lt;passes; i++) {
+        params = (params=[]) + params + params;
+    }
+    // actually move the prim, now
+    llSetPrimitiveParams(params);
+}
+ 
+returnHome()
+{
+    llSetTimerEvent(0);
+    llSetStatus(STATUS_PHYSICS, FALSE);
+    llSleep(0.2);
+    moveTo(llGetPos(),homePos);
+    llSetRot(ZERO_ROTATION);
+}
+ 
+default
+{
+    state_entry() {
+        homePos = llGetPos();
+        llOwnerSay(&quot;Mass is &quot;+(string)llGetMass());
+    }
+    on_rez(integer _n) {
+        llResetScript();
+    }
+    touch_start(integer n) {
+        space = &quot;  &quot;;
+        do {
+          llSleep(0.5);
+        } while (llGetEnergy() &lt; 0.998);
+        llSetPos( llGetPos()+&lt;0,0,5&gt;);
+        llSetStatus(STATUS_PHYSICS,TRUE);
+        llSetTimerEvent(1.0);
+ 
+        vector impulse = &lt;0,0,5&gt;*llGetMass();
+        if (testCount == 0) {
+            llOwnerSay(&quot;ApplyImpulse (test 0)&quot;);
+            llApplyImpulse( impulse, TRUE ); 
+        } else if (testCount == 1) {
+            llOwnerSay(&quot;ApplyRotImpulse (test 1)&quot;);
+            llApplyRotationalImpulse( impulse, TRUE);
+        } else if (testCount == 2) {
+            llOwnerSay(&quot;PushObject (test 2)&quot;);
+            llPushObject(llGetKey(), impulse, ZERO_VECTOR, TRUE); 
+        } else if (testCount == 3) {
+            llSetForceAndTorque( ZERO_VECTOR, ZERO_VECTOR, TRUE ); 
+            llOwnerSay(&quot;Force (test 3)&quot;);
+            llSetForce( impulse, TRUE ); 
+        } else if (testCount == 4) {
+            llSetForceAndTorque( ZERO_VECTOR, ZERO_VECTOR, TRUE ); 
+            llOwnerSay(&quot;Torque (test 4)&quot;);
+            llSetTorque( impulse, TRUE ); 
+        } else if (testCount == 5) {
+            llSetForceAndTorque( ZERO_VECTOR, ZERO_VECTOR, TRUE ); 
+            llOwnerSay(&quot;Force and Torque (test 5)&quot;);
+            llSetForceAndTorque( impulse, impulse, TRUE ); 
+        } else if (testCount == 6) {
+            llSetForceAndTorque( ZERO_VECTOR, ZERO_VECTOR, TRUE ); 
+            llOwnerSay(&quot;MoveToTarget (test 6)&quot;);
+            llMoveToTarget( impulse, 0.4 ); 
+        } else if (testCount == 7) {
+            llStopMoveToTarget ( ); 
+            llOwnerSay(&quot;RotLookAt (test 7)&quot;);
+            llRotLookAt( llEuler2Rot(impulse*DEG_TO_RAD), 0.4, 0.4 ); 
+        } else if (testCount == 8) {
+            llStopLookAt ( ); 
+            llOwnerSay(&quot;LookAt (test 8)&quot;);
+            llLookAt( impulse, 0.4, 0.4 ); 
+        } else if (testCount == 9) {
+            llStopLookAt ( ); 
+            llOwnerSay(&quot;Hover Height (test 9)&quot;);
+            llSetHoverHeight( 5.0, TRUE, 0.5);
+        } else if (testCount == 10) {
+            llSetHoverHeight( 0, TRUE, 0.5);
+            llOwnerSay(&quot;Ground Repel (test 10)&quot;);
+            llGroundRepel( 5, TRUE, 0.5);
+        } else if (testCount == 11) {
+            llGroundRepel( 0, TRUE, 0.5);
+            llOwnerSay(&quot;Buoyancy (test 11)&quot;);
+            llSetBuoyancy( 0.997 );
+        } else {
+            llSetBuoyancy( 0.0 );
+            llOwnerSay(&quot;Done&quot;);
+        }
+        timerCount = 0;
+        if (testCount != 12) {
+            llOwnerSay((string)timerCount+&quot;. Energy:    &quot;+space+(string)llGetEnergy());
+            testCount++;
+        }
+        else {
+            testCount = 0; 
+            returnHome();
+        }
+    }
+    timer() {
+        timerCount++;
+        if (timerCount &gt;= 10) space = &quot;&quot;;
+        llOwnerSay((string)timerCount+&quot;. Energy:    &quot;+space+(string)llGetEnergy());
+        if (timerCount&gt;=10) {
+            returnHome();
+        }
+    }
+    collision(integer n) {
+        llOwnerSay(&quot;*. Energy:    &quot;+space+(string)llGetEnergy()+&quot; (collision)&quot;);
+    }
+}</code></pre></div></section>

@@ -1,0 +1,30 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Negative floats are fine (i.e. negative signs will be preserved.)<br /></div>
+<div class="wiki-line">If you say 1 place, you will get 7.0 instead of 7.0000000<br /></div>
+<div class="wiki-line">If you say 3 places, you get 7.14 instead of 7.1400000<br /></div>
+<div class="wiki-line">7.1373699 will come out as 7.13 or 7.14, depending on whether you specify rounding<br /></div>
+<div class="wiki-line">rnd (rounding) should be set to <a href="/constants/TRUE/">TRUE</a> for Rounding, <a href="/constants/FALSE/">FALSE</a> for no rounded<br /></div>
+<div class="wiki-line"><strong>Example:</strong></div>
+<div class="wiki-line"><pre><code>string myFormattedFloat = Float2String(-7.1373699, 3, TRUE);&lt;br /&gt; //rounded
+//returns &quot;-7.14&quot;
+
+string myFormattedFloat = Float2String(-7.1373699, 3, FALSE);&lt;br /&gt; //not rounded
+//returns &quot;-7.13&quot;</code></pre></div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that contains the float <strong>num</strong> in a tidy text format, with optional rounding.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line"><pre><code>string Float2String ( float num, integer places, integer rnd) { 
+//allows string output of a float in a tidy text format
+//rnd (rounding) should be set to TRUE for rounding, FALSE for no rounding
+
+    if (rnd) {
+        float f = llPow( 10.0, places );
+        integer i = llRound(llFabs(num) * f);
+        string s = &quot;00000&quot; + (string)i; // number of 0s is (value of max places - 1 )
+        if(num &lt; 0.0)
+            return &quot;-&quot; + (string)( (integer)(i / f) ) + &quot;.&quot; + llGetSubString( s, -places, -1);
+        return (string)( (integer)(i / f) ) + &quot;.&quot; + llGetSubString( s, -places, -1);
+    }
+    if (!places)
+        return (string)((integer)num );
+    if ( (places = (places - 7 - (places &lt; 1) ) ) &amp; 0x80000000)
+        return llGetSubString((string)num, 0, places);
+    return (string)num;
+}</code></pre></div></section>

@@ -1,0 +1,101 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span>__NOTOC__</div>
+<h2 id="library">Library</h2>
+<div class="wiki-line"><pre><code>string NAME;
+string URL   = &quot;http://cyber.caworks-sl.de/name2key/n2k.php&quot;;
+string URL2 = &quot;http://www.aga-sl.de/projekte/name2key/n2k.php&quot;; // just in case the URL above should not be working
+key reqid;
+
+/// chat: /101 &lt;displayname&gt;
+
+default
+{
+    state_entry()
+    {
+        llListen(101,&quot;&quot;,&quot;&quot;,&quot;&quot;);
+    }
+    listen(integer c, string n, key id, string message)
+    {
+        if(c == 101)
+        {
+            NAME = message;
+            reqid = llHTTPRequest( URL + &quot;?name=&quot; + llEscapeURL(NAME), [], &quot;&quot; );
+        }
+    }
+    http_response(key id, integer status, list meta, string body)
+    {
+        body = llDeleteSubString(body, 0 , llSubStringIndex(body, &quot;&lt;br&gt;&quot;) + 3);
+        if ( id != reqid )
+        {
+            return;
+        }
+        if ( status == 499 )
+        {
+            llOwnerSay(&quot;timed out&quot;);
+        }
+        else if ( status != 200 )
+        {
+            llOwnerSay(&quot;Server Offline&quot;);
+        }
+        else
+        {
+            llOwnerSay(NAME + &quot;&#x27;s key is: &quot; + body );
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<div class="wiki-line">and here the PHP for use on your Server. Name it n2k.php. It also integrates to websites. So you can use it to search from you page.</div>
+<div class="wiki-line"><pre><code>&lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;-1&quot;&gt;&lt;font color=&quot;#FFFFF0&quot;&gt;
+&lt;?php
+$username = $_GET[&quot;name&quot;];
+if($username == &quot;&quot;)
+{
+echo &#x27;&lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;-1&quot;&gt;
+&lt;form action=&quot;n2k.php&quot; method=&quot;GET&quot;&gt;
+&lt;input type=&quot;text&quot; size=&quot;18&quot; maxlength=&quot;40&quot; value=&quot;SL Name&quot; name=&quot;name&quot;&gt;
+&lt;br&gt;&lt;input type=&quot;submit&quot; value=&quot;lookup&quot;&gt;
+&lt;/form&gt;&#x27;;
+}
+else
+{
+$uuid = name2Key($username);
+echo &quot;&lt;br&gt;$uuid&quot;;
+}
+    function getPage($web)
+	{
+		$html = &quot;&quot;;
+		  $ch = curl_init($web);
+		  curl_setopt($ch, CURLOPT_USERAGENT, &quot;Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.0.12) Gecko/20070508 Firefox/1.5.0.12&quot;);
+		  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		  curl_setopt($ch, CURLOPT_HEADER, 0);
+		  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		  curl_setopt($ch, CURLOPT_AUTOREFERER, 1);
+		  curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+		  $html = curl_exec($ch);
+		  if(curl_errno($ch))
+		  {
+			  $html = &quot;&quot;;
+		  }
+		  curl_close ($ch);
+		return $html;
+	}
+    function getBetween($content,$start,$end)
+	{
+		$a1 = strpos($content,$start);
+		$content = substr($content,$a1 + strlen($start));
+		while($a2 = strrpos($content,$end))
+		{
+			$content = substr($content,0,$a2);
+		}
+		return $content;
+	}
+    function name2Key($name)
+	{
+		$SL_SEARCH = &#x27;http://search.secondlife.com/client_search.php?s=People&amp;t=N&amp;q=&#x27;;
+		$sName = split(&#x27; &#x27;,$name);
+		$data = getPage($SL_SEARCH.$sName[0].&#x27;%20&#x27;.$sName[1]);
+		$uuid = getBetween($data,&#x27;http://world.secondlife.com/resident/&#x27;,&#x27;&quot;&#x27;);
+                if(!preg_match(&quot;/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/&quot;,$uuid)) $uuid = &#x27;00000000-0000-0000-0000-000000000000&#x27;;
+		return $uuid;
+	}
+?&gt;</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples|DisplayName2Key}}</code></span></div>

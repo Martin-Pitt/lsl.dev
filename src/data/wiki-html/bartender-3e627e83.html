@@ -1,0 +1,176 @@
+<h2 id="bartender-v1-0-0">Bartender! v1.0.0</h2>
+<div class="wiki-line">Bartender to serve drinks.. and other things.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">Drop this script in your bartender prim.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">Drop a bunch of 'drink' objects into your bartender prim.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">Touch the bartender prim and select a drink.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">Some debugging info is transmitted on llOwnerSay, but spam is minimal. Edit the script variable to adjust this.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line"><b>This script differs from others in that:</b></div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">It opens a single random negative channel, it does not activate an llListen *every time* someone clicks it.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">IF the random channel is being used by something else, and this causes the bartender to get a bunch of garbage inputs, it will automatically change to a new random channel, and optionally inform the owner.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">Evidently this script can be used as a kind of object freebie vendor too.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">NOTES:</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">It's been a while since I wrote it, and it was never really extensively tested, so i expect there is some stupid in it. But AFAIK it's fine.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">It features a primitive kind of double-touch prevention that i don't use anymore, so I guess the touch functions have been improved.. yeah.. that was it.. i think.. yeah. So there are some redundant bits.</div>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><pre><code>//
+// BETLOG Hax
+// for Aley Arai AEST: 20080328 0645 [SLT:  20080327 1345]
+// Written to allow easier use - just dump drink objects into inv and you are done.
+// No more editing script drink lists.
+//=========================================================================
+// ---LICENCE START---
+// http://creativecommons.org/licenses/by-sa/3.0/
+// ie: Attribution licence:
+//   Give me credit by leaving it in the script I created.
+//   Supply my original script with your modified version.
+//   Refer to the wiki URL from which you copied this script.
+//      https://wiki.secondlife.com/wiki/Bartender
+// ---LICENCE END---
+//=========================================================================
+
+//----------------------------------
+// SHARED CONFIGURATION
+//----------------------------------
+// CONFIGURATION
+//
+//OPTIONAL debug feedback - 0=off, 1=Channel &amp; Noise info, 2=all debug
+integer gDebug              = 
+                                //0;
+                                1;
+                                //2;
+//
+//number of invalid messages received before re-randomizing channel
+integer gChannelNoiseMax    = 5; 
+//
+// message that appears on the dialog
+string  gDlgMessage         = &quot;\n\t\n\t\n\t\t\tMay I offer you a drink?&quot;;
+//
+// Optional chat responses
+// leave BOTH of these fields blank ( &quot;&quot;; ) to NOT speak a message
+// leave one OR the other blank to alter the form of the message
+//recipient name is auto-inserted between these two
+string  gMsgResponseA       = &quot;Thanks&quot;;
+// target name ends up here
+string  gMsgResponseB       = &quot;, enjoy your drink. :)&quot;;
+//----------------------------------
+// CORE CODE
+integer gListenHandle       = 0;
+integer gDlgLimiter         = 0;
+integer gDlgChannel         = -5746547; //failsafe only
+list    gDrinksList         = [];
+integer gDrinksCount        = 0;
+integer gChannelNoise       = 0;
+//----------------------------------
+f_dialogMenu(key id, list dlgButtons)
+{   llDialog(id, gDlgMessage, dlgButtons, gDlgChannel);
+    if (gDebug &gt; 1)
+    {   llOwnerSay(&quot;***OFFERING DIALOG:***&quot;
+            +&quot;\nname: &quot;+llKey2Name(id)
+            +&quot;\nid: &quot;+(string)id
+            +&quot;\ngDlgMessage: &quot;+gDlgMessage
+            +&quot;\ndlgButtons: &quot;+llList2CSV(dlgButtons)
+            +&quot;\ngDlgChannel: &quot;+(string)gDlgChannel
+            +&quot;\n***************&quot;
+        );
+    }
+}
+//-----------------------
+f_dialogNullify()
+{   gDlgLimiter = 0;    
+}
+//-----------------------
+f_randomChannel()
+{   
+//a static channel is more reliable where many people may request a drink while another is still considering the choices
+//gChannelNoise will trigger auto-re-randomization of this static channel if too much invalid message activity is detected
+    if (gListenHandle)
+        llListenRemove(gListenHandle);
+    gDlgChannel = (integer)(llFrand(-0x7FFFFFFF)-1);
+    gListenHandle = llListen(gDlgChannel, &quot;&quot;, &quot;&quot;, &quot;&quot;); 
+    if (gDebug)
+        llOwnerSay(&quot;gDlgChannel: &quot;+(string)gDlgChannel);
+}
+//-----------------------
+f_assessInventory()
+{   integer    i;
+    integer    n = llGetInventoryNumber(INVENTORY_OBJECT);
+    gDrinksList = [];
+    for(i=0; i&lt;n; i++ )
+        gDrinksList += [ llGetInventoryName(INVENTORY_OBJECT, i) ];
+    gDrinksCount = llGetListLength(gDrinksList);
+    if (gDebug &gt; 1)
+        llOwnerSay(&quot;gDrinksCount: &quot;+(string)gDrinksCount+&quot; - gDrinksList: &quot;+llList2CSV(gDrinksList));        
+}
+//-----------------------
+default
+{   on_rez(integer start_param)
+    {   llResetScript();
+    }
+    changed(integer change)
+    {   if (change &amp; CHANGED_INVENTORY)
+        {   llSetText(&quot;RE-EVALUATING\ninventory.&quot;, &lt;0.0, 1.0, 0.0&gt;,1.0);            
+            //so its not being called too much and slowing down inv changes            
+            llSetTimerEvent(8.0);
+        }
+        if (change &amp; CHANGED_OWNER)
+            llResetScript();
+    }
+    timer()
+    {   llSetTimerEvent(0.0);
+        llSetText(&quot;&quot;, &lt;1.0, 1.0, 1.0&gt;,1.0);
+        f_assessInventory();        
+    }
+    state_entry()
+    {   f_randomChannel();
+        f_assessInventory();
+    }
+    touch_end(integer num_detected)
+    {   gDlgLimiter += 1;
+        if (gDlgLimiter == 1)
+        {   key av = llDetectedKey(0);
+            f_dialogMenu(av, gDrinksList);            
+        }
+        else if (gDlgLimiter &gt;= 2) //3)
+            f_dialogNullify();
+    }
+    listen(integer channel, string name, key id, string message)
+    {   integer index = llListFindList(gDrinksList, [message]);
+        if (index == -1)
+        {   gChannelNoise++;
+            if (gDebug)
+                llOwnerSay(&quot;FYI - INVALID MESSAGE DETECTED ON THIS CHANNEL:\ngDlgChannel: &quot;+(string)gDlgChannel+&quot;\ngChannelNoise/gChannelNoiseMax = &quot;+(string)gChannelNoise+&quot;/&quot;+(string)gChannelNoiseMax+&quot;\nFrom: &quot;+name+&quot; [key: &quot;+(string)id+&quot;]&quot;);
+            if (gChannelNoise &gt;= gChannelNoiseMax)
+                f_randomChannel();
+            return;
+        }
+        string drink = llGetInventoryName(INVENTORY_OBJECT, index);
+        if (drink != &quot;&quot;)
+        {   f_dialogNullify();            
+            if ( (gMsgResponseA != &quot;&quot;) || (gMsgResponseB != &quot;&quot;) )
+                llSay(0, gMsgResponseA+&quot; &quot;+name+&quot; &quot;+gMsgResponseB);
+            llGiveInventory(id, drink);
+            if (gDebug &gt; 1)
+                llOwnerSay(&quot;drink: &quot;+drink+&quot; was given to: &quot;+name+&quot; [key: &quot;+(string)id+&quot;]&quot;);
+        }
+        else
+        {   // SHOULD never happen
+            llOwnerSay(&quot;ERROR: The bar has no drinks!!!..or somthing else bad happened..&quot;);
+        }
+    }
+}
+
+
+  </code></pre></div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples|Bartender!}}</code></span></div>

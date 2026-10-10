@@ -1,0 +1,125 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is the maximum combined <a href="http://community.secondlife.com/t5/English-Knowledge-Base/Calculating-land-impact/ta-p/974163" rel="noreferrer">land impact</a> allowed for objects on the parcel at <code>pos</code>.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">If <code>sim_wide</code> is...</div>
+<ul>
+<li><span class="wiki-template"><code>{{#var:FALSE}}</code></span> then the return is the maximum land impact supported by the parcel.</li>
+<li><em>not</em> <span class="wiki-template"><code>{{#var:FALSE}}</code></span> then the return is the total land impact supported by all land in the region owned by the parcel owner.</li>
+</ul></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If there is an Object Bonus for the region, the value returned may be more than the region's total limit.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+        llSay(0, &quot;The total land impact of objects rezzed on this parcel is &quot;
+             +(string)llGetParcelPrimCount(llGetPos(), PARCEL_COUNT_TOTAL, FALSE) +&quot;, of &quot;
+             +(string)llGetParcelMaxPrims(llGetPos(), FALSE) + &quot; allowed.&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelPrimCount/">llGetParcelPrimCount</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-boolean-c769e8e3/">Template:LSL Function/boolean</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:nbdv|{{#switch:{{uc:{{{default|}}}}}|T|TRUE=true|F|FALSE=false}}}}
+
+{{#vardefine:p_{{{1|}}}_desc|{{#if:{{{bool|}}}|{{HoverLink|boolean{{#var:lang}}|A type that can only be true or false|boolean}},}} {{{pd|}}} {{#if:{{{bool|}}}{{{pd|}}}|{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}|{{ucfirst:{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}}}}} {{#vardefineecho:TRUE|{{LSL Const{{#var:lang}}|TRUE|integer|1}}}}{{#vardefine:FALSE|{{LSL Const{{#var:lang}}|FALSE|integer|0}}}}{{#if:{{{non-zero|}}}|{{Footnote|handle=non-zero|Any value that is not zero/{{#var:FALSE}} is treated the same as {{#var:TRUE}}. This behavior should not be depended upon.|Any value that is not zero/FALSE is treated the same as TRUE. This behavior should not be depended upon.}}}}{{#ifeq:{{#var:nbdv}}|true|&amp;#32;({{HoverText|default|default for new objects etc}})}} {{#if:{{{td|}}}|{{{td|}}}|enables}}, {{#ifeq:{{{if|}}}|*|if|{{{if|}}}}} {{#var:FALSE}}{{#ifeq:{{#var:nbdv}}|false|&amp;#32;({{HoverText|default|default for new objects etc}})}} {{#if:{{{fd|}}}|{{{fd|}}}|disables}}}}
+
+{{#vardefine:p_{{{1|}}}_hover|{{#if:{{{bool|}}}|boolean,}} {{#if:{{{ph|}}}|{{{ph|}}}|{{{pd|}}}}} {{#if:{{{bool|}}}{{{pd|}}}{{{ph|}}}|{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}|{{ucfirst:{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}}}}} TRUE{{#ifeq:{{#var:nbdv}}|true|&amp;#32;(default)}} {{#if:{{{th|}}}|{{{th|}}}|{{#if:{{{td|}}}|{{{td|}}}|enables}}}}, {{#ifeq:{{{if|}}}|*|if|{{{if|}}}}} FALSE{{#ifeq:{{#var:nbdv}}|false|&amp;#32;(default)}} {{#if:{{{fh|}}}|{{{fh|}}}|{{#if:{{{fd|}}}|{{{fd|}}}|disables}}}}}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|default=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|default=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|if=*|non-zero=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|if=*|non-zero=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|if=when|non-zero=*|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|if=when|non-zero=*|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-position-a2dae76f/">Template:LSL Function/position</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+This template is to be used to specify setup the description for position like parameters (offsets, positions, points, etc.).
+
+Right now it&#x27;s pretty basic and easy to edit. I&#x27;m wondering if these functions should be in a position parameter specific category.
+
+====TODO====
+* add clamping flag and verbiage for out of region/range coordinates.
+&lt;/noinclude&gt;{{#if:
+
+{{#if:{{{region|}}}|
+  {{#if:{{{local|}}}|
+
+    {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region}} or [[Viewer coordinate frames#Local|local coordinates]] depending upon the situation{{{desc|}}}}}
+
+    {{#vardefine:p_{{{1|}}}_hover|position in region or local coordinates depending upon the situation{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+  |
+    {{#ifeq:{{{1|}}}|point|
+
+      {{#vardefine:p_{{{1|}}}_desc|A point in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region-local}} space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|A point in region-local space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region coordinates}}{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in region coordinates{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+|
+  {{#if:{{{local|}}}|
+
+    {{#ifeq:{{{1|}}}|offset|
+
+      {{LSL Function/offset|{{{1|}}}|local={{{local}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in [[Viewer coordinate frames#Local|local coordinates]]{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in local coordinates{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+}}
+
+}}</code></pre></details></section>

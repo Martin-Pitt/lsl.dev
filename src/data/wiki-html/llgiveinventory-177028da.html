@@ -1,0 +1,111 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Give <code>inventory</code> to <code>destination</code>.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>destination</code> is an object then it must be in the same <a href="https://wiki.secondlife.com/wiki/region">region</a>.<br/>If <code>destination</code> is an avatar they do not have to be in the same region.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>There is no way to know if the transaction failed.  Unless you send a message when inventory is given to a prim and prim's script checks its inventory and sends a message back using llRegionSay.</li>
+<li>Scripts reach <code>destination</code> disabled (not running, and cannot be made to run unless the destination object is taken to inventory and rezzed again, or the script is recompiled). To send a running script to a prim use <a href="/functions/llSetRemoteScriptAccessPin/">llSetRemoteScriptAccessPin</a> and <a href="/functions/llRemoteLoadScriptPin/">llRemoteLoadScriptPin</a>.</li>
+<li>If <code>destination</code> is locked then <code>inventory</code> is not transferred and a <strong>Blocked by permissions</strong> error is shouted on the <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</li>
+<li>If <code>destination</code> object is not modifiable then <code>inventory</code> is not transferred and a <strong>Blocked by permissions</strong> error is shouted on the <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</li>
+<li>If <code>inventory</code> is no-copy it is transfered to <code>destination</code> without copying it. Since it is no-copy the only copy is given to <code>destination</code>; removing it from the source prim's inventory.</li>
+<li>the <a href="/events/changed/">changed</a> event does <strong>not</strong> fire in this case</li>
+<li>To avoid this problem use <a href="/functions/llGetInventoryPermMask/">llGetInventoryPermMask</a> to check the permissions of <code>inventory</code>.</li>
+<li><a href="/wiki/attachment-040d2b36/">Attachments</a> cannot give or receive no-copy inventory. When attempted an error is shouted on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</li>
+<li>When giving to an attachment that is not owned by the script owner, the receiving attachment must have <a href="/functions/llAllowInventoryDrop/">llAllowInventoryDrop</a> set to TRUE.</li>
+<li>If <code>destination</code> is an avatar that refuses to accept it (by manual decline or muting), is in busy mode, or is offline with instant messages capped, it is not returned to the prim's inventory; it is deleted.</li>
+<li>It is not returned to the owner. It does not show up in their lost and found or any other inventory folder.</li>
+<li>It is not put in the target's trash folder. </li>
+<li>A successful send to an offline avatar by means of llGiveInventory() counts as an IM against that avatar’s IM cap.</li>
+<li>As of 31th January 2012, llGiveInventory now has similar throttle to instant messages. A throttle of 5k per hour per owner per region; with a maximum burst of 2.5k. This throttle only affects gives to agents, not to non-agents.</li>
+<li>"With 3k subscribers you will want to send slow enough that it takes ~45 minutes to send 1 item to each subscriber. A general safe way would be to send ~2k as fast as you can, then wait 31 minutes and send another 2k." <a href="https://jira.secondlife.com/browse/SVC-7631?focusedCommentId=308665&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-308665" rel="noreferrer">Kelly Linden on SVC-7631</a></li>
+<li>Be aware that while you script a system to handle the top of these limits that other busy scripted objects can be adding up to the throttle as well, such as vendors.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer n)
+    {
+        //Gives this script to whoever touches the object.
+        llGiveInventory(llDetectedKey(0), llGetScriptName());
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGiveInventoryList/">llGiveInventoryList</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGiveAgentInventory/">llGiveAgentInventory</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRemoteLoadScriptPin/">llRemoteLoadScriptPin</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetRemoteScriptAccessPin/">llSetRemoteScriptAccessPin</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llMapDestination/">llMapDestination</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/changed/">changed</a></div></div></section>
+<section><h2 id="tests">Tests</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/llGiveInventory_Test">llGiveInventory Test</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-give-3e3c21e6/">Template:LSL Function/give</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;includeonly&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:target-type|~{{#expr:{{#if:{{{avatar|}}}|1|0}}+{{#if:{{{prim|}}}{{{object|}}}|2|0}}+{{#if:{{{link|}}}|4|0}}}}}}
+
+{{#vardefine:pcaveats|{{#var:caveats}}}}
+{{#vardefine:caveats}}
+
+{{LSL Function/{{#switch:{{#var:target-type}}|~1=avatar|~2=prim|~4=link|uuid}}|group=|object={{{object|}}}|sim={{{sim|}}}|{{{1|}}}|}}
+
+{{LSL Function/inventory|{{{2|}}}|type={{{type|}}}|uuid={{{uuid|}}}|full={{{full|}}}|insert={{{insert|}}}|}}
+
+{{#vardefine:caveats|{{#var:pcaveats}}{{#ifeq:{{#var:target-type}}|~4||
+* If &#x27;&#x27;&#x27;{{LSL Param|{{{1}}}}}&#x27;&#x27;&#x27; is {{#switch:{{#var:target-type}}|~1=not the owner|~2=not owned by the same person|not the owner nor shares the same owner}}, {{#ifeq:{{{uuid|}}}|true|&#x27;&#x27;&#x27;{{LSL Param|{{{2}}}}}&#x27;&#x27;&#x27; is not a [[UUID]]}} and &#x27;&#x27;&#x27;{{LSL Param|{{{2}}}}}&#x27;&#x27;&#x27; does not have transfer permissions, an error is shouted on {{#var:DEBUG_CHANNEL}}.
+{{#if:{{{copyok|}}}||
+* If &#x27;&#x27;&#x27;{{LSL Param|{{{2}}}}}&#x27;&#x27;&#x27; {{#if:{{{full|}}}|is not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}|permissions do not allow copy}}, the transfer fails and an error is shouted on {{#var:DEBUG_CHANNEL}}.{{#switch:{{#var:target-type}}
+|~1=|* If &#x27;&#x27;&#x27;{{LSL Param|{{{1}}}}}&#x27;&#x27;&#x27; {{#ifeq:{{#var:target-type}}|~2||is a prim that}} is not in the same region an error is shouted on {{#var:DEBUG_CHANNEL}}.}}}}}}
+{{#switch:{{{type|}}}|script|=* When scripts are copied or moved between inventories, their state does not survive the transfer. Memory, event queue and execution position are all discarded.|#default=}}
+{{#var:caveats}}}}
+
+{{#vardefine:pcaveats}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+{{#vardefine:caveats}}{{#vardefine:p_target_desc}}{{#vardefine:p_target_hover}}{{#vardefine:p_item_desc}}{{#vardefine:p_item_hover}}
+{| {{Prettytable}} {{#vardefine:caveats}}
+|+&lt;code&gt;&lt;nowiki&gt;{{&lt;/nowiki&gt;{{FULLPAGENAMEE}}&lt;nowiki&gt;|target|item|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|target|item|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_target_desc}}
+|-
+{{VarPair|p_target_hover}}
+|-
+{{VarPair|p_item_desc}}
+|-
+{{VarPair|p_item_hover}}
+|}
+{{#vardefine:caveats}}{{#vardefine:p_target_desc}}{{#vardefine:p_target_hover}}{{#vardefine:p_item_desc}}{{#vardefine:p_item_hover}}
+{| {{Prettytable}} {{#vardefine:caveats}}
+|+&lt;code&gt;&lt;nowiki&gt;{{&lt;/nowiki&gt;{{FULLPAGENAMEE}}&lt;nowiki&gt;|target|item|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|target|item|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_target_desc}}
+|-
+{{VarPair|p_target_hover}}
+|-
+{{VarPair|p_item_desc}}
+|-
+{{VarPair|p_item_hover}}
+|}
+{{#vardefine:caveats}}{{#vardefine:p_target_desc}}{{#vardefine:p_target_hover}}{{#vardefine:p_item_desc}}{{#vardefine:p_item_hover}}
+{| {{Prettytable}} {{#vardefine:caveats}}
+|+&lt;code&gt;&lt;nowiki&gt;{{&lt;/nowiki&gt;{{FULLPAGENAMEE}}&lt;nowiki&gt;|target|item|type=script|uuid=true|link=*}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|target|item|type=script|uuid=true|link=*}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_target_desc}}
+|-
+{{VarPair|p_target_hover}}
+|-
+{{VarPair|p_item_desc}}
+|-
+{{VarPair|p_item_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p id="svc-7631"><a href="/wiki/template-issues-svc-7631-96234611/">Template:Issues/SVC-7631</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-7631|New rate throttle on [[llGiveInventory]]|type=bug}}</code></pre></details><p id="bug-5656"><a href="/wiki/template-issues-bug-5656-9a43a070/">Template:Issues/BUG-5656</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-5656|[[llGiveInventory]] fails when no-copy items are given to attachments (even no-copy ones) |type=bug|dnc=*}}</code></pre></details></section>

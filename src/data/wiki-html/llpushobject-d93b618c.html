@@ -1,0 +1,46 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Applies <code>impulse</code> and <code>ang_impulse</code> to object <code>target</code></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Only works on land where Push is not restricted or where the script is owned by the land owner.</li>
+<li>If the land is owned by a group, the scripted object must be deeded to the same group.</li>
+<li>In no-push areas an object can only push its owner or itself.</li>
+<li>The effectiveness of Push is modulated by the amount of <a href="https://wiki.secondlife.com/wiki/Energy">script energy</a> available.</li>
+<li>There is a <a href="https://wiki.secondlife.com/wiki/LlPushObject/Havok4Implementation">simplified code snippet</a> describing how Push is implemented in the Havok4 project and reveals some of the details of how the energy budget affects the final Push magnitude.</li>
+<li><code>ang_impulse</code> is ignored when applying to agents or their attachments.</li>
+<li><a href="https://wiki.secondlife.com/wiki/Energy">Energy</a> is fully depleted by this function when either <code>impulse</code> or <code>ang_impulse</code> is nonzero.  If <code>impulse</code> is nonzero, it will drain all energy in the object before <code>ang_impulse</code> is processed, causing the push to be purely linear.</li>
+<li>The push impact is diminished with distance by a factor of distance cubed.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Pushes the collided object or avatar.
+default
+{
+    collision_start(integer num_detected)
+    {
+        llPushObject(llDetectedKey(0),&lt;0,0,100&gt;, &lt;0,0,100&gt;, TRUE);
+    }
+}</code></pre></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-uuid-f11a4088/">Template:LSL Function/uuid</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}{{#if:{{{group|1}}}|{{LSLGC|Group|group}},&amp;#32;}}{{LSLGC|Avatar|avatar}} or {{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{ph|}}}|{{{ph|}}}&amp;#32;|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}}}{{#if:{{{group|1}}}|group,&amp;#32;}}avatar or {{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Avatar/As A Parameter}}
+}}}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

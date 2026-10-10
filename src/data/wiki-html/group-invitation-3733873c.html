@@ -1,0 +1,96 @@
+<div class="wiki-line">VolumeDetect prim that whispers a group invitation hyperlink that can be clicked in history to bring up the group profile.</div>
+<div class="wiki-line"><pre><code>//
+// BETLOG Hax
+// AEST: 20080613 0704 [SLT:  20080612 1404]
+// For  Harleywood Guru request in SecondLife Hobos group chat
+// UTC10: 20090417 1557 [SLT:  20090416 2257]
+// Rewrote for volumedetect collision detection
+//
+// Thanks to Punkaroo Snoring, and Pavig Lok for inadvertently pointing out something
+// i read in a RC release notes and totally didnt pay attention to. But which is really useful.
+//
+// Set the group active on your avatar before rezzing this box.
+// If you forget just reset the script after you set the box to the right group.
+// Volumedetect is activated in script, so dont link this prim.
+// This solution can be a bit spammy, so its certainly not ideal.
+//=========================================================================
+// ---LICENCE START---
+// http://creativecommons.org/licenses/by-sa/3.0/
+// ie: Attribution licence:
+//   Give me credit by leaving it in the script I created.
+//   Supply my original script with your modified version.
+//   Refer to the wiki URL from which you copied this script.
+//      https://wiki.secondlife.com/wiki/Group_invitation
+// ---LICENCE END---
+//=========================================================================
+
+// SHARED CONFIGURATION
+//----------------------------------
+// CONFIGURATION
+//----------------------------------
+// CORE CODE
+string      gUUID;
+//=========================================================================
+default
+{   on_rez(integer start_param)
+    {   llResetScript();
+    }
+    state_entry()
+    {   gUUID = llList2String(llGetObjectDetails(llGetKey(), ([OBJECT_GROUP])), 0);    
+        llVolumeDetect(TRUE);
+    }
+    collision_start(integer num)
+    {   if(llGetAndResetTime() &lt; 10.0) return;
+        if (~llDetectedType(0) &amp; AGENT) return;
+        llWhisper(0, &quot;\nJoin the group! Please click the link in your history window (ctrl-H)&quot;
+                +&quot;\n secondlife:///app/group/&quot;+gUUID+&quot;/about&quot;); 
+    }
+}
+//=========================================================================</code></pre></div>
+<div class="wiki-line">Touch based solution.</div>
+<div class="wiki-line">Sends group invite text as an IM - so far less spammy, and only delivered to avatars who </div>
+<div class="wiki-line">voluntarily touch the box. Much better solution.</div>
+<div class="wiki-line"><pre><code>//
+// BETLOG Hax
+//
+// AEST: 20080613 0704 [SLT:  20080612 1404]
+// For  Harleywood Guru request in SecondLife Hobos group chat
+//
+// Thanks to Punkaroo Snoring, and Pavig Lok for inadvertently pointing out something
+// i read in a RC release notes and totally didnt pay attention to. But which is really useful.
+//=========================================================================
+// ---LICENCE START---
+// http://creativecommons.org/licenses/by-sa/3.0/
+// ie: Attribution licence:
+//   Give me credit by leaving it in the script I created.
+//   Supply my original script with your modified version.
+//   Refer to the wiki URL from which you copied this script.
+//      https://wiki.secondlife.com/wiki/Group_invitation
+// ---LICENCE END---
+//=========================================================================
+// SHARED CONFIGURATION
+//----------------------------------
+// CONFIGURATION
+//----------------------------------
+// CORE CODE
+//=========================================================================
+default
+{   state_entry()
+    {   llSetText(&quot;group join offer EXAMPLE - touch to get the IM&quot;, &lt;1.0, 1.0, 1.0&gt;,1.0);
+    }
+    touch_start(integer total_number)
+    {   list data = llGetObjectDetails(llGetKey(), ([OBJECT_GROUP]));
+        string UUID = llList2String(data, 0);
+        llSetColor(&lt;1.0, 0.0, 0.0&gt;, ALL_SIDES);         //IM adds a delay.. indicate this visually
+//        llLoadURL(        //does NOT seem to work, but i&#x27;d love to know if it does (like if it gets fixed in a client release)
+        llInstantMessage(
+            llDetectedKey(0)
+//            , &quot;Join the group! Please click the dialog box.&quot;           //as above 
+            , &quot;\nJoin the group! Please click the link in your history window (ctrl-H)&quot;
+                +&quot;\n secondlife:///app/group/&quot;+UUID+&quot;/about&quot;
+        ); 
+        llSetColor(&lt;0.0, 1.0, 0.0&gt;, ALL_SIDES);        //IM adds a delay.. indicate this visually
+    }
+}
+//=========================================================================</code></pre></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-examples-d1aa2221/">Category:LSL Examples</a></div>

@@ -1,0 +1,33 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Return the number of seconds added to the current time before calculating the current environmental time for the parcel.  <a href="/functions/llGetDayOffset/">llGetDayOffset</a> returns the value for the current parcel, <a href="/functions/llGetRegionDayOffset/">llGetRegionDayOffset</a> produces the same value for the entire region.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// print the apparent time of day as HH:MM (%), just like the environment window in the viewer.
+// Time of day is a fraction between 0 and 1, 0 is midnight, 0.5 is noon
+string printTimeOfDay(float dayFraction) {
+    integer hours = (integer)(dayFraction * 24);
+    integer minutes = (integer)(dayFraction * 24 * 60) % 60;
+    integer percent = (integer)(dayFraction * 100);
+    return (string)hours + &quot;:&quot; + llGetSubString((string)(100+minutes), 1, 2) + &quot; (&quot; + (string)percent + &quot;%)&quot;;
+}
+
+default {
+    state_entry() {
+        llSetTimerEvent(5);
+    }
+
+    timer() {
+        float timeOfDay = (llGetUnixTime() + llGetDayOffset()) % llGetDayLength() * 1.0 / llGetDayLength();
+        llSetText(printTimeOfDay(timeOfDay), &lt;1,1,0&gt;, 1);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetEnvironment/">llGetEnvironment</a></div> Newer function that consolidates many environment-based settings.</div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetDayLength/">llGetDayLength</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetDayOffset/">llGetDayOffset</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetMoonDirection/">llGetMoonDirection</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetMoonRotation/">llGetMoonRotation</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetSunDirection/">llGetSunDirection</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetSunRotation/">llGetSunRotation</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRegionDayLength/">llGetRegionDayLength</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRegionDayOffset/">llGetRegionDayOffset</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRegionMoonDirection/">llGetRegionMoonDirection</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRegionMoonRotation/">llGetRegionMoonRotation</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRegionSunDirection/">llGetRegionSunDirection</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRegionSunRotation/">llGetRegionSunRotation</a></div></div></section>

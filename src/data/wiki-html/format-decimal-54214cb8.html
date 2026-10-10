@@ -1,0 +1,63 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span>__NOTOC__</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="function-string-formatdecimal-float-number-integer-precision">Function: <a href="https://wiki.secondlife.com/wiki/string">string</a> FormatDecimal(<a href="https://wiki.secondlife.com/wiki/float">float</a> <code>number</code>, <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>precision</code>);</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><em>Formats a float value to a fixed precision ie. for display purposes</em></div>
+<div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/String">string</a> that comprises the <strong><code>number</code></strong> truncated and rounded to the given <strong><code>precision</code></strong>.</div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/float">float</a> — number — <span class="wiki-template"><code>{{#var:p_number_desc}}</code></span></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/integer">integer</a> — precision — <span class="wiki-template"><code>{{#var:p_precision_desc}}</code></span></div></div>
+<table></table>
+<div class="wiki-line"><br/></div>
+<table><tr><th><code>precision</code></th><th>Value</th></tr><tr><td>positive</td><td>Truncates <strong><code>number</code></strong> rounded to this fraction positions</td></tr><tr><td>zero</td><td>Truncates <strong><code>number</code></strong> rounded to it's integer value</td></tr><tr><td>negative</td><td>Rounds <strong><code>number</code></strong> at this pre-decimal position</td></tr></table>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="specification">Specification</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><pre><code>string FormatDecimal(float number, integer precision)
+{    
+    float roundingValue = llPow(10, -precision)*0.5;
+    float rounded;
+    if (number &lt; 0) rounded = number - roundingValue;
+    else            rounded = number + roundingValue;
+    
+    if (precision &lt; 1) // Rounding integer value
+    {
+        integer intRounding = (integer)llPow(10, -precision);
+        rounded = (integer)rounded/intRounding*intRounding;
+        precision = -1; // Don&#x27;t truncate integer value
+    }
+    
+    string strNumber = (string)rounded;
+    return llGetSubString(strNumber, 0, llSubStringIndex(strNumber, &quot;.&quot;) + precision);
+}</code></pre></div>
+<div class="wiki-line"><strong>Examples:</strong></div>
+<table><tr><th><code>number</code></th><th><code>precision</code></th><th>Result</th><th>Code</th></tr><tr><td>123.456</td><td>2</td><td>123.46</td><td><code>FormatDecimal(123.456, 2)</code></td></tr><tr><td> -123.456</td><td>2</td><td> -123.46</td><td><code>FormatDecimal(-123.456, 2)</code></td></tr><tr><td>123.456</td><td>0</td><td>123</td><td><code>FormatDecimal(123.456, 0)</code></td></tr><tr><td>123.456</td><td> -2</td><td>100</td><td><code>FormatDecimal(123.456, -2)</code></td></tr></table>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;&lt;div id="box"&gt;</div>
+<h2 id="caveats">Caveats</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">Maximum value is restricted to <a href="https://wiki.secondlife.com/wiki/integer">integer</a> range, that is -2,147,483,648 to +2,147,483,647</div>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="example">Example</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">Trivial example to listen to any chat from the object owner for <strong><code>number</code>, <code>precision</code></strong> values and respond formatted value.</div>
+<div class="wiki-line"><pre><code>// Insert code of FormatDecimal user function here
+
+default
+{
+    state_entry()
+    {
+        llOwnerSay(&quot;Enter: [number,precision]&quot;);
+        llListen(0, &quot;&quot;, llGetOwner(), &quot;&quot;);
+    }
+
+    listen(integer _chan, string _str, key _id, string _msg)
+    {
+        list values=llCSV2List(_msg);
+        float number = llList2Float(values,0);
+        integer decimals = llList2Integer(values,1);
+        llOwnerSay(&quot;Number &quot; + (string)number + &quot; is formatted &quot; + FormatDecimal(number, decimals));
+    }
+}</code></pre></div>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples|Format Decimal}}</code></span></div>

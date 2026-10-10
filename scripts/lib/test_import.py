@@ -107,7 +107,19 @@ class TransclusionTests(unittest.TestCase):
 
 class DatasetTests(unittest.TestCase):
     @classmethod
-    def setUpClass(cls): cls.c=json.loads((ROOT/'src/data/catalog.json').read_text(encoding='utf8'))
+    def setUpClass(cls):
+        # The catalog is split (see write_split in import-datasets.py); put the rendered wiki back
+        # on the entries so these tests read one structure.
+        cls.c=json.loads((ROOT/'src/data/catalog.json').read_text(encoding='utf8'))
+        api=json.loads((ROOT/'data/derived/api-wiki.json').read_text(encoding='utf8'))
+        for w in cls.c['wiki']:
+            w['html']=(ROOT/'src/data/wiki-html'/(w['slug']+'.html')).read_text(encoding='utf8')
+            w['sections']=[{'id':i,'title':t,'html':h} for i,t,h in re.findall(r'<section><h2 id="([^"]*)">(.*?)</h2>(.*?)</section>(?=\n<section>|\n?$)',w['html'],re.S)]
+        for plural in ('functions','events','constants'):
+            for e in cls.c[plural]:
+                if e['wiki'] and e['name'] in api:
+                    e['wiki']['sections']=api[e['name']]['sections']
+                    e['wiki']['html']='\n'.join('<section><h2 id="'+s['id']+'">'+s['title']+'</h2>'+s['html']+'</section>' for s in e['wiki']['sections'])
     def test_counts_and_exclusions(self):
         self.assertEqual(len(self.c['wiki']),2266)
         self.assertEqual(len(self.c['functions']),501)

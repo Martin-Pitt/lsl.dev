@@ -1,0 +1,35 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> that is <code>src</code> broken into a list, discarding <code>separators</code>, keeping <code>spacers</code>, keeping any null values generated.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">The behavior is identical to that for <a href="/functions/llParseString2List/">llParseString2List</a>, except blank strings found in the list are kept. This is useful when parsing a list that contains values that can be null or empty (and subsequently removing the nulls would upset the distribution of data and the element indexes).</div>
+<div class="wiki-line">llParseStringKeepNulls("", ["~"], []) will return [""]</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Only the first 8 <code>separators</code> and first 8 <code>spacers</code> will be used any extras will be ignored.</li>
+<li>All <code>separators</code> and <code>spacers</code> must be strings, all other types will be ignored.</li>
+<li><code>separators</code> take precedent over <code>spacers</code>. The string is parsed from start to finish, each position is compared against the <code>separators</code> then <code>spacers</code> before moving onto the next position. The first match is the one that is returned. Using the list ["A", "AB"] will always act with "A" and never "AB".</li>
+<li>Duplicate or irrelevant <code>separators</code> or <code>spacers</code> count towards the limits and slow down parsing.</li>
+<li>All entries in the return are typed as string. Use explicit typecasting on <a href="/functions/llList2String/">llList2String</a> to convert the values into other types. Do not rely upon the implicit typecasting of the other llList2* functions (as they typically return a default value).</li>
+<li>Remember to capture the result of the operation with a variable, unless you are planning to act directly on the results.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        // This will say:
+        // &lt;A&gt;&lt;crazy&gt;&lt;fox&gt;&lt;.&gt;&lt;Saw&gt;&lt;the&gt;&lt;moon&gt;&lt;.&gt;&lt;.&gt;
+        string my_string = &quot;A crazy fox.  Saw the moon..&quot;;
+        list my_list = llParseString2List(my_string,[&quot; &quot;],[&quot;.&quot;]);
+        llOwnerSay(&quot;&lt;&quot; + llDumpList2String(my_list,&quot;&gt;&lt;&quot;) + &quot;&gt;&quot;);
+        
+        // This will say:
+        //  &lt;A&gt;&lt;crazy&gt;&lt;fox&gt;&lt;.&gt;&lt;&gt;&lt;&gt;&lt;Saw&gt;&lt;the&gt;&lt;moon&gt;&lt;.&gt;&lt;&gt;&lt;.&gt;&lt;&gt;
+        my_list = llParseStringKeepNulls(my_string,[&quot; &quot;],[&quot;.&quot;]);
+        llOwnerSay(&quot;&lt;&quot; + llDumpList2String(my_list,&quot;&gt;&lt;&quot;) + &quot;&gt;&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><strong>Replacement functions without or very large separator/spacer count limits</strong></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/ParseString2List">ParseString2List</a> — Functions exactly the same as <a href="/functions/llParseString2List/">llParseString2List</a> and <a href="/functions/llParseStringKeepNulls/">llParseStringKeepNulls</a>.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Separate_Words">separateWords</a> — Functions the same as <a href="/functions/llParseString2List/">llParseString2List</a> unless certain preconditions are not met.</div></div>
+<table></table></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llParseString2List/">llParseString2List</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDumpList2String/">llDumpList2String</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llCSV2List/">llCSV2List</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llList2CSV/">llList2CSV</a></div></div></section>

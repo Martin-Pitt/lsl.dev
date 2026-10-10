@@ -1,0 +1,38 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">To clarify, numbers and ASCII7 alphabetical characters are NOT escaped. If a character requires more then one byte in <a href="https://en.wikipedia.org/wiki/UTF-8" rel="noreferrer">UTF-8</a> <a href="https://en.wikipedia.org/wiki/Byte" rel="noreferrer">byte</a> form then it returns multiple <code>"%xx"</code> sequences chained together.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the escaped/encoded version of <code>url</code>, replacing spaces with <code>"%20"</code> etc. The function will escape any character not in <code>[a-zA-Z0-9]</code> to <code>"%xx"</code> where <code>"xx"</code> is the <a href="https://en.wikipedia.org/wiki/Hexadecimal" rel="noreferrer">hexadecimal</a> value of the character in <a href="https://en.wikipedia.org/wiki/UTF-8" rel="noreferrer">UTF-8</a> <a href="https://en.wikipedia.org/wiki/Byte" rel="noreferrer">byte</a> form.</div></section>
+<section><h2 id="caveats">Caveats</h2><div class="wiki-line">The function is not appropriate for escaping a <code>url</code> all at once, because the <code>":"</code> after the protocol, and all of the <code>"/"</code> characters delimiting the various parts, will be escaped. Instead, build the <code>url</code> in parts; escaping parts of the path and query string arguments as needed.</div>
+<div class="wiki-line">Sample URL: <a href="https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322/foo/bar?arg=gra" rel="noreferrer"><span class="wiki-template"><a href="/wiki/template-hovertextstyle-4507879d/">HoverTextStyle</a>: <code>{{HoverTextStyle|style=color:green;|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322|2={{String|x-script-url}} = {{String|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322}}}}</code></span><span class="wiki-template"><a href="/wiki/template-hovertextstyle-4507879d/">HoverTextStyle</a>: <code>{{HoverTextStyle|style=color:blue;|/foo/bar|2={{String|x-path-info}} = {{String|/foo/bar}}}}</code></span>?<span class="wiki-template"><a href="/wiki/template-hovertextstyle-4507879d/">HoverTextStyle</a>: <code>{{HoverTextStyle|style=color:red;|1=arg=gra|2={{String|x-query-string}} = {{String|1=arg=gra}}}}</code></span></a></div>
+<table><tr><th> URL part</th><th> example</th></tr><tr><td> base URL</td><td> &lt;font color="green"&gt;https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322&lt;/font&gt;</td></tr><tr><td> trailing path</td><td> &lt;font color="blue"&gt;/foo/bar&lt;/font&gt;</td></tr><tr><td> query string past the first "?" in the URL</td><td> &lt;font color="red"&gt;arg=gra&lt;/font&gt;</td></tr></table></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>string str = &quot;http://wiki.secondlife.com/wiki/LSL Portal&quot;;
+ 
+default
+{
+    state_entry()
+    {
+        llOwnerSay(&quot;Plain string:\n\t&quot; + str);
+        // output: &quot;http://wiki.secondlife.com/wiki/LSL Portal&quot;
+ 
+        llOwnerSay(&quot;Escaped string:\n\t&quot; + llEscapeURL(str));
+        // output: &quot;http%3A%2F%2Fwiki%2Esecondlife%2Ecom%2Fwiki%2FLSL%20Portal&quot;
+ 
+        llOwnerSay(&quot;Escaped string unescaped again:\n\t&quot; + llUnescapeURL( llEscapeURL(str) ));
+        // output: &quot;http://wiki.secondlife.com/wiki/LSL Portal&quot;
+ 
+        // because escaping and unescaping are exact opposite
+        // and unescaping an escaped string returns the original
+ 
+ 
+        //  For readability&#x27;s sake it would make more sense to do:
+        llOwnerSay(&quot;For readability&#x27;s sake:\n\t&quot; + &quot;http://wiki.secondlife.com/wiki/&quot; + llEscapeURL(&quot;LSL Portal&quot;));
+        // output: &quot;http://wiki.secondlife.com/wiki/LSL%20Portal&quot;
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>The SL viewer pretty prints URLs when converting them to clickable links in chat and dialogs. To confirm that a URL was escaped as intended, right-click the URL and copy, then paste to inspect it in the chat bar; or wrap it between "&lt;nolink&gt;...&lt;/nolink&gt;"; or examine your chat log in an external editor; or display the string with an alternative function like <a href="/functions/llSetText/">llSetText</a>.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llUnescapeURL/">llUnescapeURL</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/UTF-8">UTF-8</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/category-lsl-base64-68dc3ec8/">Base64</a></div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li>Prior to SL versions 1.19.1.81992, this function was limited to returning a maximum of 254 characters. <a href="https://jira.secondlife.com/browse/SVC-470" rel="noreferrer">SVC-470</a></li>
+</ul></section>

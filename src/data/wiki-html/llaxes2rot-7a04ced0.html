@@ -1,0 +1,23 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">All three vectors must be mutually orthogonal unit vectors.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/rotation">rotation</a> that is defined by the 3 coordinate axes</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        vector i = &lt; 1.0, 0.0, 0.0&gt;;
+        vector j = &lt; 0.0, 1.0, 0.0&gt;;
+        vector k = &lt; 0.0, 0.0, 1.0&gt;;
+
+        rotation rot = llAxes2Rot( j, -i, k );
+
+        llSay(0, (string) (llRot2Euler(rot) * RAD_TO_DEG) );
+    }
+}</code></pre></div>
+<div class="wiki-line">This script displays:</div>
+<div class="wiki-line">   Object: &lt;-0.00000, 0.00000, 90.00000&gt;</div>
+<div class="wiki-line">which shows that (<strong>j</strong>, <strong>-i</strong>, <strong>k</strong>) is obtained by rotating (<strong>i</strong>, <strong>j</strong>, <strong>k</strong>) 90 degrees around z direction.</div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Technically, only the first two vectors are needed to define this rotation, which can be done by calling any of these:</div>
+<div class="wiki-line"><pre><code>llAxes2Rot(fwd, left, fwd % left);
+llAxes2Rot(left % up, left, up);
+llAxes2Rot(fwd, up % fwd, up);</code></pre></div></section>
+<section><h2 id="tests">Tests</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/User:Dora_Gustafson/llAxes2Rot_right_and_wrong">Visual illustration</a> — Importance of mutually orthogonal unit vectors</div></div></section>

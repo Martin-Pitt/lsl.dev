@@ -1,0 +1,35 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is the number of seconds elapsed since 00:00 hours, Jan 1, 1970 <a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time" rel="noreferrer">UTC</a> from the system clock (<a href="https://en.wikipedia.org/wiki/Unix_time" rel="noreferrer">Unix time</a>).</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Time codes outside 1901-12-13 20:45:52 UTC and 2038-01-19 03:14:08 UTC cannot be represented in LSL due to its use of signed 32-bit integers for Unix times. Scripts that rely on this function after January 19, 2038 may have logical errors.</li>
+<li>Consider <a href="/functions/llGetTimestamp/">llGetTimestamp</a> instead, which will correctly report time through 2038.</li>
+<li>Lua scripts (not including LSL scripts compiled for the Luau VM) do not have this limitation with <code>os.time()</code>, since it returns a 64-bit number and will correctly represent time through the likely heat death of the universe.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Reset tracker
+integer BOOT_TIME;
+default
+{
+    state_entry()
+    {
+        BOOT_TIME = llGetUnixTime(); 
+        llSetTimerEvent(0.1);
+    }
+    
+    timer()
+    {
+        llSetText((string)(llGetUnixTime() - BOOT_TIME) + &quot; Seconds since boot.\n\n &quot;, &lt;1,0,0&gt;, 1.0);
+        llSetTimerEvent(1);
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><h3 id="helper-functions">Helper Functions:</h3>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Unix2StampLst">Unix2StampLst</a> — Converts Unix Time stamp to a list. ex: 1234567890 to [2009, 2, 13, 23, 31, 30]</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Stamp2UnixInt">Stamp2UnixInt</a> — Converts date to Unix Time stamp. ex: [2009, 2, 13, 23, 31, 30] to 1234567890</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/uuLinuxTime">uuLinuxTime</a> — Converts date to Unix Time stamp (from Linux kernel's sources)</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Unix2WeekdayStr">Unix2WeekdayStr</a> — Gets the weekday from a Unix Time stamp. ex: "Friday" from 1234567890</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Unix2PST_PDT">Unix2PST_PDT</a> — Converts Unix Time stamp to an SLT date/time string with PST or PDT indication as appropriate</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Unix2GMTorBST">Unix2GMTorBST</a> — Converts Unix Time stamp to a UK date/time string with GMT or BST indication as appropriate</div></div>
+<table></table></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetTimestamp/">llGetTimestamp</a> — Human Readable UTC Date and time</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetDate/">llGetDate</a> — Human Readable UTC Date</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetTime/">llGetTime</a> — Elapsed script-time.</div></div></section>
+<section><h2 id="tests">Tests</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/llGetUnixTime/test">llGetUnixTime Conformance Test</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="bug-4703"><a href="/wiki/template-issues-bug-4703-0ffdc887/">Template:Issues/BUG-4703</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-4703|{{Wikipedia|Year 2038 problem}}|type=bug}}</code></pre></details><p id="svc-6357"><a href="/wiki/template-issues-svc-6357-a718f028/">Template:Issues/SVC-6357</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-6357|&#x27;&#x27;&#x27;llGetUnixTimeNanos&#x27;&#x27;&#x27;() - greater precision timing mechanism|type=nf}}</code></pre></details></section>

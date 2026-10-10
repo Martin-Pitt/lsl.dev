@@ -1,0 +1,91 @@
+<div class="wiki-line">When working with Shared Media, a common issue is getting the media to visually appear as intended on the prim. This article helps solve a common problem: how to do the equivalent of pressing the texture panel <strong>Align</strong> button from Linden Script (LSL).</div>
+<h3 id="using-the-align-button-on-the-texture-panel">Using the Align Button on the Texture Panel</h3>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">First, let's put a Shared Media texture on a prim the interactive way:</div>
+<div class="wiki-line"><strong>1. Here I've rezzed a rectangular prim:</strong></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/image:P1.jpg">466px</a></div>
+<div class="wiki-line"><strong>2. I have a web page that I want to display such that the content will take up the entire surface of the prim.</strong></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Image:P2.jpg">466px</a></div>
+<div class="wiki-line">This web page is "test content" - it's just a page with a 0 pixel margin that's displaying a "test pattern" image that is 300x200 pixels. This will help make it easier to see what's happening when it's rendered inworld.</div>
+<div class="wiki-line">HTML:</div>
+<div class="wiki-line"><pre><code>&lt;style type=&quot;text/css&quot;&gt;
+body {
+margin-left: 0px;
+margin-top: 0px;
+margin-right: 0px;
+margin-bottom: 0px;
+background-color: #eeeeee;
+font: .8em/1.3em verdana,arial,helvetica,sans-serif;
+}
+&lt;/style&gt;
+&lt;image width=&quot;300&quot; height=&quot;200&quot; src=&quot;test_pattern.png&quot; /&gt;</code></pre></div>
+<div class="wiki-line">And here's the image, in case you want it:</div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Image:P3.png">Image:P3.png</a></div>
+<div class="wiki-line"><strong>3. After selecting the face, entering the URL for the Shared Media, and setting the size explicitly to 300X200, the texture does not yet appear as I want it. Notice how it's squished into the corner.</strong></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Image:P3.jpg">466px</a></div>
+<div class="wiki-line"><strong>4. To fix this, I click the "Align" button on the texture panel:</strong></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Image:P4.jpg">466px</a></div>
+<div class="wiki-line">And voila!</div>
+<h3 id="how-would-you-do-this-if-the-shared-media-was-added-from-linden-script">How would you do this if the Shared Media was added from Linden Script?</h3>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">For example, the same "Not yet aligned" problem occurs with the script that put the Shared Media on this prim:</div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Image:P5.jpg">466px</a></div>
+<div class="wiki-line">Here's that script:</div>
+<div class="wiki-line"><pre><code>init()
+{
+    integer face = 2;
+    integer w = 300;
+    integer h = 200;
+    string url = &quot;http://www.uccellogames.com/media_demos/test_pattern.html&quot;;
+   
+    llClearPrimMedia(face); // forces refresh of cache if reloading the same page
+    llSetPrimMediaParams(face, [
+        PRIM_MEDIA_CURRENT_URL, url,
+        PRIM_MEDIA_AUTO_SCALE, FALSE,
+        PRIM_MEDIA_AUTO_PLAY, TRUE,
+        PRIM_MEDIA_WIDTH_PIXELS, w,
+        PRIM_MEDIA_HEIGHT_PIXELS, h
+    ]);
+}
+ 
+default
+{
+    state_entry()
+    {
+        init();
+    }
+   
+    on_rez(integer start_param)
+    {
+    }
+}</code></pre></div>
+<div class="wiki-line">There is no LSL command that does the same thing as clicking the <strong>Align</strong> button on the texture panel. Help!</div>
+<h3 id="help-has-arrived">Help has arrived!</h3>
+<div class="wiki-line">Here's some LSL that has the same effect as the texture button.</div>
+<div class="wiki-line"><pre><code>doAlign(integer w, integer h, integer face)
+{
+    // compute scale factors based on next bigger power of 2
+    integer div;
+    div = 2;
+    while (div &lt; w) div*=2;    
+    float scale_s = (float)w / div;
+    div = 2;
+    while (div &lt; h) div*=2;
+    float scale_t = (float)h / div;
+   
+    // compute offset from scale
+    float offset_u = -(1.0 - scale_s) / 2.0;
+    float offset_v = -(1.0 - scale_t) / 2.0;
+ 
+    // do the &quot;Align&quot;:   
+    llOffsetTexture(offset_u, offset_v, face);
+    llScaleTexture(scale_s, scale_t, face);
+}</code></pre></div>
+<div class="wiki-line">This LSL does the same math that the Second Life Viewer would do internally if you clicked the <strong>Align</strong> button.</div>
+<div class="wiki-line">And so by adding a call</div>
+<div class="wiki-line">    doAlign(w, h, face)</div>
+<div class="wiki-line">after the call to llSetPrimMediaParams, it fixes it! Hooray! </div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Image:P6.jpg">466px</a></div>
+<div class="wiki-line">I hope this saves you the time and trouble I spent on this issue.  Happy Shared Media content building.</div>
+<div class="wiki-line">Edelman Linden</div>
+<div class="wiki-line"><a href="/wiki/category-lsl-b2b52844/">Category:LSL</a> <a href="https://wiki.secondlife.com/wiki/Category:Shared_Media">Category:Shared Media</a></div>

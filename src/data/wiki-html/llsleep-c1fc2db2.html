@@ -1,0 +1,35 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Puts the script to sleep for <strong>sec</strong> seconds. The script will not do anything during this time.</div>
+<div class="wiki-line">The script will sleep at least until the next server-frame, which happen every (1/45 = ~0.02222) seconds under normal conditions.</div>
+<div class="wiki-line">If <strong>sec</strong> is zero or less, the script will not sleep at all.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSay(0, &quot;I going to take a nap for 5 seconds.&quot;);
+        llSleep(5.0);
+        llSay(0, &quot;I feel so refreshed!&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llOwnerSay(&quot;Time between sleeps:&quot;);
+
+        integer loops = 10;
+        float last_time = 0.0;
+
+        llResetTime();
+        llSleep(0.02);
+
+        while (--loops)
+        {
+            float time = llGetTime();
+            llOwnerSay((string)(time - last_time));
+            last_time = time;
+            llSleep(0.0); // Try a value above zero
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetTimerEvent/">llSetTimerEvent</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/timer/">timer</a></div></div></section>

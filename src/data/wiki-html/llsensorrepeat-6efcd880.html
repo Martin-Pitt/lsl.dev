@@ -1,0 +1,155 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Performs a scan for <code>name</code> and <code>id</code> with <code>type</code> within <code>range</code> meters and <code>arc</code> radians of forward vector and repeats every <code>rate</code> seconds. The first scan is not performed until <code>rate</code> seconds have passed.</div>
+<div class="wiki-line">Script execution continues immediately. Whenever a scan is completed, a <a href="/events/sensor/">sensor</a> or <a href="/events/no_sensor/">no_sensor</a> event is put in the event queue.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>name</code>, <code>id</code>, and/or <code>type</code> are empty or 0, they are ignored.<br/>If <code>id</code> is an invalid key or <a href="/constants/NULL_KEY/">NULL_KEY</a> it is treated as empty.&lt;br id="NameFormat"/&gt;Depending upon which AGENT* flag is used determines the format requirements for <code>name</code></div>
+<div class="wiki-line">See: <a href="http://www.lslwiki.net/lslwiki/wakka.php?wakka=llSensor" rel="noreferrer">llSensor</a> for an excellent explanation of <code>arc</code>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The repeat of the sensor event is adversely affected by <a href="/functions/llGetRegionTimeDilation/">time dilation</a> (lag).</li>
+<li>Sensors placed in the root prim of attachments will use the direction the avatar is facing as their forward vector. In mouselook, this means that it will be wherever the avatar is looking, while out of mouselook, this means whichever way the avatar is pointing. This does not include where the avatar's head is pointing, or what animation the avatar is doing, just the direction the avatar would move in if you walked forward. This is the case, regardless of where the object is attached.</li>
+<li>Sensors placed in prims other than the root prim of an attachment will have their forward direction offset relative to the root prim's forward direction, e.g. a sensor in a prim whose +X direction is the reverse of the root +X will look backward.</li>
+<li>Only the most recent <a href="/events/sensor/">sensor</a> event is queued. Previous sensor events are replaced.</li>
+<li>A repeating sensor does not persist across a state change.</li>
+<li><a href="/functions/llSensorRepeat/">llSensorRepeat</a> can occasionally detect outside of it's specified range every few cycles when used near sim borders. <a href="/functions/llSensor/">llSensor</a> in a <a href="/events/timer/">timer</a> does not.</li>
+<li>Only one or zero llSensorRepeats can be active per script. If llSensorRepeat is called a second time without calling <a href="/functions/llSensorRemove/">llSensorRemove</a>, the first llSensorRepeat is deactivated and the second one replaces it</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Written by Steamy Latte.
+// Scans every 30 seconds for visitors within 10 meters.
+// Reports new visitors to object owner when she is in range.
+
+string AllAgents;
+
+default
+{
+    state_entry()
+    {
+        // arc=PI is a sphere, you could look more narrowly in the direction object is facing with PI/2, PI/4 etc.
+        // don&#x27;t repeat this too often to avoid lag.
+        llSensorRepeat(&quot;&quot;, &quot;&quot;, AGENT_BY_LEGACY_NAME, 10.0, PI, 30.0);
+    }
+    sensor(integer num_detected)
+    {
+        string thisAgent;
+        integer agentNum;
+        for (agentNum=0; agentNum&lt;num_detected; agentNum++)
+        {
+            thisAgent = llDetectedName(agentNum);
+            if (llDetectedKey(agentNum) == llGetOwner())
+            {
+                if (AllAgents != &quot;&quot;)
+                {
+                    llOwnerSay(&quot;We&#x27;ve had the following visitors:&quot; + AllAgents);
+                    AllAgents = &quot;&quot;;
+                }
+            }
+            else if (llSubStringIndex(AllAgents+&quot;\n&quot;, &quot;\n&quot;+thisAgent+&quot;\n&quot;) &lt; 0)
+            {
+                AllAgents = AllAgents + &quot;\n&quot; + thisAgent;
+            }
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// Written by Evans Love.
+// (Limited to most recent 200 names by Void Singer to prevent eventual Stack/Heap Collision + clean up)
+// Continuously scans for visitors within 10 meters and reports new visitors to object owner.
+//-------------------------------------------------------------------------------------
+
+integer RESPONSE_CHANNEL = -100;
+float   SCAN_RANGE       = 10.0;
+float   SCAN_INTERVAL    = 20.0;
+list    VISITOR_LIST;
+
+default
+{
+    state_entry()
+    {
+        llSensorRepeat(&quot;&quot;, NULL_KEY, AGENT_BY_LEGACY_NAME, SCAN_RANGE, PI, SCAN_INTERVAL);
+    }
+
+    sensor(integer number_detected)
+    {
+        integer agent_number;
+
+//      iterate through all detected agents
+        for (; agent_number &lt; number_detected; agent_number++)
+        {
+            string  this_agent_name = llDetectedName(agent_number);
+            key     this_agent_key  = llDetectedKey(agent_number);
+
+//          if the agent is not found on the list
+            if (llListFindList(VISITOR_LIST, [this_agent_name]) == -1)
+            {
+//              add her/him and make the list hold the last 200 visitors
+                VISITOR_LIST = [this_agent_name] + llList2List(VISITOR_LIST, 0, 198);
+
+                llDialog(this_agent_key, &quot;Welcome!&quot;, [&quot;Ok&quot;], RESPONSE_CHANNEL);
+
+                llOwnerSay(this_agent_name);
+            }
+//          else agent is already on the list
+        }
+
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">You might want to use <a href="/functions/llGetAgentList/">llGetAgentList</a> instead of using sensors to get a list of all avatars within the same parcel or region.</div></aside></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSensor/">llSensor</a> — Runs a sensor once</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSensorRemove/">llSensorRemove</a> — Stops the llSensorRepeat timer</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llOverMyLand/">llOverMyLand</a> — What happens over owners land</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/sensor/">sensor</a> — Triggered when a sensor detects something</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/no_sensor/">no_sensor</a> — Triggered when a sensor detects nothing</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-uuid-f11a4088/">Template:LSL Function/uuid</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}{{#if:{{{group|1}}}|{{LSLGC|Group|group}},&amp;#32;}}{{LSLGC|Avatar|avatar}} or {{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{ph|}}}|{{{ph|}}}&amp;#32;|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}}}{{#if:{{{group|1}}}|group,&amp;#32;}}avatar or {{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Avatar/As A Parameter}}
+}}}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-constants-sensing-3952dde9/">Template:LSL Constants/Sensing</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:
+
+{{#vardefine:caveats|{{#var:caveats}}
+*When searching for an avatar but not by name, it doesn&#x27;t matter which AGENT flag is used.}}
+
+{{#vardefine:constants_nb|{{#var:constants_nb}}
+{{{!}}
+{{LSL Constants Sensor|{{{1|}}}|no_wrapper=*|tstyle=margin-top:0;}}
+&lt;div style=&quot;display:inline-block;&quot;&gt;
+{{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}- {{Hl2}}
+!Float Constants
+!Arc
+{{!}}-
+{{!}}{{#vardefine:PI_BY_TWO|{{LSL Const|PI_BY_TWO|float|1.570796326}}}}{{#var:PI_BY_TWO}}
+{{!}}A hemisphere scan
+{{!}}-
+{{!}}{{#vardefine:PI|{{LSL Const|PI|float|3.141592653}}}}{{#var:PI}}
+{{!}}A full sphere scan
+{{!}}}
+&lt;/div&gt;
+{{!}}}
+}}
+
+}}&lt;noinclude&gt;{{#var:constants_nb}}&lt;/noinclude&gt;</code></pre></details><p id="svc-2409"><a href="/wiki/template-issues-svc-2409-84fa882b/">Template:Issues/SVC-2409</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:
+&lt;!--
+{{#vardefine:caveats|{{#var:caveats}}
+*[[no_sensor]] will not be triggered unless the script has a [[sensor]] event ~ [[#SVC-2409|SVC-2409]]
+**An empty [[sensor]] event is enough to satisfy this condition and cause [[no_sensor]] to be triggered.
+}}
+--&gt;
+}}{{Issues|SVC-2409|[[llSensorRepeat]] not triggering [[no_sensor]] unless a [[sensor]] event handler is present|type=bug|resolution=fixed}}</code></pre></details><p id="svc-4301"><a href="/wiki/template-issues-svc-4301-ce5257dc/">Template:Issues/SVC-4301</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-4301|[[llSensorRepeat]] randomly returns unexpected results if &lt;code&gt;{{LSLPT|arc}}&gt;[[PI]]&lt;/code&gt;|type=bug|resolution=more}}</code></pre></details><p id="svc-6662"><a href="/wiki/template-issues-svc-6662-f8da85c2/">Template:Issues/SVC-6662</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-6662|type=bug|status=ack|resolution=unres|[[llSensorRepeat]] sometimes detects Avatars in adjacent sims, even though they are beyond the specified sensor range}}</code></pre></details><p id="bug-2366"><a href="/wiki/template-issues-bug-2366-58f01453/">Template:Issues/BUG-2366</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-2366|[[llSensor]] removes the sensor repeat if called AFTER [[llSensorRepeat]]|type=bug|status=accepted|resolution=unres}}</code></pre></details></section>

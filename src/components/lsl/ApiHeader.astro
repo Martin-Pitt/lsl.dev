@@ -1,0 +1,71 @@
+---
+/**
+ * Data-driven header of a function, event or constant page: kind, flag, category and feature
+ * the signature block, facts (return type, delay, energy, permission), the definition's
+ * description and, for constants, their groups. Everything here comes from the LSL definitions;
+ * the prose below it lives in the page's MDX. Breadcrumbs and category/feature chips are under the title (PageTitle override).
+ */
+import ApiSignature from '../reference/ApiSignature.astro';
+import { catalog, apiHref, constantGroupHref } from '../../lib/catalog';
+import { inlineLsl, enhanceText } from '../../lib/inline-lsl';
+interface Props { name: string; kind: 'function' | 'event' | 'constant'; description?: boolean }
+const { name, kind, description: showDescription = false } = Astro.props;
+const list = { function: catalog.functions, event: catalog.events, constant: catalog.constants }[kind] as any[];
+const entry = list.find(e => e.name === name);
+if (!entry) throw new Error(`<${{ function: 'LSLFunction', event: 'LSLEvent', constant: 'LSLConstant' }[kind]} name="${name}" />: "${name}" is not a public ${kind} in the LSL definitions. It may have been removed or deprecated; see \`npm run generate:mdx -- --check\`.`);
+const d = entry.definition;
+const memberships: string[] = d['member-of'] || [];
+const flags = [['experience', 'Requires an experience'], ['linden-experience', 'Linden experience only'], ['god-mode', 'Privileged function']].filter(([key]) => d[key]);
+const description = await enhanceText(entry.description, { self: entry.name });
+const sleep = d['mono-sleep'] ?? d.sleep;
+const facts = [
+	kind === 'function' && entry.returnType !== 'void' && ['Returns', await inlineLsl(entry.returnType)],
+	kind === 'function' && sleep ? ['Delay', `${sleep} s`] : null,
+	kind === 'function' && d.energy != null ? ['Energy', String(d.energy)] : null,
+	d['requires-permission'] && ['Permission', await inlineLsl(String(d['requires-permission']))],
+].filter(Boolean) as [string, string][];
+const replaces: string[] = entry.replaces || [];
+const replacesHtml = await Promise.all(replaces.map(n => inlineLsl(n, { link: false })));
+const groups = await Promise.all(memberships.map(async group => ({
+	group,
+	related: await Promise.all(catalog.constants.filter((c: any) => c.definition['member-of']?.includes(group) && c.name !== entry.name)
+		.map(async (c: any) => ({ href: apiHref('constant', c.name), name: await inlineLsl(c.name, { link: false }), value: String(c.definition.value) }))),
+})));
+---
+<div class="api-kinds">
+	<span class="api-kind">{kind}</span>
+	{flags.map(([, label]) => <span class="api-flag">{label}</span>)}
+</div>
+{replaces.length > 0 && (
+	<p class="api-replaces" data-pagefind-weight="3">Replaces deprecated {replacesHtml.map((h, i) => <>{i > 0 && ', '}<Fragment set:html={h} /></>)}.</p>
+)}
+
+<ApiSignature entry={entry} />
+{facts.length > 0 && <dl class="api-facts not-content">{facts.map(([k, v]) => <div><dt>{k}</dt><dd set:html={v} /></div>)}</dl>}
+
+{showDescription && <p class="api-description" set:html={description} />}
+
+{memberships.length > 0 && (
+	<section class="api-groups">
+		<h2 id="constant-groups">Constant groups</h2>
+		<p>{memberships.map((g, i) => <>{i > 0 && ' · '}<a href={constantGroupHref(g)}>{g}</a></>)}</p>
+		{groups.map(({ group, related }) => related.length > 0 && (
+			<details><summary>Other {group} values ({related.length})</summary>
+				<ul>{related.map(c => <li><a class="lsl-ref" href={c.href} set:html={c.name} /> <code>{c.value}</code></li>)}</ul>
+			</details>
+		))}
+	</section>
+)}
+<style>
+	.api-kinds { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .5rem; margin-top: .25rem; }
+	.api-kind, .api-flag { font-size: var(--sl-text-2xs); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+	.api-kind { color: var(--sl-color-text-accent); margin-inline-end: .25rem; }
+	.api-flag { background: var(--sl-color-gray-6); padding: .1rem .5rem; border-radius: .25rem; }
+	.api-replaces { font-size: var(--sl-text-sm); border-inline-start: 3px solid var(--sl-color-accent); padding-inline-start: .75rem; }
+	.api-facts { display: flex; flex-wrap: wrap; gap: .25rem 1.75rem; margin: .75rem 0 0; font-size: var(--sl-text-sm); }
+	.api-facts div { display: flex; gap: .45rem; align-items: baseline; }
+	.api-facts dt { color: var(--sl-color-gray-3); font-size: var(--sl-text-xs); }
+	.api-facts dd { margin: 0; }
+	.api-description { font-size: var(--sl-text-lg); line-height: 1.65; white-space: pre-line; }
+	.api-groups ul { columns: 2 18rem; }
+</style>

@@ -1,0 +1,33 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
+<div class="wiki-line">The following script detects "ghosted" avatars within sensor range.</div>
+<div class="wiki-line">Avatars sometimes become ghosted due to a longstanding server bug.  Ghosted avatars are motionless and phantom: other avatars can walk through them without colliding.  A ghosted avatar cannot be teleported home using <a href="https://wiki.secondlife.com/wiki/The_Region-Estate_window">estate management tools</a>; the error is <em>Could not find user to teleport home / estate owner request failed: teleporthomeuser</em>.  Their visual appearance may be partially or completely grayed; a cloud; or invisible.  Although seemingly present (and detectable by <a href="/functions/llSensor/">llSensor</a> and visible on the <a href="https://wiki.secondlife.com/wiki/Mini-Map">Mini-Map</a>), ghosted avatars are in fact usually logged out and unable to log in (although sometimes they will be logged in on some other region).  The only way to "rescue" a ghosted avatar is to <a href="https://wiki.secondlife.com/wiki/The_Region-Estate_window">restart</a> the region it is in.</div>
+<div class="wiki-line">This code takes advantage of the fact that <a href="/functions/llKey2Name/">llKey2Name</a> returns an empty string for ghosted avatars.</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+        llSensor(&quot;&quot;, NULL_KEY, AGENT, 96.0, PI );
+    }
+    
+    sensor(integer num_detected) {
+        integer i;
+        for (i = 0; i &lt; num_detected; i++) {
+            key k = llDetectedKey(i);
+            vector pos = llDetectedPos(i);
+            
+            if (llKey2Name(k) == &quot;&quot;) {
+                llOwnerSay(&quot;Ghosted avatar: &quot; +
+                 &quot;secondlife:///app/agent/&quot; + (string)k + &quot;/about&quot; +
+                 &quot; at secondlife://&quot; + llEscapeURL(llGetRegionName()) + &quot;/&quot; +
+                 (string)llRound(pos.x) + &quot;/&quot; +
+                 (string)llRound(pos.y) + &quot;/&quot; +
+                 (string)llRound(pos.z) + &quot;/&quot;);
+            }
+        }
+    }
+    
+    no_sensor() {
+        llOwnerSay(&quot;...&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples}}</code></span></div>

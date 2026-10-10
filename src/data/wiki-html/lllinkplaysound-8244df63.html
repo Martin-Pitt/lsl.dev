@@ -1,0 +1,98 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Plays <code>attached</code> <code>sound</code> once at <code>volume</code></div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><th> Constant </th><th> Value</th><th>Description</th><th>LSL Function</th></tr><tr><td> <a href="/constants/SOUND_PLAY/">SOUND_PLAY</a></td><td> 0x00</td><td> This is the default behavior.  Plays the sound once, attached to the linked primitive. </td><td> <a href="/functions/llPlaySound/">llPlaySound</a></td></tr><tr><td> <a href="/constants/SOUND_LOOP/">SOUND_LOOP</a></td><td> 0x01</td><td> Loops the sound attached to the linked primitive. </td><td> <a href="/functions/llLoopSound/">llLoopSound</a></td></tr><tr><td> <a href="/constants/SOUND_TRIGGER/">SOUND_TRIGGER</a></td><td> 0x02</td><td> Triggers the sound at the location of the linked prim. The sound is not attached and does not move with the prim.  If this flag is set it overrides all others.</td><td> <a href="/functions/llTriggerSound/">llTriggerSound</a></td></tr><tr><td> <a href="/constants/SOUND_SYNC/">SOUND_SYNC</a></td><td> 0x04</td><td> Synchronizes sound playback to the nearest sound master. Please see <a href="/functions/llLoopSoundMaster/">llLoopSoundMaster</a>.</td><td>  <a href="/functions/llLoopSoundSlave/">llLoopSoundSlave</a>, <a href="/functions/llPlaySoundSlave/">llPlaySoundSlave</a></td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>A call to llPlaySound replaces any other sound (so that only one sound can be played at the same time from the same prim), except sounds started with the deprecated <a href="/wiki/llsound-6e1f7512/">llSound</a> which always plays sound files till the end.</li>
+<li>Sound files must be 30 seconds or shorter.</li>
+<li>Sounds are always sampled at 44.1KHz, 16-bit, mono (stereo files will have one channel dropped--merged (as in combined)--when uploading).</li>
+<li>If the object playing the sound is a <a href="https://wiki.secondlife.com/wiki/HUD">HUD</a>, the sound is only heard by the user the HUD is attached to.</li>
+<li>To play a sound inworld from a HUD use <a href="/functions/llTriggerSound/">llTriggerSound</a>.</li>
+<li>It is impossible to play two (or more) sounds at the same time and have them start playing at exactly the same time ~ <a href="https://jira.secondlife.com/browse/VWR-15663" rel="noreferrer">VWR-15663</a></li>
+<li>If multiple sound emitters play the same exact sound within range of the viewer at the same time, they are usually not in sync due to latency between the server/client and script execution &amp; communication delays. This can produce echos, odd resonance, and other strange effects that you (probably) do not want.</li>
+<li>When used in conjunction with <a href="/functions/llSetSoundQueueing/">llSetSoundQueueing</a>, sounds may incorrectly <a href="https://community.secondlife.com/forums/topic/443645-llplaysound-plays-the-sound-twice-or-more/" rel="noreferrer">play more than once.</a> This can be fixed by disabling the sound queue if only a single sound sample is to be played.</li>
+<li>Use <a href="/functions/llLinkStopSound/">llLinkStopSound</a> to stop a looped sound started in a link with <a href="/constants/SOUND_LOOP/">SOUND_LOOP</a>.</li>
+<li>Playing sounds is throttled. If the average number of played sounds per second exceeds the limit (22 sounds/s), all sounds from the object are suppressed until the average falls sufficiently. The throttle is per object, not per link or per script, so multiple links cannot be used to overcome the throttle.</li>
+<li>Once the throttle is hit, the following error will be shown in debug channel: "Too many sound requests.  Throttled until average falls."</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+ {
+     state_entry()
+     {
+          llLinkPlaySound(LINK_ROOT, &quot;some_sound&quot;, 1.0, SOUND_PLAY);
+     }
+ }</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTriggerSound/">llTriggerSound</a> — 3=Plays a sound <code>unattached</code>.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTriggerSoundLimited/">llTriggerSoundLimited</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLoopSound/">llLoopSound</a> — 3=Plays a sound <code>attached</code>.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLoopSoundMaster/">llLoopSoundMaster</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLoopSoundSlave/">llLoopSoundSlave</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llPlaySoundSlave/">llPlaySoundSlave</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetSoundQueueing/">llSetSoundQueueing</a> — 3=Sets a prim property which allows sounds to be queued, instead of overwriting eachother.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llStopSound/">llStopSound</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinkStopSound/">llLinkStopSound</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llPreloadSound/">llPreloadSound</a> — 3=Preloads sound on viewers within range.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinkAdjustSoundVolume/">llLinkAdjustSoundVolume</a> — 3=Adjusts volume of <code>attached</code> sound.</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-link-face-a7ffc876/">Template:LSL Function/link-face</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:{{{1|}}}|{{LSL Function/link|{{{1}}}|nogroup={{{nogroup|}}}}}}}{{#if:{{{2|}}}|{{LSL_Function/face|{{{2}}}}}}}{{#if:
+
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetLinkNumberOfSides]]|Returns the number of faces of the linked prim.}}}}
+
+}}</code></pre></details><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details></section>

@@ -1,0 +1,28 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/float">float</a> that is the mass of object (in <a href="#lindograms">lindograms</a>) that script is attached to.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The mass reported by this function is in <a href="#lindograms">lindograms</a>, which function the same as kilograms within the bounds of Second Life, but not elsewhere. (<a href="#lindograms">See below</a>)</li>
+<li>Attachments do not affect an avatar's mass, only certain Appearance settings.</li>
+<li>Avatar mass is reported to either be unexpectedly low (when measured using <a href="/functions/llGetMass/">llGetMass</a>) or unexpectedly high (when measured using <a href="/functions/llGetMassMKS/">llGetMassMKS</a>). This is likely due to the weight being calculated based on a fixed value, with a modifier for height. The fixed value being used is incorrect, likely due to an incorrect density value being used.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//A way of making a constant force that returns the same speed visually whatever the object is
+default
+{
+    touch_start()
+    {
+        llApplyImpulse(&lt;0.0, 0.0, 5.0&gt; * llGetMass(), FALSE);
+        // This fires the object up at the same m/s whatever the size (or difference!)
+    }
+}//Written by El Taka</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectMass/">llGetObjectMass</a> — Gets the object mass (in lindograms)</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetForce/">llGetForce</a> — Gets the objects force</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetOmega/">llGetOmega</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetVel/">llGetVel</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetTorque/">llGetTorque</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAccel/">llGetAccel</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetMassMKS/">llGetMassMKS</a> — Get the mass of an object (in kilograms)</div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><h2 id="lindograms">Lindograms</h2>
+<div class="wiki-line">"Lindograms" is the name of the primary unit of mass used in Second Life.</div>
+<div class="wiki-line">While Second Life primarily makes use of the <a href="https://en.wikipedia.org/wiki/International_System_of_Units" rel="noreferrer">SI system of units</a>, mass seems to be an exception.</div>
+<div class="wiki-line">Some speculate that lindograms were intended to be <em>kilograms</em>, but a mistake was made when factoring object density, causing the mass value returned to be 100 times less than the actual kilogram value. As a result, some new functions were implemented (such as <a href="/functions/llGetMassMKS/">llGetMassMKS</a>) which report the correct kilogram weight of an object.</div>
+<div class="wiki-line">Functionally speaking, lindograms can be used in the same way kilograms are used&lt;ref&gt;With exception to some functions, such as <a href="/functions/llSetPhysicsMaterial/">llSetPhysicsMaterial</a>, which use kilograms, not lindograms. <a href="/functions/llGetMassMKS/">llGetMassMKS</a> returns a kilogram value, not a lindogram value.&lt;/ref&gt;, however only within the bounds of Second Life. Trying to export mass values from Second Life will often run into issues, caused by the use of lindograms as a base unit of measurement.</div>
+<div class="wiki-line">From a technical point-of-view, a lindogram is equivalent to a <a href="https://en.wikipedia.org/wiki/Quintal" rel="noreferrer">{{em|metric quintal}}</a>, however it is not treated as such.</div></section>

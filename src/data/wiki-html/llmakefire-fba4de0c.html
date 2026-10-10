@@ -1,0 +1,144 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Make fire like particles</div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Beginning in 1.14, the simulator will be using llParticleSystem to emulate legacy llMakeFire particles.</div>
+<div class="wiki-line"><pre><code>llMakeFire(integer particle_count,
+           float particle_scale,
+           float particle_speed,
+           float particle_lifetime,
+           float source_cone,
+           string source_texture_id,
+           vector local_offset);</code></pre></div>
+<div class="wiki-line"><pre><code>fakeMakeFire(integer particle_count, float particle_scale, float particle_speed,
+             float particle_lifetime, float source_cone, string source_texture_id,
+             vector local_offset)
+{
+//    local_offset is ignored
+    llParticleSystem([
+        PSYS_PART_FLAGS,            PSYS_PART_INTERP_COLOR_MASK | PSYS_PART_INTERP_SCALE_MASK | PSYS_PART_EMISSIVE_MASK | PSYS_PART_WIND_MASK,
+        PSYS_SRC_PATTERN,           PSYS_SRC_PATTERN_ANGLE_CONE,
+        PSYS_PART_START_COLOR,      &lt;1.0, 1.0, 1.0&gt;,
+        PSYS_PART_END_COLOR,        &lt;1.0, 1.0, 1.0&gt;,
+        PSYS_PART_START_ALPHA,      0.50,
+        PSYS_PART_END_ALPHA,        0.10,
+        PSYS_PART_START_SCALE,      &lt;particle_scale/2, particle_scale/2, 0.0&gt;,
+        PSYS_PART_END_SCALE,        &lt;particle_scale, particle_scale, 0.0&gt;,
+        PSYS_PART_MAX_AGE,          0.5,
+        PSYS_SRC_ACCEL,             &lt;0.0, 0.0, 0.0&gt;,
+        PSYS_SRC_TEXTURE,           source_texture_id,
+        PSYS_SRC_BURST_RATE,        5 / particle_count,
+        PSYS_SRC_ANGLE_BEGIN,       0.0,
+        PSYS_SRC_ANGLE_END,         source_cone * PI,
+        PSYS_SRC_BURST_PART_COUNT,  1,
+        PSYS_SRC_BURST_RADIUS,      0.0,
+        PSYS_SRC_BURST_SPEED_MIN,   particle_speed,
+        PSYS_SRC_BURST_SPEED_MAX,   particle_speed,
+        PSYS_SRC_MAX_AGE,           particle_lifetime / 2,
+        PSYS_SRC_OMEGA,             &lt;0.0, 0.0, 0.0&gt;
+        ]);
+}
+//    Known discrepancies:
+//    1) The original llMakeFire has random particle lifetime, which cannot be
+//       created in the current particle system via a single call
+//    2) The original llMakeFire has continual particle growth throughout its
+//       lifetime, ending well past the 4m limit of the current system, on long lived
+//       particles
+//    3) several values are not taken &#x27;verbatim&#x27; in the original particle system
+//       (velocity is not m/sec for instance, and number of particles seems to be
+//       wildly off), these are approximated loosely in this simulation via basic
+//       divisors, which may not work out the same in some scenarios
+//    4) There is no way to duplicate the offset from the old functions within the
+//       new particle system
+//    5) These effects do not &#x27;pump&#x27; like the older functions do,
+//       i.e. its a single, set property, calling it 10 times won&#x27;t cause
+//       10x as many particles, as the old ones did</code></pre></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-offset-46e653b3/">Template:LSL Function/offset</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|}}}_desc|offset relative to the {{#switch:{{{local|}}}|*|=prim&#x27;s|#default={{{local|}}}|object=object&#x27;s}} position and expressed in [[Viewer coordinate frames#Local|local coordinates]]{{#if:{{{dead|}}}|&amp;#32;and is completely ignored.}}{{{desc|}}}}}
+
+{{#vardefine:p_{{{1|}}}_hover|offset relative to the {{#switch:{{{local|}}}|*|=prim&#x27;s|#default={{{local|}}}|object=object&#x27;s}} position and expressed in local coordinates{{#if:{{{dead|}}}|&amp;#32;and is completely ignored.}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+{{#if:{{{dead|}}}|{{#vardefine:caveats|{{#var:caveats}}
+*{{LSLP|{{{1|}}}}} functionality {{#switch:{{{dead|}}}|never=has not been implemented|*|#default=has been removed}}, any value provided is completely ignored. For future proofing purposes, you should use a [[ZERO_VECTOR]] for it&#x27;s value.}}
+}}
+
+{{#if:{{{sim|}}}{{{region|}}}|
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+The requested position needs to be in the same region.}}
+}}
+
+{{#if:{{{noZ|}}}|
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+Only the {{LSLP|x}} and {{LSLP|y}} coordinates in {{LSLP|offset}} are important, the {{lSLP|z}} component is ignored.}}
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details></section>

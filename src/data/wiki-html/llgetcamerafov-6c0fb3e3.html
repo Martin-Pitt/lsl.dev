@@ -1,0 +1,40 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/float">float</a> value for the current camera's field of view (FOV), in radians, of the agent for which the task has permissions.</div></section>
+<section><h2 id="caveats">Caveats</h2><div class="wiki-line">Returns zero when permissions have not been granted.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// say the camera aspect ratio and field of view (FOV)
+integer has_perms = FALSE;
+default
+{
+    on_rez(integer a)
+    {
+        llResetScript();
+        has_perms = FALSE;
+    }
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TRACK_CAMERA);
+    }
+    run_time_permissions(integer permission)
+    {
+        has_perms = (permission == PERMISSION_TRACK_CAMERA);
+    }
+    touch_start(integer num_touches)
+    {
+        if (has_perms)
+        {
+            float aspect = llGetCameraAspect();
+            float fov = llGetCameraFOV();
+            llOwnerSay(&quot;aspect = &quot; + (string)aspect + &quot;  FOV = &quot; + (string)fov);
+        }
+        else
+        {
+            llRequestPermissions(llGetOwner(), PERMISSION_TRACK_CAMERA);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetCameraAspect/">llGetCameraAspect</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetCameraPos/">llGetCameraPos</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetCameraRot/">llGetCameraRot</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetCameraParams/">llSetCameraParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetCameraAtOffset/">llSetCameraAtOffset</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetCameraEyeOffset/">llSetCameraEyeOffset</a></div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-function-permission-4bc8750c/">LSL Function/permission</a>: <code>{{LSL_Function/permission|PERMISSION_TRACK_CAMERA}}</code></span></div></section>

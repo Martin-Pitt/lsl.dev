@@ -1,0 +1,153 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<h4 id="animation-triggered-sound-loop">Animation triggered sound loop</h4>
+<div class="wiki-line">--<a href="https://wiki.secondlife.com/wiki/User:BETLOG_Hax">BETLOG Hax</a> UTC+10: 20091011 1615 [SLT: 20091010 2315]</div>
+<div class="wiki-line">You want a specific animation (thats already handled by your AO) to play a special sound.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">This script does the sound bit. (LOOPS the sound FOR AS LONG AS you play the animation)</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line"><pre><code>//==============================================================
+// BETLOG Hax
+// UTC+10: 20091011 1601 [SLT: 20091010 2301]
+// For Eln Alter
+//----------------------------------
+//        **** LICENCE START ****
+// http://creativecommons.org/licenses/by-sa/3.0/
+//             Attribution licence:
+// You must:
+//    -Include this unaltered licence information.
+//    -Supply my original script with your modified version.
+//    -Retain the original scripts&#x27; SL permissions. [+c/+m/+t]
+//        -Exception for Eln ALter to protect the commercial viability of his animations&#x27; UUID
+// Or:
+//    -Link to the wiki URL from which you copied this script.
+//        https://wiki.secondlife.com/wiki/Animation_triggered_sound_loop
+//    -Document: &quot;Uses parts of &lt;scriptname&gt; by BETLOG Hax&quot;
+//        **** LICENCE END ****
+//==============================================================
+string      gAnimUUID       = &quot;&quot;;//***THIS HAS TO BE INSERTED BY YOU***
+string      gSound          = &quot;&quot;;//having a sound in contents will override
+//----------------------------------
+integer     gAnimState;
+//----------------------------------
+f_toggle(integer on)
+{   if(on)
+    {   string n = llGetInventoryName(INVENTORY_SOUND,0);
+        if(n!=&quot;&quot;)
+            gSound=n;
+        if(gSound!=&quot;&quot;)
+            llLoopSound(gSound,1.0);
+        else
+            llOwnerSay(&quot;ERROR: No sound defined in script and none in object contents.
+                Without one or the other I cant work.&quot;);
+    }
+    else
+        llStopSound();
+}
+//----------------------------------
+f_perms() //make it still operate when entering no script areas
+{   if(llGetAttached())
+        llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+}
+//==============================================================
+default
+{   state_entry()
+    {   if(llGetAttached())//DEV
+            f_perms();
+        else
+            llOwnerSay(&quot;You must be wearing me for this to operate.&quot;);
+    }
+    attach(key id) 
+    {   f_perms();
+    }
+    run_time_permissions(integer perm) 
+    {   if(perm &amp; PERMISSION_TAKE_CONTROLS)
+        {   f_toggle(gAnimState=FALSE);
+            llSetTimerEvent(0.444444);
+        }
+    }
+    control(key id, integer pressed, integer change) 
+    {   //make it still operate when entering no script areas
+    }
+    timer() 
+    {   if(-1&lt;llListFindList(llGetAnimationList(llGetOwner()), [(key)gAnimUUID]))
+        {   if(!gAnimState)
+                f_toggle(gAnimState=TRUE);
+        }
+        else if(gAnimState)
+            f_toggle(gAnimState=FALSE);
+    }
+}
+//==============================================================</code></pre></div>
+<h4 id="animation-triggered-sound-noloop">Animation triggered sound NOloop</h4>
+<div class="wiki-line">--<a href="https://wiki.secondlife.com/wiki/User:BETLOG_Hax">BETLOG Hax</a> UTC+10: 20091011 1615 [SLT: 20091010 2315]</div>
+<div class="wiki-line">You want a specific animation (thats already handled by your AO) to play a special sound.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">This script does the sound bit. (Plays the sound ONCE each time you start the animation)</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line"><pre><code>//==============================================================
+// BETLOG Hax
+// UTC+10: 20091011 1601 [SLT: 20091010 2301]
+// For Eln Alter
+//----------------------------------
+//        **** LICENCE START ****
+// http://creativecommons.org/licenses/by-sa/3.0/
+//             Attribution licence:
+// You must:
+//    -Include this unaltered licence information.
+//    -Supply my original script with your modified version.
+//    -Retain the original scripts&#x27; SL permissions. [+c/+m/+t]
+//        -Exception for Eln ALter to protect the commercial viability of his animations&#x27; UUID
+// Or:
+//    -Link to the wiki URL from which you copied this script.
+//          https://wiki.secondlife.com/wiki/Animation_triggered_sound_loop
+//    -Document: &quot;Uses parts of &lt;scriptname&gt; by BETLOG Hax&quot;
+//        **** LICENCE END ****
+//==============================================================
+string      gAnimUUID       = &quot;&quot;;//***THIS HAS TO BE INSERTED BY YOU***
+string      gSound          = &quot;&quot;;//having a sound in contents will override
+//----------------------------------
+integer     gAnimState;
+//----------------------------------
+f_perms() //make it still operate when entering no script areas
+{   if(llGetAttached())
+        llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+}
+//==============================================================
+default
+{   state_entry()
+    {   if(llGetAttached())//DEV
+            f_perms();
+        else
+            llOwnerSay(&quot;You must be wearing me for this to operate.&quot;);
+    }
+    attach(key id) 
+    {   f_perms();
+    }
+    run_time_permissions(integer perm) 
+    {   if(perm &amp; PERMISSION_TAKE_CONTROLS)
+            llSetTimerEvent(0.444444);
+    }
+    control(key id, integer pressed, integer change) 
+    {   //make it still operate when entering no script areas
+    }
+    timer() 
+    {   if(-1&lt;llListFindList(llGetAnimationList(llGetOwner()), [(key)gAnimUUID]))
+        {   if(!gAnimState)
+            {   string n = llGetInventoryName(INVENTORY_SOUND,0);//not ideal-meh
+                if(n!=&quot;&quot;)
+                    gSound=n;
+                if(gSound!=&quot;&quot;)
+                {   gAnimState=TRUE;
+                    llPlaySound(gSound,1.0);
+                }
+                else
+                    llOwnerSay(&quot;ERROR: No sound defined in script and none in object contents.
+                        Without one or the other I cant work.&quot;);
+            }
+        }
+        else if(gAnimState)
+            gAnimState=FALSE;
+    }
+}
+//==============================================================</code></pre></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-examples-d1aa2221/">Category:LSL Examples</a></div>

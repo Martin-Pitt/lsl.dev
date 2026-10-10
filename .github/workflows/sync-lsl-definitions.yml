@@ -43,6 +43,20 @@ jobs:
     - name: Regenerate catalog
       run: python scripts/import-datasets.py
 
+    # API pages (src/content/docs/{functions,events,constants}/*.mdx) belong to people: the
+    # generator only creates pages for new APIs and reports drift; it never rewrites a page.
+    # Signatures, parameters and other facts render from the catalog, so they update anyway.
+    - name: Create pages for new APIs and report drift
+      id: mdx
+      run: |
+        python scripts/generate-mdx.py | tee mdx-report.txt
+        {
+          echo 'report<<EOF'
+          cat mdx-report.txt
+          echo 'EOF'
+        } >> "$GITHUB_OUTPUT"
+        rm mdx-report.txt
+
     - name: Run data tests
       run: python -m unittest discover -s scripts/lib -p 'test_*.py'
 
@@ -57,12 +71,23 @@ jobs:
 
           Changes:
           - Updated `data/sources/lsl_definitions.yaml` from secondlife/lsl-definitions
-          - Regenerated `src/data/catalog.json`, `public/wiki-source` and `data/reports`
+          - Regenerated `src/data/catalog.json`, `src/data/wiki-html`, `data/derived`, `public/wiki-source` and `data/reports`
+          - Created MDX pages for new APIs only; existing pages are never rewritten
+
+          MDX generator report (orphaned pages and drift need a person; see docs/editing-api-pages.md):
+
+          ```
+          ${{ steps.mdx.outputs.report }}
+          ```
 
           The wiki snapshot is unchanged. Please review the changes before merging.
         branch: auto-update-lsl-definitions
         add-paths: |
           data/sources
           src/data
+          src/content/docs/functions
+          src/content/docs/events
+          src/content/docs/constants
+          data/derived
           public/wiki-source
           data/reports

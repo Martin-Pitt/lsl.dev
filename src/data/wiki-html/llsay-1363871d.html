@@ -1,0 +1,103 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Says the text supplied in string <code>msg</code> on channel supplied in integer <code>channel</code>. The message can be heard 20m away, usually (see caveats)</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><code>msg</code> can only be heard within 20 meters of the speaking prim (rather than the root). This is contrary to how the event <a href="/events/listen/">listen</a> works, where a <code>msg</code> can only be heard by any prim in the object if and only if the root prim is capable of hearing it.</li>
+<li>Some simulators (mostly event sims or linden-owned ones) have <code><a href="/functions/llGetEnv/">llGetEnv</a>("chat_range")</code> set to a value other than 20. On these sims:</li>
+<li><code>llSay(0, msg)</code> can be heard in a radius of <code><a href="/functions/llGetEnv/">llGetEnv</a>("chat_range")</code></li>
+<li><code>llSay(any_other_channel, msg)</code> can be heard in a radius of 20m</li>
+<li>as of 2023-03-26, <a href="http://maps.secondlife.com/secondlife/Hippotropolis/67/188/28" rel="noreferrer">Hippotropolis</a> (a linden meeting sim) has a chat range of 40m</li>
+<li><code>msg</code> can be a maximum of 1024 bytes. This can convey 1024 ASCII characters, or 256-512 multibyte UTF-8 characters such as <code>á</code> (2 bytes), <code>ℋ</code> (3 bytes) or <code>🧡</code> (4 bytes).</li>
+<li>If a multibyte character ends up on the 1024 byte boundary, it is discarded and not split into invalid bytes.</li>
+<li>A prim can <strong>not</strong> hear itself, this to prevent problems with recursion. It can however hear other prims within the same object. Use <a href="/functions/llMessageLinked/">llMessageLinked</a> instead for intra-prim messaging.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line">To avoid making your object spam its neighborhood, use <a href="/functions/llInstantMessage/">llInstantMessage</a>, <a href="/functions/llOwnerSay/">llOwnerSay</a> or <a href="/functions/llRegionSayTo/">llRegionSayTo</a>.</div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>Channel <code>0</code> is the <a href="/constants/PUBLIC_CHANNEL/">PUBLIC_CHANNEL</a>. Everyone can hear chat transmitted on this channel. All other channels are private channels (not sent to users, with the exception of <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>).</li>
+<li>Consider using <a href="/functions/llInstantMessage/">llInstantMessage</a>, <a href="/functions/llOwnerSay/">llOwnerSay</a>, or the <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a> for debugging purposes. If <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a> is used as <code>channel</code>, the script will say <code>msg</code> to the Script Warning/Error window.</li>
+<li>Note, however, that when using <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>, what <em>you</em> consider to be 'debugging messages' will still be seen by others as <em>scripting errors</em> indicated by the floating 'script error' icon.</li>
+<li>If one object 'says' something to another object (<em>e.g.</em>, a button that, when touched, turns on a lamp), it is a good idea to use a very negative channel, <em>e.g.</em>, <code>-5243212</code> but don't just use any number take a look at the <a href="https://wiki.secondlife.com/wiki/User-Defined_Protocols_%26_APIs">User-Defined Protocols &amp; APIs</a> and choose one that won't interfere with other protocols. If you are going to sell your script widely, please add it to the appropriate <a href="https://wiki.secondlife.com/wiki/LSL_Protocol#known-negative-chat-channels">known chat channels list</a> so others won't interfere with your product (do keep in mind you should build your product so that it handles interference appropriately).</li>
+</ul>
+<div class="wiki-line"><pre><code>    llSay(-5243212,&quot;turn on&quot;);</code></pre></div>
+<div class="wiki-line">:From at least September 2016 (see <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/4.0.9.320038">Release Notes/Second Life Release/4.0.9.320038</a>), viewers have been able to chat on negative channels, although chat from viewers is <a href="https://jira.secondlife.com/browse/BUG-41541" rel="noreferrer">limited to 254 characters</a>. (Chat from objects caps at 1024 bytes, whether the channel is negative or not). Negative channels were popular for script communications because the standard SL client was unable to chat directly on those channels (<code>/-xxxx message</code> would not chat <code>message</code> on channel <code>-xxxx</code>). The only way for a viewer to generate chat on negative channels prior to <a href="/functions/llTextBox/">llTextBox</a> was to use <a href="/functions/llDialog/">llDialog</a> which was limited to 24 bytes.</div>
+<ul>
+<li>Be aware that if you mistakenly use an integer bigger than the maximum or smaller than the minimum, SL will treat the literal number as a <code>float</code> and convert it implicitly to an out-of-range integer, resulting in <code>1</code>, <em>without</em> giving a script/syntax error (since this implicit conversion is legitimate). This means that all scripts listening to an out-of-range integer will be listening to channel 1 instead! (see also <a href="/functions/llListen/">llListen</a>).</li>
+<li>Objects with all-whitespace names (e.g., a space or a series of spaces) will appear as "(Unnamed)" if they emit chat via llSay, although this behaviour may vary in third-party viewers.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llListen/">llListen</a> — Ask for listen events</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llInstantMessage/">llInstantMessage</a> — Sends chat to the owner only (or to some other user only) to avoid spamming the <a href="/constants/PUBLIC_CHANNEL/">PUBLIC_CHANNEL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llOwnerSay/">llOwnerSay</a> — Sends chat to the owner only to avoid spamming the <a href="/constants/PUBLIC_CHANNEL/">PUBLIC_CHANNEL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRegionSay/">llRegionSay</a> — Sends chat region wide</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRegionSayTo/">llRegionSayTo</a> — Sends chat region wide to a specific avatar, or their attachments, or to a rezzed object of known UUID</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llShout/">llShout</a> — Sends chat limited to 100 meters</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llWhisper/">llWhisper</a> — Sends chat limited to 10 meters</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/listen/">listen</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; — Receives chat</div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/hello-avatar-56eeecb8/">Hello Avatar</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-chat-144925b5/">Template:LSL Function/chat</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}{{LSLC|Communications{{#var:lang}}}}}}}}&lt;/includeonly&gt;
+
+{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}{{LSLC|Chat{{#var:lang}}}}}}}}&lt;/includeonly&gt;
+
+{{#vardefine:fc-neither|{{#ifeq:{{#if:{{{np|}}}|*}}{{#if:{{{nd|}}}|*}}|**|*}}}}
+
+{{#if:{{#var:fc-neither}}|{{LSL Constants/Chat}}|
+{{#vardefine:constants_nb|{{LSL Constants/Chat|np={{{np|}}}|nd={{{nd|}}}|direct={{{direct|}}}}}
+{{#var:constants_nb}}}}}}
+
+{{#if:{{{np|}}}||{{Footnote|handle=channel_zero|Channel zero is also known as: {{#var:PUBLIC_CHANNEL}}, open chat, local chat and public chat|Channel zero is also known as: PUBLIC_CHANNEL, open chat, local chat and public chat}}}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{input|}}}|input|output}} {{LSLGC|Chat|chat}} channel, any integer value {{#if:{{#var:fc-neither}}|except zero{{Footnote|handle=channel_zero}} and {{#var:DEBUG_CHANNEL}}|{{#if:{{{np|}}}|except zero{{Footnote|handle=channel_zero}}}}{{#if:{{{nd|}}}|except {{#var:DEBUG_CHANNEL}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{input|}}}|input|output}} chat channel, any integer value {{#if:{{#var:fc-neither}}|except zero (PUBLIC_CHANNEL) and DEBUG_CHANNEL|{{#if:{{{np|}}}|except zero (PUBLIC_CHANNEL)}}{{#if:{{{nd|}}}|except DEBUG_CHANNEL}}}}}}
+
+{{#ifeq:{{#var:fc-neither}}{{{1|&lt;noinclude&gt;{{{1}}}&lt;/noinclude&gt;}}}{{{dialog|}}}|{{{1}}}|
+{{#vardefine:caveats|{{#var:caveats}}
+*Messages sent on {{#if:{{{np|}}}||channel zero{{Footnote|handle=channel_zero}} {{#if:{{{nd|}}}||and}}}} {{#if:{{{nd|}}}||{{#var:DEBUG_CHANNEL}}}} are throttled to a rate of &lt;200/10sec, per region, per owner/user.
+**Once the rate is exceeded, all following messages on {{#if:{{{np|}}}||channel zero {{#if:{{{nd|}}}||or}}}} {{#if:{{{nd|}}}||{{#var:DEBUG_CHANNEL}}}} will be dropped until the send rate is again below 200/10sec for the previous 10 sec. Dropped messages, despite being dropped still count against the limit.}}
+}}
+
+}}
+
+{{#if:{{{2|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|
+
+{{#if:{{{input|}}}|
+{{#vardefine:p_{{{2|none_}}}_desc|{{#if:{{{ph|}}}|{{{ph|}}}|{{{pd|}}}}} message}}
+|
+{{#if:{{{dialog|}}}|
+{{#vardefine:p_{{{2|none_}}}_desc|message to be displayed in the {{{dialog|}}}}}
+|
+{{#vardefine:p_{{{2|none_}}}_desc|message to be transmitted}}
+}}
+}}
+
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|-
+{{VarPair|p_{{{2|none_}}}_desc}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPair|examples}}
+|-
+{{VarPairTable|footnotes}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

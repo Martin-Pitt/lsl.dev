@@ -1,0 +1,176 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the name of <code>link</code> in link set</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If <strong>link</strong> is out of bounds, NULL_KEY is returned.</li>
+<li>The prim name attribute is limited to 63 bytes, any string longer then that will be truncated. This truncation does not always happen when the attribute is set or read.</li>
+<li>There is no corresponding <strong>llSetLinkName</strong>, use <code>llSetLinkPrimitiveParamsFast(link, [PRIM_NAME, name]);</code> instead.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Listen on channel 10 for a name; check if a prim with that name is part of this object</div>
+<div class="wiki-line"><pre><code>integer check_for_prim(string name)
+{
+    integer i = llGetNumberOfPrims();
+    for (; i &gt;= 0; --i)
+    {
+        if (llGetLinkName(i) == name)
+        {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+default
+{
+    state_entry()
+    {
+        llListen(10, &quot;&quot;, llGetOwner(), &quot;&quot;);
+    }
+    listen(integer chan, string obj, key id, string msg)
+    {
+        if (check_for_prim(msg))
+        {
+            llOwnerSay(&quot;found a linked prim named \&quot;&quot; + msg + &quot;\&quot;&quot;);
+        }
+        else
+        {
+            llOwnerSay(&quot;this object does not have any linked prims named \&quot;&quot; + msg + &quot;\&quot;&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><pre><code>integer getLinkWithName(string name) {
+    integer i = llGetLinkNumber() != 0;   // Start at zero (single prim) or 1 (two or more prims)
+    integer x = llGetNumberOfPrims() + i; // [0, 1) or [1, llGetNumberOfPrims()]
+    for (; i &lt; x; ++i)
+        if (llGetLinkName(i) == name) 
+            return i; // Found it! Exit loop early with result
+    return -1; // No prim with that name, return -1.
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLinkKey/">llGetLinkKey</a> — Gets the instance UUID of the link</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectName/">llGetObjectName</a> — Get the prims name</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetObjectName/">llSetObjectName</a> — Set the prims name</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectDesc/">llGetObjectDesc</a> — Get the prims description</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetObjectDesc/">llSetObjectDesc</a> — Set the prims description</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectDetails/">llGetObjectDetails</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Prim_Attribute_Overloading">Prim Attribute Overloading</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-600"><a href="/wiki/template-issues-svc-600-2c098462/">Template:Issues/SVC-600</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-600|[[llGetLinkKey]] returns the wrong result when passed [[LINK_THIS]]|type=bug|resolution=fixed}}</code></pre></details><p><a href="/wiki/template-lsl-function-link-8049cdf0/">Template:LSL Function/link</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:header|{{#var:header}}
+{{#switch:{{#if:{{{nc|}}}|Template|{{NAMESPACE}}}}|Template=|User=|}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Link{{#var:lang}}}}{{#if:{{{mode|}}}|{{LSLC|Link/{{{mode}}}{{#var:lang}}}}}}
+}}}}}}
+&lt;/includeonly&gt;
+
+{{#if:{{{nlf|}}}{{{noconst|}}}{{#var:link_constants}}||
+{{#vardefine:constants_nb|
+{{{!}} style={{{ostyle|}}}
+{{!}}- valign=&quot;top&quot;
+{{!}}
+{{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! colspan=&quot;2&quot; {{!}}Flag
+!Description
+{{!}}-
+{{!}} {{LSL Const|LINK_ROOT|integer|1|c={{{verb|refers to}}} the root prim in a multi-prim linked set}}
+{{!}} {{#var:value}}
+{{!}} {{{verb|refers to}}} the [[Link#Root_Prim|root]] prim in a multi-prim linked set{{Footnote|handle=LINK_ROOT|LINK_ROOT does not work on single [[prim]] [[object|objects]]. Unless there is an avatar sitting on the [[object]].}}
+{{#if:{{{nogroup|}}}||{{!}}-
+{{!}} {{LSL Const|LINK_SET|integer|-1|c={{{verb|refers to}}} all prims}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LINK_ALL_OTHERS|integer|-2|c={{{verb|refers to}}} all other prims}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}}}
+{{!}}}
+{{!}}
+{{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! colspan=&quot;2&quot; {{!}}Flag
+!Description
+{{!}}-
+{{#if:{{{nogroup|}}}||{{!}} {{LSL Const|LINK_ALL_CHILDREN|integer|-3|c={{{verb|refers to}}} all children, (everything but the root)}}
+{{!}} {{#var:value}}
+{{!}} {{{verb|refers to}}} all children, (everything but the [[Link#Root_Prim|root]])}}
+{{!}}-
+{{!}} {{LSL Const|LINK_THIS|integer|-4|c={{{verb|refers to}}} the prim the script is in}}
+{{!}} {{#var:value}}
+{{!}} {{{verb|refers to}}} the [[prim]] the [[script]] is in
+{{!}}}
+{{!}}}
+{{#var:constants_nb}}}}
+{{#vardefine:link_constants|*}}
+}}
+
+{{#vardefine:p_{{{1|}}}_desc|[[Link]] number ({{#if:{{{nounlinked|}}}||0: {{HoverText|unlinked|When an object is made up of only one prim, and there are no avatars seated upon it, the link number of the (root) prim is zero.}},&amp;#32;}}1: {{HoverText|[[Link#Root_Prim|root]] prim|When an object is made up of multiple prims or there is an avatar seated upon the object, the root prim&#x27;s link number is one}}, &amp;gt;1: child prims{{#if:{{{noavatar|}}}||&amp;#32;and {{HoverText|seated avatars|Avatars sitting on objects are assigned link numbers. They are always greater than prim link numbers.}}}}) {{#if:{{{nlf|}}}||or a &lt;code&gt;LINK_*&lt;/code&gt; [[flag]]}}{{{2|}}}&amp;#32;}}
+{{#vardefine:p_{{{1|}}}_hover|Link number ({{#if:{{{nounlinked|}}}||0: unlinked,&amp;#32;}}1: root prim, &amp;gt;1: child prims{{#if:{{{noavatar|}}}||&amp;#32;and seated avatars}}) {{#if:{{{nlf|}}}||or a LINK_* flag}}{{#if:{{{3|}}}|{{{3|}}}|{{{2|}}}}}&amp;#32;}}
+
+{{#if:{{{nocaveats|}}}||{{#if:{{{noavatar|}}}|
+{{#vardefine:caveats|
+*{{LSLP|{{{1|}}}}} cannot be a {{HoverText|seated avatar|Avatars sitting on objects are assigned link numbers. They are always greater than link numbers of prims.}}.
+{{#var:caveats}}}}
+}}{{#if:{{{nogroup|}}}|
+{{#vardefine:caveats|
+*{{LSLP|{{{1|}}}}} needs to be either an actual [[llGetLinkNumber|link number]] or a link constants that equate to a single prim, such as [[LINK_ROOT]] and [[LINK_THIS]].
+**[[LINK_SET]], [[LINK_ALL_CHILDREN]] and [[LINK_ALL_OTHERS]] will not work.
+{{#var:caveats}}}}
+}}}}
+
+{{#if:{{#var:link_stuff}}||
+{{#vardefine:link_stuff|*}}
+{{#vardefine:notes|
+&lt;h3&gt;Link Numbers&lt;/h3&gt;
+Each prim that makes up an [[object]] has an address, a link number. To access a specific [[prim]] in the [[object]], the [[prim]]&#x27;s link number must be known. In addition to [[prim|prims]] having link numbers, avatars seated upon the [[object]] do as well.
+* If an [[object]] consists of only one [[prim]], and there are no avatars seated upon it, the ([[Link#Root_Prim|root]]) [[prim]]&#x27;s link number is zero.
+* However, if the [[object]] is made up of multiple prims or there is an avatar seated upon the [[object]], the [[Link#Root_Prim|root]] [[prim]]&#x27;s link number is one.
+
+When an avatar sits on an [[object]], it is added to the end of the link set and will have the largest link number. In addition to this, while an avatar is seated upon an object, the object is unable to link or unlink prims without [[llUnSit|unseating]] all avatars first.
+&lt;h4&gt;Counting Prims &amp; Avatars&lt;/h4&gt;
+There are two functions of interest when trying to find the number of prims and avatars on an object.
+* &lt;code&gt;[[llGetNumberOfPrims]]()&lt;/code&gt; - Returns the number of [[prim|prims]] and seated avatars.
+* &lt;code&gt;[[llGetObjectPrimCount]]([[llGetKey]]())&lt;/code&gt; - Returns only the number of [[prim|prims]] in the [[object]] but will return zero for attachments.
+
+&lt;syntaxhighlight lang=&quot;lsl2&quot;&gt;integer GetPrimCount() { //always returns only the number of prims
+    if(llGetAttached())//Is it attached?
+        return llGetNumberOfPrims();//returns avatars and prims but attachments can&#x27;t be sat on.
+    return llGetObjectPrimCount(llGetKey());//returns only prims but won&#x27;t work on attachments.
+}&lt;/syntaxhighlight&gt;See [[llGetNumberOfPrims]] for more about counting prims and avatars.
+
+&lt;h4&gt;Errata&lt;/h4&gt;
+If a script located in a [[Link#Child_Prim|child]] prim erroneously attempts to access link 0, it will get or set the property of the linkset&#x27;s [[Link#Root_Prim|root]] prim.  This bug ({{jira|BUG-5049}}) is preserved for broken legacy scripts. {{PBR}}
+{{#var:notes}}
+}}
+
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetLinkNumber]]|Returns the link number of the [[prim]] the script is in.}}}}
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|}}}_desc}}
+|-
+{{VarPairTable|also_functions}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPair|notes}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-limits-4dd687a9/">Template:LSL Function/limits</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{LSL DefineRow||[[Limits{{#var:lang}}{{{1|}}}|Limits]]|SL limits and constrictions}}
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPairTable|also_articles}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

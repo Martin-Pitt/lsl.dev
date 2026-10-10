@@ -1,0 +1,98 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>name</code> is not <a href="/functions/llGetInventoryPermMask/">copy, mod, trans</a> then the return is <a href="/constants/NULL_KEY/">NULL_KEY</a>.<br/>Use <a href="/functions/llGetInventoryType/">llGetInventoryType</a> instead of this function to verify the existence of inventory.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/key">key</a> that is the <a href="https://wiki.secondlife.com/wiki/UUID">UUID</a> of the inventory <code>name</code></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Inventory items are records that usually <em>point</em> to assets, but they are not the actual assets.</li>
+<li>Multiple inventory items can point to the same asset and return the same key.</li>
+<li>Some newly created inventory entries get default keys until they are edited and saved:</li>
+<li>Newly created notecard entries use <a href="/constants/NULL_KEY/">NULL_KEY</a> at present, until they are edited and saved.</li>
+<li>Newly created script entries point to the "<a href="/wiki/hello-avatar-56eeecb8/">Hello Avatar</a>" script ("d0d40b7c-e32b-3bcb-3346-2be8470093c0" at this writing, not a guaranteed default) until they are edited and saved.</li>
+<li>Most other inventory entries are given unique asset keys at creation time.</li>
+<li>When an asset is "edited" a new asset key is assigned to the edit. The inventory item used to open the asset for editing is updated with the new asset key.</li>
+<li>No other inventory items that share the original asset are updated with the new asset key.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Put this script in an empty prim, and drag a full-perm texture into the prim&#x27;s contents to find out its UUID
+default
+{
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_INVENTORY)    // if there has been a change to the prim&#x27;s contents ...
+        {
+            string name = llGetInventoryName(INVENTORY_TEXTURE, 0);
+            if (name)        // if a texture exists ...
+            {
+                key uuid = llGetInventoryKey(name);
+                if (uuid)    // if the uuid is valid ...
+                    llOwnerSay( &quot;The UUID of &#x27;&quot; + name + &quot;&#x27; is &quot; + (string) uuid);
+                else         // texture was not full-perm
+                    llOwnerSay( &quot;The UUID of &#x27;&quot; + name + &quot;&#x27; could not be determined&quot;);
+            }
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>string item = &quot;Default&quot;;
+
+default
+{
+    state_entry()
+    {
+        llOwnerSay(&quot;Touch to get information about \&quot;&quot; + item + &quot;\&quot;.&quot;);
+    }
+
+    touch_start(integer total_number)
+    {
+        integer type = llGetInventoryType(item);
+        integer index = llListFindList([ INVENTORY_NONE, 
+            INVENTORY_TEXTURE, INVENTORY_SOUND, INVENTORY_LANDMARK, INVENTORY_CLOTHING, 
+            INVENTORY_OBJECT, INVENTORY_NOTECARD, INVENTORY_SCRIPT, INVENTORY_BODYPART, 
+            INVENTORY_ANIMATION, INVENTORY_GESTURE], [type]);
+        string name = llList2String([&quot;does not exist&quot;, 
+            &quot;texture&quot;, &quot;sound&quot;, &quot;landmark&quot;, &quot;clothing&quot;,
+            &quot;object&quot;, &quot;notecard&quot;, &quot;script&quot;, &quot;body part&quot;,
+            &quot;animation&quot;, &quot;gesture&quot;], index);
+
+        llOwnerSay(&quot;Type: &quot; + name);
+        
+        if(type == INVENTORY_NONE)
+            return;
+        
+        integer owner_perms = llGetInventoryPermMask(item, MASK_OWNER);
+        list perms;
+        if(owner_perms &amp; PERM_COPY)
+            perms += &quot;Copy&quot;;
+        
+        if(owner_perms &amp; PERM_MODIFY)
+            perms += &quot;Modify&quot;;
+        
+        if(owner_perms &amp; PERM_TRANSFER)
+            perms += &quot;Transfer&quot;;
+
+        if(owner_perms &amp; PERM_MOVE)
+            perms += &quot;Move&quot;;
+        
+        llOwnerSay(&quot;Perms: &quot; + llList2CSV(perms));
+        
+        integer temp = PERM_COPY | PERM_MODIFY | PERM_TRANSFER;
+        if((owner_perms &amp; temp) != temp)
+            return;
+
+        llOwnerSay(&quot;Key: &quot; + (string)llGetInventoryKey(item));
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>The UUID returned is that of the asset to which the inventory item points, it is not the UUID of the inventory item itself. The assets themselves are immutable (they never change, they are only ever created and deleted); this allows multiple inventory handles to refer to the same asset without having to duplicate the asset. When it appears an asset is being modified, it is saved as a new asset. The consequence of this is that multiple copies of items in inventory all share the same asset UUID.</li>
+<li>It is still possible to inspect the UUID of any animation in inventory by triggering it and using <a href="/functions/llGetAnimationList/">llGetAnimationList()</a> like so:</li>
+</ul>
+<div class="wiki-line"><pre><code>llStartAnimation(&quot;myAnim&quot;);
+llOwnerSay(&quot;myAnim&#x27;s UUID is &quot; + llList2String(llGetAnimationList(llGetPermissionsKey()), -1));</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryAcquireTime/">llGetInventoryAcquireTime</a> — Returns the time the item was added to the prim's inventory</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryName/">llGetInventoryName</a> — Returns the inventory item's name</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryType/">llGetInventoryType</a> — Tests to see if an inventory item exists and returns its type</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryNumber/">llGetInventoryNumber</a> — Returns the number of items of a specific type in inventory</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryPermMask/">llGetInventoryPermMask</a> — Returns the inventory item's permissions</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryCreator/">llGetInventoryCreator</a> — Returns the inventory item's creator</div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li>0.2 - Introduced during the closed beta period.</li>
+<li>1.2 - Restricted to full perm inventory items only.</li>
+<li>1.24 - Objects and scripts no longer return their actual UUID but a hash (i.e. pseudo UUID which is consistent with the object/script) instead. -- <a href="https://jira.secondlife.com/browse/SVC-3670" rel="noreferrer">SVC-3670</a></li>
+</ul>
+<div class="wiki-line"><sup>The preceding version numbers are approximations.</sup></div></section>

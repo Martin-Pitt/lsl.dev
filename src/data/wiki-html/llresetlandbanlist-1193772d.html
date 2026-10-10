@@ -1,0 +1,94 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Removes all residents from the land ban list.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// This is not a complete solution, requires full avatar names to work - even for unbanning someone!
+// This is meant only as an example of the land ban and pass management functions.
+// free to copy, use, modify, distribute - just don&#x27;t ask me to debug your modified code. ;-)
+// 
+// Commands are:
+//   /5 ban:full_avatar_name
+//   /5 tempban:full_avatar_name
+//   /5 unban:full_avatar_name
+//   /5 pass:full_avatar_name
+//   /5 unpass:full_avatar_name
+//   /5 clearban
+//   /5 clearpass
+
+string command;
+
+default
+{
+    state_entry()
+    {
+        llListen(5, &quot;&quot;, llGetOwner(), &quot;&quot;);
+    }
+    
+    on_rez(integer param)
+    {
+        llResetScript();
+    }
+
+    listen(integer chan, string name, key id, string message)
+    {
+        if (command != &quot;&quot;)
+        {
+            llOwnerSay(&quot;Sorry, still processing last command, try again in a second.&quot;);
+        }
+        
+        list args = llParseString2List(message,[&quot;:&quot;],[]);
+        command = llToLower(llList2String(args,0));
+        
+        if (command == &quot;clearbans&quot;)
+        {
+            llResetLandBanList();
+        }
+        if (command == &quot;clearpass&quot;)
+        {
+            llResetLandPassList();
+        }
+        else
+        {
+            llSensor(llList2String(args,1),NULL_KEY,AGENT,96,PI);
+        }
+    }
+    
+    no_sensor()
+    {
+        command = &quot;&quot;;
+    }
+    
+    sensor(integer num)
+    {
+        integer i;
+        for (i=0; i&lt; num; ++i)
+        {
+            if (command == &quot;ban&quot;)
+            {
+                // Ban indefinetely 
+                llAddToLandBanList(llDetectedKey(i),0.0);
+            }
+            if (command == &quot;tempban&quot;)
+            {
+                // Ban for 1 hour.
+                llAddToLandBanList(llDetectedKey(i),1.0);
+            }
+            if (command == &quot;unban&quot;)
+            {
+                llRemoveFromLandBanList(llDetectedKey(i));
+            }
+            if (command == &quot;pass&quot;)
+            {
+                // Add to land pass list for 1 hour
+                llAddToLandPassList(llDetectedKey(i),1.0);
+            }
+            if (command == &quot;unpass&quot;)
+            {
+                llRemoveFromLandPassList(llDetectedKey(i));
+            }
+        }
+        command = &quot;&quot;;
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llAddToLandBanList/">llAddToLandBanList</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llAddToLandPassList/">llAddToLandPassList</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRemoveFromLandBanList/">llRemoveFromLandBanList</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRemoveFromLandPassList/">llRemoveFromLandPassList</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llResetLandPassList/">llResetLandPassList</a></div></div></section>

@@ -1,0 +1,34 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets the <a href="https://wiki.secondlife.com/wiki/Streaming_Music">streaming audio</a> URL for the parcel object is on</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">The object owner must also be the land owner. If the land is deeded to a group the object will need to be deeded to the same group for this function to work.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// This script changes the music URL based on time of day.
+
+integer night = FALSE;
+string nighturl = &quot;http://205.188.215.228:8006&quot;;
+string dayurl = &quot;http://208.122.59.30:7156&quot;;
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(10);
+    }
+    
+    timer()
+    {
+        vector pos = llGetSunDirection();
+        
+        if ((pos.z &lt; -.75) != night)
+        {
+            night = !night;
+            if (night)
+            {
+                llSetParcelMusicURL(nighturl);
+            }
+            else
+            {
+                llSetParcelMusicURL(dayurl);   
+            }
+        } 
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelMusicURL/">llGetParcelMusicURL</a> — Gets the music stream URL for the parcel object is on</div></div></section>

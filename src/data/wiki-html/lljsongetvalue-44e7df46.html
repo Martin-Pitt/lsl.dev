@@ -1,0 +1,92 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Gets the value indicated by specifiers from the <a href="http://json.org" rel="noreferrer">json</a> string.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">When the input is invalid or no result can be found this function returns <a href="/constants/JSON_INVALID/">JSON_INVALID</a>. If the result is <code>null</code> the function returns <a href="/constants/JSON_NULL/">JSON_NULL</a>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> made by parsing <strong>json</strong>, a string representing json and traversing as specified by <strong>specifiers</strong>.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">See <a href="/wiki/json-usage-in-lsl-6a7f5995/">Json usage in LSL</a></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Manual definition of JSON syntax within LSL does not always parse in the expected way, so be careful to avoid using syntax characters anywhere other than where needed (for example, inside a string.); alternately escape the syntax character and use <a href="/functions/llUnescapeURL/">llUnescapeURL</a> on the retrieved string to convert it back - See <a href="#bugs"></a>.</li>
+</ul>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-kbwarning-e5dd1efa/">KBwarning</a>: <code>{{KBwarning|The below comment in regards to speed cannot be assumed to be true on all server versions and in all environments. &#x27;&#x27;&#x27;Always test execution speed claims for yourself.&#x27;&#x27;&#x27;}}</code></span></div>
+<ul>
+<li>As of Second Life Server 2024-06-11.9458617693, benchmark testing in a 99%+ scripts run environment resulted in the following conclusions with a 3-element array cast to either JSON or CSV:</li>
+<li><a href="/functions/llJsonGetValue/">llJsonGetValue</a> takes approximately 2-3 ms per call to execute regardless of depth, making it a faster option for reading a single element from a dataset.</li>
+<li><a href="/functions/llParseStringKeepNulls/">llParseStringKeepNulls</a> takes approximately 5 ms to execute, while each subsequent <a href="/functions/llList2String/">llList2String</a> takes approximately 0.5 ms to execute, making it a faster option for reading more than 2 elements from a dataset.</li>
+<li>This function will convert the occurrence of a <code>\n</code> to a line feed and a <code>\t</code> to <code>U+0009</code>.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default {
+    state_entry() {
+     
+     //below is an example of a JSON=string with a key called &quot;key&quot; and a value &quot;val&quot; 
+     string json1 = &quot;{\&quot;key\&quot;:\&quot;val\&quot;}&quot;;
+     llSay(0, llJsonGetValue( json1, [&quot;key&quot;]));//returns &quot;val&quot; in localchat
+
+     string json2 = &quot;{\&quot;mansBestFriend\&quot;:\&quot;dog\&quot;}&quot;;
+     llSay(0, llJsonGetValue( json2, [&quot;mansBestFriend&quot;]));//returns &quot;dog&quot; in localchat
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>JGetValTest(){
+    string j=&quot;[[1,2],[4,5,6]]&quot;;            //JSON may be written directly as a string like this in sl.
+    string k;                              //this will change with each command below;
+    k=llJsonGetValue(j,[]);                //returns the whole array of a JSON. It might just be one entry or a whole nested array or whole nested object.
+    //if &quot;j&quot; is a single JSON_STRING, this may return what the string represents as a JSON within a string; a JSON_NUMBER , JSON_TRUE, TRUE ...
+
+    k=llJsonGetValue(&quot;\&quot;3.14\&quot;&quot;,[]);       //==k=&quot;3,14&quot; (float that was stored in a JSON_STRING within a JSON. and not as JSON_NUMBER for no good reason)
+    k=llJsonGetValue(&quot;\&quot;TRUE\&quot;&quot;     ,[]);  //==k=&quot;TRUE&quot; (the value was stored as a JSON_STRING and is thus returned verbatim)
+    k=llJsonGetValue(j,[0]);               //returns only the first entry (at offset 0). An entry can be any JSON type,
+                                           //each entry being separated by a comma from other entries.
+                                           //array and object entries may contain multiple comma separated entries within them.
+    k=llJsonGetValue(j,[1]);//returns only the second entry... (all the above still applies) k=&quot;[4,5,6]&quot;;
+    k=llJsonGetValue(llJsonGetValue(j,[1]),[2]);
+                                           //instead of getting an entry from &quot;j&quot; we get a sub-entry from llJsonGetValue(j,[1]), 
+                                           //assuming the sub-entry is a JSON_ARRAY. It returns the 3rd sub-entry of the second entry, 
+                                           //that is an array with 3 entries. it would make k=&quot;6&quot;. 
+                                           //it will return JSON_INVALID if there is no 3rd entry in the 2nd sub-array,
+                                           //or no 2nd sub-array.
+    k=llJsonGetValue(j,[1,2]);             //Shorter way to do the same as in the previous example.
+    k=llJsonGetValue(&quot;true&quot;,[]);           //Sets k to JSON_TRUE
+    k=llJsonGetValue(&quot;True&quot;,[]);           //Sets k to JSON_INVALID because the JSON constant for &#x27;true&#x27; is all lower case
+    k=llJsonGetValue(&quot;TRUE&quot;,[]);           //Sets k to JSON_INVALID because the JSON constant for &#x27;true&#x27; is all lower case
+    k=llJsonGetValue(JSON_TRUE,[]);        //Sets k to JSON_INVALID. The JSON_xxxx constants are not supposed to be part of
+                                           // a JSON string, just values to test against.
+}</code></pre></div>
+<div class="wiki-line">See also <a href="/functions/llJsonValueType/">llJsonValueType</a> for examples where the value type is checked before getting the value as that type.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llList2Json/">llList2Json</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llJson2List/">llJson2List</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llJsonSetValue/">llJsonSetValue</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llJsonValueType/">llJsonValueType</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Typecast">Typecast</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13-05-20-276191"> 20/05/2013 </a></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-issues-f22f2c92/">Template:Issues</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#ifeq:{{NAMESPACE}}|Template|{{Multi-lang|&lt;includeonly&gt;category=Jira Issues&lt;/includeonly&gt;}}}}&lt;includeonly&gt;{{#if:
+
+The purpose of the following is to swap out the old code and use a new template without breaking the old templates.
+{{#if:{{{status|}}}{{{resolution|}}}|
+{{#vardefine:last_issue|{{{{{debugging|Issue/Version 1}}}|{{{1}}}|{{{2|}}}
+|style={{{style|}}}
+|status={{{status|}}}
+|resolution={{{resolution|}}}
+|priority={{{priority|}}}
+|type={{{type|}}}
+|dnc={{{dnc|}}}
+|fc={{{fc|}}}
+}}}}
+|
+{{#vardefine:last_issue|{{{{{debugging|Issue/Version 1}}}|{{{1}}}|{{{2|}}}
+|style={{{style|}}}
+|status={{{status|}}}
+|resolution={{{resolution|}}}
+|priority={{{priority|}}}
+|type={{{type|}}}
+|dnc={{{dnc|}}}
+|fc={{{fc|}}}
+}}}}
+}}
+
+{{#vardefine:issues{{#var:direction}}|{{#var:issues{{#var:direction}}}}
+{{#var:last_issue}}}}
+
+{{#ifexpr:{{#var:count-last-issue|0}} &gt; 0|
+{{#vardefine:bugs{{#var:direction}}|{{#var:bugs{{#var:direction}}}}
+{{#var:last_issue}}}}
+}}
+
+}}{{#if:{{{1|}}}|{{#ifeq:{{NAMESPACE}}|Template|{{IssueTable}}[[Category:Jira Issues{{#var:lang}}|{{#explode:{{{1}}}|-|0}}-{{padleft:{{#explode:{{{1}}}|-|1}}|6|0}}]]}}}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{documentation}}&lt;/noinclude&gt;</code></pre></details></section>

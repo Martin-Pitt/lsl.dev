@@ -1,0 +1,56 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/vector">vector</a> that is the color vector between <code>start</code> and <code>end</code> depending upon <code>percentage</code> if the vector between can be calculated, else returns <code><span class="wiki-template"><a href="/wiki/template-lsl-vr-76baeca7/">LSL VR</a>: <code>{{LSL VR|-1|-1|-1}}</code></span></code>.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line"><pre><code>//  Created by Ugleh Ulrik
+
+vector GradientValue(vector start, vector end, float percentage)
+{
+    list colorParams = [start.x, start.y, start.z, end.x, end.y, end.z];
+
+    if (percentage &lt; 0.0
+        || 100.0 &lt; percentage
+        || llListStatistics(LIST_STAT_MIN, colorParams) &lt; 0.0
+        || 1.0 &lt; llListStatistics(LIST_STAT_MAX, colorParams))
+    {
+        return &lt;-1, -1, -1&gt;;
+    }
+
+    percentage /= 100.0;// convert to decimal for further use
+
+    return start + percentage*(end - start);
+}</code></pre></div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>vector GradientValue(vector start, vector end, float percentage)
+{
+    list colorParams = [start.x, start.y, start.z, end.x, end.y, end.z];
+
+    if (percentage &lt; 0.0
+        || 100.0 &lt; percentage
+        || llListStatistics(LIST_STAT_MIN, colorParams) &lt; 0.0
+        || 1.0 &lt; llListStatistics(LIST_STAT_MAX, colorParams))
+    {
+        return &lt;-1, -1, -1&gt;;
+    }
+
+    percentage /= 100.0;
+
+    return start + percentage*(end - start);
+}
+
+default
+{
+    state_entry()
+    {
+        vector maroon = &lt;0.522, 0.078, 0.294&gt;;
+        vector teal   = &lt;0.224, 0.800, 0.800&gt;;
+
+        vector ColorBetween = GradientValue(maroon, teal, 50.0);
+//             ColorBetween = &lt;0.373, 0.439, 0.547&gt;
+
+        if (ColorBetween != &lt;-1, -1, -1&gt;)
+            llSetColor(ColorBetween, ALL_SIDES);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetColor/">llGetColor</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLinkPrimitiveParams/">llGetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetColor/">llSetColor</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLinkColor/">llSetLinkColor</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/color-and-scripting-0f65e2cc/">Color and Scripting</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/category-lsl-color-798a2282/">Color</a></div></div></section>

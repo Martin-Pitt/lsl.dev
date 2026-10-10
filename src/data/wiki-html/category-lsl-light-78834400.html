@@ -1,0 +1,76 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Prim}}</code></span></div>
+<h2 id="properties-of-light">Properties of light</h2>
+<div class="wiki-line">The quality of a <a href="/constants/PRIM_POINT_LIGHT/">PRIM_POINT_LIGHT</a> cast by an object is determined by five parameters found on the <a href="/wiki/building-tools-609cb149/#features-tab">features tab</a> of the <a href="/wiki/building-tools-609cb149/#edit-tool">edit tool</a>, which can also be set by script commands. The controls appear in the dialog in the same order as used in the script commands (see example below).</div>
+<div class="wiki-line">The first is a simple <strong>on/off switch</strong>: either the object is a <a href="/constants/PRIM_POINT_LIGHT/">PRIM_POINT_LIGHT</a> source (checkbox activated or <a href="/constants/TRUE/">TRUE</a>) or it isn't. The light's <strong>color</strong> is set by a color picker (dialog) or as an RGB vector (script) as usual. The <strong>intensity</strong> of light is a measurement of how strong in absolute terms the light is. This is a floating-point number ranging from 0.0 to 1.0, where 1.0 is fully on and 0.0 is equivalent to "off."</div>
+<div class="wiki-line">The two remaining settings are trickier, because their effects are quite subtle and they do interact with each other. <strong>Radius</strong> is the distance that light will travel from the centre of the object before it blends into and becomes indistinguishable from the scene's natural ambient lighting. This is a floating-point number measured in metres. <strong>Falloff</strong> is the extent to which light "decays" as it travels away from the object. This is a floating-point number ranging from 0.01 to 2.0, where 2.0 is an abrupt falling-off of intensity and 0.01 is relatively little change over distance. </div>
+<div class="wiki-line">To illustrate how these settings work, imagine&mdash;or better still: build&mdash;a hollow grey cube 8 by 8 by 8 metres on the inside, with a light source hovering in the middle of one end-wall, and yourself standing below the light source looking at the opposite wall. (Hint: if you do actually build this, turn the sun off while you are testing; you may also need to close the curtains and extinguish all lights in the real-life room you're working in.)</div>
+<div class="wiki-line">While the <strong>radius</strong> is less than 4 metres (i.e. under halfway to the opposite wall), it remains fairly dark. Turning the falloff up to 2.0 (maximum decay) makes the room somewhat darker.</div>
+<div class="wiki-line">As the <strong>radius</strong> approaches 8 metres (the distance to the wall), the room is only slightly brighter; at maximum <strong>falloff</strong>, the room is about as dark as it was when the <strong>radius</strong> was 4 metres and <strong>falloff</strong> was 0.01.</div>
+<div class="wiki-line">Only after the <strong>radius</strong> is greater than the distance to the opposite wall does it become significantly brighter. The effect of <strong>falloff</strong> is greater: when it is 0.01, direct illumination begins to make concentric circles on the wall, centred on the point where it intersects the light's axis; at the maximum of 2.0 the room is again as dark as it was when the <strong>radius</strong> was only 4 metres.</div>
+<h2 id="controlling-light-sources">Controlling light sources</h2>
+<div class="wiki-line">An example - How to generate, switch and change light from LSL:</div>
+<div class="wiki-line"><pre><code>integer isLightTurnedOn;
+ 
+default
+{
+    touch_start(integer total_number)
+    {
+//      toggle isLightTurnedOn between TRUE and FALSE
+        isLightTurnedOn = !isLightTurnedOn;
+ 
+        if (isLightTurnedOn)
+        {
+            llSetPrimitiveParams([
+                PRIM_FULLBRIGHT, ALL_SIDES, FALSE,
+                PRIM_POINT_LIGHT, FALSE, ZERO_VECTOR, 1.0, 10.0, 0.6]);
+        }
+        else
+        {
+            vector COLOR_ORANGE  = &lt;1.000, 0.522, 0.106&gt;;
+ 
+            llSetPrimitiveParams([
+                PRIM_FULLBRIGHT, ALL_SIDES, TRUE,
+                PRIM_POINT_LIGHT, TRUE, COLOR_ORANGE, 1.0, 10.0, 0.6]);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">The following example shows how to create a configurable light that turns itself on and off when touched.  The light's properties can be edited by changing the values defined at the top of the script.  This script illustrates the lighting attributes <a href="/constants/PRIM_POINT_LIGHT/">PRIM_POINT_LIGHT</a>, <a href="/constants/PRIM_FULLBRIGHT/">PRIM_FULLBRIGHT</a> and <a href="/constants/PRIM_GLOW/">PRIM_GLOW</a>.</div>
+<div class="wiki-line"><pre><code>// Touch the object to light it up.
+// Lighting is configurable.
+
+integer light_s    = TRUE;
+vector  lightcolor = &lt;1.0, 0.75, 0.5&gt;;
+float   intensity  = 1.0;             // 0.0 &lt;= intensity &lt;= 1.0
+float   radius     = 10.0;            // 0.1 &lt;= radius &lt;= 20.0
+float   falloff    = 0.01;            // 0.01 &lt;= falloff &lt;= 2.0
+float   glow       = 0.05;
+
+toggle()
+{
+    float thisglow = 0.0;
+    light_s = !light_s;
+
+    if (light_s)
+        thisglow = glow;
+
+    llSetPrimitiveParams([
+        PRIM_POINT_LIGHT, light_s, lightcolor, intensity, radius, falloff,
+        PRIM_FULLBRIGHT, ALL_SIDES, light_s,
+        PRIM_GLOW,       ALL_SIDES, thisglow
+    ]);
+      llSetColor(lightcolor, ALL_SIDES);
+}
+
+default
+{
+    state_entry()
+    {
+        llSetText(&quot;Touch for light&quot;, &lt;1.0, 1.0, 1.0&gt;, 1.0);
+        toggle();
+    }
+ 
+    touch_start(integer total_number)
+    {
+        toggle();
+    }
+}</code></pre></div>

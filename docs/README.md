@@ -7,3 +7,5 @@ Internal guides for writing and maintaining lsl.dev. These are not published on 
   the Combat2 wiki page
 - [editing-feature-pages.md](editing-feature-pages.md): editing or adding a feature page, the
   feature components, and what reads the pages (sidebar, redirects, API feature chips)
+- [editing-api-pages.md](editing-api-pages.md): editing or adding a function, event or constant
+  page, the API components, and what `npm run generate:mdx` does and does not overwrite

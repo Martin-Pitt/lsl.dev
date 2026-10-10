@@ -1,0 +1,99 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/key">key</a> that is the object owner's <a href="https://wiki.secondlife.com/wiki/UUID">UUID</a>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>When the owner of an object changes, code that depends on this function's return value will not automatically update for the new owner or be automatically re-evaluated.</li>
+<li>This requires the reregistration of <a href="/functions/llListen/">listens</a> and  <a href="/functions/llRequestPermissions/">requesting of permissions</a> from the new owner as needed.</li>
+<li>This is not limited to listens and permissions but anything that caches the return value, it is up to the programmer to work around this limitation.</li>
+<li>Detection of owner change can be achieved with the <a href="/events/changed/">changed</a> event in conjunction with the <a href="/constants/CHANGED_OWNER/">CHANGED_OWNER</a> flag (see the second example) or by storing the old value and periodically (e.g. in <a href="/events/on_rez/">on_rez</a>) checking if it has changed. Both techniques are valid though the latter will not detect the sale of the object if it is sold with "sell original" in-world and not picked up.</li>
+<li>When the object is deeded to a group, the UUID returned is that of the group.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>llOwnerSay( (string)llGetOwner()); // speaks in chat the &quot;key&quot; (UUID code) of the avatar.
+llOwnerSay( llKey2Name(llGetOwner())); // speaks in chat the name of the owner if in the sim.</code></pre></div>
+<div class="wiki-line"><pre><code>default
+{
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_OWNER)
+            llResetScript();
+    }
+
+    state_entry()
+    {
+        key owner = llGetOwner();
+        llInstantMessage(owner, &quot;Only you can hear me. Isn&#x27;t that eerie.&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line">To determine the owner of an object that might be group-deeded you can use the following code snippet. Setting the <code>groupAdmin</code> parameter to <code>TRUE</code> can be used to specify that group members should <em>always</em> count as owners, even if the object isn't deeded to that group.</div>
+<div class="wiki-line"><pre><code>integer isOwner(key id, integer groupAdmin) {
+    integer result = FALSE;
+    {
+        key owner = llGetOwner();
+        if (id == owner) result = TRUE;
+        else { // If object is group owned, avatar need only belong to same group
+            integer sameGroup = llSameGroup(id);
+            if (groupAdmin) result = sameGroup;
+            else {
+                key group = (key)((string)llGetObjectDetails(llGetKey(), [OBJECT_GROUP]));
+                if (group == owner) result = sameGroup;
+            }
+        }
+    }
+    return result;
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">To retrieve the owners name while the owner is in the region use <a href="/functions/llKey2Name/">llKey2Name</a>, <a href="/functions/llGetUsername/">llGetUsername</a> or <a href="/functions/llGetDisplayName/">llGetDisplayName</a>. Respectively <a href="/functions/llRequestAgentData/">llRequestAgentData</a>, <a href="/functions/llRequestUsername/">llRequestUsername</a> or <a href="/functions/llRequestDisplayName/">llRequestDisplayName</a> should be used when the owner is not in the region.</div>
+<div class="wiki-line">The one problem many coders come up against is that previously-activated events referring to the owner don't automatically change when the owner changes.  The most often-seen result is a listen registered to owner will continue to listen to the PREVIOUS owner rather than the CURRENT owner.  It is often confused as a bug in <a href="/functions/llGetOwner/">llGetOwner</a> or <a href="/functions/llListen/">llListen</a> it is not in fact a bug but part of the design.  There are several ways of working around this problem.  The easy solution is to reset the script when owner changes or it is rezzed. The easy solution is not always the right solution.</div>
+<div class="wiki-line">There are two ways to detect if the owner has changed, the most reliable is to use the <a href="/events/changed/">changed</a> event.</div>
+<div class="wiki-line"><pre><code>changed(integer change)
+{
+    if (change &amp; CHANGED_OWNER)//if owner changes, reset the script.
+        llResetScript();
+}</code></pre></div>
+<div class="wiki-line">In many applications resetting the script when the object is rezzed is an adequate and easy solution.</div>
+<div class="wiki-line"><pre><code>on_rez(integer start_param)
+{ //when the object is rezzed, reset the script.
+    llResetScript();
+}</code></pre></div>
+<div class="wiki-line">Resetting the script is not appropriate if the script needs to keep it's data when it's ownership is transfered or if script startup is slow, in these situations listens will need to be re-keyed to the new owner along with any other owner specific code, like who the script is supposed to be animating.</div>
+<div class="wiki-line">The <a href="/events/on_rez/">on_rez</a> and <a href="/events/changed/">changed</a> events can be harnessed to reinitialize owner specific code every time the object is rezzed or changes owner.</div>
+<div class="wiki-line"><pre><code>integer listen_handle;
+
+init()
+{
+    key owner = llGetOwner();
+    llListenRemove(listen_handle);
+    // PUBLIC_CHANNEL has the integer value 0
+    listen_handle = llListen(PUBLIC_CHANNEL, &quot;&quot;, owner, &quot;&quot;);
+    llRequestPermissions(owner, PERMISSION_TRIGGER_ANIMATION);
+}
+
+default
+{
+    state_entry()
+    {
+        init();
+        //insert additional startup code here that doesn&#x27;t need to run each rez/owner change
+        //for example, reading settings from a notecard
+    }
+
+    on_rez(integer start)
+    {
+        init();
+    }
+
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_OWNER)
+            init();
+    }
+
+    run_time_permissions(integer perm)
+    {//always use the run_time_permissions event with llRequestPermissions, never assume
+        if(perm &amp; PERMISSION_TRIGGER_ANIMATION)
+        {
+            //setup your animation code here, start your timers, etc.
+            llOwnerSay(&quot;I have animation permissions&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetCreator/">llGetCreator</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetOwnerKey/">llGetOwnerKey</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedOwner/">llDetectedOwner</a></div></div></section>

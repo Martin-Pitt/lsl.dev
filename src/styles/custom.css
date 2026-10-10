@@ -3,12 +3,28 @@
  * slua-base.css is copied verbatim from slua.dev (src/css/custom.css) so both sister sites
  * share typography, palette and spacing. Only lsl.dev-specific content rules live here.
  */
+/* Larger page content width with more information density is preferred (as on the original
+   lsl.dev). Unlayered so it overrides slua-base.css (17rem / 60rem). */
+:root { --sl-sidebar-width: 15rem; --sl-content-width: 75rem; }
+
 @layer site {
+	/* Title, breadcrumbs, chips and body read as one block: no rule under the title panel. */
+	.content-panel + .content-panel { border-top: 0; }
+	.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 	.sl-markdown-content :is(pre, table) { max-width: 100%; }
-	.sl-markdown-content code { overflow-wrap: anywhere; }
-	.sl-markdown-content pre code { overflow-wrap: normal; }
+	/* Identifiers never break inside; lines may wrap before or after inline code. */
+	.sl-markdown-content code, code.lsl-inline { overflow-wrap: break-word; word-break: normal; }  /* breaks only a token longer than the line */
 	.sl-markdown-content table { display: block; overflow-x: auto; }
+	/* Tables: names and inline code stay on one line, the name column takes only what it needs,
+	   descriptions wrap; narrow screens scroll the table, not the page. */
+	.sl-markdown-content :is(td, th) :is(code, a.lsl-ref) { white-space: nowrap; }
+	.sl-markdown-content td:first-child:has(> :is(code, a, strong):first-child) { width: 1%; white-space: nowrap; }
+	/* Wide pages for dense reference content, but prose keeps a readable line length. */
+	.sl-markdown-content > :is(p, ul, ol, blockquote), .sl-markdown-content details > p, .api-description { max-width: 80ch; }
+	/* Tab indents follow the screen width (as on the original lsl.dev). */
 	.sl-markdown-content .expressive-code { tab-size: 4; }
+	@media (max-width: 48rem) { .sl-markdown-content .expressive-code { tab-size: 2; } }
+	@media (min-width: 92.5rem) { .sl-markdown-content .expressive-code { tab-size: 6; } }
 	.table-scroll { overflow-x: auto; }
 	.category-links { columns: 3 26ch; }
 	.category-links__link { display: block; margin-block: .25rem; }
@@ -16,7 +32,7 @@
 	.function-syntax { padding: 1rem; overflow-x: auto; border: 1px solid var(--sl-color-gray-5); border-radius: .5rem; font-family: var(--sl-font-mono); }
 
 	/* Imported wiki content (API pages and the wiki archive). */
-	.wiki-content { overflow-wrap: anywhere; }
+	.wiki-content { overflow-wrap: break-word; }
 	.wiki-content section { margin-top: 2rem; }
 	.wiki-content .wiki-line { margin: .65em 0; }
 	.wiki-content pre { overflow: auto; max-width: 100%; padding: 1rem; border: 1px solid var(--sl-color-hairline); border-radius: .6rem; background: var(--sl-color-gray-6); font-size: .85rem; line-height: 1.6; }
@@ -24,7 +40,7 @@
 	.wiki-content table { display: block; overflow-x: auto; max-width: 100%; font-size: var(--sl-text-sm); }
 	.wiki-content table { overflow-wrap: normal; }
 	.wiki-content th { white-space: nowrap; }
-	.wiki-content td code.lsl-inline, .wiki-content td a.lsl-ref { white-space: nowrap; }
+	.wiki-content td :is(code, a.lsl-ref) { white-space: nowrap; }
 	.wiki-content td { min-width: 6rem; }
 	.wiki-content td:last-child { min-width: 14rem; }
 	.wiki-content table table { margin-block: .75rem; font-size: var(--sl-text-xs); }
@@ -41,18 +57,6 @@
 	a.lsl-ref { text-decoration: none; }
 	a.lsl-ref:hover code.lsl-inline, code.lsl-inline a.lsl-link:hover { text-decoration-style: solid; text-decoration-color: var(--sl-color-text-accent); }
 
-	/* API breadcrumbs, placed in Starlight's banner slot so they sit above the title. */
-	.sl-banner:has(> .api-crumbs) { padding: 1rem var(--sl-content-pad-x) 0; background: none; box-shadow: none; color: inherit; text-align: start; text-wrap: wrap; }
-	.sl-banner:has(> .api-crumbs) + .content-panel { padding-top: .25rem; }
-	.sl-banner:has(> .api-crumbs) + .content-panel h1 { margin-top: .25rem; }
-	.api-crumbs { max-width: var(--sl-content-width); font-size: var(--sl-text-sm); }
-	.api-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem; margin: 0; padding: 0; list-style: none; }
-	.api-crumbs li { display: inline-flex; align-items: center; gap: .15rem; min-width: 0; overflow-wrap: anywhere; }
-	.api-crumbs a { color: var(--sl-color-white); font-weight: 500; text-decoration: none; }
-	.api-crumbs a:hover { color: var(--sl-color-text-accent); }
-	.api-crumbs [aria-current] { color: var(--sl-color-gray-3); }
-	.api-crumbs svg { color: var(--sl-color-gray-4); flex: none; }
-	@media (min-width: 72rem) { .api-crumbs { margin-inline: var(--sl-content-margin-inline, auto); } }
 
 	/* Collapsible examples on API pages. */
 	.api-example { margin-block: .75rem; border: 1px solid var(--sl-color-hairline); border-radius: .6rem; padding: .6rem .9rem; }

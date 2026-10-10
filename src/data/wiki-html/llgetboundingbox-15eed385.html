@@ -1,0 +1,146 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">The bounding box is for the entire link set, not just the requested prim.<br/>Returns an empty list (<code>[]</code>) if <code>object</code> is not found.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> that is the bounding box of <code>object</code> relative to its root prim, in <a href="https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#local">local coordinates</a>.<br/>Format: <code>[ (vector) <code>min_corner</code>, (vector) <code>max_corner</code> ]</code></div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">The physical representation of an object is made up of the shape of the prims and avatars seated upon it. The bounding box is the smallest possible cuboid which can contain the physical representation of the object and have its faces aligned to the object's local axes.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Regardless if <code>object</code> is a non-root prim, the bounding box of the object is returned.  This also applies if <code>object</code> is an agent sitting on an object - the bounding box of the sat-upon object (including the agent's shape) is returned.</li>
+<li>The bounding box is determined by the physics models, not the visual representation.</li>
+<li>A child prim with its physics mode set to none will not affect the bounding box.</li>
+<li><a href="https://wiki.secondlife.com/wiki/Phantom">Phantom</a> and <a href="/functions/llVolumeDetect/">volume detect</a> objects do have physics interactions, which is why they still have bounding boxes.</li>
+<li>Attachments have no bounding boxes of their own as they have no physics interaction, instead the bounding box of the avatar is returned.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default//An avatar bounding box ruler thingy
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHANTOM, TRUE);
+    }
+    
+    touch_start(integer total_number)
+    {
+        key target = llDetectedKey(0);
+        list box = llGetBoundingBox(target);
+        vector center = llDetectedPos(0) + (llList2Vector(box, 0) + llList2Vector(box, 1)) * 0.5;
+        vector size = llList2Vector(box, 1) - llList2Vector(box, 0);
+        llSetPrimitiveParams([PRIM_POSITION, center, PRIM_SIZE, size]);
+        llSetText(&quot;Name: &quot; + llDetectedName(0) + &quot;, UUID: &quot; + (string)target + 
+                &quot;\nBounding Box Size: &quot; + (string)size, &lt;1.0, 1.0, 1.0&gt;, 1.0);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// Enclose a named object in the tightest possible box
+// that is aligned with the object&#x27;s root prim axes.
+// Drop this script in a box near the object to enclose
+// (must be in a 10m range)
+
+string ObjectNameToEnclose = &quot;SearchMe&quot;;
+key UUID;
+
+default
+{
+    state_entry()
+    {
+        llSensor(ObjectNameToEnclose, &quot;&quot;, ACTIVE | PASSIVE, 10, PI);
+    }
+
+    sensor(integer n)
+    {
+        UUID = llDetectedKey(0);
+        llSetTimerEvent(1);
+    }
+
+    timer()
+    {
+        list info = llGetObjectDetails(UUID, [OBJECT_POS, OBJECT_ROT]) + llGetBoundingBox(UUID);
+        vector pos = llList2Vector(info, 0);
+        rotation rot = llList2Rot(info, 1);
+        vector corner1 = llList2Vector(info, 2) * rot + pos;
+        vector corner2 = llList2Vector(info, 3) * rot + pos;
+        vector size = llList2Vector(info, 3) - llList2Vector(info, 2);
+
+        llSetPos((corner1 + corner2) * 0.5); // Set position to the midpoint (average) of the corners
+        llSetRot(rot);
+        llSetScale(size);
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><pre><code>//(bool) isInPrim - determines whether a given vector position in the region is within the borders of a cuboid,
+// respecting the cuboid&#x27;s rotation.
+integer isInPrim(vector vPos)
+{
+    list bb = llGetBoundingBox(llGetKey());
+    vector min = llList2Vector(bb, 0);
+    vector max = llList2Vector(bb, 1);
+    vPos = (vPos - llGetPos()) / llGetRot();
+    float fTemp;
+    if (min.x &gt; max.x)
+    {
+        fTemp = max.x;
+        max.x = min.x;
+        min.x = fTemp;
+    }
+    if (min.y &gt; max.y)
+    {
+        fTemp = max.y;
+        max.y = min.y;
+        min.y = fTemp;
+    }
+    if (min.z &gt; max.z)
+    {
+        fTemp = max.z;
+        max.z = min.z;
+        min.z = fTemp;
+    }
+    if (vPos.x &lt; min.x)
+    {
+        return FALSE;
+    }
+    if (vPos.y &lt; min.y)
+    {
+        return FALSE;
+    }
+    if (vPos.z &lt; min.z)
+    {
+        return FALSE;
+    }
+    if (vPos.x &gt; max.x)
+    {
+        return FALSE;
+    }
+    if (vPos.y &gt; max.y)
+    {
+        return FALSE;
+    }
+    if (vPos.z &gt; max.z)
+    {
+        return FALSE;
+    }
+    return TRUE;
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAgentSize/">llGetAgentSize</a></div></div></section>
+<section><h2 id="history">History</h2><h5 id="sitting-in-1-36">Sitting in 1.36</h5>
+<div class="wiki-line">Avatars historically when they sit upon an object have been treated as part of the object, like a prim, even being assigned a link number (which can be used to detect and manipulate them to some extent). Unrelated to this, requesting the bounding box for a child prim of an object would return the bounding box for the entire object (unless it was an attachment, which point it would return the bounding box for the avatar). The first is something of a misfeature, the latter is an honest to goodness feature; the combination of these two lead to something interesting: Prior to 1.36 requesting the bounding box of an attachment while seated returned the bounding box for the object sat upon. It got reported as a bug <a href="https://jira.secondlife.com/browse/SVC-1174" rel="noreferrer">SVC-1174</a>, and the behavior was changed in 1.36. The bounding box for the object sat upon is unchanged by 1.36, the avatar still counts. However when the bounding box for the seated avatar is requested it does not fall through to the object being sat upon.</div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-uuid-f11a4088/">Template:LSL Function/uuid</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}{{#if:{{{group|1}}}|{{LSLGC|Group|group}},&amp;#32;}}{{LSLGC|Avatar|avatar}} or {{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{ph|}}}|{{{ph|}}}&amp;#32;|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}}}{{#if:{{{group|1}}}|group,&amp;#32;}}avatar or {{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Avatar/As A Parameter}}
+}}}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

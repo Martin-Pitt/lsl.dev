@@ -1,0 +1,109 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Generates a key using Type 3 (MD5) UUID generation to create a unique key using region-name, object-key, service and variable.</div>
+<div class="wiki-line"><strong>NOTE:</strong> this function has been largely superseded by <a href="/functions/llGenerateKey/">llGenerateKey</a>() which is faster; however, the implementation on this page does have some further uses, as it is able to generate predictable random keys which is useful if you wish to avoid the need to track lists of recent keys. For example, using the optimised form of this function, two scripts using the same URI for key generation can produce the same set of keys using a synchronised variable, useful for generating a new key for each message, that can be predicted ahead of time (rather than keeping a list of recent keys to ignore).</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/key">key</a> The generated key</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">In a two-prim linked-set put the following script (adding generateKey where noted) into the child-prim:</div>
+<div class="wiki-line"><pre><code>integer requestID = 0;
+
+// Add generateKey here!!
+
+default {
+    touch_start(integer x) {
+        llMessageLinked(
+            LINK_ROOT, 
+            1234, 
+            &quot;I am a request&quot;, 
+            generateKey(&quot;echo&quot;, (string)requestID++)
+        );
+    }
+
+    link_message(integer x, integer y, string msg, key id) {
+        if (y == 1234) 
+            llOwnerSay(&quot;Request: &quot; + (string)id + &quot; = &quot; + msg);
+    }
+}</code></pre></div>
+<div class="wiki-line">And the following script in the root-prim:</div>
+<div class="wiki-line"><pre><code>default {
+    link_message(integer x, integer y, string msg, key id) {
+        if (y == 1234) // Echo, send straight back
+            llMessageLinked(x, y, msg, id);
+    }
+}</code></pre></div>
+<div class="wiki-line">Simply touch the child-prim to use, enjoy!</div></section>
+<section><h2 id="additional">Additional wiki content</h2><h2 id="implementation">Implementation</h2>
+<div class="wiki-line"><pre><code>key generateKey(string service, string variable) {
+    return (key)llInsertString(
+        llInsertString(
+            llInsertString(
+                llInsertString(
+                    llMD5String(
+                        &quot;secondlife://&quot; + llGetRegionName()  + &quot;/&quot; + 
+                            (string)llGetKey() + &quot;/&quot; + 
+                            (string)llGetLinkNumber() + &quot;/&quot; + 
+                            llGetScriptName() + &quot;/&quot; + 
+                            service + &quot;/&quot; + variable, 
+                        0 // This is reserved by specification, will 
+                          // be increased with new/different versions.
+                    ),
+                    8,
+                    &quot;-&quot;
+                ),
+                13,
+                &quot;-&quot;
+            ),
+            18,
+            &quot;-&quot;
+        ),
+        23,
+        &quot;-&quot;
+    );
+}</code></pre></div>
+<h2 id="optimisation">Optimisation</h2>
+<div class="wiki-line">Instead of always calling <a href="/functions/llGetRegionName/">llGetRegionName()</a>, <a href="/functions/llGetKey/">llGetKey()</a>, <a href="/functions/llGetLinkNumber/">llGetLinkNumber()</a>, and <a href="/functions/llGetScriptName/">llGetScriptName()</a>, you may wish to cache their return values into a <code>uri</code> variable, and only dynamically add the service and variable parameters each-time. Remember to update this variable when you know it's components will have changed, using the <a href="/events/changed/">changed()</a>, <a href="/events/on_rez/">on_rez()</a>, and/or <a href="/events/attach/">attach()</a> events.</div>
+<div class="wiki-line">Here is an example of the caching version of the function:</div>
+<div class="wiki-line"><pre><code>string uri;
+key generateKey(string service, string variable) {
+    if (uri == &quot;&quot;) 
+        uri =  &quot;secondlife://&quot; + llGetRegionName()  + &quot;/&quot; + 
+            (string)llGetKey() + &quot;/&quot; + 
+            (string)llGetLinkNumber() + &quot;/&quot; + 
+            llGetScriptName() + &quot;/&quot;;
+    return (key)llInsertString(
+        llInsertString(
+            llInsertString(
+                llInsertString(
+                    llMD5String(
+                        uri + service + &quot;/&quot; + variable, 
+                        0 // This is reserved by specification, will 
+                          // be increased with new/different versions.
+                    ),
+                    8,
+                    &quot;-&quot;
+                ),
+                13,
+                &quot;-&quot;
+            ),
+            18,
+            &quot;-&quot;
+        ),
+        23,
+        &quot;-&quot;
+    );
+}
+
+integer counter = 0;
+default {
+    state_entry() {
+        llSetTimerEvent(10.0);
+    }
+
+    on_rez(integer x) { uri = &quot;&quot;; }
+    attach(key id) { uri = &quot;&quot;; }
+    changed(integer changes) {
+        if (changes &amp; (CHANGED_REGION | CHANGED_INVENTORY)) uri = &quot;&quot;;
+    }
+
+     timer() {
+        llOwnerSay(&quot;Random key of the moment is \&quot;&quot; + (string)generateKey(&quot;counter&quot;, (string)(counter++)) + &quot;\&quot;&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples}}</code></span></div></section>

@@ -1,0 +1,86 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
+<div class="wiki-line">Camera sync allows for two users to synchronize their cameras, for use by builders in joint projects or in tutorials and demonstrations. </div>
+<div class="wiki-line">----</div>
+<div class="wiki-line"><strong>Camera Tween</strong> - Smoothly adjusts the position and rotation of the camera over a given number of steps:</div>
+<div class="wiki-line"><pre><code>camTween(rotation camRot_origin, vector camPos_origin, rotation camRot_target, vector camPos_target, float steps)
+{
+    //Keep steps a float, but make sure its rounded off to the nearest 1.0
+    steps = (float)llRound(steps);
+    
+    //Calculate camera position increments
+    vector posStep = (camPos_target - camPos_origin) / steps;
+    
+    //Calculate camera rotation increments
+    //rotation rotStep = (camRot_target - camRot_origin);
+    //rotStep = &lt;rotStep.x / steps, rotStep.y / steps, rotStep.z / steps, rotStep.s / steps&gt;;
+    
+    
+    float cStep = 0.0; //Loop through motion for cStep = current step, while cStep &lt;= Total steps
+    for(; cStep &lt;= steps; ++cStep)
+    {
+        //Set next position in tween
+        vector camPos_next = camPos_origin + (posStep * cStep);
+        rotation camRot_next = slerp( camRot_origin, camRot_target, cStep / steps);
+        
+        //Set camera parameters
+        llSetCameraParams([
+            CAMERA_ACTIVE, 1, //1 is active, 0 is inactive
+            CAMERA_BEHINDNESS_ANGLE, 0.0, //(0 to 180) degrees
+            CAMERA_BEHINDNESS_LAG, 0.0, //(0 to 3) seconds
+            CAMERA_DISTANCE, 0.0, //(0.5 to 10) meters
+            CAMERA_FOCUS, camPos_next + llRot2Fwd(camRot_next), //Region-relative position
+            CAMERA_FOCUS_LAG, 0.0 , //(0 to 3) seconds
+            CAMERA_FOCUS_LOCKED, TRUE, //(TRUE or FALSE)
+            CAMERA_FOCUS_THRESHOLD, 0.0, //(0 to 4) meters
+            CAMERA_POSITION, camPos_next, //Region-relative position
+            CAMERA_POSITION_LAG, 0.0, //(0 to 3) seconds
+            CAMERA_POSITION_LOCKED, TRUE, //(TRUE or FALSE)
+            CAMERA_POSITION_THRESHOLD, 0.0, //(0 to 4) meters
+            CAMERA_FOCUS_OFFSET, ZERO_VECTOR //&lt;-10,-10,-10&gt; to &lt;10,10,10&gt; meters
+        ]);
+    }
+}
+
+rotation slerp( rotation a, rotation b, float f ) {
+    float angleBetween = llAngleBetween(a, b);
+    if ( angleBetween &gt; PI )
+        angleBetween = angleBetween - TWO_PI;
+    return a*llAxisAngle2Rot(llRot2Axis(b/a)*a, angleBetween*f);
+}//Written by Francis Chung, Taken from http://forums-archive.secondlife.com/54/3b/50692/1.html</code></pre></div>
+<div class="wiki-line"><strong>Camera Default</strong> - Sets the camera parameters back to their defaults:</div>
+<div class="wiki-line"><pre><code>camDefault()
+{
+    llSetCameraParams([
+        CAMERA_ACTIVE, FALSE, //1 is active, 0 is inactive
+        CAMERA_BEHINDNESS_ANGLE, 10.0, //(0 to 180) degrees
+        CAMERA_BEHINDNESS_LAG, 0.0, //(0 to 3) seconds
+        CAMERA_DISTANCE, 3.0, //(0.5 to 10) meters
+        CAMERA_FOCUS_LAG, 0.1 , //(0 to 3) seconds
+        CAMERA_FOCUS_LOCKED, FALSE, //(TRUE or FALSE)
+        CAMERA_FOCUS_THRESHOLD, 1.0, //(0 to 4) meters
+        CAMERA_PITCH, 0.0, //(-45 to 80) degrees
+        CAMERA_POSITION_LAG, 0.1, //(0 to 3) seconds
+        CAMERA_POSITION_LOCKED, FALSE, //(TRUE or FALSE)
+        CAMERA_POSITION_THRESHOLD, 1.0, //(0 to 4) meters
+        CAMERA_FOCUS_OFFSET, ZERO_VECTOR //&lt;-10,-10,-10&gt; to &lt;10,10,10&gt; meters
+    ]);
+}</code></pre></div>
+<div class="wiki-line"><strong>Camera Match</strong> - Sets a prim's position and rotation to that of the user's camera (the one we have permissions for):</div>
+<div class="wiki-line"><pre><code>warpPos(vector destpos)
+{
+    integer jumps = (integer)(llVecDist(destpos, llGetPos()) / 10.0) + 1;
+    list rules = [PRIM_POSITION, destpos];
+    integer count = 1;
+    while (( count = count &lt;&lt; 1 ) &lt; jumps)
+    {
+        rules = (rules=[]) + rules + rules;
+    }
+    llSetPrimitiveParams(rules + llList2List(rules, (count - jumps) &lt;&lt; 1, count));
+}
+camMatch()
+{
+    warpPos(llGetCameraPos());
+    llSetRot(llGetCameraRot());
+}</code></pre></div>
+<div class="wiki-line">Note: <strong>Camera Match</strong> utilizes <a href="https://wiki.secondlife.com/wiki/WarpPos">WarpPos</a> to enable the camera tracking prim to jump great distances in an efficient manner.</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library}}</code></span></div>

@@ -1,0 +1,105 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If the prim lacks a <a href="/functions/llSitTarget/">sit target</a> or there is no avatar sitting on the prim, then </div>
+<div class="wiki-line"><a href="/constants/NULL_KEY/">NULL_KEY</a></div>
+<div class="wiki-line"> is returned.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/key">key</a> that is the <a href="https://wiki.secondlife.com/wiki/UUID">UUID</a> of the user seated on the prim.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>A prim does not have a sit target unless <a href="/functions/llSitTarget/">llSitTarget</a> has been called with a <strong>nonzero</strong> vector as the first argument.</li>
+<li>If the prim lacks a sit target or the avatar is seated upon a different prim, the only way to determine how many and which avatars are seated upon the object is to scan the link set (for an example of this, see <a href="/functions/llGetNumberOfPrims/#useful-snippets">llGetNumberOfPrims</a>).</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        // set sit target, otherwise this will not work 
+        llSitTarget(&lt;0.0, 0.0, 0.1&gt;, ZERO_ROTATION);
+    }
+
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_LINK)
+        { 
+            key av = llAvatarOnSitTarget();
+            if (av) // evaluated as true if key is valid and not NULL_KEY
+            {
+                llSay(0, &quot;Hello &quot; + llKey2Name(av) + &quot;, thank you for sitting down&quot;);
+            }
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><pre><code>//Gets the link number of a seated avatar
+integer GetAgentLinkNumber(key avatar)
+{
+    integer link_num = llGetNumberOfPrims();
+    while (link_num &gt; 1) // Check only child prims.
+    {
+        if (llGetLinkKey(link_num) == avatar) // If it is the avatar we want
+        {
+            return link_num; // then return the link number
+        }
+        --link_num; // else go on with next child.
+    }
+    // Avatar wasn&#x27;t found
+    return FALSE; // 0 (zero) for easy testing.
+}</code></pre></div>
+<div class="wiki-line"><pre><code>//It&#x27;s sometimes useful to use a state change
+//useful when the prim is linked to an other prim
+//and useful with a dialog box
+default
+{
+    state_entry()  
+    {
+        //&quot;Sit target is a prim property.&quot;
+        llSitTarget(&lt;0.0, 0.0, 0.1&gt;, ZERO_ROTATION);
+    }
+    
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_LINK)
+        { 
+            key av_sit = llAvatarOnSitTarget();
+            if (av_sit) 
+            {
+                //Someone is on the sit target.
+                state sitting;
+            }
+        }
+    }
+}
+
+state sitting
+{
+    state_entry()
+    {
+        //Open a dialog box when an avatar is sitting on the prim
+        key av_menu = llAvatarOnSitTarget();
+        llListen(-99, &quot;&quot;, av_menu, &quot;Yes&quot;);
+        llDialog(av_menu, &quot;\nDo you like this example?&quot;, [&quot;Yes&quot;, &quot;No&quot; ] , -99);
+    }
+    
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_LINK)
+        { 
+            key av_unsit = llAvatarOnSitTarget();
+            if (av_unsit == NULL_KEY) 
+            {
+                //No one is on the sit target.
+                //&quot;On state change all listens are removed automatically.&quot;
+                state default;
+            }
+        }
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        // If the user clicked the &quot;Yes&quot; button
+        llWhisper(0, &quot;Thank you&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">The position of an avatar on a sit target can be determined with the use of <a href="/functions/llGetObjectDetails/">llGetObjectDetails</a> (see <a href="/functions/llSitTarget/#useful-snippets">llSitTarget</a> for an example).</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llAvatarOnLinkSitTarget/">llAvatarOnLinkSitTarget</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSitTarget/">llSitTarget</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinkSitTarget/">llLinkSitTarget</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLinkKey/">llGetLinkKey</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/changed/">changed</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/constants/CHANGED_LINK/">CHANGED_LINK</a></div></div></section>

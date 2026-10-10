@@ -1,0 +1,47 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Generates a key using <a href="http://en.wikipedia.org/wiki/UUID#Version_5_.28SHA-1_hash.29" rel="noreferrer">Version 5 (SHA-1 hash)</a> <a href="https://wiki.secondlife.com/wiki/UUID">UUID</a> generation to create a unique key.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The specific UUID version is an implementation detail that has changed in the past and may change again in the future. Do not depend upon the UUID that is returned to be Version 5.</li>
+<li>As the UUID produced is versioned, it should never return a value of <a href="/constants/NULL_KEY/">NULL_KEY</a>.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+        // avatar touching
+        key avatarKey = llDetectedKey(0);
+        string avatarName = llKey2Name(avatarKey);
+
+        // key of the owner
+        key owner = llGetOwner();
+
+        // generated random key
+        key random = llGenerateKey();
+
+        // number of objects inside the same prim
+        integer numberOfObjects = llGetInventoryNumber(INVENTORY_OBJECT);
+
+        if (numberOfObjects)
+        {
+            // name of first object sorted by name inside the prim&#x27;s inventory
+            string itemName = llGetInventoryName(INVENTORY_OBJECT, 0);
+    
+            llGiveInventory(avatarKey, itemName);
+            llInstantMessage(avatarKey, &quot;Your transaction key is &#x27;&quot; + (string)random + &quot;&#x27;.&quot;);
+    
+            llInstantMessage(owner, &quot;Transaction record:\n&quot;
+                + &quot;receiver: &quot; + avatarName + &quot; (&quot; + (string)avatarKey + &quot;)\n&quot;
+                + &quot;item: &quot; + itemName + &quot;\n&quot;
+                + &quot;transaction key: &quot; + (string)random);
+        }
+        else
+        {
+            // PUBLIC_CHANNEL has the integer value 0
+            llSay(PUBLIC_CHANNEL, &quot;No items to give away, sorry!&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="history">History</h2><ul>
+<li>Inspired by the library function <a href="/wiki/generatekey-47d18aca/">generateKey</a>.</li>
+<li>Changed from using <a href="http://en.wikipedia.org/wiki/UUID#Version_3_.28MD5_hash.29" rel="noreferrer">Version 3 (MD5 hash)</a> to <a href="http://en.wikipedia.org/wiki/UUID#Version_5_.28SHA-1_hash.29" rel="noreferrer">Version 5 (SHA-1 hash)</a>. Date of this change is unknown.</li>
+</ul></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="https://wiki.secondlife.com/wiki/Template:LSLC%7B%7B#var-lang">LSLC{{#var:lang}}</a>: <code>{{LSLC{{#var:lang}}|Encryption|llGenerateKey}}</code></span></div></section>

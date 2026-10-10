@@ -1,0 +1,337 @@
+<div class="wiki-line">Basic Tutorial on LSL.</div>
+<div class="wiki-line">By <a href="https://wiki.secondlife.com/wiki/User:James_Benedek">James Benedek</a></div>
+<div class="wiki-line">---------------------------------------------------------------------------------------------------</div>
+<div class="wiki-line">---------------------------------------------------------------------------------------------------</div>
+<div class="wiki-line">When you create a <strong>New Script</strong> from within the Content tab of a prim or from the context menu of your inventory, the system writes a simple script with the following lines of LSL code:</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+
+    touch_start(integer total_number)
+    {
+        llSay(0, &quot;Touched.&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line">The above script will basically chat "Hello, Avatar!" on the public channel when it is created and will then chat "Touched." on the same public channel when an avatar touches the prim the script is in.</div>
+<div class="wiki-line"><strong>Script formatting and Indenting</strong></div>
+<div class="wiki-line">-------------------------------</div>
+<div class="wiki-line">Throughout these examples you will observe a strict layout being followed. Each closing } aligns vertically with its opening {. Code within { and } is indented. It is strongly recommended that you follow this practice rigorously. While the compiler is only concerned with bracket matching, indenting and vertical bracket alignment are of great assistance when studying the logic of a script. There is a free tool, lslEditor, for editing, compiling, and even testing scripts off-world, that includes an excellent facility for automatically indenting your code correctly. You can download lslEditor from http://sourceforge.net/projects/lsleditor/  and the auto-indent facility is invoked via CTRL+D.</div>
+<div class="wiki-line"><strong>Errors and how to fix them?</strong></div>
+<div class="wiki-line">---------------------------</div>
+<div class="wiki-line">If you get an error while scripting at any time, it may well be that you have missed</div>
+<div class="wiki-line">out a ; at the end of a function or a { or a } after or before an event. These are the most</div>
+<div class="wiki-line">common errors (a syntax error). Sometimes this may not be the case though.</div>
+<div class="wiki-line"><strong>Basic terms</strong>:</div>
+<div class="wiki-line">-----------------------------</div>
+<div class="wiki-line">LSL <strong>Functions</strong> are shown as red within the Script Editor's composing window.</div>
+<div class="wiki-line">LSL <strong>Events</strong> are shown in blue.</div>
+<div class="wiki-line"><strong>TRUE</strong> and <strong>FALSE</strong> are Boolean variables. <a href="/constants/FALSE/">FALSE</a> is equal to the integer 0 and <a href="/constants/TRUE/">TRUE</a> is equal to the integer 1.</div>
+<div class="wiki-line"><strong>DATA Types</strong></div>
+<div class="wiki-line">A <strong>String</strong> is a string of alphanumeric characters surrounded by quotation marks, (eg. "Hello Bill").</div>
+<div class="wiki-line">An <strong>Integer</strong> is a whole number between −2,147,483,648 and +2,147,483,647, which includes 0.</div>
+<div class="wiki-line">A <strong>Float</strong> is a number with a decimal fraction like 1.0 or 1.23456 depending on the precision you need in your calculations.</div>
+<div class="wiki-line">A <strong>Vector</strong> is a set of three floats enclosed in &lt; pointy brackets &gt; like so: &lt;0.0, 0.0, 0.0&gt;. They can represent colours and positions.</div>
+<div class="wiki-line">A <strong>Key</strong> is a randomly generated Universally Unique Identifier (UUID). This specialized string consists of 32 hex characters with four dashes.</div>
+<div class="wiki-line"><strong>TASK 1</strong>:</div>
+<div class="wiki-line">-------</div>
+<div class="wiki-line">Let's begin by learning an easy task first by making the box say something else</div>
+<div class="wiki-line">when you touch/click it. You can do this by editing the "<a href="/functions/llSay/">llSay</a>(0, "Touched.");" line within the touch_start event. Just edit the string between the quote marks. The function <a href="/functions/llSay/">llSay</a>()'s format is interpreted as meaning:</div>
+<div class="wiki-line"><a href="/functions/llSay/">llSay</a>(Channel number to transmit the text, "string of text to send");</div>
+<div class="wiki-line"><a href="/functions/llSay/">llSay</a> is not the only communication function within the LSL. You can also try out:</div>
+<div class="wiki-line"><a href="/functions/llShout/">llShout</a>(Channel, "SHOUT STUFF");//can be heard 100m away from originating script</div>
+<div class="wiki-line"><a href="/functions/llWhisper/">llWhisper</a>(Channel, "WHISPER STUFF");//can be heard 10m distance</div>
+<div class="wiki-line"><a href="/functions/llOwnerSay/">llOwnerSay</a>("SAY STUFF TO YOU ONLY");</div>
+<div class="wiki-line"><a href="/functions/llRegionSay/">llRegionSay</a>(Channel, "REGION SAY STUFF");//can be heard within the entire region</div>
+<div class="wiki-line"><strong>TASK 2</strong>:</div>
+<div class="wiki-line">-------</div>
+<div class="wiki-line">Let's just add some information after this explaining what it each thing does,</div>
+<div class="wiki-line">you can do this by adding // and anything after it will appear orange, this is a comment.</div>
+<div class="wiki-line">Your script should look something like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+        llSay(0, &quot;Touched.&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><strong>TASK 3</strong>:</div>
+<div class="wiki-line">-------</div>
+<div class="wiki-line">Let's now try make it change its color when we click it, the function we will need is</div>
+<div class="wiki-line">llSetColor, its layout is like this llSetColor(vector color, integer face); this basically</div>
+<div class="wiki-line">means if i wanted the cube to be red i would use the vector &lt;1,0,0&gt;, green &lt;0,1,0&gt;, blue &lt;0,0,1&gt;.</div>
+<div class="wiki-line">For a full color chart see the link below:</div>
+<div class="wiki-line">http://www.lslwiki.net/lslwiki/wakka.php?wakka=color</div>
+<div class="wiki-line">If it was a linked object you could use <a href="/functions/llSetLinkColor/">llSetLinkColor</a>; its layout is</div>
+<div class="wiki-line"><a href="/functions/llSetLinkColor/">llSetLinkColor</a>(integer linknumber, vector color, integer face).</div>
+<div class="wiki-line">Your script should look something like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+    //  color all faces red
+        llSetColor(&lt;1.0, 0.0, 0.0&gt;, ALL_SIDES);
+    }
+}</code></pre></div>
+<div class="wiki-line"><strong>TASK 4</strong>:</div>
+<div class="wiki-line">-------</div>
+<div class="wiki-line">Let's now make it have text appear over it, you can do this by using the function</div>
+<div class="wiki-line"><a href="/functions/llSetText/">llSetText</a>, its layout is <a href="/functions/llSetText/">llSetText</a>(string text, vector color, float alpha).</div>
+<div class="wiki-line">Basically if you do this <a href="/functions/llSetText/">llSetText</a>("HELLO CAN YOU READ THIS",&lt;1,0,0&gt;,1);</div>
+<div class="wiki-line">will appear as HELLO CAN YOU READ THIS in the colour red. Alpha is the transparency,</div>
+<div class="wiki-line">if you did <a href="/functions/llSetText/">llSetText</a>("HELLO CAN YOU READ THIS",&lt;1,0,0&gt;,0); you wouldn't be able to see it.</div>
+<div class="wiki-line">0 = high transparency, 0.5 = in the middle, 1 = no transparency.</div>
+<div class="wiki-line">Your script should look something like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+    //  green and opaque floattext
+        llSetText(&quot;Nice to meet you!&quot;, &lt;0.0, 1.0, 0.0&gt;, 1.0);
+    }
+}</code></pre></div>
+<div class="wiki-line"><strong>TASK 5</strong>:</div>
+<div class="wiki-line">-------</div>
+<div class="wiki-line">Now that you understand alpha we shall make our object disappear!</div>
+<div class="wiki-line">To do this we will use the function <a href="/functions/llSetAlpha/">llSetAlpha</a>, its layout is <a href="/functions/llSetAlpha/">llSetAlpha</a>(float alpha, integer face).</div>
+<div class="wiki-line"><a href="/functions/llSetAlpha/">llSetAlpha</a>(0, <a href="/constants/ALL_SIDES/">ALL_SIDES</a>); would make all the faces of the object transparent.</div>
+<div class="wiki-line">If it was a linked object you could use <a href="/functions/llSetLinkAlpha/">llSetLinkAlpha</a>, which its layout is</div>
+<div class="wiki-line"><a href="/functions/llSetLinkAlpha/">llSetLinkAlpha</a>(integer linknumber, float alpha, integer face).</div>
+<div class="wiki-line">Your script should look something like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+    //  set all faces to transparent
+        llSetAlpha(0.0, ALL_SIDES);
+    }
+}</code></pre></div>
+<div class="wiki-line"><strong>Task 6</strong>:</div>
+<div class="wiki-line">-------</div>
+<div class="wiki-line">Let's try make our object texture itself, to do this we will use the function <a href="/functions/llSetTexture/">llSetTexture</a>, its</div>
+<div class="wiki-line">layout is <a href="/functions/llSetTexture/">llSetTexture</a>(string texture, integer face).You can do this two ways, you can place a</div>
+<div class="wiki-line">texture inside the object or use a UUID. To make it change to a texture you have placed inside</div>
+<div class="wiki-line">the object, do it like this <a href="/functions/llSetTexture/">llSetTexture</a>("NAME OF TEXTURE", <a href="/constants/ALL_SIDES/">ALL_SIDES</a>);</div>
+<div class="wiki-line">If you want to use a UUID, find a texture in your inventory, right click it &gt; copy asset UUID,</div>
+<div class="wiki-line">then paste the UUID in the "" so it looks like this</div>
+<div class="wiki-line"><a href="/functions/llSetTexture/">llSetTexture</a>("j4m3s000-0000-0000-0000-b3n3d3k00000", <a href="/constants/ALL_SIDES/">ALL_SIDES</a>);</div>
+<div class="wiki-line">If it was a linked object you could use llSetLinkTexture, which its layout is</div>
+<div class="wiki-line"><a href="/functions/llSetLinkTexture/">llSetLinkTexture</a>(integer linknumber, string texture, integer face);</div>
+<div class="wiki-line">Your script should look something like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+    //  apply texture within contents of the same prim
+        llSetTexture(&quot;name of texture&quot;, ALL_SIDES);
+    }
+}</code></pre></div>
+<div class="wiki-line"><strong>Task 7</strong>:</div>
+<div class="wiki-line">-------</div>
+<div class="wiki-line">Now let's move onto something more tricky. As you understand a bit about keys we will make our object</div>
+<div class="wiki-line">only respond when the owner clicks the object. This is called an if statement.</div>
+<div class="wiki-line">To do this we will need to use the functions <a href="/functions/llGetOwner/">llGetOwner</a>() and <a href="/functions/llDetectedKey/">llDetectedKey</a>(0);, <a href="/functions/llGetOwner/">llGetOwner</a> will</div>
+<div class="wiki-line">return your key UUID and <a href="/functions/llDetectedKey/">llDetectedKey</a>(0) when put under the touch event will return the key of who is</div>
+<div class="wiki-line">clicking/touching your object. So firstly lay out your script like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+        key owner = llGetOwner();
+        key touchingAvatar = llDetectedKey(0);
+
+        if (owner == touchingAvatar)
+            llSay(0, &quot;Touched by owner.&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line">If you want it to do something when someone else other than the owner touches it, use an else statement.</div>
+<div class="wiki-line">You can do this by laying out your script like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, &quot;Hello, Avatar!&quot;);
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+        key owner = llGetOwner();
+        key touchingAvatar = llDetectedKey(0);
+
+        if (owner == touchingAvatar)
+            llSay(0, &quot;Touched by owner.&quot;);
+        else
+            llSay(0, &quot;Touched by someone else.&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><strong>Task 8</strong>:</div>
+<div class="wiki-line">-------</div>
+<div class="wiki-line">Now let's try make an object do something when you say something, to do this</div>
+<div class="wiki-line">we will have to use a <a href="/functions/llListen/">llListen</a> function, its layout is this</div>
+<div class="wiki-line"><a href="/functions/llListen/">llListen</a>(integer channel, string name, key id, string msg);</div>
+<div class="wiki-line">We will firstly place this under the state_entry() event.</div>
+<div class="wiki-line">In this task we will just make it use the public channel, which is 0, and we will make it</div>
+<div class="wiki-line">listen to only you, which requires the <a href="/functions/llGetOwner/">llGetOwner</a>() function we used previously.</div>
+<div class="wiki-line">We will then need to use a listen event, its layout is like this</div>
+<div class="wiki-line">listen(integer channel, string name, key id, string message) {, replace the touch event with this.</div>
+<div class="wiki-line">we will then make the object annoy you by it saying "Really?" whenever you type something XD</div>
+<div class="wiki-line">This will involve using a <a href="/functions/llSay/">llSay</a> like we used in task 1.</div>
+<div class="wiki-line">Your script should look something like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        key owner = llGetOwner();
+
+        llListen(0, &quot;&quot;, owner, &quot;&quot;);
+    }
+
+//  when something has been heared
+    listen(integer channel, string name, key id, string message)
+    {
+        llSay(0, &quot;Received: &#x27;&quot; + message + &quot;&#x27;.&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line">To make it only listen for commands not on the <a href="/constants/PUBLIC_CHANNEL/">PUBLIC_CHANNEL</a>, which will be more secret and</div>
+<div class="wiki-line">which is less laggy in complex scripts, you can do this by changing the integer 0 to something</div>
+<div class="wiki-line">like 99, this time use a <a href="/functions/llOwnerSay/">llOwnerSay</a> instead of a llSay, which should make it secret.</div>
+<div class="wiki-line">Your script should look something like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llListen(99,&quot;&quot;,llGetOwner(),&quot;&quot;);
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+
+        llOwnerSay(&quot;Really?&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line">To chat in another channel, just type in the chat bar /channel before you type something,</div>
+<div class="wiki-line">in this case it will be "/99 hello" for example.To make it do only certain stuff when you say</div>
+<div class="wiki-line">certain commands we will have to use a if statement, like before but this time we will have</div>
+<div class="wiki-line">to check if the message equals the command, <a href="https://wiki.secondlife.com/wiki/if">if</a> (message == "Your Command Here").</div>
+<div class="wiki-line">Your script should look something like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llListen(99,&quot;&quot;,llGetOwner(),&quot;&quot;);
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        if (message == &quot;hello&quot;)
+        {
+            llOwnerSay(&quot;Hello to you too!&quot;);
+        }
+        else
+        {
+            llOwnerSay(&quot;INVALID COMMAND&quot;);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">To learn more about llListen take a look at:</div>
+<div class="wiki-line">https://wiki.secondlife.com/wiki/llListen</div>
+<div class="wiki-line"><strong>TASK 9</strong>:</div>
+<div class="wiki-line">-------</div>
+<div class="wiki-line">Now let's experiment with vectors, and make your object move non physically,</div>
+<div class="wiki-line">to do this we will need to use the function <a href="/functions/llSetPos/">llSetPos</a>, its layout is <a href="/functions/llSetPos/">llSetPos</a>(vector pos);</div>
+<div class="wiki-line">We will also use <a href="/functions/llGetPos/">llGetPos</a>() so we can make it move +1 of its current position.</div>
+<div class="wiki-line">Place the <a href="/functions/llSetPos/">llSetPos</a> function under a touch event with a vector &lt;0,0,1&gt; + <a href="/functions/llGetPos/">llGetPos</a>();.</div>
+<div class="wiki-line">Your script should look something like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        // Some scripters prefer to use a &#x27;Mnemonic Constant&#x27; for channel zero
+        // However, Mnemonic constants are much more useful and are recommended for less obvious values like CHANGED_OWNER instead of remembering the value 128
+        // Here is an example. &#x27;PUBLIC_CHANNEL&#x27; has the value 0.
+        llSay(PUBLIC_CHANNEL, &quot;Hello, Avatar!&quot;);
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+        vector oldPosition = llGetPos();
+
+        llSetPos(oldPosition + &lt;0.0, 0.0, 1.0&gt;);
+    }
+}</code></pre></div>
+<div class="wiki-line">A position vector layout is in the format x,y,z, so &lt;0,0,1&gt; will make it go up 1m.</div>
+<div class="wiki-line">to learn more take a look at:</div>
+<div class="wiki-line">https://wiki.secondlife.com/wiki/llSetPos</div>
+<div class="wiki-line"><strong>TASK 10</strong>:</div>
+<div class="wiki-line">--------</div>
+<div class="wiki-line">Like when editing an object, you can make it Phantom, Physical...</div>
+<div class="wiki-line">You can also do this with scripting, the function you have to use to do this is</div>
+<div class="wiki-line"><a href="/functions/llSetStatus/">llSetStatus</a>, its layout is <a href="/functions/llSetStatus/">llSetStatus</a>(integer status, integer value);, so if i wanted</div>
+<div class="wiki-line">to make my object go physical the integer status would be <a href="/constants/STATUS_PHYSICS/">STATUS_PHYSICS</a> or 1, if i wanted</div>
+<div class="wiki-line">to make my object go phantom i would use <a href="/constants/STATUS_PHANTOM/">STATUS_PHANTOM</a> or 16.</div>
+<div class="wiki-line">Your script should look something like this:</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHYSICS, TRUE);
+    }
+}</code></pre></div>
+<div class="wiki-line">---------------------------------------------------------------------------------------------------</div>
+<div class="wiki-line">You now know pretty much the basics of scripting,</div>
+<div class="wiki-line">but there are still many more functions to use and experiment with yet!!!!!!</div>
+<div class="wiki-line">To know more functions and what they do, take a look at these links below:</div>
+<div class="wiki-line">http://wiki.secondlife.com/wiki/LSL_Portal</div>
+<div class="wiki-line">http://www.lslwiki.net/lslwiki/wakka.php?wakka=HomePage</div>
+<div class="wiki-line">http://rpgstats.com/wiki/index.php?title=Main_Page</div>
+<div class="wiki-line">---------------------------------------------------------------------------------------------------</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Tutorials}}</code></span></div>

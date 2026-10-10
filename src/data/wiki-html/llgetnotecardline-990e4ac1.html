@@ -1,0 +1,364 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Requests the line <code>line</code> of the notecard <code>name</code> from the dataserver.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>line</code> is past the end of the notecard <a href="/constants/EOF/">EOF</a> is returned by the <a href="/events/dataserver/">dataserver</a>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If notecard contains embedded inventory items (such as textures and landmarks), <a href="/constants/EOF/">EOF</a> will be returned, regardless of the line requested.</li>
+<li>If the requested line is longer than 1024 bytes (<em>not</em> characters), <a href="/events/dataserver/">dataserver</a> will only return the first 1024 <em>bytes</em> of the line.</li>
+<li>To check that the returned line has not been truncated, use the example snippet on <a href="/functions/llStringToBase64/">llStringToBase64</a> to check the number of bytes returned in the <a href="/events/dataserver/">dataserver</a> event. If the string is exactly 1024 bytes, it <em>may</em> have been truncated.</li>
+<li>Do not use <a href="/functions/llStringLength/">llStringLength</a> for this, because strings in LSL support multi-byte characters (UTF-8 for LSL-2, UTF-16 for Mono).</li>
+<li>The maximum bytes returned by this function was increased from 255 bytes to 1024 bytes with server version <a href="https://releasenotes.secondlife.com/simulator/2021-10-25.565008.html" rel="noreferrer">2021-10-25.565008</a>.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>key notecardQueryId; //Identifier for the dataserver event
+
+string notecardName = &quot;MyNotecard&quot;; //Name of a notecard in the object&#x27;s inventory. Needs to be Full Perm for key checking for changed contents to work
+ 
+integer notecardLine; //Initialize the counter value at 0
+
+key notecardKey; //Store the notecard&#x27;s key, so we don&#x27;t read it again by accident.
+ 
+list notecardData; //List to store data read from the notecard.
+
+ReadNotecard()
+{
+    if (llGetInventoryKey(notecardName) == NULL_KEY)
+    { //Check if the notecard exists in inventory, and is has been saved since it&#x27;s creation (newly created notecards that are yet to be saved are assigned NULL_KEY).
+        llOwnerSay( &quot;Notecard &#x27;&quot; + notecardName + &quot;&#x27; is missing, unwritten, or not full permission.&quot;); //Notify user.
+        return; //Don&#x27;t do anything else.
+    }
+    else if (llGetInventoryKey(notecardName) == notecardKey) return;
+    //This notecard has already been read - call to read was made in error, so don&#x27;t do anything. (Notecards are assigned a new key each time they are saved.)
+
+    llOwnerSay(&quot;Began reading notecard: &quot; + notecardName); //Notify user that read has started.
+    notecardData = []; //Clear the memory of the previous notecard.
+    notecardKey = llGetInventoryKey(notecardName); //Remember the key of this iteration of the notecard, so we don&#x27;t read it again by accident.
+    notecardQueryId = llGetNotecardLine(notecardName, notecardLine);
+}
+ 
+default
+{
+    state_entry()
+    {
+        ReadNotecard(); //Pass off to the read function.
+    }
+    
+    changed(integer change)
+    {
+        if(change &amp; CHANGED_INVENTORY)
+        { //The object&#x27;s inventory just changed - the notecard could have been modified!
+            ReadNotecard();
+        }
+    }
+ 
+    dataserver(key query_id, string data)
+    {
+        if (query_id == notecardQueryId)
+        {
+            if (data == EOF) //Reached end of notecard (End Of File).
+            {
+                llOwnerSay(&quot;Done reading notecard, read &quot; + (string) notecardLine + &quot; notecard lines.&quot;); //Notify user.
+                llSay(DEBUG_CHANNEL,&quot;=== READ FROM NOTECARD: &quot; + notecardName + &quot; ===\n&quot; + llDumpList2String(notecardData,&quot;\n&quot;));
+                //Dump the contents of the notecard (for testing purposes).
+            }
+            else
+            {
+                notecardData += data; //Add the line being read to a new entry on the list.
+                ++notecardLine; //Increment line number (read next line).
+                notecardQueryId = llGetNotecardLine(notecardName, notecardLine); //Query the dataserver for the next notecard line.
+            }
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><pre><code>/////
+//  Generic Multi Notecard reader by Brangus Weir
+//  Given freely and published on wiki.secondlife.com
+//
+//  This script will read three note cards and store the results into three lists.
+//  It can be modified and extended to as many (or few) cards as you&#x27;d like to read. 
+//
+
+list gOneCard;    // All the lines from from the first card
+list gTwoCard;    // All the lines from from the second card
+list gThreeCard;  // All the lines from from the third card
+
+string gsCardOneName = &quot;One&quot;;  //Set these to the name of the invetory item.
+string gsCardTwoName = &quot;Two&quot;;
+string gsCardThreeName = &quot;Three&quot;;
+
+//Temporary variables for processing
+string g_sNoteCardName; // Name of the card to be read.
+list g_lTempLines;      // The resulting data pushed into a list
+integer g_iLine;        // The line count for the card reader
+key g_kQuery;           // The key of the card being read
+
+
+initialize(string _action) {
+    // Due to the execution order when using dataserver, this function sets the first card to 
+    // be read, and the excetuion finishes when called again with the _action set to &quot;finish&quot;.
+    if (_action == &quot;&quot;) {
+        loadNoteCard(gsCardOneName);
+    } else if (_action == &quot;finish&quot;) {
+        // All cards have been read into the lists... now you can do any kind of string
+        // manipulations to get the data you need to set your script.
+        // But here we will prove that the cards have been read with a loop
+
+        g_lTempLines = []; // lets not forget to delete this global, or it will be dead weight.
+
+        integer len = llGetListLength(gOneCard);  //Always evaluate this once, don&#x27;t do it
+                                                  //INSIDE the for loop like noob programers will.
+                                                  //Reduce lag, THINK ABOUT MACHINE CYCLES!
+        integer i = 0;
+        for (; i&lt; len; ++i)
+            llSay(0, llList2String(gOneCard,i));
+
+        len = llGetListLength(gTwoCard);
+        for (i = 0; i&lt; len; ++i)
+            llSay(0, llList2String(gTwoCard,i));
+
+        len = llGetListLength(gThreeCard);
+        for (i = 0; i&lt; len; ++i)
+            llSay(0, llList2String(gThreeCard,i));
+    }                
+                              
+}
+
+loadNoteCard( string _notecard ) {
+    g_lTempLines = []; //clear the temp lines
+    g_sNoteCardName = _notecard;
+    g_iLine = 0;
+    g_kQuery = llGetNotecardLine(g_sNoteCardName, g_iLine);  
+    
+}
+
+notecardFinished(string _notecard){
+    // Called at the end of each notecard as it is read. The temp results are stored
+    // and the next card is commanded to be read.
+    if (_notecard == gsCardOneName) {
+        gOneCard = g_lTempLines;
+        loadNoteCard(gsCardTwoName);
+    } else if (_notecard == gsCardTwoName) {
+        gTwoCard = g_lTempLines;
+        loadNoteCard(gsCardThreeName);
+    } else if (_notecard == gsCardThreeName) {
+        gThreeCard = g_lTempLines;
+        initialize(&quot;finish&quot;);  // Finally pass execution to finish the initialization.   
+    }    
+}
+
+default
+{
+    state_entry()
+    {
+    }
+    
+    touch_start(integer _num_det){
+        initialize(&quot;&quot;);
+    }
+     
+    dataserver(key _query_id, string _data) 
+    {
+        if (_query_id == g_kQuery) {
+            // this is a line of our notecard
+            if (_data != EOF) {    
+                g_lTempLines += _data;
+                //request a next line
+                ++g_iLine;   // increment line count
+                g_kQuery = llGetNotecardLine(g_sNoteCardName, g_iLine);
+            } else {
+                //The notecard has been read 
+                //notify end of read
+                notecardFinished(g_sNoteCardName);
+            }
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>/////
+//  Generic Multi Notecard reader by Randur Source
+//  Given freely and published on wiki.secondlife.com
+//
+//  This script will read all note cards in sequence and dump the results into chat as an example.
+//  It can be modified and extended to do other things to the data. 
+//
+
+integer inventorycnt;
+integer notecardlinecnt;
+integer notecardlinenumber;
+string notecardname;
+key linenumberid;
+key lineid;
+
+getnextnotecardlinenumber()
+{
+    // first get the number of lines from the notecard
+    inventorycnt++;
+    if (inventorycnt &lt; llGetInventoryNumber(INVENTORY_NOTECARD))
+    {
+        notecardname = llGetInventoryName(INVENTORY_NOTECARD,inventorycnt);
+        linenumberid = llGetNumberOfNotecardLines(notecardname);
+    }
+    else
+        llOwnerSay(&quot;Done.&quot;);
+}
+
+getnextnotecardline()
+{
+     // get the next line from the notecard or skip to the next notecard
+    notecardlinecnt++;
+    if (notecardlinecnt &lt; notecardlinenumber)
+        lineid = llGetNotecardLine(notecardname,notecardlinecnt);
+    else
+        getnextnotecardlinenumber();
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        if (llDetectedKey(0) != llGetOwner()) return; // allow owner only
+
+        inventorycnt = -1;
+        getnextnotecardlinenumber();
+    }
+    
+    dataserver(key queryid,string data)
+    {
+        if (queryid == linenumberid) // this was a line number lookup
+        {
+            linenumberid = NULL_KEY;
+            notecardlinenumber = (integer)data;
+            if (notecardlinenumber == 0)
+                getnextnotecardlinenumber();
+            else
+            {
+                notecardlinecnt = -1;
+                getnextnotecardline();
+            }
+        }
+        else if (queryid == lineid) // this was a data line lookup
+        {
+            lineid = NULL_KEY;
+
+            // Example of what to do with the data:
+            // Test for valid avatar names, possibly multiple names on each line, separated by ,
+            // and say them in chat to the owner
+            list names = llParseString2List(data,[&quot;,&quot;],[]); // split lines on ,
+            integer len = llGetListLength(names); // I wouldn&#x27;t dare to put this inside the for loop
+            integer cnt;
+            for (cnt = 0; cnt &lt; len; cnt++)
+            {
+                string name = llDumpList2String(llParseString2List(llList2String(names,cnt),[&quot; &quot;],[]),&quot; &quot;); // remove extra spaces
+                if (llGetListLength(llParseString2List(name,[&quot; &quot;],[])) == 2) // check for first + lastname
+                    llOwnerSay(notecardname + &quot;: &quot; + name);
+            }
+
+            getnextnotecardline();
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetNumberOfNotecardLines/">llGetNumberOfNotecardLines</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetNotecardLineSync/">llGetNotecardLineSync</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/dataserver/">dataserver</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-added-c4a824ad/">LSL Added</a>: <code>{{LSL Added|0.6.0|remote=http://secondlife.wikia.com/wiki/Version_0.6.0}}</code></span></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-negative-index-2a0eb411/">Template:LSL Function/negative index</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+Format:
+&lt;nowiki&gt;{{LSL Function/negative index|boolean|p1|p2|p3}}&lt;/nowiki&gt;&lt;br/&gt;
+Exclude p1, p2, or p3 if not used.
+
+{{#vardefine:also_articles|{{LSL DefineRow||Test}}}}
+{{#vardefine:ni_mode|true}}
+{{#vardefine:ni_nc|}}
+{{#vardefine:ni_p1|number}}
+{{#vardefine:ni_p2|p2}}
+&lt;!--{{#vardefine:ni_p3|p3}}--&gt;
+
+&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:ni_c|{{#if:{{{2|{{#var:ni_p1}}}}}|{{#if:{{{3|{{#var:ni_p2}}}}}|{{#if:{{{4|{{#var:ni_p3}}}}}|3|2}}|1}}|0}}}}
+
+{{#vardefine:t|{{#ifeq:{{{1|{{#var:ni_mode}}}}}|true|{{#switch:{{#var:ni_c}}|3|2=LSL_Function/negative_index/range|1=LSL_Function/negative_index/single}}}}}}
+
+{{{{#var:t}}|{{{2|{{#var:ni_p1}}}}}|{{{3|{{#var:ni_p2}}}}}|{{{4|{{#var:ni_p3}}}}}|noExclude={{{noExclude|}}}}}
+
+{{#if:{{{noSpec|}}}||
+{{#vardefine:spec|{{#var:spec}}
+{{#if:{{#var:t}}|
+{{{!}} {{Prettytable|style=float:left;}}
+{{!}}-{{Hl2}}
+! Index
+! Positive
+! Negative
+{{!}}-
+{{!}} First
+{{!}} &lt;code&gt;0&lt;/code&gt;
+{{!}} &lt;code&gt;-{{{length|length}}}&lt;/code&gt;
+{{!}}-
+{{!}} Last
+{{!}} &lt;code&gt;{{{length|length}}} - 1&lt;/code&gt;
+{{!}} &lt;code&gt;-1&lt;/code&gt;
+{{!}}}
+=== Indexes ===
+&lt;div style=&quot;display:table;&quot;&gt;&lt;div style=&quot;display:block;&quot;&gt;
+*Positive indexes count from the beginning, the first item being indexed as &lt;code&gt;0&lt;/code&gt;, the last as &lt;code&gt;({{{length|length}}} - 1)&lt;/code&gt;.
+&lt;/div&gt;&lt;/div&gt;
+&lt;div style=&quot;display:table;&quot;&gt;&lt;div style=&quot;display:block;&quot;&gt;
+*Negative indexes count from the far end, the first item being indexed as &lt;code&gt;-{{{length|length}}}&lt;/code&gt;, the last as &lt;code&gt;-1&lt;/code&gt;. 
+&lt;/div&gt;&lt;/div&gt;
+}}
+}}
+}}
+
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{#if:{{#var:t}}|{{LSL_DefineRow||{{LSLGC|Negative_Index{{#var:lang}}|Negative Index}}|}}}}}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+{{#vardefineecho:ni_ps|{{#switch:{{#var:ni_c}}
+  |0=This function
+  |1={{LSLP|{{{2}}}}}
+  |2={{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}}
+  |3={{LSLP|{{{2}}}}}, {{LSLP|{{{3}}}}} &amp; {{LSLP|{{{4}}}}}
+ }}}} {{#if:{{#var:t}}| support{{#ifexpr:{{#var:ni_c}}&gt;1||s}}| &#x27;&#x27;do{{#ifexpr:{{#var:ni_c}}&gt;1||es}} not&#x27;&#x27; support }} {{LSLGC|Negative_Index{{#var:lang}}|negative indexes}}.{{PBR}}
+}}
+
+{{#vardefine:footer|{{#var:footer}}
+{{#if:{{#var:t}}|{{#ifeq:{{NAMESPACE}}|Template||{{#if:{{#var:self}}{{{self|}}}{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Negative Index{{#var:lang}}}}}}}}|
+{{#if:{{#var:self}}{{{self|}}}{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Positive_Index_Only{{#var:lang}}}}}}
+}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#if:{{{nc|{{#var:ni_nc}}}}}||
+* If {{#switch:{{#var:ni_c}}
+ |3=either {{LSLP|{{{2}}}}}, {{LSLP|{{{3}}}}} or {{LSLP|{{{4}}}}} are
+ |2=either {{LSLP|{{{2}}}}} or {{LSLP|{{{3}}}}} are
+ |1={{LSLP|{{{2}}}}} is}} out of bounds {{#if:{{{oob-return|}}}|this function returns {{{oob-return|}}} and}} the script continues to execute without an error message.
+{{#if:{{#var:t}}|{{#ifexpr:{{#var:ni_c}}&gt;1|{{#if:{{{noExclude|}}}|* {{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}} will not form an [[#exclusion_range|exclusion range]] when {{LSLP|{{{2}}}}} is past {{LSLP|{{{3}}}}} (Approximately: {{LSLP|{{{2}}}}} &gt; {{LSLP|{{{3}}}}}), instead it will act as if {{LSLP|{{{2}}}}} was zero &amp; {{LSLP|{{{3}}}}} was -1.|* {{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}} will form an [[#exclusion_range|exclusion range]] when {{LSLP|{{{2}}}}} is past {{LSLP|{{{3}}}}} (Approximately: {{LSLP|{{{2}}}}} &gt; {{LSLP|{{{3}}}}}). }}}}}}
+}}}}
+
+}}&lt;noinclude&gt;
+==Debugging==
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|spec}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|notes}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPairTable|also_articles}}
+|-
+{{VarPair|footer}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-notecard-dd319050/">Template:LSL Function/notecard</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{LSL_Function/inventory|{{{1|name}}}|uuid={{{uuid|}}}|type=notecard}}{{#if:
+
+{{#vardefine:caveats|{{#var:caveats}}
+* If {{LSLP|{{{1|name}}}}} is a new empty notecard (never saved) then an error &quot;Couldn&#x27;t find notecard ~NAME~&quot; (~NAME~ being the value of {{LSLP|{{{1|name}}}}}) will be shouted on the [[DEBUG_CHANNEL]]. This is because until a notecard is saved for the first time, it does not exist as an asset only as an inventory placeholder.
+** If the notecard is {{LSLGC|Permissions/Asset|full-perms}} you can check for this with [[llGetInventoryKey]] which will return [[NULL_KEY]] in this case. However if notecard is not {{LSLGC|Permissions/Asset|full-perms}}, there is no way to avoid the error message.
+}}
+
+}}&lt;noinclude&gt;
+{{Box|Caveats|2={{#var:caveats}}}}
+&lt;/noinclude&gt;</code></pre></details></section>

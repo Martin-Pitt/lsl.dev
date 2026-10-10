@@ -1,0 +1,92 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line"><code>id</code> must specify a valid rezzed prim or avatar key, present in or otherwise known to the sim in which the script is running, otherwise an empty string is returned. In the case of an avatar, this function will still return a valid name if the avatar is a child agent of the sim (i.e., in an adjacent sim, but presently able to see into the one the script is in), or for a short period after the avatar leaves the sim (specifically, when the client completely disconnects from the sim, either as a main or child agent).<br /><br /></div>
+<div class="wiki-line">Keys of inventory items will not work; in the case of these, use <a href="/functions/llGetInventoryName/">llGetInventoryName</a> instead.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the <a href="/wiki/category-lsl-avatar-name-1fcd5f3e/">legacy name</a> of the prim or avatar specified by <code>id</code>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>It is difficult to tell the difference between a prim that has a name that is an empty string and a prim that is not in the sim, or because an invalid key was specified. Use <a href="/functions/llGetObjectDetails/">llGetObjectDetails</a> to avoid this problem.</li>
+<li>To get around the "avatar must be present" limitation, you can use the <a href="/functions/llRequestAgentData/">llRequestAgentData</a> function and the <a href="/events/dataserver/">dataserver</a> event to obtain the avatar's name from a key.</li>
+<li>The opposite function (<a href="/functions/llName2Key/">llName2Key</a>) can be used to find the user key associated with an avatar in the same region. To find the user key of an avatar anywhere on the grid, use <a href="/functions/llRequestUserKey/">llRequestUserKey</a>, which triggers a <a href="/events/dataserver/">dataserver</a> event.</li>
+<li>If an avatar is "ghosted" (which occasionally happens due to a longstanding server bug), an empty string is returned even though the avatar is seemingly present and shows up in <a href="/functions/llSensor/">llSensor</a> and the <a href="https://wiki.secondlife.com/wiki/Mini-Map">Mini-Map</a>.  This fact can be used as the basis of a <a href="/wiki/ghost-detector-0c0c7304/">Ghost Detector</a> script.</li>
+<li>Unlike the related functions <a href="/functions/llGetUsername/">llGetUsername</a> and <a href="/functions/llRequestUsername/">llRequestUsername</a>, this function returns a 'nice' name in proper case and - if applicable - with a space, e.g. "Peter Stindberg", instead of "peter.stindberg" (or "Josh" instead of "josh.resident") as returned by the other two functions.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Best viewed in Chat History (ctrl-h)
+
+default
+{
+    collision_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        string name = llKey2Name(id);
+
+        string detectedName = llDetectedName(0);
+
+        llSay(0, &quot;llKey2Name: &quot; + name
+            + &quot;\nllDetectedName: &quot; + detectedName);
+    }
+
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        string name = llKey2Name(id);
+
+        string detectedName = llDetectedName(0);
+
+        llSay(0, &quot;llKey2Name: &quot; + name
+            + &quot;\nllDetectedName: &quot; + detectedName);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line"><strong>World Wide Web Consortium</strong></div>
+<ul>
+<li><a href="https://wiki.secondlife.com/wiki/N2K">N2K</a> - Independent of databases or bots, this uses the <a href="http://cgi.w3.org/cgi-bin/html2txt" rel="noreferrer">W3C html2text</a> to convert the viewer search to text and extract the key from Second Life's own services.</li>
+</ul>
+<div class="wiki-line"><strong>Active Name2Key Databases:</strong></div>
+<ul>
+<li><a href="http://w-hat.com/name2key" rel="noreferrer">W-Hat name2key</a> (last names replaced with the <em>Resident</em> word for the <a href="/wiki/category-lsl-username-125522d0/">Usernames</a>)</li>
+<li><a href="http://kdc.ethernia.net/sys/name2key.php" rel="noreferrer">KDC name2key</a></li>
+</ul>
+<div class="wiki-line"><strong>Dead Name2Key Databases:</strong></div>
+<ul>
+<li><a href="http://kubwa.net/index.php?cmd=name2key" rel="noreferrer">Kubwa name2key</a> (Bot based name2key Database; Supports: <a href="/wiki/category-lsl-legacy-name-97d24b19/">Legacy</a> and <a href="/wiki/category-lsl-username-125522d0/">Username</a> formats; Shows related names; SSL support.) &lt;font color=red&gt;(Appears to be gone as of Apr 2013 [Reports Error 404])&lt;/font&gt;</li>
+<li>&lt;s&gt;http://wiki.apez.biz/Development (web-service API functions getAvatarKey and getAvatarName)&lt;/s&gt; &lt;font color=red&gt;(Apez seems to be gone ? - May 2011)&lt;/font&gt;</li>
+<li>&lt;s&gt;http://www.libsecondlife.org/protocol/index.php/Name2key&lt;/s&gt;&lt;font color=red&gt;(Appears to be gone as of Apr 2008, but search for name2key on that site for more information)&lt;/font&gt;</li>
+<li>&lt;s&gt;http://www.ulrikasheim.org/tools/name2key.html&lt;/s&gt;&lt;font color=red&gt;(Appears to be gone as of Apr 2008)&lt;/font&gt;</li>
+<li>&lt;s&gt;<a href="http://www.db4mv.info" rel="noreferrer">DB4MV name2key</a> (Name2Key Database for Avatars (<a href="/wiki/category-lsl-legacy-name-97d24b19/">Legacy Names</a>,<a href="/wiki/category-lsl-username-125522d0/">Usernames</a>, and <a href="/wiki/category-lsl-display-name-eb239ef2/">Display Names</a>, GroupNames and Keys, LSL API)&lt;/s&gt;&lt;font color=red&gt;(Currently listed as non-existant by host)&lt;/font&gt;</li>
+</ul>
+<div class="wiki-line"><strong>Name2Key Libraries:</strong></div>
+<ul>
+<li><a href="https://wiki.secondlife.com/wiki/Name2Key_in_LSL">Name2Key_in_LSL</a></li>
+<li><a href="https://wiki.secondlife.com/wiki/User:Ugleh_Ulrik/Name2Key">Ugleh Ulrik&#x27;s Name2Key PHP script</a></li>
+<li><a href="https://wiki.secondlife.com/wiki/Failsafename2key">Failsafe name2key script</a></li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetUsername/">llGetUsername</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetDisplayName/">llGetDisplayName</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectDetails/">llGetObjectDetails</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestAgentData/">llRequestAgentData</a> — Uses the <a href="/events/dataserver/">dataserver</a> to request avatar information</div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Prim_Attribute_Overloading">Prim Attribute Overloading</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-added-c4a824ad/">LSL Added</a>: <code>{{LSL Added|0.4.0|remote=http://secondlife.wikia.com/wiki/Version_0.4.0#Scripting}}</code></span></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-215"><a href="/wiki/template-issues-svc-215-86faa510/">Template:Issues/SVC-215</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-215|&#x27;&#x27;&#x27;llRequestAgentKey&#x27;&#x27;&#x27;() (&#x27;&#x27;&#x27;llName2Key&#x27;&#x27;&#x27;())|type=nf}}</code></pre></details><p id="svc-4170"><a href="/wiki/template-issues-svc-4170-f1df5f5c/">Template:Issues/SVC-4170</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-4170|[[llKey2Name]] returns avatar names with double space between first and last (sometimes)|type=bug|dnc=*}}</code></pre></details><p id="svc-3935"><a href="/wiki/template-issues-svc-3935-23220b33/">Template:Issues/SVC-3935</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-3935|[[llKey2Name]] returns text &quot;(Loading...)&quot; instead of empty string or avatar name|type=bug}}</code></pre></details><p><a href="/wiki/template-lsl-function-uuid-f11a4088/">Template:LSL Function/uuid</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}{{#if:{{{group|1}}}|{{LSLGC|Group|group}},&amp;#32;}}{{LSLGC|Avatar|avatar}} or {{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{ph|}}}|{{{ph|}}}&amp;#32;|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}}}{{#if:{{{group|1}}}|group,&amp;#32;}}avatar or {{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Avatar/As A Parameter}}
+}}}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

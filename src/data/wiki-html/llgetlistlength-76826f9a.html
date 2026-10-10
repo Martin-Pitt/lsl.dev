@@ -1,0 +1,42 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is the number of elements in the list <code>src</code>.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//Basic usage
+default
+{
+    state_entry()
+    {
+        list testList = [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;];
+        integer length = llGetListLength(testList);
+        llOwnerSay(&quot;There are &quot; + (string)length + &quot; entries in the list.&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><h3 id="best-practices">Best Practices</h3>
+<div class="wiki-line">When using list length to help you loop through a list, it is better to determine the length first, then start your loop:</div>
+<div class="wiki-line"><pre><code>integer length = llGetListLength(mylist);
+
+integer index;// default is 0
+while (index &lt; length)
+{
+    llSay(0, llList2String(mylist, index));
+    ++index;
+}</code></pre></div>
+<div class="wiki-line">The following example is to illustrate what not to do, it calculates the length in the "for" loop and is inefficient because the length gets recalculated at each pass through the loop. This should only ever be done if the list is in fact changing (in length) with each iteration of the loop<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|Recalculating the length is slow because the VM duplicates the entire list (including the values) when it is pushed on the stack (so it can be popped off the stack when the length is calculated).}}</code></span>.</div>
+<div class="wiki-line"><pre><code>integer index;// default is 0
+while (index &lt; llGetListLength(mylist))
+{
+    llSay(0, llList2String(mylist, index));
+    ++index;
+}</code></pre></div>
+<div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">Please read <a href="https://wiki.secondlife.com/wiki/User:Kireji_Haiku/How_to_deal_with_lists_in_LSL">this intro of how to iterate over a list in LSL</a>.</div></aside></div>
+<h3 id="lso-optimizations">LSO Optimizations</h3>
+<div class="wiki-line">A faster and lighter (in bytecode) way to determine the length of a list is to do a not-equals compare with a null list. This works because the list not-equals compare returns the difference between the lengths, meaning that it returns the same result as <code>llGetListLength()</code>, minus the overhead in bytecode, and performance penalty of calling a non-native function. Note: This optimization is much less beneficial time-wise in Mono as Mono's llGetListLength function is almost twice as fast, however the bytecode saving is still about 30 bytes.</div>
+<div class="wiki-line"><pre><code>list in;
+integer len_in = llGetListLength(in);
+integer flen_in = (in != []);
+//flen_in and len_in will be the same
+
+integer neg_len_in = -llGetListLength(in);
+integer fneg_len_in = ([] != in);
+//fneg_len_in and neg_len_in will be the same</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llListStatistics/">llListStatistics</a> — <a href="/constants/LIST_STAT_NUM_COUNT/">LIST_STAT_NUM_COUNT</a> – Returns the number of <a href="https://wiki.secondlife.com/wiki/integer">integer</a>s and <a href="https://wiki.secondlife.com/wiki/float">float</a>s in the list</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llStringLength/">llStringLength</a> — Returns the number of characters in a string.</div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-issues-svc-6364-ca756789/">Issues/SVC-6364</a>: <code>{{Issues/SVC-6364}}</code></span></div></section>

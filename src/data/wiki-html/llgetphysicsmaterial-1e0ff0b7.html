@@ -1,0 +1,101 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Used to get the physical characteristics of an object.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> in the form <code>[&nbsp;<a href="https://wiki.secondlife.com/wiki/float">float</a>&nbsp;<code>gravity_multiplier</code>, <a href="https://wiki.secondlife.com/wiki/float">float</a>&nbsp;<code>restitution</code>, <a href="https://wiki.secondlife.com/wiki/float">float</a>&nbsp;<code>friction</code>, <a href="https://wiki.secondlife.com/wiki/float">float</a>&nbsp;<code>density</code>&nbsp;]</code></div>
+<div class="wiki-line"><div class="wiki-related-row">float — gravity_multiplier — <span class="wiki-template"><code>{{#var:p_gravity_multiplier_desc}}</code></span></div></div>
+<div class="wiki-line"><div class="wiki-related-row">float — restitution — <span class="wiki-template"><code>{{#var:p_restitution_desc}}</code></span></div></div>
+<div class="wiki-line"><div class="wiki-related-row">float — friction — <span class="wiki-template"><code>{{#var:p_friction_desc}}</code></span></div></div>
+<div class="wiki-line"><div class="wiki-related-row">float — density — <span class="wiki-template"><code>{{#var:p_density_desc}}</code></span></div></div>
+<table></table></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+        list params = llGetPhysicsMaterial();
+        llOwnerSay(
+            &quot;\nGravity multiplier: &quot; + (string)llList2Float(params, 0) +
+            &quot;\nRestitution: &quot; + (string)llList2Float(params, 1) +
+            &quot;\nFriction: &quot; + (string)llList2Float(params, 2) +
+            &quot;\nDensity: &quot; + (string)llList2Float(params, 3) + &quot;kg/m^3&quot;
+        );
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetPhysicsMaterial/">llSetPhysicsMaterial</a></div></div></section>
+<section><h2 id="tests">Tests</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Physics_Material_Settings_test">Physics Material Settings test</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-09-23-241511"> 23/09/2011 </a></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-physics-materials-1ad835de/">Template:LSL Function/physics materials</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:material_mask|mask}}
+
+{{Footnote|The default values for friction and restitution depend upon the prim&#x27;s [[PRIM_MATERIAL|material]].|The default values for friction and restitution depend upon the prim&#x27;s material (PRIM_MATERIAL).|handle=material}}
+
+&lt;!-- caveats &amp; parameter descriptions copied from PRIM_PHYSICS_MATERIAL article --&gt;
+{{#vardefine:p_{{#var:material_mask}}_desc|bitwise combination of [[DENSITY]], [[FRICTION]], [[RESTITUTION]], and [[GRAVITY_MULTIPLIER]] and specifies which floats to actually apply}}
+{{#vardefine:p_gravity_multiplier_desc|range {{Interval|gte=-1.0|center=gravity_multiplier|lte=+28.0}}, default:&amp;nbsp;1.0}}
+{{#vardefine:p_restitution_desc|range {{Interval|gte=0.0|center=restitution|lte=1.0}}, default:&amp;nbsp;{{Interval|gte=0.3|center=restitution|lte=0.9}} {{Footnote|handle=material}}}}
+{{#vardefine:p_friction_desc|range {{Interval|gte=0.0|center=friction|lte=255.0}}, default:&amp;nbsp;{{Interval|gte=0.2|center=friction|lte=0.9}}{{Footnote|handle=material}}}}
+{{#vardefine:p_density_desc|range {{Interval|gte=1.0|center=density|lte=22587.0}} [[llGetMassMKS|kg]]/m^3, default:&amp;nbsp;1000.0}}
+
+{{#vardefine:p_{{#var:material_mask}}_hover|bitwise combination of DENSITY, FRICTION, RESTITUTION, and GRAVITY_MULTIPLIER and specifies which floats to actually apply}}
+{{#vardefine:p_gravity_multiplier_hover|range -1.0 to +28.0, default:&amp;nbsp;1.0}}
+{{#vardefine:p_restitution_hover|range 0.0 to 1.0, default values are in the range 0.3 to 0.9 (note, a collision between two objects with restitution 1.0 will still not be perfectly elastic due to damping in the physics engine)}}
+{{#vardefine:p_friction_hover|range 0.0 to 255.0, default values are in the range 0.2 to 0.9}}
+{{#vardefine:p_density_hover|range 1.0 to 22587.0 (in kg/m^3), default:&amp;nbsp;1000.0}}
+
+{{#vardefine:physics_material_rows|
+!{{!}} {{LSLPT|{{#var:material_mask}}}} Flags
+! title=&quot;Value&quot; {{!}} V
+! colspan=&quot;6&quot; {{!}} Description
+{{!}}-
+{{!}} {{LSL Const|DENSITY|integer|1}}
+{{!}} {{#var:value}}
+{{!}} colspan=&quot;6&quot; {{!}} Indicates that {{LSLP|density}} parameter is enabled and will override the previous value.
+{{!}}-
+{{!}} {{LSL Const|FRICTION|integer|2}}
+{{!}} {{#var:value}}
+{{!}} colspan=&quot;6&quot; {{!}} Indicates that {{LSLP|friction}} parameter is enabled and will override the previous value.
+{{!}}-
+{{!}} {{LSL Const|RESTITUTION|integer|4}}
+{{!}} {{#var:value}}
+{{!}} colspan=&quot;6&quot; {{!}} Indicates that {{LSLP|restitution}} parameter is enabled and will override the previous value.
+{{!}}-
+{{!}} {{LSL Const|GRAVITY_MULTIPLIER|integer|8}}
+{{!}} {{#var:value}}
+{{!}} colspan=&quot;6&quot; {{!}} Indicates that {{LSLP|gravity_multiplier}} parameter is enabled and will override the previous value.
+}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+* A collision between two objects with {{LSLP|restitution}} 1.0 will still not be perfectly elastic due to damping in the physics engine.
+}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+The default values for {{LSLP|friction}} and {{LSLP|restitution}} depend upon the [[PRIM_MATERIAL|material type]].}}
+
+{{#vardefine:history|{{#var:history}}{{PBR}}
+* Content taken from [[Release Notes/Second Life Server/11#11.09.23.241511]]&#x27;&#x27;
+* Documentation expanded with information from [[Physics Material Settings test]].{{PBR}}}}
+
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{#var:material_mask}}_desc}}
+|-
+{{VarPair|p_gravity_multiplier_desc}}
+|-
+{{VarPair|p_restitution_desc}}
+|-
+{{VarPair|p_friction_desc}}
+|-
+{{VarPair|p_density_desc}}
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|history}}
+|-
+{{VarPairTable|physics_material_rows}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

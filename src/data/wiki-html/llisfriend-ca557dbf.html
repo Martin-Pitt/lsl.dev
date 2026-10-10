@@ -1,0 +1,60 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is <a href="/constants/TRUE/">TRUE</a> if <code>agent_id</code> and the owner of the <a href="https://wiki.secondlife.com/wiki/prim">prim</a> the <a href="/wiki/script-102acc10/">script</a> is in are friends, otherwise <a href="/constants/FALSE/">FALSE</a>.</div></section>
+<section><h2 id="specification">Specification</h2><ul>
+<li>If the prim is owned by a group this function behaves identically to <a href="/functions/llSameGroup/">llSameGroup</a></li>
+<li>This function will return <a href="/constants/FALSE/">FALSE</a> under the following edge cases:</li>
+<li>If neither the owner, nor the target agent are in the region.</li>
+<li>If the agent_id does not specify an agent.</li>
+</ul></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>You are not your own friend.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSensorRepeat(&quot;&quot;, NULL_KEY, AGENT, 95, PI, 10);
+    }
+
+    sensor(integer count)
+    {
+        integer index;
+        for (index = 0; index &lt; count; ++index)
+        {
+            string is_is_not = &quot; is NOT &quot;;
+            if (llIsFriend(llDetectedKey(index)))
+            {
+                is_is_not = &quot; is &quot;;
+            }
+            llSay(0, llDetectedName(index) + is_is_not + &quot;a friend.&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedGroup/">llDetectedGroup</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSameGroup/">llSameGroup</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-uuid-f11a4088/">Template:LSL Function/uuid</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}{{#if:{{{group|1}}}|{{LSLGC|Group|group}},&amp;#32;}}{{LSLGC|Avatar|avatar}} or {{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{ph|}}}|{{{ph|}}}&amp;#32;|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}}}{{#if:{{{group|1}}}|group,&amp;#32;}}avatar or {{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Avatar/As A Parameter}}
+}}}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

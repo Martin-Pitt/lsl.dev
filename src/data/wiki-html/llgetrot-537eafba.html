@@ -1,0 +1,31 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/rotation">rotation</a> that is the prim's rotation relative to the <a href="https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region">region</a>'s axes.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><a href="/functions/llGetRot/">llGetRot</a> incorrectly reports the avatars rotation when called from the root of an attached object, use <a href="/functions/llGetLocalRot/">llGetLocalRot</a> for root prims, instead</li>
+<li><a href="/functions/llGetRot/">llGetRot</a> will return an accurate facing for Avatars seated or in mouselook, but only a rough direction otherwise when called from an attached prim.</li>
+<li>When called in an attachment's child prim, the reported rotation will only be visually correct if the object's root is attached to <a href="/constants/ATTACH_AVATAR_CENTER/">ATTACH_AVATAR_CENTER</a>, at <a href="/constants/ZERO_ROTATION/">ZERO_ROTATION</a>. Moving the attachment's root or changing the attachment point will not affect the reported rotation. Avatar animation is invisible to the simulator, so it also does not affect the reported rotation. Also see <a href="https://wiki.secondlife.com/wiki/Rotation#single-or-root-prims-vs-linked-prims-vs-attachments">Single or Root Prims vs Linked Prims vs Attachments</a>.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code> //-- rotates an object to face the nearest cardinal direction (N,E,S,W)
+ //-- assumes build is aligned to root object facing
+
+default{
+  state_entry()
+  {
+    llSay( 0, &quot;Rotate me in edit, then touch to make me face the nearest compass point&quot; );
+  }
+
+  touch_start( integer vIntTouches )
+  {
+     //-- convert our rotation to x/y/z radians
+    vector vRadBase = llRot2Euler( llGetRot() );
+     //-- round the z-axis to the nearest 90deg (PI_BY_TWO = 90deg in radians)
+    llSetRot( llEuler2Rot( &lt;0.0, 0.0, llRound( vRadBase.z / PI_BY_TWO ) * PI_BY_TWO &gt; ) );
+  }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLocalRot/">llGetLocalRot</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRootRotation/">llGetRootRotation</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimitiveParams/">llGetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetRot/">llSetRot</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLocalRot/">llSetLocalRot</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLinkPrimitiveParamsFast/">llSetLinkPrimitiveParamsFast</a></div></div></section>

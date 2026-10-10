@@ -1,0 +1,74 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets whether touches detected on this prim are passed to the root <a href="https://wiki.secondlife.com/wiki/prim">prim</a>.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llPassCollisions/">llPassCollisions</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/touch_start/">touch_start</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/touch/">touch</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/touch_end/">touch_end</a></div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li>Introduction: ?</li>
+<li>Change: <a href="https://jira.secondlife.com/browse/SVC-5923" rel="noreferrer">SVC-5923</a> - Server version 1.40.2 - New <code>pass</code> value added: 2</li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-3306"><a href="/wiki/template-issues-svc-3306-cc73f914/">Template:Issues/SVC-3306</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-3306|Add enumeration to [[llPassCollisions]]() to provide [[PASS_ALWAYS]], [[PASS_IF_NOT_HANDLED]], and [[PASS_NEVER]] as explicit options.&lt;br&gt;(Was: {{LSLGC|Collision}}s passed to parent REGARDLESS [[llPassCollisions]]([[FALSE]]) in child)|type=nf|status=fixp}}</code></pre></details><p><a href="/wiki/template-lslgc-36716c81/">Template:LSLGC</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>[[:Category:LSL {{{1}}}|{{#if:{{{2|}}}|{{{2}}}|{{{1}}}}}]]&lt;noinclude&gt;
+{{Documentation}}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-pass-14f55868/">Template:LSL Function/Pass</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:header|{{#var:header}}
+{{#switch:{{#if:{{{nc|}}}|Template|{{NAMESPACE}}}}|Template=|User=|}}}}
+
+{{#vardefine:p_{{{1|}}}_desc|PASS_* flag&amp;#32;}}
+{{#vardefine:p_{{{1|}}}_hover|PASS_* flag&amp;#32;}}
+
+&lt;!--
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Pass{{#var:lang}}}}{{#if:{{{mode|}}}|{{LSLC|Pass/{{{mode}}}{{#var:lang}}}}}}
+}}}}}}
+&lt;/includeonly&gt;
+--&gt;
+
+{{#if:{{{noconst|}}}{{#var:pass_constants}}||
+{{#vardefine:constants_nb|
+{{LSL Constants/Pass|{{{1|}}}|{{{2|}}}|{{{3}}}|default={{{default|}}}}}{{#var:constants_nb}}}}
+{{#vardefine:pass_constants|*}}
+}}
+
+{{#if:{{{nocaveats|}}}||
+{{#vardefine:caveats|
+* Has no known effect if called from within the root prim.
+* The script must be located in the prim whose pass-touch behavior is being changed; if not, the prim reverts to the default pass-touch setting.
+{{#var:caveats}}}}
+}}
+
+{{#if:{{{default|}}}|
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+Whether {{{3|}}} are passed to the root prim depends not only on which PASS_* flag is selected, but may also depend on if there is a script that in the prim that handles one of the {{{2|}}} events. For this reason most users will want to use {{#var:PASS_ALWAYS}} or {{#var:PASS_NEVER}} as they do not have this variable behavior.
+
+The default value for this attribute is {{#var:{{{default|}}}}}.{{PBR}}
+}}
+}}
+
+{{#if:{{{tf|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|
+{{#vardefine:deepnotes|{{#vardefine:deepnotes|}}{{PBR}}
+==== [[TRUE]] &amp; [[FALSE]] vs. PASS_* flags ====
+Prior to Server Version 1.40.2, {{LSLPT|{{{1|}}}}} was couched in terms of being a [[:Category:LSL_Integer/boolean|boolean]] and the only meaningful values were 0 and 1. The best practice at that time was to use the integer constants [[TRUE]] and [[FALSE]]. The design of this function left much to be desired. The problem was that while [[TRUE]] always caused all {{{3}}} to be passed along to the the root, [[FALSE]] would only not pass {{{3}}} if there the prim had a script that handled a {{{2}}} event. This meant to fully utilize this function the prim must contain a script that handled {{{2}}} events! With the release of Server Version 1.40.2, the PASS_* flags were introduced and the subtype of the {{LSLPT|{{{1|}}}}} was changed. Specifically the introduction of {{#var:PASS_NEVER}} solved this problem, allowing content creators to eliminate scripts that were only in the object to tweak the passing of {{{2}}} events.
+}}
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|}}}_desc}}
+|-
+{{VarPairTable|also_functions}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|spec}}
+|-
+{{VarPair|deepnotes}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

@@ -1,0 +1,149 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>pattern</code> is not found in <code>source</code>, -1 (in LSL) or nil (in SLua) is returned.<br/></div>
+<div class="wiki-line">The index of the first character in the string is <code>0</code></div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is the index of the first instance of <code>pattern</code> in <code>source</code>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Performs a literal match (case sensitive).</li>
+<li>Wildcards and RegEx are not supported.</li>
+<li>If <code>pattern</code> is an <code>empty string</code> the value returned is <code>0</code> rather than -1.</li>
+<li>There is no function to search the string starting at a specific offset. check <a href="/functions/llSubStringIndex/#see-also">See Also</a> for a function to search from the end.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+        string  name       = llDetectedName(0);
+        integer spaceIndex = llSubStringIndex(name, &quot; &quot;);
+
+//      no conditional check is needed for (spaceIndex == -1)
+//      because we KNOW the legacy name must have a space
+
+//      extract the substring from the first character to the one before the space
+        string  firstName  = llGetSubString(name, 0, spaceIndex - 1);
+
+        llSay(PUBLIC_CHANNEL, firstName + &quot; touched me.&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSensorRepeat(&quot;&quot;, NULL_KEY, AGENT_BY_LEGACY_NAME, PI, 96.0, 20);
+    }
+
+    sensor(integer num_detected)
+    {
+    //  Loop through all the sensor data and match against &quot; Linden&quot;, 
+    //  this causes it to match with any last name of Linden (since there can&#x27;t be spaces before the firstname)
+    //  Alternatively you could match a firstname with &quot;FirstName &quot; or anything else
+
+        integer index;
+        do
+        {
+            key avatarKey = llDetectedKey(index);
+            string avatarLegacyName = llDetectedName(index);
+
+        //  watch out for the bitwise-NOT (~)
+        //  the next line translates to if (indexOfSearchedStringInOtherString != -1)
+            integer isReallyALinden = ~llSubStringIndex(avatarLegacyName, &quot; Linden&quot;);
+
+            if (isReallyALinden)
+                llInstantMessage(avatarKey, &quot;Hello, I see you!&quot;);
+        }
+        while (++index &lt; num_detected);
+    }
+}</code></pre></div>
+<div class="wiki-line"><strong>Basic Example:</strong></div>
+<div class="wiki-line"><pre><code>integer index = llSubStringIndex(&quot;string data&quot;,&quot;TEST&quot;);
+if(index == -1) {
+    llSay(PUBLIC_CHANNEL,&quot;TEST was not found in the string&quot;);
+} else {
+    llSay(PUBLIC_CHANNEL,&quot;TEST was found in the string.&quot;);
+}</code></pre></div>
+<h3 id="string-cheese">String Cheese</h3>
+<div class="wiki-line"><pre><code>//This example shows how you can ask if a word or group of words is in a given string.
+//There is a limitation with this function. Your search of the string is for an exact match (case sensitive)
+//so the string_example below would be hard to match.
+
+string string_example = &quot;ThIs serVes As aN exaMplE sTrinG. It ISn&#x27;t toO coMPleX bUt HaS sOme mIlD vARietY&quot;;
+
+//If you chat a question &quot;Search for search_word&quot; within range of the object this script is in
+//it will recognize (by searching the chat msg) the &quot;search for&quot; part and take the word or words following it
+//and check the string_example for those words.
+
+string search_test_a = &quot;seArCh foR&quot;;
+
+//The example below works the same way but searches for the word in front of the recognized trigger question.
+
+string search_test_b = &quot;is the word I seek&quot;;
+
+//Using this variable provides a way to manipulate the word(s) during the script without damaging the msg.
+                   
+string search_word;
+
+// Provide a mnemonic for the -1 return code that means NOT FOUND
+integer NOT_FOUND = -1;
+
+default
+{
+    on_rez(integer param)//Although reseting the script on_rez provides many benefits
+    { //in some cases it would be a bad idea because stored variables, lists and queued events would be trashed.
+        llResetScript();
+    }
+    state_entry()
+    {   //This is just for fun (but better to know what object is talking to you).
+        llSetObjectName(&quot;String Cheese&quot;);
+        llListen(PUBLIC_CHANNEL, &quot;&quot;, llGetOwner(), &quot;&quot;);//Listen to you on the public chat channel for everything you say.
+    }
+    listen(integer chan, string name, key id, string msg)
+    {
+        if(llSubStringIndex(llToUpper(msg), llToUpper(search_test_a)) != NOT_FOUND)
+        {
+            search_word = llStringTrim(llGetSubString(msg, llStringLength(search_test_a), -1), STRING_TRIM);
+            if(llSubStringIndex(llToUpper(string_example), llToUpper(search_word)) != NOT_FOUND)
+            {
+                llSay(PUBLIC_CHANNEL, &quot;I have found the word &quot; + &quot;&#x27;&#x27;&quot; + search_word + &quot;&#x27;&#x27;&quot; + &quot; in the example string&quot;);
+            }
+            else                         
+            {
+                llSay(PUBLIC_CHANNEL, &quot;I cannot find the word &quot; + &quot;&#x27;&#x27;&quot; + search_word + &quot;&#x27;&#x27;&quot; + &quot; in the example string.&quot;);
+            }
+        }
+        if(llSubStringIndex(msg, search_test_b) != NOT_FOUND)
+        {
+            search_word = llStringTrim(llGetSubString(msg, 0, (llSubStringIndex(msg, search_test_b)-1)), STRING_TRIM);
+            if(llSubStringIndex(string_example, search_word) != NOT_FOUND)
+            {
+                llSay(PUBLIC_CHANNEL, &quot;I have found the word &quot; + &quot;&#x27;&#x27;&quot; + search_word + &quot;&#x27;&#x27;&quot; + &quot; in the example string&quot;);
+            }
+            else
+            {
+                llSay(PUBLIC_CHANNEL, &quot;I cannot find the word &quot; + &quot;&#x27;&#x27;&quot; + search_word + &quot;&#x27;&#x27;&quot; + &quot; in the example string.&quot;);
+            }
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line">Tests to see if one string contains a copy of another:</div>
+<div class="wiki-line">1. Concise &amp; conventional:</div>
+<div class="wiki-line"><pre><code>integer contains(string haystack, string needle) // http://wiki.secondlife.com/wiki/llSubStringIndex
+{
+    return 0 &lt;= llSubStringIndex(haystack, needle);
+}</code></pre></div>
+<div class="wiki-line"><pre><code>integer startswith(string haystack, string needle) // http://wiki.secondlife.com/wiki/llSubStringIndex
+{
+    return llDeleteSubString(haystack, llStringLength(needle), 0x7FFFFFF0) == needle;
+}</code></pre></div>
+<div class="wiki-line"><pre><code>integer endswith(string haystack, string needle) // http://wiki.secondlife.com/wiki/llSubStringIndex
+{
+    return llDeleteSubString(haystack, 0x8000000F, ~llStringLength(needle)) == needle;
+}</code></pre></div>
+<div class="wiki-line">Note: Some of the snippets above return a result without ever calling llSubStringIndex.</div>
+<div class="wiki-line">2. Clever &amp; smaller (calculates contains in ~54 bytes rather than ~60):</div>
+<div class="wiki-line"><pre><code>integer contains(string haystack, string needle) // http://wiki.secondlife.com/wiki/llSubStringIndex
+{
+    return ~llSubStringIndex(haystack, needle);
+}</code></pre></div>
+<div class="wiki-line">Note: The llSubStringIndex function returns -1 only when not found and the ~ operator returns zero only for -1, so the clever combination ~llSubStringIndex returns zero only for not found, else nonzero for found.</div>
+<div class="wiki-line">Note: Smaller was not noticeably faster or slower when our <a href="/wiki/code-racer-526264b3/">Code Racer</a> and <a href="/wiki/efficiency-tester-8d2cf4d5/">Efficiency Tester</a> harnesses measured the expression { contains(&quot;wiki.secondlife.com&quot;, &quot;wiki&quot;); }.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llListFindList/">llListFindList</a> — Find a list in another list</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetSubString/">llGetSubString</a> — Copy out part of a string of characters</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/SubStringLastIndex">uSubStringLastIndex</a> — Returns an integer that is the index of the <code>last</code> pattern in source.</div></div></section>

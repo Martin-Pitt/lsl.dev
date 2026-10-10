@@ -1,0 +1,93 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">PRIM_POINT_LIGHT is used to configure the point light configuration of the prim</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Viewers that do not have advanced lighting enabled can only render 6 lights at a time and projectors will be rendered as omnidirectional light sources. (OpenGL limitations allow for 8 light sources, SL appears to reserve one each for the Sun and Moon.)</li>
+<li>Viewers that <strong>do</strong> have advanced lighting enabled can render as many lights as their graphics card allows; it is not hard-limited by the viewer.</li>
+<li>Lights with a high intensity have a wash-out effect when overlapping. Keep this in mind when using multiple lights. <strong><em>Never</strong> create an abundance of lights to get around the 6 light maximum in basic lighting</em>, as viewers with advanced lighting will be washed out and may suffer from client lag.</li>
+<li>Unlike most color in LSL, which expects a gamma-encoded value (sRGB), this expects a non-gamma-encoded value (linear RGB). This means that the value you set as the light color is not the same value you'd pass to make the source (e.g. filament ) glow the same color. You may wish to implement an <a href="/functions/llsRGB2Linear/">sRGB Electro-Optical Transfer Function (EOTF)</a> to bypass this.</li>
+<li>The <code>falloff</code> parameter is a bit of a misnomer. Instead of modifying the characteristics of light decay over distance, it instead acts as a modifier to a light's overall intensity value.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Set the prim's color and the color of the light it emits to the same color:-</div>
+<div class="wiki-line"><pre><code>integer switch;
+
+vector gLampCol = &lt;255,190,121&gt;; //Light colour in regular (0-255) sRGB space. This will be converted to LSL later.
+
+default
+{
+    state_entry()
+    {
+        gLampCol /= 255; //Convert to LSL colour.
+    }
+
+    touch_start(integer total_number)
+    {
+        switch = !switch; //toggle the switch
+        llSetLinkPrimitiveParamsFast(LINK_THIS,[
+            PRIM_POINT_LIGHT,switch,llsRGB2Linear(gLampCol),1,20,0, //Convert colour to linear RGB as PRIM_POINT_LIGHT requires, using llsRGB2Linear
+            PRIM_COLOR,ALL_SIDES,gLampCol,1,
+            PRIM_GLOW,ALL_SIDES,switch,
+            PRIM_FULLBRIGHT,ALL_SIDES,switch]);
+    }
+}</code></pre></div>
+<div class="wiki-line">Basic light script:-</div>
+<div class="wiki-line"><pre><code>integer isLightTurnedOn;
+
+default
+{
+    touch_start(integer total_number)
+    {
+//      toggle isLightTurnedOn between TRUE and FALSE
+        isLightTurnedOn = !isLightTurnedOn;
+
+        if (isLightTurnedOn)
+        {
+            llSetPrimitiveParams([
+                PRIM_FULLBRIGHT, ALL_SIDES, FALSE,
+                PRIM_POINT_LIGHT, FALSE, ZERO_VECTOR, 1.0, 10.0, 0.6]);
+        }
+        else
+        {
+            vector COLOR_ORANGE  = &lt;1.000, 0.522, 0.106&gt;;
+
+            llSetPrimitiveParams([
+                PRIM_FULLBRIGHT, ALL_SIDES, TRUE,
+                PRIM_POINT_LIGHT, TRUE, COLOR_ORANGE, 1.0, 10.0, 0.6]);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">A compact version of the above:-</div>
+<div class="wiki-line"><pre><code>integer switch;
+default
+{
+    touch_start(integer total_number)
+    {
+        llSetPrimitiveParams(
+        [       PRIM_FULLBRIGHT, ALL_SIDES, switch = !switch,
+                PRIM_POINT_LIGHT, switch, &lt;1, 0.5, 0.1&gt; *  switch, 1, 10, 0.6 ] );      
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLinkPrimitiveParamsFast/">llSetLinkPrimitiveParamsFast</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimitiveParams/">llGetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLinkPrimitiveParams/">llGetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llsRGB2Linear/">llsRGB2Linear</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-primitiveparam-categorize-1ca2b81a/">Template:LSL PrimitiveParam Categorize</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#ifexist:Template:LSLC{{#var:lang}}|
+ {{LSLC{{#var:lang}}|PrimitiveParams}}
+ {{LSLC{{#var:lang}}|PrimitiveParams/{{{1}}}}}
+ {{LSLC{{#var:lang}}|{{{1}}}}}
+|
+ {{LSLC|PrimitiveParams{{#var:lang}}}}
+ {{LSLC|PrimitiveParams/{{{1}}}{{#var:lang}}}}
+ {{LSLC|{{{1}}}{{#var:lang}}}}
+}}
+}}}}</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line">&lt;onlyinclude&gt;<span class="wiki-template"><code>{{#if:
+{{#vardefine:light_const|{{LSL Const|PRIM_POINT_LIGHT|integer|23|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the prim&#x27;s point light configuration}}}}
+{{#vardefine:p_radius_desc|ranges from 0.1 to 20.0}}
+{{#vardefine:p_falloff_desc|ranges from 0.0 to 2.0}}
+{{#vardefine:p_intensity_desc|ranges from 0.0 to 1.0}}
+}}</code></span>&lt;/onlyinclude&gt;<span class="wiki-template"><code>{{#if:
+{{LSL_Function/boolean|boolean}}
+{{LSL_Function/linear_color|linear_color}}
+}}</code></span></div></section>

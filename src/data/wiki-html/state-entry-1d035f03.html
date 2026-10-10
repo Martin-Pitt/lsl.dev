@@ -1,0 +1,61 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered on any state transition and startup</div></section>
+<section><h2 id="specification">Specification</h2><h3 id="triggered">Triggered</h3>
+<ul>
+<li>Script save or adding to object</li>
+<li>State change</li>
+<li>A <a href="/events/state_exit/">state_exit</a> is triggered in the old state and the <a href="/events/state_entry/">state_entry</a> is triggered in the new state. All other events in the queue are lost as a result of the state change.</li>
+<li>On script reset, either by client or <a href="/functions/llResetScript/">llResetScript</a>/<a href="/functions/llResetOtherScript/">llResetOtherScript</a></li>
+<li>When the object is rezzed <em>without</em> a saved script status</li>
+<li>If it was a copy taken from inworld</li>
+<li>If the event had not been triggered due to no-script land.</li>
+</ul>
+<h3 id="not-triggered">Not Triggered</h3>
+<ul>
+<li>When the object is rezzed <em>with</em> saved script status, not even on change of owner</li>
+<li>Use <a href="/events/on_rez/">on_rez</a> event in this situation</li>
+<li>When the task moves to another SIM, nor on SIM restart</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSay(0,
+            &quot;You either just saved the script after editing it&quot;
+            + &quot;\nand/or the script (re)entered the default state.&quot;);
+ 
+        llSetText(&quot;Click to change states&quot;, &lt;1.0, 1.0, 1.0&gt;, 1.0);
+    }
+ 
+    touch_end(integer num_detected)
+    {
+        // Note: NEVER do a state change from within a touch_start event -
+        // - that can lead to the next touch_start on return to this state to be missed.
+        // Here we do the state change safely, from within touch_end
+        state two;
+    }
+ 
+    state_exit()
+    {
+        llSay(0, &quot;The script leaves the default state.&quot;);
+    }
+}
+ 
+state two
+{
+    state_entry()
+    {
+        llSay(0, &quot;The script entered state &#x27;two&#x27;&quot;);
+        state default;
+    }
+ 
+    state_exit()
+    {
+        llSay(0, &quot;The script leaves state &#x27;two&#x27;&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llResetScript/">llResetScript</a> — Resets the script</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llResetOtherScript/">llResetOtherScript</a> — Resets another script in the prim</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetStartParameter/">llGetStartParameter</a> — The <a href="/events/on_rez/">on_rez</a> parameter (or <a href="/functions/llRemoteLoadScriptPin/">llRemoteLoadScriptPin</a> parameter)</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/on_rez/">on_rez</a> — Triggered when the object is rezzed</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/state_exit/">state_exit</a> — Triggered when the state is exited at state change</div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-issues-svc-3379-85c42747/">Issues/SVC-3379</a>: <code>{{Issues/SVC-3379}}</code></span></div></section>

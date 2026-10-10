@@ -1,0 +1,69 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> containing the agent information about <code>id</code>.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><th> Constant</th><th> <code>Val</code></th><th> Returned if agent...</th></tr><tr><td><a href="/constants/AGENT_ALWAYS_RUN/">4096</a></td><td>0x1000</td><td>has running (<span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|Always Run}}</code></span>) enabled, or is using tap-tap-hold</td></tr><tr><td><a href="/constants/AGENT_ATTACHMENTS/">2</a></td><td>0x0002</td><td>has attachments</td></tr><tr><td><a href="/constants/AGENT_AUTOMATED/">16384</a></td><td>0x4000</td><td>is marked as a scripted agent/bot</td></tr><tr><td><a href="/constants/AGENT_AUTOPILOT/">8192</a></td><td>0x2000</td><td>is in <span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|autopilot}}</code></span> mode</td></tr><tr><td><a href="/constants/AGENT_AWAY/">64</a></td><td>0x0040</td><td>is in <span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|away}}</code></span> mode</td></tr><tr><td><a href="/constants/AGENT_BUSY/">2048</a></td><td>0x0800</td><td>is in <span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|busy}}</code></span> mode</td></tr><tr><td><a href="/constants/AGENT_CROUCHING/">1024</a></td><td>0x0400</td><td>is crouching</td></tr><tr><td><a href="/constants/AGENT_FLOATING_VIA_SCRIPTED_ATTACHMENT/">32768</a></td><td>0x8000</td><td>is floating or hovering because of a scripted attachment</td></tr><tr><td><a href="/constants/AGENT_FLYING/">1</a></td><td>0x0001</td><td>is flying or hovering</td></tr><tr><td><a href="/constants/AGENT_IN_AIR/">256</a></td><td>0x0100</td><td>is in the air (jumping, flying or falling)</td></tr><tr><td><a href="/constants/AGENT_MOUSELOOK/">8</a></td><td>0x0008</td><td>is in mouselook</td></tr><tr><td><a href="/constants/AGENT_ON_OBJECT/">32</a></td><td>0x0020</td><td>is sitting on an object (and linked to it)</td></tr><tr><td><a href="/constants/AGENT_SCRIPTED/">4</a></td><td>0x0004</td><td>has scripted attachments</td></tr><tr><td><a href="/constants/AGENT_SITTING/">16</a></td><td>0x0010</td><td>is sitting<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|1=&quot;Sit down&quot; on the avatar context menu allows ground sits anywhere: atop the terrain, on objects or even in the air, so it is possible to sit &quot;on&quot; an object without linking.}}</code></span></td></tr><tr><td><a href="/constants/AGENT_TYPING/">512</a></td><td>0x0200</td><td>is typing</td></tr><tr><td><a href="/constants/AGENT_WALKING/">128</a></td><td>0x0080</td><td>is walking, running or crouch walking</td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><a href="/constants/AGENT_BUSY/">AGENT_BUSY</a> indicates that the "busy" <a href="https://wiki.secondlife.com/wiki/Internal_Animations">internal animation</a> is playing, even if the user is not truly in busy mode.</li>
+<li><strong>On server 1.40 and below</strong>, <a href="/constants/AGENT_TYPING/">AGENT_TYPING</a> indicated that the "type" internal animation is playing, it would not be set if the user disabled <a href="https://wiki.secondlife.com/wiki/Debug_Settings">PlayTypingAnim</a>. <strong>On server 1.42 and up</strong>, it reflects <a href="https://wiki.secondlife.com/wiki/ChatFromViewer">typing start/stop messages</a> from the client and does not depend on the  animation. If the old behavior is desired, use <a href="/functions/llGetAnimationList/">llGetAnimationList</a> and look for <span class="wiki-template"><a href="/wiki/template-nowrap-f17d8afe/">NoWrap</a>: <code>{{NoWrap|{{String|c541c47f-e0c0-058b-ad1a-d6ae3a4584d9}}}}</code></span> &mdash; <a href="https://jira.secondlife.com/browse/SVC-787" rel="noreferrer">SVC-787</a></li>
+<li><code><a href="/constants/AGENT_ALWAYS_RUN/">AGENT_ALWAYS_RUN</a> | <a href="/constants/AGENT_WALKING/">AGENT_WALKING</a></code> indicates that the user requested to run using standard viewer controls. Use <a href="/functions/llGetAnimation/">llGetAnimation</a> to also detect running caused by physics.</li>
+<li>This function does not return reliable information immediately after a border crossing. Use <a href="/functions/llGetAnimation/">llGetAnimation</a> instead, if you can. &mdash; <a href="https://jira.secondlife.com/browse/SVC-3177" rel="noreferrer">SVC-3177</a></li>
+<li><a href="/constants/AGENT_AUTOMATED/">AGENT_AUTOMATED</a> may unexpectedly be enabled, see <a href="/constants/AGENT_AUTOMATED/">its caveats</a> for more detail.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer buf)
+    {
+        buf = llGetAgentInfo(llDetectedKey(0));
+        string out;
+        if(buf &amp; AGENT_FLYING)
+            out += &quot;The agent is flying.\n&quot;;
+        else
+            out += &quot;The agent is not flying.\n&quot;;
+ 
+        if(buf &amp; AGENT_ATTACHMENTS)
+        {
+            if(buf &amp; AGENT_SCRIPTED)
+                out += &quot;The agent has scripted attachments.\n&quot;;
+            else
+                out += &quot;The agent&#x27;s attachments are unscripted.\n&quot;;
+        }
+        else
+            out += &quot;The agent does not have attachments.\n&quot;;
+ 
+        if(buf &amp; AGENT_MOUSELOOK)
+            out += &quot;the agent is in mouselook.&quot;;
+        else
+            out += &quot;the agent is in normal camera mode.&quot;;
+        llWhisper(0, out);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">This is not a good way of testing if an avatar is in the region, use <a href="/functions/llGetAgentSize/">llGetAgentSize</a> instead.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestAgentData/">llRequestAgentData</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAnimation/">llGetAnimation</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAnimationList/">llGetAnimationList</a></div></div></section>
+<section><h2 id="tests">Tests</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/llGetAgentInfo_Test">llGetAgentInfo_Test</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-added-c4a824ad/">LSL Added</a>: <code>{{LSL Added|0.4.0|remote=http://secondlife.wikia.com/wiki/Version_0.4.0#Scripting}}</code></span> along with these flags <a href="/constants/AGENT_FLYING/">AGENT_FLYING</a>, <a href="/constants/AGENT_ATTACHMENTS/">AGENT_ATTACHMENTS</a>, &amp; <a href="/constants/AGENT_SCRIPTED/">AGENT_SCRIPTED</a>.</div>
+<ul>
+<li><a href="/constants/AGENT_AUTOPILOT/">AGENT_AUTOPILOT</a> was added in <span class="wiki-template"><a href="/wiki/template-svn-6879a543/">SVN</a>: <code>{{SVN|2900|rev=136439|trunk=*|ser=1.33.0|anchor=file21}}</code></span></li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-91"><a href="/wiki/template-issues-svc-91-c3684e6b/">Template:Issues/SVC-91</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-91|&#x27;&#x27;&#x27;agent_info&#x27;&#x27;&#x27;() event|type=nf}}</code></pre></details><p id="svc-3177"><a href="/wiki/template-issues-svc-3177-4a92b0b9/">Template:Issues/SVC-3177</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-3177|[[llGetAgentInfo]]() returns unreliable info after a sim border crossing|type=bug}}</code></pre></details><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

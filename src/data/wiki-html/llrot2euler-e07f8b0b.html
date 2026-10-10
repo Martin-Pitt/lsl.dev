@@ -1,0 +1,43 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/vector">vector</a> that is the Euler representation (roll, pitch, yaw) of <code>quat</code>, with each component expressed in radians.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">The <a href="/wiki/category-lsl-euler-dfaac822/">Euler</a> angle vector (in radians) is converted from a rotation by doing the rotations around the 3 axes in Z, Y, X order.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Angles greater than <a href="/constants/PI/">PI</a> radians (180 degrees) are returned as negative angles.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        rotation input = llGetRot();
+        llSay(0, &quot;The Rot2Euler of &quot; + (string)input + &quot; is: &quot; + (string) llRot2Euler(input) );
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// This script rotates a prim by 15 degrees each time the prim is touched
+
+// While not the best way of achieving the result,
+// this script demonstrates the use of llRot2Euler and llEuler2Rot
+// and the use of more human-friendly degrees rather than radians
+
+default
+{
+    touch_start(integer total_number)
+    {
+        // Get the object&#x27;s current rotation as a quarternion
+        rotation rot = llGetRot();
+        // Convert the rotation to a euler with roll, pitch, and yaw in radians
+        vector euler = llRot2Euler(rot);
+        // convert the angles from radians to degrees
+        euler *= RAD_TO_DEG;
+        // Add 15 degrees on the Z axis        
+        euler += &lt;0, 0, 15&gt;;
+        // Say the current euler values in degrees
+        llSay(0, (string) euler);         
+        // convert degrees back to radians
+        euler *= DEG_TO_RAD;
+        // Convert the euler back to a rotation quarternion
+        rot =  llEuler2Rot (euler);
+        // Apply the updated rotation to the prim   
+        llSetRot( rot ); 
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llEuler2Rot/">llEuler2Rot</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://en.wikipedia.org/wiki/Euler_Angles" rel="noreferrer">Euler Angles</a></div></div></section>

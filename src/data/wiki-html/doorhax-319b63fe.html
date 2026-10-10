@@ -1,0 +1,80 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<h4 id="doorhax-v0-1-0">DoorHax v0.1.0</h4>
+<div class="wiki-line">--<a href="https://wiki.secondlife.com/wiki/User:BETLOG_Hax">BETLOG Hax</a> UTC+10: 20091110 2120 [SLT: 20091110 0420]</div>
+<div class="wiki-line">A smooth swinging door.</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">It seemed to work. Almost completely untested.</div>
+<div class="wiki-line"><pre><code>//==============================================================
+// BETLOG Hax
+// UTC+10: 20091110 2001 [SLT: 20091110 0301]
+// For Gutterblood Spoonhammer
+//----------------------------------
+//        **** LICENCE START ****
+// http://creativecommons.org/licenses/by-sa/3.0/
+//             Attribution licence:
+// You must:
+//    -Include this unaltered licence information.
+//    -Supply my original script with your modified version.
+//    -Retain the original scripts&#x27; SL permissions. [+c/+m/+t]
+// Or:
+//    -Link to the wiki URL from which you copied this script.
+//          https://wiki.secondlife.com/wiki/DoorHax
+//    -Document: &quot;Uses parts of &lt;scriptname&gt; by BETLOG Hax&quot;
+//        **** LICENCE END ****
+//----------------------------------
+// SHARED CONFIGURATION
+//----------------------------------
+// CONFIGURATION
+float       gShutAngle      = 0.0;
+float       gShutTau        = 3.0;
+//
+float       gOpenAngle      = 90.0;
+float       gOpenTau        = 0.75;
+//
+string      gSndOpening     = &quot;cb340647-9680-dd5e-49c0-86edfa01b3ac&quot;;
+float       gVolOpening     = 1.0;
+string      gSndOpened      = &quot;2ffd48fb-293c-d8c8-f2c5-c0ca76126baa&quot;;
+float       gVolOpened      = 1.0;
+
+string      gSndClosing     = &quot;e7ff1054-003d-d134-66be-207573f2b535&quot;;
+float       gVolClosing     = 1.0;
+string      gSndClosed      = &quot;31b0c4db-e126-47c5-ac1c-60edb1c0103a&quot;;
+float       gVolClosed      = 1.0;
+//----------------------------------
+// CORE CODE
+integer     gOpen;
+//=========================================================================
+f_toggle()
+{   float f;
+    llResetTime();
+    if(gOpen)
+    {   llTriggerSound(gSndOpening, gVolOpening);//opening
+        do{ f=gShutAngle+(llGetTime()/gOpenTau*llFabs(gShutAngle-gOpenAngle));
+//llSetText((string)f, &lt;.0, 1.0, .0&gt;, 1.0);
+            llRotLookAt(llEuler2Rot(&lt;0.0, 0.0, f&gt;*DEG_TO_RAD),0.05,0.05);
+        }while(f&lt;=gOpenAngle);
+        llTriggerSound(gSndOpened,gVolOpened);//opening end
+    }
+    else
+    {   llTriggerSound(gSndClosing, gVolClosing);//closing
+        do{ f=gOpenAngle-(llGetTime()/gShutTau*llFabs(gShutAngle-gOpenAngle));
+//llSetText((string)f, &lt;1.0, .0, .0&gt;, 1.0);        
+            llRotLookAt(llEuler2Rot(&lt;0.0, 0.0, f&gt;*DEG_TO_RAD),0.05,0.05);
+        }while(f&gt;=gShutAngle);
+        llTriggerSound(gSndClosed, gVolClosed);//closing end
+    }
+//llOwnerSay((string)llGetTime());
+}
+//----------------------------------
+default
+{   state_entry()
+    {   llSetText(&quot;&quot;, &lt;1.0, 1.0, 1.0&gt;, 1.0);
+        f_toggle();
+    }
+    touch_start(integer num)
+    {   gOpen=!gOpen;
+        f_toggle();
+    }
+}
+//----------------------------------</code></pre></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-examples-d1aa2221/">Category:LSL Examples</a></div>

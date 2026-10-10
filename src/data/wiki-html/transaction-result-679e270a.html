@@ -1,0 +1,185 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered when task receives asynchronous data</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><th> <a href="/wiki/category-lsl-transfer-45a91db5/">llTransfer*</a> Function ---- <code>data</code> CSV Contents</th><th> Error Tag (Returned from data)</th><th> Error Tag Description</th></tr><tr><td rowspan="12"> <code><a href="https://wiki.secondlife.com/wiki/key">key</a>&nbsp;<a href="/functions/llTransferLindenDollars/">llTransferLindenDollars</a>(&nbsp;<a href="https://wiki.secondlife.com/wiki/key">key</a>&nbsp;<code>destination</code>, <a href="https://wiki.secondlife.com/wiki/integer">integer</a>&nbsp;<code>amount</code>&nbsp;)</code> ---- <code>[&nbsp;<a href="https://wiki.secondlife.com/wiki/key">key</a>&nbsp;<code>destination</code>, <a href="https://wiki.secondlife.com/wiki/integer">integer</a>&nbsp;<code>amount</code>&nbsp;]</code></td><td> LINDENDOLLAR_INSUFFICIENTFUNDS</td><td> The source agent does not have enough L$ for the transfer</td></tr><tr><td> LINDENDOLLAR_ENTITYDOESNOTEXIST</td><td> The destination UUID is not a valid agent.</td></tr><tr><td> LINDENDOLLAR_BADCLOCKSKEW</td><td> There is bad clock skew between the sim host and the L$ service</td></tr><tr><td> INVALID_DESTINATION</td><td> Destination agent is not a valid UUID</td></tr><tr><td> INVALID_AMOUNT</td><td> Amount is &lt;= 0</td></tr><tr><td> THROTTLED</td><td> The scripted L$ throttle was hit for this object owner.</td></tr><tr><td> MISSING_PERMISSION_DEBIT</td><td> The script does not have <a href="/constants/PERMISSION_DEBIT/">debit permission</a></td></tr><tr><td> GROUP_OWNED</td><td> The object is group owned and thus can't give money</td></tr><tr><td> TRANSFERS_DISABLED</td><td> L$ transfers are disabled in the region</td></tr><tr><td> EXPIRED</td><td> The simulator timed out waiting for a response from the back-end service.</td></tr><tr><td> SERVICE_ERROR</td><td> There was an error connecting to the back-end service</td></tr><tr><td> LINDENDOLLAR_TRANSACTIONTIMEOUT</td><td> The transaction timed out.</td></tr></table></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>/*
+* A simple piggy bank, anyone can pay in money and anyone can click it to get money out.
+*
+* TO DO:
+*  - handle different errors differently based upon CSV output
+*
+* original by Strife Onizuka
+*
+* modified by Kireji Haiku:
+*  - because weird things happen in LSL when using more than one state
+*  - one should say thanks when being payed
+*  - added 0 L$ payment when bank is empty, to show failed payment notifications
+*  - added target UUID and L$ amount into transaction history, too
+*
+* Note from Traven Sachs (VWR-28201):
+* In testing this script using an account with no funds - it has been noted that when the INSUFFICIENT FUNDS
+* error occurs on Transaction Results that the Display of L$ on the account attempting to transfer funds will
+* read as -1 on some viewers, even if the account has funds less than the transaction amount available to it.
+* (i.e. if account has 7L and attempts to pay 10L the viewer display will read -1 L until the next L$ transaction
+* occurs that is actually valid.  Don&#x27;t know if this is a viewer glitch or back end glitch but felt it should
+* be mentioned.)
+*/
+ 
+integer hasBeenGrantedDebitPerms;
+ 
+integer amountGivenAwayOnClick;
+integer totalLindenDollarsInBank;
+ 
+list listOfTransactionRecords;
+ 
+update_floattext()
+{
+    string floattext = &quot;I have no L$ to give away :(&quot;;
+ 
+    if (amountGivenAwayOnClick &lt;= totalLindenDollarsInBank
+        &amp;&amp; hasBeenGrantedDebitPerms)
+    {
+        floattext = &quot;I have L$ &quot;+ (string)totalLindenDollarsInBank + &quot; to give away!&quot;;
+    }
+ 
+    llSetText(floattext, &lt;1.0, 1.0, 1.0&gt;, (float)TRUE);
+}
+ 
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+ 
+ 
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_OWNER)
+            llResetScript();
+    }
+ 
+    state_entry()
+    {
+        // how much money to give away each time?
+ 
+        amountGivenAwayOnClick = 10;
+ 
+        // how much money do we initially &quot;have&quot; in the bank?
+ 
+        totalLindenDollarsInBank = 50;
+ 
+        update_floattext();
+ 
+        // request permissions to give away money, otherwise this won&#x27;t work
+ 
+        key owner = llGetOwner();
+        llRequestPermissions(owner, PERMISSION_DEBIT);
+    }
+ 
+    touch_start(integer num_detected)
+    {
+        // if the script has been granted debit permissions
+        if (hasBeenGrantedDebitPerms)
+        {
+            key id = llDetectedKey(0);
+ 
+            // if we have at least as much money in the bank as we would be giving away
+            if (amountGivenAwayOnClick &lt;= totalLindenDollarsInBank)
+            {
+                // we add the transaction ID, the target avatar UUID and the L$ amount to a list
+                listOfTransactionRecords += [llTransferLindenDollars(id, amountGivenAwayOnClick), id, amountGivenAwayOnClick];
+ 
+                // we take the money from the bank
+                totalLindenDollarsInBank -= amountGivenAwayOnClick;
+            }
+            else
+            {
+                // will not work, cause paying 0 L$!
+                // will send a &quot;failed payment&quot; notification!
+                // only for DEMO purposes, usually you should do something like:
+                // llSay(PUBLIC_CHANNEL, &quot;Sorry, no money in the bank!&quot;);
+                // instead !!!
+ 
+                listOfTransactionRecords += [llTransferLindenDollars(id, 0), id, 0];
+            }
+        }
+ 
+        update_floattext();
+    }
+ 
+    money(key id, integer amount)
+    {
+        // someone payed the bank!
+ 
+        totalLindenDollarsInBank += amount;
+ 
+        // be nice, say thanks
+        llInstantMessage(id, &quot;Thanks a bunch!&quot;);
+ 
+        update_floattext();
+    }
+ 
+    transaction_result(key id, integer success, string data)
+    {
+        integer index = llListFindList(listOfTransactionRecords, [id]);
+ 
+        //if the ID was found in our list
+        if (~index)
+        {
+            // if payment failed, give notice
+            if (!success)
+            {
+                key targetUUID = llList2Key(listOfTransactionRecords, index + 1);
+                integer amountNotPayed = llList2Integer(listOfTransactionRecords, index + 2);
+ 
+                llSay(PUBLIC_CHANNEL, &quot;\n \nSorry, somehow the transaction has failed!&quot;
+                    + &quot;\ntransaction ID: &quot; + (string)id
+                    + &quot;\ntarget UUID: &quot; + (string)targetUUID
+                    + &quot;\namount not payed: &quot; + (string)amountNotPayed
+                    + &quot;\nfailure reason: &quot; + data);
+ 
+                // if the amount that wasn&#x27;t payed is more than 0 L$, put the money back into the bank
+                if (amountNotPayed)
+                    totalLindenDollarsInBank += amountNotPayed;
+            }
+ 
+            // remove the entry again [transaction ID, target UUID, L$ amount]
+            listOfTransactionRecords = llDeleteSubList(listOfTransactionRecords, index, index + 2);
+        }
+ 
+        // total amount could have changed again...
+        update_floattext();
+    }
+ 
+    run_time_permissions (integer perm)
+    {
+        // when owner granted debit perms, enable piggy bank functionality
+        if(perm &amp; PERMISSION_DEBIT)
+            hasBeenGrantedDebitPerms = TRUE;
+ 
+        update_floattext();
+    }
+}</code></pre></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-12-03-246118"> 03/12/2011 </a></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="https://wiki.secondlife.com/wiki/Template:#vardefine-p-lltransferlindendollars-amount-desc">Template:</a></p></section>

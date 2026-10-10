@@ -1,0 +1,59 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered by the start of agent clicking on task</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If a prim <a href="/wiki/face-304afc32/">face</a> has <a href="https://wiki.secondlife.com/wiki/Navigating_Shared_Media">Shared Media</a> enabled and the avatar's viewer supports this feature, LSL scripts will not detect touches on that face. Touches from older clients will be detected.</li>
+<li>The default behavior is: If you have a multi-prim object and the root has a <a href="/events/touch_start/">touch_start</a> handler AND one or more child prims has a <a href="/events/touch_start/">touch_start</a> handler, the root prim's handler will be called when it (the root) or a child without a handler is touched. If you touch a child prim that has a <a href="/events/touch_start/">touch_start</a> handler, it will receive the event and the root prim will not.</li>
+<li>This behavior can be configured with <a href="/functions/llPassTouches/">llPassTouches</a>. After configuring a prim's touch-passing behavior you can delete the script that configured the prim.</li>
+<li>Rigged mesh attachments do not support touch events, this is because you can steer your avatar/camera by click dragging your avatar body which is what the rigged mesh replaces. The only way to get a touch event on a rigged mesh attachment is via the right click context menu and clicking the "Touch" button.</li>
+<li><a href="https://feedback.secondlife.com/scripting-bugs/p/touch-start-only-triggers-on-the-second-touch-if-touch-is-already-active" rel="noreferrer">Due to a known issue</a>, if a resident is already touching a scripted object, <a href="/events/touch_start/">touch_start</a> runs only every other time that other residents touch it.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">You can use index 0 through (<code>num_detected</code>-1) with the various llDetected... functions to handle simultaneous touches at once.</div>
+<div class="wiki-line">For most purposes, it's usually enough to handle just with the first toucher e.g. <a href="/functions/llDetectedKey/">llDetectedKey</a>(0). It is rare (but not impossible) for <code>num_detected</code> to be greater than 1.</div>
+<div class="wiki-line"><pre><code>default
+{ 
+    touch_start(integer num_detected)
+    {
+        key    avatarKey  = llDetectedKey(0);
+        string avatarName = llDetectedName(0);
+
+        llInstantMessage(avatarKey, &quot;Hello &quot; + avatarName );
+    }
+}</code></pre></div>
+<div class="wiki-line">This next example demonstrates detecting when the owner of the object clicks-and-holds on the object for 1 second in order perhaps to access a management menu or similar, Normal brief clicks are distinguished.</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+        llResetTime(); // Set llGetTime to 0
+    }
+
+    touch_end(integer num_detected)
+    {
+        // Check how much time elapsed since touch_start
+        if (llGetTime() &lt;= 1.0)
+        {
+            // The user did a normal quick click on the object
+            // Execute actions for normal clicks...
+        }
+        else
+        {
+            // The owner has touched this object for longer than 1 second
+            // Execute some special feature such as issuing a management dialog...
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>If using a touch to change states be careful about the touch event order. <strong>The best advice is not to do state changes from within touch_start.</strong> Add a <a href="/events/touch_end/">touch_end</a> handler and do the state change there. Changing state from within <a href="/events/touch_start/">touch_start</a> can cause the next occurrence of THIS <a href="/events/touch_start/">touch_start</a> code to be missed.  </li>
+</ul>
+<ul>
+<li>On clicking a prim with touch event handlers, the following handlers are triggered: <a href="/events/touch_start/">touch_start</a> (on first contact), <a href="/events/touch/">touch</a> (during) and <a href="/events/touch_end/">touch_end</a> (as released).</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetTouchText/">llSetTouchText</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llPassTouches/">llPassTouches</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedTouchFace/">llDetectedTouchFace</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedTouchST/">llDetectedTouchST</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedTouchUV/">llDetectedTouchUV</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedTouchPos/">llDetectedTouchPos</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedTouchNormal/">llDetectedTouchNormal</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedTouchBinormal/">llDetectedTouchBinormal</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/touch/">touch</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/touch_end/">touch_end</a></div></div></section>

@@ -1,0 +1,42 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets a character to wander about a central spot within a specified radius.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/WANDER_PAUSE_AT_WAYPOINTS/">WANDER_PAUSE_AT_WAYPOINTS</a><span> integer</span><span> 0</span><span> b=[&nbsp;</span><span> e=&nbsp;]</span><span> s1=id="WANDER_PAUSE_AT_WAYPOINTS"</span><span> nolink=<span class="wiki-template"><code>{{#var:path_update_no_const_links}}</code></span></span><span> c=Whether the character should pause after reaching each wander waypoint.</span></div></div>
+<table><tr><th> Option</th><th> V</th><th> Parameters</th><th> Default</th><th> Description</th></tr><tr><td>[&nbsp;<a href="https://wiki.secondlife.com/wiki/integer">integer</a>&nbsp;<code>boolean</code>&nbsp;]</td><td>[&nbsp;<a href="/constants/FALSE/">FALSE</a>&nbsp;]</td><td>Whether the character should pause after reaching each wander waypoint.</td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Must use <a href="/functions/llCreateCharacter/">llCreateCharacter</a> or script won't compile.</li>
+<li>Wander area is a rough area based on the specified origin, to a specified scale on each axis. So, if <code>&lt;20, 10, 2&gt;</code> is specified the object will wander within 20m along the world x-axis, 10m along the world y-axis, and 2m along the world z-axis.</li>
+<li>if <strong>dist</strong> has any dimension less than 1.0, an error is shouted on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>. <strong>Scale too small. All dimensions must be at least 1.0.</strong></li>
+<li>When <a href="/constants/WANDER_PAUSE_AT_WAYPOINTS/">WANDER_PAUSE_AT_WAYPOINTS</a> is enabled, <a href="/constants/PU_GOAL_REACHED/">PU_GOAL_REACHED</a> and <a href="/constants/PU_SLOWDOWN_DISTANCE_REACHED/">PU_SLOWDOWN_DISTANCE_REACHED</a> <a href="/events/path_update/">path_update</a> events will be trigged when approaching each waypoint.  When this flag is disabled, the aforementioned path_update events will not be triggered when arriving at waypoints.</li>
+<li>Wander area can be limited to a smaller area by introducing obstacles such as walls.</li>
+<li>Vertical positions specified for any vectors should be chosen to be as close as possible to the actual height of the terrain requested. Large difference between the provided vertical position and the actual terrain/object will result in failure of the behavior.</li>
+<li>As for all pathfinding behaviors, DO NOT rely on the detailed implementation here. The wander distance is just a rough estimate. We may change the exact shape on a whim. For fun. Or because it seems better that way. Or to ensure that you aren't relying on the detailed implementation. Don't make this another <a href="https://jira.secondlife.com/browse/PATHBUG-69" rel="noreferrer">PATHBUG-69</a>. :)</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llCreateCharacter([CHARACTER_MAX_SPEED, 25, CHARACTER_DESIRED_SPEED, 15.0]);
+        //MAX_SPEED is @ 20 by default
+    }
+
+    touch_start(integer total_number)
+    {
+        llWanderWithin(llGetPos(), &lt;10.0, 10.0, 5.0&gt;, [WANDER_PAUSE_AT_WAYPOINTS, TRUE]);
+    }
+}		</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><ul>
+<li><a href="/functions/llCreateCharacter/">llCreateCharacter</a></li>
+<li><a href="/functions/llDeleteCharacter/">llDeleteCharacter</a></li>
+<li><a href="/functions/llEvade/">llEvade</a></li>
+<li><a href="/functions/llExecCharacterCmd/">llExecCharacterCmd</a></li>
+<li><a href="/functions/llGetClosestNavPoint/">llGetClosestNavPoint</a></li>
+<li><a href="/functions/llFleeFrom/">llFleeFrom</a></li>
+<li><a href="/functions/llNavigateTo/">llNavigateTo</a></li>
+<li><a href="/functions/llPatrolPoints/">llPatrolPoints</a></li>
+<li><a href="/functions/llPursue/">llPursue</a></li>
+<li><a href="/functions/llUpdateCharacter/">llUpdateCharacter</a></li>
+<li><a href="/functions/llWanderWithin/">llWanderWithin</a></li>
+</ul></section>
+<section><h2 id="see-also-events">See also: events</h2><ul>
+<li><a href="/events/path_update/">path_update</a></li>
+</ul></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-31-262785"> 31/07/2012 </a></div></section>

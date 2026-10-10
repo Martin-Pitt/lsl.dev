@@ -1,0 +1,68 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=3}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Keywords}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Flow Control}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span></div>
+<h2 id="user-defined-functions">User-Defined Functions</h2>
+<div class="wiki-line">This category contains custom pre-defined function contributions from the LSL community to extend the abilities of LSL.</div>
+<div class="wiki-line">To add a wiki page to this category, include a link to this page. You may use the <a href="https://wiki.secondlife.com/wiki/Template:LSL_Function/docs">Template:LSL_Function</a> (with "mode" set to user) to create the page to be added here.</div>
+<div class="wiki-line">Go to the <a href="/wiki/category-lsl-functions-83ba2c38/">Functions</a> page to view the built-in functions.</div>
+<h3 id="about-user-defined-functions">About User-Defined Functions</h3>
+<div class="wiki-line">LSL allows user-defined functions which will help keep scripts compact and readable, and allow code reuse.  The <a href="https://wiki.secondlife.com/wiki/LSL_Style_Guide">LSL Style Guide</a> suggests that user-defined functions should be placed before the default state definition and after user-defined variables. </div>
+<div class="wiki-line">The definitions are as follows:</div>
+<div class="wiki-line"><pre><code>&lt;return_type&gt; function_name([&lt;parameter1_type&gt; parameter1[, &lt;parameter2_type&gt; parameter2[, ...]]])
+{
+  function_statements;
+
+  ...
+
+  return value_of_return_type;
+}</code></pre></div>
+<ul>
+<li>User-defined functions must be defined before any <a href="https://wiki.secondlife.com/wiki/state">state</a>s in the script or a syntax error will be generated on compilation.</li>
+<li><code>return_type</code> and <code>parameterN_type</code> may be any <a href="/wiki/category-lsl-types-67643027/">LSL variable type</a>.</li>
+<li>The <code>return_type</code> may also be omitted for a void type function. Such a function is not required to use the <code>return</code> statement at all, and if one is used it will have no parameter.</li>
+<li>There are no known limits on the maximum number and size of parameters, beyond normal script memory limits.</li>
+<li>If the function requires no parameters, the entire parameter list can be omitted.</li>
+<li>Parameters are passed by value, as with built-in functions. They behave like local variables and writing into them has no effect on what the function was called with.</li>
+<li>Entering a user-defined function starts a new <a href="https://wiki.secondlife.com/wiki/LSL_Variables#scope-of-variables">scope</a>. Only global variables and the function parameters are visible; any local variables from where the function was called from are not directly available.</li>
+<li>If multiple return values are desired, they can be packed into a <a href="https://wiki.secondlife.com/wiki/list">list</a>, a <a href="https://wiki.secondlife.com/wiki/vector">vector</a> or a <a href="https://wiki.secondlife.com/wiki/rotation">rotation</a>, depending on what you need to return.</li>
+</ul>
+<h3 id="examples">Examples</h3>
+<div class="wiki-line"><pre><code>// example with void return type:
+
+let_prim_say_something_and_include_owner_info(string message)
+{
+    key ownerKey = llGetOwner();
+    string ownerName = llKey2Name(ownerKey);
+
+    llSay(PUBLIC_CHANNEL, &quot;/me (owned by &quot; + ownerName + &quot;): &quot; + message);
+}
+
+default
+{
+    state_entry()
+    {
+        let_prim_say_something_and_include_owner_info(&quot;Hello world!&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// example with integer return type (actually it&#x27;s a boolean)
+
+integer is_sun_up()
+{
+    vector sunDirection = llGetSunDirection();
+
+    if (sunDirection.z &lt; 0.0)
+        return FALSE;
+
+    // else
+        return TRUE;
+}
+
+default
+{
+    state_entry()
+    {
+        if (is_sun_up())
+            llSay(PUBLIC_CHANNEL, &quot;Good day!&quot;);
+        else
+            llSay(PUBLIC_CHANNEL, &quot;Good night!&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line">Below is a list of functions on this wiki that have been included in this category:</div>

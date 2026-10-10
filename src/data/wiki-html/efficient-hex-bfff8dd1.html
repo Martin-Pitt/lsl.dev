@@ -1,0 +1,162 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<div class="wiki-line">__TOC__</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="function-string-hex-integer-value">Function: <a href="https://wiki.secondlife.com/wiki/string">string</a> hex(<a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>value</code>);</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">Returns the hexadecimal nybbles of the integer value in order, from most to least significant, starting with the first nonzero nybble.</div>
+<div class="wiki-line">Parameters:</div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/integer">integer</a> — value — <span class="wiki-template"><code>{{#var:p_value_desc}}</code></span></div></div>
+<table></table>
+<div class="wiki-line">We derived this specification from the specification found at the <a href="https://wiki.secondlife.com/wiki/hex">hex</a> article. We began with that conventional specification but then discarded any merely conventional requirement that prevented us from making the code more clever, small, or fast.</div>
+<div class="wiki-line">Our LSL wiki includes two articles to discuss the astonishingly non-trivial problem of converting to hex string from 31 signed or 32 unsigned bits of integer instead of just one article because our LSL wiki serves at least two distinct communities of LSL authors. Our new authors need to see brief &amp; clear &amp; conventional exemplars first, our experts find appropriate uses for the clever &amp; small &amp; fast exemplars.</div>
+<div class="wiki-line">We don't know how to write LSL that implements a hex function that is conventional and brief and clear and small and fast, all at once. We think that design goal is an impossibility in LSL, as in many other programming languages.</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="different-clever-and-fast">Different, Clever and Fast</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">You should choose this different, clever, and fast code when you can accept the cost of abandoning the conventional specification in order to make the code most clever and fast and small.</div>
+<div class="wiki-line">This code sees the most significant bit of the integer as just another data bit, rather than as the sign bit, so results with eight nybbles can begin with any of the nonzero unsigned nybbles 1 2 3 4 5 6 7 8 9 A B C D E F. This code also doesn't bother to calculate the "-0x" or "0x" part of the conventional answer.</div>
+<div class="wiki-line">This code returns "0" for 0, unsigned "80000000" for -0x80000000, unsigned "FFFFFFFF" for -0x1, etc. The code presented here does return easy-to-read upper case A B C D E F nybbles, but code exactly as small and fast can instead return easy-to-type lower case a b c d e f nybbles.</div>
+<div class="wiki-line"><pre><code>// http://wiki.secondlife.com/wiki/Efficient_Hex
+
+string bits2nybbles(integer bits)
+{
+    integer lsn; // least significant nybble
+    string nybbles = &quot;&quot;;
+    do
+        nybbles = llGetSubString(&quot;0123456789ABCDEF&quot;, lsn = (bits &amp; 0xF), lsn) + nybbles;
+    while (bits = (0xfffFFFF &amp; (bits &gt;&gt; 4)));
+    return nybbles;
+}</code></pre></div>
+<div class="wiki-line">161 bytes of code reported by llGetFreeMemory</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="different-and-small">Different and Small</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">You should choose this different and small code rather than the different, clever, and fast code when you think smaller means faster, or you have some other reason to care more about small than about clever and fast.</div>
+<div class="wiki-line"><pre><code>// http://wiki.secondlife.com/wiki/Efficient_Hex
+
+string bits2nybbles(integer bits)
+{
+    string nybbles = &quot;&quot;;
+    do
+    {
+        integer lsn = bits &amp; 0xF; // least significant nybble
+        nybbles = llGetSubString(&quot;0123456789ABCDEF&quot;, lsn, lsn) + nybbles;
+    } while (bits = (0xfffFFFF &amp; (bits &gt;&gt; 4)));
+    return nybbles;
+}</code></pre></div>
+<div class="wiki-line">139 bytes of code reported by llGetFreeMemory</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="clever-and-fast">Clever and Fast</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">You should choose this clever and fast code when you care most about clever and fast and small but you still have to implement the conventional specification.</div>
+<div class="wiki-line">We think this code produces the same results as the brief, clear, and conventional code of the <a href="https://wiki.secondlife.com/wiki/hex">hex</a> article. After adequate education &amp; review, you should agree.</div>
+<div class="wiki-line">This code cleverly packs all the source lines into one function, not two. This code cleverly assigns a variable and passes a copy of that variable within the parameter list of a function call, which works only when you &amp; the compiler agree over which parameters to evaluate first. This code cleverly loops once per nonzero nybble, rather than unrolling the loop. This code cleverly zeroes the most significant nybble once per loop, rather than zeroing that nybble once and then looping separately to process the remaining nybbles if any. This code cleverly declares its variables outside the loop.</div>
+<div class="wiki-line"><pre><code>// http://wiki.secondlife.com/wiki/Efficient_Hex
+
+string hex(integer value)
+{
+    string lead = &quot;0x&quot;;
+    if (value &amp; 0x80000000) // means (integer &lt; 0) but is smaller and faster
+    {
+        lead = &quot;-0x&quot;;
+        value = -value; // unnecessary when value == -0x80000000
+    }
+
+    integer lsn; // least significant nybble
+    string nybbles = &quot;&quot;;
+    do
+    {
+        nybbles = llGetSubString(&quot;0123456789abcdef&quot;, lsn = (value &amp; 0xF), lsn) + nybbles;
+    }
+    while ((value = (0xfffFFFF &amp; (value &gt;&gt; 4))));
+    
+    return lead + nybbles;
+}</code></pre></div>
+<div class="wiki-line">202 bytes of code reported by llGetFreeMemory</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="clever-and-small">Clever and Small</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">You should choose this clever and small code when you care most about clever and small and fast but you still have to implement the conventional specification.</div>
+<div class="wiki-line">We think this code produces the same results as the brief, clear, and conventional code of the <a href="https://wiki.secondlife.com/wiki/hex">hex</a> article. After adequate education &amp; review, you should agree.</div>
+<div class="wiki-line"><pre><code>// http://wiki.secondlife.com/wiki/Efficient_Hex
+
+string hex(integer value)
+{
+    string lead = &quot;0x&quot;;
+    if (value &amp; 0x80000000) // means (integer &lt; 0) but is smaller and faster
+    {
+        lead = &quot;-0x&quot;;
+        value = -value; // unnecessary when value == -0x80000000
+    }
+
+    string nybbles = &quot;&quot;;
+    do
+    {
+        integer lsn = value &amp; 0xF; // least significant nybble
+        nybbles = llGetSubString(&quot;0123456789abcdef&quot;, lsn, lsn) + nybbles;
+    } while ((value = (0xfffFFFF &amp; (value &gt;&gt; 4))));
+
+    return lead + nybbles;
+}</code></pre></div>
+<div class="wiki-line">197 bytes of code reported by llGetFreeMemory</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="brief-clear-and-conventional">Brief, Clear, and Conventional</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">You should choose this code when you care more about brief and clear than about clever and small and fast.</div>
+<div class="wiki-line">You should feel that the concise &amp; conventional code is easy to review and modify. For example, you should immediately understand how to substitute the easy-to-read upper case A B C D E F nybbles of IBM style for the easy-to-type lower case a b c d e f nybbles of AT&amp;T style. Also you should immediately see what results to expect that code to return for any input.</div>
+<div class="wiki-line">To see the code, visit the <a href="https://wiki.secondlife.com/wiki/hex">hex</a> article.</div>
+<div class="wiki-line"><pre><code>// http://wiki.secondlife.com/wiki/hex
+
+...</code></pre></div>
+<div class="wiki-line">347 bytes of code reported by llGetFreeMemory</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="instruments-and-procedures">Instruments and Procedures</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<h3 id="science">Science</h3>
+<div class="wiki-line">By definition, our results are scientific only if we can teach you to reproduce them.</div>
+<h3 id="instruments">Instruments</h3>
+<div class="wiki-line">Measuring clever, clear, and brief is hard. Eventually we present our consensus here, but consensus is hard to achieve among computer programmers, who by nature often passionately disagree, like other poets. Possibly the most useful opinions on clever, clear, brief, small, and fast come from the http://www.jargon.net/jargonfile/l/languagelawyer.html community.</div>
+<div class="wiki-line">Measuring small is easy. Compile two copies of the code into one script, call llGetFreeMemory, delete one copy, and report the difference. For more detailed instructions, especially if your results are off by exactly four bytes, see the <a href="/wiki/code-sizer-9919bcf5/">Code Sizer</a> article.</div>
+<div class="wiki-line">Measuring fast is hard, because a closed-source server runs a script and often crashes when we try to create enough results to average meaningfully, such as 7 x 10,000 x 5 runs of hex(0x7fffFFFF). The science of persuasively measuring fast in Second Life remains a work in progress, now ongoing in such places as the <a href="/wiki/efficiency-tester-8d2cf4d5/">Efficiency Tester</a> and <a href="/wiki/code-racer-526264b3/">Code Racer</a> articles on how best to harness llGetTime and llGetTimestamp.</div>
+<div class="wiki-line">Measuring fast is painfully tedious too. 10,000 runs of 200ms burns thru more than 33 minutes of your time &amp; attention. We welcome volunteers to advance this science.</div>
+<h3 id="why-bother">Why Bother</h3>
+<div class="wiki-line">The relative value of clever, clear, and brief is disputed. See http://en.wikipedia.org/wiki/Optimization_(computer_science)#When_to_optimize</div>
+<div class="wiki-line">The value of fast and small in Second Life LSL scripts is disputed, but not with enough passion for us to have found a cross-reference to share with you.</div>
+<h3 id="illustrative-details">Illustrative Details</h3>
+<div class="wiki-line">To see the raw data and arithmetic that stand behind the summary results briefly presented here, visit the <a href="https://wiki.secondlife.com/wiki/Talk:Efficient_Hex">discussion</a> tab.</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="see-also">See Also</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><strong>Articles</strong></div>
+<ul>
+<li><a href="https://wiki.secondlife.com/wiki/Hex">Hex</a></li>
+</ul>
+<div class="wiki-line"><strong>Functions</strong></div>
+<ul>
+<li><a href="/functions/llGetFreeMemory/">llGetFreeMemory</a></li>
+<li><a href="/functions/llGetTime/">llGetTime</a></li>
+<li><a href="/functions/llGetTimestamp/">llGetTimestamp</a></li>
+<li><a href="/functions/llIntegerToBase64/">llIntegerToBase64</a></li>
+</ul>
+<div class="wiki-line"><strong>Wikipedia</strong></div>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Exemplar" rel="noreferrer">Exemplar</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Optimization_%28computer_science%29%23When_to_optimize" rel="noreferrer">Optimization_(computer_science)#When_to_optimize</a></li>
+</ul>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples|Hex}}</code></span></div>

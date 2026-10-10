@@ -1,0 +1,56 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets the prim's name according to the <code>name</code> parameter.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If this function is called from a child prim in a linked set, it will change the name of the child prim and not the root prim.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The name is limited to 63 characters. Longer prim names are cut short.</li>
+<li>Names can only consist of the 95 printable characters found in the <a href="http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters" rel="noreferrer">ASCII-7</a> (non-extended) character set, with the exception of the vertical bar/pipe ("|") character.</li>
+<li>Invalid characters in the range 1 to 31, as well as the pipe character (124) are replaced with a question mark ("?").</li>
+<li>Other invalid characters in the range 128 and above are replaced with two or more question marks, depending on how many bytes their UTF-8 representation requires.</li>
+<li>Objects with all-whitespace names (e.g., a space or a series of spaces) will appear as "(Unnamed)" if they emit chat via <a href="/functions/llSay/">llSay</a>, <a href="/functions/llOwnerSay/">llOwnerSay</a>, <a href="/functions/llInstantMessage/">llInstantMessage</a>, etc., although this behaviour may vary in third-party viewers.</li>
+<li>While an object is attached, the script cannot change the name of the object as it appears in the user's inventory.<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|2=Whether or not this is a bug is still debated, regardless LL has said they will not fix it. This behavior was first recognized as a pain point in 2006 and only confirmed to be lava-flowed more recently (2011).|1=Whether or not this is a bug is still debated, regardless LL has said they will not fix it. This behavior was first recognized as a pain point in [http://forums-archive.secondlife.com/255/ab/84853/1.html 2006] and only confirmed to be lava-flowed [https://jira.secondlife.com/browse/SVC-3429?focusedCommentId=267372&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-267372 more recently (2011)].}}</code></span></li>
+<li>Changes to the name of the root prim (with <a href="/functions/llSetObjectName/">llSetObjectName</a> for example) will not be saved to inventory; when the attachment is detached (to inventory, not dropped) this name change is discarded and the name in inventory is used instead.</li>
+<li>When attachment is dropped (to the ground) and taking it into inventory, the inventory item will have the new name (not the old).</li>
+<li>Changes to the names of child prims will be saved back to inventory when the object is detached to inventory. They survive detachment.</li>
+<li>Changes to the object name do not trigger a <a href="/events/changed/">changed</a> event.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><table><tr><th> <strong>Set this prim's name</strong></th><th> <strong>Set the root prim's name</strong></th></tr><tr><td><pre><code>default
+{
+    state_entry()
+    {
+        llSetObjectName(&quot;NEW PRIM NAME&quot;);
+    }
+}</code></pre></td><td> <pre><code>default
+{
+    state_entry()
+    {
+        llSetLinkPrimitiveParamsFast(LINK_ROOT,
+            [PRIM_NAME, &quot;NEW ROOT PRIM NAME&quot;]);
+    }
+}</code></pre></td></tr><tr><th colspan="2"> <strong>Test if a string is valid as an object name</strong></th></tr><tr><td colspan="2"> <pre><code>// Returns TRUE if &#x27;name&#x27; is a valid object name, FALSE otherwise
+integer isValidObjectName(string name)
+{
+    string original_name = llGetObjectName();
+    llSetObjectName(name);
+    integer valid_name = llGetObjectName() == name;
+    llSetObjectName(original_name);
+    return valid_name;
+}</code></pre></td></tr></table></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectName/">llGetObjectName</a> — Get the prims name</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLinkName/">llGetLinkName</a> — Get a linked prims name</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectDesc/">llGetObjectDesc</a> — Get the prims description</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetObjectDesc/">llSetObjectDesc</a> — Set the prims description</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectDetails/">llGetObjectDetails</a> — Get a list of object details</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-limits-4dd687a9/">Template:LSL Function/limits</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{LSL DefineRow||[[Limits{{#var:lang}}{{{1|}}}|Limits]]|SL limits and constrictions}}
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPairTable|also_articles}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

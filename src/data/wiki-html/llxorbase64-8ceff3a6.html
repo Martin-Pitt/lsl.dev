@@ -1,0 +1,164 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Correctly performs an exclusive or on two <a href="/wiki/category-lsl-base64-68dc3ec8/">Base64</a> strings.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line"><code>str2</code> repeats if it is shorter than <code>str1</code>. If the inputs are not Base64 strings the result will be erratic.<br/> Be sure to read the <a href="#cryptography">Cryptography</a> section before designing a cryptographic algorithm.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is a Base64 XOR of <code>str1</code> and <code>str2</code>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>During the conversion to a byte array the last <code>(bitcount % 8)</code> are discarded from both <code>str1</code> and <code>str2</code>. See <a href="#implementation">Implementation</a> for details.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry(){
+        
+        // Use a HARD password ! with caps nocaps numbers and symbols !
+        string pass = &quot;P4s5Wo_rD&quot;;
+        
+        string data = &quot;I am some ver important data.&quot;;
+        
+        // Enccrypting the data:
+        string crypt = llXorBase64(llStringToBase64(data), llStringToBase64(pass));
+        
+        // Say the mess you made to Owner
+        llOwnerSay(crypt);
+        
+        // DeCrypting the data and say back to owner:
+        llOwnerSay(llBase64ToString(llXorBase64(crypt, llStringToBase64(pass))));
+        
+    }
+ 
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// Stronger encryption - generates a random encrypted string.
+//safe character set
+string ASCII = &quot;0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;;
+
+//convert integer to characters
+string chr(integer i)
+{
+    return llGetSubString(ASCII, i, i);
+}
+
+//for generating a random string.
+string salt(integer amount) {
+    string salt = &quot;&quot;;
+    integer i;
+    //for length of salt , generate characters
+    for(i = 0; i &lt; amount; i++) {
+        salt += chr((integer)llFrand(llStringLength(ASCII)));
+    }
+    return salt;
+}    
+
+default
+{
+    touch_start(integer n) {
+        //generates a random salt to add to the string.
+        //put salt on the end so that even if the data is corrupted by SVC-6362, it is unimportant data
+        string data = &quot;I am some very important data.&quot; + salt((integer)llFrand(5)+ 5);
+
+        string pass = &quot;password&quot;;
+
+        // Encrypting the data:
+        string crypt = llXorBase64(llStringToBase64(data), llStringToBase64(pass));
+ 
+        // Say the mess you made to Owner
+        llOwnerSay(crypt);
+ 
+        // DeCrypting the data and say back to owner: Remember to remove the salt when needed ;)
+        llOwnerSay(llBase64ToString(llXorBase64(crypt, llStringToBase64(pass))));
+
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><h3 id="implementation">Implementation</h3>
+<div class="wiki-line">The XOR is performed by converting each Base64 strings <code>str1</code> and <code>str2</code> into a byte arrays and then XORing the two byte arrays. Finally converting the resulting byte array back into Base64 and returning it to the user.</div>
+<div class="wiki-line">However during the conversion to byte arrays the last (bitcount % 8) are discard. LSL treats Base64 strings as 8-bit byte arrays, not arrays of 6-bit bytes.</div>
+<h3 id="cryptography">Cryptography</h3>
+<div class="wiki-line">While the information provided in this section is by no means exhaustive, it should give the reader enough information that they can ask the right questions and guide their future reading. Writing cryptographic algorithms should not be attempted without an understanding of cryptography as the results may otherwise be disastrous.</div>
+<div class="wiki-line">In cryptography, a <em>secret</em> is a bit of input information that is used to transform the cryptographic algorithm. The <em>secret</em> is not mutated with subsequent runs of the algorithm. A <em>seed</em> is also used to transform the algorithm but unlike the <em>secret</em> it does mutate; the method of mutation is part of the algorithm.</div>
+<div class="wiki-line">To effectively use a secret and a seed you need to keep secret at-least two of the following: <strong>1)</strong> the algorithm, <strong>2)</strong> the seed, or <strong>3)</strong> the secret.</div>
+<div class="wiki-line">Believe it (or not) that keeping your algorithm secret will not protect you. The attack vectors that can be used against XOR algorithms require little or no knowledge of the algorithm. The best protection is a strong algorithm that uses multiple secrets/seeds. In this way you can still satisfy the prior precondition by interpreting the numbered items as categories. Keep in mind how the secrets and seeds are used, an attacker need not determine the secrets, only intermediate static values and the relationship between intermediate values for the algorithm to be broken. Do not give the attacker secrets and seeds that render blocks of living code, static. The more information provide to the attacker, the simpler your algorithm becomes.</div>
+<h4 id="best-practices">Best Practices</h4>
+<div class="wiki-line">As a cryptographic technique, XOR is weak and there are several attacks that can be leveraged to determine the XOR inputs. Depending upon how the secrets are used cracking a single message could expose the input secrets, resulting in the derived algorithm being broken.</div>
+<div class="wiki-line">Keep your secrets secret. Use a seeded trap door function to shake up the bits of the secret before using with the XOR and change the seed often.</div>
+<div class="wiki-line">Do not XOR a value by two differing length values without knowing the implications. It may seem like a good idea but what it actually does is link the fields. While it will give you a longer key value (the <a href="https://en.wikipedia.org/wiki/Least_Common_Multiple" rel="noreferrer">Least Common Multiple</a> in length), the fields will be linked such that there are really only as many fields as the <a href="https://en.wikipedia.org/wiki/Greatest_Common_Divisor" rel="noreferrer">Greatest Common Divisor</a>. The number of unique fields determines the theoretical maximum number of keys an attacker has to try.</div>
+<div class="wiki-line">Unique_Key_Fields = Greatest_Common_Divisor(lengths_of_keys) * number_of_keys</div>
+<h4 id="attack-vectors">Attack Vectors</h4>
+<div class="wiki-line">First thing you need to know is that XOR is limited poly-alphabetic cipher. The attack vectors that work for poly-alphabetic ciphers work for XOR.</div>
+<ul>
+<li><strong>Probability</strong>: In English, letters have different probabilities of occurring because of grammar and spelling rules. XOR does not hide the letter probabilities. This attack only works when the keys are many times smaller than the message.</li>
+<li><strong>UTF-8 Rules</strong>: When you convert a string to Base64, UTF-8 encoding is used first. If you assume the inputs are valid UTF-8 encodes some bits can be determined purely upon examination. This is most useful in determining the length of the key.</li>
+<li><strong>Plain Text</strong>: The user captures outputs for known inputs can expose weaknesses in the key.</li>
+<li><strong>Brute force</strong>: Attacking the key, secret and/or seed</li>
+</ul>
+<h3 id="how-to-decode-with-php">How to decode with php</h3>
+<div class="wiki-line">PHP script can be found in <a href="http://lslwiki.net/lslwiki/wakka.php?wakka=llXorBase64StringsCorrect" rel="noreferrer">LSL Wiki</a>.</div>
+<div class="wiki-line">An older version of the code can be found here: <a href="https://wiki.secondlife.com/wiki/User:SignpostMarv_Martin/LSL2/llXorBase64StringsCorrect">llXorBase64StringsCorrect in PHP</a>.</div>
+<div class="wiki-line">Implementation of SignpostMarv's decoder in PHP.</div>
+<div class="wiki-line"><pre><code>&lt;?php
+/* 
+ * Description: Implementation of SignpostMarv&#x27;s php base64 decoder.
+ * Author: Kopilo Hallard
+ * License: http://creativecommons.org/licenses/by-sa/2.5/
+ */
+
+/* Cipher (s1 data, s2 key) */
+function llXorBase64($s1, $s2) {
+    $s1 = base64_decode($s1); $l1 = strlen($s1);
+    $s2 = base64_decode($s2);
+    if($l1 &gt; strlen($s2)) $s2 = str_pad($s2, $l1, $s2, STR_PAD_RIGHT);
+    return base64_encode($s1 ^ $s2);
+}
+
+$Skey = &quot;password&quot;;
+$para1 = $_POST[&quot;para1&quot;];
+
+$result = llXorBase64($para1, base64_encode($Skey));
+
+echo &quot;Encrypted Data: &quot;.$para1.PHP_EOL;
+echo &quot;Unencrypted &quot;.base64_decode($result);
+
+?&gt;</code></pre></div>
+<h3 id="how-to-decode-with-java">How to decode with java</h3>
+<div class="wiki-line">Remember to URLEncode your BASE64 hash if you transfer it vie GET...</div>
+<div class="wiki-line"><pre><code>       String BASE64datahash = &quot;error&quot;;
+       String passhash = &quot;error&quot;;
+
+       try {
+        //URLDecode the URL encoded encrypted data
+        BASE64datahash = java.net.URLDecoder.decode(&quot;KhoFRRYaAUMbEVU%3D&quot;, &quot;UTF-8&quot;); //KhoFRRYaAUMbEVU%3D
+        System.out.println(&quot;BASE64datahash: &quot; + BASE64datahash); //KhoFRRYaAUMbEVU=
+
+        //create an array of BASE64 data
+        char[] BASE64data = BASE64datahash.toCharArray();
+        char[] dataUB = new String(new BASE64Decoder().decodeBuffer(new String(BASE64data))).toCharArray(); //BASE64 decode the data
+        System.out.println(&quot;encrypted data (but base64 decoded) [dataUB]: &quot; + new String(dataUB));
+
+
+        //Encode the secred key/password to BASE64 (Just to show how to use BASE64Encoder)
+        //String BASE64password = new String(new BASE64Encoder().encodeBuffer(&quot;supersecretpassword&quot;.getBytes()));
+        //System.out.println(&quot;BASE64password: &quot; + new String(BASE64password));
+
+        //create array of BASE64 key/password
+        //char[] key = BASE64password.toCharArray();
+        //char[] keyUB = new String(new BASE64Decoder().decodeBuffer(new String(key))).toCharArray();
+        char[] keyUB = &quot;supersecretpassword&quot;.toCharArray(); 
+        System.out.println(&quot;plaintext key/password [keyUB]: &quot; + new String(keyUB));
+
+        //XOR data array chars with corresponding key/password array chars
+        int k=0;
+        for (int i = 0; i &lt; dataUB.length; i++) {
+            dataUB[i] = (char) (dataUB[i] ^ keyUB[k]);
+            k++;
+
+            //Loop to start of the key if the key is too short
+            if (k == keyUB.length)
+               k=0;
+		}
+
+        System.out.println(&quot;Decoded data [dataUB]: &quot; + new String(dataUB));
+        
+        } catch (Exception ex) {
+            System.out.println(&quot;Oops!&quot;);
+        }</code></pre>      </div>
+<div class="wiki-line">&lt;div style="display:none;"&gt;<pre><code> </code></pre>&lt;/div&gt;</div></section>
+<section><h2 id="history">History</h2><ul>
+<li>Added to LSL to fix the problems with <a href="/wiki/llxorbase64stringscorrect-b1c1a388/">llXorBase64StringsCorrect</a> (which was supposed to fix the bugs in <a href="/wiki/llxorbase64strings-b9ce0da0/">llXorBase64Strings</a>), as reported in <a href="https://jira.secondlife.com/browse/SCR-35" rel="noreferrer">SCR-35</a>.</li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-289"><a href="/wiki/template-issues-svc-289-be0702a8/">Template:Issues/SVC-289</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-289|[[llXorBase64StringsCorrect]] zero out last &lt;code&gt;(bitcount % 8)&lt;/code&gt; bits of data.|type=bug|resolution=expect}}</code></pre></details><p id="scr-35"><a href="/wiki/template-issues-scr-35-abeba18b/">Template:Issues/SCR-35</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SCR-35|[[llXorBase64StringsCorrect]] returns wrong result when the 2nd string contains nulls|type=bug|resolution=fixed|fc={{{fc|}}}}}</code></pre></details><p id="bug-3763"><a href="/wiki/template-issues-bug-3763-54910acb/">Template:Issues/BUG-3763</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-3763|[[llXorBase64]] returns wrong result after second {{LSLPT|str2}} repeat|type=bug}}</code></pre></details></section>

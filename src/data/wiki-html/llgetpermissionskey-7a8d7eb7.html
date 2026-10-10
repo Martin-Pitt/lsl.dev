@@ -1,0 +1,51 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Returns <a href="/constants/NULL_KEY/">NULL_KEY</a> if permissions were neither granted nor declined (e.g., the permissions dialog was cancelled or otherwise ignored).</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// 1. rez a cube
+// 2. create a new script and paste this
+// 3. save script
+// 4. right-click the prim and choose attach
+// 5. touch the prim
+
+announce_permissions_key()
+{
+    key permissionsKey = llGetPermissionsKey();
+
+    llSay(0, &quot;key llGetPermissionsKey() = &#x27;&quot; + (string)permissionsKey + &quot;&#x27;&quot;);
+}
+
+default
+{
+    state_entry()
+    {
+        announce_permissions_key();
+
+        key owner = llGetOwner();
+        llRequestPermissions(owner, PERMISSION_ATTACH);
+    }
+
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        key owner = llGetOwner();
+        key permissionsKey = llGetPermissionsKey();
+
+        if (id == owner)
+        {
+            if (permissionsKey == owner)
+                llDetachFromAvatar();
+            else
+                llSay(0, &quot;Can&#x27;t detach from you, you have not granted ATTACH perms.&quot;);
+        }
+        else
+            llSay(0, &quot;Sorry, you&#x27;re not the owner!&quot;);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm &amp; PERMISSION_ATTACH)
+            announce_permissions_key();
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPermissions/">llGetPermissions</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestPermissions/">llRequestPermissions</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/run_time_permissions/">run_time_permissions</a></div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-issues-svc-4862-b3b3c220/">Issues/SVC-4862</a>: <code>{{Issues/SVC-4862}}</code></span></div></section>

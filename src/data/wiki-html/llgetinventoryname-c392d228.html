@@ -1,0 +1,128 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Inventory items are sorted in alphabetical order (not chronological order).</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the name of the inventory item <code>number</code> of <code>type</code>. Returns an empty string if no item of the specified type is found in the prim's inventory (or there are less than or equal to <code>number</code> items of the type).</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><td><table><tr><th colspan="2"><strong>Flag</strong></th><th> <strong>Inventory Type</strong></th></tr><tr><td> <a href="/constants/INVENTORY_NONE/">INVENTORY_NONE</a></td><td rowspan="2"> -1</td><td> Item does not exist.</td></tr><tr><td> <a href="/constants/INVENTORY_ALL/">INVENTORY_ALL</a></td><td> Any inventory type.</td></tr><tr><td> <a href="/constants/INVENTORY_TEXTURE/">INVENTORY_TEXTURE</a></td><td> 0</td><td> <a href="https://wiki.secondlife.com/wiki/texture">texture</a></td></tr><tr><td> <a href="/constants/INVENTORY_SOUND/">INVENTORY_SOUND</a></td><td> 1</td><td> <a href="https://wiki.secondlife.com/wiki/sound">sound</a></td></tr><tr><td> <a href="/constants/INVENTORY_LANDMARK/">INVENTORY_LANDMARK</a></td><td> 3</td><td> <a href="https://wiki.secondlife.com/wiki/landmark">landmark</a></td></tr><tr><td> <a href="/constants/INVENTORY_CLOTHING/">INVENTORY_CLOTHING</a></td><td> 5</td><td> <a href="https://wiki.secondlife.com/wiki/clothing">clothing</a></td></tr><tr><td> <a href="/constants/INVENTORY_OBJECT/">INVENTORY_OBJECT</a></td><td> 6</td><td> <a href="https://wiki.secondlife.com/wiki/object">object</a></td></tr></table></td><td><table><tr><th colspan="2"><strong>Flag</strong></th><th> <strong>Inventory Type</strong></th></tr><tr><td> <a href="/constants/INVENTORY_NOTECARD/">INVENTORY_NOTECARD</a></td><td> 7</td><td> <a href="https://wiki.secondlife.com/wiki/notecard">notecard</a></td></tr><tr><td> <a href="/constants/INVENTORY_SCRIPT/">INVENTORY_SCRIPT</a></td><td> 10</td><td> <a href="/wiki/script-102acc10/">script</a></td></tr><tr><td> <a href="/constants/INVENTORY_BODYPART/">INVENTORY_BODYPART</a></td><td> 13</td><td> <a href="/wiki/body-part-cc9bc0e9/">body part</a></td></tr><tr><td> <a href="/constants/INVENTORY_ANIMATION/">INVENTORY_ANIMATION</a></td><td> 20</td><td> <a href="/wiki/animation-1dd10f24/">animation</a></td></tr><tr><td> <a href="/constants/INVENTORY_GESTURE/">INVENTORY_GESTURE</a></td><td> 21</td><td> <a href="https://wiki.secondlife.com/wiki/gesture">gesture</a></td></tr><tr><td> <a href="/constants/INVENTORY_SETTING/">INVENTORY_SETTING</a></td><td> 56</td><td> <a href="https://wiki.secondlife.com/wiki/Environmental_Enhancement_Project">setting</a></td></tr><tr><td> <a href="/constants/INVENTORY_MATERIAL/">INVENTORY_MATERIAL</a></td><td> 57</td><td> <a href="https://wiki.secondlife.com/wiki/PBR_Materials">material</a></td></tr></table></td></tr></table></section>
+<section><h2 id="examples">Examples</h2><h5 id="box-unpacker">Box Unpacker</h5>
+<div class="wiki-line"><pre><code>// Give all prim contents to anyone touching this object,
+// But don&#x27;t give this script itself.
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        list    InventoryList;
+        integer count = llGetInventoryNumber(INVENTORY_ALL);  // Count of all items in prim&#x27;s contents
+        string  ItemName;
+        while (count--)
+        {
+            ItemName = llGetInventoryName(INVENTORY_ALL, count);
+            if (ItemName != llGetScriptName() )  
+                InventoryList += ItemName;   // add all contents except this script, to a list
+        }
+        // Give all the items to the toucher, in a folder named as per this prim&#x27;s name
+        llGiveInventoryList(llDetectedKey(0), llGetObjectName(), InventoryList);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">The maximum number of characters for an object inventory item is currently 63 characters.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryAcquireTime/">llGetInventoryAcquireTime</a> — Returns the time the item was added to the prim's inventory</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryNumber/">llGetInventoryNumber</a> — Returns the number of items of a specific type in inventory</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryType/">llGetInventoryType</a> — Tests to see if an inventory item exists and returns its type.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryCreator/">llGetInventoryCreator</a> — Returns the inventory item's creator</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryPermMask/">llGetInventoryPermMask</a> — Returns the inventory item's permissions</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryKey/">llGetInventoryKey</a> — Returns the inventory item's <a href="https://wiki.secondlife.com/wiki/UUID">UUID</a> (if full perm)</div></div></section>
+<section><h2 id="tests">Tests</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/llGiveInventory_All_Test">llGiveInventory_All_Test</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-negative-index-2a0eb411/">Template:LSL Function/negative index</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+Format:
+&lt;nowiki&gt;{{LSL Function/negative index|boolean|p1|p2|p3}}&lt;/nowiki&gt;&lt;br/&gt;
+Exclude p1, p2, or p3 if not used.
+
+{{#vardefine:also_articles|{{LSL DefineRow||Test}}}}
+{{#vardefine:ni_mode|true}}
+{{#vardefine:ni_nc|}}
+{{#vardefine:ni_p1|number}}
+{{#vardefine:ni_p2|p2}}
+&lt;!--{{#vardefine:ni_p3|p3}}--&gt;
+
+&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:ni_c|{{#if:{{{2|{{#var:ni_p1}}}}}|{{#if:{{{3|{{#var:ni_p2}}}}}|{{#if:{{{4|{{#var:ni_p3}}}}}|3|2}}|1}}|0}}}}
+
+{{#vardefine:t|{{#ifeq:{{{1|{{#var:ni_mode}}}}}|true|{{#switch:{{#var:ni_c}}|3|2=LSL_Function/negative_index/range|1=LSL_Function/negative_index/single}}}}}}
+
+{{{{#var:t}}|{{{2|{{#var:ni_p1}}}}}|{{{3|{{#var:ni_p2}}}}}|{{{4|{{#var:ni_p3}}}}}|noExclude={{{noExclude|}}}}}
+
+{{#if:{{{noSpec|}}}||
+{{#vardefine:spec|{{#var:spec}}
+{{#if:{{#var:t}}|
+{{{!}} {{Prettytable|style=float:left;}}
+{{!}}-{{Hl2}}
+! Index
+! Positive
+! Negative
+{{!}}-
+{{!}} First
+{{!}} &lt;code&gt;0&lt;/code&gt;
+{{!}} &lt;code&gt;-{{{length|length}}}&lt;/code&gt;
+{{!}}-
+{{!}} Last
+{{!}} &lt;code&gt;{{{length|length}}} - 1&lt;/code&gt;
+{{!}} &lt;code&gt;-1&lt;/code&gt;
+{{!}}}
+=== Indexes ===
+&lt;div style=&quot;display:table;&quot;&gt;&lt;div style=&quot;display:block;&quot;&gt;
+*Positive indexes count from the beginning, the first item being indexed as &lt;code&gt;0&lt;/code&gt;, the last as &lt;code&gt;({{{length|length}}} - 1)&lt;/code&gt;.
+&lt;/div&gt;&lt;/div&gt;
+&lt;div style=&quot;display:table;&quot;&gt;&lt;div style=&quot;display:block;&quot;&gt;
+*Negative indexes count from the far end, the first item being indexed as &lt;code&gt;-{{{length|length}}}&lt;/code&gt;, the last as &lt;code&gt;-1&lt;/code&gt;. 
+&lt;/div&gt;&lt;/div&gt;
+}}
+}}
+}}
+
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{#if:{{#var:t}}|{{LSL_DefineRow||{{LSLGC|Negative_Index{{#var:lang}}|Negative Index}}|}}}}}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+{{#vardefineecho:ni_ps|{{#switch:{{#var:ni_c}}
+  |0=This function
+  |1={{LSLP|{{{2}}}}}
+  |2={{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}}
+  |3={{LSLP|{{{2}}}}}, {{LSLP|{{{3}}}}} &amp; {{LSLP|{{{4}}}}}
+ }}}} {{#if:{{#var:t}}| support{{#ifexpr:{{#var:ni_c}}&gt;1||s}}| &#x27;&#x27;do{{#ifexpr:{{#var:ni_c}}&gt;1||es}} not&#x27;&#x27; support }} {{LSLGC|Negative_Index{{#var:lang}}|negative indexes}}.{{PBR}}
+}}
+
+{{#vardefine:footer|{{#var:footer}}
+{{#if:{{#var:t}}|{{#ifeq:{{NAMESPACE}}|Template||{{#if:{{#var:self}}{{{self|}}}{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Negative Index{{#var:lang}}}}}}}}|
+{{#if:{{#var:self}}{{{self|}}}{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Positive_Index_Only{{#var:lang}}}}}}
+}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#if:{{{nc|{{#var:ni_nc}}}}}||
+* If {{#switch:{{#var:ni_c}}
+ |3=either {{LSLP|{{{2}}}}}, {{LSLP|{{{3}}}}} or {{LSLP|{{{4}}}}} are
+ |2=either {{LSLP|{{{2}}}}} or {{LSLP|{{{3}}}}} are
+ |1={{LSLP|{{{2}}}}} is}} out of bounds {{#if:{{{oob-return|}}}|this function returns {{{oob-return|}}} and}} the script continues to execute without an error message.
+{{#if:{{#var:t}}|{{#ifexpr:{{#var:ni_c}}&gt;1|{{#if:{{{noExclude|}}}|* {{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}} will not form an [[#exclusion_range|exclusion range]] when {{LSLP|{{{2}}}}} is past {{LSLP|{{{3}}}}} (Approximately: {{LSLP|{{{2}}}}} &gt; {{LSLP|{{{3}}}}}), instead it will act as if {{LSLP|{{{2}}}}} was zero &amp; {{LSLP|{{{3}}}}} was -1.|* {{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}} will form an [[#exclusion_range|exclusion range]] when {{LSLP|{{{2}}}}} is past {{LSLP|{{{3}}}}} (Approximately: {{LSLP|{{{2}}}}} &gt; {{LSLP|{{{3}}}}}). }}}}}}
+}}}}
+
+}}&lt;noinclude&gt;
+==Debugging==
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|spec}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|notes}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPairTable|also_articles}}
+|-
+{{VarPair|footer}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

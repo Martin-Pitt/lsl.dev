@@ -1,0 +1,87 @@
+<div class="wiki-line">Here's a method of authenticating chat with shared secret.</div>
+<div class="wiki-line"><pre><code>//By: Gigs Taggart
+//Modified by Strife Onizuka
+//Released under BSD license
+
+string  gSetupNotecardName = &quot;setup&quot;;
+
+string  gPassword;
+integer gSeed;
+
+key     gSetupQueryId;
+integer gSetupNotecardLine;
+
+//to sign a message we hash message+gSecret+llGetKey()
+string sign_message(string message)
+{
+    string hash = llMD5String(message + gPassword + (string)llGetKey(), gSeed);
+    return message + hash;
+}
+
+//to verify a message we do all the same stuff except we get the sender&#x27;s key
+integer verify_message(string raw, key sender)
+{
+    string hash = llMD5String(llDeleteSubString(message, -32, -1) + gPassword + (string)sender, gSeed);
+    return llGetSubString(message, -32, -1) == hash;
+}
+
+readSettingsNotecard()
+{
+   gSetupNotecardLine = 0;
+   gSetupQueryId = llGetNotecardLine(gSetupNotecardName, gSetupNotecardLine); 
+}
+
+
+default
+{
+    state_entry()
+    {
+         readSettingsNotecard();
+    }
+    dataserver(key queryId, string data)
+    {
+        if(queryId == gSetupQueryId) 
+        {
+            if(data != EOF)
+            {
+                integer split = llSubStringIndex(data, &quot;=&quot;);
+                if(~split)
+                {
+                    string setting = llDeleteSubString(data, split, -1);
+                    string value   = llDeleteSubString(data, 0,  split);
+                    if (setting == &quot;password&quot;)
+                    {
+                        gPassword = value;
+                    }
+                    else if(setting == &quot;seed&quot;)
+                    {
+                        gSeed = (integer)value;
+                    }
+                }
+                gSetupQueryId = llGetNotecardLine(gSetupNotecardName, ++gSetupNotecardLine); 
+            }
+            else
+            {
+                state running;   
+            }
+        }
+    }           
+    changed(integer change)
+    {
+        llResetScript();
+    }
+}
+
+state running
+{
+
+    changed(integer change)
+    {
+        llResetScript();
+    }
+}</code></pre></div>
+<h4 id="notecard">Notecard</h4>
+<div class="wiki-line"><strong>Name:</strong> "setup"</div>
+<div class="wiki-line"><pre><code>password=secret
+seed=0xdeadbeef</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples|Authenticated Chat}}</code></span></div>

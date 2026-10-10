@@ -1,0 +1,70 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Modify land with <code>action</code> on <code>brush</code></div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">The position of the prim is used to determine the input for various flags.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><div class="wiki-line">&lt;div&gt;</div>
+<div class="wiki-line">&lt;div style="width:auto; height:auto; display:inline; vertical-align:top;"&gt;</div>
+<div class="wiki-line">&lt;div style="display:table-cell; vertical-align:top;" valign="top"&gt;</div>
+<table><tr><th>Action</th><th></th><th>Description</th></tr><tr><td><a href="/constants/LAND_LEVEL/">LAND_LEVEL</a></td><td>0</td><td>Levels on prim center</td></tr><tr><td><a href="/constants/LAND_RAISE/">LAND_RAISE</a></td><td>1</td><td>Raises the land</td></tr><tr><td><a href="/constants/LAND_LOWER/">LAND_LOWER</a></td><td>2</td><td>Lowers the land</td></tr><tr><td><a href="/constants/LAND_SMOOTH/">LAND_SMOOTH</a></td><td>3</td><td>Smooths the land</td></tr><tr><td><a href="/constants/LAND_NOISE/">LAND_NOISE</a></td><td>4</td><td>Makes the land rough</td></tr><tr><td><a href="/constants/LAND_REVERT/">LAND_REVERT</a></td><td>5</td><td>Restores to baked value</td></tr></table>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div style="width:auto; height:auto; display:inline; vertical-align:top;"&gt;</div>
+<div class="wiki-line">&lt;div style="display:table-cell; vertical-align:top;" valign="top"&gt;</div>
+<table><tr><th>Brush</th><th><code>Value</code></th><th> Size</th></tr><tr><td><a href="/constants/LAND_BRUSH_SMALL/">LAND_BRUSH_SMALL</a></td><td>0</td><td>2m x 2m</td></tr><tr><td><a href="/constants/LAND_BRUSH_MEDIUM/">LAND_BRUSH_MEDIUM</a></td><td>1</td><td>4m x 4m</td></tr><tr><td><a href="/constants/LAND_BRUSH_LARGE/">LAND_BRUSH_LARGE</a></td><td>2</td><td>8m x 8m</td></tr><tr><td>&lt;s&gt;<a href="https://wiki.secondlife.com/wiki/LAND_SMALL_BRUSH">LAND_SMALL_BRUSH</a>&lt;/s&gt;</td><td>1</td><td>4m x 4m</td></tr><tr><td>&lt;s&gt;<a href="https://wiki.secondlife.com/wiki/LAND_MEDIUM_BRUSH">LAND_MEDIUM_BRUSH</a>&lt;/s&gt;</td><td>2</td><td>8m x 8m</td></tr><tr><td>&lt;s&gt;<a href="https://wiki.secondlife.com/wiki/LAND_LARGE_BRUSH">LAND_LARGE_BRUSH</a>&lt;/s&gt;</td><td>3</td><td>8m x 8m</td></tr><tr><td colspan="3">&lt;small&gt;The "LAND_*_BRUSH constants are wrong.<br/>Use the "LAND_BRUSH_*" constants instead.&lt;/small&gt;</td><td></td><td></td></tr></table>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>This function has no effect if the script's owner is offline or not in the same sim as the scripted object.</li>
+<li>Uncontrolled use of llModifyLand in scripted objects may force the region's navmesh to rebake continually and cause Memory Allocated for the region to exceed its limit, making it impossible to rez objects. (<a href="https://jira.secondlife.com/browse/BUG-9047" rel="noreferrer">BUG-9047</a>)</li>
+<li>This function has no effect if the scripted object is deeded to a group.</li>
+<li>"LAND_BRUSH_*" constants are only present on Lua-enabled sims. On older sims, use their values 0, 1, and 2 instead. The "LAND_*_BRUSH" constants have incorrect values and are not recommended</li>
+<li>If the script is in a prim that is attached to an avatar or is in the child prim of a linkset, then the local position relative to it's attachment point or root prim is used rather than the position within the region. (<a href="https://jira.secondlife.com/browse/BUG-4929" rel="noreferrer">BUG-4929</a>)</li>
+<li>If land is not owned by script owner or the owner doesn't have terraform permissions, the script will silently fail.</li>
+<li>You cannot change altitude beyond land terraform limits for the specified parcel..</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSetTimerEvent(0.1);
+    }
+    
+    timer()
+    {
+        llModifyLand(LAND_LEVEL, LAND_BRUSH_SMALL);
+    }
+}</code></pre></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-3272"><a href="/wiki/template-issues-svc-3272-97fdbcc4/">Template:Issues/SVC-3272</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-3272|LSL: llModifyLandStrength|type=fs|status=open}}</code></pre></details><p id="storm-2006"><a href="/wiki/template-issues-storm-2006-53654bd2/">Template:Issues/STORM-2006</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|STORM-2006|type=bug|Brush constants are all off-by-one.}}</code></pre></details><p><a href="/wiki/template-issues-f22f2c92/">Template:Issues</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#ifeq:{{NAMESPACE}}|Template|{{Multi-lang|&lt;includeonly&gt;category=Jira Issues&lt;/includeonly&gt;}}}}&lt;includeonly&gt;{{#if:
+
+The purpose of the following is to swap out the old code and use a new template without breaking the old templates.
+{{#if:{{{status|}}}{{{resolution|}}}|
+{{#vardefine:last_issue|{{{{{debugging|Issue/Version 1}}}|{{{1}}}|{{{2|}}}
+|style={{{style|}}}
+|status={{{status|}}}
+|resolution={{{resolution|}}}
+|priority={{{priority|}}}
+|type={{{type|}}}
+|dnc={{{dnc|}}}
+|fc={{{fc|}}}
+}}}}
+|
+{{#vardefine:last_issue|{{{{{debugging|Issue/Version 1}}}|{{{1}}}|{{{2|}}}
+|style={{{style|}}}
+|status={{{status|}}}
+|resolution={{{resolution|}}}
+|priority={{{priority|}}}
+|type={{{type|}}}
+|dnc={{{dnc|}}}
+|fc={{{fc|}}}
+}}}}
+}}
+
+{{#vardefine:issues{{#var:direction}}|{{#var:issues{{#var:direction}}}}
+{{#var:last_issue}}}}
+
+{{#ifexpr:{{#var:count-last-issue|0}} &gt; 0|
+{{#vardefine:bugs{{#var:direction}}|{{#var:bugs{{#var:direction}}}}
+{{#var:last_issue}}}}
+}}
+
+}}{{#if:{{{1|}}}|{{#ifeq:{{NAMESPACE}}|Template|{{IssueTable}}[[Category:Jira Issues{{#var:lang}}|{{#explode:{{{1}}}|-|0}}-{{padleft:{{#explode:{{{1}}}|-|1}}|6|0}}]]}}}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{documentation}}&lt;/noinclude&gt;</code></pre></details></section>

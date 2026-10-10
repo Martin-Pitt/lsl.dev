@@ -1,0 +1,63 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets the rotation of the prim to <code>rot</code>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If the prim is attached, then this function offsets the rotation by the avatar's rotation.</li>
+<li>If the prim is not the root prim it is offset by the root's rotation.</li>
+<li>If you are trying to set the rotation of a child prim relative to the root prim then divide the rotation by the root rotation.</li>
+<li>If you are trying to set the rotation of a child prim to a global rotation then you need to divide the global rotation by the root rotation <strong>twice</strong>.</li>
+<li>It is better to use <a href="/functions/llSetLocalRot/">llSetLocalRot</a> to set the rotation of child prims, even if you are setting it to a global rotation (just divide by the root rotation in that case).</li>
+<li>Alternatively see the <a href="/functions/llSetRot/#useful-snippets">Useful Snippets</a> for generalized workarounds that work with <a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a>, <a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a>, and <a href="/functions/llSetLinkPrimitiveParamsFast/">llSetLinkPrimitiveParamsFast</a></li>
+<li>For small rotation changes, there is an update threshold depending on the time duration between changes. It does not appear to be limited to the 6deg rule any longer.</li>
+<li>For "static objects" (type of <a href="https://wiki.secondlife.com/wiki/pathfinding">pathfinding</a>), the script fails with the error in debug channel: </li>
+<li>"Unable to set prim rotation: object contributes to the navmesh."</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Drop this script in the root prim of an object to have it rotate in 1 degree increments. Note that it won't work on child prims if the root is rotated.</div>
+<div class="wiki-line"><pre><code>rotation rot_xyzq;
+
+default
+{
+    state_entry()
+    {
+        vector xyz_angles = &lt;0,1.0,0&gt;; // This is to define a 1 degree change
+        vector angles_in_radians = xyz_angles*DEG_TO_RAD; // Change to Radians
+        rot_xyzq = llEuler2Rot(angles_in_radians); // Change to a Rotation
+    }
+
+    touch_start(integer s)
+    {
+        llSetRot(llGetRot()*rot_xyzq); //Do the Rotation...
+    }
+}</code></pre></div>
+<div class="wiki-line">Drop this one in a child prim to have it rotate around the world's Y axis in 1 degree increments. It won't work in the root if it is rotated.</div>
+<div class="wiki-line"><pre><code>rotation rot_xyzq;
+
+default
+{
+    state_entry()
+    {
+        vector xyz_angles = &lt;0,1.0,0&gt;; // This is to define a 1 degree change
+        vector angles_in_radians = xyz_angles*DEG_TO_RAD; // Change to Radians
+        rot_xyzq = llEuler2Rot(angles_in_radians); // Change to a Rotation
+    }
+
+    touch_start(integer s)
+    {
+        llSetRot(llGetRot()*rot_xyzq/llGetRootRotation()/llGetRootRotation()); //Do the Rotation...
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><pre><code>//-- These correctly set a global rotation for the root prim in all scenarios
+llSetLocalRot( rot )
+llSetPrimitiveParams( [PRIM_ROT_LOCAL, rot] )
+
+//-- These correctly set a global rotation for a child prim in all scenarios
+llSetLocalRot( rot / llGetRootRotation() )
+llSetPrimitiveParams( [PRIM_ROT_LOCAL, rot / llGetRootRotation() ] )</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRot/">llGetRot</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLocalRot/">llGetLocalRot</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimitiveParams/">llGetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLinkPrimitiveParams/">llGetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLocalRot/">llSetLocalRot</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLinkPrimitiveParamsFast/">llSetLinkPrimitiveParamsFast</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTargetOmega/">llTargetOmega</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-93"><a href="/wiki/template-issues-svc-93-1a81b09b/">Template:Issues/SVC-93</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-93|[[llSetRot]] and [[llSetPrimitiveParams]] (using [[PRIM_ROTATION]]) incorrectly implemented for child prims.|type=bug|resolution=wont}}</code></pre></details></section>

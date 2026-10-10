@@ -2,7 +2,7 @@ name: Validate local LSL datasets
 on:
   workflow_dispatch:
   pull_request:
-    paths: ['data/**', 'scripts/**', 'src/data/**']
+    paths: ['data/**', 'scripts/**', 'src/data/**', 'src/content/docs/functions/**', 'src/content/docs/events/**', 'src/content/docs/constants/**']
 permissions:
   contents: read
 jobs:
@@ -17,4 +17,8 @@ jobs:
       - run: python -m unittest discover -s scripts/lib -p 'test_*.py'
       - run: python scripts/import-datasets.py
       - name: Check generated data is current
-        run: git diff --exit-code -- src/data/catalog.json public/wiki-source data/reports
+        run: git diff --exit-code -- src/data/catalog.json src/data/wiki-html data/derived public/wiki-source data/reports/import-report.json
+      # The MDX pages are hand-edited and not regenerated here. Fail only when an API has no page
+      # or a page has no public API; signature drift is reported for review, not failed on.
+      - name: Check every public API has exactly one page
+        run: python scripts/generate-mdx.py --check

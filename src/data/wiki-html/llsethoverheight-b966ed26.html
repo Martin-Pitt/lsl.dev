@@ -1,0 +1,130 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Critically damps to a <code>height</code> above the ground (or water) in <code>tau</code> seconds.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Do not use with vehicles.<br/>Use <a href="/functions/llStopHover/">llStopHover</a> to stop hovering.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Do not rely on built-in limits. In the past, the difference between the object's initial position and the hover height was limited to 64 meters. Under SL Server 1.26.2 the limit is 4096 meters above the ground level.</li>
+<li>This is not a prim property; stopping or resetting the script stops llSetHoverHeight; same with the similar <a href="/functions/llGroundRepel/">llGroundRepel</a></li>
+<li>If the object tries to go above the height (like, walking up a prim ramp), llSetHoverHeight will pull it back down, unlike the similar <a href="/functions/llGroundRepel/">llGroundRepel</a></li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Put in an attached prim and touch to start floating in air without flying.
+// Touch again to drop to the ground.
+
+integer gHovering = FALSE; // are we supposd to be hovering now?
+
+default {
+    touch_start(integer total_number) {
+        if (!llGetAttached()) {
+            llWhisper(0, &quot;Wear me to play.&quot;);
+            return;
+        }
+
+        if (gHovering) {
+            llOwnerSay(&quot;Releasing you.&quot;);
+            llStopHover();
+        }
+        else {
+            llOwnerSay(&quot;Making you float...&quot;);
+
+            // Start hovering 5 meters over our current location.
+            vector myPosition = llGetPos();
+            llSetHoverHeight(myPosition.z - llGround(ZERO_VECTOR) + 5.0, FALSE, 1.0);
+        }
+
+        gHovering = !gHovering; // flip the switch
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGroundRepel/">llGroundRepel</a> — Same as llSetHoverHeight but does not hover all the time</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llStopHover/">llStopHover</a> — To stop hovering</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-physical-ad285cc8/">Template:LSL Function/physical</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:caveats|{{#var:caveats}}
+*Only works in {{#if:{{{avatar|}}}|attachments and}} [[STATUS_PHYSICS|physics-enabled]] objects.}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|- {{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-damping-1dce8927/">Template:LSL Function/damping</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}}}
+
+{{#vardefine:p_{{{1|}}}_desc|seconds to critically damp in}}
+
+{{#if:{{{1|}}}|{{#vardefine:hidden-text|{{#var:hidden-text}}{{LSLC|Damping}}}}}}
+
+}}&lt;includeonly&gt;{{#if:{{{1|}}}|{{LSLC|Damping}}}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|}}}_desc}}
+|-
+{{VarPair|p_{{{1|}}}_hover}}
+|-
+{{VarPair|header_footnote}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lslp-7ff6581f/">Template:LSLP</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSLPT|{{{1|}}}|{{{2|}}}|{{{3|}}}}}&lt;noinclude&gt;
+
+Same exact syntax as [[Template:LSL Param]].
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-boolean-c769e8e3/">Template:LSL Function/boolean</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:nbdv|{{#switch:{{uc:{{{default|}}}}}|T|TRUE=true|F|FALSE=false}}}}
+
+{{#vardefine:p_{{{1|}}}_desc|{{#if:{{{bool|}}}|{{HoverLink|boolean{{#var:lang}}|A type that can only be true or false|boolean}},}} {{{pd|}}} {{#if:{{{bool|}}}{{{pd|}}}|{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}|{{ucfirst:{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}}}}} {{#vardefineecho:TRUE|{{LSL Const{{#var:lang}}|TRUE|integer|1}}}}{{#vardefine:FALSE|{{LSL Const{{#var:lang}}|FALSE|integer|0}}}}{{#if:{{{non-zero|}}}|{{Footnote|handle=non-zero|Any value that is not zero/{{#var:FALSE}} is treated the same as {{#var:TRUE}}. This behavior should not be depended upon.|Any value that is not zero/FALSE is treated the same as TRUE. This behavior should not be depended upon.}}}}{{#ifeq:{{#var:nbdv}}|true|&amp;#32;({{HoverText|default|default for new objects etc}})}} {{#if:{{{td|}}}|{{{td|}}}|enables}}, {{#ifeq:{{{if|}}}|*|if|{{{if|}}}}} {{#var:FALSE}}{{#ifeq:{{#var:nbdv}}|false|&amp;#32;({{HoverText|default|default for new objects etc}})}} {{#if:{{{fd|}}}|{{{fd|}}}|disables}}}}
+
+{{#vardefine:p_{{{1|}}}_hover|{{#if:{{{bool|}}}|boolean,}} {{#if:{{{ph|}}}|{{{ph|}}}|{{{pd|}}}}} {{#if:{{{bool|}}}{{{pd|}}}{{{ph|}}}|{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}|{{ucfirst:{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}}}}} TRUE{{#ifeq:{{#var:nbdv}}|true|&amp;#32;(default)}} {{#if:{{{th|}}}|{{{th|}}}|{{#if:{{{td|}}}|{{{td|}}}|enables}}}}, {{#ifeq:{{{if|}}}|*|if|{{{if|}}}}} FALSE{{#ifeq:{{#var:nbdv}}|false|&amp;#32;(default)}} {{#if:{{{fh|}}}|{{{fh|}}}|{{#if:{{{fd|}}}|{{{fd|}}}|disables}}}}}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|default=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|default=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|if=*|non-zero=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|if=*|non-zero=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|if=when|non-zero=*|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|if=when|non-zero=*|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

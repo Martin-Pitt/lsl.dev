@@ -1,0 +1,104 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Performs a single scan for <code>name</code> and <code>id</code> with <code>type</code> within <code>radius</code> meters and <code>arc</code> radians of forward vector.</div>
+<div class="wiki-line">Script execution continues immediately. When the scan is completed, a <a href="/events/sensor/">sensor</a> or <a href="/events/no_sensor/">no_sensor</a> event is put in the event queue.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>name</code> and/or <code>id</code> are empty, they are ignored.<br/>If <code>id</code> is an invalid key or <a href="/constants/NULL_KEY/">NULL_KEY</a> it is treated as empty.&lt;br id="NameFormat"/&gt;Depending upon which AGENT* flag is used determines the format requirements for <code>name</code></div>
+<div class="wiki-line">See: <a href="https://web.archive.org/web/20150426032518/http://www.lslwiki.net/lslwiki/wakka.php?wakka=llSensor" rel="noreferrer">llSensor</a> for an excellent explanation of <code>arc</code>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>AGENT, PASSIVE and ACTIVE behave inclusively. SCRIPTED is <strong>not</strong> inclusive and will exclude non-scripted targets (like avatars) from the detected set.</li>
+<li>Objects do not detect themselves, and attachments cannot detect their wearers (this includes HUD attachments).</li>
+<li>Attachments cannot be detected by llSensor.</li>
+<li>For an object to be detected, the center of its root prim (the same point it would report with <a href="/functions/llGetRootPosition/">llGetRootPosition</a>) must be within the sensor beam.</li>
+<li>For an agent to be detected, a point near the pelvis must be inside the sensor beam (the same as llGetRootPosition would report in a script attached to that avatar). This point is indicated by red crosshairs when Advanced&gt;Character&gt;Display Agent Target is turned on.</li>
+<li>If the agent is sitting on an object, the root prim of the sat upon object becomes a second sensor target for the agent (but not if the avatar is outside the sensor arc, see <a href="https://jira.secondlife.com/browse/SVC-5145" rel="noreferrer">SVC-5145</a>). </li>
+<li>Sensors placed in the root prim of attachments will use the direction the avatar is facing as their forward vector. In mouselook, this means that it will be wherever the avatar is looking, while out of mouselook, this means whichever way the avatar is pointing. This does not include where the avatar's head is pointing, or what animation the avatar is doing, just the direction the avatar would move in if you walked forward. This is the case, regardless of where the object is attached.</li>
+<li>Sensors placed in prims other than the root prim of an attachment will have their forward direction offset relative to the root prim's forward direction, e.g. a sensor in a prim whose +X direction is the reverse of the root +X will look backward.</li>
+<li>llSensor does not detect objects or agents across region boundaries</li>
+<li>If <code>type</code> is zero, the sensor will silently fail, neither <a href="/events/sensor/">sensor</a> or <a href="/events/no_sensor/">no_sensor</a> will be triggered.</li>
+<li>Only 32 objects will be scanned each time. (Increased from 16 with Release 2024-03-18.8333615376 on Tuesday, March 19, 2024)</li>
+<li>DAMAGEABLE is a filter flag; it cannot be used on its own. It must be combined with at least one other flag. For example, AGENT &vert; ACTIVE &vert; PASSIVE &vert; DAMAGEABLE will return all damageable agents and objects, whether physical or not.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">This sensor scans a 45 degree cone about the x-axis (<a href="/constants/PI/">PI</a>/2 or <a href="/constants/PI_BY_TWO/">PI_BY_TWO</a> scans a hemisphere; <a href="/constants/PI/">PI</a> is a spherical scan). Also it will only match an agent with the <a href="/wiki/category-lsl-avatar-name-1fcd5f3e/">legacy name</a> "Governor Linden".</div>
+<div class="wiki-line"><pre><code>llSensor( &quot;Governor Linden&quot;, NULL_KEY, AGENT_BY_LEGACY_NAME, 96.0, PI/4 );</code></pre></div>
+<div class="wiki-line">This sensor detects all prims and agents with a given name within 15m of the sensor.  (AGENT, PASSIVE and ACTIVE behave inclusively.  SCRIPTED is not inclusive and will exclude non-scripted targets (like avatars) from the detected set.)</div>
+<div class="wiki-line"><pre><code>llSensor( &quot;&quot;, NULL_KEY, ( AGENT | PASSIVE | ACTIVE ), 15.0, PI );</code></pre></div>
+<div class="wiki-line">Basic example script that when touched executes a sensor scan of agents. When the sensor event is processed it spits out messages to the owner of each detected agents' name.</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+        llSensor(&quot;&quot;, NULL_KEY, AGENT, 30.0, PI);
+    }
+    
+    sensor( integer detected )
+    {
+        while(detected--)
+        {
+            llOwnerSay(llDetectedName(detected));
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">You might want to use <a href="/functions/llGetAgentList/">llGetAgentList</a> instead of using sensors to get a list of all avatars within the same parcel or region.</div></aside></div>
+<h4 id="loops-repetition">Loops &amp; Repetition</h4>
+<div class="wiki-line">Using <a href="/functions/llSensor/">llSensor</a> in a <a href="/wiki/for-ca15ebc0/">for</a> loop is a beginners mistake, as events will not interrupt each other (the sensor event will not interrupt whatever event is currently being executed). To perform repeat sensor sweeps, <a href="/functions/llSensorRepeat/">llSensorRepeat</a> is the better solution. While it is possible to call llSensor from a <a href="/events/timer/">timer</a> event, it is less efficient to do so; there is a limit to the number of events that can be processed in a second and using the timer just to call llSensor will result in your script getting less timeslice.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSensorRepeat/">llSensorRepeat</a> — Runs a sensor on a timer</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSensorRemove/">llSensorRemove</a> — Stops the llSensorRepeat timer</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/sensor/">sensor</a> — Triggered when a sensor detects something</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/no_sensor/">no_sensor</a> — Triggered when a sensor detects nothing</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-uuid-f11a4088/">Template:LSL Function/uuid</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}{{#if:{{{group|1}}}|{{LSLGC|Group|group}},&amp;#32;}}{{LSLGC|Avatar|avatar}} or {{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{ph|}}}|{{{ph|}}}&amp;#32;|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}}}{{#if:{{{group|1}}}|group,&amp;#32;}}avatar or {{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Avatar/As A Parameter}}
+}}}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-constants-sensing-3952dde9/">Template:LSL Constants/Sensing</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:
+
+{{#vardefine:caveats|{{#var:caveats}}
+*When searching for an avatar but not by name, it doesn&#x27;t matter which AGENT flag is used.}}
+
+{{#vardefine:constants_nb|{{#var:constants_nb}}
+{{{!}}
+{{LSL Constants Sensor|{{{1|}}}|no_wrapper=*|tstyle=margin-top:0;}}
+&lt;div style=&quot;display:inline-block;&quot;&gt;
+{{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}- {{Hl2}}
+!Float Constants
+!Arc
+{{!}}-
+{{!}}{{#vardefine:PI_BY_TWO|{{LSL Const|PI_BY_TWO|float|1.570796326}}}}{{#var:PI_BY_TWO}}
+{{!}}A hemisphere scan
+{{!}}-
+{{!}}{{#vardefine:PI|{{LSL Const|PI|float|3.141592653}}}}{{#var:PI}}
+{{!}}A full sphere scan
+{{!}}}
+&lt;/div&gt;
+{{!}}}
+}}
+
+}}&lt;noinclude&gt;{{#var:constants_nb}}&lt;/noinclude&gt;</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="gallery">Gallery</h2>
+<div class="wiki-line">&lt;gallery&gt;</div>
+<div class="wiki-line">File:sensor_pi_by_four.png|arc = PI / 4</div>
+<div class="wiki-line">File:sensor_pi_by_two.png|arc = PI / 2</div>
+<div class="wiki-line">File:sensor_pi.png|arc = PI</div>
+<div class="wiki-line">&lt;/gallery&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div></section>

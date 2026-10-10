@@ -1,0 +1,258 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<h4 id="double-tap-detection-without-timers">Double Tap Detection without Timers</h4>
+<div class="wiki-line">This is an example to show one method of detecting a double tap of a movement key without using a timer. --<a href="https://wiki.secondlife.com/wiki/User:Eyana_Yohkoh">Eyana Yohkoh</a> 19:09, 27 August 2007 (PDT)</div>
+<div class="wiki-line"><pre><code>// Dash/dodge template script by Eyana Yohkoh
+//
+//
+///////
+
+// This script is an example of a way to detect a double tap on movement
+// keys to trigger a function.
+// There are multiple ways to detect a double tap, and this method quite
+// possibly is not the best, but this certainly works.
+
+
+// debugging stuff:
+//
+integer debug = FALSE;      // set this to TRUE if you want to hear debugging messages
+
+debugging(string debugMsg)  // if debug is TRUE, then this is what will send messages
+{                           // I put this in a function for ease of adding more debug messages
+    if ( debug )            
+    {
+        llOwnerSay(debugMsg);
+    }
+}
+
+
+// getting the time for the comparison
+/////////
+float strTime;          // used to store the current time 
+float time;
+
+getSeconds()
+{
+    string timestamp    = llGetTimestamp();                 
+                                        // first part of getting the current time with milliseconds
+                                        // this gives a strange time format so it was easier for me
+                                        // to just grab the very end of the time to get the
+                                        // fractional seconds.
+    string subTime      = llGetSubString(timestamp, 19, 25);                                        
+
+    float wallclock     = llGetWallclock();
+                            // this gets the current time in seconds
+                            // can&#x27;t use this for a check without the above stuff because
+                            // it does not do decimal places
+                            
+    strTime = (float)subTime + wallclock;
+                            // appending milliseconds to the end of the rounded off seconds
+                            // you could just do without this and test with seconds and milliseconds
+                            // but that would cause problems with the comparison check for when
+                            // double tapping at the cusp of a completed minute
+                            
+    debugging((string)strTime);             // debug message for testing purposes
+}
+
+// comparing the stored time with the current tap time
+///////////
+
+float storedTime;               // number will be stored at the end of a tap for comparison
+float recentTime;               // stored immediately on tapping for comparing with the stored
+
+compareTimes(float stored, float recent)        // find the difference between the times
+{                                               // example use: compareTimes(storedTime, recentTime)
+    time = recent - stored;
+    debugging((string)recent + &quot; - &quot; + (string)stored + &quot; = &quot; +  (string)time);
+}
+
+
+resetStored()
+{
+    storedTime = 0;
+}
+
+float interval = 0.5;   // time between double taps
+                        // default interval is 0.5 seems to be a good number
+                        // 0.2 is too fast for some people, 1.0 is far too slow
+
+
+doubleTap()
+{
+    if ( time &lt; interval )
+    {
+        llSay(0, &quot;Double tap detected&quot;);
+    }
+}
+
+key avatar;
+requestPerms()          // permissions we want to take:
+{
+    integer permissions = PERMISSION_TAKE_CONTROLS;
+    llRequestPermissions(avatar, permissions);          // avatar is snagged when object is attached
+}
+
+takeControls()              // what controls to take. pared down for the example.
+{
+    integer controls    =   CONTROL_FWD;
+                            
+    llTakeControls(controls, TRUE, TRUE);
+}
+
+default
+{
+    on_rez(integer reznum)
+    {
+        llReleaseControls();            // release controls just in case
+        resetStored();                  // reset all stored numbers
+        debugging(&quot;Debug messages are turned on.&quot;);
+    }
+
+    run_time_permissions(integer perms)
+    {
+        if ( perms &gt; 0 )            // if permissions are granted then take controls
+        {
+            takeControls();
+        }
+    }
+    
+    attach(key id)
+    {
+        if ( id != NULL_KEY )       // if id is NULL then it&#x27;s not attached to a person!
+        {
+            avatar = id;            // store the key for later use without need to reset
+            requestPerms();         // get permissions
+        }
+        else                        // since it&#x27;s no longer attached, then no need for control
+        {
+            llReleaseControls();
+        }
+    }
+
+    control(key id, integer held, integer change) 
+    {
+        integer pressed = held &amp; change;
+                    
+        if ( pressed &amp; CONTROL_FWD )
+        {
+            getSeconds();
+            recentTime = strTime;                   // store the recent time 
+                                                    // that was just found with getSeconds()
+            compareTimes(storedTime, recentTime);   // comparing times
+            doubleTap();                            // this will trigger for double taps!
+            storedTime = recentTime;                // store the recent time for later in case
+                                                    // this time was not a successful double tap
+                                                    // but was possibly the first key press for the
+                                                    // double tap
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">Double-tap detection - this example warps user at maximum velocity.</div>
+<div class="wiki-line">[Functional code, paste to script, add to object, wear object, double tap forward key to test.]</div>
+<div class="wiki-line"><pre><code>//
+// BETLOG Hax
+// AEST: 20080801 2227 [SLT:  20080801 0527]
+//=========================================================================
+// ---LICENCE START---
+// http://creativecommons.org/licenses/by-sa/3.0/
+// ie: Attribution licence:
+//   Give me credit by leaving it in the script I created.
+//   Supply my original script with your modified version.
+//   Refer to the wiki URL from which you copied this script.
+//      https://wiki.secondlife.com/wiki/Double_Tap_Detection
+// ---LICENCE END---
+//=========================================================================
+
+//----------------------------------
+// SHARED CONFIGURATION
+//----------------------------------
+// CONFIGURATION
+float       gDoubleTap          = 0.1;
+//----------------------------------
+// CORE CODE
+integer     gWarpActive         = FALSE;
+//----------------------------------
+default
+{
+    state_entry()
+    {
+        if (llGetAttached())
+            llRequestPermissions(llGetOwner(),PERMISSION_TAKE_CONTROLS);
+    }
+    attach(key id)
+    {
+        if (llGetAttached())
+            llRequestPermissions(llGetOwner(),PERMISSION_TAKE_CONTROLS);
+    }
+    run_time_permissions(integer perms)
+    {
+        if(~perms &amp; PERMISSION_TAKE_CONTROLS)
+            llReleaseControls();
+        else
+        {
+            llTakeControls(0
+                | CONTROL_FWD
+                | CONTROL_BACK
+                | CONTROL_LEFT
+                | CONTROL_RIGHT
+//                | CONTROL_ROT_LEFT
+//                | CONTROL_ROT_RIGHT
+                | CONTROL_UP
+                | CONTROL_DOWN
+//                | CONTROL_LBUTTON
+//                | CONTROL_ML_LBUTTON
+            ,TRUE, TRUE);
+            llOwnerSay(&quot;Ready - Doubletap frequency: &quot;+(string)gDoubleTap);
+        }
+    }
+    control(key id, integer pressed, integer change)
+    {
+        integer start = pressed &amp; change;
+        integer end = ~pressed &amp; change;
+        integer held = pressed &amp; ~change;
+        integer unheld = ~(pressed | change);
+        //----------------------------------
+        if (start &amp; (CONTROL_FWD|CONTROL_BACK
+                    |CONTROL_UP|CONTROL_DOWN
+                    |CONTROL_LEFT//|CONTROL_ROT_LEFT
+                    |CONTROL_RIGHT//|CONTROL_ROT_RIGHT
+        ))
+        {
+            if (llGetTime() &lt;= gDoubleTap)
+            {
+                if (-change == gWarpActive) //try to ensure only the key being *intentionally* double tapped is used.
+                    gWarpActive = 1;
+            }
+        }
+        //----------------------------------
+        if (end &amp; (CONTROL_FWD|CONTROL_BACK
+                    |CONTROL_UP|CONTROL_DOWN
+                    |CONTROL_LEFT//|CONTROL_ROT_LEFT
+                    |CONTROL_RIGHT//|CONTROL_ROT_RIGHT
+        ))
+        {
+            gWarpActive = -change;  //try to ensure only the key being *intentionally* double tapped is used.
+            llResetTime();
+        }
+        //----------------------------------
+        if (held &amp; CONTROL_FWD)
+        {
+            if (gWarpActive &gt; 0)
+            {
+                llPushObject(
+                    llGetOwner()
+                    ,llRot2Fwd(llGetRot())*0x7FFFFFFF//forward
+                    ,ZERO_VECTOR
+                    ,FALSE
+                );
+            }
+        }
+        //----------------------------------
+        // ADD THE REST OF THE KEYS/DIRECTIONS HERE
+//                    ,-llRot2Fwd(llGetRot())*0x7FFFFFFF //back
+//                    ,llRot2Left(llGetRot())*0x7FFFFFFF //left
+//                    ,-llRot2Left(llGetRot())*0x7FFFFFFF //right
+//                    ,llRot2up(llGetRot())*0x7FFFFFFF //up
+//                    ,-llRot2Up(llGetRot())*0x7FFFFFFF //down
+    }
+}</code></pre></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-examples-d1aa2221/">Category:LSL Examples</a></div>

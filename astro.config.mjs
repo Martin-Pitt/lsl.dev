@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { readFileSync } from 'node:fs';
+import rehypeInlineLsl from './src/lib/rehype-inline-lsl.ts';
 import { loadFeatures, featureRedirects } from './scripts/feature-index.mjs';
 
 /**
@@ -38,6 +39,8 @@ const redirects = Object.fromEntries(Object.entries(featureRedirects(features)).
 export default defineConfig({
 	site: 'https://lsl.dev',
 	redirects,
+	// Inline `code` and links to API pages in Markdown/MDX are highlighted as LSL (see the plugin).
+	markdown: { rehypePlugins: [rehypeInlineLsl] },
 	integrations: [starlight({
 		title: 'LSL Dev',
 		favicon: '/favicon.svg',
@@ -47,12 +50,15 @@ export default defineConfig({
 		social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Martin-Pitt/lsl.dev' }],
 		tableOfContents: false,
 		pagination: false,
+		// Breadcrumbs and meta description of the MDX API pages.
+		routeMiddleware: ['./src/route-middleware.ts', './src/routeData.ts'],
 		customCss: ['./src/styles/slua-base.css', './src/styles/custom.css'],
 		components: {
 			Header: './src/components/starlight/Header.astro',
 			PageFrame: './src/components/starlight/PageFrame.astro',
 			Hero: './src/components/starlight/Hero.astro',
 			Footer: './src/components/starlight/Footer.astro',
+			PageTitle: './src/components/starlight/PageTitle.astro',
 		},
 		sidebar: [
 			{

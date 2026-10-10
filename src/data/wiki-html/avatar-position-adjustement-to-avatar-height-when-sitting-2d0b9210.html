@@ -1,0 +1,15 @@
+<h3 id="animation-adjustement-according-to-avatar-height-snippet">Animation Adjustement According to Avatar Height Snippet</h3>
+<div class="wiki-line">This is a piece of code, that is meant to be putted inside a changed event (what is initialized when avatar sits).<br><br></div>
+<div class="wiki-line">This snippet is for a prim that is AT THE FLOOR LEVEL mainly for standing and walking animations. If you need a snippet for a chair, just use zero. <br><br></div>
+<div class="wiki-line"><pre><code>integer agentlinknum = llGetNumberOfPrims(); // when avatar sits it becomes the last child on the linkset
+
+  vector size = llGetAgentSize(llAvatarOnSitTarget()); // we measure the avatar size
+    
+    
+    float adjustement = (size.z / 2 );  // size.z is avatar height, pelvis is halfway the avatar
+     
+      
+      
+     float avup = (adjustement + ( size.z/10)) + 0.08; // half of avatar + one tenth of avatar + your own tweak (depends on various things, so you have to test what works for you)
+            
+llSetLinkPrimitiveParamsFast(agentlinknum,[PRIM_POS_LOCAL,&lt;0,0,avup&gt;,PRIM_ROT_LOCAL,llEuler2Rot(&lt;0,0,0&gt;)]); // here we move the avatar to the new position, the rotation part is the target rotation in euler</code></pre></div>

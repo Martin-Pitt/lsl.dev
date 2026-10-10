@@ -1,0 +1,36 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">EOF is a value returned by the <a href="/events/dataserver/">dataserver</a> event, as a result of a call to <a href="/functions/llGetNotecardLine/">llGetNotecardLine</a>, specifically when the requested line is past the end of the notecard. The value returned equals "\n\n\n", which is to say, three newline characters (0x0a).</div>
+<div class="wiki-line">Essentially, it is used to let you know when you have finished reading information (usually user configurable parameters) from a notecard, and are ready to move onto the next stage or state of the script.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>integer iLine;
+string card = &quot;~config&quot;;
+key myquery;
+
+default{
+    state_entry() {
+        if(llGetInventoryType(card) != INVENTORY_NONE)
+            myquery = llGetNotecardLine(card, iLine = 0);
+        else
+            llSay(0,&quot;The \&quot;&quot; + card + &quot;\&quot; notecard is missing! Cannot proceed!&quot;);
+    }
+     
+    dataserver(key request, string sdata){
+        if(request == myquery){
+            if(sdata == EOF){ // no more text in the notecard
+                state ready; //move to the next state
+            }
+            else {
+                //here you would process the data
+                //llOwnerSay(sdata);
+                myquery = llGetNotecardLine(card, ++iLine); // now read in next line, and start the dataserver process all over again
+            }
+        }
+    }
+}
+
+state ready{
+    state_entry(){
+        llOwnerSay(&quot;I&#x27;m ready for action!&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">EOF is an acronym that stands for "End Of File".</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetNotecardLine/">llGetNotecardLine</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/dataserver/">dataserver</a></div></div></section>

@@ -1,0 +1,25 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/vector">vector</a> that is the acceleration of the object in the <a href="https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region">region</a> frame of reference.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Returns <a href="/constants/ZERO_VECTOR/">ZERO_VECTOR</a> in attachments regardless of the avatar's acceleration.</li>
+<li>Returns <a href="/constants/ZERO_VECTOR/">ZERO_VECTOR</a> in child prims regardless of the linkset's acceleration.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//A very simple (and not very effective) way of keeping a physical object in place.
+//If the object is moving when the script is put in the object, then the object will continue to move, so long as it doesn&#x27;t accelerate. 
+//If you ever want to actually stop an object, use llMoveToTarget(llGetPos(), .1)
+default {
+    moving_start(){ 
+        vector ac;
+        // Go forever         
+        while(llVecMag(ac = llGetAccel()) &gt; .001) { //We&#x27;re accelerating...
+            llApplyImpulse(-ac, 0); //Slow us down.
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetOmega/">llGetOmega</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetVel/">llGetVel</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetTorque/">llGetTorque</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetMass/">llGetMass</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetForce/">llGetForce</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetForce/">llSetForce</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetTorque/">llSetTorque</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetForceAndTorque/">llSetForceAndTorque</a></div></div></section>

@@ -1,0 +1,162 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">The index of the first entry in the list is <code>0</code><br></div>
+<div class="wiki-line">The index of the first entry in a slice is <code>0</code><br></div>
+<div class="wiki-line">If <code>start</code>, <code>end</code>, or <code>slice_index</code> are negative they are indexed from end of list.  -1 is last element in the list.  -list_length is the 1st element of the list.<br></div>
+<div class="wiki-line">If <code>slice_index</code> is negative it is counted from the end of its stride regardless of whether or not the stride exceeds the end of the list.  e.g:  -1 is the last element in a stride.<br></div>
+<div class="wiki-line">If <code>start</code> &gt; <code>end</code> the range from start to end is treated as an exclusion range.<br></div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> of the slice_index'th element of every stride in <a href="https://wiki.secondlife.com/wiki/List#strided-lists">strided list</a> whose index is a multiple of <code>stride</code> in the range <code>start</code> to <code>end</code>.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>list mylist = [0,1,2,3,4,5,6];
+list result_a = llList2ListSlice(mylist,0,-1,3,0); //start at first item in list, go to the end, return 1st slice of every stride of 3
+//result_a == [0,3,6]
+
+list result_b = llList2ListSlice(mylist,0,-1,3,1); //start at first item in list, go to the end, return 2nd slice of every stride of 3
+//result_b == [1,4]
+
+list result_c = llList2ListSlice(mylist,1,-1,3,1); //start at second item in list, go to the end, return 2nd slice of every stride of 3
+//result_c == [2,5]
+
+list result_d = llList2ListSlice(mylist,2,-1,3,-1); //start at third item in list, go to the end, return last slice of every stride of 3
+//result_d == [4]
+
+list result_e = llList2ListSlice(mylist,4,2,1,0); //4&gt;2 so this is an exclusion. slice indices count from 0 and first element after exclusion. Return every element not in range with a stride of 1
+//result_e == [0,1,2,4,5,6]</code></pre></div>
+<div class="wiki-line"><pre><code>list menu = [&quot;1&quot;, &quot;one&quot;, &quot;2&quot;, &quot;two&quot;, &quot;3&quot;, &quot;three&quot;];
+default
+{
+    state_entry()
+    {
+        llListen(10, &quot;&quot;, llGetOwner(), &quot;&quot;);
+    }
+    touch_start(integer detected)
+    {
+        list buttons = llList2ListSlice(menu, 0, -1, 2, 0);
+        llDialog(llDetectedKey(0), &quot;choose a number&quot;, buttons, 10); //display the digits
+    }
+    listen(integer channel, string obj, key id, string message)
+    {
+        integer index = llListFindList(menu, [message]);
+        if (index != -1)
+        {
+            list names = llList2ListSlice(menu, 0, -1, 2, 1);
+            llOwnerSay(&quot;you chose &quot; + llList2String(names, index/2) + &quot; (&quot; + message + &quot;)&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><ul>
+<li><a href="https://wiki.secondlife.com/wiki/User:Fred_Gandt/Scripts/Functions#strideoflist">StrideOfList</a> - Starting from <strong>start</strong> and stopping before <strong>end</strong> exceeded it skips every <strong>stride</strong>-1 items. returns the slice_index element of the stride if its position is less than list length.</li>
+</ul></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">If the list is not modulo the stride, elements up to the length of the list will be returned in the final slice matching conditions.  e.g.  a list of 5 elements with a stride of 2 will return 3 elements for a 0,5 range on slice index 0 but only 2 if the slice_index is 1.</div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-negative-index-2a0eb411/">Template:LSL Function/negative index</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+Format:
+&lt;nowiki&gt;{{LSL Function/negative index|boolean|p1|p2|p3}}&lt;/nowiki&gt;&lt;br/&gt;
+Exclude p1, p2, or p3 if not used.
+
+{{#vardefine:also_articles|{{LSL DefineRow||Test}}}}
+{{#vardefine:ni_mode|true}}
+{{#vardefine:ni_nc|}}
+{{#vardefine:ni_p1|number}}
+{{#vardefine:ni_p2|p2}}
+&lt;!--{{#vardefine:ni_p3|p3}}--&gt;
+
+&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:ni_c|{{#if:{{{2|{{#var:ni_p1}}}}}|{{#if:{{{3|{{#var:ni_p2}}}}}|{{#if:{{{4|{{#var:ni_p3}}}}}|3|2}}|1}}|0}}}}
+
+{{#vardefine:t|{{#ifeq:{{{1|{{#var:ni_mode}}}}}|true|{{#switch:{{#var:ni_c}}|3|2=LSL_Function/negative_index/range|1=LSL_Function/negative_index/single}}}}}}
+
+{{{{#var:t}}|{{{2|{{#var:ni_p1}}}}}|{{{3|{{#var:ni_p2}}}}}|{{{4|{{#var:ni_p3}}}}}|noExclude={{{noExclude|}}}}}
+
+{{#if:{{{noSpec|}}}||
+{{#vardefine:spec|{{#var:spec}}
+{{#if:{{#var:t}}|
+{{{!}} {{Prettytable|style=float:left;}}
+{{!}}-{{Hl2}}
+! Index
+! Positive
+! Negative
+{{!}}-
+{{!}} First
+{{!}} &lt;code&gt;0&lt;/code&gt;
+{{!}} &lt;code&gt;-{{{length|length}}}&lt;/code&gt;
+{{!}}-
+{{!}} Last
+{{!}} &lt;code&gt;{{{length|length}}} - 1&lt;/code&gt;
+{{!}} &lt;code&gt;-1&lt;/code&gt;
+{{!}}}
+=== Indexes ===
+&lt;div style=&quot;display:table;&quot;&gt;&lt;div style=&quot;display:block;&quot;&gt;
+*Positive indexes count from the beginning, the first item being indexed as &lt;code&gt;0&lt;/code&gt;, the last as &lt;code&gt;({{{length|length}}} - 1)&lt;/code&gt;.
+&lt;/div&gt;&lt;/div&gt;
+&lt;div style=&quot;display:table;&quot;&gt;&lt;div style=&quot;display:block;&quot;&gt;
+*Negative indexes count from the far end, the first item being indexed as &lt;code&gt;-{{{length|length}}}&lt;/code&gt;, the last as &lt;code&gt;-1&lt;/code&gt;. 
+&lt;/div&gt;&lt;/div&gt;
+}}
+}}
+}}
+
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{#if:{{#var:t}}|{{LSL_DefineRow||{{LSLGC|Negative_Index{{#var:lang}}|Negative Index}}|}}}}}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+{{#vardefineecho:ni_ps|{{#switch:{{#var:ni_c}}
+  |0=This function
+  |1={{LSLP|{{{2}}}}}
+  |2={{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}}
+  |3={{LSLP|{{{2}}}}}, {{LSLP|{{{3}}}}} &amp; {{LSLP|{{{4}}}}}
+ }}}} {{#if:{{#var:t}}| support{{#ifexpr:{{#var:ni_c}}&gt;1||s}}| &#x27;&#x27;do{{#ifexpr:{{#var:ni_c}}&gt;1||es}} not&#x27;&#x27; support }} {{LSLGC|Negative_Index{{#var:lang}}|negative indexes}}.{{PBR}}
+}}
+
+{{#vardefine:footer|{{#var:footer}}
+{{#if:{{#var:t}}|{{#ifeq:{{NAMESPACE}}|Template||{{#if:{{#var:self}}{{{self|}}}{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Negative Index{{#var:lang}}}}}}}}|
+{{#if:{{#var:self}}{{{self|}}}{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Positive_Index_Only{{#var:lang}}}}}}
+}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#if:{{{nc|{{#var:ni_nc}}}}}||
+* If {{#switch:{{#var:ni_c}}
+ |3=either {{LSLP|{{{2}}}}}, {{LSLP|{{{3}}}}} or {{LSLP|{{{4}}}}} are
+ |2=either {{LSLP|{{{2}}}}} or {{LSLP|{{{3}}}}} are
+ |1={{LSLP|{{{2}}}}} is}} out of bounds {{#if:{{{oob-return|}}}|this function returns {{{oob-return|}}} and}} the script continues to execute without an error message.
+{{#if:{{#var:t}}|{{#ifexpr:{{#var:ni_c}}&gt;1|{{#if:{{{noExclude|}}}|* {{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}} will not form an [[#exclusion_range|exclusion range]] when {{LSLP|{{{2}}}}} is past {{LSLP|{{{3}}}}} (Approximately: {{LSLP|{{{2}}}}} &gt; {{LSLP|{{{3}}}}}), instead it will act as if {{LSLP|{{{2}}}}} was zero &amp; {{LSLP|{{{3}}}}} was -1.|* {{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}} will form an [[#exclusion_range|exclusion range]] when {{LSLP|{{{2}}}}} is past {{LSLP|{{{3}}}}} (Approximately: {{LSLP|{{{2}}}}} &gt; {{LSLP|{{{3}}}}}). }}}}}}
+}}}}
+
+}}&lt;noinclude&gt;
+==Debugging==
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|spec}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|notes}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPairTable|also_articles}}
+|-
+{{VarPair|footer}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-stride-ec5ce168/">Template:LSL Function/stride</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:header_footnote|This function supports [[List#Strided_lists|Strided Lists]].}}
+
+{{#vardefine:p_{{{1|none}}}_hover|number of entries per stride, if less than 1 it is assumed to be 1}}
+{{#vardefine:p_{{{1|none}}}_desc|number of entries per stride, if less than 1 it is assumed to be 1}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|- {{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|-
+{{VarPair|header_footnote}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

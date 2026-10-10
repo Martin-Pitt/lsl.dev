@@ -2,13 +2,16 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import WikiContent from '../../components/reference/WikiContent.astro';
 import { catalog, allApi, apiHref } from '../../lib/catalog';
+// Rendered pages live in one file each and are loaded only when their page is built.
+const pages = import.meta.glob<string>('../../data/wiki-html/*.html', { query: '?raw', import: 'default' });
 export function getStaticPaths(){return catalog.wiki.map(wiki=>({params:{slug:wiki.slug},props:{wiki}}));}
 const {wiki}=Astro.props;const api=allApi.find(e=>e.wiki?.slug===wiki.slug);
-const headings=wiki.sections.map(s=>({depth:2,slug:s.id,text:s.title}));
+const html = await pages[`../../data/wiki-html/${wiki.slug}.html`]();
+const headings=wiki.headings.map(s=>({depth:2,slug:s.id,text:s.title}));
 ---
 <StarlightPage frontmatter={{title:wiki.title,description:`Community documentation: ${wiki.title}`,editUrl:false,lastUpdated:false}} headings={headings}>
 {api && <p class="archive-note">Looking for the current API? <a href={apiHref(api.kind,api.name)}>Open the {api.name} reference →</a></p>}
 {wiki.namespace===14 && <p class="archive-note">This is a historical wiki category. <a href="/categories/">Explore the current topic guides →</a></p>}
-<WikiContent wiki={wiki}/>
+<WikiContent wiki={wiki} html={html}/>
 </StarlightPage>
 <style>.archive-note{padding:1rem;border:1px solid var(--sl-color-hairline);border-radius:.6rem;font-size:.9rem}</style>

@@ -1,0 +1,45 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered when task starts colliding with another task</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Will not detect collisions with ground.  Use <a href="/events/land_collision_start/">land_collision_start</a> instead.</li>
+<li>Phantom objects can never receive trigger collision events.</li>
+<li><code><a href="/functions/llVolumeDetect/">llVolumeDetect</a>(<a href="/constants/TRUE/">TRUE</a>)</code> objects get trigger <a href="/events/collision_start/">collision_start</a> and <a href="/events/collision_end/">collision_end</a> but not <a href="/events/collision/">collision</a>() events.</li>
+<li>A collision with a hovering avatar does not trigger collisions, unless the avatar turns or moves.</li>
+<li>Only a physical object will get collision events from colliding with a non-physical object.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    collision_start(integer num)
+    {
+        llSay(0,&quot;No pushing.&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>list DetectedAvatars = [];
+default
+{
+    state_entry()
+    {
+        llVolumeDetect(TRUE); // Enable detection of people colliding with object....
+    }
+    collision_start(integer detected)
+    {
+        integer index = llListFindList(DetectedAvatars, [llDetectedKey(0)]);
+        if (index == -1)
+        {
+            llInstantMessage(llDetectedKey(0), &quot; Welcome to the Community&quot;);
+            DetectedAvatars = llListInsertList(DetectedAvatars, [llDetectedKey(0)], -1);
+
+            if (llGetListLength(DetectedAvatars) == 2)
+            {
+                DetectedAvatars = llDeleteSubList(DetectedAvatars, 1, 2);
+            }
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llPassCollisions/">llPassCollisions</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llCollisionFilter/">llCollisionFilter</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llCollisionSound/">llCollisionSound</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llcollisionsprite-0a27d671/">llCollisionSprite</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llVolumeDetect/">llVolumeDetect</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/collision/">collision</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/collision_end/">collision_end</a></div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-issues-svc-3306-cc73f914/">Issues/SVC-3306</a>: <code>{{Issues/SVC-3306}}</code></span></div></section>

@@ -1,0 +1,26 @@
+<section><h2 id="event-notes">Event notes</h2><div class="wiki-line"><strong>start_param</strong> is always zero when an object is not rezzed by <a href="/functions/llRezObject/">llRezObject</a> or <a href="/functions/llRezAtRoot/">llRezAtRoot</a>. </div>
+<div class="wiki-line"><br/>When an object is rezzed by <a href="/functions/llRezObject/">llRezObject</a> or <a href="/functions/llRezAtRoot/">llRezAtRoot</a>, then <strong>start_param</strong> will be the value given as the last parameter of the rezzing command.</div>
+<div class="wiki-line"><br/><strong>start_param</strong> is available at any subsequent time by calling <a href="/functions/llGetStartParameter/">llGetStartParameter</a> (unless it has been overridden by <a href="/functions/llRemoteLoadScriptPin/">llRemoteLoadScriptPin</a>).</div></section>
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered when an object is rezzed (by script or by user). Also triggered in attachments when a user logs in, or when the object is <a href="/events/attach/">attach</a>ed from inventory.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If an object is rezzed by another object then the <a href="/events/object_rez/">object_rez</a> event in the parent object does not trigger at the same time as the on_rez event in the child object and the order of the events is not guaranteed. See the examples in <a href="/events/object_rez/">object_rez</a> for how to reliably establish communications between objects when rezzing.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    on_rez(integer start_param)
+    {
+        // Restarts the script every time the object is rezzed
+        llResetScript(); 
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><h3 id="state-entry-on-rez"><a href="/events/state_entry/">state_entry</a> &amp; <a href="/events/on_rez/">on_rez</a></h3>
+<div class="wiki-line"><a href="/events/state_entry/">state_entry</a> will be triggered prior to <a href="/events/on_rez/">on_rez</a> if <a href="/events/state_entry/">state_entry</a> has not been run prior.</div>
+<h3 id="on-rez-attach"><a href="/events/on_rez/">on_rez</a> &amp; <a href="/events/attach/">attach</a></h3>
+<div class="wiki-line"><a href="/events/on_rez/">on_rez</a> will be triggered prior to <a href="/events/attach/">attach</a> when attaching from inventory or during login.</div>
+<h3 id="on-rez-slow-events"><a href="/events/on_rez/">on_rez</a> &amp; slow events</h3>
+<div class="wiki-line">If the script was already processing an event at rez time, <a href="/events/on_rez/">on_rez</a> does not <strong>not</strong> trigger until the current event handler is completed. (same with <a href="/events/attach/">attach</a>)</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetStartParameter/">llGetStartParameter</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRezObject/">llRezObject</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRezAtRoot/">llRezAtRoot</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/object_rez/">object_rez</a> — triggered when this object rezzes an object from inventory</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/state_entry/">state_entry</a> — triggered during script startup, reset and state change</div></div></section>

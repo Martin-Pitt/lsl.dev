@@ -1,0 +1,35 @@
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>When called from the root of an attachment, returns the wearer's region position. To see the position used, enable <strong>Develop&gt;Avatar&gt;Display Agent Target</strong> and use the red crosshair. If the avatar is sitting on an object, the red crosshair may be hidden by the white one, in the same position.</li>
+</ul>
+<ul>
+<li>When called in an attachment's child prim, the position given is again relative to the <em>avatar's</em> root position and rotation, but with the offset from the root prim added. Visually, the reported position will only be correct if the object's root is attached to <a href="/constants/ATTACH_AVATAR_CENTER/">ATTACH_AVATAR_CENTER</a>, at <a href="/constants/ZERO_ROTATION/">ZERO_ROTATION</a> and <a href="/constants/ZERO_VECTOR/">ZERO_VECTOR</a>. Moving the attachment's root or changing the attachment point will not affect the reported position. Avatar animation is invisible to the simulator, so it also does not affect the reported position.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+        // When touched, check the position of
+        // the object, save it to &quot;position&quot;,
+        // then convert it into a string and
+        // say it.
+        vector position = llGetPos();
+        llSay(0, (string)position);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>default
+{
+    on_rez(integer param)
+    {
+        // Adding .x .y or .z after the vector name can be used to get the float value of just that axis.
+        vector pos = llGetPos();
+        float Z = pos.z; // &lt;--- Like this.
+        if(Z &gt; 500.0)
+        llOwnerSay(&quot;Oooh! I&#x27;m up high!&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLocalPos/">llGetLocalPos</a> — Gets the prim <a href="https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#local">local</a> position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimitiveParams/">llGetPrimitiveParams</a> — Gets prim properties</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRootPosition/">llGetRootPosition</a> — Gets the root prims position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetPos/">llSetPos</a> — Sets the prim position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a> — Sets prim properties</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a> — Sets linked prim properties</div></div></section>

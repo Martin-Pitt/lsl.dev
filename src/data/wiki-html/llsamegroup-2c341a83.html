@@ -1,0 +1,147 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">This function compares the <code>group-uuid</code> of the <a href="https://wiki.secondlife.com/wiki/prim">prim</a> containing the script to that of the <code>group-uuid</code> of what <code>uuid</code> describes.</div>
+<div class="wiki-line">It answers these two questions:</div>
+<ul>
+<li>"Is the script's prim in the same <a href="https://wiki.secondlife.com/wiki/group">group</a> as <code>uuid</code>?"</li>
+<li>"Is the <code>group-uuid</code> of the script's prim equal to <code>uuid</code>?"</li>
+</ul></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is <a href="/constants/TRUE/">TRUE</a> if <code>uuid</code> and the <a href="https://wiki.secondlife.com/wiki/prim">prim</a> the <a href="/wiki/script-102acc10/">script</a> is in are of the same <a href="https://wiki.secondlife.com/wiki/group">group</a>, otherwise <a href="/constants/FALSE/">FALSE</a>.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">The group of the prim the script is in is...</div>
+<ul>
+<li>The group the prim is set-to</li>
+<li>The group the prim is deeded-to </li>
+<li>The group the prim is otherwise <a href="https://wiki.secondlife.com/wiki/Owner">owned by</a></li>
+<li>If no group information is set, the <code>group-uuid</code> used for this is <a href="/constants/NULL_KEY/">NULL_KEY</a>.</li>
+</ul>
+<div class="wiki-line">The group of the <code>uuid</code> is...</div>
+<ul>
+<li>If <code>uuid</code> is a prim (known to the <a href="https://wiki.secondlife.com/wiki/region">region</a>)...</li>
+<li>and it is an <a href="/wiki/attachment-040d2b36/">attachment</a>, the active group of the owner*</li>
+<li>The group the prim is set-to</li>
+<li>The group the prim is deeded-to </li>
+<li>The group the prim is otherwise owned by</li>
+<li>If no group information is set, the <code>group-uuid</code> used for this is <a href="/constants/NULL_KEY/">NULL_KEY</a>.</li>
+<li>If <code>uuid</code> is an <a href="/wiki/avatar-ca8e826d/">avatar</a> (known to the <a href="https://wiki.secondlife.com/wiki/region">region</a>)...</li>
+<li>The active group of the avatar.</li>
+<li>If no group information is set, the <code>group-uuid</code> used for this is <a href="/constants/NULL_KEY/">NULL_KEY</a>.</li>
+<li>Otherwise, treat <code>uuid</code> AS the <code>group-uuid</code>.</li>
+<li>This means that instead of doing "Is the script's prim in the same group as <code>uuid</code>?", it becomes "Is the <code>group-uuid</code> of the script's prim equal to <code>uuid</code>?"</li>
+</ul>
+<div class="wiki-line"><strong>Note:</strong> No group, prim, or avatar share the same <code>uuid</code>.</div>
+<div class="wiki-line">In pseudocode:</div>
+<div class="wiki-line"><pre><code>integer llSameGroup(key uuid){
+    key group = getGroupKey(llGetKey());
+    if(uuid == group)
+        return TRUE;
+    if(getGroupKey(uuid) == group)
+        return TRUE;
+    return FALSE;
+}</code></pre></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Not so obvious is that it returns <a href="/constants/TRUE/">TRUE</a> if the <a href="https://wiki.secondlife.com/wiki/object">object</a> is not set to a group (i.e. "(none)") and either the <a href="/wiki/avatar-ca8e826d/">AV</a> with the given <a href="https://wiki.secondlife.com/wiki/key">key</a> has no group active or the function is called with a <a href="/constants/NULL_KEY/">NULL_KEY</a>.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Gives inventory object only to agents with the same active group
+
+default
+{
+    touch_start(integer total_number)
+    {
+        key id = llDetectedKey(0);
+
+        integer sameGroup = llSameGroup(id);
+//      same as llDetectedGroup(i) (with llDetectedGroup, detected does not need to be in the sim)
+
+        if (sameGroup)
+        {
+            integer numberOfObjectsInPrim = llGetInventoryNumber(INVENTORY_OBJECT);
+
+            if (numberOfObjectsInPrim)
+                llGiveInventory(id, llGetInventoryName(INVENTORY_OBJECT, 0));
+        }
+        else
+        {
+            llRegionSayTo(id, 0, &quot;Wrong active group!&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line">To determine if an avatar is an object's owner when deeded to group, you should use a function similar to that provided for <a href="/functions/llGetOwner/#useful-snippets">llGetOwner</a>().</div>
+<div class="wiki-line">The following uses llSameGroup() to determine if a <a href="https://wiki.secondlife.com/wiki/parcel">parcel</a> is <a href="https://wiki.secondlife.com/wiki/Rez">rezzable</a> based on the object's active group and parcel details. Useful for preventing unnecessary rez failure notices from various types of attached objects (e.g. guns, water/skywalk <a href="https://wiki.secondlife.com/wiki/HUD">HUD</a>s, etc).</div>
+<div class="wiki-line"><pre><code>/*
+  By Aryn Gellner
+  pos - position (in region coordinates) to check against.
+  * Additional Land Owner Test added by Ruthven Willenov, simplified by Strife
+*/
+ 
+integer is_rezzable(vector pos)
+{
+    integer parcel_flags = llGetParcelFlags(pos);
+    if (parcel_flags &amp; PARCEL_FLAG_ALLOW_CREATE_OBJECTS)
+    {
+        return true; //Anyone can rez. No further checks are needed.
+    }
+
+    //Ok, not just anyone can rez. Maybe they share an owner or the land allows for group rezzing.
+    //So let&#x27;s get the parcel owner_id and group_id
+
+    list details = llGetParcelDetails(pos, [PARCEL_DETAILS_OWNER, PARCEL_DETAILS_GROUP]);
+
+    if (llList2Key(details, 0) == llGetOwner())
+    {
+        return TRUE; //Owner can always rez.
+    }
+
+    //Since what we are going to return is a boolean just return the result of the boolean expression.
+    return (parcel_flags &amp; PARCEL_FLAG_ALLOW_CREATE_GROUP_OBJECTS) &amp;&amp; llSameGroup(llList2Key(details, 1));
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedGroup/">llDetectedGroup</a> — Used in conjunction with <a href="/wiki/category-lsl-detected-a60bd5c2/">detection</a> events</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAttachedList/">llGetAttachedList</a> — Together with <a href="/functions/llGetObjectDetails/">llGetObjectDetails</a> and <a href="/constants/OBJECT_GROUP/">OBJECT_GROUP</a>, it can be used to determine the active group of an avatar that is wearing at least one non-HUD attachment.</div></div></section>
+<section><h2 id="tests">Tests</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/llSameGroup_Test">llSameGroup Test</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-uuid-f11a4088/">Template:LSL Function/uuid</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}{{#if:{{{group|1}}}|{{LSLGC|Group|group}},&amp;#32;}}{{LSLGC|Avatar|avatar}} or {{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{ph|}}}|{{{ph|}}}&amp;#32;|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}}}{{#if:{{{group|1}}}|group,&amp;#32;}}avatar or {{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Avatar/As A Parameter}}
+}}}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-group-1d804f40/">Template:LSL Function/group</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{Issues/VWR-5044}}
+
+{{#vardefine:notes|{{#var:notes}}{{PBR}}
+==== Child Prims ====
+It is possible for the group of a child prim to differ from that of the root prim. To build such an object it must first be unlinked, the groups set, and then relinked. Rezzing an object resets the group of the object to that of the group that the user currently has activated. Changing the group of an object changes the group for the entire object. This may only be an artifact or manifestation of [[#VWR-5044|VWR-5044]].}}
+
+}}&lt;noinclude&gt;{{#vardefine:notes}}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|notes}}
+|-
+{{VarPairTable|issues}}
+|-
+{{VarPair|BugCounter}}
+|-
+{{VarPair|IssueCounter}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

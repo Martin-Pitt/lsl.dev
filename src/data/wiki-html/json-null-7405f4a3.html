@@ -1,0 +1,23 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Return value for <a href="/functions/llJsonValueType/">llJsonValueType</a> function indicating the Json data type of a given address specifier in a given string-serialized JSON text.</div>
+<div class="wiki-line">Also the return string value for <a href="/functions/llJsonGetValue/">llJsonGetValue</a> function when the bare word 'null' is at the given address specifier in a given string-serialized JSON text.</div>
+<div class="wiki-line">Also used to encode the bare word 'null' within a Json text to signify an empty, valueless placeholder Value at that location (the empty LSL String, "", can be used as well for that).</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Showing usage of JSON_NULL
+// within a Json text string
+string jText;
+
+default
+{
+    state_entry(){
+        jText = llList2Json(JSON_OBJECT, [&quot;A&quot;, 4, &quot;B&quot;, 5]);
+        llOwnerSay(jText); // jText is &#x27;{&quot;A&quot;:4,&quot;B&quot;:5}&#x27;
+        llOwnerSay(llJsonGetValue(jText, [&quot;B&quot;])); // The string &quot;5&quot;
+        jText = llJsonSetValue(jText, [&quot;B&quot;], JSON_NULL);
+        llOwnerSay(jText); // jText is now &#x27;{&quot;A&quot;:4,&quot;B&quot;:null}&#x27;
+        llOwnerSay(llJsonGetValue(jText, [&quot;B&quot;])); // The Unicode value of JSON_NULL
+
+        }
+}</code></pre></div></section>
+<section><h2 id="see-also-constants">See also: constants</h2><span id="constants"></span><table><tr><th> Type Flags</th><th> Value</th><th> Unicode</th><th> <a href="/functions/llOrd/">Integer</a></th><th> <a href="/wiki/category-lsl-encoding-url-a2cbd91f/">URL Encoded</a></th><th> HTML Encoded</th><th> Description</th></tr><tr><td> <a href="/constants/JSON_INVALID/">JSON_INVALID</a></td><td> &#xFDD0;</td><td> U+FDDO</td><td> 64976</td><td> "%EF%B7%90"</td><td> &amp;#xFDD0;</td><td> Value returned when inputs are not well formed.</td></tr><tr><td> <a href="/constants/JSON_OBJECT/">JSON_OBJECT</a></td><td> &#xFDD1;</td><td> U+FDD1</td><td> 64977</td><td> "%EF%B7%91"</td><td> &amp;#xFDD1;</td><td> </td></tr><tr><td> <a href="/constants/JSON_ARRAY/">JSON_ARRAY</a></td><td> &#xFDD2;</td><td> U+FDD2</td><td> 64978</td><td> "%EF%B7%92"</td><td> &amp;#xFDD2;</td><td> </td></tr><tr><td> <a href="/constants/JSON_NUMBER/">JSON_NUMBER</a></td><td> &#xFDD3;</td><td> U+FDD3</td><td> 64979</td><td> "%EF%B7%93"</td><td> &amp;#xFDD3;</td><td> </td></tr><tr><td> <a href="/constants/JSON_STRING/">JSON_STRING</a></td><td> &#xFDD4;</td><td> U+FDD4</td><td> 64980</td><td> "%EF%B7%94"</td><td> &amp;#xFDD4;</td><td> </td></tr><tr><td> <a href="/constants/JSON_NULL/">JSON_NULL</a></td><td> &#xFDD5;</td><td> U+FDD5</td><td> 64981</td><td> "%EF%B7%95"</td><td> &amp;#xFDD5;</td><td> </td></tr><tr><td> <a href="/constants/JSON_TRUE/">JSON_TRUE</a></td><td> &#xFDD6;</td><td> U+FDD6</td><td> 64982</td><td> "%EF%B7%96"</td><td> &amp;#xFDD6;</td><td> </td></tr><tr><td> <a href="/constants/JSON_FALSE/">JSON_FALSE</a></td><td> &#xFDD7;</td><td> U+FDD7</td><td> 64983</td><td> "%EF%B7%97"</td><td> &amp;#xFDD7;</td><td> </td></tr><tr><td> <a href="/constants/JSON_DELETE/">JSON_DELETE</a></td><td> &#xFDD8;</td><td> U+FDD8</td><td> 64984</td><td> "%EF%B7%98"</td><td> &amp;#xFDD8;</td><td> Used with <a href="/functions/llJsonSetValue/">llJsonSetValue</a> to remove a key-value pair.</td></tr></table></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llJsonValueType/">llJsonValueType</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llJsonGetValue/">llJsonGetValue</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="bug-3692"><a href="/wiki/template-issues-bug-3692-e8493d87/">Template:Issues/BUG-3692</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-3692|type=bug|&lt;s&gt;[[JSON_NULL]] may be deceptively returned instead of [[JSON_INVALID]] when [http://tools.ietf.org/html/rfc4627 noncompliant Json text] is encountered by either [[llJsonValueType]] or [[llJsonGetValue]].&lt;/s&gt; Fixed with release 13.09.21.281328.|dnc=*}}</code></pre></details></section>

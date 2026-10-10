@@ -1,0 +1,239 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
+<div class="wiki-line">I have posted 3 sections to this code, the encryption, decryption, and also a 3rd file. While the 3rd is unnecessary, since the value for the next channel to communicate on is changed each time data is sent, i found it annoying that when you edited the code to change the number, or tweak minor things, when it was saved, it reloaded the default values. The third script does nothing more than store the next channel to communicate on and pass it to either the encrypter or decypter when that script is reset. If you choose to use it, it should be placed in both prims that you are using.</div>
+<div class="wiki-line">This code basically takes a float, converts it to an alpha key, randomizes it, than takes a random channel, converts it to an alpha key, randomizes it, appends it to the string for the float, and shouts it to another prim, which decrypts it and returns the value of the float, as well as change it's listen to the next randomly determined channel. In this incarnation the script is not practical for transferring data, however can be incorporated into your code to do so.</div>
+<div class="wiki-line">Thank you to whomever took the time to clean it up for easier viewing and made the changes :)</div>
+<div class="wiki-line">Encrypter</div>
+<div class="wiki-line"><pre><code>//Simple Alpha Hash for practical floats by Beverly Larkin
+
+//WARNING!!!   Before actually using this to transfer any numbers(the principal is the same for strings)  
+//CHANGE THE ORDER OF THE LETTERS! - don&#x27;t leave them sequential (a,b,c, etc.) 
+//it might even be a good idea to perform a simple math function on your number before you send it, 
+//(before encrypting it obviously). This is not practical for any use by itself, but i present it here 
+//for those that wish to customize it for their own needs (change the list in the Decrypter to match 
+//this one too :P
+
+string letters = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoptuvwxyz&quot;;
+list numbers = [8388608, 4194304, 2097152, 1048576, 524288, 262144, 131072, 65536, 32768, 16384, 
+                8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.75, 0.5, 0.4, 
+                0.2, 0.1, 0.05, 0.04, 0.02, 0.01, 0.005, 0.004, 0.002, 0.001, 0.0005, 0.0004, 0.0002, 
+                0.0001, 0.00005, 0.00004, 0.00002, 0.00001, 0.000005, 0.000004, 0.000002, 0.000001 ];  
+
+integer com_channel;
+
+float test_number_to_send = 104.7525; //WARNING FLOATING POINT NUMBERS ARE ROUNDED AUTOMATICALLY 
+                                      //excessively large numbers will be changed BEFORE they are 
+                                      //encrypted, sorry no easy change for this, as this is just a 
+                                      //demo script.
+
+// each pass of data includes an encrypted &quot;next channel command&quot; the channel to be used for the next 
+// packet of data is determined by:
+// integer com_channel = (integer)llFrand((8388608) + 100000) * -1;
+// next channel could be lower, but left to a &quot;smaller&quot; range to keep it practical for use with this script
+
+
+float received_number;
+
+//q = number separator
+//r = * -1
+//s = channel
+
+string Encrypt(float X)
+{
+    integer negative = (X &lt; 0.0);
+    if( negative )
+        X = -X;
+    string returned;
+    integer int = 0;
+    for(; int &lt; 49; ++int)
+    {
+        if(X &gt;= llList2Float(numbers, int))
+        {
+            returned += llGetSubString(letters, int, int);
+            X -= llList2Float(numbers, int);
+        }
+    }
+    if( negative )
+    {
+        returned += &quot;r&quot;;
+    }
+    return returned;
+}
+
+string Randomized(string X)
+{
+    integer length = llStringLength(X);
+    integer int;
+    list randomized;
+    for(int = 0; int &lt; length; ++int)
+    {
+        randomized += llGetSubString(X, int, int);
+    }
+    return (string)llListRandomize(randomized, 1);
+}
+
+default
+{
+    on_rez(integer X)
+    {
+        llResetScript();
+    }
+    
+    state_entry()
+    {
+        llMessageLinked(LINK_THIS, 0, &quot;retrieve&quot;, NULL_KEY);
+    }
+    
+    touch_start(integer Z)
+    {
+        string encrypted;
+        string hashed = Encrypt(test_number_to_send);
+        hashed = Randomized(hashed);
+        encrypted += hashed;
+        encrypted += &quot;q&quot;;
+        integer next_com_channel = (integer)llFrand((8388608) + 100000) * -1;
+        hashed = Encrypt(next_com_channel);
+        hashed += &quot;s&quot;;
+        hashed = Randomized(hashed);
+        encrypted += hashed;
+        llShout(com_channel, encrypted);
+        com_channel = next_com_channel;
+        llMessageLinked(LINK_THIS, com_channel, &quot;store&quot;, NULL_KEY);
+        
+    }
+    link_message(integer SENDER, integer NUM, string STR, key ID)
+    {
+        if(STR == &quot;com_channel&quot;)
+        {
+            com_channel = NUM;
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">Decrypter</div>
+<div class="wiki-line"><pre><code>//Simple Alpha Hash for practical floats by Beverly Larkin
+
+list letters = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoptuvwxyz&quot;;
+list numbers = [8388608, 4194304, 2097152, 1048576, 524288, 262144, 131072, 65536, 32768, 16384, 
+                8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.75, 0.5, 0.4, 
+                0.2, 0.1, 0.05, 0.04, 0.02, 0.01, 0.005, 0.004, 0.002, 0.001, 0.0005, 0.0004, 0.0002, 
+                0.0001, 0.00005, 0.00004, 0.00002, 0.00001, 0.000005, 0.000004, 0.000002, 0.000001 ];  
+
+integer listener;
+integer com_channel;
+
+// each pass of data includes an encrypted &quot;next channel command&quot; the channel to be used for the next
+// packet of data is determined by:
+// integer com_channel = (integer)llFrand((8388608) + 100000) * -1;
+// next channel could be lower, but left to a &quot;smaller&quot; range to keep it practical for use with 
+// this script
+
+float received_number;
+
+//q = number separator
+//r = * -1
+//s = channel
+
+list Separate_Numbers(string encrypted)
+{
+    integer position = llSubStringIndex(encrypted, &quot;q&quot;);
+    return [llDeleteSubString(encrypted, position, -1), llDeleteSubString(encrypted, 0, position)];
+}
+
+float Value(string X)
+{
+    integer position = llSubStringIndex(letters, X);
+    float returned = llList2Float(numbers, position);
+    return returned;
+}
+
+float Number_Convert(string X)
+{
+    integer negative = FALSE;
+    integer channel = FALSE;
+    integer position = llSubStringIndex(X, &quot;r&quot;);
+    if(~position)
+    {
+        negative = TRUE;
+        X = llDeleteSubString(X, position, position);
+    }
+    if(~(position = llSubStringIndex(X, &quot;s&quot;)))
+    {
+        channel = TRUE;
+        X = llDeleteSubString(X, position, position);
+    }
+    integer int;
+    float returned;
+    for(int = 0; int &lt; llStringLength(X); ++int)
+    {
+        returned += Value(llGetSubString(X, int, int));
+    }
+    if(negative)
+    {
+        returned = -returned;
+    }
+    if(channel)
+    {
+        com_channel = (integer)returned;
+        returned = 0.0;
+    }
+    return returned;
+}
+
+default
+{
+    on_rez(integer X)
+    {
+        llResetScript();
+    }
+    
+    state_entry()
+    {
+        llMessageLinked(LINK_THIS, 0, &quot;retrieve&quot;, NULL_KEY);   
+    }
+    listen(integer channel, string name, key id, string message)
+    {
+        llListenRemove(listener);
+        llOwnerSay(&quot;Message received = &quot; + message); // message received from encryt prim
+        list BEER = Separate_Numbers(message);
+        integer int;
+        for(int = 0; int &lt; llGetListLength(BEER); ++int)
+        {
+            float X = Number_Convert(llList2String(BEER, int));
+            if(X)
+            {
+                received_number = X;
+            }
+        }
+        listener = llListen(com_channel, &quot;&quot;, &quot;&quot;, &quot;&quot;);
+        // next channel to receive data on
+        llOwnerSay(&quot;Next message will be received on channel &quot; +(string)com_channel); 
+        llOwnerSay(&quot;Decrypted Number is &quot; + (string)received_number); // decrypted number
+        llMessageLinked(LINK_THIS, com_channel, &quot;store&quot;, NULL_KEY);
+    }
+
+    link_message(integer SENDER, integer NUM, string STR, key ID)
+    {
+        if(STR == &quot;com_channel&quot;)
+        {
+            com_channel = NUM;
+            listener = llListen(com_channel, &quot;&quot;, &quot;&quot;, &quot;&quot;);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">Channel Storage</div>
+<div class="wiki-line"><pre><code>integer com_channel = -21747232;
+default
+{
+    link_message(integer SENDER, integer NUM, string STR, key ID)
+    {
+        if(STR == &quot;store&quot;)
+        {
+            com_channel = NUM;
+        }
+        else if(STR == &quot;retrieve&quot;)
+        {
+            llMessageLinked(LINK_THIS, com_channel, &quot;com_channel&quot;, NULL_KEY);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">----</div>
+<div class="wiki-line"><a href="/wiki/category-lsl-library-83389c2f/">Category:LSL Library</a> <a href="https://wiki.secondlife.com/wiki/Category:_LSL_Encryption">Category: LSL Encryption</a></div>

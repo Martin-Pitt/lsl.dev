@@ -1,0 +1,211 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Instantiate <code>inventory</code> object at <code>pos</code> with an initial set of parameters specified in <code>params</code>.</div>
+<div class="wiki-line"><code>pos</code> will default to the position of the object containing the script, unless REZ_POS is specified. (see below)</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/key">key</a> which will be the key of the object when it is successfully rezzed in the world. On failure, returns <code>(key)""</code> (in LSL), or <code>NULL_KEY</code> (in Lua).</div></section>
+<section><h2 id="specification">Specification</h2><h3 id="parameters">Parameters</h3>
+<table><tr><th>parameter</th><th>integer value</th><th>values to set</th><th>description</th></tr><tr><td> <a href="/constants/REZ_PARAM/">REZ_PARAM</a></td><td> 0</td><td> integer param</td><td> Start parameter passed into the rezzed object's <a href="/events/on_rez/">on_rez</a>(integer) event.</td></tr><tr><td> <a href="/constants/REZ_FLAGS/">REZ_FLAGS</a></td><td> 1</td><td> integer flags</td><td> Flags applied to rezzed object when it is created in the world.<h4 id="flags">Flags</h4><table><tr><th>parameter</th><th>integer value</th><th>description</th></tr><tr><td> REZ_FLAG_TEMP</td><td> 0x0001</td><td> Object is rezzed as temporary.</td></tr><tr><td> REZ_FLAG_PHYSICAL</td><td> 0x0002</td><td> Object is rezzed as physical.</td></tr><tr><td> REZ_FLAG_PHANTOM</td><td> 0x0004</td><td> Object is rezzed as phantom</td></tr><tr><td> REZ_FLAG_DIE_ON_COLLIDE</td><td> 0x0008</td><td> The object will die after its first collision.</td></tr><tr><td> REZ_FLAG_DIE_ON_NOENTRY</td><td> 0x0010</td><td> Object will die if it attempts to enter a parcel that it can't.</td></tr><tr><td> REZ_FLAG_NO_COLLIDE_OWNER</td><td> 0x0020</td><td> Object will not trigger a collision event if colliding with its owner.<sup>&dagger;</sup></td></tr><tr><td> REZ_FLAG_NO_COLLIDE_FAMILY</td><td> 0x0040</td><td> Object will not trigger collision events when colliding with other object rezzed by the same rezzer.<sup>&dagger;</sup></td></tr><tr><td> REZ_FLAG_BLOCK_GRAB_OBJECT</td><td> 0x0080</td><td> Grabbing is disabled for this object.</td></tr></table> &dagger; Disabling collisions only disables collision events and damage. The object will still cause a physics collision and may push the objects.</td></tr><tr><td> <a href="/constants/REZ_POS/">REZ_POS</a></td><td> 2</td><td> vector pos, integer relative, integer at_root</td><td> Position to rez the new object in the world. If relative is FALSE the position is in region coordinates. If relative is TRUE, the position will be relative to the rezzing object. If at_root is FALSE, the <a href="/functions/llGetGeometricCenter/">center</a> of the object will be at the position specified by pos(<a href="/functions/llRezObject/">llRezObject</a>). Set at_root to TRUE to set the position of the root prim(<a href="/functions/llRezAtRoot/">llRezAtRoot</a>).</td></tr><tr><td> <a href="/constants/REZ_ROT/">REZ_ROT</a></td><td> 3</td><td> rotation rot, integer relative</td><td> The initial rotation to apply to the object. If relative is TRUE, the rotation is relative to the rezzing object, otherwise it is absolute.</td></tr><tr><td> <a href="/constants/REZ_VEL/">REZ_VEL</a></td><td> 4</td><td> vector velocity, integer local, integer inherit</td><td> The initial velocity to apply to the object. If local is TRUE the velocity is in the local object coordinate frame, otherwise it is in world coordinates.  If inherit is TRUE the object also inherits it's rezzer's velocity.</td></tr><tr><td> <a href="/constants/REZ_ACCEL/">REZ_ACCEL</a></td><td> 5</td><td> vector force, integer local</td><td> A constant force to apply to the object. If local is TRUE, the force vector is in local coordinates.</td></tr><tr><td> <a href="/constants/REZ_OMEGA/">REZ_OMEGA</a></td><td> 7</td><td> vector axis, integer local, float spin, float gain</td><td> Spin the object around the specified axis. If local is TRUE that axis is in local coordinates, otherwise they are global.</td></tr><tr><td> <a href="/constants/REZ_DAMAGE/">REZ_DAMAGE</a></td><td> 8</td><td> float damage</td><td> The amount of damage applied to an agent upon collision with this object.</td></tr><tr><td> <a href="/constants/REZ_SOUND/">REZ_SOUND</a></td><td> 9</td><td> string sound, float volume, integer loop</td><td> A sound to attach to this object. It will be played at the specified volume.  If loop is TRUE the sound will loop continuously for the life of the object. The sound parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset.</td></tr><tr><td> <a href="/constants/REZ_SOUND_COLLIDE/">REZ_SOUND_COLLIDE</a></td><td> 10</td><td> string sound, float volume</td><td> A sound to play upon collision with another object, the ground or an avatar. The sound parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset.</td></tr><tr><td> <a href="/constants/REZ_LOCK_AXES/">REZ_LOCK_AXES</a></td><td> 11</td><td> vector locks</td><td> Prevent the object from spinning on certain axes. Setting the vector's coordinate to non-zero will prevent the object from spinning on that axis. For instance <pre><code>REZ_LOCK_AXES, &lt;1.0, 1.0, 0.0&gt;</code></pre> will allow the object to only rotate around its Z-axis.</td></tr><tr><td> <a href="/constants/REZ_DAMAGE_TYPE/">REZ_DAMAGE_TYPE</a></td><td> 12</td><td> integer damage_type</td><td> The damage type to apply when this prim collides with another object. Can match one of the <a href="/wiki/category-lsl-combat2-1973b561/#damage-types">DAMAGE_TYPE_*</a> constants, be a custom damage type or repurpose the damage field.</td></tr><tr><td> <a href="/constants/REZ_PARAM_STRING/">REZ_PARAM_STRING</a></td><td> 13</td><td> string start_param</td><td> Pass an initialization string to the root prim of the newly rezzed object that may be read with <a href="/functions/llGetStartString/">llGetStartString</a> from within the rezzed object. Maximum string length is 1024 bytes.</td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Silently fails to rez <code>inventory</code> if REZ_POS is too far from the geometric center of the object trying to rez <code>inventory</code> (generally 10 meters; see <a href="/functions/llRezObject/">llRezObject</a>).</li>
+<li>When scripting attachments meant to rez objects, remember that when used in the root of an (<a href="/events/attach/">attached</a>) <a href="/wiki/attachment-040d2b36/">attachment</a> <code><a href="/functions/llGetPos/">llGetPos</a></code> doesn't return the position of the attachment but instead returns the position of the avatar's bounding box geometric center. Read <a href="/functions/llGetPos/">llGetPos</a> and <a href="/functions/llParticleSystem/#caveats"> llParticleSystem Caveats</a> for more information.</li>
+<li>If the object is unattached and the owner of the object does not have copy permission  on <code>inventory</code>, the object will no longer be present in inventory after it is rezzed (so another attempt to rez (the same object) will fail); if the owner does have copy permission, then a copy is rezzed, and the original <code>inventory</code> remains in inventory.</li>
+<li>If the object is attached and the owner of the object does not have copy permission  on <code>inventory</code>, an error is shouted on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>: "Cannot rez no copy objects from an attached object."</li>
+<li>Silently fails if you don't have offline building rights on the land. To have the right, your objects needs to <em>either</em>: </li>
+<li>Be on land you own yourself.</li>
+<li>Be on land where anyone is allowed to build, e.g. a sandbox. </li>
+<li>Be deeded to the group that owns the land.</li>
+<li>Be set to the same group that owns the land and the land have the parcel flag 'allow group to build' set.</li>
+<li>The group role "Always allow 'Create Objects'" will only work to override this when you are online, in the region, or have a child agent in the region. See <a href="#svc-3145">SVC-3145</a> in the Issues subsection of Deep Notes for more information.</li>
+<li>See <a href="/events/object_rez/">object_rez</a> for examples on how to establish communications between the rezzing object and the new prim.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">The list of parameters is entirely optional. If you want to rez an object exactly where the rezzer is, you may call the function with an empty list.</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+        llRezObjectWithParams(&quot;Object&quot;, []);
+    }
+}</code></pre></div>
+<div class="wiki-line">The below example rezzes an object slightly above the rezzer, slowly spinning and with automatic cleanup. See <a href="/wiki/category-lsl-temporary-e5c9e139/">Temporary</a></div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+        llRezObjectWithParams(&quot;Object&quot;, [
+            REZ_FLAGS, REZ_FLAG_TEMP | REZ_FLAG_PHANTOM,
+            REZ_POS, &lt;0,0,1&gt;, TRUE, TRUE,
+            REZ_OMEGA, &lt;0,0,1&gt;, TRUE, 0.5, PI
+        ]);
+    }
+}</code></pre></div>
+<div class="wiki-line">The below is a basic example of firing a typical bullet from a worn attachment. The bullet is fired with a left-click during <a href="https://wiki.secondlife.com/wiki/mouselook">mouselook</a>.</div>
+<div class="wiki-line"><pre><code>default
+{
+    control(key id, integer level, integer edge)
+    {
+        integer click = level &amp; edge;
+
+        if (click &amp; CONTROL_ML_LBUTTON) {
+            llRezObjectWithParams(&quot;Bullet&quot;, [
+                REZ_POS, &lt;2,0,0&gt;, TRUE, TRUE, // Relative offset 2 meters forward
+                REZ_ROT, ZERO_ROTATION, TRUE, // Relative rotation
+                REZ_VEL, &lt;100,0,0&gt;, TRUE, FALSE, // Relative velocity 100m/s forward
+                REZ_DAMAGE, 40,
+                REZ_LOCK_AXES, &lt;1,1,1&gt;, // Disable all rotation
+                REZ_FLAGS, 0
+                | REZ_FLAG_PHYSICAL
+                | REZ_FLAG_TEMP
+                | REZ_FLAG_DIE_ON_COLLIDE
+                | REZ_FLAG_DIE_ON_NOENTRY
+                | REZ_FLAG_NO_COLLIDE_OWNER
+                | REZ_FLAG_NO_COLLIDE_FAMILY
+                | REZ_FLAG_BLOCK_GRAB_OBJECT
+            ]);
+        }
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm) {
+            llTakeControls(CONTROL_ML_LBUTTON, TRUE, FALSE);
+        }
+    }
+
+    attach(key id)
+    {
+        if (id) {
+            llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+        }
+    }
+
+    state_entry()
+    {
+        if (llGetAttached()) {
+            llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line"><strong>Maximum rez distance</strong></div>
+<ul>
+<li>The <code>distance</code> scales with the size of the object the script is in.</li>
+<li>The formula is <code>10 + llVecMag(llGetScale()) * 0.5</code></li>
+<li>The <code>distance</code> measured is between the <a href="/functions/llGetPos/">center</a> of the rezzing <code>prim</code> and the <a href="/functions/llGetPos/">center</a> of the <code>prim</code> that is rezzed.</li>
+<li>The tests did not include rezzing from or the rezzing of link_set objects.</li>
+<li>A <code>0.01</code> meter cube could rez just beyond <code>10.0</code> meters away.</li>
+<li>A <code>10.0</code> meter cube could rez just beyond <code>18.66</code> meters away.</li>
+<li>A <code>32.0</code> meter cube could rez just beyond <code>37.71</code> meters away.</li>
+<li>A <code>64.0</code> meter cube could rez just beyond <code>65.42</code> meters away.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRezAtRoot/">llRezAtRoot</a> — Rezzes the object at the requested position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRezObject/">llRezObject</a> — Rezzes the object at the requested position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetStartString/">llGetStartString</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetStartParameter/">llGetStartParameter</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGodLikeRezObject/">llGodLikeRezObject</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelFlags/#examples">LlGetParcelFlags</a> — Test if the parcel allows this script to rez</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/object_rez/">object_rez</a> — triggered when this object rezzes an object from inventory</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-position-a2dae76f/">Template:LSL Function/position</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+This template is to be used to specify setup the description for position like parameters (offsets, positions, points, etc.).
+
+Right now it&#x27;s pretty basic and easy to edit. I&#x27;m wondering if these functions should be in a position parameter specific category.
+
+====TODO====
+* add clamping flag and verbiage for out of region/range coordinates.
+&lt;/noinclude&gt;{{#if:
+
+{{#if:{{{region|}}}|
+  {{#if:{{{local|}}}|
+
+    {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region}} or [[Viewer coordinate frames#Local|local coordinates]] depending upon the situation{{{desc|}}}}}
+
+    {{#vardefine:p_{{{1|}}}_hover|position in region or local coordinates depending upon the situation{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+  |
+    {{#ifeq:{{{1|}}}|point|
+
+      {{#vardefine:p_{{{1|}}}_desc|A point in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region-local}} space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|A point in region-local space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region coordinates}}{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in region coordinates{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+|
+  {{#if:{{{local|}}}|
+
+    {{#ifeq:{{{1|}}}|offset|
+
+      {{LSL Function/offset|{{{1|}}}|local={{{local}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in [[Viewer coordinate frames#Local|local coordinates]]{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in local coordinates{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+}}
+
+}}</code></pre></details></section>

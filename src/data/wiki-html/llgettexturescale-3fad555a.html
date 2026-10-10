@@ -1,0 +1,78 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/vector">vector</a> that is the texture scale on <code>face</code> (only the x and y components are used).</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">In the default texture mapping mode the scale units are in texture repeats per face. In the planar texture mapping mode the scale units are in texture repeats per half meter. This is in contrast to the in-world editing tool, in which the planar texture scaling units are repeats per meter.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>ALL_SIDES seems to return the scale of the *first* face, not an average or other function of all the faces.  It acts much like if it were called with <code>face=0</code>.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//Script by Basil Wijaya, 2009 August 08
+//Sets texture scale on face 0. 
+//Corresponds to the object edit window, Texture tab, Repeats per Face: Horiontal U and Vertical V
+
+float U_repeats = 1.0;
+float V_repeats = 1.0;
+integer face = 0;
+
+default
+{
+    state_entry()
+    {
+        llScaleTexture( U_repeats, V_repeats, ALL_SIDES);  
+    }
+    
+    touch_start(integer num)
+    {
+        U_repeats = U_repeats + .2;
+        V_repeats = V_repeats + .5;
+        
+        //set texture scale on a face
+        llScaleTexture( U_repeats , V_repeats, face);
+        llOwnerSay(&quot;Scale has been set to &quot; + (string)U_repeats +  &quot; and &quot; +  (string)V_repeats);
+
+        //get texture scale of a face
+        vector scale_vector = llGetTextureScale(face); 
+        llOwnerSay(&quot;llGetTextureScale(0) gives a vector :  &quot; +  (string)scale_vector); 
+        //You can see that the first 2 values of the vector contain the U_repeats and V_repeats values we have setted.
+
+        //The object edit window, in the Texture tab, shows the changes of the U and V values, but only for face 0. 
+        //Other faces changes are done but do not show in the edit window.  
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llScaleTexture/">llScaleTexture</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-vr-76baeca7/">Template:LSL VR</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&amp;lt;{{{1}}}{{#if:{{{2|}}}|, {{{2}}}{{#if:{{{3|}}}|, {{{3}}}{{#if:{{{4|}}}|, {{{4}}}{{#if:{{{5|}}}|, {{{5}}}}}}}}}}}&amp;gt;</code></pre></details><p><a href="/wiki/template-lsl-function-face-21ce125f/">Template:LSL Function/face</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:header|{{#var:header}}{{#if:{{{nc|}}}{{#pos:{{#var:moded}}|r}}||{{#switch:{{NAMESPACE}}|Template=|User=|[[Category:LSL Face{{#var:lang}}]][[Category:LSL Face{{#var:lang}}/{{#if:{{{return|}}}{{{returns|}}}|Get|Set}}]]}}}}}}
+
+{{#vardefine:ALL_SIDES|{{LSL Const|ALL_SIDES|integer|-1|hex=0xFFFFFFFF}}}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{LSLGC|Face{{#var:lang}}|face}} number{{#ifeq:{{{notall|}}}|*||&lt;nowiki&gt; &lt;/nowiki&gt;or {{#var:ALL_SIDES}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|face number{{#ifeq:{{{notall|}}}|*||&lt;nowiki&gt; &lt;/nowiki&gt;or ALL_SIDES (-1)}}}}
+
+{{#ifeq:{{{notall|}}}|*||{{#vardefine:facechoise|If {{LSLP|{{{1|none}}}}} is {{#var:ALL_SIDES}} then the {{#if:{{{2|}}}|{{{2|}}}|function}} {{#if:{{{get|}}}|{{{get|}}}|{{#if:{{{ALL_SIDES|}}}|{{{ALL_SIDES|}}}|works on all sides.}}}}}}}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{#if:{{{!footer|}}}||{{PBR}}
+{{#var:facechoise}}{{PBR}}}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}{{#if:{{{!footer|}}}|
+*{{#var:facechoise}}|}}{{#if:{{{return|}}}{{{returns|}}}|
+*If {{LSLP|{{{1|none}}}}} indicates a face that does not exist the {{#if:{{{2|}}}|{{{2|}}}}} {{#if:{{{return|}}}|return is {{{return|}}}| returns {{{returns|}}}}}|
+*The {{#if:{{{2|}}}|{{{2|}}}|function}} silently fails if its {{LSLP|{{{1|none}}}}} value indicates a face that does not exist.}}}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|ALL_SIDES}}
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|-
+{{VarPair|facechoise}}
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|caveats}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

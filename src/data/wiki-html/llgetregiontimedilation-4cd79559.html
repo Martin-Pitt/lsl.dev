@@ -1,0 +1,39 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">It is used as the ratio between the change of script time to that of real world time.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/float">float</a> that is the current time dilation, the value range is [0.0,&nbsp;1.0], 0.0 (full dilation) and 1.0 (no dilation).</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">Time dilation is a method the server uses to cope with simulator lag. Physics and script generated lag can result in time dilation. Time dilation slows script time &amp; execution. When time dilation is zero script execution halts.</div>
+<h5 id="affects">Affects</h5>
+<ul>
+<li>Intervals of <a href="/events/sensor/">sensor</a> events queued as a result of <a href="/functions/llSensorRepeat/">llSensorRepeat</a>.</li>
+</ul></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><a href="http://community.secondlife.com/t5/Second-Life-Server/Region-Idling-FAQ/m-p/1535497" rel="noreferrer">Region idling</a> lowers a region's framerate when no avatars are currently on or looking into the region. Scripts measuring time dilation with llGetRegionTimeDilation may report significant time dilation if the region is <a href="/functions/llGetEnv/">idle</a>.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// The beginnings of a region-info script.
+string region;
+string sim;
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(1.0);
+    }
+    timer()
+    {
+        string here = llGetRegionName();
+        if(region != here)
+        {
+            sim = llGetSimulatorHostname();
+            region = here;
+        }
+        llSetText(
+                &quot;   REGION NAME : &quot; + region + 
+              &quot;\n  SIM HOSTNAME : &quot; + sim + 
+              &quot;\n TIME DILATION : &quot; + (string)llGetRegionTimeDilation() +
+              &quot;\n    REGION FPS : &quot; + (string)llGetRegionFPS(),
+            &lt;0,1,0&gt;, 1.0);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRegionFPS/">llGetRegionFPS</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetTime/">llGetTime</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAndResetTime/">llGetAndResetTime</a></div></div></section>

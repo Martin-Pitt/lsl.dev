@@ -1,0 +1,120 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<div class="wiki-line">This is a vendor inspired by websites like humblebundle.  The owner can set a minimum price for people to pay for the item.  If someone pays more than the average price for the item, they also get the bonus item.  The item and bonus item are set using the menu, and the items have to be in the vendor's inventory beforehand to set it.  Just drop the script into a prim to use it.  The owner menu options are Set minimum price, Set base item, Set bonus item, Set message, and Close.</div>
+<div class="wiki-line"><pre><code>integer minimum;
+integer average;
+integer divisor;
+integer total;
+string baseItem;
+string bonusItem;
+string buyMessage = &quot;Thank you for purchasing!&quot;;
+integer mainChannel;
+list getInventory()
+{
+    integer i;
+    list inventory;
+    for (i=0; i&lt;llGetInventoryNumber(INVENTORY_ALL); i++)
+    {
+       inventory += [llGetInventoryName(INVENTORY_ALL, i)];
+    }
+    return inventory;
+}
+
+setPriceFloat()
+{
+    llSetText(&quot;Minimum price: &quot; + (string)minimum + &quot;\nAverage price: &quot; + (string)average + &quot;\nPurchase item: &quot; + baseItem + &quot;\nBonus Item: &quot; + bonusItem, &lt;1.0,1.0,1.0&gt;, 1.0);
+}
+default
+{
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_DEBIT);
+        llSetPayPrice(PAY_HIDE, [PAY_HIDE, PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+        setPriceFloat();
+    }
+
+    touch_start(integer total_number)
+    {
+        if (llDetectedKey(0) == llGetOwner())
+        {
+            llDialog(llGetOwner(), &quot;Welcome!&quot;, [&quot;Set minimum price&quot;, &quot;Set base item&quot;, &quot;Set bonus item&quot;, &quot;Set message&quot;, &quot;Close&quot;], -42);
+            mainChannel = llListen(-42, &quot;&quot;, llGetOwner(), &quot;&quot;);
+        }
+        llInstantMessage(llDetectedKey(0), &quot;The minimum price is &quot; + (string)minimum + &quot; and the average price is &quot; + (string)average);
+    }
+    
+    listen(integer channel, string name, key id, string message)
+    {
+        if (channel == -42) {
+            if (message == &quot;Set minimum price&quot;)
+                llTextBox(llGetOwner(), &quot;Please enter the minimum price&quot;, -42);
+            else if (message == &quot;Set base item&quot;) {
+                llDialog(llGetOwner(), &quot;Choose item buyers get&quot;, getInventory(), -100);
+                llListenRemove(mainChannel);
+                mainChannel = llListen(-100, &quot;&quot;, llGetOwner(), &quot;&quot;);
+            }
+            else if (message == &quot;Set bonus item&quot;) {
+                llDialog(llGetOwner(), &quot;Choose bonus item buyers get for beating the average&quot;, getInventory(), -142);
+                llListenRemove(mainChannel);
+                mainChannel = llListen(-142, &quot;&quot;, llGetOwner(), &quot;&quot;);
+            }
+            else if (message == &quot;Set message&quot;) {
+                llTextBox(llGetOwner(), &quot;Please enter message to be shown on purchase&quot;, -50);
+                llListenRemove(mainChannel);
+                mainChannel = llListen(-50, &quot;&quot;, llGetOwner(), &quot;&quot;);
+            }
+            else if (message == &quot;Close&quot;) {
+                llListenRemove(mainChannel);
+            }
+            else if ((integer)message &gt; 0) {
+                integer mini = (integer)message;
+                if (!(llGetPermissions() &amp; PERMISSION_DEBIT))
+                    llSetPayPrice(PAY_HIDE, [PAY_HIDE, PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+                else {
+                    llSetPayPrice(mini, [PAY_HIDE, PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+                    minimum = mini;
+                    llListenRemove(mainChannel);
+                    if (average == 0)
+                        average = minimum;
+                    setPriceFloat();
+                }
+            }
+        }
+        else if (channel == -100) {
+            baseItem = message;
+            llListenRemove(mainChannel);
+            setPriceFloat();
+        }
+        else if (channel == -142) {
+            bonusItem = message;
+            llListenRemove(mainChannel);
+            setPriceFloat();
+        }
+        else if (channel == -50) {
+            buyMessage = message;
+            llListenRemove(mainChannel);
+        }
+            
+    }
+    
+    money(key id, integer amount)
+    {
+        if (amount &gt;= minimum) {
+            if (amount &gt; average) {
+                llGiveInventory(id, baseItem);
+                llGiveInventory(id, bonusItem);
+            }
+            else {
+                llGiveInventory(id, baseItem);
+            }
+            llInstantMessage(id, buyMessage);
+            total += amount;
+            divisor++;
+            average = total/divisor;
+            setPriceFloat();
+        }
+        else {
+            llWhisper(0, &quot;Sorry that is not enough, your money is being refunded.&quot;);
+            llGiveMoney(id, amount);
+        }
+    }
+}</code></pre></div>

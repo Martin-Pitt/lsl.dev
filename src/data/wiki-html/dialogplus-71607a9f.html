@@ -1,0 +1,156 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Creates a dialog menu for <strong>storing more than 12 buttons</strong>, very useful for Inventory items, Scanners, and just huge lists.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line"><strong>'CurMenu</strong>' will take place of an integer menuindex.<br />This requires a Listen Event when using DialogPlus to allow the Back and Next button to work.</div></section>
+<section><h2 id="specification">Specification</h2><h2 id="for-a-more-flexible-multi-page-solution-without-the-owner-only-restriction-see-simpledialogmenusystem">For a more flexible multi-page solution, without the owner-only restriction, see <a href="https://wiki.secondlife.com/wiki/SimpleDialogMenuSystem">SimpleDialogMenuSystem</a></h2>
+<div class="wiki-line"><pre><code>//Created by Ugleh Ulrik
+//This sort of script should cost, but for you free :)
+//Edited by Taff Nouvelle to put the buttons in correct order.
+
+list order_buttons(list buttons)
+{
+    return llList2List(buttons, -3, -1) + llList2List(buttons, -6, -4) +
+        llList2List(buttons, -9, -7) + llList2List(buttons, -12, -10);
+}
+
+integer menuindex;
+
+DialogPlus(key avatar, string message, list buttons, integer channel, integer CurMenu)
+{
+    if (12 &lt; llGetListLength(buttons))
+    {
+        list lbut = buttons;
+        list Nbuttons = [];
+        if(CurMenu == -1)
+        {
+            CurMenu = 0;
+            menuindex = 0;
+        }
+
+        if((Nbuttons = (llList2List(buttons, (CurMenu * 10), ((CurMenu * 10) + 9)) + [&quot;Back&quot;, &quot;Next&quot;])) == [&quot;Back&quot;, &quot;Next&quot;])
+            DialogPlus(avatar, message, lbut, channel, menuindex = 0);
+        else
+            llDialog(avatar, message,  order_buttons(Nbuttons), channel);
+    }
+    else
+        llDialog(avatar, message,  order_buttons(buttons), channel);
+}</code></pre></div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Created by Ugleh Ulrik
+// List2DialogPlus Example
+
+// Here we set the Dialog Channel
+integer channel = -900;
+
+integer listen_handle;
+
+// Here we make a huge list for an example
+list The_List = [
+    &quot;Option 1&quot;, &quot;Option 2&quot;, &quot;Option 3&quot;,
+    &quot;Option 4&quot;, &quot;Option 5&quot;, &quot;Option 6&quot;,
+    &quot;Option 7&quot;, &quot;Option 8&quot;, &quot;Option 9&quot;,
+    &quot;Option 10&quot;, &quot;Option 11&quot;, &quot;Option 12&quot;,
+    &quot;Option 13&quot;, &quot;Option 14&quot;, &quot;Option 15&quot;,
+    &quot;Option 16&quot;, &quot;Option 17&quot;, &quot;Option 18&quot;,
+    &quot;Option 19&quot;, &quot;Option 20&quot;];
+
+default
+{
+    touch_start(integer total_number)
+    {
+        key owner = llGetOwner();
+        
+        // We set a listen for only the owner
+        // So this script assumes the object will only be touched by the owner
+        listen_handle = llListen(channel, &quot;&quot;, owner, &quot;&quot;);
+        
+        // Touch_Start we issue menuindex as 0 inside of the function itself
+        DialogPlus(owner, &quot;Select an Option&quot;, The_List, channel, menuindex = 0);
+    }
+
+    // We need a listen for the dialog itself, but as well as the Back/Next button.
+    listen(integer chan, string name, key id, string msg)
+    {
+        key owner = llGetOwner();
+
+        // If they clicked Next it will go to the next dialog window
+        if(msg == &quot;Next&quot;)
+        {
+            // ++menuindex will turn menuindex plus 1, making it give the next page.
+            DialogPlus(owner, &quot;Select an Option&quot;, The_List, channel, ++menuindex);
+        }
+
+        // if they clicked back it will go to the last dialog window.
+        else if(msg == &quot;Back&quot;)
+            DialogPlus(owner, &quot;Select an Option&quot;, The_List, channel, --menuindex);
+            // --menuindex will turn menuindex minus 1, making it give the previous page.
+
+        // If they choose anything besides Back/Next it will be in this section
+        else
+        {
+            // Be Safe
+            llListenRemove(listen_handle);
+            //Example used, change to whatever you wish.
+            llSay(0, &quot;Your choice was &quot; + msg);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>//Created by Ugleh Ulrik
+//Inventory2DialogPlus Example
+
+//Here we set the Dialog Channel
+integer channel = -900;
+
+integer listen_handle;
+
+list InventoryList;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        InventoryList = [];
+        integer i;
+        integer a = llGetInventoryNumber(INVENTORY_ALL);
+
+        do
+        {
+            InventoryList += [TrimStringToLength(llGetInventoryName(INVENTORY_ALL, i),23)];
+        }
+        while (++i &lt; a);
+
+        key owner = llGetOwner(); 
+      
+        // We set a listen for only the owner
+        // So this script assumes the object will only be touched by the owner
+        listen_handle = llListen(channel, &quot;&quot;, owner,&quot;&quot;);
+        // touch_start we issue menuindex as 0 inside of the function itself
+        DialogPlus(owner, &quot;Select an Option&quot;, InventoryList, channel, menuindex = 0);
+    }
+
+    // We need a listen for the dialog itself, but as well as the Back/Next button.
+    listen(integer chan, string name, key id, string msg)
+    {
+        key owner = llGetOwner();
+
+        // If they clicked Next it will go to the next dialog window
+        if(msg == &quot;Next&quot;)
+        {
+            // ++menuindex will turn menuindex plus 1, making it give the next page.
+            DialogPlus(owner, &quot;Select an Option&quot;, InventoryList, channel, ++menuindex);
+        }
+
+        //if they clicked back it will go to the last dialog window.
+        else if(msg == &quot;Back&quot;)
+        {
+            // --menuindex will turn menuindex minus 1, making it give the previous page.
+            DialogPlus(owner, &quot;Select an Option&quot;, InventoryList, channel, --menuindex);
+        }
+
+        // If they choose anything besides Back/Next it will be in this section
+        else
+        {
+            //Be Safe
+            llListenRemove(listen_handle);
+            //Example used, change to whatever you wish.
+            llSay(0, &quot;Your choice was &quot;+ msg);
+        }
+    }
+}</code></pre></div></section>

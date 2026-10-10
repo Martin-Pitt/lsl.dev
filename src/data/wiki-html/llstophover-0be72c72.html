@@ -1,0 +1,30 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Stop hovering to a height</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Put in an attached prim and touch to start floating in air without flying.
+// Touch again to drop to the ground.
+ 
+integer gHovering = FALSE; // are we supposd to be hovering now?
+ 
+default {
+    touch_start(integer total_number) {
+        if (!llGetAttached()) {
+            llWhisper(0, &quot;Wear me to play.&quot;);
+            return;
+        }
+ 
+        if (gHovering) {
+            llOwnerSay(&quot;Releasing you.&quot;);
+            llStopHover();
+        }
+        else {
+            llOwnerSay(&quot;Making you float...&quot;);
+ 
+            // Start hovering 5 meters over our current location.
+            vector myPosition = llGetPos();
+            llSetHoverHeight(myPosition.z - llGround(ZERO_VECTOR) + 5.0, FALSE, 1.0);
+        }
+ 
+        gHovering = !gHovering; // flip the switch
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGroundRepel/">llGroundRepel</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetHoverHeight/">llSetHoverHeight</a></div></div></section>

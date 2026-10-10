@@ -1,0 +1,145 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the substring of <strong>src</strong> from <strong>start</strong> to <strong>end</strong>, leaving the original <a href="https://wiki.secondlife.com/wiki/string">string</a> intact.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        string word = &quot;Hello!&quot;;
+        llOwnerSay(llGetSubString(word, 0, 0));
+        // Object: H
+        llOwnerSay(llGetSubString(word, -1, -1));
+        // Object: !
+        llOwnerSay(llGetSubString(word, 2, 3));
+        // Object: ll
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// display SL time using a script without an &#x27;if&#x27;
+default
+{
+    state_entry()
+    {
+        // synchronise our clock to a fraction of a second
+        float fnow = llGetWallclock();
+        while (fnow == llGetWallclock() )   ;   // await a change in seconds
+
+        llSetTimerEvent(1.0);
+    }
+
+    timer()
+    {
+        integer seconds = (integer) llGetWallclock();
+        integer minutes = seconds / 60;
+        seconds = seconds % 60;
+        integer hours = minutes / 60;
+        minutes = minutes % 60;
+
+        string stringHours   = llGetSubString(&quot;0&quot; + (string)hours,   -2, -1);
+        string stringMinutes = llGetSubString(&quot;0&quot; + (string)minutes, -2, -1);
+        string stringSeconds = llGetSubString(&quot;0&quot; + (string)seconds, -2, -1);
+
+        string time = stringHours + &quot;:&quot; + stringMinutes + &quot;:&quot; + stringSeconds;
+
+        llSetText(time, &lt;1.0, 1.0, 1.0&gt;, 1.0);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">The counting of the characters starts at 0. Using 0,0 as start and end positions would return the first character only. Using negative numbers causes backwards counting, so -1 is shortform for the last character in a string. Ergo, using 0, -1 as start and end positions would return the entire string.</div>
+<div class="wiki-line">To ascertain how long a string is, use <a href="/functions/llStringLength/">llStringLength</a>.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llReplaceSubString/">llReplaceSubString</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDeleteSubString/">llDeleteSubString</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llInsertString/">llInsertString</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Library_Combined_Library#str-replace">CombinedLibrary: str_replace</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-negative-index-2a0eb411/">Template:LSL Function/negative index</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+Format:
+&lt;nowiki&gt;{{LSL Function/negative index|boolean|p1|p2|p3}}&lt;/nowiki&gt;&lt;br/&gt;
+Exclude p1, p2, or p3 if not used.
+
+{{#vardefine:also_articles|{{LSL DefineRow||Test}}}}
+{{#vardefine:ni_mode|true}}
+{{#vardefine:ni_nc|}}
+{{#vardefine:ni_p1|number}}
+{{#vardefine:ni_p2|p2}}
+&lt;!--{{#vardefine:ni_p3|p3}}--&gt;
+
+&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:ni_c|{{#if:{{{2|{{#var:ni_p1}}}}}|{{#if:{{{3|{{#var:ni_p2}}}}}|{{#if:{{{4|{{#var:ni_p3}}}}}|3|2}}|1}}|0}}}}
+
+{{#vardefine:t|{{#ifeq:{{{1|{{#var:ni_mode}}}}}|true|{{#switch:{{#var:ni_c}}|3|2=LSL_Function/negative_index/range|1=LSL_Function/negative_index/single}}}}}}
+
+{{{{#var:t}}|{{{2|{{#var:ni_p1}}}}}|{{{3|{{#var:ni_p2}}}}}|{{{4|{{#var:ni_p3}}}}}|noExclude={{{noExclude|}}}}}
+
+{{#if:{{{noSpec|}}}||
+{{#vardefine:spec|{{#var:spec}}
+{{#if:{{#var:t}}|
+{{{!}} {{Prettytable|style=float:left;}}
+{{!}}-{{Hl2}}
+! Index
+! Positive
+! Negative
+{{!}}-
+{{!}} First
+{{!}} &lt;code&gt;0&lt;/code&gt;
+{{!}} &lt;code&gt;-{{{length|length}}}&lt;/code&gt;
+{{!}}-
+{{!}} Last
+{{!}} &lt;code&gt;{{{length|length}}} - 1&lt;/code&gt;
+{{!}} &lt;code&gt;-1&lt;/code&gt;
+{{!}}}
+=== Indexes ===
+&lt;div style=&quot;display:table;&quot;&gt;&lt;div style=&quot;display:block;&quot;&gt;
+*Positive indexes count from the beginning, the first item being indexed as &lt;code&gt;0&lt;/code&gt;, the last as &lt;code&gt;({{{length|length}}} - 1)&lt;/code&gt;.
+&lt;/div&gt;&lt;/div&gt;
+&lt;div style=&quot;display:table;&quot;&gt;&lt;div style=&quot;display:block;&quot;&gt;
+*Negative indexes count from the far end, the first item being indexed as &lt;code&gt;-{{{length|length}}}&lt;/code&gt;, the last as &lt;code&gt;-1&lt;/code&gt;. 
+&lt;/div&gt;&lt;/div&gt;
+}}
+}}
+}}
+
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{#if:{{#var:t}}|{{LSL_DefineRow||{{LSLGC|Negative_Index{{#var:lang}}|Negative Index}}|}}}}}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{PBR}}
+{{#vardefineecho:ni_ps|{{#switch:{{#var:ni_c}}
+  |0=This function
+  |1={{LSLP|{{{2}}}}}
+  |2={{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}}
+  |3={{LSLP|{{{2}}}}}, {{LSLP|{{{3}}}}} &amp; {{LSLP|{{{4}}}}}
+ }}}} {{#if:{{#var:t}}| support{{#ifexpr:{{#var:ni_c}}&gt;1||s}}| &#x27;&#x27;do{{#ifexpr:{{#var:ni_c}}&gt;1||es}} not&#x27;&#x27; support }} {{LSLGC|Negative_Index{{#var:lang}}|negative indexes}}.{{PBR}}
+}}
+
+{{#vardefine:footer|{{#var:footer}}
+{{#if:{{#var:t}}|{{#ifeq:{{NAMESPACE}}|Template||{{#if:{{#var:self}}{{{self|}}}{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Negative Index{{#var:lang}}}}}}}}|
+{{#if:{{#var:self}}{{{self|}}}{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Positive_Index_Only{{#var:lang}}}}}}
+}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#if:{{{nc|{{#var:ni_nc}}}}}||
+* If {{#switch:{{#var:ni_c}}
+ |3=either {{LSLP|{{{2}}}}}, {{LSLP|{{{3}}}}} or {{LSLP|{{{4}}}}} are
+ |2=either {{LSLP|{{{2}}}}} or {{LSLP|{{{3}}}}} are
+ |1={{LSLP|{{{2}}}}} is}} out of bounds {{#if:{{{oob-return|}}}|this function returns {{{oob-return|}}} and}} the script continues to execute without an error message.
+{{#if:{{#var:t}}|{{#ifexpr:{{#var:ni_c}}&gt;1|{{#if:{{{noExclude|}}}|* {{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}} will not form an [[#exclusion_range|exclusion range]] when {{LSLP|{{{2}}}}} is past {{LSLP|{{{3}}}}} (Approximately: {{LSLP|{{{2}}}}} &gt; {{LSLP|{{{3}}}}}), instead it will act as if {{LSLP|{{{2}}}}} was zero &amp; {{LSLP|{{{3}}}}} was -1.|* {{LSLP|{{{2}}}}} &amp; {{LSLP|{{{3}}}}} will form an [[#exclusion_range|exclusion range]] when {{LSLP|{{{2}}}}} is past {{LSLP|{{{3}}}}} (Approximately: {{LSLP|{{{2}}}}} &gt; {{LSLP|{{{3}}}}}). }}}}}}
+}}}}
+
+}}&lt;noinclude&gt;
+==Debugging==
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|spec}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|notes}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPairTable|also_articles}}
+|-
+{{VarPair|footer}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

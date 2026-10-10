@@ -39,7 +39,3 @@ export const wikiByTitle = new Map(data.wiki.map(w => [w.title, w]));
 export function constantsInGroup(group: string) {
   return data.constants.filter(c => ((c as any).groups as string[] | undefined)?.includes(group));
 }
-/** Pagefind aliases: names people search for that are not LSL functions. */
-export const searchAliases: Record<string, { alias: string; note: string }[]> = {
-  llSetLinkPrimitiveParamsFast: [{ alias: 'llSetPrimitiveParamsFast', note: 'There is no llSetPrimitiveParamsFast function. Use llSetLinkPrimitiveParamsFast with LINK_THIS to change the prim that contains the script.' }],
-};

@@ -1,0 +1,72 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Responds to <code>request_id</code> with <code>status</code> and <code>body</code>.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">The response need not be made inside the <a href="/events/http_request/">http_request</a> event but if it does not happen in a timely fashion the request will time out (within 25 seconds).</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>This call must be made by the script containing the <a href="/events/http_request/">http_request</a> event where the <code>request_id</code> was received.</li>
+<li>There is no limit, other than script size, to the amount of data that can be sent by this function.</li>
+<li><a href="/functions/llHTTPRequest/">llHTTPRequest</a> can truncate the response length in <em>receiving</em> scripts. Be aware when using them together for prim-to-prim communications.</li>
+<li>The response by default has <code><span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|content-type: text/plain}}</code></span></code>. Use <a href="/functions/llSetContentType/">llSetContentType</a> to optionally return a different type, like <code><span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|text/html}}</code></span></code>.</li>
+<li>Besides <a href="/functions/llSetContentType/">llSetContentType</a>, there is no way to set any custom HTTP headers in the response.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>string url;
+
+default
+{
+    changed(integer change)
+    {
+        if (change &amp; (CHANGED_REGION_START | CHANGED_REGION | CHANGED_TELEPORT))
+            llResetScript();
+    }
+
+    state_entry()
+    {
+        llRequestURL();
+    }
+
+    touch_start(integer num_detected)
+    {
+    //  PUBLIC_CHANNEL has the integer value 0
+        if (url != &quot;&quot;)
+            llSay(PUBLIC_CHANNEL, &quot;URL: &quot; + url);
+    }
+
+    http_request(key id, string method, string body)
+    {
+    //  http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
+        list CRUDmethods = [&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;];
+    //  it&#x27;s bit-wise NOT ( ~ ) !!!
+        integer isAllowedMethod = ~llListFindList(CRUDmethods, [method]);
+
+        if (isAllowedMethod)
+        {
+            llHTTPResponse(id, 200, &quot;Body of request below:\n&quot; + body);
+        }
+        else if (method == URL_REQUEST_GRANTED)
+        {
+        //  don&#x27;t forget the trailing slash
+            url = body + &quot;/&quot;;
+
+            llOwnerSay(&quot;URL: &quot; + url);
+        }
+        else if (method == URL_REQUEST_DENIED)
+        {
+            llOwnerSay(&quot;Something went wrong, no URL.\n&quot; + body);
+        }
+        else
+        {
+            llOwnerSay(&quot;Ummm... I have no idea what SL just did. Method=\&quot;&quot;+method+&quot;\&quot;\n&quot; + body);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetFreeURLs/">llGetFreeURLs</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestURL/">llRequestURL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestSecureURL/">llRequestSecureURL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llReleaseURL/">llReleaseURL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetHTTPHeader/">llGetHTTPHeader</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetContentType/">llSetContentType</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/http_request/">http_request</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/http_response/">http_response</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/LSL_http_server">LSL http server</a></div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li><span class="wiki-template"><a href="/wiki/template-svn-6879a543/">SVN</a>: <code>{{SVN|1836|rev=112899 |trunk=*|anchor=file22|ver=|ser=}}</code></span></li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="scr-396"><a href="/wiki/template-issues-scr-396-18acdaea/">Template:Issues/SCR-396</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SCR-396|&#x27;&#x27;&#x27;llHTTPImageResponse&#x27;&#x27;&#x27;() - function for sending image data as a response to an HTTP request|type=nf}}</code></pre></details></section>

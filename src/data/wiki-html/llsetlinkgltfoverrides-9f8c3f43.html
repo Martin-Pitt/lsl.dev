@@ -1,0 +1,49 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets or removes individual overrides applied to a <a href="https://wiki.secondlife.com/wiki/PBR">PBR</a> texture on a face</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><h3 id="parameters">Parameters</h3>
+<table><tr><th>parameter</th><th>value</th><th>type</th><th>description</th></tr><tr><td> <a href="/constants/OVERRIDE_GLTF_BASE_COLOR_FACTOR/">OVERRIDE_GLTF_BASE_COLOR_FACTOR</a></td><td> 1</td><td> vector</td><td> Set the tinting color used for the base color. Color is specified in linear RGB. Use <a href="/functions/llsRGB2Linear/">llsRGB2Linear</a> to convert colors from Blinn-Phong to PBR.</td></tr><tr><td> <a href="/constants/OVERRIDE_GLTF_BASE_ALPHA/">OVERRIDE_GLTF_BASE_ALPHA</a></td><td> 2</td><td> float</td><td> Sets the alpha for the face(s). Only impacts the rendering when the alpha mode is set to <a href="/constants/PRIM_GLTF_ALPHA_MODE_BLEND/">PRIM_GLTF_ALPHA_MODE_BLEND</a>.</td></tr><tr><td> <a href="/constants/OVERRIDE_GLTF_BASE_ALPHA_MODE/">OVERRIDE_GLTF_BASE_ALPHA_MODE</a></td><td> 3</td><td> integer</td><td> Set the alpha mode on the face(s). Must be one of the valid blend modes<table><tr><th>GLTF Alpha Mode</th><th>value</th><th>description</th></tr><tr><td> <a href="/constants/PRIM_GLTF_ALPHA_MODE_OPAQUE/">PRIM_GLTF_ALPHA_MODE_OPAQUE</a></td><td> 0</td><td> Ignore the alpha value and render the material as opaque.</td></tr><tr><td> <a href="/constants/PRIM_GLTF_ALPHA_MODE_BLEND/">PRIM_GLTF_ALPHA_MODE_BLEND</a></td><td> 1</td><td> Render the material with transparency determined by the alpha value. Blending is done in linear color space. As is the case for Blinn-Phong as well, this mode suffers from depth sorting and performance issues. Use alpha mask instead when possible.</td></tr><tr><td> <a href="/constants/PRIM_GLTF_ALPHA_MODE_MASK/">PRIM_GLTF_ALPHA_MODE_MASK</a></td><td> 2</td><td> Render the material as  fully opaque where the alpha value is greater than the alpha cutoff, and otherwise render the material as fully transparent.</td></tr></table></td></tr><tr><td> <a href="/constants/OVERRIDE_GLTF_BASE_ALPHA_MASK/">OVERRIDE_GLTF_BASE_ALPHA_MASK</a></td><td> 4</td><td> float</td><td> Sets the alpha cutoff level on the face(s) when alpha mode is set to mask.</td></tr><tr><td> <a href="/constants/OVERRIDE_GLTF_BASE_DOUBLE_SIDED/">OVERRIDE_GLTF_BASE_DOUBLE_SIDED</a></td><td> 5</td><td> integer</td><td> If set to <strong>TRUE</strong> then the texture on the face(s) will be rendered as double sided.</td></tr><tr><td> <a href="/constants/OVERRIDE_GLTF_METALLIC_FACTOR/">OVERRIDE_GLTF_METALLIC_FACTOR</a></td><td> 6</td><td> float</td><td> Adjusts the metallic factor on the specified face(s). Value should be between 0 and 1.</td></tr><tr><td> <a href="/constants/OVERRIDE_GLTF_ROUGHNESS_FACTOR/">OVERRIDE_GLTF_ROUGHNESS_FACTOR</a></td><td> 7</td><td> float</td><td> Adjust the roughness factor on the specified face(s). Value should be between 0 and 1.</td></tr><tr><td> <a href="/constants/OVERRIDE_GLTF_EMISSIVE_FACTOR/">OVERRIDE_GLTF_EMISSIVE_FACTOR</a></td><td> 8</td><td> vector</td><td> Set the tint used for the emissive texture on the face(s). Note that this is specified in linear RGB.</td></tr></table>
+<div class="wiki-line">Passing an empty string ("") as the override value will clear that override.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><code>OVERRIDE_GLTF_BASE_COLOR_FACTOR</code> and <code>OVERRIDE_GLTF_BASE_ALPHA</code> parameters are coupled.  If an override is set for one parameter, then the other is automatically given an override.  The default <code>OVERRIDE_GLTF_BASE_COLOR_FACTOR</code> is &lt;1,1,1&gt;, and the default <code>OVERRIDE_GLTF_BASE_ALPHA</code> is 1.0.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Toggle alpha on\off</div>
+<div class="wiki-line"><pre><code>integer toggle;
+default
+{
+    touch_start(integer num_detected)
+    {
+        toggle=!toggle;
+        llSetLinkGLTFOverrides( LINK_THIS, 0, [
+            OVERRIDE_GLTF_BASE_ALPHA_MODE, PRIM_GLTF_ALPHA_MODE_BLEND,
+            OVERRIDE_GLTF_BASE_ALPHA, toggle]);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetprimitiveparams-193e7d67/">LlSetPrimitiveParams</a> — Sets the parameters for a prim</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimitiveParams/">LlGetPrimitiveParams</a> — Gets the parameters set on a prim</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-color-aa9adaff/">Template:LSL Function/color</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{LSLGC|Color|color}} in RGB {{LSL_VR|1={{HoverText|R|Red}}, {{HoverText|G|Green}}, {{HoverText|B|Blue}}}} ({{LSL_VR|0.0, 0.0, 0.0}} &amp;#61; black, {{LSL_VR|1.0, 1.0, 1.0}} &amp;#61; white)}}
+
+{{#vardefine:p_{{{1|none}}}_hover|color in RGB {{LSL_VR|R, G, B}} ({{LSL_VR|0.0, 0.0, 0.0}} &amp;#61; black, {{LSL_VR|1.0, 1.0, 1.0}} &amp;#61; white)}}
+
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{LSL DefineRow||{{LSLGC|Color|Color in LSL}} {{#switch:{{#if:{{{nc|}}}|Template|{{NAMESPACE}}}}|Template=|User=|{{LSLC|Color}}}} }}}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|-
+{{VarPairTable|also_articles}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-link-face-a7ffc876/">Template:LSL Function/link-face</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:{{{1|}}}|{{LSL Function/link|{{{1}}}|nogroup={{{nogroup|}}}}}}}{{#if:{{{2|}}}|{{LSL_Function/face|{{{2}}}}}}}{{#if:
+
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetLinkNumberOfSides]]|Returns the number of faces of the linked prim.}}}}
+
+}}</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><a href="/wiki/category-gltf-06c4ba99/">Category:glTF</a></div></section>

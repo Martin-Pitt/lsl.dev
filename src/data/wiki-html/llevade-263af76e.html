@@ -1,0 +1,83 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Characters will (roughly) try to hide from their pursuers if there is a good hiding spot along their fleeing path. Hiding means no direct line of sight from the head of the character (center of the top of its physics bounding box) to the head of its pursuer and no direct path between the two on the navmesh.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Must use <a href="/functions/llCreateCharacter/">llCreateCharacter</a> or script will shout an error "You must call llCreateCharacter before llEvade.".</li>
+</ul>
+<ul>
+<li>If the <code>target</code> is an object, it must be unlinked or be the root prim of a linkset.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>vector start_position;
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        llDeleteCharacter();
+        llCreateCharacter([CHARACTER_MAX_SPEED, 25, CHARACTER_DESIRED_SPEED, 15.0]);
+
+        start_position = llGetPos();
+        llWanderWithin(start_position, &lt;10.0, 10.0, 2.0&gt;, [] );
+    }
+ 
+    touch_start(integer num_detected)
+    {
+        llEvade(llDetectedKey(0), []);
+        llSetTimerEvent(20.0);
+    }
+
+    timer()
+    {
+    //  do not keep running away...
+        llSetTimerEvent(0.0);
+
+        llWanderWithin(start_position, &lt;10.0, 10.0, 2.0&gt;, [] );
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><ul>
+<li><a href="/functions/llCreateCharacter/">llCreateCharacter</a></li>
+<li><a href="/functions/llDeleteCharacter/">llDeleteCharacter</a></li>
+<li><a href="/functions/llEvade/">llEvade</a></li>
+<li><a href="/functions/llExecCharacterCmd/">llExecCharacterCmd</a></li>
+<li><a href="/functions/llGetClosestNavPoint/">llGetClosestNavPoint</a></li>
+<li><a href="/functions/llFleeFrom/">llFleeFrom</a></li>
+<li><a href="/functions/llNavigateTo/">llNavigateTo</a></li>
+<li><a href="/functions/llPatrolPoints/">llPatrolPoints</a></li>
+<li><a href="/functions/llPursue/">llPursue</a></li>
+<li><a href="/functions/llUpdateCharacter/">llUpdateCharacter</a></li>
+<li><a href="/functions/llWanderWithin/">llWanderWithin</a></li>
+</ul></section>
+<section><h2 id="see-also-events">See also: events</h2><ul>
+<li><a href="/events/path_update/">path_update</a></li>
+</ul></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-31-262785"> 31/07/2012 </a></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-uuid-f11a4088/">Template:LSL Function/uuid</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}{{#if:{{{group|1}}}|{{LSLGC|Group|group}},&amp;#32;}}{{LSLGC|Avatar|avatar}} or {{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{ph|}}}|{{{ph|}}}&amp;#32;|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}}}{{#if:{{{group|1}}}|group,&amp;#32;}}avatar or {{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Avatar/As A Parameter}}
+}}}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

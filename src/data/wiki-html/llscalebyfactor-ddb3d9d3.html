@@ -1,0 +1,42 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Attempts to resize the entire object by <code>scaling_factor</code>, maintaining the size-position ratios of the prims.</div>
+<div class="wiki-line">Resizing is subject to prim scale limits and linkability limits. This function can not resize the object if the linkset is physical, a pathfinding character, in a keyframed motion, or if resizing would cause the parcel to overflow.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <a href="/constants/TRUE/">TRUE</a> if it succeeds, <a href="/constants/FALSE/">FALSE</a> if it fails.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Due to floating point precision issues (often, sqrt(x*x) != x), avoid rescaling by the values returned by <a href="/functions/llGetMinScaleFactor/">llGetMinScaleFactor</a> and <a href="/functions/llGetMaxScaleFactor/">llGetMaxScaleFactor</a>.  To guarantee successful rescaling, use values slightly within the limits returned by those functions.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//  Touching this script causes the object to double or halve in size.
+
+integer growing;
+
+default
+{
+    state_entry()
+    {
+        llSay(PUBLIC_CHANNEL, &quot;Touch to toggle scale.&quot;);
+    }
+
+    touch_start(integer num_detected)
+    {
+        growing = !growing;
+
+        float min_factor = llGetMinScaleFactor();
+        float max_factor = llGetMaxScaleFactor();
+
+        llSay(PUBLIC_CHANNEL, &quot;min_scale_factor = &quot; + (string)min_factor
+                            + &quot;\nmax_scale_factor = &quot; + (string)max_factor);
+
+        integer success;
+
+        if (growing) success = llScaleByFactor(2.0);
+        else         success = llScaleByFactor(0.5);
+
+        if (!success) llSay(PUBLIC_CHANNEL, &quot;Scaling failed!&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llScaleByFactor/">llScaleByFactor</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetMaxScaleFactor/">llGetMaxScaleFactor</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetMinScaleFactor/">llGetMinScaleFactor</a></div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li>Mentioned in <a href="https://wiki.secondlife.com/wiki/Simulator_User_Group/Transcripts/2013.12.10">Simulator_User_Group/Transcripts/2013.12.10</a></li>
+<li>Mentioned in <a href="https://wiki.secondlife.com/wiki/Simulator_User_Group/Transcripts/2013.12.17">Simulator_User_Group/Transcripts/2013.12.17</a></li>
+</ul></section>

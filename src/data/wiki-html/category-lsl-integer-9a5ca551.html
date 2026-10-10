@@ -1,0 +1,98 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Types}}</code></span></div>
+<h2 id="integers">Integers</h2>
+<div class="wiki-line">The integer data type is a signed 32 bit value between −2,147,483,648 and +2,147,483,647 (that is 0x80000000 to 0x7FFFFFFF in hex). Integers are whole numbers. The fractional datatype is the <a href="https://wiki.secondlife.com/wiki/float">float</a>.</div>
+<div class="wiki-line"><a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a> can be used as a constant for the maximum integer (for that is the value it is defined as).</div>
+<h2 id="examples">Examples</h2>
+<div class="wiki-line">All of the following are integers:</div>
+<div class="wiki-line"><pre><code>integer firstInt = 5512623;
+integer secondInt = ACTIVE;
+integer thirdInt = 0x61EC1A;
+integer fourthInt = -160693;</code></pre></div>
+<div class="wiki-line">The following are NOT integers, use <a href="https://wiki.secondlife.com/wiki/float">float</a> for them:</div>
+<div class="wiki-line"><pre><code>integer decimalValue = 125.2; // ERROR : Type mismatch -- Integer literals can&#x27;t have a decimal.
+integer bigValue = 3147483647; // An undocumented way to say -1,147,483,649 // Integer literals can&#x27;t be larger than 2,147,483,647.
+integer biggerValue = 10123456789; // An undocumented way to say -1 // Integer literals can&#x27;t be larger than 2,147,483,647.</code></pre></div>
+<div class="wiki-line">The following function can be used to determine whether a string of characters consists only of integers. This can be important if you need to know that a user has entered a valid integer in chat or a textbox, for example.</div>
+<div class="wiki-line"><pre><code>integer IsInteger(string var)
+{
+    integer i;
+    for (i=0;i&lt;llStringLength(var);++i)
+    {
+        if(!~llListFindList([&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,&quot;5&quot;,&quot;6&quot;,&quot;7&quot;,&quot;8&quot;,&quot;9&quot;,&quot;0&quot;],[llGetSubString(var,i,i)]))
+        {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}</code></pre></div>
+<div class="wiki-line">Here's a simpler solution for strings containing positive or negative decimal integers (values from −2147483648 and 2147483647 written without + sign, leading zeros, or thousands separators ',' ). Omei Qunhua.</div>
+<div class="wiki-line"><pre><code>    if ( (string) ( (integer) data) == data)
+        llOwnerSay(&quot;&#x27;&quot; + data + &quot;&#x27; contains a valid integer&quot;);</code></pre></div>
+<div class="wiki-line">The following examples will validate that a string contains only the characters 0 though 9. Omei Qunhua.</div>
+<div class="wiki-line">a) Example for a string of length 5</div>
+<div class="wiki-line"><pre><code>    StringOf5Dec(string test)
+    {
+        return ( (integer) (&quot;1&quot; + test) &gt;= 100000);
+    }</code></pre></div>
+<div class="wiki-line">b) Example for a string of length 1 through 9</div>
+<div class="wiki-line"><pre><code>    VarStringIsDecimal(string test)
+    {
+        integer limit = (integer) llPow(10.0, llStringLength(test) );
+        return ( (integer) (&quot;1&quot; + test) &gt;= limit);
+    }</code></pre></div>
+<div class="wiki-line">This function should validate any decimal integer, with or without signs or leading zeroes, and with leading/trailing space but does not accept thousands separators. (Phil Metalhead)</div>
+<div class="wiki-line"><pre><code>    integer uIsInteger(string input)
+    {
+        input = llStringTrim(input,STRING_TRIM); // remove leading/trailing whitespace
+        // &quot;+123&quot; is a valid integer string but would otherwise fail, so strip leading &quot;+&quot; if it&#x27;s there
+        if (llGetSubString(input,0,0) == &quot;+&quot;) input = llGetSubString(input,1,-1);
+        return ((string)((integer)input) == input);
+    }</code></pre></div>
+<div class="wiki-line">Test cases for the above function (click "Expand" link on the right side of the page):</div>
+<div class="wiki-line"><pre><code>///////////////
+// Returns 1 // (leading and trailing whitespace)
+   2352316
+
+///////////////
+// Returns 1 // (leading &quot;+&quot;)
++151613662
+///////////////
+// Returns 1 // (negative number)
+-263163626
+///////////////
+// Returns 1 // (largest positive integer)
+2147483647
+///////////////
+// Returns 1 // (largest negative integer) 
+-2147483648
+///////////////
+// Returns 1 // (largest positive integer with leading and trailing whitespace, and leading &quot;+&quot;)
+   +2147483647
+
+///////////////
+// Returns 0 // (contains letters)
+161362stuff
+///////////////
+// Returns 0 // (number is a float, not an integer -- contains &quot;.&quot; in string)
+123.4
+///////////////
+// Returns 0 // (whitespace in middle of string)
+2347
+9089
+///////////////
+// Returns 0 // (contains thousands separator &quot;,&quot;)
+844,241
+// Returns 0 // (&quot;+&quot; in middle of string)
+2378+87668
+///////////////
+// Returns 0 // (&quot;-&quot; in middle of string)
+3462098-12
+// Returns 0 // (number &gt; 2147483647)
+2147483648
+///////////////
+// Returns 0 // (number &lt; -2147483648)
+-2147483649
+///////////////</code></pre></div>
+<h2 id="further-reading">Further Reading</h2>
+<div class="wiki-line">For a more extensive coverage of integers, including the different ways they are used in LSL, see <a href="https://wiki.secondlife.com/wiki/LSL_101/LSL_in_Focus:_Integers">LSL in Focus: Integers</a>.</div>

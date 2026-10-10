@@ -1,0 +1,57 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Critically damps to <code>height</code> if within <code><code>height</code> * 0.5</code> of ground or water level (which ever is higher).</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Do not use with vehicles.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">Does not pull the object down if it is stuck higher than that, unlike the similar <a href="/functions/llSetHoverHeight/">llSetHoverHeight</a>.</div>
+<div class="wiki-line">To stop llGroundRepel, this seems to work: <code>llGroundRepel(0.0, FALSE, 0.0)</code></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>This is not a prim property; stopping or resetting the script stops llGroundRepel; same with the similar <a href="/functions/llSetHoverHeight/">llSetHoverHeight</a></li>
+<li>Crossing a sim border will cancel llGroundRepel, unlike <a href="/functions/llSetHoverHeight/">llSetHoverHeight</a></li>
+<li>A negative height value allows you to hover underwater, same as <a href="/functions/llSetHoverHeight/">llSetHoverHeight</a></li>
+<li>A previous version of this page suggested that <a href="/functions/llStopHover/">llStopHover</a> will stop llGroundRepel, but it does not</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHYSICS, TRUE);
+        llGroundRepel(0.5, TRUE, 0.2); // In a 1/2 meter cube this is roughly the minimum height for any noticeable effect.
+        // to
+        llGroundRepel(4096.0, TRUE, 0.2); // There is no restrictive maximum.
+        // However as the prim reaches 4096 meters (bear in mind the prim height will be (float height + ground height))
+        // it will be too high to be allowed to exist.
+    }
+}// This is actually a remarkably fast way to go straight up!!</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetHoverHeight/">llSetHoverHeight</a> — Similar to llGroundRepel, but also pulls down</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-physical-ad285cc8/">Template:LSL Function/physical</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:caveats|{{#var:caveats}}
+*Only works in {{#if:{{{avatar|}}}|attachments and}} [[STATUS_PHYSICS|physics-enabled]] objects.}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|- {{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-damping-1dce8927/">Template:LSL Function/damping</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}}}
+
+{{#vardefine:p_{{{1|}}}_desc|seconds to critically damp in}}
+
+{{#if:{{{1|}}}|{{#vardefine:hidden-text|{{#var:hidden-text}}{{LSLC|Damping}}}}}}
+
+}}&lt;includeonly&gt;{{#if:{{{1|}}}|{{LSLC|Damping}}}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|}}}_desc}}
+|-
+{{VarPair|p_{{{1|}}}_hover}}
+|-
+{{VarPair|header_footnote}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

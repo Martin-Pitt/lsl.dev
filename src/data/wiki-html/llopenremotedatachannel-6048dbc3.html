@@ -1,0 +1,26 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Creates a channel to listen for XML-RPC calls. Will trigger a <a href="/wiki/remote-data-3ce63638/">remote_data</a> event with channel id once it is available.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><strong>XML-RPC should not be used anymore.  Use http-in instead, see <a href="https://wiki.secondlife.com/wiki/LSL_http_server">LSL_http_server</a>.</strong></li>
+<li>If an object moves from one region to another it must re-open the channel</li>
+<li>The object will get the *same* channel as before, but without re-opening no requests will get through</li>
+<li>Any channel that is not used for 14 days will be cleaned up.</li>
+<li>May be advisable to somewhat regularly (before expected use or on a regular schedule) check that the channel is good and hasn't changed by calling llOpenRemoteDataChannel and comparing to the previous channel.</li>
+<li>Note: XML-RPC requests often time-out due to the front-end server being overloaded.  LL has continued to upgrade the server hardware periodically, but it has remained unreliable.  LL developers have advised that the XML-RPC design isn't scalable (due to the single server bottle-neck) and that the service is "deprecated".  They suggest using <a href="https://wiki.secondlife.com/wiki/HTTP_Polling">HTTP Polling</a> as an alternative.  If an XML-RPC request does time-out the script's remote_data event may or may not be triggered (and any script response is lost).</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llOpenRemoteDataChannel();
+    }
+    changed(integer c)
+    {
+        if(c &amp; (CHANGED_REGION | CHANGED_TELEPORT))
+            llOpenRemoteDataChannel();
+    }
+    remote_data( integer event_type, key channel, key message_id, string sender, integer idata, string sdata )
+    {
+        if (event_type == REMOTE_DATA_CHANNEL) { // channel created
+        }
+    }
+}</code></pre></div></section>

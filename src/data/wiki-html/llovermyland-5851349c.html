@@ -1,0 +1,146 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">On group <code>deeded</code> land the object containing the script must be deeded to the same group. (It is not enough to set the script to the group.)</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>boolean</code>, <a href="/constants/TRUE/">TRUE</a> if <code>id</code> is over land owned by the script owner, <a href="/constants/FALSE/">FALSE</a> otherwise.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//--// private land message //--//
+
+//-- list of people not to pester, lower case only
+list gLstIgnore = [&quot;void singer&quot;];
+key  gKeyAv;
+
+default{
+    state_entry(){
+        llOwnerSay( &quot;I&#x27;ll pester anyone on your land I can find,&quot;
+                    + &quot; unless they&#x27;re in your ignore list.&quot; );
+        llSensorRepeat( &quot;&quot;, &quot;&quot;, AGENT, 96, PI, 30 );
+    }
+
+    sensor( integer vIntFound ){
+        do{
+            gKeyAv = llDetectedKey( --vIntFound );  //-- Decrement sensor variable to walk backwards through all detections
+             //-- check if they are over our land
+            if (llOverMyLand( gKeyAv )){ //-- the return value is automatically tested by the if statemnt
+                 //-- check if they are in the ignore list
+                if (!~llListFindList( gLstIgnore, (list)llToLower( llDetectedName( vIntFound ) ) )){ //-- &#x27;!~llListFindList&#x27; == &#x27;not found in the list&#x27;
+                     //-- pester everyone not in the ignore list !!!
+                    llInstantMessage( gKeyAv, &quot;You are on private land, please leave this parcel&quot; );
+                }
+            }
+        }while (vIntFound);
+    }
+}</code></pre></div>
+<div class="wiki-line">This following example is a variation of the previous one.  It will email you a daily visitor log.  This is useful to determine how much traffic your parcel is attracting each day, and who is visiting you regularly.  The <a href="/functions/llOverMyLand/">llOverMyLand</a> function is used to prevented the script from counting people on other parcels.  </div>
+<div class="wiki-line"><pre><code>// This script will email you a daily count of new visitors and repeat visitors.
+// Visitors are counted once per email update cycle.
+
+// -----------------------------------
+// Configuration: customize this script here.
+// Change this to your email address.
+string MyEmail = &quot;you@example.com&quot;;
+// This is a number 0 to 96 meters, anything farther away than that will not be noticed.  
+float SensorRange = 96.0;
+// How often to send email updates.
+integer UpdateFrequency = 86400; // Number of seconds in 1 day.
+// -----------------------------------
+
+// Internal Variables -- Do not change.
+list todayVisitors = [];
+list allVisitors = [];
+list repeatVisitors = [];
+list firstTimers = [];
+integer newVisitors = 0;
+integer returnVisitors = 0;
+string ParcelName;
+
+default
+{
+    state_entry()
+    {
+        list parcelDetails = llGetParcelDetails(llGetPos(), [PARCEL_DETAILS_NAME]);
+        ParcelName = llList2String(parcelDetails, 0);
+        llSensorRepeat( &quot;&quot;, &quot;&quot;, AGENT, SensorRange, PI, 20);
+        llSetTimerEvent(UpdateFrequency); // Email me a regular report.
+        llOwnerSay(&quot;Visitor Log Started.&quot;);
+    }
+ 
+    sensor(integer avsFound)
+    {
+        key  avKey;
+        integer avNum;
+        for(avNum=0; avNum&lt;avsFound; avNum++)
+        {
+            avKey = llDetectedKey(avNum);
+            if (llOverMyLand(avKey))
+            {
+                string whom = llDetectedName(avNum);
+                if (!~llListFindList(todayVisitors, [whom]))
+                {
+                    // This person hasn&#x27;t been seen yet today.
+                    todayVisitors += [whom];
+                    if (~llListFindList(allVisitors, [whom]))
+                    {
+                        // This is a returning visitor.
+                        returnVisitors++;
+                        repeatVisitors += [whom];
+                    }
+                    else
+                    {
+                        // This is a first-time visitor.
+                        newVisitors++;
+                        allVisitors = [whom] + allVisitors;
+                        firstTimers += [whom];
+                    }
+                }
+            }
+        }
+    }
+    
+    timer() 
+    {
+        list parcelDetails = llGetParcelDetails(llGetPos(), [PARCEL_DETAILS_NAME]);
+        ParcelName = llList2String(parcelDetails, 0);
+        string subj = &quot;Visitor Log for &quot; + ParcelName;
+        string body = &quot;Number of Visitors Total: &quot; + (string)(newVisitors + returnVisitors)
+            + &quot;\nReturning Visitors: &quot; + (string)returnVisitors
+            + &quot;\nNew Visitors: &quot; + (string)newVisitors 
+            + &quot;\n\nList of New Visitors:\n\t&quot; + llDumpList2String(firstTimers, &quot;\n\t&quot;)
+            + &quot;\n\nList of Returning Visitors:\n\t&quot; + llDumpList2String(repeatVisitors, &quot;\n\t&quot;);
+        newVisitors = 0;
+        returnVisitors = 0;
+        todayVisitors = [];
+        repeatVisitors = [];
+        firstTimers = [];
+        if (llGetListLength(allVisitors)&gt;500)
+        {
+            allVisitors = llList2List(allVisitors, 0, 499);
+        }
+        llEmail(MyEmail, subj, body);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llReturnObjectsByID/">llReturnObjectsByID</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-added-c4a824ad/">LSL Added</a>: <code>{{LSL Added|0.6.0|remote=http://secondlife.wikia.com/wiki/Version_0.6.0}}</code></span></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-uuid-f11a4088/">Template:LSL Function/uuid</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}{{#if:{{{group|1}}}|{{LSLGC|Group|group}},&amp;#32;}}{{LSLGC|Avatar|avatar}} or {{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{ph|}}}|{{{ph|}}}&amp;#32;|{{#if:{{{pd|}}}|{{{pd|}}}&amp;#32;}}}}{{#if:{{{group|1}}}|group,&amp;#32;}}avatar or {{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default = &amp;#32;{{{sim|}}}}}
+}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Avatar/As A Parameter}}
+}}}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

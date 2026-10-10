@@ -1,0 +1,82 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">The agent identified by <code>id</code> is forced to stand up if any of the following apply:</div>
+<ul>
+<li>The agent is sitting on the scripted object</li>
+<li>The agent is over land owned by the scripted object's owner and/or a group the owner has land rights for.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// UnSit on Sit, Using a sit target
+default
+{
+    state_entry()
+    {
+        llSitTarget(&lt;0.0, 0.0, 0.1&gt;, ZERO_ROTATION); // Needed for llAvatarOnSitTarget to work. The vectors components must not all be set to 0.0
+    }
+    changed(integer change) // Triggered when various changes are sensed.
+    {
+        if(change &amp; CHANGED_LINK) // When an agent sits on an object they become a new link.
+        {
+            key user = llAvatarOnSitTarget(); // Store the UUID of any agent sitting on the sit target.
+            if(user) // An avatar is on the sit target.
+                llUnSit(user); // Un-Sit the avatar.
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// UnSit on Sit, NOT using a sit target
+
+default
+{
+    changed(integer change) // Triggered when various changes are sensed.
+    {
+        if(change &amp; CHANGED_LINK) // When an agent sits on an object they become a new link.
+        {
+            integer links = 0; // Create an integer type variable.
+            if(llGetObjectPrimCount(llGetKey()) &lt; (links = llGetNumberOfPrims())) // During the check store the number of links.
+            // If the number of prims is fewer than the number of links, the last must be an avatar.
+                llUnSit(llGetLinkKey(links)); // Use the key of the last link to be added (the avatar) to call llUnSit().
+            else
+                llOwnerSay(&quot;Some kind of linking or unlinking has changed me but, I am not being sat on.&quot;);
+            // llUnSit() triggers the changed event too (the number of links is reduced by 1).
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>unsit_all_avatars()
+{
+    integer objectPrimCount = llGetObjectPrimCount(llGetKey());
+    integer currentLinkNumber = llGetNumberOfPrims();
+
+    for (; objectPrimCount &lt; currentLinkNumber; --currentLinkNumber)
+        llUnSit(llGetLinkKey(currentLinkNumber));
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        unsit_all_avatars();
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llAvatarOnSitTarget/">llAvatarOnSitTarget</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSitTarget/">llSitTarget</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/changed/">changed</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-924"><a href="/wiki/template-issues-svc-924-a5dbd89a/">Template:Issues/SVC-924</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-924|&#x27;&#x27;&#x27;llSit&#x27;&#x27;&#x27;() - scriptable ability to force an avatar to sit on an object|type=nf}}</code></pre></details><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

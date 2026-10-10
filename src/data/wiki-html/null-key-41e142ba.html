@@ -1,0 +1,40 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">&lt;span style="color:red;"&gt;<strong>NULL_KEY is a <a href="https://wiki.secondlife.com/wiki/string">string</a>.</strong>&lt;/span&gt; However it is only really useful as a <a href="https://wiki.secondlife.com/wiki/key">key</a>.</div>
+<div class="wiki-line">For <a href="/wiki/category-lsl-conditional-969143ab/">Conditional</a> tests, NULL_KEY evaluates to <strong>TRUE</strong> like other strings.</div>
+<div class="wiki-line">For list search (like <a href="/functions/llListFindList/">llListFindList</a>), NULL_KEY won't match null keys whose type is <strong>key</strong> without typecasting.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Returns 2 for valid keys, 1 for NULL_KEY, 0 for invalid keys.
+integer isKey(key input)
+{
+    if (input) return 2;
+    return (input == NULL_KEY);
+}</code></pre></div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        // NULL_KEY itself is evaluated as FALSE only when typecast to key.
+        if (NULL_KEY) { llOwnerSay(&quot;NULL_KEY is TRUE&quot;);  } // Correct.
+        else          { llOwnerSay(&quot;NULL_KEY is FALSE&quot;); } // Never.
+
+        if ((key) NULL_KEY) { llOwnerSay(&quot;Casted NULL_KEY is TRUE&quot;);  } // Never.
+        else                { llOwnerSay(&quot;Casted NULL_KEY is FALSE&quot;); } // Correct.
+
+        // NULL_KEY won&#x27;t match keys in lists without typecasting.
+        // The following list contains a null key because avatars don&#x27;t have creators:
+        list details = llGetObjectDetails(llGetOwner(), [OBJECT_CREATOR]);
+        integer index = llListFindList(details, [NULL_KEY]);
+        if (index &gt;= 0) { llOwnerSay(&quot;NULL_KEY was found in list&quot;); } // Never.
+        else             { llOwnerSay(&quot;NULL_KEY was NOT found in list&quot;); } // Correct.
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">In most situations NULL_KEY isn't needed; an empty string ("") will suffice. To take advantage of this certain practices have to be avoided. In many applications keys are checked against NULL_KEY to determine if they are valid; this is bad practice.</div>
+<div class="wiki-line">LSL makes it easy to check if a key is valid. Simply use the key as the parameter for a conditional.</div>
+<div class="wiki-line">That is, instead of <code>if(uuid != NULL_KEY)</code>, use <code>if(uuid)</code>. <code>if(uuid)</code> will only return <a href="/constants/TRUE/">TRUE</a> if it is a valid key that is also not a null key.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llAvatarOnSitTarget/">llAvatarOnSitTarget</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedKey/">llDetectedKey</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetNotecardLine/">llGetNotecardLine</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLandOwnerAt/">llGetLandOwnerAt</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPermissionsKey/">llGetPermissionsKey</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetTexture/">llGetTexture</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llListen/">llListen</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/attach/">attach</a></div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-issues-svc-5772-5c5c1558/">Issues/SVC-5772</a>: <code>{{Issues/SVC-5772}}</code></span></div></section>

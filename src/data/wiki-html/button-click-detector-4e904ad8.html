@@ -1,0 +1,44 @@
+<div class="wiki-line"><pre><code>// This script assumes a grid of 4 columns, 3 rows of buttons as listed in the &#x27;buttons&#x27; list below.
+// But you can change it as you like, just change horizontal to the # of columns and vertical to the # of rows,
+// and of course the buttons list must be updated as well. Other than that the code (and more importantly, the MATH)
+// should not need updating.
+
+integer horizontal = 4;
+integer vertical = 3;
+list buttons = [ &quot;brown&quot;, &quot;red&quot;, &quot;orange&quot;, &quot;yellow&quot;,
+&quot;blue&quot;, &quot;cyan&quot;, &quot;lblue&quot;, &quot;gray&quot;,
+&quot;green&quot;, &quot;puke&quot;, &quot;purple&quot;, &quot;pink&quot; ];
+
+default
+{  
+    touch_start(integer total_number)
+    {
+        vector v = llDetectedTouchUV(0);
+        
+        if( v == TOUCH_INVALID_TEXCOORD ) {
+            llSay(0, &quot;I don&#x27;t know what you just did.&quot;);
+            return;
+        }
+
+        float x = v.x;
+        float y = 1.0-v.y;
+        
+        integer idx;
+        integer rowno;
+        integer colno;
+        
+        rowno = (integer)(y / (1.0/(float)vertical));
+        colno = (integer)(x / (1.0/(float)horizontal));
+        
+        idx = rowno*horizontal + colno;
+
+        if( idx &gt; llGetListLength(buttons) ) {
+            llSay(0, &quot;Great, you stumped me. Push off.&quot;);
+            return;
+        }        
+        
+        llSay(0, &quot;Click at &quot; + (string)x + &quot;, &quot; + (string)y);        
+        llSay(0, &quot;That is, row &quot; + (string)rowno + &quot;, col &quot; + (string)colno);
+        llSay(0, &quot;That is, you clicked near the &quot; + llList2String(buttons,idx) + &quot; button.&quot;);
+    }
+}</code></pre></div>

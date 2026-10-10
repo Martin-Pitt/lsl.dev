@@ -1,0 +1,75 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered when task stops moving</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The <a href="/events/moving_start/">moving_start</a> and <a href="/events/moving_end/">moving_end</a> events require special handling when scripting attachments.</li>
+<li>After adding or editing a script you must take off the attachment and then wear the attachment again.</li>
+<li>This event's behavior is undefined for non-physical movement (<a href="/functions/llSetPos/">llSetPos</a>, movement via <a href="/wiki/building-tools-609cb149/">build tool</a>, etc.) although these movements will often trigger it.</li>
+<li>This event is triggered when an object finishes its <a href="/functions/llSetKeyframedMotion/">keyframed motion</a>, or when motion ceases via KFM_CMD_PAUSE or KFM_CMD_STOP.</li>
+<li>This event is also triggered when an object is rezzed (unless, presumably, you happen to rez it in precisely the same spot it was before.)</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//Physical Prim Movement Script
+//By Nika Rugani
+//With spam work around
+
+vector pos;
+float move_time = 5; //Move every 5 seconds
+float increment = 5;
+
+float power = 0.5; //The TAU
+
+integer trigger_multiple = FALSE; // This bad boy will prevent spam of moving start event
+integer trigger_slave = 1;
+
+setPhysical(integer status_physics)
+{
+    llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_PHYSICS, status_physics]);
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        if(llGetStatus(STATUS_PHYSICS) == FALSE)
+        {
+            pos = llGetPos(); //Set the objects default position
+            setPhysical(TRUE);
+            llSetTimerEvent(move_time);
+        }
+        else
+        {
+            setPhysical(FALSE);
+            llSetPos(pos);
+        }
+    }
+    moving_start()
+    {
+        if(trigger_slave == 0)
+        {
+            llOwnerSay(&quot;YEY!! I&#x27;m Moving!&quot;);
+            if(trigger_multiple == FALSE)
+            {
+                trigger_slave = 1;
+            }
+        }
+    }
+    moving_end()
+    {
+        llSetTimerEvent(move_time);
+    }
+    timer()
+    {
+        llSetTimerEvent(0);
+        if(llVecDist(pos, llGetPos()) &gt; (increment-2))
+        {
+            llMoveToTarget(pos, power);
+        }
+        else
+        {
+            llMoveToTarget(pos+&lt;0.0,0.0,increment&gt;, power);
+        }
+        trigger_slave = 0;
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTarget/">llTarget</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRotTarget/">llRotTarget</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/moving_start/">moving_start</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-1004"><a href="/wiki/template-issues-svc-1004-dd944d42/">Template:Issues/SVC-1004</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-1004|Behavior of moving_start() and moving_end() is inconsistent.|type=bug}}</code></pre></details></section>

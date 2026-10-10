@@ -1,0 +1,28 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Calculates the <em>sample</em> standard deviation of a list of numbers.</div>
+<div class="wiki-line"><pre><code>float sample_standard_deviation = llListStatistics( LIST_STAT_STD_DEV, numList );</code></pre></div>
+<div class="wiki-line">Standard deviation is a measure of how spread out the values are, and is defined as the square root of the average of the squares of the numbers:</div>
+<div class="wiki-line"><pre><code>integer count = (integer)llListStatistics( LIST_STAT_NUM_COUNT, numList );
+float standard_deviation = llSqrt( llListStatistics( LIST_STAT_SUM_SQUARES , numList ) ) / count;</code></pre></div>
+<div class="wiki-line">The sample standard deviation is used when the list doesn't (or can't) include the <em>entire</em> set of numbers, like the mass of <em>every</em> prim in SL. The true standard deviation is therefore estimated by using the sample standard deviation, which is defined by,</div>
+<div class="wiki-line"><pre><code>integer count = (integer)llListStatistics( LIST_STAT_NUM_COUNT, numList );
+float sample_standard_deviation = llSqrt( llListStatistics( LIST_STAT_SUM_SQUARES , numList ) ) / (count - 1);</code></pre></div>
+<div class="wiki-line">Another way to calculate the sample standard deviation is </div>
+<div class="wiki-line"><pre><code>    list numList = [1,1,1,2,1000,1000,1000];
+    integer count = llGetListLength( numList );
+    float sum = 0;
+    float mean = llListStatistics( LIST_STAT_MEAN, numList );
+    integer i = 0;
+    for (; i&lt;count; ++i) {
+        float val = llList2Float( numList, i );
+        float diff = val - mean;
+        sum += ( diff * diff );
+    }
+    float sample_stdev = llSqrt( sum / (count - 1) ); 
+    float true_stdev = llSqrt( sum / count ); 
+    llOwnerSay((string)true_stdev);
+    llOwnerSay((string)sample_stdev);
+    llOwnerSay((string)llListStatistics( LIST_STAT_STD_DEV, numList ));
+}</code></pre></div></section>
+<section><h2 id="see-also-constants">See also: constants</h2><span id="constants"></span></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llListStatistics/">llListStatistics</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2></section>

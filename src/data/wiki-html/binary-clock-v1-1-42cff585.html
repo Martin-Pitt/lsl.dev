@@ -1,0 +1,125 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<h2 id="binary-clock-v1-2">Binary Clock V1.2</h2>
+<div class="wiki-line"><pre><code>// Binary Clock Script
+// By Fox Diller
+// OMG INSANITY!
+
+list bTime;
+list oTime;
+
+integer token;
+
+string dec2bin(integer dec)
+{
+    return llGetSubString(&quot;0000,0001,0010,0011,0100,0101,0110,0111,1000,1001&quot;, dec * 5, dec * 5 + 3);
+}
+
+BuildClock()
+{
+    integer shiftraw = (integer)llGetWallclock();
+
+    integer hours = shiftraw / 3600;
+    integer minutes = (shiftraw % 3600) / 60;
+    integer seconds = shiftraw % 60;
+
+    bTime = [hours / 10, hours % 10,
+        minutes / 10, minutes % 10,
+        seconds / 10, seconds % 10];
+}
+
+SendDigitsToLinks(string str, integer link, integer len)
+{
+    integer x = 3;
+    while(len--)
+    {
+        llMessageLinked(link++, (integer) llGetSubString(str, x, x) , &quot;&quot;, &quot;&quot;);
+        --x;
+    }
+}
+
+displayBDC()
+{
+    integer current_rowA = llList2Integer(bTime, 0);
+    if (current_rowA != llList2Integer(oTime, 0) )
+    {
+        string rowA = dec2bin(current_rowA);
+        SendDigitsToLinks(rowA, 2, 2);
+    }
+    else if (!current_rowA) 
+        SendDigitsToLinks(&quot;00&quot;, 2, 2);
+
+    integer current_rowB = llList2Integer(bTime, 1);
+    if (current_rowB != llList2Integer(oTime, 1))
+    {
+        string rowB = dec2bin(current_rowB);
+        SendDigitsToLinks(rowB, 4, 4);
+    }
+    else if (!current_rowB)
+        SendDigitsToLinks(&quot;0000&quot;, 4, 4);
+
+    integer current_rowC = llList2Integer(bTime, 2);
+    if (current_rowC != llList2Integer(oTime, 2))
+    {
+        string rowC = dec2bin(current_rowC);
+        SendDigitsToLinks(rowC, 8, 3);
+    }
+    else if (!current_rowC)
+        SendDigitsToLinks(&quot;000&quot;, 8, 3);
+
+    integer current_rowD = llList2Integer(bTime, 3);
+    if (current_rowD != llList2Integer(oTime, 3))
+    {
+        string rowD = dec2bin(current_rowD);
+        SendDigitsToLinks(rowD, 11, 4);
+    }
+    else if (!current_rowD)
+        SendDigitsToLinks(&quot;0000&quot;, 11, 4);
+
+    integer current_rowE = llList2Integer(bTime, 4);
+    if (current_rowE != llList2Integer(oTime, 4))
+    {
+        string rowE = dec2bin(current_rowE);
+        SendDigitsToLinks(rowE, 15, 3);
+    }
+    else if (!current_rowE)
+        SendDigitsToLinks(&quot;000&quot;, 15, 3);
+
+    integer current_rowF = llList2Integer(bTime, 5);
+    if (current_rowF != llList2Integer(oTime, 5))
+    {
+        string rowF = dec2bin(current_rowF);
+        SendDigitsToLinks(rowF, 18, 4);
+    }
+    else if (!current_rowF)
+        SendDigitsToLinks(&quot;0000&quot;, 18, 4);
+}
+
+MessageLinked(integer inputLinkNumber, integer inputNumber)
+{
+    llMessageLinked(inputLinkNumber, inputNumber, &quot;&quot;, &quot;&quot;);
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        if (llDetectedKey(0) != llGetOwner() )
+            return;
+        if ( !(token = !token) )
+            llOwnerSay(&quot;Off!&quot;);
+        else
+        {
+            oTime = bTime = [];
+            llOwnerSay(&quot;On!&quot;);
+        }
+        llSetTimerEvent(token);
+    }
+
+    timer()
+    {
+        bTime = oTime;
+        BuildClock();
+        displayBDC();
+    }
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library|Binary Clock}}</code></span></div>

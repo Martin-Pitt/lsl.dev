@@ -1,0 +1,80 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">In most situations <a href="/functions/llParseStringKeepNulls/">llParseStringKeepNulls</a> should be used instead. Discarding null values is rarely desired.</div>
+<div class="wiki-line">When dealing with <a href="https://wiki.secondlife.com/wiki/vector">vector</a> and <a href="https://wiki.secondlife.com/wiki/rotation">rotation</a> data, consider using <a href="/functions/llCSV2List/">llCSV2List</a> instead, since it can correctly parse them.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> that is <code>src</code> broken into a list of strings, discarding <code>separators</code>, keeping <code>spacers</code>, discards any null (empty string) values generated.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>All empty strings (that would arise from a spacer or separator being adjacent to each other or the ends) are removed;</li>
+<li>If you want them (to keep the order of a list, for example) use <a href="/functions/llParseStringKeepNulls/">llParseStringKeepNulls</a> instead;</li>
+<li>Only the first 8 separators and first 8 spacers supplied will be used. Any beyond that will be ignored. To work around this see <a href="#useful-snippets"></a> section below. The only limit on the number of items in the output is available script memory.</li>
+<li>All separators and spacers must be strings. All other types will be ignored;</li>
+<li>Separators take precedent over spacers. The string is parsed from start to finish. Each position is compared against the separators then spacers before moving onto the next position;</li>
+<li>Duplicate separators and spacers have no ill effects;</li>
+<li>All elements in the list returned by llParseString2List are strings, and must be explicitly typecast if they are to be used as other types. Do not rely upon the implicit typecasting of the other llList2* functions (as they typically return a default value);</li>
+<li>Remember to capture the result of the operation with a variable, unless you are planning to act directly on the results.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        // This will say:
+        // &lt;A&gt;&lt;crazy&gt;&lt;fox&gt;&lt;.&gt;&lt;Saw&gt;&lt;the&gt;&lt;moon&gt;&lt;.&gt;&lt;.&gt;
+        string my_string = &quot;A crazy fox.  Saw the moon..&quot;;
+        list my_list = llParseString2List(my_string,[&quot; &quot;],[&quot;.&quot;]);
+        llOwnerSay(&quot;&lt;&quot; + llDumpList2String(my_list,&quot;&gt;&lt;&quot;) + &quot;&gt;&quot;);
+        
+        // This will say:
+        //  &lt;A&gt;&lt;crazy&gt;&lt;fox&gt;&lt;.&gt;&lt;&gt;&lt;&gt;&lt;Saw&gt;&lt;the&gt;&lt;moon&gt;&lt;.&gt;&lt;&gt;&lt;.&gt;&lt;&gt;
+        my_list = llParseStringKeepNulls(my_string,[&quot; &quot;],[&quot;.&quot;]);
+        llOwnerSay(&quot;&lt;&quot; + llDumpList2String(my_list,&quot;&gt;&lt;&quot;) + &quot;&gt;&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line">While LSL does not support lists-in-lists, you can emulate lists-in-lists by making successive calls or you could use <a href="/wiki/category-lsl-json-d0f9c2d9/">JSON</a>.</div>
+<div class="wiki-line">In this example some items have additional information supplied.</div>
+<div class="wiki-line"><pre><code>   
+string shoppinglist = &quot;macaroni::pepperoni::bread#wheat::sausage#italian::coffee::syrup::apple::ice cream#strawberry#chocolate#vanilla&quot;;
+
+default
+{
+    state_entry()
+    {
+        list items = llParseString2List(shoppinglist, [&quot;::&quot;], []);
+        integer i = 0;
+        integer j = llGetListLength(items);
+        for(;i &lt; j; ++i)
+        {
+            list desc = llParseString2List(llList2String(items, i), [&quot;#&quot;], []);
+            if(llGetListLength(desc) &gt; 1)
+            {
+                list types = llDeleteSubList(desc,0,0);
+                llOwnerSay(&quot;Item: &quot;+ llList2String(desc, 0) + &quot;  Type: &quot; + llList2CSV(llDeleteSubList(types,-2,-1) + llDumpList2String(llList2List(types,-2,-1), &quot; &amp; &quot;)));
+            } else {
+                llOwnerSay(&quot;Item: &quot;+ (string)desc);
+            }
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><strong>Examples of processing more than 8 spacers or separators:</strong></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/ParseString2List">ParseString2List</a> — Functions exactly the same as <a href="/functions/llParseString2List/">llParseString2List</a> and <a href="/functions/llParseStringKeepNulls/">llParseStringKeepNulls</a>.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Separate_Words">separateWords</a> — <div class="wiki-line">Functions exactly the same as <a href="/functions/llParseString2List/">llParseString2List</a> unless you violate it's additional preconditions.</div>
+<div class="wiki-line">Appears to be correct at a glance.</div></div></div>
+<table></table></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Whenever you need to process the resulting list entries further (eg. typecasting), remember to <a href="/functions/llStringTrim/">llStringTrim</a> any whitespace characters from the string. This can prevent issues such as unexpected values for vectors and rotations.</div>
+<div class="wiki-line">-----</div>
+<div class="wiki-line">If you indicate some items as separators, it will split the string where it finds the indicated separators, and strip out the separators.</div>
+<div class="wiki-line">If instead you indicate some items as spacers, it will split the string where it finds the spacers, but leave the spacers there, including them as separate entries in the result list.</div>
+<div class="wiki-line"><pre><code>string myString = &quot;What Are You Looking At?&quot;;
+
+llSay(0, llList2CSV( llParseString2List(myString,  [&quot;W&quot;, &quot;A&quot;, &quot;Y&quot;, &quot;L&quot;], [] ) ) );
+//returns:  hat , re , ou , ooking , t?
+    
+llSay(0, llList2CSV( llParseString2List(myString, [], [&quot;W&quot;, &quot;A&quot;, &quot;Y&quot;, &quot;L&quot;] ) ) );
+//returns: W, hat , A, re , Y, ou , L, ooking , A, t?</code></pre></div>
+<div class="wiki-line">Using " " as a separator will parse a sentence into words.</div>
+<div class="wiki-line">If there is no spacer you care about, just use <code>[]</code> as the spacer.</div>
+<div class="wiki-line">If an empty string is used as a separator or a spacer, it will have no effect.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llParseStringKeepNulls/">llParseStringKeepNulls</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDumpList2String/">llDumpList2String</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llCSV2List/">llCSV2List</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llList2CSV/">llList2CSV</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Separate_Words">Separate Words</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/LSL-Editor/Bugs">LSL-Editor/Bugs</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-added-c4a824ad/">LSL Added</a>: <code>{{LSL Added|0.6.0|remote=http://secondlife.wikia.com/wiki/Version_0.6.0}}</code></span></div></section>

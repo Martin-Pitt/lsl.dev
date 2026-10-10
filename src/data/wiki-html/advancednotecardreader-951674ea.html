@@ -1,0 +1,296 @@
+<div class="wiki-line"><pre><code>// Multi-file configuration, v1a
+// Lear Cale, 2007
+// Public Domain.  Feel free to delete header comments.
+
+// This script reads all configuration notecards that match a given suffix,
+// storing the settings in global variables.  It rereads the notecards
+// on any inventory change.
+
+// It does not require a script reset on any event, but one is done for
+// owner change on general principles.  If your object needs not to be
+// reset on owner change, you may delete those lines from the code.
+
+// ==============================================================
+// Places where you change the code are marked with &quot;%%%&quot;
+// ==============================================================
+
+
+// Example config variables -- replace these with meaningful stuff! %%%
+
+// For this example, we allow the user to configure any number of &quot;foos&quot;,
+// with an integer parameter for each foo.  There&#x27;s also a float &quot;bar&quot;
+// parameter.
+
+// Replace these lines with your globals and try to save: you&#x27;ll get
+// errors in the places you need to edit.
+
+list    Foos;       // %%% all foos configured
+list    FooVals;    // %%% value for each foo configured
+float   Bar;        // %%% a configurable parameter
+
+
+// %%% Static parameters for reading card config: you may change these, but don&#x27;t have to.
+integer ConfigRequired          = FALSE;        // whether to fail if no config cards
+string  ConfigNotecardSuffix    = &quot;.cfg&quot;;       // string identifying config notecards
+float   ConfigTimeout           = 60.0;         // seconds to wait for slow server
+
+
+// Globals for reading card config
+integer ConfigLineIndex;    // line number in notecard we&#x27;re reading
+key     ConfigRequestID;    // request we&#x27;re waiting for
+list    ConfigCards;        // list of names of config notecards
+string  ConfigCardName;     // name of card being read
+integer ConfigCardIndex;    // index of next card to read
+
+integer Debug;              // Whether to print debug text
+
+
+config_init()
+{
+    // Initialize all configurable global variables here %%%
+    // Don&#x27;t initialize your configurable globals at their
+    // declarations (above).  Doing it here provides default
+    // behavior if the user deletes a config line from a notecard
+    // rather than retaining the previous value.
+    Foos = [];          // %%%
+    Bar  = 20.0;        // %%%
+}
+
+// print the configuration, handy for debugging.
+
+config_dump()
+{
+    // Replace this example code with your config %%%.
+    say(&quot;Foos: &quot;       + llList2CSV(Foos));      // %%%
+    say(&quot;FooVals: &quot;    + llList2CSV(FooVals));   // %%%
+    say(&quot;Bar: &quot;        + (string) Bar);          // %%%     
+}
+
+
+// Example notecard line parser.
+// This function is called for each configuration line.
+// It treats all config notecards the same.
+//
+// For this example (which you can modify to suit your purposes)
+//   Comments lines begin with a slash
+//   Each line begins with a command followed by optional arguments
+//   An Equals-sign (&quot;=&quot;) separates command and arguments (and args from each other)
+//   Unrecognized commands are ignored -- good for forwards-backwards notecard compatibility
+//   cardName and lineNum are in case you want to print error messages.
+//   This example doesn&#x27;t allow spaces around the &quot;=&quot;.  If you want to allow
+//   and ignore them, use this instead of [&quot;=&quot;] in llParsStringKeepNulls().
+//     [&quot;  =  &quot;, &quot;  = &quot;, &quot; =  &quot;, &quot; = &quot;, &quot; =&quot;, &quot;= &quot;, &quot;=&quot;]
+//
+// Example config file contents:
+//   foo=Lowell George=1979
+//   foo=Freddy Murcury=1991
+//   foo=Robert Johnson=1938
+//   bar=1.5
+
+config_parse(string str, string cardName, integer lineNum)
+{
+    str = llStringTrim(str, STRING_TRIM_HEAD);  // delete leading spaces
+
+    // lines beginning with slash are comments -- ignore them
+    if (llGetSubString(str,0,0) == &quot;/&quot;) {
+        return;
+    }
+
+    list ldata  = llParseStringKeepNulls(str, [&quot;=&quot;], [&quot;&quot;]);
+    string cmd  = llList2String(ldata,0);
+    string arg1 = llList2String(ldata,1);
+    string arg2 = llList2String(ldata,2);
+    // %%% Add more lines such as the above as needed for more arguments.
+
+    // %%% Process example commands -- replace this code with meaningful stuff! %%%
+    if (cmd == &quot;foo&quot;) {
+        // another Foo configured: remember it
+        Foos    += [arg1];
+        FooVals += [(integer) arg2];
+    } else if (cmd == &quot;bar&quot;) {
+        Bar = (float) arg1;
+    }
+        
+    // this one is a good one to keep
+    else if (cmd == &quot;debug&quot;) {
+        Debug = (integer) arg1;
+    }
+}
+
+
+// Post-process any config, if necessary
+config_done() {
+    if (Debug) {
+        config_dump();
+    }
+    say(&quot;Config done&quot;);
+}
+
+
+// ==== Utilities ====
+
+// Say something, in this case to owner (%%% modify to whisper or whatever)
+
+say(string str)
+{
+    llOwnerSay(str);
+}
+
+
+// Say something if debug is enabled
+debug(string str)
+{
+    if (Debug) {
+        say(llGetScriptName() + &quot;: &quot; + str);
+    }
+}
+
+// Get the next notecard name, and
+// return TRUE if there is one
+
+integer next_card()
+{
+    if (ConfigCardIndex &gt;= llGetListLength(ConfigCards)) {
+        ConfigCards = [];
+        return (FALSE);
+    }
+    
+    ConfigLineIndex = 0;
+    ConfigCardName = llList2String(ConfigCards, ConfigCardIndex);
+    ConfigCardIndex++;
+    ConfigRequestID = llGetNotecardLine(ConfigCardName, ConfigLineIndex);
+    say(&quot;Reading &quot; + ConfigCardName);
+    return (TRUE);
+}</code></pre></div>
+<div class="wiki-line">States:</div>
+<div class="wiki-line"><pre><code>// Default state can do any init you need that doesn&#x27;t require configuration.
+
+default
+{
+    state_entry() {
+        llSetText(&quot;&quot;, &lt;1.0,1.0,1.0&gt;, 1.0);
+        state s_config;
+    }
+}
+
+// This state is only used to get into s_config, because going from
+// s_config to s_config won&#x27;t redo it&#x27;s state_entry.  But we might
+// not want to redo anything we might have put in default state entry.
+
+state s_reconfig
+{
+    state_entry() {
+        state s_config;
+    }
+}
+
+// Read card config
+// Multiple notecard version - read all cards with the given extension
+
+state s_config
+{
+    state_entry() {
+        config_init();
+
+        string item;
+        ConfigCards = [];
+        integer n = llGetInventoryNumber(INVENTORY_NOTECARD);
+        while (n-- &gt; 0) {
+            item = llGetInventoryName(INVENTORY_NOTECARD, n);
+            // Note: for simplicity, read cards with the &quot;suffix&quot; anywhere in the name
+            if (llSubStringIndex(item, ConfigNotecardSuffix) != -1) {
+                ConfigCards += [item];
+            }
+        }
+
+        ConfigCardIndex = 0;
+        if (next_card()) {
+            llSetTimerEvent(ConfigTimeout);
+        } else if (ConfigRequired) {
+            say(&quot;Configuration notecard missing.&quot;);              
+            state s_configRetry;
+        } else {
+            state s_active;
+        }
+    }
+
+    dataserver(key query_id, string data) {
+        if (query_id == ConfigRequestID) {
+            if (data == EOF) {
+                if (! next_card()) {
+                    config_done();
+                    state s_active;
+                }
+            } else {
+                config_parse(data, ConfigCardName, ConfigLineIndex);
+                ConfigRequestID = llGetNotecardLine(ConfigCardName, ++ConfigLineIndex);
+                llSetTimerEvent(ConfigTimeout);
+            }
+        }
+    }
+
+    timer() {
+        say(&quot;Dataserver time out: touch to retry&quot;);
+        state s_configRetry;
+    }
+
+    on_rez(integer num) { state s_reconfig; }
+
+    changed(integer change) {
+        if (change &amp; CHANGED_OWNER) { llResetScript(); }
+        if (change &amp; CHANGED_INVENTORY) { state s_reconfig; }
+    }
+
+    state_exit() {
+        llSetTimerEvent(0);
+    }
+}
+
+state s_configRetry
+{
+    touch_start(integer tot) {
+        if (llDetectedKey(0) == llGetOwner()) {
+            state s_config;
+        }
+    }
+    
+    changed(integer change) {
+        if (change &amp; CHANGED_OWNER) { llResetScript(); }
+        if (change &amp; CHANGED_INVENTORY) { state s_config; }
+    }
+}
+        
+// State to go into if notecard is required but missing.
+// You can delete this and the code above that refers to it,
+// or just set ConfigurationRequired to FALSE.
+state s_unconfigured
+{
+    state_entry() {
+        llSetText(&quot;Configuration missing&quot;, &lt;1.0,1.0,1.0&gt;, 1.0);
+    }
+
+    changed(integer change) {
+        if (change &amp; CHANGED_OWNER) { llResetScript(); }
+        if (change &amp; CHANGED_INVENTORY) { state s_reconfig; }
+    }
+    
+    state_exit() {
+        llSetText(&quot;&quot;, &lt;1.0,1.0,1.0&gt;, 1.0);
+    }
+}
+
+
+// The fun starts here!
+
+state s_active
+{
+
+    // %%% Your code goes here!
+
+    // Every state should usually have this, or something like it.
+    changed(integer change) {
+        if (change &amp; CHANGED_OWNER) { llResetScript(); }
+        if (change &amp; CHANGED_INVENTORY) { state s_reconfig; }
+    }
+}</code></pre></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-library-83389c2f/">Category:LSL Library</a></div>

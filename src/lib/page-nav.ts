@@ -1,0 +1,82 @@
+/**
+ * Page navigation shared by the PageTitle override (breadcrumbs and chips under the title) and
+ * the sidebar route data (which sidebar entry is "current" on deep pages).
+ *
+ * Everything is derived from the URL and the catalog, so it works for content pages (MDX) and
+ * for the Astro routes alike.
+ */
+import { catalog, categoryMap, categoryHref, constantGroupHref, featureByCategory, featureHref, featuresForApi } from './catalog';
+
+export type Crumb = { label: string; href?: string };
+/** Chip kinds keep their own visual style; `kind` is also read out to screen readers. */
+export type Chip = { label: string; href: string; kind: 'Category' | 'Feature' | 'Group' | 'Page' };
+export type PageNav = { crumbs: Crumb[]; chips: Chip[]; sidebar: string[] };
+
+const SECTIONS: Record<string, Crumb> = {
+	functions: { label: 'Functions', href: '/functions/' },
+	events: { label: 'Events', href: '/events/' },
+	constants: { label: 'Constants', href: '/constants/' },
+	categories: { label: 'Categories', href: '/categories/' },
+	features: { label: 'Features', href: '/features/' },
+	wiki: { label: 'Wiki archive', href: '/wiki/' },
+	types: { label: 'Language types', href: '/types/' },
+	controls: { label: 'Flow control', href: '/controls/' },
+	guides: { label: 'Learn LSL', href: '/guides/' },
+	reference: { label: 'Reference', href: '/reference/' },
+};
+const KINDS: Record<string, any[]> = { functions: catalog.functions, events: catalog.events, constants: catalog.constants };
+const api = new Map<string, any>();
+for (const [plural, list] of Object.entries(KINDS)) for (const e of list) api.set(`${plural}/${e.name}`, e);
+
+const featureChips = (fs: { id: string; title: string }[]): Chip[] => fs.map(f => ({ label: f.title, href: featureHref(f.id), kind: 'Feature' }));
+
+/** Entry for an API page id such as "functions/llDialog", if it is one. */
+export function apiEntry(path: string) { return api.get(path); }
+
+/**
+ * @param pathname  the page URL path, e.g. /functions/llDialog/
+ * @param title     the page title (last crumb)
+ * @param siblings  for feature sub-pages: the other pages of the same feature
+ */
+export function pageNav(pathname: string, title: string, siblings: { label: string; href: string }[] = []): PageNav {
+	const parts = decodeURIComponent(pathname).replace(/^\/|\/$/g, '').split('/').filter(Boolean);
+	const crumbs: Crumb[] = []; const chips: Chip[] = []; const sidebar: string[] = [];
+	if (parts.length < 2) return { crumbs, chips, sidebar };
+	const [section] = parts;
+	const entry = parts.length === 2 ? api.get(parts.join('/')) : undefined;
+	if (SECTIONS[section]) crumbs.push(SECTIONS[section]);
+	if (entry) {
+		const groups: string[] = entry.groups ?? [];
+		const category = entry.categories[0];
+		if (entry.kind === 'constant' && groups[0]) crumbs.push({ label: groups[0], href: constantGroupHref(groups[0]) });
+		else if (category) crumbs.push({ label: categoryMap.get(category)?.label || category, href: categoryHref(category) });
+		for (const g of groups) chips.push({ label: g, href: constantGroupHref(g), kind: 'Group' });
+		for (const id of entry.categories) chips.push({ label: categoryMap.get(id)?.label || id, href: categoryHref(id), kind: 'Category' });
+		const fs = featuresForApi(entry);
+		chips.push(...featureChips(fs));
+		// Closest sidebar entry: the primary category, else a feature area, else the index.
+		for (const id of entry.categories) sidebar.push(categoryHref(id));
+		for (const f of fs) sidebar.push(featureHref(f.id));
+		for (const g of groups) sidebar.push(constantGroupHref(g));
+		sidebar.push(SECTIONS[section].href!);
+	} else if (section === 'constants' && parts[1] === 'groups' && parts[2]) {
+		crumbs.push({ label: 'Constant groups', href: '/constants/groups/' });
+		chips.push(...featureChips(featuresForApi({ name: '', groups: [parts[2]] })));
+		sidebar.push(constantGroupHref(parts[2]), '/constants/groups/', '/constants/');
+	} else if (section === 'categories') {
+		const f = featureByCategory.get(parts[1]);
+		if (f) chips.push(...featureChips([f]));
+		sidebar.push(categoryHref(parts[1]), ...(f ? [featureHref(f.id)] : []), '/categories/');
+	} else if (section === 'features' && parts.length >= 3) {
+		const parent = siblings.find(s => s.href === `/features/${parts[1]}/`);
+		if (parent) crumbs.push({ label: parent.label, href: parent.href });
+		chips.push(...siblings.filter(s => s.href !== pathname && s.href !== parent?.href).map(s => ({ ...s, kind: 'Page' as const })));
+		sidebar.push(`/features/${parts[1]}/`, '/features/');
+	} else {
+		// Generic: every ancestor path that is a section index.
+		for (let i = 2; i < parts.length; i++) crumbs.push({ label: parts[i - 1] });
+		sidebar.push(...parts.map((_, i) => '/' + parts.slice(0, parts.length - i).join('/') + '/'));
+	}
+	crumbs.push({ label: title });
+	return { crumbs, chips, sidebar };
+}

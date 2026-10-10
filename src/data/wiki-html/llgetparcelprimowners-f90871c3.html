@@ -1,0 +1,177 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Requires owner-like permissions for the parcel.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> of all residents and groups who own objects on the parcel at <code>pos</code> and with individual <a href="http://community.secondlife.com/t5/English-Knowledge-Base/Calculating-land-impact/ta-p/974163" rel="noreferrer">land impact</a> used. <br/>The list is formatted as <code>[ <a href="https://wiki.secondlife.com/wiki/key">key</a> ownerKey1, <a href="https://wiki.secondlife.com/wiki/integer">integer</a> agentImpact1, <a href="https://wiki.secondlife.com/wiki/key">key</a> ownerKey2, <a href="https://wiki.secondlife.com/wiki/integer">integer</a> agentImpact2, ... ]</code>, and sorted by agent/group <a href="https://wiki.secondlife.com/wiki/UUID">key</a> with a maximum of 100 strides.</div></section>
+<section><h2 id="specification">Specification</h2><h4 id="ownership">Ownership</h4>
+<ul>
+<li>If the parcel owner and object owner are the same (including if the object and parcel are both group owned):</li>
+<li>All object owners are returned.</li>
+<li>If the parcel is group owned but the object is owned by a member of the group, the function return depends upon what powers they have been granted:</li>
+<li>If resident has the '<code>return group owned objects</code>' power:</li>
+<li>The return list includes the group and the LI of objects it owns on the parcel.</li>
+<li>If the resident has the 'return group set objects' power:</li>
+<li>The return list includes all owners who have objects set to the group on the parcel</li>
+<li>If the resident has the 'return non-group objects' power</li>
+<li>The return list includes all owners of objects that don't fall into the above two categories.</li>
+<li>If none of the above cases match, an empty list will be returned.</li>
+</ul>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-collapsible-table-395785c5/">Collapsible Table</a>: <code>{{Collapsible_Table|collapsed=*|table-style=width:100%;|title-style=text-align:left;|title=&lt;h5 style=&quot;margin-top:0;&quot;&gt;Pseudocode&lt;/h5&gt;|content={{!}} Pseudocode written in Javascript
+<pre><code>if(parcel_owner == object_owner)
+    return all;
+var r = [];
+if((parcel_owner is Group) &amp;&amp; (object_owner in parcel_owner.members))
+{
+  if(&quot;return group owned objects&quot; in parcel_owner.members[object_owner].powers)
+    r = r.concat(group_owned_stride);
+  if(&quot;return group set objects&quot; in parcel_owner.members[object_owner].powers)
+    r = r.concat(group_set_strides);
+  if(&quot;return non-group objects&quot; in parcel_owner.members[object_owner].powers)
+    r = r.concat(non_group_strides);
+}
+return r;</code></pre>
+}}</code></span></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Function WILL NOT work on group owned land if the owner of the object where this function resides is not currently online and connected to the sim (although now seems to be working for land owner on privately owned land even when the owner is not around).</li>
+<li>These limitation can be overcome by <a href="https://wiki.secondlife.com/wiki/deed">deed</a>ing the object to a group the object owner is one of the owners of.  </li>
+<li>Remember to take a copy before deeding because you cannot undeed something.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Show a comma separated list of user IDs and their prim counts.</div>
+<div class="wiki-line">key1, count1, key2, count2 .... etc.</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        list TempList = llGetParcelPrimOwners( llGetPos() );
+        llSay(0, llList2CSV(TempList) );
+    }
+}</code></pre></div>
+<div class="wiki-line">Use floating text to show prim owner names and counts in count order</div>
+<div class="wiki-line"><pre><code>// Show a floating text list of prim owners on this parcel,
+// Sorted by prim count per owner. Highest users first.
+// Omei Qunhua
+
+// The object has the same permisions to view prim parcel owners
+// as its owner (In About Land &gt;&gt; Objects &gt;&gt; Object Owners )
+
+// Example: If you can&#x27;t return group object, you won&#x27;t see group objects
+// If you can&#x27;t return any objects, an empty list will be returned.
+// If the prim is deeded to the right group, it should always get a full list
+
+// Note: Only works on group owned land when the object owner is in the Sim
+//       Deeded objects always work (group is always online?)
+
+list    gListCountsAndOwners;       // Sorted list count+owner pairs
+list    gListNamesAndCounts;        // List of owner names + prim counts
+integer gOffset;
+integer gIndex;
+key     gDataserverID;
+integer gListLength;
+
+default
+{
+    state_entry()
+    {
+        llSetText(&quot;Parcel Prim Owner List\n&quot;, &lt;1,1,1&gt;, 1);
+        list TempList = llGetParcelPrimOwners( llGetPos() );
+        gListLength= llGetListLength(TempList);      
+        if (!gListLength)
+        {
+            llSetText(&quot;[ERROR]\n Couldn&#x27;t get Parcel Prim Owners&quot;, &lt;1,0,0&gt;, 1);
+        }
+        else
+        {
+            // Produce a copy of the list suitable for sorting by count, i.e. count then key 
+            integer x;
+            for ( ; x &lt; gListLength; x += 2)
+            {
+                gListCountsAndOwners += llList2Integer(TempList, x+1);
+                gListCountsAndOwners += llList2String(TempList, x);
+            }
+            // Sort the list in descending order of prim count
+            gListCountsAndOwners = llListSort(gListCountsAndOwners, 2, FALSE);
+            // Lookup each owner&#x27;s name. Start at the beginning of our sorted list
+            gDataserverID = llRequestAgentData( llList2String(gListCountsAndOwners, 1), DATA_NAME );
+        }
+    }
+
+    dataserver( key request_id, string data)
+    {
+        string TempStr = &quot;Parcel Prim Owner List\n&quot;;
+        if ( request_id == gDataserverID )
+        {
+            gListNamesAndCounts += data;
+            gListNamesAndCounts += llList2String(gListCountsAndOwners, gIndex);  // process the count as a string
+
+            gIndex += 2;               // bump through the strided list
+            if (gIndex &lt; gListLength )
+            {
+                // lookup name of next owner in our list
+                gDataserverID = llRequestAgentData( llList2String(gListCountsAndOwners, gIndex +1) , DATA_NAME );
+            }
+            integer x;
+            for (; x &lt; 16; x+=2)       // show an 8-name subset of the list, starting at &#x27;gOffset&#x27;
+            {
+                // If we run off the end of the list, we just pick up nulls, so no harm done
+                TempStr += llList2String(gListNamesAndCounts, gOffset+x) + &quot; : &quot; + llList2String(gListNamesAndCounts, gOffset+x+1) + &quot;\n&quot;;
+            }
+            llSetText(TempStr, &lt;1,1,1&gt;, 1);
+            if ( (gListNamesAndCounts != []) &gt; 14)       // If list is longer than 14 (7 owners + counts) ...
+            {
+                gOffset += 2;   // scroll the list forwards
+                llSleep(2);     // at 2 second intervals
+            }
+        }
+    }
+
+    touch_start(integer total_number)
+    {
+        llResetScript();        // On touch, start the whole process over again
+    }
+}</code></pre></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-position-a2dae76f/">Template:LSL Function/position</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+This template is to be used to specify setup the description for position like parameters (offsets, positions, points, etc.).
+
+Right now it&#x27;s pretty basic and easy to edit. I&#x27;m wondering if these functions should be in a position parameter specific category.
+
+====TODO====
+* add clamping flag and verbiage for out of region/range coordinates.
+&lt;/noinclude&gt;{{#if:
+
+{{#if:{{{region|}}}|
+  {{#if:{{{local|}}}|
+
+    {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region}} or [[Viewer coordinate frames#Local|local coordinates]] depending upon the situation{{{desc|}}}}}
+
+    {{#vardefine:p_{{{1|}}}_hover|position in region or local coordinates depending upon the situation{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+  |
+    {{#ifeq:{{{1|}}}|point|
+
+      {{#vardefine:p_{{{1|}}}_desc|A point in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region-local}} space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|A point in region-local space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region coordinates}}{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in region coordinates{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+|
+  {{#if:{{{local|}}}|
+
+    {{#ifeq:{{{1|}}}|offset|
+
+      {{LSL Function/offset|{{{1|}}}|local={{{local}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in [[Viewer coordinate frames#Local|local coordinates]]{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in local coordinates{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+}}
+
+}}</code></pre></details></section>

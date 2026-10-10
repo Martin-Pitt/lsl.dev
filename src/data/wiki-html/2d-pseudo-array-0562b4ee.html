@@ -1,0 +1,127 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span><a href="/wiki/category-lsl-library-83389c2f/">Category:LSL Library</a><a href="/wiki/category-lsl-user-defined-functions-0f776b9a/">Category:LSL_User-Defined_Functions</a></div>
+<div class="wiki-line">Many times it is useful to work with multi-dimensional arrays.  While LSL does not provide us with this functionality directly, it is possible to obtain the same behavior using a set of very simple algorithms.</div>
+<div class="wiki-line">A list is defined as “a heterogeneous list of the other data types”.  It is linear by nature and can be thought of as a single column.</div>
+<div class="wiki-line">At the physical level, arrays are stored in contiguous sections of memory. (Another linear structure)  An algorithm is used to translate between the logical rows and columns and the physical level of addresses.</div>
+<div class="wiki-line">Consider a list with 24 elements.  Normally we visualize this as a vertical column.  </div>
+<div class="wiki-line">In this case, it is convenient to think of them as 4 rows and 6 columns.  </div>
+<div class="wiki-line">Notice we are starting with element 1.  Element zero is reserved for storing the size of the array. </div>
+<table>
+    <tr><td>&nbsp;</td><td><strong>0</strong></td><td><strong>1</strong></td><td><strong>2</strong></td><td><strong>3</strong></td><td><strong>4</strong></td><td><strong>5</strong></td></tr>
+    <tr><td><strong>0</strong></td><td> 1</td><td> 2</td><td> 3</td><td> 4</td><td> 5</td><td> 6</td></tr>
+    <tr><td><strong>1</strong></td><td> 7</td><td> 8</td><td> 9</td><td>10</td><td>11</td><td>12</td></tr>
+    <tr><td><strong>2</strong></td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
+    <tr><td><strong>3</strong></td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td></tr>
+</table>
+<div class="wiki-line"><strong>Figure 1.</strong>  Indexes of a list arranged in rows and columns.</div>
+<div class="wiki-line">Our addressing algorithm can use the following formula:</div>
+<div class="wiki-line">index = row * cols + col + 1</div>
+<div class="wiki-line"><strong>Where:</strong></div>
+<ul>
+<li>row is the row number of the element</li>
+<li>cols is the number of columns in the array</li>
+<li>col is the column number of the element</li>
+</ul>
+<div class="wiki-line"><strong>Example:</strong> Find the index for the data stored in row 3 and column 4.</div>
+<ul>
+<li>index = row * cols + col + 1</li>
+<li>index = 3 * 6 + 4 + 1</li>
+<li>index = 23</li>
+</ul>
+<div class="wiki-line">We will implement this in a set of functions.  These functions raise the level of abstraction and give us the ability to manipulate arrays referencing rows and columns.</div>
+<div class="wiki-line">Sandie</div>
+<h2 id="lsl-implementation">LSL Implementation:</h2>
+<div class="wiki-line"><pre><code>//-----------------------------------------------------------------------------
+// Script: IntegerArrayExample
+// Description:
+//      Example implementation of a 2-dimensional array of integers
+//
+// Written By: Sandie Harbour, July 2008
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Function: initIntArray
+// Descripton:
+//      Given the number of rows and columns, create an list of integers
+//      that will be used as an aarray.
+//------------------------------------------------------------------------------
+list makeArray ( integer rows, integer cols )
+{
+    integer i;
+    list array = [];
+    array += &lt; rows, cols, 0 &gt;;
+    for (i=0; i &lt; rows * cols; ++i)
+    {
+        array += 0;
+    }
+    return array;
+}
+
+//------------------------------------------------------------------------------
+// Function: getElement
+// Descripton:
+//      Return the integer which is stored in the given array
+//      at the given row and column numbers.
+//------------------------------------------------------------------------------
+integer getElement( list array, integer row, integer col )
+{
+    vector metadata = llList2Vector( array, 0);
+    integer cols = (integer)metadata.y;
+    integer index = row * cols + col + 1;
+    return llList2Integer( array, index);
+}
+
+//------------------------------------------------------------------------------
+// Function: setElement
+// Descripton:
+//      Set the value in the specified row and columnn and return
+//      the array.
+//------------------------------------------------------------------------------
+list setElement( list array, integer row, integer col, integer value )
+{
+    vector metadata = llList2Vector( array, 0);
+    integer cols = (integer)metadata.y;
+    integer index = row * cols + col  + 1;
+    return llListReplaceList(array, [value], index, index);
+}
+
+
+//------------------------------------------------------------------------------
+// 
+//------------------------------------------------------------------------------
+default
+{
+    state_entry()
+    {
+
+       integer rows = 4;
+       integer cols = 6;
+       integer row;
+       integer col;
+        integer index;
+        // Build the array
+        list elements= makeArray( 4, 6 );
+
+
+        for (row=0; row &lt; rows; ++row)
+        {
+            for ( col=0; col&lt;cols; ++col)
+            {
+                index = row * cols + col  + 1;
+                elements = setElement(elements,row,col, index) ;
+            }
+        }
+
+        for (row=0; row &lt; rows; ++row)
+        {
+            for ( col=0; col&lt;cols; ++col)
+            {
+            // Report the value at (3,4)
+            integer element = getElement( elements,row,col);
+            llOwnerSay( &quot;row=&quot; + (string)row
+                       + &quot;, col=&quot; + (string)col
+                       + &quot;, index=&quot; + (string)element);           
+            }
+        }
+
+    }
+}</code></pre></div>

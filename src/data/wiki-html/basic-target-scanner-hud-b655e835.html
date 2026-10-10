@@ -1,0 +1,83 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span><a href="/wiki/category-lsl-library-83389c2f/">Category:LSL Library</a></div>
+<div class="wiki-line">This single prim HUD is just a button that scrolls through nearby players names, photos and user key.</div>
+<div class="wiki-line">Drop it in a prim and touch the prim and you are set to go.  Modify it to suit your particular use in another Hud, weapon, or whatever you want.</div>
+<div class="wiki-line">&lt;3</div>
+<div class="wiki-line">--<a href="https://wiki.secondlife.com/wiki/User:Ackley_Bing">Ackley Bing</a></div>
+<div class="wiki-line"><pre><code>// Basic Target Scanner HUD
+// by Ackley Bing
+// v.2.0 now using llGetAgentList() instead of sensor().  Added a missing profile photo texture. fixed a lot of issues.
+
+integer index;
+key HUDtarget;
+key photoReq;
+integer HUDattachpoint=ATTACH_HUD_CENTER_1;
+string missingtexture=&quot;1a6e02aa-23a8-7a5f-0525-44d724144f89&quot;;
+Target()
+{
+    list agents=llGetAgentList(AGENT_LIST_REGION,[]);
+    integer ownerindex=llListFindList( agents, (list)llGetOwner() );
+    integer num_agents;
+    agents=llDeleteSubList( agents, ownerindex, ownerindex );
+    num_agents = llGetListLength(agents);
+    index=((index&lt;0)*(num_agents-1))+((index&gt;=0)*(index*(index!=num_agents)));
+    HUDtarget=llList2Key(agents, index);
+    llSetText(llKey2Name(HUDtarget)+&quot; (&quot;+llGetDisplayName(HUDtarget)+&quot;)\n&quot;+(string)HUDtarget, &lt;0.0, 1.0, 0.0&gt;, 1.0);
+    photoReq=llHTTPRequest(&quot;http://world.secondlife.com/resident/&quot; + (string)HUDtarget, [], &quot;&quot;);
+    llOwnerSay(&quot;(&quot;+(string)(index+1)+&quot;/&quot;+(string)(num_agents) +&quot;) Current Target: secondlife:///app/agent/&quot; + (string)HUDtarget + &quot;/inspect &quot; + (string)HUDtarget );
+}
+default
+{
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(),PERMISSION_ATTACH);
+    }
+    attach(key id)
+    {
+        if (id)
+        {
+            llSetScale(&lt;0.1, 0.15, 0.1&gt;);
+            llSetPrimitiveParams([PRIM_TYPE, PRIM_TYPE_BOX, PRIM_HOLE_DEFAULT, &lt;0.0, 1.0, 0.0&gt;, 0.0, &lt;0.0, 0.0, 0.0&gt;, &lt;2.0, 0.5, 1.0&gt;, &lt;0.0, 0.0, 0.0&gt;, PRIM_ROT_LOCAL, &lt;0.000000, -0.707107, 0.000000, 0.707107&gt;, PRIM_COLOR, 0, &lt;1.0,1.0,1.0&gt;, 1.0, PRIM_COLOR, 1, &lt;0.0,1.0,0.0&gt;, 1.0, PRIM_COLOR, 3, &lt;0.0,1.0,0.0&gt;, 1.0, PRIM_COLOR, 2, &lt;1.0,1.0,1.0&gt;, 0.0, PRIM_COLOR, 4, &lt;1.0,1.0,1.0&gt;, 0.0]);
+            llRotateTexture(270.0*DEG_TO_RAD,0);
+            HUDattachpoint=llGetAttached();
+            Target();
+            llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+        }
+    }
+    on_rez(integer param)
+    {
+        if ( !llGetAttached() )
+        {
+            index=0;
+            HUDtarget=NULL_KEY;
+            llSetText(&quot;&quot;, &lt;0.0, 1.0, 0.0&gt;, 1.0);
+            llSetTexture(missingtexture, 0);
+            llRequestPermissions(llGetOwner(),PERMISSION_ATTACH);
+        }
+    }
+    touch_start(integer n)
+    {
+        index=index+(llDetectedTouchFace(0)==1)-(llDetectedTouchFace(0)==3);
+        Target();
+    }
+    http_response(key request_id, integer status, list metadata, string body)
+    {
+        if( request_id == photoReq )
+        {
+            string photoID;
+            integer StartIndex=llSubStringIndex(body,&quot;&lt;title&gt;&quot;);
+            integer EndIndex=llSubStringIndex(body,&quot;&lt;/title&gt;&quot;);
+            if( StartIndex!=-1)
+            {
+                integer tempIndex=llSubStringIndex(body,&quot;imageid&quot;)+18;
+                if(tempIndex&gt;17)photoID=llGetSubString(body,tempIndex,tempIndex+35);
+            }
+            if ( photoID==NULL_KEY || photoID==&quot;&quot; ) photoID=missingtexture;
+            llSetTexture(photoID, 0);
+        }
+    }
+    run_time_permissions(integer perms)
+    {
+        if ( perms &amp; PERMISSION_ATTACH ) llAttachToAvatar(HUDattachpoint);
+        if ( perms &amp; PERMISSION_TAKE_CONTROLS ) llTakeControls(CONTROL_BACK, FALSE, TRUE);
+    }
+}</code></pre></div>

@@ -1,0 +1,48 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets the prims description</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Changing the object description does not trigger a <a href="/events/changed/">changed</a> event.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><table><tr><th> <strong>Set this prim's description</strong></th><th> <strong>Set the root prim's description</strong></th></tr><tr><td><pre><code>default
+{
+    state_entry()
+    {
+        llSetObjectDesc(&quot;NEW PRIM DESCRIPTION&quot;);
+    }
+}</code></pre></td><td> <pre><code>default
+{
+    state_entry()
+    {
+        llSetLinkPrimitiveParamsFast(LINK_ROOT,
+            [PRIM_DESC, &quot;NEW ROOT PRIM DESCRIPTION&quot;]);
+    }
+}</code></pre></td></tr></table></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>Object descriptions are often used to store data that needs to be protected from script resets (see, for example, <a href="https://wiki.secondlife.com/wiki/Prim_Attribute_Overloading">Prim Attribute Overloading</a>). However, descriptions are not immutable and can be tampered with by users or other scripts, either intentionally or accidentally, so this method should only be considered a last resort for data storage.</li>
+<li><a href="/functions/llLinksetDataWrite/">llLinksetDataWrite</a> and associated functions are generally better suited for this purpose, because they allow for significantly more data storage and are much more secure against tampering.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectDesc/">llGetObjectDesc</a> — Gets the prim description.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectName/">llGetObjectName</a> — Gets the prim name.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetObjectName/">llSetObjectName</a> — Sets the prim name.</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="vwr-437"><a href="/wiki/template-issues-vwr-437-646474f7/">Template:Issues/VWR-437</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|VWR-437|[[llSetObjectDesc]] and editor panel have different description string length limits|type=bug|resolution=wont}}</code></pre></details><p id="svc-3429"><a href="/wiki/template-issues-svc-3429-4290fc32/">Template:Issues/SVC-3429</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-3429|Name or description change, of an attached object, is rolled back when object is detached|type=bug}}</code></pre></details><p id="vwr-8761"><a href="/wiki/template-issues-vwr-8761-09731c8f/">Template:Issues/VWR-8761</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|VWR-8761|Cannot delete object description.|type=bug|dnc=*}}</code></pre></details><p><a href="/wiki/template-lsl-function-prim-desc-85fa0b38/">Template:LSL Function/prim-desc</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{LSL Function/limits}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+*The prim description is [[limit]]ed to 127 [[bytes]]; any string longer then that will be truncated. This truncation does not always happen when the attribute is set or read.
+*The prim description may only contain printable ASCII characters (code points 32-126), except the pipe character &#x27;&amp;#124;&#x27;, which is not permitted for historical reasons.{{Footnote|The pipe character historically has been used to separate fields in the serialized version of inventory and possibly other internal fields for prim parameters.}} All other characters will be replaced with one &#x27;?&#x27; character per illegal UTF-8 byte.
+*Note that when people have &quot;Hover Tips on All Objects&quot; selected in the viewer&#x27;s &quot;View&quot; menu, they&#x27;ll see the object description pop-up for any object under their mouse pointer.  For that reason, it is good practice to only set human-friendly information in the description, e.g. keys and such.
+*When an attached object is detached, changes made by script to the name and description (of the root prim) of the attachment will be lost. While the object is attached the name and description can be changed but it will not be reflected in inventory. This caveat does &#x27;&#x27;not&#x27;&#x27; apply to child prims.
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPairTable|also_articles}}
+|-
+{{VarPair|caveats}}
+|}
+{{Footnotes}}
+&lt;/noinclude&gt;</code></pre></details></section>

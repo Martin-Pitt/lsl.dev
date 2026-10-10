@@ -1,0 +1,83 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> of keys of playing animations for <code>avatar</code>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>There is no internal mechanism to get the name of the animations playing.</li>
+<li>Standard animations can be started and stopped by scripts, so the list returned may not accurately reflect the avatar's state. Use <a href="/functions/llGetAgentInfo/">llGetAgentInfo</a> and <a href="/functions/llGetAnimation/">llGetAnimation</a> when this matters.</li>
+<li><a href="https://wiki.secondlife.com/wiki/Internal_Animations#viewer-generated-motions">Some motions are local to the viewer</a> and cannot be detected by scripts.</li>
+<li><a href="https://wiki.secondlife.com/wiki/Internal_Animations#user-playable-animations">Animations that are triggered by other animations are local to the viewer</a> and cannot be detected by scripts.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">This example is a bit involved but there aren't many applications for this function.</div>
+<div class="wiki-line"><pre><code>//Simple Animation Override for Walk
+key old_anim = &quot;6ed24bd8-91aa-4b12-ccc7-c97c857ab4e0&quot;;
+string new_anim=&quot;yoga_float&quot;;
+integer status;
+list check;
+key owner;
+
+default
+{
+    state_entry()
+    {
+        owner = llGetOwner();
+        llRequestPermissions(owner, PERMISSION_TRIGGER_ANIMATION);
+        check = [old_anim];
+    }
+    
+    run_time_permissions(integer p)
+    {
+        if(p &amp; PERMISSION_TRIGGER_ANIMATION)
+        {
+            llSetTimerEvent(0.2);
+        }
+    }
+
+    timer()
+    {
+        if(llGetAgentInfo(owner) &amp; AGENT_WALKING)
+        {
+            list anims = llGetAnimationList(owner);
+            if(~llListFindList(anims, check))
+            {
+                status = 1;
+                llStartAnimation(new_anim);
+                llStopAnimation(old_anim);
+            }
+        }
+        else if(status)
+        {
+            llStopAnimation(new_anim);
+            status = 0;
+        }
+    }
+
+    on_rez(integer p)
+    {
+        llResetScript();
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAgentInfo/">llGetAgentInfo</a> — Gets the avatar info</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAnimation/">llGetAnimation</a> — Get the avatar's base animation state</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llStartAnimation/">llStartAnimation</a> — Start an animation on an avatar</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llStopAnimation/">llStopAnimation</a> — Stop an animation playing on an avatar</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p id="bug-1731"><a href="/wiki/template-issues-bug-1731-32346d59/">Template:Issues/BUG-1731</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-1731|type=bug|[[llGetAnimationList]] sometimes returns a [[NULL_KEY]]}}</code></pre></details></section>

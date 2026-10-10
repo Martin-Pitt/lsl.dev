@@ -1,0 +1,142 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">llListSortStrided is llListSort with the added parameter of stride_index, adding the flexibility to sort by any item in the stride.  These routines use the same underlying code and have the same computational complexity.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> that is <code>src</code> sorted by the <code>stride_index</code> item in every <code>stride</code>.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">The sort order is affected by type. For strings and keys, it is case sensitive and sorts by Unicode character code.<br/></div>
+<div class="wiki-line"><pre><code>llListSortStrided([&quot;a&quot;, &quot;á&quot;, &quot;B&quot;, &quot;C&quot;, &quot;d&quot;, &quot;e&quot;], 1, 0, TRUE) // returns [&quot;B&quot;, &quot;C&quot;, &quot;a&quot;, &quot;d&quot;, &quot;e&quot;, &quot;á&quot;]</code></pre></div>
+<div class="wiki-line">For ascending sort, each type is sorted individually and then feathered to have the same order of types.</div>
+<div class="wiki-line"><pre><code>llListSortStrided([1, &quot;C&quot;, 3, &quot;A&quot;, 2, &quot;B&quot;], 1, 0, TRUE) // returns [1, &quot;A&quot;, 2, &quot;B&quot;, 3, &quot;C&quot;]
+
+llListSortStrided([1, 3, 2, &quot;C&quot;, &quot;A&quot;, &quot;B&quot;], 1, 0, TRUE) // returns [1, 2, 3, &quot;A&quot;, &quot;B&quot;, &quot;C&quot;]
+
+llListSortStrided([1, &quot;C&quot;, 3, &quot;A&quot;, 2, &quot;B&quot;], 2, 0, TRUE) // returns [1, &quot;C&quot;, 2, &quot;B&quot;, 3, &quot;A&quot;]
+
+llListSortStrided([1, &quot;C&quot;, 3, &quot;A&quot;, 2, &quot;B&quot;], 2, 1, TRUE) // returns [3, &quot;A&quot;, 2, &quot;B&quot;, 1, &quot;C&quot;]</code></pre></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>It uses the same unoptimized selection sort algorithm as llListSort, which is an algorithm with a Big O of N². A <a href="https://wiki.secondlife.com/wiki/JIRA">JIRA</a> issue exists to improve this function, <a href="https://jira.secondlife.com/browse/SVC-2988" rel="noreferrer">SVC-2988</a>.</li>
+<li>Originally the wiki stated that non-zero values for the "ascending" parameter would produce an ascending sort.  That was incorrect.  For this function, the value must be exactly 1 (or TRUE) for an ascending sort.</li>
+<li><a href="https://wiki.secondlife.com/wiki/Vector">Vector</a>s are sorted by magnitude. <a href="https://jira.secondlife.com/browse/SVC-5643" rel="noreferrer">SVC-5643</a></li>
+<li><a href="https://wiki.secondlife.com/wiki/Rotation">Rotation</a>s are not sorted in any meaningful order. If a list containing only rotations is sorted in ascending order, it will be returned unchanged.</li>
+<li>For descending sort, if there are mixed types, the final order is deterministic (the same input will always produce the same output) but it can be completely useless. <pre><code>llListSortStrided([2, &quot;B&quot;, &quot;C&quot;, 3, 1, &quot;A&quot;], 1, 0, FALSE) // returns [&quot;A&quot;, 3, 1, &quot;C&quot;, &quot;B&quot;, 2]</code></pre> If there are no mixed types, however, the descending sort works just fine.</li>
+<li>When the stride is greater than 1, if the list length is not a multiple of the stride, the list will be returned unchanged.</li>
+<li>stride_index must be less than stride and greater than or equal to -stride, otherwise an empty list is returned.</li>
+<li>When strings contain numbers, the numbers are still sorted left-to-right like any other character, which may not necessarily match numeric order: <pre><code>llListSortStrided([&quot;127&quot;, &quot;3&quot;, &quot;25&quot;], 1, 0, TRUE) // returns [&quot;127&quot;, &quot;25&quot;, &quot;3&quot;] because the 1 in 127 is before the 2 in 25 which is before the 3</code></pre> To sort them in numeric order, numbers in strings can be padded with zeros: <pre><code>llListSortStrided([&quot;127&quot;, &quot;003&quot;, &quot;025&quot;], 1, 0, TRUE) // returns [&quot;003&quot;, &quot;025&quot;, &quot;127&quot;]</code></pre></li>
+<li>This order differs from the order of items in a prim's inventory, which is "natural order" (e.g "New Script 2" is sorted before "New Script 11").</li>
+<li>The sorting algorithm is not <a href="https://en.wikipedia.org/wiki/Sorting_algorithm#Stability" rel="noreferrer">stable</a>. Thus you cannot use 2 sorts on different columns to sort by multiple keys: <pre><code>default { state_entry() { // THIS DOES NOT WORK AS A MULTI-KEY SORT
+    list input = [1, &quot;b&quot;, 0, &quot;c&quot;, 1, &quot;a&quot;, 0, &quot;b&quot;, 1, &quot;c&quot;, 0, &quot;a&quot;];
+    list partialSort = llListSortStrided(input, 2, 1, TRUE);
+    llOwnerSay(&quot;partialSort = &quot; + llList2Json(JSON_ARRAY, partialSort));
+    list fullSort = llListSortStrided(partialSort, 2, 0, TRUE);
+    llOwnerSay(&quot;fullSort = &quot; + llList2Json(JSON_ARRAY, fullSort));
+} }</code></pre>This gives the following output (errors bolded):</li>
+<li>partialSort = [1,"a",0,"a",<strong>0,</strong>"b",<strong>1,</strong>"b",<strong>1,</strong>"c",<strong>0,</strong>"c"]</li>
+<li>fullSort = [0,"a",0,"b",0,"c",1,<strong>"b",</strong>1,<strong>"c",</strong>1,<strong>"a"</strong>]</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>list scoreboard = 
+    [ &quot;Andrew&quot;, &quot;Petersen&quot;, 200
+    , &quot;Jeremy&quot;, &quot;Walker&quot;, 400
+    , &quot;Richard&quot;, &quot;Baker&quot;, 100
+    ];
+    
+default
+{
+    state_entry()
+    {
+        // Raw dump of the original, unsorted list
+
+        llOwnerSay(&quot;Unsorted: scoreboard = [&quot; + llDumpList2String(scoreboard, &quot;,&quot;) + &quot;]&quot;);
+        // Result: [Andrew,Petersen,200,Jeremy,Walker,400,Richard,Baker,100]
+
+        
+        // Ascending (A to Z, 0 to 999)
+
+        // Sort by first names (ascending)
+        scoreboard = llListSortStrided(scoreboard, 3, 0, TRUE);
+        llOwnerSay(&quot;Sort by first names (ascending) :: scoreboard = [&quot; + llDumpList2String(scoreboard, &quot;,&quot;) + &quot;]&quot;);
+        // Result: [Andrew,Petersen,200,Jeremy,Walker,400,Richard,Baker,100]
+        
+        // Sort by last names (ascending)
+        scoreboard = llListSortStrided(scoreboard, 3, 1, TRUE);
+        llOwnerSay(&quot;Sort by last names (ascending) :: scoreboard = [&quot; + llDumpList2String(scoreboard, &quot;,&quot;) + &quot;]&quot;);
+        // Result: [Richard,Baker,100,Andrew,Petersen,200,Jeremy,Walker,400]
+
+        // Sort by score (ascending)
+        scoreboard = llListSortStrided(scoreboard, 3, 2, TRUE);
+        llOwnerSay(&quot;Sort by score (ascending) :: scoreboard = [&quot; + llDumpList2String(scoreboard, &quot;,&quot;) + &quot;]&quot;);
+        // Result: [Richard,Baker,100,Andrew,Petersen,200,Jeremy,Walker,400]
+
+
+        // Descending (Z to A, 999 to 0)
+
+
+        // Sort by first names (descending)
+        scoreboard = llListSortStrided(scoreboard, 3, 0, FALSE);
+        llOwnerSay(&quot;Sort by first names (descending) :: scoreboard = [&quot; + llDumpList2String(scoreboard, &quot;,&quot;) + &quot;]&quot;);
+        // Result: [Richard,Baker,100,Jeremy,Walker,400,Andrew,Petersen,200]
+
+        // Sort by last names (descending)
+        scoreboard = llListSortStrided(scoreboard, 3, 1, FALSE);
+        llOwnerSay(&quot;Sort by last names (descending) :: scoreboard = [&quot; + llDumpList2String(scoreboard, &quot;,&quot;) + &quot;]&quot;);
+        // Result: [Jeremy,Walker,400,Andrew,Petersen,200,Richard,Baker,100]
+
+        // Sort by score (descending)
+        scoreboard = llListSortStrided(scoreboard, 3, 2, FALSE);
+        llOwnerSay(&quot;Sort by score (descending) :: scoreboard = [&quot; + llDumpList2String(scoreboard, &quot;,&quot;) + &quot;]&quot;);
+        // Result: [Jeremy,Walker,400,Andrew,Petersen,200,Richard,Baker,100]
+    }
+}</code></pre></div>
+<div class="wiki-line">llListSort and llListSortStrided really only works on items of the same type. It will work on lists that hold diverse data types -- to be clear, it won't blow up your script -- but the results returned are usually meaningless.</div>
+<div class="wiki-line"><pre><code>list mylist = [&quot;brown&quot;, &lt;0.000000, 0.000000, 0.000000&gt;, &quot;house&quot;, 17.005, 100, &quot;cat&quot;, &lt;3.000000, 3.000000, 3.000000&gt;, 39];
+list tmplist = llListSortStrided(mylist, 1, 0, TRUE);
+llSay(0, llList2CSV(tmplist));</code></pre></div>
+<div class="wiki-line">This returns in chat:</div>
+<div class="wiki-line"> brown, &lt;0.000000, 0.000000, 0.000000&gt;, cat, 17.004999, 39, house, &lt;3.000000, 3.000000, 3.000000&gt;, 100</div>
+<div class="wiki-line">The same ordered in descending order returns even more meaningless results:</div>
+<div class="wiki-line"><pre><code>list mylist = [&quot;brown&quot;, &lt;0.000000, 0.000000, 0.000000&gt;, &quot;house&quot;, 17.005, 100, &quot;cat&quot;, &lt;3.000000, 3.000000, 3.000000&gt;, 39];
+list tmplist = llListSortStrided(mylist, 1, 0, FALSE);
+llSay(0, llList2CSV(tmplist));</code></pre></div>
+<div class="wiki-line">returns in chat:</div>
+<div class="wiki-line"> 39, &lt;3.000000, 3.000000, 3.000000&gt;, cat, 100, 17.004999, house, &lt;0.000000, 0.000000, 0.000000&gt;, brown</div>
+<h3 id="utilizing-the-results">Utilizing the Results</h3>
+<div class="wiki-line">It's important to note that the source list that you are sorting will remain unchanged. Instead, a new, sorted list will be produced. So, it's important that you capture this with a variable (unless you are acting directly on the results.)</div>
+<div class="wiki-line"><pre><code>llListSortStrided(myList, 1, 0, TRUE); // You&#x27;ve wasted cpu time; you didn&#x27;t capture the results
+
+list newlist = llListSortStrided(myList, 1, 0, TRUE);// Okay. You&#x27;ve captured the results.
+
+llSay(0,llList2CSV(llListSortStrided(myList, 1, 0, TRUE))); // No need to capture, using the results right away.</code></pre></div>
+<h3 id="stride-parameter"><code>Stride</code> parameter</h3>
+<div class="wiki-line">Most times, you will want to set "integer stride" to 1 (0 also works) to tell it to sort each item in the list on its own basis. (If you are working with a strided list, though, see the special section below on sorting strides.)</div>
+<h3 id="sort-order">Sort Order</h3>
+<div class="wiki-line">Setting the parameter "integer ascending" to <a href="/constants/TRUE/">TRUE</a> returns a sorted list that is in ascending order. <br/></div>
+<div class="wiki-line">For example: ["Apples", "Bananas", "Oranges"]</div>
+<div class="wiki-line">Setting the parameter "integer ascending" to <a href="/constants/FALSE/">FALSE</a> returns a sorted list that is in descending order. <br/></div>
+<div class="wiki-line">For example: ["Oranges", "Bananas", "Apples"]</div>
+<h3 id="sorting-strided-lists">Sorting Strided Lists</h3>
+<div class="wiki-line">If you have a <a href="https://wiki.secondlife.com/wiki/List#strided-lists">strided list</a>, in which you are keeping related pieces of data together in chunks, letting each list element sort on its own basis would be disastrous.</div>
+<div class="wiki-line"><pre><code>list demographics = [&quot;John Adams&quot;, &quot;male&quot;, &quot;2007-06-22&quot;, &quot;Shirley Bassey&quot;, &quot;female&quot;, &quot;2005-11-02&quot;, &quot;Matt Damon&quot;, &quot;male&quot;, &quot;2008-05-19&quot;];</code></pre></div>
+<h4 id="bad-example">Bad Example</h4>
+<div class="wiki-line"><pre><code>list tmplist_1 = llListSortStrided(demographics, 1, 0, TRUE);
+//tmplist_1 == [&quot;2005-11-02&quot;, &quot;2007-06-22&quot;, &quot;2008-05-19&quot;, &quot;John Adams&quot;, &quot;Matt Damon&quot;, &quot;Shirley Bassey&quot;, &quot;female&quot;, &quot;male&quot;, &quot;male&quot;]
+//The strides have been destroyed, the sorted data is now useless</code></pre></div>
+<h4 id="good-example">Good Example</h4>
+<div class="wiki-line">Instead, because you have the data grouped (aka "strided") in sets of 3, you need to do this:</div>
+<div class="wiki-line"><pre><code>list tmplist_2 = llListSortStrided(demographics, 3, 0, TRUE);
+//templist_2 = [&quot;John Adams&quot;, &quot;male&quot;, &quot;2007-06-22&quot;, &quot;Matt Damon&quot;, &quot;male&quot;, &quot;2008-05-19&quot;, &quot;Shirley Bassey&quot;, &quot;female&quot;, &quot;2005-11-02&quot;]</code></pre></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-2988"><a href="/wiki/template-issues-svc-2988-8dd9da86/">Template:Issues/SVC-2988</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-2988|Convert [[llListSort]]() to use faster sorting methods!|type=nf}}</code></pre></details><p id="svc-5146"><a href="/wiki/template-issues-svc-5146-27de4799/">Template:Issues/SVC-5146</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-5146|&#x27;&#x27;&#x27;llSortedListFindList&#x27;&#x27;&#x27;() - improved [[llListFindList]]() for known to be sorted lists|type=nf}}</code></pre></details><p><a href="/wiki/template-lsl-function-stride-ec5ce168/">Template:LSL Function/stride</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:header_footnote|This function supports [[List#Strided_lists|Strided Lists]].}}
+
+{{#vardefine:p_{{{1|none}}}_hover|number of entries per stride, if less than 1 it is assumed to be 1}}
+{{#vardefine:p_{{{1|none}}}_desc|number of entries per stride, if less than 1 it is assumed to be 1}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|- {{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|-
+{{VarPair|header_footnote}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

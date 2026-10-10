@@ -1,0 +1,258 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">If it is contained in the result of <a href="/functions/llDetectedType/">llDetectedType</a>, it means it is avatar.<br />If it is used as an filter of <a href="/functions/llSensor/">llSensor</a> or <a href="/functions/llSensorRepeat/">llSensorRepeat</a>, it will search for avatars by <a href="/wiki/category-lsl-avatar-name-1fcd5f3e/">legacy name</a>.</div></section>
+<section><h2 id="caveats">Caveats</h2><div class="wiki-line">There is no avatar whose <a href="/functions/llDetectedType/">llDetectedType</a> is <em>equal to</em> 1<code>(<span class="wiki-template"><code>{{#var:AGENT_BY_LEGACY_NAME}}</code></span>)</code> since there is no avatar who doesn't require the physical calculation, even if they are just standing. Standing agent's type will be equal to 3<code>(<span class="wiki-template"><code>{{#var:AGENT_BY_LEGACY_NAME}}</code></span>|<span class="wiki-template"><code>{{#var:ACTIVE}}</code></span>)</code>. Sitting agent's type will be equal to 5<code>(<span class="wiki-template"><code>{{#var:AGENT_BY_LEGACY_NAME}}</code></span>|<span class="wiki-template"><code>{{#var:PASSIVE}}</code></span>)</code>.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedType/">llDetectedType</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSensor/">llSensor</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSensorRepeat/">llSensorRepeat</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-constants-sensor-675d8b16/">Template:LSL Constants Sensor</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:{{{no_wrapper|}}}||{{{!}} }}
+{{!}}- valign=&quot;top&quot;
+{{!}} &lt;div style=&quot;display:inline-block;&quot;&gt;
+{{{!}} {{Prettytable|style=margin-bottom:0;{{{tstyle|}}}}}
+{{!}}-{{Hl2}}
+! colspan=&quot;2&quot; {{!}} &#x27;&#x27;&#x27;{{{1|}}} Flag Mask&#x27;&#x27;&#x27; 
+! &#x27;&#x27;&#x27;Description ([[llDetectedType]]())&#x27;&#x27;&#x27;
+! &#x27;&#x27;&#x27;Description ([[llSensor]]() and [[llSensorRepeat]]() mask)&#x27;&#x27;&#x27;
+{{!}}-{{#if:
+{{!}} {{#vardefine:AGENT_BY_LEGACY_NAME|{{LSL Const|AGENT_BY_LEGACY_NAME|integer|1|hex=0x1|c=Agents}}}}{{#var:AGENT_BY_LEGACY_NAME}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} This is used to find agents by {{LSLGC|Avatar/Name|legacy name}}.
+{{!}}-
+{{!}} {{#vardefine:AGENT|{{LSL Const|AGENT|integer|1|hex=0x1|c=Agents}}}}{{#var:AGENT}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} This is also used to find agents by {{LSLGC|Avatar/Name|legacy name}}, and is functionally identical to [[AGENT_BY_LEGACY_NAME]]
+{{!}}-
+{{!}} {{#vardefine:AGENT_BY_USERNAME|{{LSL Const|AGENT_BY_USERNAME|integer|16|hex=0x10|c=Agents}}}}{{#var:AGENT_BY_USERNAME}}
+{{!}} {{#var:value}}
+{{!}} &#x27;&#x27;{{HoverText|Reserved|This value is currently not used by llDetectedType}}&#x27;&#x27;
+{{!}} This is used to find agents by {{LSLGC|Avatar/Name|username}}.
+{{!}}-
+{{!}} {{#vardefine:ACTIVE|{{LSL Const|ACTIVE|integer|2|hex=0x2|c=Physical tasks. (Physical objects &amp; agents) }}}}{{#var:ACTIVE}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} Physical objects that are moving or objects containing an active script. Thus, it is using SL server resources now.
+{{!}}-
+{{!}} {{#vardefine:PASSIVE|{{LSL Const|PASSIVE|integer|4|hex=0x4|c=Non-physical objects.}}}}{{#var:PASSIVE}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} Non-scripted or script is inactive and non-physical or, if physical, not moving. Thus, it is not using SL server resources now.
+{{!}}-
+{{!}} {{#vardefine:SCRIPTED|{{LSL Const|SCRIPTED|integer|8|hex=0x8|c=Objects containing any active script.}}}}{{#var:SCRIPTED}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} Objects that has any script, which is doing anything in simulator just now.
+{{!}}-
+{{!}} {{#vardefine:DAMAGEABLE|{{LSL Const|DAMAGEABLE|integer|32|hex=0x20|c=Objects &amp; agents that are able to process damage.}}}}{{#var:DAMAGEABLE}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} Filter for objects in world that have a script with [[on_damage]] or a [[final_damage]] event (able to process damage)
+{{!}}}
+&lt;/div&gt;&lt;div style=&quot;display:inline-block;&quot;&gt;
+{{{!}} {{Prettytable}}
+{{!}}-{{Hl2}}
+![[llDetectedType]]()
+!Scripted
+!Not Scripted
+!Agent Standing
+!title=&quot;Agent sitting on object&quot;|Agent Sitting
+{{!}}-
+! Physical Movement
+{{!}} 10 ({{#var:ACTIVE}}|{{#var:SCRIPTED}})
+{{!}} 2 ({{#var:ACTIVE}})
+{{!}} 3 ({{#var:ACTIVE}}|{{#var:AGENT}})
+{{!}} 3 ({{#var:ACTIVE}}|{{#var:AGENT}})
+{{!}}-
+! title=&quot;Not moving&quot; | Non-Physical
+{{!}} 12 ({{#var:PASSIVE}}|{{#var:SCRIPTED}})
+{{!}} 4 ({{#var:PASSIVE}})
+{{!}} 1 ({{#var:AGENT}})
+{{!}} 5 ({{#var:PASSIVE}}|{{#var:AGENT}})
+{{!}}}&lt;/div&gt;
+{{#if:{{{no_wrapper|}}}||{{!}}} }}{{#if:
+
+{{#if:{{{examples|}}}&lt;noinclude&gt;*&lt;/noinclude&gt;|
+{{#vardefine:examples|{{#var:examples}}
+&#x27;&#x27;&#x27;Using [[llDetectedType]] in [[collision]] event:&#x27;&#x27;&#x27;
+&lt;source lang=&quot;lsl2&quot;&gt;
+integer type;
+
+default
+{
+    state_entry()
+    {
+        llVolumeDetect(TRUE);
+    }
+    collision_start(integer detected)
+    {
+        type = llDetectedType(0);
+        if (type == AGENT)// = 1
+        {
+            llSay(0, &quot;This is impossible. Since there is no avatar who doesn&#x27;t require the physical calculation.&quot;);
+        }
+        else if (type == ACTIVE)// = 2
+        {
+            llSay(0, &quot;I have been struck by a physical object not containing any script.&quot;);
+        }
+        else if (type == PASSIVE)// = 4
+        {
+            llSay(0, &quot;This is impossible. Non-physical objects cannot trigger this event.&quot;);
+        }
+        else if (type == SCRIPTED)// = 8
+        {
+            llSay(0, &quot;This is impossible. Since there is no object which isn&#x27;t physical nor non-physical.&quot;);
+        }
+        else if (type == (AGENT | ACTIVE) ) // 1 + 2
+        {
+            llSay(0, &quot;I have been struck by an avatar.&quot;);
+        }
+        else if (type == (SCRIPTED | ACTIVE) ) // = 8 + 2
+        {
+            llSay(0, &quot;I have been struck by a physical object containing any script.&quot;);
+        }
+        else if (type == (SCRIPTED | PASSIVE) ) // = 8 + 4
+        {
+            llSay(0, &quot;This is impossible. Non-physical objects cannot trigger this event.&quot;);
+        }
+    }
+}
+&lt;/source&gt;
+&#x27;&#x27;&#x27;Using [[llDetectedType]] in [[sensor]] event:&#x27;&#x27;&#x27;
+&lt;source lang=&quot;lsl2&quot;&gt;
+default
+{
+    touch_start(integer numberDetected)
+    {
+         llSensor(&quot;&quot;, &quot;&quot;, ACTIVE | PASSIVE | AGENT, 20.0, PI); // activates the sensor.
+    }
+
+    sensor (integer numberDetected)
+    {
+        integer i;
+        while(i &lt; numberDetected)
+        {
+            integer type = llDetectedType(i);
+            string message;
+            message += (string)i + &quot;, &quot; + llDetectedName(i) + &quot;, &quot;;
+            list typeList;
+            if (type &amp; AGENT)
+            {
+                typeList += &quot;AGENT&quot;;
+            }
+            if (type &amp; ACTIVE)
+            {
+                typeList += &quot;ACTIVE&quot;;
+            }
+            if (type &amp; PASSIVE)
+            {
+                typeList += &quot;PASSIVE&quot;;
+            }
+            if (type &amp; SCRIPTED)
+            {
+                typeList += &quot;SCRIPTED&quot;;
+            }
+            message += llDumpList2String(typeList, &quot;|&quot;);
+            llWhisper(0, message);
+            ++i;
+        }
+    }
+ 
+    no_sensor()
+    {
+        // This is impossible if range = 20.0 and you are standing within 10m!
+        llWhisper(0, &quot;Nothing is near me at present.&quot;); 
+    }
+}
+&lt;/source&gt;
+&#x27;&#x27;&#x27;Using filter in {{LSLGC|Sensor|llSensor*}} functions:&#x27;&#x27;&#x27;
+&lt;source lang=&quot;lsl2&quot;&gt;
+// Report nearby sensed objects and avatars under sundry categories
+
+list     SenseTypes;
+integer  gIndex;
+
+SenseNextType()
+{
+    string  text = llList2String( SenseTypes, gIndex);
+    integer tipe = llList2Integer(SenseTypes, gIndex + 1);
+    if (tipe)
+    {
+        llWhisper(0, text);
+        llSensor(&quot;&quot;, NULL_KEY, tipe, 20.0, PI);
+        gIndex += 2;   // increment by stride
+    }
+    else
+        llWhisper(0, &quot;--- Finished ---&quot;);
+}
+
+default
+{
+    touch_start(integer detected)
+    {
+        // Make a Strided list of text and sensor type combinations
+        // (Can&#x27;t use &#x27;|&#x27; in Global, unfortunately)
+        SenseTypes = [
+            &quot;AGENT_BY_LEGACY_NAME&quot;, AGENT_BY_LEGACY_NAME,
+            &quot;ACTIVE&quot;, ACTIVE,
+            &quot;AGENT_BY_LEGACY_NAME|ACTIVE&quot;, AGENT_BY_LEGACY_NAME|ACTIVE,
+            &quot;PASSIVE&quot;, PASSIVE,
+            &quot;AGENT_BY_LEGACY_NAME|PASSIVE&quot;, AGENT_BY_LEGACY_NAME|PASSIVE,
+            &quot;ACTIVE|PASSIVE&quot;, ACTIVE|PASSIVE,
+            &quot;AGENT_BY_LEGACY_NAME|ACTIVE|PASSIVE&quot;, AGENT_BY_LEGACY_NAME|ACTIVE|PASSIVE,
+            &quot;SCRIPTED&quot;, SCRIPTED,
+            &quot;AGENT|SCRIPTED&quot;, AGENT|SCRIPTED,
+            &quot;ACTIVE|SCRIPTED&quot;, ACTIVE|SCRIPTED,
+            &quot;AGENT_BY_LEGACY_NAME|ACTIVE|SCRIPTED&quot;, AGENT_BY_LEGACY_NAME|ACTIVE|SCRIPTED,
+            &quot;PASSIVE|SCRIPTED&quot;, PASSIVE|SCRIPTED,
+            &quot;&quot;, 0 ];
+        gIndex = 0;
+        SenseNextType();        // Kick off the sensing sequence
+    }
+    sensor(integer detected)
+    {
+        integer x;
+        while (x &lt; detected)
+        {
+            llWhisper(0, (string) (x+1) + &quot;: &quot; + llDetectedName(x) );
+            ++x;
+        }
+        SenseNextType();
+    }
+    no_sensor()
+    {
+        llWhisper(0, &quot;none&quot;);
+        SenseNextType();
+    }
+}
+&lt;/source&gt;
+&#x27;&#x27;&#x27;Detecting [[DAMAGEABLE|damageable]] things with sensors:&#x27;&#x27;&#x27;
+&lt;source lang=&quot;lsl&quot;&gt;
+default
+{
+    state_entry()
+    {
+        llSensor(&quot;&quot;, &quot;&quot;, SCRIPTED|AGENT|DAMAGEABLE, 20, PI);
+    }
+
+    no_sensor()
+    {
+        llOwnerSay(&quot;Nothing detected&quot;);
+    }
+
+    sensor(integer num_detected)
+    {
+        llOwnerSay(&quot;Detected &quot; + (string)num_detected + &quot; damageable thing(s)&quot;);
+        integer i;
+        for (i = 0; i &lt; num_detected; ++i)
+        {
+            string name = llDetectedName(i);
+            integer isAgent = llDetectedType(i) &amp; AGENT;
+            list types = [&quot;Object&quot;, &quot;Agent&quot;];
+
+            llOwnerSay(llList2String(types, isAgent) + &quot;: &quot; + name);
+        }
+    }
+}
+&lt;/source&gt;
+}}}}
+
+}}&lt;noinclude&gt;{{#var:examples}}&lt;/noinclude&gt;</code></pre></details><p><a href="https://wiki.secondlife.com/wiki/Template:#vardefine-also-constants">Template:</a></p></section>

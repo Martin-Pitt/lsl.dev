@@ -1,0 +1,109 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered when money is paid to the prim in the <code>amount</code> by <code>id</code>.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">When money is paid to the prim, the money is given to the object's owner.<br/>If the object is owned by or deeded to a group it is divvied up amongst the group members immediately (which is why groups can't grant <a href="/constants/PERMISSION_DEBIT/">PERMISSION_DEBIT</a>). Only members of a role that has the "Accounting/Pay group liabilities and receive group dividends" attribute will receive money.<br></div>
+<div class="wiki-line">Don't forget to turn on the pay-behavior of the prims/objects involved.<br/></div>
+<div class="wiki-line">The pay buttons should be configured in most applications where money is being transfered (<a href="/functions/llSetPayPrice/">llSetPayPrice</a>), it makes paying money to the object easier.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>This event cannot be triggered by a call to <a href="/functions/llGiveMoney/">llGiveMoney</a> because <a href="/functions/llGiveMoney/">llGiveMoney</a> cannot be used by one object to pay another object.</li>
+<li>Money cannot be paid to an attachment.</li>
+<li><strong>Money() does not check if it is running on the Testing Grid!</strong> If you are writing a vendor that does networking, be sure to check that it was not payed aditi grid by doing <code>if(llSubStringIndex(llGetEnv("simulator_hostname"), ".aditi.") == -1)</code> or by checking if <a href="/functions/llHTTPRequest/">llHTTPRequest</a>'s <code>X-SecondLife-Shard</code> header does not equal "Testing".</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">This example shows the simplest tip-jar and shows how little code is needed to receive unverified amounts of money.</div>
+<div class="wiki-line"><pre><code>default
+{
+    money(key id, integer amount)      // Some money has been received (and has been paid into the owner&#x27;s account) 
+    {
+        // Thank the giver for their tip
+        llInstantMessage(id, &quot;Thanks for the L$&quot;  + (string) amount + &quot; tip!&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line">Next level of tip jar, advising owner, keeping a running total, and with floating text to show status.</div>
+<div class="wiki-line"><pre><code>integer Total;
+string  OwnerName;
+
+default
+{
+    on_rez( integer sparam )
+    {
+        llResetScript();
+    }
+    state_entry()
+    {
+        OwnerName = llKey2Name( llGetOwner() );
+        llSetText( OwnerName + &quot;&#x27;s Tip Jar.\nAny tips gratefully received!\nL$0 Donated so far&quot;, &lt;.2, 1, .6&gt;, 1);
+    }
+
+    money(key id, integer amount)
+    {
+        Total += amount;
+        // Shortcut &#x27;cheat&#x27; to avoid multiple casts when constructing a message including non-string items
+        string str = (string) [OwnerName, &quot;&#x27;s Tip Jar.\nPlease tip if you are so inclined!\nL$&quot;, amount, &quot; Was donated last!\nL$&quot;, Total, &quot; Donated so far&quot; ];
+        llSetText(str, &lt;1,1,1&gt;, 1);
+        llInstantMessage(id,&quot;Thanks for the tip!&quot;);
+        llInstantMessage(llGetOwner(), llKey2Name(id) + &quot; donated L$&quot; + (string) amount );
+    }
+}</code></pre></div>
+<div class="wiki-line">An elementary vendor with money validation and refund capability</div>
+<div class="wiki-line"><pre><code>// Give the first item in this object&#x27;s inventory to anyone who pays the price
+
+integer price = 10;      // The price needed to purchase the item
+
+default
+{
+    state_entry()
+    {
+        // Turn off pay options so no money can be received until we are ready
+        llSetPayPrice(PAY_HIDE, [PAY_HIDE ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+        // Request Debit Permissions from the owner so refunds can be given
+        llRequestPermissions(llGetOwner(), PERMISSION_DEBIT);
+    }
+    on_rez(integer p)
+    {
+        llResetScript();                // Reset script on rezzing. Will thus register any change of owner.
+    }
+    money(key id, integer amount)        // Some money has been received and has gone to this object&#x27;s owner
+    {
+        if (amount &lt; price)
+        {   // Customer has not paid enough
+            llInstantMessage(id, &quot;That&#x27;s not enough money.&quot;);
+            llGiveMoney(id, amount);   // Refund the money they paid
+            return;
+        }
+        if (amount &gt; price)
+        {   // Customer paid too much. Refund the excess
+            integer change = amount - price;
+            llInstantMessage(id, &quot;You paid more than L$&quot; + (string)price
+                + &quot;  your change is L$&quot; + (string)change );
+            llGiveMoney(id, change);
+        }
+        // Customer has paid at least the right amount. Give them the item.
+        string ItemName = llGetInventoryName(INVENTORY_OBJECT, 0);
+        llGiveInventory(id, ItemName);
+        llInstantMessage(id, &quot;Please accept your purchase worth L$&quot; + (string) price );
+    }
+    run_time_permissions(integer perm)
+    {
+        // If Debit permissions are granted, set up the pay price for this single-price vendor
+        if(perm &amp; PERMISSION_DEBIT)
+            llSetPayPrice(price, [PAY_HIDE ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+
+        // In practice, the following line would be preferable and almost fully guards against a wrong amount being paid
+        // - except in the rare event that the price is changed while a transaction is in progress, or a user with a hacked viewer
+        //  llSetPayPrice(PAY_HIDE, [price ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTransferLindenDollars/">llTransferLindenDollars</a> — Give money to another avatar with transaction confirmation</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGiveMoney/">llGiveMoney</a> — Give money to another avatar</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetPayPrice/">llSetPayPrice</a> — Configure the pay buttons</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-warning-8285bf70/">Template:LSL Function/warning</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:{{#var:fw-multiple}}|{{#vardefine:fw-multiple|{{#expr:{{#var:fw-multiple}}+1}}}}
+&lt;span style=&quot;font-size:120%;&quot;&gt;&#x27;&#x27;&#x27;{{{1}}} Warning&#x27;&#x27;&#x27;&lt;span&gt;
+&lt;div&gt;
+{{{2}}}
+&lt;/div&gt;
+|{{#vardefine:header|{{#var:header}}{{#vardefine:fw-multiple|0}}{{#if:{{{2}}}}}{{#vardefine:fw-title|{{{1}}} Warning{{#ifexpr:{{#var:fw-multiple}} &gt; 1|s}}!}}
+{{{!}} style=&quot;background-color:#AAAAAA; margin-bottom:10px;&quot; cellpadding=&quot;3&quot; cellspacing=&quot;1&quot;
+{{!}} style=&quot;background:white;&quot; valign=&quot;top&quot; rowspan=&quot;2&quot; {{!}} [[Image:Emblem-important-red.png]]
+{{!}} style=&quot;color:white; background:#990000;&quot; title=&quot;{{#var:fw-title}}&quot; width=&quot;100%&quot; {{!}} &#x27;&#x27;&#x27;{{#var:fw-title}}&#x27;&#x27;&#x27;
+{{!}}-
+{{!}} style=&quot;background:#F9F9F9; font-size:90%;&quot; {{!}}
+{{{2}}}
+{{!}}} }}{{#if:{{{inline|}}}&lt;noinclude&gt;t&lt;/noinclude&gt;|{{#var:header}}|{{LSL Injection Test}}}}{{#vardefine:fw-multiple|}}{{#vardefine:fw-title|}}}}</code></pre></details></section>

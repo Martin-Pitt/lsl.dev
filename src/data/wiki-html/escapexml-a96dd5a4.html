@@ -1,0 +1,38 @@
+<h5 id="escapexml">EscapeXML</h5>
+<div class="wiki-line"><pre><code>// Escape standard reserved XML chars with entities
+// Copyright 2008, JB Kraft &amp; Strife Onizuka
+// Released under BSD license
+// http://www.opensource.org/licenses/bsd-license.php
+
+
+// ------------------------------------------------------------------------
+// escape standard reserved XML chars with entities
+// ------------------------------------------------------------------------
+string escapeXML( string str )
+{
+    integer i = llStringLength( str );
+    if(i)
+    {
+        string unescapedChars = &quot;&amp;\&quot;&#x27;&lt;&gt;&quot;; 
+        list escapedChars = [&quot;&amp;amp;&quot;, &quot;&amp;quot;&quot;, &quot;&amp;#39;&quot;, &quot;&amp;lt;&quot;, &quot;&amp;gt;&quot;];
+        integer ndx;
+
+        do
+            if( ~(ndx = llSubStringIndex( unescapedChars, llGetSubString(str, --i, i))) )
+                str = llInsertString( llDeleteSubString( str, i, i), i, llList2String( escapedChars, ndx));
+        while(i);
+    }
+    return str;
+}
+
+// ------------------------------------------------------------------------
+// D E F A U L T
+// ------------------------------------------------------------------------
+default
+{
+    state_entry()
+    {
+        llSay(0, escapeXML(&quot;&lt;Black&gt; &amp; \&quot;White\&quot; &amp; &#x27;Red&#x27; &amp; &lt;Green&gt;&quot;));
+    }
+}</code></pre></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-examples-d1aa2221/">Category:LSL Examples</a></div>

@@ -1,0 +1,25 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Divide the returned value by 256 to get the region offset.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/vector">vector</a> in meters that is the global location of the south-west corner of the region the object is in. The z component is 0.0</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Calculates your position relative to &lt;0,0,0&gt; of &#x27;Da Boom&#x27; in meters when you touch it
+vector vecrel; //a sum of llgetpos and llgetregioncorner (and another vector). Saving time doing vector math.
+
+default
+{
+    state_entry()
+    {
+        llSetText(&quot;Touch me to get your position&quot;, &lt;1.0,1.0,1.0&gt;, 1.0);
+    }
+    
+    touch_start(integer total_number)
+    {
+        vecrel = llGetRegionCorner() + llDetectedPos(0);
+        llWhisper(0, &quot;llGetRegionCorner() is:&quot;+(string)vecrel); //for debugging before vector addition
+        
+        vecrel -= &lt;256000.0, 256000.0, 0.0&gt;;//Da Boom&#x27;s region corner is at &lt;256000.0, 256000.0, 0.0&gt;
+        llWhisper (0, &quot;Position relative to &lt;0,0,0&gt; of &#x27;Da Boom&#x27;: &quot; + 
+        (string)llRound(vecrel.x) + &quot;, &quot; + (string)llRound(vecrel.y) + &quot;, &quot; + (string)llRound(vecrel.z) + &quot;.&quot;);
+        
+        llWhisper(0, &quot;Position relative to &lt;0,0,0&gt; of &#x27;Da Boom&#x27;:&quot; +(string)vecrel); //faster but unformatted output
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">The great zero is at region offset &lt;1000,1000&gt;, <span class="wiki-template"><a href="/wiki/template-slurl-c693d0e1/">SLurl</a>: <code>{{SLurl|region=Da Boom|x=0|y=0|title=Great Zero}}</code></span></div></section>

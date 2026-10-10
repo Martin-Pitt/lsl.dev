@@ -1,0 +1,33 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/float">float</a> that is the mean region frames per second.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Region FPS is currently capped at 45.0 frames per second, so this function never returns greater than 45.0</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// The beginnings of a region-info script.
+string region;
+string sim;
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(1.0);
+    }
+
+    timer()
+    {
+        string here = llGetRegionName();
+        if(region != here)
+        {
+            sim = llGetSimulatorHostname();
+            region = here;
+        }
+        llSetText(
+                &quot;   REGION NAME : &quot; + region + 
+              &quot;\n  SIM HOSTNAME : &quot; + sim + 
+              &quot;\nTIME DIALATION : &quot; + (string)llGetRegionTimeDilation() +
+              &quot;\n    REGION FPS : &quot; + (string)llGetRegionFPS(),
+            &lt;0,1,0&gt;, 1.0);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetSimulatorHostname/">llGetSimulatorHostname</a> — Gets the hostname of the server</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRegionTimeDilation/">llGetRegionTimeDilation</a> — Gets the region time dilation</div></div></section>

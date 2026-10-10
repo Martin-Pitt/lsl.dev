@@ -1,0 +1,82 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
+<h2 id="example-lsl-script-gun-and-holster">Example LSL Script - Gun and Holster</h2>
+<div class="wiki-line">The following example script demonstrates the combined use of several LSL features. Among those are:</div>
+<ul>
+<li>The <a href="/events/attach/">attach()</a> Event - When the Agent Attaches, Wears or Detaches the Object</li>
+<li>The <a href="/functions/llListen/">llListen()</a> and <a href="/functions/llListenRemove/">llListenRemove()</a> functions - Turning a Listen on and off</li>
+<li><a href="/functions/llGetLinkNumber/">llGetLinkNumber()</a> function - Am I the Root Prim?</li>
+<li><a href="/functions/llSetAlpha/">llSetAlpha()</a> and <a href="/functions/llSetLinkAlpha/">llSetLinkAlpha()</a> functions - Now you see me, now you dont.</li>
+</ul>
+<h3 id="purpose-of-the-script">Purpose of the Script</h3>
+<div class="wiki-line">A common feature provided with a Second Life weapon is the ability to "Draw" or "Holster" it. Typicaly a simple chat command, spoken on a specific channel, will either put the weapon in your hand, or back in the holster. (eg: "/33 draw" or "/33 holster") However, this is not accomplished by moving a Prim Attachment Point or any similar method, it is done by good old fashioned slight of hand.</div>
+<div class="wiki-line">When the command to "Draw" is spoken by the wearer, the weapon attached to the wearer's hand turns visible and the one in the holster turns invisible. Similarly, when the command to "Holster" is given, the weapon in the wearer's hand turns invisible and the one in the holster goes visible. This visual trick gives the appearance that the weapon has been either drawn into the hand, or put away in the holster.</div>
+<div class="wiki-line">The <a href="/functions/llSetAlpha/">llSetAlpha()</a> and <a href="/functions/llSetLinkAlpha/">llSetLinkAlpha()</a> functions are called to make the object either visible or invisible. When the script is in the Root Prim of a multi-prim object, it will not only turn itself visible or invisible, it will also do the same to all of its Child Prims (by use of the <a href="/functions/llSetLinkAlpha/">llSetLinkAlpha()</a> function). However, if the script is in the only prim of a single-prim object, or it is in a Child Prim of a multi-prim object, then it will only turn itself visible or invisible (with the <a href="/functions/llSetAlpha/">llSetAlpha()</a> function).</div>
+<div class="wiki-line">The weapon in the hand is often a multi-prim object that is itself scripted, usually to provide shooting and aiming abilities. The script presented here should be placed in the Root Prim of the weapon held in the hand, and then set the variable IsGun = TRUE;</div>
+<div class="wiki-line">The holstered weapon may be either a single-prim "dummy" or a multi-prim but non-functional replica. In the case of a single-prim dummy, the script should be placed in the only prim, </div>
+<div class="wiki-line">and then set the variable IsGun = FALSE;</div>
+<div class="wiki-line">If the holstered weapon is one prim but is linked to the holster attached to the wearer, it should be linked as a Child Prim and not the Root Prim. This script should then be placed </div>
+<div class="wiki-line">in the weapon prim and then set the variable IsGun = FALSE;</div>
+<div class="wiki-line">Finally, if the holstered weapon is a multi-prim object just for the weapon and not including the holster, you will have to edit this script to make it leave the holster prim (or prims) always visible, while changing the weapon prims from visible to invisible.</div>
+<h3 id="lsl-script">LSL Script</h3>
+<div class="wiki-line"><pre><code>//
+// Written and presented by Darrius Gothly 2009
+// Free for any use, if it helps you, far out. If not, sorry.
+//
+
+integer IsGun       = TRUE;             // set to TRUE for Gun, FALSE for Holster
+integer ChatChan    = 33;               // set to desired chat channel
+
+string DrawCmd      = &quot;draw&quot;;
+string HolsterCmd   = &quot;holster&quot;;        // set to whatever commands you want
+
+integer IsVisible;
+integer hListen;
+
+default
+{
+    state_entry()
+    {
+    }
+    
+    attach(key id)
+    {
+        if (id != NULL_KEY) {
+            hListen = llListen(ChatChan, &quot;&quot;, id, &quot;&quot;);
+        } else {
+            llListenRemove(hListen);
+        }
+    }
+    
+    listen(integer chan, string name, key id, string msg)
+    {
+        if (chan == ChatChan) {
+            if (llToLower(msg) == llToLower(DrawCmd)) {
+                if (IsGun) {
+                    if (llGetLinkNumber() == LINK_ROOT)
+                        llSetLinkAlpha(LINK_SET, 1.0, ALL_SIDES);
+                    else
+                        llSetAlpha(1.0, ALL_SIDES);
+                } else {
+                    if (llGetLinkNumber() == LINK_ROOT)
+                        llSetLinkAlpha(LINK_SET, 0.0, ALL_SIDES);
+                    else
+                        llSetAlpha(0.0, ALL_SIDES);
+                }
+            } else if (llToLower(msg) == llToLower(HolsterCmd)) {
+                if (IsGun) {
+                    if (llGetLinkNumber() == LINK_ROOT)
+                        llSetLinkAlpha(LINK_SET, 0.0, ALL_SIDES);
+                    else
+                        llSetAlpha(0.0, ALL_SIDES);
+                } else {
+                    if (llGetLinkNumber() == LINK_ROOT)
+                        llSetLinkAlpha(LINK_SET, 1.0, ALL_SIDES);
+                    else
+                        llSetAlpha(1.0, ALL_SIDES);
+                }
+            }
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">Contributed by <a href="https://wiki.secondlife.com/wiki/User:Darrius_Gothly">Darrius Gothly 2009</a></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-examples-d1aa2221/">Category:LSL Examples</a></div>

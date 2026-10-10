@@ -1,0 +1,39 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Result of <a href="/functions/llTarget/">llTarget</a> library function call</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>integer target_id;
+vector target_pos;
+
+default
+{
+    state_entry()
+    {
+        target_pos = llGetPos() + &lt;5.0, 0.0, 0.0&gt;;
+        target_id = llTarget(target_pos, 0.5);
+        llSetStatus(STATUS_PHYSICS, TRUE);
+        llMoveToTarget(target_pos, 0.4);
+    }
+    at_target(integer tnum, vector targetpos, vector ourpos)
+    {
+        if (tnum == target_id)
+        {
+            llOwnerSay(&quot;object is within range of target&quot;);
+            llOwnerSay(&quot;target position: &quot; + (string)targetpos + &quot;, object is now at: &quot; + (string)ourpos);
+            llOwnerSay(&quot;this is &quot; + (string)llVecDist(targetpos, ourpos) + &quot; meters from the target&quot;);
+            llTargetRemove(target_id);
+        }
+    }
+    not_at_target()
+    {
+        llOwnerSay(
+            &quot;not there yet - object is at &quot; + (string)llGetPos() + 
+            &quot;, which is &quot; + (string)llVecDist(target_pos, llGetPos()) + 
+            &quot; meters from the target (&quot; + (string)target_pos + &quot;)&quot;
+        );
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTarget/">llTarget</a> — Setup a target position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTargetRemove/">llTargetRemove</a> — Stop a target position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRotTarget/">llRotTarget</a> — Setup a target rotation</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRotTargetRemove/">llRotTargetRemove</a> — Stop a target rotation</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/not_at_target/">not_at_target</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/at_rot_target/">at_rot_target</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/not_at_rot_target/">not_at_rot_target</a></div></div></section>

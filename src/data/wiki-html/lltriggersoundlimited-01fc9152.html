@@ -1,0 +1,188 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Plays <code>sound</code> at <code>volume</code>, centered at but not attached to the object, limited to the box defined by vectors <code>top_north_east</code> and <code>bottom_south_west</code></div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If the object moves the sound does not move with it.<br/>Use <a href="/functions/llPlaySound/">llPlaySound</a> to play a sound attached to the object.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Unlike <a href="/functions/llSetSoundRadius/">llSetSoundRadius</a>, the sound audibility is determined by <strong>avatar</strong> position and not camera position.</li>
+<li>If the script is attached and the parcel has avatar sounds turned off, an error is shouted on <span class="wiki-template"><code>{{#var:DEBUG_CHANNEL}}</code></span>: "Too many sound triggers."</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>/*
+    Single Prim llTriggerSoundLimited Helper by Daemonika Nightfire.
+ 
+    Just use this script in a single prim and make the prim as big as your room.
+    If you then click on the prim, the sound will only be triggered inside and you will get a message with a finished LSL code.
+    You can simply copy this code to the clipboard and use it in your actual script.
+    
+    Important:
+    You cannot rotate the prim, the code needs global coordinates.
+*/
+
+string sound = &quot;c704dbd8-53b1-246d-e197-b486e92da45b&quot;; // use here your own sound uuid
+
+////////// nothing to do below this line \\\\\\\\\\
+default
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHANTOM, TRUE);
+        llSetRot(ZERO_ROTATION);
+    }
+
+    touch_start(integer total_number)
+    {
+        llSetRot(ZERO_ROTATION);
+        vector my_pos = llGetPos();
+        vector my_scale = llGetScale();
+        
+        float _X = my_scale.x/2;
+        float _Y = my_scale.y/2;
+        float _Z = my_scale.z/2;
+        
+        vector bottom_south_west = &lt;my_pos.x - _X, my_pos.y - _Y, my_pos.z - _Z&gt;;
+        vector top_north_east    = &lt;my_pos.x + _X, my_pos.y + _Y, my_pos.z + _Z&gt;;
+        
+        llTriggerSoundLimited(sound, 1.0, top_north_east, bottom_south_west);
+        
+        llOwnerSay(&quot;\nllTriggerSoundLimited(\&quot;&quot; + sound + &quot;\&quot;, 1.0, &quot; + (string)top_north_east + &quot;, &quot; + (string)bottom_south_west + &quot;);&quot;);
+    }
+    
+    on_rez(integer Dae)
+    {
+        llResetScript();
+    }
+}</code></pre></div>
+<h3 id="secret-collision-sound">Secret Collision Sound</h3>
+<div class="wiki-line">This will play a sound on collision, only to the person who collided with it.</div>
+<div class="wiki-line">It can be used for haunted houses where you want to add confusion, since others wont hear!</div>
+<div class="wiki-line"><pre><code>string sound = &quot;a9da4612-5d4b-662a-050a-c821c394991f&quot;; // squeaky toy
+
+playSoundAt(key avatar, string sound, float volume)
+{
+    if (llGetAgentSize(avatar)) // Make sure theyre actually present
+    {
+        vector pos = (vector)llList2String(llGetObjectDetails(avatar, [OBJECT_POS]),0); // Their position
+        list scale = llGetBoundingBox(avatar); // The corners of their bounding box
+        vector corner2 = pos+llList2Vector(scale,1); // Top northeast corner of their bounding box
+        vector corner1 = pos+llList2Vector(scale,0); // Bottom southwest corner of their bounding box
+        llTriggerSoundLimited(sound, volume, corner2, corner1); // Play sound in their location only
+    }
+}
+default
+{
+    collision_start(integer n)
+    {
+        key bumper = llDetectedKey(0);
+        float volume = 1.0; // Volume is affected by distance like llPlaySound!
+        playSoundAt(bumper, sound, volume);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llPlaySound/">llPlaySound</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTriggerSound/">llTriggerSound</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetSoundRadius/">llSetSoundRadius</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-added-c4a824ad/">LSL Added</a>: <code>{{LSL Added|0.4.0|remote=http://secondlife.wikia.com/wiki/Version_0.4.0}}</code></span></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-4897"><a href="/wiki/template-issues-svc-4897-d4de8d22/">Template:Issues/SVC-4897</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-4897|&#x27;&#x27;&#x27;llSetSyncTime&#x27;&#x27;&#x27;() - a function for synchronising client side effects|type=nf}}</code></pre></details><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-position-a2dae76f/">Template:LSL Function/position</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+This template is to be used to specify setup the description for position like parameters (offsets, positions, points, etc.).
+
+Right now it&#x27;s pretty basic and easy to edit. I&#x27;m wondering if these functions should be in a position parameter specific category.
+
+====TODO====
+* add clamping flag and verbiage for out of region/range coordinates.
+&lt;/noinclude&gt;{{#if:
+
+{{#if:{{{region|}}}|
+  {{#if:{{{local|}}}|
+
+    {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region}} or [[Viewer coordinate frames#Local|local coordinates]] depending upon the situation{{{desc|}}}}}
+
+    {{#vardefine:p_{{{1|}}}_hover|position in region or local coordinates depending upon the situation{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+  |
+    {{#ifeq:{{{1|}}}|point|
+
+      {{#vardefine:p_{{{1|}}}_desc|A point in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region-local}} space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|A point in region-local space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region coordinates}}{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in region coordinates{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+|
+  {{#if:{{{local|}}}|
+
+    {{#ifeq:{{{1|}}}|offset|
+
+      {{LSL Function/offset|{{{1|}}}|local={{{local}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in [[Viewer coordinate frames#Local|local coordinates]]{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in local coordinates{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+}}
+
+}}</code></pre></details></section>

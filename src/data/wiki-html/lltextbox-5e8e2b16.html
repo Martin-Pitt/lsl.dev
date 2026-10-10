@@ -1,0 +1,127 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Shows a dialog box on <code>avatar</code>'s screen with the text <code>message</code>. It contains a text box for input, any text that is entered is <a href="/functions/llSay/">said</a> by <code>avatar</code> on <code>channel</code> when the "Submit" button is clicked.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Not supported in official Linden Lab viewers prior to version 2.4, and some <a href="https://wiki.secondlife.com/wiki/Third_Party_Viewer_Directory">TPVs</a> may not support it. Unsupported viewers will display a dialog box with a single option of "!!llTextBox!!".</li>
+<li>There is no way by script to kill a text box.</li>
+<li>There is no way for the script to detect if the user clicked the small "ignore" button (no chat is generated as a result of pressing this button).</li>
+<li>If the listening prim is out of the 20 meter range of the sending prim when the "Submit" button is pressed, it will not be able to hear the response.</li>
+<li>This limitation affects attachments too if the wearer moves more than 20 meters from where the listener is located. </li>
+<li>The textbox input is limited to 250 bytes (characters). This can be a problem for larger text input; if the input can be over 250 characters, you will have to accept it through chat.</li>
+<li>There is an undocumented throttle on llTextBox requests. Exceeding it will shout an error on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a> until the "average" falls.</li>
+</ul>
+<h3 id="message-limits">message limits</h3>
+<ul>
+<li>If it exceeds 7 (Viewer 3) or 8 (Viewer 1) lines a scroll bar will appear.</li>
+<li><code>message</code> must be less than 512 bytes and not empty. Otherwise, it will shout an error on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>. One easy way to create an empty message is to use a line feed, as in <pre><code>llTextBox(avatar_key,&quot; \n&quot;,dialog_channel);</code></pre></li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>integer  gListener;
+default
+{
+    touch_start(integer total_number)
+    {
+        // See &#x27;discussion&#x27; page for more comments on choosing a channel and possible left-open listener
+        integer channel = -13572468;
+        // &quot;&quot; saves byte-code over NULL_KEY
+        gListener = llListen( channel, &quot;&quot;, &quot;&quot;, &quot;&quot;);     
+        llTextBox(llDetectedKey(0), &quot;Some info text for the top of the window...&quot;, channel);
+    }
+    listen(integer channel, string name, key id, string message)
+    {
+        llListenRemove(gListener);
+        llSay(0, &quot;You wrote: &quot; + message);
+    }
+}</code></pre></div>
+<div class="wiki-line">If the user hits <span class="wiki-template"><a href="/wiki/template-k-9900c680/">K</a>: <code>{{K|Enter}}</code></span> before clicking the <code>"Submit"</code> button, there will be a final carriage return in the message. In the rare event that this could be a problem, it is easily removed:</div>
+<div class="wiki-line"><pre><code>        message = llStringTrim(message,STRING_TRIM);</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDialog/">llDialog</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llListen/">llListen</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSay/">llSay</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llWhisper/">llWhisper</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llShout/">llShout</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRegionSay/">llRegionSay</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/listen/">listen</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Introduced in <span class="wiki-template"><a href="/wiki/template-svn-6879a543/">SVN</a>: <code>{{SVN|568|rev=88085|trunk=*|anchor=file33|date=Wednesday, 21 May 2008}}</code></span></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-chat-144925b5/">Template:LSL Function/chat</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}{{LSLC|Communications{{#var:lang}}}}}}}}&lt;/includeonly&gt;
+
+{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}{{LSLC|Chat{{#var:lang}}}}}}}}&lt;/includeonly&gt;
+
+{{#vardefine:fc-neither|{{#ifeq:{{#if:{{{np|}}}|*}}{{#if:{{{nd|}}}|*}}|**|*}}}}
+
+{{#if:{{#var:fc-neither}}|{{LSL Constants/Chat}}|
+{{#vardefine:constants_nb|{{LSL Constants/Chat|np={{{np|}}}|nd={{{nd|}}}|direct={{{direct|}}}}}
+{{#var:constants_nb}}}}}}
+
+{{#if:{{{np|}}}||{{Footnote|handle=channel_zero|Channel zero is also known as: {{#var:PUBLIC_CHANNEL}}, open chat, local chat and public chat|Channel zero is also known as: PUBLIC_CHANNEL, open chat, local chat and public chat}}}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{input|}}}|input|output}} {{LSLGC|Chat|chat}} channel, any integer value {{#if:{{#var:fc-neither}}|except zero{{Footnote|handle=channel_zero}} and {{#var:DEBUG_CHANNEL}}|{{#if:{{{np|}}}|except zero{{Footnote|handle=channel_zero}}}}{{#if:{{{nd|}}}|except {{#var:DEBUG_CHANNEL}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{input|}}}|input|output}} chat channel, any integer value {{#if:{{#var:fc-neither}}|except zero (PUBLIC_CHANNEL) and DEBUG_CHANNEL|{{#if:{{{np|}}}|except zero (PUBLIC_CHANNEL)}}{{#if:{{{nd|}}}|except DEBUG_CHANNEL}}}}}}
+
+{{#ifeq:{{#var:fc-neither}}{{{1|&lt;noinclude&gt;{{{1}}}&lt;/noinclude&gt;}}}{{{dialog|}}}|{{{1}}}|
+{{#vardefine:caveats|{{#var:caveats}}
+*Messages sent on {{#if:{{{np|}}}||channel zero{{Footnote|handle=channel_zero}} {{#if:{{{nd|}}}||and}}}} {{#if:{{{nd|}}}||{{#var:DEBUG_CHANNEL}}}} are throttled to a rate of &lt;200/10sec, per region, per owner/user.
+**Once the rate is exceeded, all following messages on {{#if:{{{np|}}}||channel zero {{#if:{{{nd|}}}||or}}}} {{#if:{{{nd|}}}||{{#var:DEBUG_CHANNEL}}}} will be dropped until the send rate is again below 200/10sec for the previous 10 sec. Dropped messages, despite being dropped still count against the limit.}}
+}}
+
+}}
+
+{{#if:{{{2|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|
+
+{{#if:{{{input|}}}|
+{{#vardefine:p_{{{2|none_}}}_desc|{{#if:{{{ph|}}}|{{{ph|}}}|{{{pd|}}}}} message}}
+|
+{{#if:{{{dialog|}}}|
+{{#vardefine:p_{{{2|none_}}}_desc|message to be displayed in the {{{dialog|}}}}}
+|
+{{#vardefine:p_{{{2|none_}}}_desc|message to be transmitted}}
+}}
+}}
+
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|-
+{{VarPair|p_{{{2|none_}}}_desc}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPair|examples}}
+|-
+{{VarPairTable|footnotes}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

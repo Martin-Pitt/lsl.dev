@@ -1,0 +1,75 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line"><a href="/constants/ZERO_VECTOR/">ZERO_VECTOR</a> is returned if <code>avatar</code> is not in the region or if it is not an avatar.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/vector">vector</a> that is an estimated size of the requested <code>avatar</code>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The returned vector is an estimate calculated from the avatar's current shape including shoes. x is a constant 0.45<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|1={{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=88|text=const F32 DEFAULT_AGENT_DEPTH = 0.45f;}}|2=const F32 DEFAULT_AGENT_DEPTH = 0.45f;}}</code></span>, y is a constant 0.60<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|1={{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=92|text=const F32 DEFAULT_AGENT_WIDTH = 0.60f;}}|2=const F32 DEFAULT_AGENT_WIDTH = 0.60f;}}</code></span>, z is the approximate total height of all avatar's bones, with an arbitrary amount added or subtracted based on the current shape's "Hover" setting. Reported height is constrained to the range 1.1 to 2.45 meters, and does not include animation or mesh bone offsets. <span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|2=llGetAgentSize returns the same value as LLVOAvatar::computeBodySize(). See llcommon/indra_constants.h for defaults and limits.|1=llGetAgentSize returns the same value as {{SourceLink/github|viewer|indra/llappearance/llavatarappearance.cpp|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=433|text=LLVOAvatar::computeBodySize()}}. See {{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=86|text=indra/llcommon/indra_constants.h}} for defaults and limits.}}</code></span></li>
+<li>Due to the shape Hover setting, and mesh and animation offsets, it is not possible to use this function to determine the rendered height of an avatar with any degree of confidence.</li>
+<li>As of Second Life Server 13.11.19.284082, the return value is the avatar's reported <a href="/functions/llGetBoundingBox/">bounding box</a> - &lt;0.1, 0.1, 0.2&gt; when standing. (Avatar bounding boxes have historically been redefined with major physics upgrades.) An avatar's bounding box changes when an avatar sits, while <a href="/functions/llGetAgentSize/">llGetAgentSize</a> is constant for as long as the shape does not change.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//A simple script that makes a box hover above the owner&#x27;s head.
+default
+{
+    state_entry()
+    {
+        key    owner = llGetOwner();
+        vector pos   = llList2Vector(llGetObjectDetails(owner, [OBJECT_POS]), 0);
+        vector agent = llGetAgentSize(owner);
+
+    //  &quot;pos&quot; needs to be adjusted so it appears above the owner.
+        pos.z += 0.5 + agent.z / 2;
+
+    //  makes sure it found the owner, a zero vector evaluates as false
+        if(agent)
+            llSetPos(pos);
+    }
+
+    touch_start(integer num)
+    {
+        llResetScript();
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>This function is a good way to quickly test...</li>
+<li>if an avatar is in the same region.</li>
+<li>if a UUID known to be in the region is an avatar.</li>
+</ul>
+<div class="wiki-line">To use this function to test either case use as follows</div>
+<div class="wiki-line"><pre><code>if(llGetAgentSize(uuid)) {
+    //uuid is an avatar in the region
+} else {
+    //uuid is not an avatar in the region
+}</code></pre></div>
+<ul>
+<li><code>DEFAULT_AGENT_HEIGHT</code> in <span class="wiki-template"><a href="/wiki/template-sourcelink-github-10361efb/">SourceLink/github</a>: <code>{{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=0ca239e469b3|line=96|text=indra/llcommon/indra_constants.h}}</code></span> is 1.9. This will be the z value if an avatar's shape has <a href="https://wiki.secondlife.com/wiki/Ruth">not loaded yet</a>. It is possible but extremely rare to see a fully loaded avatar with this exact size, so:</li>
+</ul>
+<div class="wiki-line"><pre><code>vector agentSize = llGetAgentSize(uuid);
+if (agentSize.z == 1.9) {
+    // avatar is probably Ruthed
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectDetails/">llGetObjectDetails</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetBoundingBox/">llGetBoundingBox</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAgentInfo/">llGetAgentInfo</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestAgentData/">llRequestAgentData</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/avatar-body-size-614e9416/">Avatar body size</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

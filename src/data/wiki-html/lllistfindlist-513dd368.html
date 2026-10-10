@@ -1,0 +1,51 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>test</code> is not found in <code>src</code>, -1 (in LSL) or nil (in SLua) is returned.<br/></div>
+<div class="wiki-line">The index of the first entry in the list is <code>0</code><br></div>
+<div class="wiki-line">If <code>test</code> is found at the last index in <code>src</code> the positive index is returned (5th entry of 5 returns 4).</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Strict type matching and case sensitivity is enforced.</li>
+<li>"1" != 1</li>
+<li>"1.0" != 1.0</li>
+<li>1 != 1.0</li>
+<li>"a822ff2b-ff02-461d-b45d-dcd10a2de0c2" != (key)"a822ff2b-ff02-461d-b45d-dcd10a2de0c2"</li>
+<li>"Justice" != "justice"</li>
+<li>If <code>test</code> is an <code>empty list</code> the value returned is <code>0</code> rather than -1.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>list numbers = [1, 2, 3, 4, 5];
+default
+{
+    state_entry()
+    {
+        integer index = llListFindList(numbers, [3]);
+        if (index != -1)
+        {
+            list three_four = llList2List(numbers, index, index + 1);
+            llOwnerSay(llDumpList2String(three_four, &quot;,&quot;));
+            // Object: 3,4
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>//You can also search for two items at once to find a pattern in a list
+list avatarsWhoFoundMagicLeaves = [&quot;Fire Centaur&quot;,&quot;Red Leaf&quot;];
+default
+{
+    state_entry()
+    {
+        integer index = llListFindList(avatarsWhoFoundMagicLeaves, [&quot;Fire Centaur&quot;,&quot;Red Leaf&quot;]);
+        if (index != -1)
+        {
+            list output = llList2List(avatarsWhoFoundMagicLeaves, index, index + 1);
+            llOwnerSay(llDumpList2String(output, &quot;,&quot;));
+            // Object: Fire Centaur, Red Leaf
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line">An easy way to see if an item exists in a list...</div>
+<div class="wiki-line"><pre><code>if(~llListFindList(myList, (list)item))
+{//it exists
+    // This works because ~(-1) produces 0, but ~ of any other value produces non-zero and causes the &#x27;if&#x27; to succeed
+    // So any return value (including 0) that corresponds to a found item, will make the condition succeed
+    // It saves bytecode and is faster then doing != -1
+    // This is a bitwise NOT (~) not a negation (-)
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSubStringIndex/">llSubStringIndex</a> — Find a string in another string</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-5146"><a href="/wiki/template-issues-svc-5146-27de4799/">Template:Issues/SVC-5146</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-5146|&#x27;&#x27;&#x27;llSortedListFindList&#x27;&#x27;&#x27;() - improved [[llListFindList]]() for known to be sorted lists|type=nf}}</code></pre></details><p id="bug-10924"><a href="/wiki/template-issues-bug-10924-81050d3a/">Template:Issues/BUG-10924</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-10924|&#x27;&#x27;&#x27;llSubListFindList&#x27;&#x27;&#x27;() - Search within a sub-list|type=nf}}</code></pre></details></section>

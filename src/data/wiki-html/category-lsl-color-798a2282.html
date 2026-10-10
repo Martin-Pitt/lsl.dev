@@ -1,0 +1,148 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><code>{{#if:
+
+{{#vardefine:header_title|Color in LSL}}
+{{#vardefine:header_text|LSL has its own special format for color. LSL uses a [[vector]] to store color. Unlike traditional RGB where each channel is 0 -&amp;gt; 255, LSL&#x27;s color channels are 0 -&amp;gt; 1.&lt;br/&gt;
+===Format: {{LSL VR|&#x27;&#x27;&#x27;R&#x27;&#x27;&#x27;|&#x27;&#x27;&#x27;G&#x27;&#x27;&#x27;|&#x27;&#x27;&#x27;B&#x27;&#x27;&#x27;}}===
+{{{!}}
+{{LSL DefineRow|float|x|Red value|[0, 1]}}
+{{LSL DefineRow|float|y|Green value|[0, 1]}}
+{{LSL DefineRow|float|z|Blue value|[0, 1]}}
+{{!}}}
+
+=== Light colors ===
+Unlike most other functions relating to color in LSL, lights and [[PBR Materials|PBR material]] tints operate in a {{HoverText|slightly different color space|color is expected in Linear space}} and thus do not accept a {{HoverText|regular RGB value|color in sRGB space}}. (Or, they will, however the displayed color will not be the expected color).
+
+Fortunately, this is easily resolved with 2 functions:
+
+*[[llsRGB2Linear]] - Convert {{HoverText|regular LSL color|color in sRGB space}} into {{HoverText|linear color|color in Linear space}}. (for use in lights)
+*[[llLinear2sRGB]] - Convert {{HoverText|linear color|color in Linear space}} to {{HoverText|regular LSL color|color in sRGB space}}.
+}}
+
+{{#vardefine:helpers|
+&#x27;&#x27;&#x27;Useful functions for storing/retrieving color and alpha values to/from integers&#x27;&#x27;&#x27;
+<pre><code>integer ColorAlphatoRGBA(vector color, float alpha) {
+    return (((integer)(alpha   * 255.0) &amp; 0xFF) &lt;&lt; 24) |
+           (((integer)(color.x * 255.0) &amp; 0xFF) &lt;&lt; 16) |
+           (((integer)(color.y * 255.0) &amp; 0xFF) &lt;&lt; 8) |
+            ((integer)(color.z * 255.0) &amp; 0xFF);
+}
+
+vector RGBAtoColor(integer rgba) {
+    return &lt; (rgba &gt;&gt; 16) &amp; 0xFF, (rgba &gt;&gt; 8) &amp; 0xFF, (rgba &amp; 0xFF) &gt; / 255.0;
+}
+
+float RGBAtoAlpha(integer rgba) {
+    return ((rgba &gt;&gt; 24) &amp; 0xFF) / 255.0;
+}</code></pre>
+&#x27;&#x27;&#x27;Converting RGB colours in hexadecimal to LSL colour vectors&#x27;&#x27;&#x27;
+<pre><code>vector hex2lsl(string hex)
+{
+    integer i = (integer)(&quot;0x&quot; + hex);
+    return &lt;(i &gt;&gt; 16) &amp; 0xFF, (i &gt;&gt; 8) &amp; 0xFF, (i &amp; 0xFF)&gt; / 255;
+}</code></pre>
+* See also: [[Color space conversions]].
+}}
+
+{{#vardefine:examples|
+
+{{{!}} class=&quot;sortable&quot; {{Prettytable|style=float:right;}}
+{{!}}- {{Hl2}}
+! Color
+! Code
+{{!}}-{{ColorMath|hex=001f3f}}
+{{!}} style=&quot;color: white; background: #{{#var:hex}}&quot; {{!}}NAVY
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=0074d9}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}BLUE
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=7fdbff}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}AQUA
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=39cccc}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}TEAL
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=3d9970}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}OLIVE
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=2ecc40}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}GREEN
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=01ff70}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}LIME
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=ffdc00}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}YELLOW
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=ff851b}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}ORANGE
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=ff4136}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}RED
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=85144b}}
+{{!}} style=&quot;color: white; background: #{{#var:hex}}&quot; {{!}}MAROON
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=f012be}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}FUCHSIA
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=b10dc9}}
+{{!}} style=&quot;color: white; background: #{{#var:hex}}&quot; {{!}}PURPLE
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=ffffff}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}WHITE
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=dddddd}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}SILVER
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=aaaaaa}}
+{{!}} style=&quot;background: #{{#var:hex}}&quot; {{!}}GRAY
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}-{{ColorMath|hex=000000}}
+{{!}} style=&quot;color: white; background: #{{#var:hex}}&quot; {{!}}BLACK
+{{!}}&lt;code&gt;{{#var:vector}}&lt;/code&gt;
+{{!}}}
+
+[[File:V1.23 Color Picker.jpg|right|thumb|color picker]]
+
+Equivalent color vectors to the default color picker palette. These are defined in the viewer program directory&#x27;s skins/default/colors.xml while custom user-saved palette entries will be in {{mono|user_settings/colors.xml}}.
+
+<pre><code>vector black               = &lt;0, 0, 0&gt;;          //ColorPaletteEntry01, &quot;Black&quot;
+vector white_A             = &lt;1, 1, 1&gt;;          //ColorPaletteEntry17, &quot;White&quot;
+vector gray                = &lt;0.5, 0.5, 0.5&gt;;    //ColorPaletteEntry02, &quot;Gray&quot;
+vector light_gray          = &lt;0.75, 0.75, 0.75&gt;; //ColorPaletteEntry18, &quot;LtGray&quot;
+vector dark_red            = &lt;0.5, 0, 0&gt;;        //ColorPaletteEntry03
+vector red                 = &lt;1, 0, 0&gt;;          //ColorPaletteEntry19, &quot;Red&quot;
+vector dark_yellow         = &lt;0.5, 0.5, 0&gt;;      //ColorPaletteEntry04
+vector yellow              = &lt;1, 1, 0&gt;;          //ColorPaletteEntry20, &quot;Yellow&quot;
+vector dark_green          = &lt;0, 0.5, 0&gt;;        //ColorPaletteEntry05
+vector green               = &lt;0, 1, 0&gt;;          //ColorPaletteEntry21, &quot;Green&quot;
+vector dark_cyan           = &lt;0, 0.5, 0.5&gt;;      //ColorPaletteEntry06
+vector cyan                = &lt;0, 1, 1&gt;;          //ColorPaletteEntry22
+vector dark_blue           = &lt;0, 0, 0.5&gt;;        //ColorPaletteEntry07
+vector blue                = &lt;0, 0, 1&gt;;          //ColorPaletteEntry23, &quot;Blue&quot;
+vector dark_magenta        = &lt;0.5, 0, 0.5&gt;;      //ColorPaletteEntry08
+vector magenta             = &lt;1, 0, 1&gt;;          //ColorPaletteEntry24, &quot;Purple&quot;
+vector dirty_yellow        = &lt;0.5, 0.5, 0&gt;;      //ColorPaletteEntry09
+vector light_yellow        = &lt;1, 1, 0.5&gt;;        //ColorPaletteEntry25
+vector dark_green_to_blue  = &lt;0, 0.25, 0.25&gt;;    //ColorPaletteEntry10
+vector green_to_blue       = &lt;0, 1, 0.5&gt;;        //ColorPaletteEntry26
+vector light_green_to_blue = &lt;0, 0.5, 1&gt;;        //ColorPaletteEntry11
+vector light_blue_to_green = &lt;0.5, 1, 1&gt;;        //ColorPaletteEntry27
+vector dark_blue_to_cyan   = &lt;0, 0.25, 0.5&gt;;     //ColorPaletteEntry12
+vector cyan_to_pink        = &lt;0.5, 0.5, 1&gt;;      //ColorPaletteEntry28
+vector indigo              = &lt;0.5, 0, 1&gt;;        //ColorPaletteEntry13
+vector violet              = &lt;1, 1, 0.5&gt;;        //ColorPaletteEntry29
+vector dark_brown          = &lt;0.5, 0.25, 0&gt;;     //ColorPaletteEntry14
+vector brown               = &lt;1, 0.5, 0&gt;;        //ColorPaletteEntry30
+vector white_B             = &lt;1, 1, 1&gt;;          //ColorPaletteEntry15, &quot;White&quot;
+vector white_C             = &lt;1, 1, 1&gt;;          //ColorPaletteEntry31
+vector pale_yellow         = &lt;1, 1, 0.79&gt;;       //ColorPaletteEntry16, &quot;LtYellow&quot;
+vector white_D             = &lt;1, 1, 1&gt;;          //ColorPaletteEntry32, &quot;White&quot;
+
+// Floating point conversions, ambient inworld light and color profile variances
+// can show up as small differences in stored settings and externally picked samples</code></pre>
+}}
+
+}}</code></span><span class="wiki-template"><a href="/wiki/template-lsl-generic-d8a16039/">LSL Generic</a>: <code>{{LSL Generic}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Face|*Color}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span></div>

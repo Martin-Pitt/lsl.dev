@@ -1,0 +1,27 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Requests the Agent ID for the agent identified by name from the dataserver. The name given may be either the current name of an avatar or a historical name that has been used in the past. If no agent can be found with the supplied name this function returns the value <a href="/constants/NULL_KEY/">NULL_KEY</a>. </div>
+<div class="wiki-line">Returns a handle (a key) that can be used to identify the request when the dataserver event is raised. </div>
+<div class="wiki-line">The agent being searched for with this function does not need to be signed on to Second Life.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>This function is throttled. The throttle is undocumented, but as of October 2018 the function appears to support bursts of up to 20 requests and sustained use at an average rate of 1.9 requests per second per owner, per region. (Meaning the throttle applies to all objects in the region with the same owner.) Once tripped, the function fails and says "Too many llRequestUserKey requests.  Throttled until average falls." on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</li>
+<li>This function will return a NULL_KEY for any agent that has yet to log on to the grid the function is used on.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>key name_key_query;
+default
+{
+   state_entry()
+   {
+       name_key_query = llRequestUserKey(&quot;rider.linden&quot;);
+   }
+
+   dataserver(key queryid, string data) 
+   {
+       if ( name_key_query == queryid )
+       {
+           llSay(0, &quot;The key for this user is : &quot; + data);
+       }
+   }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Names are always provided in the form &quot;First[ Last]&quot; or &quot;first[.last]&quot; (first name with an optional last name.) If the last name is omitted a last name of "Resident" is assumed. Case is not considered when resolving agent names.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestUsername/">llRequestUsername</a> — to translate a key to a name</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llName2Key/">llName2Key</a> — to fetch avatar UUID by name.</div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Functions}}</code></span></div></section>

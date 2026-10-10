@@ -1,0 +1,39 @@
+<div class="wiki-line">There are some advantages in using global variables over the string and key constants when programming in <a href="https://wiki.secondlife.com/wiki/LSO">LSO</a>; it's faster and uses less bytecode when it is longer than 3 characters and is used more than twice, but it uses more bytecode when it is shorter than 3 characters or is used once. This is easily demonstrated by running the scripts in Figure 1.</div>
+<div class="wiki-line">However, this is only true for <a href="https://wiki.secondlife.com/wiki/LSO">LSO</a> compiled programs. If <a href="https://wiki.secondlife.com/wiki/Mono">Mono</a> is used, then the opposite is true and it uses less memory to use constants. Mono uses only one copy of a constant in memory. In the scripts in Figure 1, using constants saves the memory used to initialize the variable null_key. This is true if LL constants (like NULL_KEY) are used or if user supplied strings (such as "this is a string") are used.</div>
+<h3 id="pros-when-using-lso">Pros when using LSO</h3>
+<ul>
+<li>Faster</li>
+<li>Uses less bytecode when it is longer than 3 characters and it used more than twice.</li>
+</ul>
+<h3 id="cons">Cons</h3>
+<ul>
+<li>User can accidentally change the value.</li>
+<li>Uses more bytecode when it is shorter than 3 characters or it used once.</li>
+</ul>
+<table><caption> Figure 1: Bytecode Cost</caption><tr><th> Constant</th><th> Global</th></tr><tr><td> <pre><code>dead(){
+    key a = NULL_KEY;
+    key b = NULL_KEY;
+    key c = NULL_KEY;
+    key d = NULL_KEY;
+}
+
+default {
+    state_entry() {
+        llOwnerSay((string) llGetFreeMemory());
+    }
+}</code></pre></td><td> <pre><code>key null_key = NULL_KEY;
+
+dead(){
+    key a = null_key;
+    key b = null_key;
+    key c = null_key;
+    key d = null_key;
+}
+
+default {
+    state_entry() {
+        llOwnerSay((string) llGetFreeMemory());
+    }
+}</code></pre></td></tr></table>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-resource-conservation-portal-nav-bf6ea231/">Resource Conservation Portal Nav</a>: <code>{{Resource Conservation Portal Nav|cat=memory}}</code></span></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-b2b52844/">Category:LSL</a></div>

@@ -1,0 +1,96 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Moves the object or primitive towards <code>pos</code> without using physics.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Movement is capped to 10m per call for unattached root prims.<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|Unless you exploit the undocumented [[warpPos]] bug.}}</code></span></div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">This function is available for nonphysical root prims and all child prims. It has no effect on the root prim if the object is physical.</div>
+<h5 id="coordinate-frame">Coordinate Frame</h5>
+<ul>
+<li>Root prims (or single prim objects)</li>
+<li>Attached</li>
+<li><strong>pos</strong> is a <a href="https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#local">local coordinate</a> relative to the attach point.</li>
+<li>Not attached</li>
+<li><strong>pos</strong> is a <a href="https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region">region coordinate</a>.</li>
+<li>Child prims (non root prims)</li>
+<li><strong>pos</strong> is a <a href="https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#local">local coordinate</a> relative to the root prim.</li>
+</ul></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Because of the intermixing of local and regional coordinates with this function, when a prims position is wanted it is best to use <a href="/functions/llGetLocalPos/">llGetLocalPos</a>.</li>
+<li>This function does not work in the root prim of physical objects. Use a physical function like <a href="/functions/llMoveToTarget/">llMoveToTarget</a> instead.</li>
+<li>If you have explicitally set your object as "static obstacle" for pathfinding , the function will fail with the error in the debug channel:</li>
+<li>"Unable to set prim position or scale: object contributes to the navmesh."</li>
+<li>The function cannot move a world object below the region ground level, and the midpoint of the root will be snapped to the ground instead.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">This function has a movement cap of 10m and a time delay of 0.2 seconds per call. Please consider using <a href="/functions/llSetRegionPos/">llSetRegionPos</a> and/or <a href="/functions/llSetLinkPrimitiveParamsFast/">llSetLinkPrimitiveParamsFast</a> instead.</div></aside></div>
+<div class="wiki-line"><pre><code>//Move the object up 1m when someone touches it.
+default {
+     touch_start(integer i) {
+          llSetPos(llGetPos() + &lt;0,0,1&gt;);
+     }
+}
+// to bypass the small movement bug use this
+// - created by Madpeter Zond
+// notes: it does not check if the movement would go out of limit range for linked prims
+llSetLocalPos(vector offset)
+{
+    vector save = offset;
+    if(offset.x &lt; 0.0) offset.x -= 1;
+    else offset.x += 1;
+    if(offset.y &lt; 0.0) offset.y -= 1;
+    else offset.y += 1;
+    if(offset.z &lt; 0.0) offset.z -= 1;
+    else offset.z += 1;
+    llSetPos(offset);
+    llSetPos(save);    
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Multiple movement commands can be chained together with <a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a> and <a href="/constants/PRIM_POSITION/">PRIM_POSITION</a>. The advantage of doing this is that the script only sleeps once per function call instead of once per movement.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetRegionPos/">llSetRegionPos</a> — Sets position of object to any position within the region.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLocalPos/">llGetLocalPos</a> — Returns the prim's local position if it is attached or non-root (otherwise it returns the global position)</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRootPosition/">llGetRootPosition</a> — Gets the root prims position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPos/">llGetPos</a> — Returns the prim's global position, even if it is attached or non-root</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-1945"><a href="/wiki/template-issues-svc-1945-1066167e/">Template:Issues/SVC-1945</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-1945|[[llSetPos]]() doesn&#x27;t change position for small vectors when called in attachments on Havok4 unless interacted with|type=bug}}</code></pre></details><p><a href="/wiki/template-lsl-function-position-a2dae76f/">Template:LSL Function/position</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+This template is to be used to specify setup the description for position like parameters (offsets, positions, points, etc.).
+
+Right now it&#x27;s pretty basic and easy to edit. I&#x27;m wondering if these functions should be in a position parameter specific category.
+
+====TODO====
+* add clamping flag and verbiage for out of region/range coordinates.
+&lt;/noinclude&gt;{{#if:
+
+{{#if:{{{region|}}}|
+  {{#if:{{{local|}}}|
+
+    {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region}} or [[Viewer coordinate frames#Local|local coordinates]] depending upon the situation{{{desc|}}}}}
+
+    {{#vardefine:p_{{{1|}}}_hover|position in region or local coordinates depending upon the situation{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+  |
+    {{#ifeq:{{{1|}}}|point|
+
+      {{#vardefine:p_{{{1|}}}_desc|A point in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region-local}} space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|A point in region-local space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region coordinates}}{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in region coordinates{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+|
+  {{#if:{{{local|}}}|
+
+    {{#ifeq:{{{1|}}}|offset|
+
+      {{LSL Function/offset|{{{1|}}}|local={{{local}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in [[Viewer coordinate frames#Local|local coordinates]]{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in local coordinates{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+}}
+
+}}</code></pre></details></section>

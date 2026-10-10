@@ -1,0 +1,55 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/key">key</a> that is the owner of prim <code>id</code></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Returns <code>id</code> if <code>id</code> is not found in the region or is not a prim.</li>
+<li>Owner information becomes unavailable <em>immediately</em> on derez or detach. For example, if a prim chats at derez or detach time, <code>id</code> can be returned even inside <a href="/events/listen/">listen</a> events of nearby objects. <sup><a href="https://jira.secondlife.com/browse/SVC-5095" rel="noreferrer">SVC-5095</a></sup></li>
+<li>Also returns <code>id</code> for avatars, use <a href="/functions/llGetAgentSize/">llGetAgentSize</a> instead to distinguish them from prims that do not exist.</li>
+<li>Returns NULL_KEY if the id passed in is not a valid key</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+    //  listen to anything talking on channel 1
+        llListen(1, &quot;&quot;, NULL_KEY, &quot;&quot;);
+    //  Type &quot;/1 &quot; + message (such as &quot;/1 poke&quot;) to chat &#x27;message&#x27; on channel 1.
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        key ownerOfThisObject = llGetOwner();
+        key ownerOfSpeaker = llGetOwnerKey(id);
+
+    //  if whoever is talking is the owner of this object
+    //  or if the owner of the object talking is the owner of this object
+        if (ownerOfSpeaker == ownerOfThisObject)
+        {
+            llOwnerSay(&quot;&#x27;&quot; + name + &quot;&#x27; has the same owner as me ^_^&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llKey2Name/">llKey2Name</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestAgentData/">llRequestAgentData</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectDetails/">llGetObjectDetails</a> — <a href="/constants/OBJECT_OWNER/">OBJECT_OWNER</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetOwner/">llGetOwner</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-prim-081edb48/">Template:LSL Function/prim</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default={{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default={{{sim|}}}}}
+}}}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="https://wiki.secondlife.com/wiki/Template:DISPLAYTITLE:farts">DISPLAYTITLE:farts</a>: <code>{{DISPLAYTITLE:farts}}</code></span></div></section>

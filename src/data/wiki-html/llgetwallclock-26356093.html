@@ -1,0 +1,85 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">For GMT use <a href="/functions/llGetGMTclock/">llGetGMTclock</a></div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/float">float</a> that is the time in seconds since midnight Pacific time (PST/PDT), truncated to whole seconds. That is the same as the time of day in SLT expressed as seconds.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Real World Sun
+integer Flag;
+
+default
+{
+    state_entry()
+    {
+        Flag = -1;
+        llSetTimerEvent(0.1);
+    }
+    
+    timer()
+    {
+        float time = llGetWallclock();
+        if (Flag == -1)
+        {
+            llSetTimerEvent(60.0);
+        }
+        if (time &lt; 21600)
+        {
+            if (Flag)
+            {
+                llSetText(&quot;The Sun is coming! :)&quot;, &lt;1,1,0&gt;, 1.0);
+                Flag = 0;
+            }
+        }
+        else if (time &lt; 64800)
+        {
+            if (Flag != 1)
+            {
+                llSetText(&quot;Sun has risen. :(&quot;, &lt;1,0,0&gt;, 1.0);
+                Flag = 1;
+            }
+        }
+        else if (Flag != 2)
+        {
+            llSetText(&quot;Goodbye Sun. :(&quot;, &lt;1,0,0&gt;, 1.0);
+            Flag = 2;
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// Convert to human-readable HH:MM:SS format
+string ConvertWallclockToTime()
+{
+    integer now = (integer)llGetWallclock();
+    integer seconds = now % 60;
+    integer minutes = (now / 60) % 60;
+    integer hours = now / 3600;
+    return llGetSubString(&quot;0&quot; + (string)hours, -2, -1) + &quot;:&quot; 
+        + llGetSubString(&quot;0&quot; + (string)minutes, -2, -1) + &quot;:&quot; 
+        + llGetSubString(&quot;0&quot; + (string)seconds, -2, -1);
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        llSay(0, ConvertWallclockToTime());
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// Convert to human-readable 12-hour HH:MM:SS (AM/PM) format
+string ConvertWallclockToTime()
+{
+    integer now = (integer)llGetWallclock();
+    integer seconds = now % 60;
+    integer minutes = (now / 60) % 60;
+    integer hours = now / 3600;
+
+    return llGetSubString(&quot;0&quot; + (string)(hours % 12), -2, -1) + &quot;:&quot; 
+           + llGetSubString(&quot;0&quot; + (string)minutes, -2, -1) + &quot;:&quot;
+           + llGetSubString(&quot;0&quot; + (string)seconds, -2, -1) + &quot; &quot;
+           + llList2String([&quot;AM&quot;, &quot;PM&quot;], (hours &gt; hours % 12));
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        llSay(0, ConvertWallclockToTime());
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">To determine if the current time returned by this function is PST or PDT, you can look at the difference between llGetGMTclock() and llGetWallclock(). The difference will be either 8 hours or -16 hours for PST, and 7 hours or -17 hours for PDT, that is 28800 or -57600,  or 25200 or -61200 seconds.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetGMTclock/">llGetGMTclock</a> — Seconds since midnight GMT</div></div></section>

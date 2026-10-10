@@ -1,0 +1,43 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sets the amount of <code>damage</code> that will be done when this object hits an avatar.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">For an avatar to take damage when the object collides with an avatar...</div>
+<ul>
+<li>The object must not be <a href="/constants/STATUS_PHANTOM/">phantom</a> or <a href="/functions/llVolumeDetect/">llVolumeDetect</a>(<a href="/constants/TRUE/">TRUE</a>)</li>
+<li>The avatar must be on the land where "Safe (no damage)" is disabled.</li>
+<li>The object however does not need to be on or even partially over damage enabled land.</li>
+</ul>
+<div class="wiki-line">When these preconditions are met, the avatar receives the damage, and the object will <a href="/functions/llDie/">die</a> without calling the <a href="/wiki/category-lsl-collision-579d074c/">collision</a> events.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><code>damage</code> is a <a href="https://wiki.secondlife.com/wiki/Prim_Properties">Prim Property</a>, and may be applied even if there is no running script.</li>
+<li>If <code>damage</code> is 100.0 or greater, the object will instantly <a href="https://wiki.secondlife.com/wiki/death">kill</a> even a fully healthy avatar.</li>
+<li>If <code>damage</code> is less than zero, the avatar will he healed for the indicated amount.</li>
+<li>If a damage enabled object hits a physics enabled object that one or more avatars are sitting on, damage will be distributed to all seated avatars.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//Simple autokiller bullet:
+// This will instantly &quot;kill&quot; on collision if contact is made with avatar on damage enabled land.
+
+default
+{
+    on_rez(integer param) // Becomes active when rezzed.
+    {
+        llSetDamage(100.0); // Set the damage to maximum.
+        llSensor(&quot;&quot;, &quot;&quot;, AGENT, 96.0, PI); // Sweep a 96 meter sphere searching for agents.
+    }
+    sensor(integer num) // If an agent is detected...
+    {
+        llSetStatus(STATUS_PHYSICS, TRUE); // Enable physics to allow physical movement.
+        llSetTimerEvent(10.0); // Set a 10 second timer.
+        llMoveToTarget(llDetectedPos(0), 0.5); // Move to the detected position.
+    }
+    no_sensor() // If no agents are detected...
+    {
+        llDie(); // Auto destruct.
+    }
+    timer() // If we missed our target...
+    {
+        llDie(); // Auto destruct.
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Damage">Damage</a> — How damage works in Second Life</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Death">Death</a> — The concept of death in Second Life</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Combat">Combat</a> — Combat in Second Life</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Weapon">Weapon</a> — Weapons in Second Life</div></div></section>

@@ -1,0 +1,85 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Set the minimum time between events being handled.</div>
+<div class="wiki-line">Defaults and minimums vary by the event type, see <a href="/wiki/lsl-delay-d1cb4fc2/">LSL Delay</a>.</div></section>
+<section><h2 id="caveats">Caveats</h2><div class="wiki-line">Minimum delay is maintained between state changes.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llMinEventDelay(5.0);
+    }
+    touch(integer detected)
+    {
+        llSay(0, &quot;Touched.&quot;);//Without the event delay set touch would cause the screen to fill 
+                             //with the word &quot;Touched&quot; in a split second if you held the mouse button down.
+    }
+}</code></pre></div>
+<div class="wiki-line">Where as, if in one object you place this script (for the sake of fun call the object "Sandy Powell"). -</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch(integer detected)
+    {
+        llSay(0, &quot;Can you hear me mother?&quot;); //Northern English accent. Catch phase of Sandy Powell (comedian).
+    }
+}</code></pre></div>
+<div class="wiki-line">and this in another object called "Mother" -</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llMinEventDelay(5.0);
+        llListen(0, &quot;Sandy Powell&quot;, &quot;&quot;, &quot;&quot;);
+    }
+    listen(integer chan, string name, key id, string msg)
+    {
+        llSay(0, &quot;Eh?&quot;);
+    }
+}</code></pre></div>
+<div class="wiki-line">the result in chat is as follows -</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-samp-a72200d2/">Samp</a>: <code>{{Samp|1=
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Mother: Eh?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Mother: Eh?
+[12:51]  Mother: Eh?
+[12:51]  Mother: Eh?
+[12:51]  Mother: Eh?
+[12:51]  Mother: Eh?
+[12:51]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+}}</code></span></div>
+<div class="wiki-line">and no more events are triggered. This is an example of lost transferred info because of <a href="/functions/llMinEventDelay/">llMinEventDelay</a> so be careful with it.</div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/lsl-delay-d1cb4fc2/">LSL Delay</a> — for default values</div></div></section>

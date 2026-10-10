@@ -1,0 +1,265 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Cast a line from <code>start</code> to <code>end</code> and report collision data for intersections with objects.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Example return of successful raycast, using the default options:</div>
+<div class="wiki-line"><pre><code>[key object_uuid, vector hit_position, integer status_code]</code></pre></div>
+<div class="wiki-line">Example return of successful raycast, using [ <a href="#rc-data-flags">RC_DATA_FLAGS</a>, <a href="#rc-data-flags">RC_MAX_HITS</a>, 2 ] , with the raycast returning 2 collisions:</div>
+<div class="wiki-line"><pre><code>[key object1_uuid, vector hit1_position, key object2_uuid, vector hit2_position, 2]</code></pre></div>
+<div class="wiki-line">In the case of an error, or if the ray hits nothing, the resulting list only contains the status code:</div>
+<div class="wiki-line"><pre><code>[integer status_code]</code></pre></div>
+<table id="return-values">
+<caption>Return values</caption>
+<tr>
+<th>Condition</th>
+<th>Values returned</th>
+</tr>
+<tr><td>when <code>status_code</code> <b>&lt; 0</b></td><td>[ <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>status_code</code> ]</td></tr>
+<tr><td>no <a href="#rc-data-flags">RC_DATA_FLAGS</a> flags</td><td><code>status_code</code> * [ <a href="https://wiki.secondlife.com/wiki/key">key</a> <code>object_uuid</code>, <a href="https://wiki.secondlife.com/wiki/vector">vector</a> <code>hit_position</code> ] + [ <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>status_code</code> ]</td></tr>
+<tr><td><a href="#rc-data-flags">RC_GET_NORMAL</a></td><td><code>status_code</code> * [ <a href="https://wiki.secondlife.com/wiki/key">key</a> <code>object_uuid</code>, <a href="https://wiki.secondlife.com/wiki/vector">vector</a> <code>hit_position</code>, <a href="https://wiki.secondlife.com/wiki/vector">vector</a> <code>surface_normal</code> ] + [ <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>status_code</code> ]</td></tr>
+<tr><td><a href="#rc-data-flags">RC_GET_LINKNUM</a></td><td><code>status_code</code> * [ <a href="https://wiki.secondlife.com/wiki/key">key</a> <code>object_uuid</code>, <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>linknum</code>, <a href="https://wiki.secondlife.com/wiki/vector">vector</a> <code>hit_position</code> ] + [ <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>status_code</code> ]</td></tr>
+<tr><td><a href="#rc-data-flags">RC_GET_NORMAL</a>|<a href="#rc-data-flags">RC_GET_LINKNUM</a></td><td><code>status_code</code> * [ <a href="https://wiki.secondlife.com/wiki/key">key</a> <code>object_uuid</code>, <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>linknum</code>, <a href="https://wiki.secondlife.com/wiki/vector">vector</a> <code>hit_position</code>, <a href="https://wiki.secondlife.com/wiki/vector">vector</a> <code>surface_normal</code> ] + [ <a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>status_code</code> ]</td></tr>
+</table></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> of strided values on a successful hit, with an additional integer <a href="#status-code">status_code</a> at the end.</div>
+<div class="wiki-line">Each stride consists of two mandatory values {<a href="https://wiki.secondlife.com/wiki/key">key</a> <code>uuid</code>, <a href="https://wiki.secondlife.com/wiki/vector">vector</a> <code>position</code>} and optionally {<a href="https://wiki.secondlife.com/wiki/integer">integer</a> <code>link_number</code>} and {<a href="https://wiki.secondlife.com/wiki/vector">vector</a> <code>normal</code>}, but beware of their order. See the <a href="#return-values">return values</a> table for return value order.</div>
+<div class="wiki-line">A negative <code>status_code</code> is an <a href="#error-code">error code</a>, otherwise it is the number of hits (and strides) returned.</div></section>
+<section><h2 id="specification">Specification</h2><h4 id="status-code"><code>status_code</code></h4>
+<div class="wiki-line"><code>status_code</code> is a number tacked onto the end of the strided list to give you extra information about the ray cast.</div>
+<div class="wiki-line">If the cast succeeded, it will be &gt;=0 and will indicate the number of hits.</div>
+<div class="wiki-line">If the ray cast failed (which should only happen right now if the simulator performance is running low), you'll get a negative status code. <a href="/constants/RCERR_SIM_PERF_LOW/">RCERR_SIM_PERF_LOW</a> will be used as the status code if the overall physics time in the simulator is too high to perform raycasts. The idea is that you will know to try your cast again in a few frames.</div>
+<table id="error-code">
+<caption><strong>status_code</strong> error codes and their meanings.</caption>
+<tr>
+<th>Status Code</th>
+<th>V</th>
+<th>Description</th>
+</tr>
+<tr><td><a href="/constants/RCERR_UNKNOWN/">RCERR_UNKNOWN</a></td><td>-1</td><td>The raycast failed for an unspecified reason. Please submit a bug report.</td></tr>
+<tr><td><a href="/constants/RCERR_SIM_PERF_LOW/">RCERR_SIM_PERF_LOW</a></td><td>-2</td><td>The raycast failed because simulator performance is low. Wait a while and then try again. If possible reduce the scene complexity.</td></tr>
+<tr><td><a href="/constants/RCERR_CAST_TIME_EXCEEDED/">RCERR_CAST_TIME_EXCEEDED</a></td><td>-3</td><td>The raycast failed because the parcel or agent has exceeded the maximum time allowed for raycasting. This resource pool is continually replenished, so waiting a few frames and retrying is likely to succeed.</td></tr>
+</table>
+<h5 id="rcerr-cast-time-exceeded"><a href="/constants/RCERR_CAST_TIME_EXCEEDED/">RCERR_CAST_TIME_EXCEEDED</a></h5>
+<div class="wiki-line"><strong>Note:</strong> <a href="https://jira.secondlife.com/browse/SCR-199" rel="noreferrer">SCR-199</a> indicates that pools have been removed from the main grid, so this return code should not appear.</div>
+<div class="wiki-line"><strong>Tips for Efficient Raycasts:</strong></div>
+<ul>
+<li>Keep the max number of hits returned as small as possible</li>
+<li>Set as many <a href="/constants/RC_REJECT_TYPES/">RC_REJECT_TYPES</a> as possible (of factors you can control, this will likely have the largest impact). For example, if you only want to know where the nearest agent is along a ray, use <code><a href="/constants/RC_REJECT_LAND/">RC_REJECT_LAND</a> | <a href="/constants/RC_REJECT_PHYSICAL/">RC_REJECT_PHYSICAL</a> | <a href="/constants/RC_REJECT_NONPHYSICAL/">RC_REJECT_NONPHYSICAL</a></code></li>
+<li>When possible, avoid raycasting through piles of prims and avoid raycasting against concave physics objects (anything with cut, hollow, twist, and so on, and any mesh object that has no decomposition and has physics type "prim"). Obviously this can't always be avoided, so some casts may take significantly longer than others. Plan for that with robust scripts that handle <a href="/constants/RCERR_CAST_TIME_EXCEEDED/">RCERR_CAST_TIME_EXCEEDED</a> responsibly, namely by sleeping briefly after the call and waiting for a few frames to go by before trying again.</li>
+</ul>
+<h4 id="options-parameter"><code>options</code> parameter</h4>
+<table id="options">
+<caption><code>options</code> flags and their parameters</caption>
+<tr>
+<th>Flag</th>
+<th>V</th>
+<th>Parameters</th>
+<th>Default Value</th>
+<th>Description</th>
+</tr>
+<tr><td>[&nbsp;<a href="/constants/RC_REJECT_TYPES/">RC_REJECT_TYPES</a>&nbsp;] </td>
+<td>0</td>
+<td>[&nbsp;<a href="https://wiki.secondlife.com/wiki/integer">integer</a>&nbsp;<code>filter</code>&nbsp;]</td>
+<td>[ 0 ]</td>
+<td> Mask used to ignore specific types of objects (and avatars). </td>
+</tr>
+<tr><td>[&nbsp;<a href="/constants/RC_DATA_FLAGS/">RC_DATA_FLAGS</a>&nbsp;] </td>
+<td>2</td>
+<td>[&nbsp;<a href="https://wiki.secondlife.com/wiki/integer">integer</a>&nbsp;<code>flags</code>&nbsp;]</td>
+<td>[ 0 ]</td>
+<td> Described in the <a href="#rc-data-flags">RC_DATA_FLAGS</a> section. </td>
+</tr>
+<tr><td>[&nbsp;<a href="/constants/RC_MAX_HITS/">RC_MAX_HITS</a>&nbsp;] </td>
+<td>3</td>
+<td>[&nbsp;<a href="https://wiki.secondlife.com/wiki/integer">integer</a>&nbsp;<code>max_hits</code>&nbsp;]</td>
+<td>[ 1 ]</td>
+<td> Maximum number of hits to return. Maximum value is 256. <em>To avoid performance issues, keep it small.</em></td>
+</tr>
+<tr><td>[&nbsp;<a href="/constants/RC_DETECT_PHANTOM/">RC_DETECT_PHANTOM</a>&nbsp;] </td>
+<td>1</td>
+<td>[&nbsp;<a href="https://wiki.secondlife.com/wiki/integer">integer</a>&nbsp;<code>detect_phantom</code>&nbsp;]</td>
+<td>[ <a href="/constants/FALSE/">FALSE</a> ]</td>
+<td>Set to <a href="/constants/TRUE/">TRUE</a> (or nonzero) to detect phantom AND volume detect objects. It is not possible to detect only phantom objects or only volume detect objects. If set to <a href="/constants/TRUE/">TRUE</a>, phantom and volume detect objects will always be detected, even if <a href="/constants/RC_REJECT_NONPHYSICAL/">RC_REJECT_NONPHYSICAL</a> and <a href="/constants/RC_REJECT_PHYSICAL/">RC_REJECT_PHYSICAL</a> are set in <a href="/constants/RC_REJECT_TYPES/">RC_REJECT_TYPES</a>.</td>
+</tr>
+</table>
+<h5 id="rc-reject-types"><a href="/constants/RC_REJECT_TYPES/">RC_REJECT_TYPES</a></h5>
+<div class="wiki-line"><code>filter</code> is a bitwise-or combination of the following constants: <a href="/constants/RC_REJECT_AGENTS/">RC_REJECT_AGENTS</a>, <a href="/constants/RC_REJECT_PHYSICAL/">RC_REJECT_PHYSICAL</a>, <a href="/constants/RC_REJECT_NONPHYSICAL/">RC_REJECT_NONPHYSICAL</a>, and <a href="/constants/RC_REJECT_LAND/">RC_REJECT_LAND</a>.</div>
+<table id="rc-reject-flags">
+<caption><strong>RC_REJECT_TYPES</strong> and their meanings.</caption>
+<tr>
+<th>Reject Type</th>
+<th>V</th>
+<th>Description</th>
+</tr>
+<tr><td><a href="/constants/RC_REJECT_AGENTS/">RC_REJECT_AGENTS</a></td><td>1</td><td>Avatars won't be detected.</td></tr>
+<tr><td><a href="/constants/RC_REJECT_PHYSICAL/">RC_REJECT_PHYSICAL</a></td><td>2</td><td><a href="https://wiki.secondlife.com/wiki/Physical" rel="noreferrer">Physical</a> objects won't be detected.</td></tr>
+<tr><td><a href="/constants/RC_REJECT_NONPHYSICAL/">RC_REJECT_NONPHYSICAL</a></td><td>4</td><td>The opposite of the above flag. Objects without physics won't be detected. For phantom objects, see <a href="/constants/RC_DETECT_PHANTOM/">RC_DETECT_PHANTOM</a>.</td></tr>
+<tr><td><a href="/constants/RC_REJECT_LAND/">RC_REJECT_LAND</a></td><td>8</td><td>Land won't be detected. This refers to actual <a href="https://wiki.secondlife.com/wiki/LlGround" rel="noreferrer">ground</a> only.</td></tr>
+</table>
+<div class="wiki-line">If you reject everything, a script runtime error will be generated (as it makes no sense to do this). Using 0 as the filter value will accept all types (default).</div>
+<div class="wiki-line">Also note that seated agents are treated like unseated agents. As in, you either get seated and unseated agents in your results, or you use <a href="/constants/RC_REJECT_AGENTS/">RC_REJECT_AGENTS</a> and get neither.</div>
+<h5 id="rc-data-flags"><a href="/constants/RC_DATA_FLAGS/">RC_DATA_FLAGS</a></h5>
+<div class="wiki-line"><code>flags</code> is a bitwise-or combination of: <a href="/constants/RC_GET_NORMAL/">RC_GET_NORMAL</a>, <a href="/constants/RC_GET_ROOT_KEY/">RC_GET_ROOT_KEY</a>, and <a href="/constants/RC_GET_LINK_NUM/">RC_GET_LINK_NUM</a>.</div>
+<table id="rc-data-flags">
+<caption><strong>RC_DATA_FLAGS</strong> and their meanings.</caption>
+<tr>
+<th>Data Flag</th>
+<th>V</th>
+<th>Description</th>
+</tr>
+<tr><td><a href="/constants/RC_GET_NORMAL/">RC_GET_NORMAL</a></td><td>1</td><td>Stride includes the <a href="https://wiki.secondlife.com/wiki/https://en.wikipedia.org/wiki/Normal_%28geometry%29">surface normal</a> that was hit.</td></tr>
+<tr><td><a href="/constants/RC_GET_ROOT_KEY/">RC_GET_ROOT_KEY</a></td><td>2</td><td>The hit <code>uuid</code> will be replaced by the object's root instead of any child.</td></tr>
+<tr><td><a href="/constants/RC_GET_LINK_NUM/">RC_GET_LINK_NUM</a></td><td>4</td><td>Stride includes the link number that was hit.</td></tr>
+</table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Depending upon the value of <code>flags</code> (provided via <a href="#rc-data-flags">RC_DATA_FLAGS</a>), the number and types of values in the strides will vary. See <a href="#rc-data-flags">RC_DATA_FLAGS</a> for details.</li>
+<li><a href="/functions/llGetRot/">llGetRot</a> will not return an avatar's exact visual rotation because the viewer doesn't update the avatar's rotation under a threshold (see <a href="https://jira.secondlife.com/browse/VWR-1331" rel="noreferrer">VWR-1331</a>). To get an avatar's exact looking direction while in mouselook, use <a href="/functions/llGetCameraRot/">llGetCameraRot</a> instead.</li>
+<li><a href="/functions/llCastRay/">llCastRay</a> will not detect prims having no physics shape (<a href="/constants/PRIM_PHYSICS_SHAPE_TYPE/">PRIM_PHYSICS_SHAPE_TYPE</a> = <a href="/constants/PRIM_PHYSICS_SHAPE_NONE/">PRIM_PHYSICS_SHAPE_NONE</a>).</li>
+<li><a href="/functions/llCastRay/">llCastRay</a> will not detect a prim if the line starts inside the prim. This makes it safe to use the prim position as the start location.</li>
+<li><a href="/functions/llCastRay/">llCastRay</a> can detect the prim the script is in, if the start location is outside the prim.</li>
+<li>The result of this function has been noted to be <strong>unreliable when the end point is out-of-bounds</strong> (Occasionally returns status code 0 regardless of amount of objects hit). (See <a href="https://community.secondlife.com/forums/topic/486603-llcastray-returning-zero-hits-seemingly-at-random/" rel="noreferrer">this forum post</a>)</li>
+<li>The random failures seem to happen if the ray begins or ends more than 8 meters outside of current region bounds. Changes in only the ray's angle, or only in its position, may change the result. The result does not change if the exact same ray is cast again.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">This basic example will cast a ray from the center of the object, 10 meters forward, depending on the object's rotation.</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+        vector start = llGetPos();
+        vector end = start + &lt;10,0,0&gt; * llGetRot();
+
+        list data = llCastRay(start, end, []);
+        llOwnerSay(llList2CSV(data));
+    }
+}</code></pre></div>
+<div class="wiki-line">This is an example attachment that casts a ray based on the owner's camera in mouselook. It has many applications for things like weapons, scripted interactions with the world (like allowing a HUD to display information about things the user is looking at), etc.</div>
+<div class="wiki-line"><pre><code>integer gTargetChan = -9934917;
+
+default
+{
+    attach(key id)
+    {
+        if (id != NULL_KEY)
+        { 
+            llRequestPermissions(id,PERMISSION_TAKE_CONTROLS|PERMISSION_TRACK_CAMERA);
+        }
+    }
+
+    run_time_permissions (integer perm)
+    {
+        if (perm &amp; PERMISSION_TAKE_CONTROLS|PERMISSION_TRACK_CAMERA) 
+        {
+            llTakeControls(CONTROL_LBUTTON|CONTROL_ML_LBUTTON,TRUE,FALSE);
+        }
+    }
+
+    control (key id, integer level, integer edge)
+    {
+        // User must be in mouselook to aim the weapon
+        if (level &amp; edge &amp; CONTROL_LBUTTON)
+        {
+            llSay(0,&quot;You must be in Mouselook to shoot.  Type \&quot;CTRL + M\&quot; or type \&quot;Esc\&quot; and scroll your mouse wheel forward to enter Mouselook.&quot;);
+        }
+        // User IS in mouselook        
+        if (level &amp; edge &amp; CONTROL_ML_LBUTTON)
+        {
+            vector start = llGetCameraPos();
+            // Detect only a non-physical, non-phantom object. Report its root prim&#x27;s UUID.
+            list results = llCastRay(start, start+&lt;60.0,0.0,0.0&gt;*llGetCameraRot(),[RC_REJECT_TYPES,RC_REJECT_PHYSICAL|RC_REJECT_AGENTS|RC_REJECT_LAND,RC_DETECT_PHANTOM,FALSE,RC_DATA_FLAGS,RC_GET_ROOT_KEY,RC_MAX_HITS,1]);
+            llTriggerSound(llGetInventoryName(INVENTORY_SOUND,0),1.0);
+            llSleep(0.03);
+            key target = llList2Key(results,0);
+            // Tell target that it has been hit. 
+            llRegionSayTo(target,gTargetChan,&quot;HIT&quot;);
+            // Target, scripted to listen on gTargetChan, can explode, change color, fall over .....
+        }
+    }            
+}</code></pre></div>
+<div class="wiki-line">This example handles the caveat about rays extending outside of region bounds by calculating the point where the ray intersects with the region's edge.</div>
+<div class="wiki-line"><pre><code>vector GetRegionEdge(vector start, vector dir)
+{
+    float scaleGuess;
+    float scaleFactor = 4095.99;
+    if (dir.x)
+    {
+        scaleFactor = ((dir.x &gt; 0) * 255.99 -start.x) / dir.x;
+    }
+    if (dir.y)
+    {
+        scaleGuess = ((dir.y &gt; 0) * 255.99 - start.y) / dir.y;
+        if (scaleGuess &lt; scaleFactor) scaleFactor = scaleGuess;
+    }
+    if (dir.z)
+    {
+        scaleGuess = ((dir.z &gt; 0) * 4095.99 - start.z) / dir.z;
+        if (scaleGuess &lt; scaleFactor) scaleFactor = scaleGuess;
+    }
+    return start + dir * scaleFactor;
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        vector start = llGetPos();
+        vector direction = &lt;1,0,0&gt; * llGetRot();
+        vector end = GetRegionEdge(start, direction);
+
+        list data = llCastRay(start, end, []);
+        llOwnerSay(llList2CSV(data));
+    }
+}</code></pre></div>
+<div class="wiki-line">This example casts a ray from the center of the object, 25 meters north, while applying different <a href="/constants/RC_REJECT_TYPES/">RC_REJECT_TYPES</a> each time.</div>
+<div class="wiki-line"><pre><code>integer filter;// default is 0
+
+default
+{
+    state_entry()
+    {
+        string ownerName = llKey2Name(llGetOwner());
+        llOwnerSay(&quot;Hello, &quot; + ownerName + &quot;!&quot;);
+    }
+
+    touch_start(integer total_number)
+    {
+        vector start = llGetPos();
+        vector end = start - &lt;0.0, -25.0, 0.0&gt;;
+
+        if ( filter &gt; 8 )
+            filter = 0;
+
+        llOwnerSay(&quot;Filter &quot; + (string)filter);
+
+        list results = llCastRay(start, end, [RC_REJECT_TYPES, filter, RC_MAX_HITS, 4] );
+
+        integer hitNum = 0;
+        // Handle error conditions here by checking llList2Integer(results, -1) &gt;= 0
+        while (hitNum &lt; llList2Integer(results, -1))
+        {
+            // Stride is 2 because we didn&#x27;t request normals or link numbers
+            key uuid = llList2Key(results, 2*hitNum);
+
+            string name = &quot;Land&quot;; // if (uuid == NULL_KEY)
+
+            if (uuid != NULL_KEY)
+                name = llKey2Name(uuid);
+
+            llOwnerSay(&quot;Hit &quot; + name + &quot;.&quot;);
+
+            ++hitNum;
+        }
+
+        ++filter;
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Use <a href="/functions/llDumpList2String/">llDumpList2String</a> to see what the output looks like when you try a new set of flags.</div>
+<div class="wiki-line">To quickly get the status code use <code><a href="/functions/llList2Integer/">llList2Integer</a>(result, -1)</code>.</div>
+<div class="wiki-line"><strong>Ideas for uses</strong>:</div>
+<ul>
+<li><strong>Weapons</strong> - Raycasts are the traditional tool used in game development for simulating projectile weapons. They are orders of magnitude more efficient than rezzing a prim and launching it from a weapon.</li>
+<li><strong>AI Objects</strong> - Line-of-sight detection of avatars and other objects, or for navigating an environment by tracing rays about themselves. For example; casting rays directly downwards to determine the height and angle (normal) of the current floor surface, useful for non-physical object movement.</li>
+<li><strong>Intelligent Object Placement</strong> - Static objects can be placed in-scene, but adjust themselves to their environment. For example; an object rezzed too high up may adjust its height to floor-level, or a computer console placed low down may cause an avatar to kneel to use it rather than standing.</li>
+<li><strong>Environment Analysis</strong> - Can be used to determine the limitations of a surrounding area, such as determining if an object has been placed within a closed room. Not a test to be performed frequently due to quantity of rays required, but could be used by objects to switch off effects if unobserved (no-one within the room). Auto-adjusting furniture or objects to snap to walls, floors, and ceilings.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedTouchNormal/">llDetectedTouchNormal</a></div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li>Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-09-23-241511"> 23/09/2011 </a></li>
+<li><a href="https://jira.secondlife.com/browse/SCR-199" rel="noreferrer">SCR-199</a> - fixed - The throttle was too low and thus rendered the function not as useful as it could be.</li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="vwr-1331"><a href="/wiki/template-issues-vwr-1331-88fda039/">Template:Issues/VWR-1331</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|VWR-1331|Improve accuracy of avatar&#x27;s visible rotation|type=nf}}</code></pre></details></section>

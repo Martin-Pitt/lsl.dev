@@ -1,0 +1,95 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If <code>name</code> does not exist, <a href="/constants/INVENTORY_NONE/">INVENTORY_NONE</a> is returned (no errors or messages are generated), making this function ideal for testing the existence of a certain item in <a href="https://wiki.secondlife.com/wiki/inventory">inventory</a>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is the type of the inventory item <code>name</code></div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><td><table><tr><th colspan="2"><strong>Flag</strong></th><th> <strong>Inventory Type</strong></th></tr><tr><td> <a href="/constants/INVENTORY_NONE/">INVENTORY_NONE</a></td><td rowspan="2"> -1</td><td> Item does not exist.</td></tr><tr><td> <a href="/constants/INVENTORY_ALL/">INVENTORY_ALL</a></td><td> Any inventory type.</td></tr><tr><td> <a href="/constants/INVENTORY_TEXTURE/">INVENTORY_TEXTURE</a></td><td> 0</td><td> <a href="https://wiki.secondlife.com/wiki/texture">texture</a></td></tr><tr><td> <a href="/constants/INVENTORY_SOUND/">INVENTORY_SOUND</a></td><td> 1</td><td> <a href="https://wiki.secondlife.com/wiki/sound">sound</a></td></tr><tr><td> <a href="/constants/INVENTORY_LANDMARK/">INVENTORY_LANDMARK</a></td><td> 3</td><td> <a href="https://wiki.secondlife.com/wiki/landmark">landmark</a></td></tr><tr><td> <a href="/constants/INVENTORY_CLOTHING/">INVENTORY_CLOTHING</a></td><td> 5</td><td> <a href="https://wiki.secondlife.com/wiki/clothing">clothing</a></td></tr><tr><td> <a href="/constants/INVENTORY_OBJECT/">INVENTORY_OBJECT</a></td><td> 6</td><td> <a href="https://wiki.secondlife.com/wiki/object">object</a></td></tr></table></td><td><table><tr><th colspan="2"><strong>Flag</strong></th><th> <strong>Inventory Type</strong></th></tr><tr><td> <a href="/constants/INVENTORY_NOTECARD/">INVENTORY_NOTECARD</a></td><td> 7</td><td> <a href="https://wiki.secondlife.com/wiki/notecard">notecard</a></td></tr><tr><td> <a href="/constants/INVENTORY_SCRIPT/">INVENTORY_SCRIPT</a></td><td> 10</td><td> <a href="/wiki/script-102acc10/">script</a></td></tr><tr><td> <a href="/constants/INVENTORY_BODYPART/">INVENTORY_BODYPART</a></td><td> 13</td><td> <a href="/wiki/body-part-cc9bc0e9/">body part</a></td></tr><tr><td> <a href="/constants/INVENTORY_ANIMATION/">INVENTORY_ANIMATION</a></td><td> 20</td><td> <a href="/wiki/animation-1dd10f24/">animation</a></td></tr><tr><td> <a href="/constants/INVENTORY_GESTURE/">INVENTORY_GESTURE</a></td><td> 21</td><td> <a href="https://wiki.secondlife.com/wiki/gesture">gesture</a></td></tr><tr><td> <a href="/constants/INVENTORY_SETTING/">INVENTORY_SETTING</a></td><td> 56</td><td> <a href="https://wiki.secondlife.com/wiki/Environmental_Enhancement_Project">setting</a></td></tr><tr><td> <a href="/constants/INVENTORY_MATERIAL/">INVENTORY_MATERIAL</a></td><td> 57</td><td> <a href="https://wiki.secondlife.com/wiki/PBR_Materials">material</a></td></tr></table></td></tr></table></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>string get_type_info(integer inputInteger)
+{
+    if (inputInteger == INVENTORY_TEXTURE)
+        return &quot;INVENTORY_TEXTURE&quot;;
+ 
+    else if (inputInteger == INVENTORY_SOUND)
+        return &quot;INVENTORY_SOUND&quot;;
+ 
+    else if (inputInteger == INVENTORY_LANDMARK)
+        return &quot;INVENTORY_LANDMARK&quot;;
+ 
+    else if (inputInteger == INVENTORY_CLOTHING)
+        return &quot;INVENTORY_CLOTHING&quot;;
+ 
+    else if (inputInteger == INVENTORY_OBJECT)
+        return &quot;INVENTORY_OBJECT&quot;;
+ 
+    else if (inputInteger == INVENTORY_NOTECARD)
+        return &quot;INVENTORY_NOTECARD&quot;;
+ 
+    else if (inputInteger == INVENTORY_SCRIPT)
+        return &quot;INVENTORY_SCRIPT&quot;;
+ 
+    else if (inputInteger == INVENTORY_BODYPART)
+        return &quot;INVENTORY_BODYPART&quot;;
+ 
+    else if (inputInteger == INVENTORY_ANIMATION)
+        return &quot;INVENTORY_ANIMATION&quot;;
+ 
+    else if (inputInteger == INVENTORY_GESTURE)
+        return &quot;INVENTORY_GESTURE&quot;;
+ 
+    else if (inputInteger == INVENTORY_SETTING)
+        return &quot;INVENTORY_SETTING&quot;;
+ 
+    else
+        return &quot;inventory type unknown&quot;;
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        integer totalItems = llGetInventoryNumber(INVENTORY_ALL);
+
+        integer index;
+        while (index &lt; totalItems)
+        {
+            string itemName = llGetInventoryName(INVENTORY_ALL, index);
+            integer type = llGetInventoryType(itemName);
+
+            // PUBLIC_CHANNEL has the integer value 0
+            llSay(PUBLIC_CHANNEL,
+                &quot;&#x27;&quot; + itemName + &quot;&#x27; (&quot; + get_type_info(type) + &quot;)&quot;);
+
+            ++index;
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><pre><code>string InventoryName(string name, integer type)
+{ // finds an item in a case insensitive fashion of the given type and returns its true name.
+    integer a = llGetInventoryType(name); 
+    if(!~a) // a == INVENTORY_NONE
+    { // it should be noted that INVENTORY_NONE == INVENTORY_ALL == -1; which is why &#x27;!~a&#x27; works.
+        string lc_name = llToLower(name);
+        a = llGetInventoryNumber(type);
+        while(a)
+        { // (a = ~-a) is equivalent to --a, but runs faster.
+            if(llToLower(name = llGetInventoryName(type, a = ~-a)) == lc_name)
+            { // we found a match ^_^
+                return name;
+            }
+        }
+    }
+    else if((a == type) ^ (!~type)) // return name, as long as a == type or type == INVENTORY_ALL
+    { // we already know that a != INVENTORY_NONE, but just in case we use xor instead of or.
+        return name;
+    }
+    return &quot;&quot;; // no match ~_~
+}
+
+integer InventoryExists(string name, integer type)
+{ // only included to show how this type of check could be done if the value of &#x27;type&#x27; is not constant and could be INVENTORY_ALL.
+    return (llGetInventoryType(name) == type) ^ (!~type);
+} // Since INVENTORY_ALL == INVENTORY_NONE, the extra part on the end is required to invert the result.</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryAcquireTime/">llGetInventoryAcquireTime</a> — Returns the time the item was added to the prim's inventory</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryName/">llGetInventoryName</a> — Returns the inventory item's name</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryNumber/">llGetInventoryNumber</a> — Returns the number of items of a specific type in inventory</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryCreator/">llGetInventoryCreator</a> — Returns the inventory item's creator</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryPermMask/">llGetInventoryPermMask</a> — Returns the inventory item's permissions</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetInventoryKey/">llGetInventoryKey</a> — Returns the inventory item's <a href="https://wiki.secondlife.com/wiki/UUID">UUID</a> (if full perm)</div></div></section>
+<section><h2 id="tests">Tests</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/llGetInventoryType_Test">llGetInventoryType_Test</a></div></div></section>

@@ -1,0 +1,76 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is the number of available URLs. If attached, return the URLs remaining for the owner. Otherwise, return the available URLs for the region.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">There is a separate URL limit for the region, and a limit for each agent. The URL limit is the same as the <a href="https://wiki.secondlife.com/wiki/Land_Impact">Land Impact</a> limit:</div>
+<ul>
+<li>Agent: 38</li>
+<li>Openspace Sim: 1,250</li>
+<li>Homestead Sim: 5,000</li>
+<li>Full Sim: 20,000</li>
+<li>Mainland Sim: 22,500</li>
+<li>30k Sim: 30,000</li>
+</ul></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If called from an attachment, there is no way to get the number of free URLs in the region; it will always return the URL count remaining for the agent.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">This script will say the number of currently available HTTP-In URLs left in the region.</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+        integer numberOfFreeURLs = llGetFreeURLs();
+
+        if (numberOfFreeURLs)
+        {
+            llSay(0, &quot;There are &quot; + (string)numberOfFreeURLs + &quot; available HTTP-In URLs left in this region.&quot;);
+        }
+        else
+        {
+            llSay(0, &quot;WARNING: There are no HTTP-In URLs available anymore.&quot;);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// WARNING:
+//
+//      This script is only for proof-of-concept (demo purposes).
+//      DO NOT use it if you don&#x27;t have the sim owners and/or
+//      estate managers OK to test this script.
+//      This script can possibly block HTTP communication from and to the sim.
+//      ...bringing down all networked vendors and/or similar machines.
+//
+//      This script allocates all available URLs.
+//      Deleting the script and/or derezzing the object containing the script,
+//      will release all previously taken URLs.
+ 
+default
+{
+    state_entry()
+    {
+        llRequestURL();
+    }
+ 
+    http_request(key request_id, string method, string body)
+    {
+        if (method == URL_REQUEST_DENIED)
+        {
+            llSetText(&quot;No free URLs!&quot;, &lt;1.0, 0.0, 0.0&gt;, 1.0);
+        }
+        else if (method == URL_REQUEST_GRANTED)
+        {
+            llSetText((string)llGetFreeURLs() + &quot; URLs left\n&quot; + body, &lt;1.0, 1.0, 1.0&gt;, 1.0);
+            llRequestURL();
+        }
+        else if (method == &quot;GET&quot;)
+        {
+            llHTTPResponse(id, 200, &quot;Hello there!&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">URLs are a finite region resource and should be released when no longer needed.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestURL/">llRequestURL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestSecureURL/">llRequestSecureURL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llReleaseURL/">llReleaseURL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llHTTPResponse/">llHTTPResponse</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetHTTPHeader/">llGetHTTPHeader</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/LSL_http_server">LSL http server</a></div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li><span class="wiki-template"><a href="/wiki/template-svn-6879a543/">SVN</a>: <code>{{SVN|1836|rev=112899 |trunk=*|anchor=file22|ver=|ser=}}</code></span></li>
+</ul></section>

@@ -1,0 +1,142 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<ul>
+<li><a href="https://wiki.secondlife.com/wiki/User:Jesse_Barnett">Click Here</a>  To see my page and more of my scripts</li>
+</ul>
+<h2 id="scripts-have-been-corrected-and-working-properly-now">Scripts have been corrected and working properly now</h2>
+<div class="wiki-line">Rezzes a ball for each avatar in range. Each ball tracks it's on AV and displays distance.</div>
+<h2 id="scanner-rezzer-script">Scanner/Rezzer Script</h2>
+<div class="wiki-line">Place this script in a prim along with the scan ball. When touched it will scan the surrounding area and rezz a ball for each avatar.</div>
+<div class="wiki-line">Suggestion: Create a sphere with a diameter of  2 meters. Set transparency about 60. Create another sphere about 0.05 diameter, color a dark color and put it in the center of the large prim. Select small prim 1st and then large prim and link them. This will give you a center point to reference. The scan ball script is set to scan for it's avatar to a range of 96 meters.</div>
+<div class="wiki-line">This formula: <code>1=vector avDivPos = (avPos - rPos) * 0.010417</code>; Takes the <code>1=(avatars position - position of scanner)</code> &amp; multiplies by <code>1=(radius of the distance you want the balls to go(2 meter sphere = 1 meter radius)/scan range(96meters))</code>:</div>
+<div class="wiki-line">1/96 = approximately 0.010417.</div>
+<div class="wiki-line"><pre><code>//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                3D Radar 2.5
+//                 &quot;Oct 15 2008&quot;, &quot;18:43:28&quot;
+//                 Creator: Jesse Barnett
+//                Released into the Public Domain
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+ 
+integer Scan = TRUE;
+string avKey;
+integer list_pos;
+list key_list;
+integer key_chan;    //Key channel is generated randomly and passed to the scan ball
+integer die_chan = -9423753;    //Hey pick your own channels and be sure to paste them into the scan balls too!
+integer key_rem_chan = -49222879;
+ 
+default 
+{
+ 
+    touch_start(integer total_number) 
+    {
+        if (Scan) 
+        {
+            llSensorRepeat(&quot;&quot;, &quot;&quot;, AGENT, 96, PI, 1);
+            key_list =[];
+            llListen(key_rem_chan, &quot;&quot;, &quot;&quot;, &quot;&quot;);
+            llOwnerSay(&quot;on&quot;);
+            Scan = FALSE;
+        }
+        else 
+        {
+            llSensorRemove();
+            llRegionSay(die_chan, &quot;die&quot;);
+            llOwnerSay(&quot;off&quot;);
+            Scan = TRUE;
+        }
+    }
+ 
+    sensor(integer iNum) 
+    {
+        integer p = 0;
+        for (p = 0; p &lt; iNum; ++p) 
+        {
+            avKey = llDetectedKey(p);
+            list_pos = llListFindList(key_list, (list)avKey);
+            if (list_pos == -1) 
+            {
+                key_list += (list) avKey;
+                key_chan = (integer) llFrand(-1000000) - 1000000;
+                llRezObject(&quot;scan ball&quot;, llGetPos(), ZERO_VECTOR, ZERO_ROTATION, key_chan);
+                llSleep(.25);
+                llRegionSay(key_chan, avKey);
+            }
+        }
+    }
+ 
+    listen(integer c, string name, key id, string msg) 
+    {
+        integer r = llListFindList(key_list,[(key)msg]);
+        key_list = llDeleteSubList(key_list, r, r);
+    }
+}</code></pre></div>
+<h2 id="scan-ball-script">Scan Ball Script</h2>
+<div class="wiki-line">Place this script in a prim and then place the prim into the inventory of the Scanner/Rezzer. It will automatically name itself.</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-tip-39950499/">Tip</a>: <code>{{Tip|custom=Suggestion:|Create a sphere prim of 0.05 diameter with glow set about .80.}}</code></span></div>
+<div class="wiki-line"><pre><code>//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                3D Radar 2.5
+//                 &quot;Oct 15 2008&quot;, &quot;18:44:36&quot;
+//                 Creator: Jesse Barnett
+//                Released into the Public Domain
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+string avName;
+integer avDistance;
+key avKey;
+integer avListen;
+integer key_chan;
+integer die_chan = -9423753;
+integer key_rem_chan = -49222879;
+vector avPos;
+vector rPos;
+key owner;
+ 
+default
+{
+
+    state_entry()
+    {
+        llSetObjectName(&quot;scan ball&quot;); //Renames the object to &quot;scan ball&quot;
+        owner = llGetOwner(); // Lets check to see what the key of the owner of the object is and save it for later
+    }
+
+    on_rez(integer start_param)
+    {
+        rPos = llGetPos();
+        key_chan = start_param;
+        llListen(die_chan, &quot;&quot;, &quot;&quot;, &quot;&quot;);
+        avListen = llListen(key_chan, &quot;&quot;, &quot;&quot;, &quot;&quot;);
+    }
+
+    listen(integer c, string n, key id, string msg)
+    {
+        if (c == die_chan &amp;&amp; msg == &quot;die&quot; &amp;&amp; owner == llDetectedOwner(0)) //Lets check to see if the message we heard matches all the criteria for the kill command
+        {                                                                 //(Right channel, right message and from radar owned by same owner)
+            llDie();
+        }
+        
+        else
+        {
+            avKey = (key) msg;
+            avName = llKey2Name(avKey);
+            llSensorRepeat(&quot;&quot;, avKey, AGENT, 96, PI, 1.0);
+            llListenRemove(avListen);
+        }
+    }
+    
+    sensor(integer n)
+    {
+        avPos = llDetectedPos(0);
+        vector avDivPos = (avPos - rPos) / (96 / 1);    //Scan range/Radius of large sphere
+        avDistance = (integer) llVecDist(rPos, llDetectedPos(0));
+        llSetPos(rPos + avDivPos);
+        llSetText(avName + &quot;[&quot; + (string) avDistance + &quot;]&quot;, &lt;1, 1, 1 &gt;, 1);
+    }
+    
+    no_sensor()
+    {
+        llRegionSay(key_rem_chan, avKey);
+        llDie();
+    }
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library|3D Radar}}</code></span></div>

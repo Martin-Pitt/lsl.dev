@@ -1,0 +1,62 @@
+<div class="wiki-line">This script is based on an extract from the Batman Follower v1.2.  It is very basic.  If you put it in an object, that object will keep moving toward a position <em>offset</em> from it's owner.</div>
+<div class="wiki-line"><pre><code>vector offset = &lt; -1, 0, 1&gt;;  //1 meter behind and 1 meter above owner&#x27;s center.
+
+default
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHYSICS, TRUE);
+        // Little pause to allow server to make potentially large linked object physical.
+        llSleep(0.1);
+        // Look for owner within 20 metres in 360 degree arc every 1 seconds.
+        llSensorRepeat(&quot;&quot;, llGetOwner(), AGENT, 20.0, PI,1.0);
+    }
+    sensor(integer total_number)
+    {   // Owner detected...
+        // Get position and rotation
+        vector pos   = llDetectedPos(0);
+        rotation rot = llDetectedRot(0);
+        // Offset back one metre in X and up one metre in Z based on world coordinates.
+        // use whatever offset you want.
+        vector worldOffset = offset;
+        // Offset relative to owner needs a quaternion.
+        vector avOffset = offset * rot;
+
+        pos += avOffset;       // use the one you want, world or relative to AV.
+
+        llMoveToTarget(pos,0.4);     
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>//adding this script as a less laggy and more efficient way of doing the same as above
+//this is for havok4&#x27;s new functions
+vector offset = &lt; -1, 0, 1&gt;;  //1 meter behind and 1 meter above owner&#x27;s center.
+
+default
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHYSICS, TRUE);
+        // Little pause to allow server to make potentially large linked object physical.
+        llSleep(0.1);
+        llSetTimerEvent(1.0);
+    }
+    timer()
+    {
+        list det = llGetObjectDetails(llGetOwner(),[OBJECT_POS,OBJECT_ROT]);//this will never fail less owner is not in the same sim
+        // Owner detected...
+        // Get position and rotation
+        vector pos   = llList2Vector(det,0);
+        rotation rot = (rotation)llList2String(det,1);
+        // Offset back one metre in X and up one metre in Z based on world coordinates.
+        // use whatever offset you want.
+        vector worldOffset = offset;
+        // Offset relative to owner needs a quaternion.
+        vector avOffset = offset * rot;
+
+        pos += avOffset;       // use the one you want, world or relative to AV.
+
+        llMoveToTarget(pos,0.4);
+    }
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library|Follower}}</code></span> </div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples|Follower}}</code></span></div>

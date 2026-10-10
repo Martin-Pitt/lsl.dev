@@ -1,0 +1,93 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the name of the animation that is being used for the specified animation state (<code>anim_state</code>).</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-animation-states-0e5a90b2/">LSL Animation States</a>: <code>{{LSL Animation States}}</code></span></div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//    llGetAnimationOverride Example
+//    A Script to check the animation Stats on
+//  all available overridable animations.
+//    By Kanashio Koroshi and Pedro Oval
+
+
+default
+{
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(),
+            PERMISSION_OVERRIDE_ANIMATIONS);
+    }
+
+    run_time_permissions(integer permissions)
+    {
+        if (permissions &amp; PERMISSION_OVERRIDE_ANIMATIONS)
+        {
+            llOwnerSay(&quot;Listing Overridden Animations&quot;);
+            llOwnerSay(&quot;Crouching: &quot; + llGetAnimationOverride(&quot;Crouching&quot;));
+            llOwnerSay(&quot;CrouchWalking: &quot; + llGetAnimationOverride(&quot;CrouchWalking&quot;));
+            llOwnerSay(&quot;Falling Down: &quot; + llGetAnimationOverride(&quot;Falling Down&quot;));
+            llOwnerSay(&quot;Flying: &quot; + llGetAnimationOverride(&quot;Flying&quot;));
+            llOwnerSay(&quot;FlyingSlow: &quot; + llGetAnimationOverride(&quot;FlyingSlow&quot;));
+            llOwnerSay(&quot;Hovering: &quot; + llGetAnimationOverride(&quot;Hovering&quot;));
+            llOwnerSay(&quot;Hovering Down: &quot; + llGetAnimationOverride(&quot;Hovering Down&quot;));
+            llOwnerSay(&quot;Hovering Up: &quot; + llGetAnimationOverride(&quot;Hovering Up&quot;));
+            llOwnerSay(&quot;Jumping: &quot; + llGetAnimationOverride(&quot;Jumping&quot;));
+            llOwnerSay(&quot;Landing: &quot; + llGetAnimationOverride(&quot;Landing&quot;));
+            llOwnerSay(&quot;PreJumping: &quot; + llGetAnimationOverride(&quot;PreJumping&quot;));
+            llOwnerSay(&quot;Running: &quot; + llGetAnimationOverride(&quot;Running&quot;));
+            llOwnerSay(&quot;Sitting: &quot; + llGetAnimationOverride(&quot;Sitting&quot;));
+            llOwnerSay(&quot;Sitting on Ground: &quot; + llGetAnimationOverride(&quot;Sitting on Ground&quot;));
+            llOwnerSay(&quot;Standing: &quot; + llGetAnimationOverride(&quot;Standing&quot;));
+            llOwnerSay(&quot;Standing Up: &quot; + llGetAnimationOverride(&quot;Standing Up&quot;));
+            llOwnerSay(&quot;Striding: &quot; + llGetAnimationOverride(&quot;Striding&quot;));
+            llOwnerSay(&quot;Soft Landing: &quot; + llGetAnimationOverride(&quot;Soft Landing&quot;));
+            llOwnerSay(&quot;Taking Off: &quot; + llGetAnimationOverride(&quot;Taking Off&quot;));
+            llOwnerSay(&quot;Turning Left: &quot; + llGetAnimationOverride(&quot;Turning Left&quot;));
+            llOwnerSay(&quot;Turning Right: &quot; + llGetAnimationOverride(&quot;Turning Right&quot;));
+            llOwnerSay(&quot;Walking: &quot; + llGetAnimationOverride(&quot;Walking&quot;));
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetAnimationOverride/">llSetAnimationOverride</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llResetAnimationOverride/">llResetAnimationOverride</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Internal_Animations">Internal_Animations</a> — lists internal Animations always available</div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13-04-12-273874"> 12/04/2013 </a></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-permission-4bc8750c/">Template:LSL Function/permission</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:
+
+{{{{#if:{{#var:DEBUG_CHANNEL}}||:DEBUG_CHANNEL}}|}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|To run this function the script must request the [[{{{1}}}]] {{#if:{{{2|}}}|or [[{{{2}}}]]}} permission with [[llRequestPermissions]]{{#ifeq:{{{grant|anyone}}}|anyone||&amp;#32;and it must be granted by {{{grant|anyone}}}}}.}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|{{PBR}}
+&lt;div style=&quot;border: 1px dotted rgba(0,0,0,0.5);&quot;&gt;{{Collapsible_Table/Simple|title=&lt;h5 style=&quot;margin:0;&quot;&gt;Permissions&lt;/h5&gt;|table-style=width:100%;|autocollapse=*|content={{!}}&lt;div&gt;
+* Do not depend upon the auto-grant status of permissions. &#x27;&#x27;&#x27;Always&#x27;&#x27;&#x27; use the [[run_time_permissions]] event.
+* If the script lacks {{#if:{{{2|}}}|both the permissions [[{{{1}}}]] and [[{{{2}}}]]|the permission [[{{{1}}}]]}}, the script will shout an error on {{#var:DEBUG_CHANNEL}} and the operation fails (but the script continues to run).{{#ifeq:{{{grant|anyone&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|anyone||
+* If [[{{{1}}}]] {{#if:{{{2|}}}|or [[{{{2}}}]]}} is granted by anyone other than {{{grant|anyone}}}, then when the function is called an error will be shouted on {{#var:DEBUG_CHANNEL}}.}}
+{{{caveats|}}}{{LSL Function/permission/caveat switch|{{{1}}}}}{{#if:{{{2|}}}|{{LSL Function/permission/caveat switch|{{{2}}}}}}}&lt;/div&gt;}}&lt;/div&gt;}}}}
+
+{{#vardefine:also_events|{{#var:also_events}}
+{{LSL DefineRow||[[run_time_permissions]]|Permission receiving event}}}}
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetPermissions]]|Get the permissions granted}}
+{{LSL DefineRow||[[llGetPermissionsKey]]|Get the agent who granted permissions}}
+{{LSL DefineRow||[[llRequestPermissions]]|Request permissions}}}}
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{LSL DefineRow||[[:Category:LSL Permissions/Script|Script permissions]]|}}}}
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||[[Category:LSL Requires Permissions]]}}
+}}}}&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPairTable|also_events}}
+|-
+{{VarPairTable|also_functions}}
+|-
+{{VarPairTable|also_articles}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

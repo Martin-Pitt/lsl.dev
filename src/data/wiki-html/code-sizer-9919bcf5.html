@@ -1,0 +1,41 @@
+<h2 id="how-small-is-that-code">How Small Is That Code</h2>
+<div class="wiki-line"><strong>Q: Want to know how small that code is?</strong></div>
+<div class="wiki-line"><strong>A:</strong> The most accurate, least misleading technique we have found is as follows.</div>
+<div class="wiki-line">First compile &amp; run this brief &amp; clear &amp; conventional (though neither clever nor fast nor small) script:</div>
+<div class="wiki-line"><strong>This code is not accurate for use with mono compilation. An example of code similar to this for use with mono compilation is on the <a href="https://wiki.secondlife.com/wiki/Talk:Code_Sizer">talk page</a>.</strong></div>
+<div class="wiki-line"><pre><code>// http://wiki.secondlife.com/wiki/Code_Sizer
+
+integer unspent = 16384; // the well-known available size of byte code plus heap plus stack
+integer wasted = 313; // the well-known byte size of this script before you add source code to it
+
+// Count the bytes newly occupied by new byte code when you added source code to this script.
+
+integer getSpentBytes(integer spendable)
+{
+    return spendable - llGetFreeMemory();
+}
+
+// Print the bytes spent when you added code to this script,
+// whenever you Save or Reset this script.
+
+default
+{
+    state_entry()
+    {
+        llOwnerSay((string) getSpentBytes(unspent - wasted));
+    }
+}</code></pre></div>
+<div class="wiki-line">The integer zero should be the result printed when you first try this.</div>
+<div class="wiki-line"><strong>See how that works?</strong></div>
+<div class="wiki-line">This code quotes the well-known available size of byte code plus heap plus stack. This code quotes the well-known size of itself. This code calculates the difference between those two quotes, <em>i.e.</em>, the count of bytes that should be free until you add more code. This code prints zero so long as those well-known sizes do not change (and prints zero in the unlikely test case of the change in wasted exactly canceling out the change in unspent).</div>
+<div class="wiki-line">Now you add code, and run the script again. For example, suppose you create a second copy of the getSpentBytes routine, giving its name some otherwise unused spelling like getSpentBites. Then you will see the second copy costs 47 bytes. A third copy costs the same, another 47 bytes for a total of 94 bytes. And so on.</div>
+<div class="wiki-line"><strong>Get it?</strong></div>
+<div class="wiki-line"><strong>Now you can easily &amp; instantly measure how small any code is.</strong></div>
+<div class="wiki-line">Note: Take care to avoid falling into the easy error of printing the llGetFreeMemory count of bytes before and after you delete the last function of the script, as if that difference measured the byte code space cost of a function. Measurements taken that way overestimate the space cost by four bytes, because adding the first function to a script spends an extra 4 bytes to create the Function Block, aka the User Function Lookup Table, as doc'ed when you search for "GFR" in such places as the 2007-07-06 edition of http://www.libsecondlife.org/wiki/LSO.</div>
+<h2 id="see-also">See Also</h2>
+<div class="wiki-line"><strong>Functions</strong></div>
+<div class="wiki-line"><a href="/functions/llGetFreeMemory/">llGetFreeMemory</a> - count bytes of code plus heap plus stack spent by the script as yet</div>
+<div class="wiki-line"><strong>Scripts</strong></div>
+<div class="wiki-line"><a href="/wiki/code-racer-526264b3/">Code Racer</a> - quickly see if one version of code usually runs faster than another</div>
+<div class="wiki-line"><a href="/wiki/efficiency-tester-8d2cf4d5/">Efficiency Tester</a> - run as long as you please to count approximate milliseconds of run time with every more accuracy</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples}}</code></span></div>

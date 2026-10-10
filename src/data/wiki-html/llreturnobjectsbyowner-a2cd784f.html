@@ -1,0 +1,92 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">If the script is owned by an agent, <a href="/constants/PERMISSION_RETURN_OBJECTS/">PERMISSION_RETURN_OBJECTS</a> may be granted by the owner.  If the script is owned by a group, this permission may be granted by an agent belonging to the group's "Owners" role.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If the return value is negative, it represents an <a href="#0">error</a> flag.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is the number of objects successfully returned to their owners or an <a href="#0">ERR_*</a> flag.</div></section>
+<section><h2 id="specification">Specification</h2><h4 id="throttle">Throttle</h4>
+<div class="wiki-line">Throttled at max parcel land impact capacity region-wide per hour.</div><span id="constants"></span><div class="wiki-line">&lt;div style="display:inline-block; vertical-align: top;"&gt;</div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/OBJECT_RETURN_PARCEL/">OBJECT_RETURN_PARCEL</a><span> integer</span><span> c=return all objects on the same parcel as the script which are owned by 'owner'</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/OBJECT_RETURN_PARCEL_OWNER/">OBJECT_RETURN_PARCEL_OWNER</a><span> integer</span><span> c=return all objects owned by 'owner' which are over parcels owned by the owner of the script.</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/OBJECT_RETURN_REGION/">OBJECT_RETURN_REGION</a><span> integer</span><span> c=return all objects in the region owned by 'owner'</span></div></div>
+<table><tr><th> <code>scope</code> Flag</th><th></th><th> Description</th></tr><tr><td> Return all objects on the same parcel as the script which are owned by <code>owner</code>. <br/> The script must be owned by an estate manager or over a parcel owned by the owner of the script.</td></tr><tr><td> Return all objects owned by <code>owner</code> which are over parcels owned by the owner of the script.</td></tr><tr><td> Return all objects in the region owned by <code>owner</code>. <br/> The script must be owned by the estate owner or an estate manager.</td></tr></table>
+<div class="wiki-line">&lt;/div&gt;&lt;div style="display:inline-block; vertical-align: top;"&gt;</div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/ERR_GENERIC/">ERR_GENERIC</a><span> integer</span><span> -1</span><span> m=3</span><span> c=A nebulous and inexplicable error, nothing is known about it.</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/ERR_PARCEL_PERMISSIONS/">ERR_PARCEL_PERMISSIONS</a><span> integer</span><span> -2</span><span> m=3</span><span> c=Permission lacked to perform task on specified parcel.</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/ERR_MALFORMED_PARAMS/">ERR_MALFORMED_PARAMS</a><span> integer</span><span> -3</span><span> m=3</span><span> c=Parameters are malformed.</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/ERR_RUNTIME_PERMISSIONS/">ERR_RUNTIME_PERMISSIONS</a><span> integer</span><span> -4</span><span> m=3</span><span> c=Script lacks the runtime permission to perform the requested task.</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/ERR_THROTTLED/">ERR_THROTTLED</a><span> integer</span><span> -5</span><span> m=3</span><span> c=Task has been throttled. Try again later.</span></div></div>
+<table><tr><th> Error&nbsp;Flags</th><th></th><th colspan="6"> Description</th></tr></table>
+<div class="wiki-line">&lt;/div&gt;</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Parcel owner, estate owner and estate managers can not have their objects returned by this method.</li>
+<li>Objects which are owned by the group the land is set to will not be returned by this method.</li>
+<li>Objects owned by other groups will be returned to their previous owner if the object is transferable. If not transferable they are deleted.</li>
+</ul></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">For group-owned land you may want to explicitly code a group owner's key into the script as there is no way to determine if a user is a group owner.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llReturnObjectsByID/">llReturnObjectsByID</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelPrimOwners/">llGetParcelPrimOwners</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDie/">llDie</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13-06-18-277494"> 18/06/2013 </a></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-6281"><a href="/wiki/template-issues-svc-6281-36f0c9ae/">Template:Issues/SVC-6281</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-6281|Shared group inventory|type=fs|fc=1}}</code></pre></details><p><a href="/wiki/template-lsl-function-permission-4bc8750c/">Template:LSL Function/permission</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:
+
+{{{{#if:{{#var:DEBUG_CHANNEL}}||:DEBUG_CHANNEL}}|}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|To run this function the script must request the [[{{{1}}}]] {{#if:{{{2|}}}|or [[{{{2}}}]]}} permission with [[llRequestPermissions]]{{#ifeq:{{{grant|anyone}}}|anyone||&amp;#32;and it must be granted by {{{grant|anyone}}}}}.}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|{{PBR}}
+&lt;div style=&quot;border: 1px dotted rgba(0,0,0,0.5);&quot;&gt;{{Collapsible_Table/Simple|title=&lt;h5 style=&quot;margin:0;&quot;&gt;Permissions&lt;/h5&gt;|table-style=width:100%;|autocollapse=*|content={{!}}&lt;div&gt;
+* Do not depend upon the auto-grant status of permissions. &#x27;&#x27;&#x27;Always&#x27;&#x27;&#x27; use the [[run_time_permissions]] event.
+* If the script lacks {{#if:{{{2|}}}|both the permissions [[{{{1}}}]] and [[{{{2}}}]]|the permission [[{{{1}}}]]}}, the script will shout an error on {{#var:DEBUG_CHANNEL}} and the operation fails (but the script continues to run).{{#ifeq:{{{grant|anyone&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|anyone||
+* If [[{{{1}}}]] {{#if:{{{2|}}}|or [[{{{2}}}]]}} is granted by anyone other than {{{grant|anyone}}}, then when the function is called an error will be shouted on {{#var:DEBUG_CHANNEL}}.}}
+{{{caveats|}}}{{LSL Function/permission/caveat switch|{{{1}}}}}{{#if:{{{2|}}}|{{LSL Function/permission/caveat switch|{{{2}}}}}}}&lt;/div&gt;}}&lt;/div&gt;}}}}
+
+{{#vardefine:also_events|{{#var:also_events}}
+{{LSL DefineRow||[[run_time_permissions]]|Permission receiving event}}}}
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetPermissions]]|Get the permissions granted}}
+{{LSL DefineRow||[[llGetPermissionsKey]]|Get the agent who granted permissions}}
+{{LSL DefineRow||[[llRequestPermissions]]|Request permissions}}}}
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{LSL DefineRow||[[:Category:LSL Permissions/Script|Script permissions]]|}}}}
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||[[Category:LSL Requires Permissions]]}}
+}}}}&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPairTable|also_events}}
+|-
+{{VarPairTable|also_functions}}
+|-
+{{VarPairTable|also_articles}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

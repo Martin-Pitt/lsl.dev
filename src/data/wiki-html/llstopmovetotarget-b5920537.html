@@ -1,0 +1,48 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Stops critically damped motion</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Use in conjunction with <a href="/functions/llMoveToTarget/">llMoveToTarget</a><br/></div>
+<div class="wiki-line">To stop rotation movement use <a href="/functions/llStopLookAt/">llStopLookAt</a></div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>integer gLockPrimInPlace;
+
+default
+{
+
+    on_rez(integer sp)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        llStopMoveToTarget();
+        llSetStatus(STATUS_PHYSICS, TRUE);
+    }
+
+    touch_start(integer total_number)
+    {
+
+        if (llDetectedKey(0) != llGetOwner())
+        {
+            return;
+        }
+
+        if (!llGetStatus(STATUS_PHYSICS))
+        {
+            llOwnerSay(&quot;Locking or unlocking position works only for physical objects.&quot;);
+            return;
+        }
+
+        gLockPrimInPlace = !gLockPrimInPlace;
+        if (gLockPrimInPlace)
+        {
+            llMoveToTarget(llGetPos(), 0.05);
+            llOwnerSay(&quot;Locked in place.&quot;);
+        }
+        else
+        {
+            llStopMoveToTarget();
+            llOwnerSay(&quot;Unlocked.&quot;);
+        }
+
+    }
+
+}</code></pre></div></section>

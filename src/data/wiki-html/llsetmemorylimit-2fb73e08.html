@@ -1,0 +1,54 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Request <code>limit</code> bytes to be reserved for this script.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">This function's behavior is dependent upon the VM the script is using. <a href="#mono">Mono</a> is the new VM, <a href="#lso">LSO</a> is the old VM.</div>
+<div class="wiki-line">;Mono:Sets the memory limit for the script.</div>
+<ul>
+<li>The memory limit can be set up to 64k.</li>
+<li>The memory limit can not be set lower than the memory currently in use by the script.</li>
+<li>All new scripts start with a limit of 64k</li>
+<li>Mono scripts compiled before this function was introduced continue to use the 64k limit.</li>
+<li>A lower limit will effect the amount of memory reported in the viewer UI and by <a href="/functions/llGetObjectDetails/">llGetObjectDetails</a>.</li>
+<li>The memory limit is not the amount of real memory actually used by the script, just the upper limit on it.</li>
+</ul>
+<div class="wiki-line">;LSO:Has no effect on LSO scripts which will always use exactly 16k</div></section>
+<section><h2 id="caveats">Caveats</h2><div class="wiki-line">;Mono:When <strong><em>n</strong></em> is too small, llSetMemoryLimit(<strong><em>n</strong></em>) is ignored and the memory limit is not changed</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Memory-walkthrough by Daemonika Nightfire (daemonika.nightfire)
+
+integer limit = 20000; // &lt;- bytes
+
+Test()
+{
+    llSetText(&quot;Limited Memory &quot; + (string)llGetMemoryLimit() +
+              &quot;\nUsed Memory &quot; + (string)llGetUsedMemory() +
+              &quot;\nFree Memory &quot; + (string)llGetFreeMemory(),&lt;1,1,1&gt;,1);
+}
+
+default
+{
+    state_entry()
+    {
+        llSetMemoryLimit(limit);
+        
+        llScriptProfiler(PROFILE_SCRIPT_MEMORY);
+        Test();
+        llScriptProfiler(PROFILE_NONE);
+        
+        llSay(0,&quot;This script used at most &quot; + (string)llGetSPMaxMemory() + &quot; bytes of memory during Test.&quot;);
+    }
+}
+
+// Result:
+        
+// Floating Text:
+// Limited Memory 20000
+// Used Memory 4972
+// Free Memory 15100
+        
+// Chat:
+// [05:11] Object: This script used at most 4972 bytes of memory during Test.</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llScriptProfiler/">llScriptProfiler</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetSPMaxMemory/">llGetSPMaxMemory</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetMemoryLimit/">llGetMemoryLimit</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetFreeMemory/">llGetFreeMemory</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetUsedMemory/">llGetUsedMemory</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectDetails/">llGetObjectDetails</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-08-10-238207"> 10/08/2011 </a></div></section>

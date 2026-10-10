@@ -1,0 +1,27 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line"><code>0</code> means the prim is not linked, <code>1</code> the prim is the root, <code>2</code> the prim is the first child, etc. Links are numbered in the reverse order in which they were linked -- if you select a box, a sphere and a cylinder in that order, then link them, the cylinder is 1, the sphere is 2 and the box is 3. The last selected prim has the lowest link number.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is the link number of the prim containing the script.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>By design may equal <a href="/functions/llGetNumberOfPrims/">llGetNumberOfPrims</a>, <em>e.g.</em>, when prim is last, object contains multiple prims, and no sitting avatars</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llOwnerSay((string) llGetLinkNumber());
+        llOwnerSay((string) llGetNumberOfPrims());
+    }
+}</code></pre></div>
+<div class="wiki-line">A non-obvious feature is using double-negation to obtain a link number zero (for an unlinked prim) or one (for the root of a linkset). Unlike constants like <a href="/constants/LINK_ROOT/">LINK_ROOT</a>, this number can be used directly with functions like <a href="/functions/llGetLinkPrimitiveParams/">llGetLinkPrimitiveParams</a> without first determining whether a prim is part of a linkset:</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        integer rootLinkNum = !!llGetLinkNumber();
+        // returns 0 in an unlinked prim, 1 in a linkset
+
+        integer isFullBright = llList2Integer(llGetLinkPrimitiveParams(rootLinkNum,[PRIM_FULLBRIGHT, ALL_SIDES]),0);
+        // TRUE if all sides of an unlinked prim or the root of a linkset are set to full bright, FALSE otherwise
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetKey/">llGetKey</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetNumberOfPrims/">llGetNumberOfPrims</a></div></div></section>

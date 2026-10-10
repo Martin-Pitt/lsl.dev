@@ -1,0 +1,353 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<h2 id="introduction">Introduction</h2>
+<div class="wiki-line"><strong>Q: Want to see if one version of code usually runs faster than another?</strong></div>
+<div class="wiki-line"><strong>A:</strong> Run your code inside a test harness such as the example code here to race two or more versions time and again. Along the way, declare the winners, measuring each win by the change in the <a href="/functions/llGetTime/">llGetTime</a> dilated script time.</div>
+<h2 id="sample-results">Sample Results</h2>
+<div class="wiki-line"><pre><code>Click Running = No to stop this script after you&#x27;ve seen enough ...
+2007-10-25T02:33:12.806088Z
+
+~4.237066 ms elapsed in version 1 to place at 1 by 8 of 10 votes
+~10.047700 ms elapsed in version 2 to place at 2 by 8 of 10 votes
+2007-10-25T02:33:15.009855Z
+
+~3.089838 ms elapsed in version 1 to place at 1 by 44 of 100 votes
+~5.549734 ms elapsed in version 2 to place at 2 by 57 of 100 votes
+2007-10-25T02:33:35.422763Z
+
+~1.333064 ms elapsed in version 1 to place at 1 by 55 of 100 votes
+~3.434490 ms elapsed in version 2 to place at 2 by 64 of 100 votes
+2007-10-25T02:33:56.083810Z
+
+~0.760552 ms elapsed in version 1 to place at 1 by 49 of 100 votes
+~1.922230 ms elapsed in version 2 to place at 2 by 63 of 100 votes
+2007-10-25T02:34:16.564139Z
+
+~1.981575 ms elapsed in version 1 to place at 1 by 481 of 1000 votes
+~5.013962 ms elapsed in version 2 to place at 2 by 597 of 1000 votes
+2007-10-25T02:37:40.371221Z
+
+~1.475276 ms elapsed in version 1 to place at 1 by 498 of 1000 votes
+~3.177954 ms elapsed in version 2 to place at 2 by 596 of 1000 votes
+2007-10-25T02:41:07.869815Z
+
+~0.773118 ms elapsed in version 1 to place at 1 by 467 of 1000 votes
+~1.858705 ms elapsed in version 2 to place at 2 by 597 of 1000 votes
+2007-10-25T02:44:25.003959Z</code></pre></div>
+<h2 id="code">Code</h2>
+<div class="wiki-line"><pre><code>// Race a few version of code in dilated script time as measured by llGetTime.
+// http://wiki.secondlife.com/wiki/Code_Racer
+
+// List every runnable version.
+
+list theRunners = [0, 1, 2];
+
+// Count runnable versions.
+
+integer theRunnable;
+
+// Count votes to place.
+
+list theVotes;
+
+// Sum the run times observed.
+
+list theSums;
+
+// Count the races that ran without time running backwards.
+
+integer theAverageable;
+
+// Race no code alongside the other code in order to measure overhead.
+
+runner0()
+{
+}
+
+// Race a few versions of code.
+
+runner1()
+{
+    integer spinning;
+    for (spinning = 0; spinning &lt; 25; ++spinning)
+        ;
+}
+
+runner2()
+{
+    integer spinning;
+    for (spinning = 0; spinning &lt; 50; ++spinning)
+        ;
+}
+
+runner3()
+{
+}
+
+runner4()
+{
+}
+
+runner5()
+{
+}
+
+// Run the chosen runner once.
+// Run thru an equal time while choosing any runner.
+
+run(integer runner)
+{
+    if (runner == 0) { runner0(); }
+    if (runner == 1) { runner1(); }
+    if (runner == 2) { runner2(); }
+    if (runner == 3) { runner3(); }
+    if (runner == 4) { runner4(); }
+    if (runner == 5) { runner5(); }
+}
+
+// Start up.
+
+startup()
+{
+    llOwnerSay(&quot;&quot;);
+    llOwnerSay(&quot;Click Running = No to stop this script after you&#x27;ve seen enough ...&quot;);
+    llOwnerSay(llGetTimestamp());
+}
+
+// Measure the race in calendar time elapsed since the minute began,
+// if called in place of llGetTime.
+//
+// Note: &quot;YYYY-MM-DDThh:mm:ss.ff..fZ&quot; = llGetTimestamp();
+// Note: 17 = 0 + llStringLength(&quot;YYYY-MM-DDThh:mm:&quot;)
+// Note: -2 = -1 - llStringLength(&quot;Z&quot;)
+
+float getTime()
+{
+    return (float) llGetSubString(llGetTimestamp(), 17, -2); // &quot;ss.ff..f&quot;
+}
+
+// Race the runners and return the times when each ran.
+// Run in llGetTime dilated script time or in getTime calendar time.
+
+list eachRunnerRun()
+{
+    list befores = [];
+    integer runnablePlus = theRunnable + 1;
+    integer running;
+    for (running = 0; running &lt; runnablePlus; ++running)
+    {
+        integer running = llList2Integer(theRunners, running);
+        befores += llGetTime(); // choose script llGetTime or calendar getTime here
+        run(running);
+    }
+    return befores;
+}
+
+// Return elapsed run time per runner,
+// else return [] if time ran backwards.
+
+list getRuntimesElseNone(list befores)
+{
+    list runtimes = [];
+    float before = llList2Float(befores, 0);
+    integer timing;
+    for (timing = 0; timing &lt; theRunnable; ++timing)
+    {
+        float after = llList2Float(befores, timing + 1);
+        float runtime = after - before;
+        if (runtime &lt; 0.0) return [];
+        runtimes += runtime;
+        before = after;
+    }
+    return runtimes;
+}
+
+// Add to a listed float.
+
+list addFloat(list sums, integer index, float addition)
+{
+    list results = [];
+    integer summable = llGetListLength(sums);
+    integer summing;
+    for (summing = 0; summing &lt; summable; ++summing)
+    {
+        float result = llList2Float(sums, summing);
+        if (index == summing)
+        {
+            result += addition;
+        }
+        results += result;
+    }
+    return results;
+}
+
+// Add to a listed integer.
+
+list addInteger(list sums, integer index, integer addition)
+{
+    list results = [];
+    integer summable = llGetListLength(sums);
+    integer summing;
+    for (summing = 0; summing &lt; summable; ++summing)
+    {
+        integer result = llList2Integer(sums, summing);
+        if (index == summing)
+        {
+            result += addition;
+        }
+        results += result;
+    }
+    return results;
+}
+
+// Race the runners once, vote to place, and sum run time per runner.
+
+runRace()
+{
+
+    // Race the runners once.
+
+    list runtimes = getRuntimesElseNone(eachRunnerRun());
+//  llOwnerSay(&quot;[&quot; + llDumpList2String(runtimes, &quot;, &quot;) + &quot;] == runtimes&quot;);
+
+    // Sort the runtimes into places.
+
+    list places = llListSort(runtimes, 1, TRUE); // sort least to most
+    integer placeable = llGetListLength(places); // 0 or theRunnable
+
+    // Sum run time per runner.
+
+    integer adding;
+    for (adding = 0; adding &lt; placeable; ++adding)
+    {
+        integer running = llList2Integer(theRunners, adding);
+        float runtime = llList2Float(runtimes, adding);
+        theSums = addFloat(theSums, running, runtime);
+        ++theAverageable;
+
+        // Vote to place at each equal runtime.
+
+        integer placing;
+        for (placing = 0; placing &lt; placeable; ++placing)
+        {
+            float placed = llList2Float(places, placing);
+            if (runtime == placed)
+            {
+                integer flat = (running * placeable) + placing;
+                theVotes = addInteger(theVotes, flat, 1);
+            }
+        }
+    }
+}
+
+// Start up a burst of races.
+
+zeroBurst()
+{
+    theSums = theVotes = [];
+    theRunnable = llGetListLength(theRunners);
+    integer placing;
+    for (placing = 0; placing &lt; theRunnable; ++placing)
+    {
+        theSums += 0.0;
+        integer running;
+        for (running = 0; running &lt; theRunnable; ++running)
+        {
+            theVotes += 0;
+        }
+    }
+}
+
+// Report a burst of races.
+
+reportBurst(integer scaling)
+{
+
+    // Consider each place.
+
+    integer placing;
+    for (placing = 0; placing &lt; theRunnable; ++placing)
+    {
+        list votes = llList2ListStrided(llList2List(theVotes, placing, -1), 0, -1, theRunnable);
+        integer winner = llList2Integer(llListSort(votes, 1, TRUE), -1);
+
+        // Find the winner (or the winners) of that place.
+
+        integer running;
+        for (running = 1; running &lt; theRunnable; ++running)
+        {
+            integer vote4place = llList2Integer(votes, running); 
+            if (vote4place == winner)
+            {
+
+                // Describe a winner.
+
+                float summed = llList2Float(theSums, running) - llList2Float(theSums, 0);
+                float average = 1000.0 * (summed / theAverageable);
+
+                llOwnerSay(&quot;~&quot; +
+                    (string) average + &quot; ms elapsed in version &quot; + (string) running +
+                    &quot; to place at &quot; + (string) placing +
+                    &quot; by &quot; + (string) vote4place + &quot; of &quot; + (string) scaling + &quot; votes&quot;
+                );
+            }
+        }
+    }
+}
+
+// Run a few bursts of races at each scale, for indefinitely increasing scale.
+
+runRaceRepeatedly()
+{
+    integer scaleable = 10;
+    integer repeatable = 2; // decide how often to repeat the first burst
+    while (TRUE)
+    {
+        integer repeating;
+        for (repeating = 0; repeating &lt; repeatable; ++repeating)
+        {
+            zeroBurst();
+
+            integer scaling;
+            for (scaling = 0; scaling &lt; scaleable; ++scaling)
+            {
+                runRace();
+                theRunners = llList2List(theRunners, -1, -1) + llList2List(theRunners, 0, -2);
+            }
+
+            llOwnerSay(&quot;&quot;);
+            reportBurst(scaling);
+            llOwnerSay((string) llGetRegionTimeDilation() + &quot; dilation @ &quot; + llGetTimestamp());
+        }
+        
+        scaleable *= 10;
+        repeatable = 3; // decide how often to repeat the other bursts
+    }
+}
+
+// Race to measure relative run-time cost of multiple versions of code.
+// Produce unreasonable answers when the run-time cost measured equals or exceeds 60 seconds.
+
+default
+{
+    state_entry()
+    {
+        startup();
+        runRaceRepeatedly();
+    }
+}</code></pre></div>
+<h2 id="instructions">Instructions</h2>
+<div class="wiki-line">This instrument quickly &amp; accurately measures the run time difference between a number of fragments of code. For example, the code presented here measures the difference between the two fragments of code found inside the functions named runner1 and runner2. To measure other code, insert the code you want to compare into the runner1, runner2, runner3, etc. functions. See the source line that assigns [0, 1, 2] to theRunners? List all the runners you want to run there. Leave runner0 empty so that the harness correctly measures and subtracts out its own overhead.</div>
+<h2 id="alternatives-caveats">Alternatives &amp; Caveats</h2>
+<div class="wiki-line">This instrument compares run times quickly, like 100X faster than the Efficiency Tester instrument. This instrument runs a number of fragments of code at a time, gives you immediate results and then progressively more accurate results over time, like when you slowly fetch a detailed image from the web. This instrument burns thru hugely much run time, so that it can provide immediate feedback to make work proceed when the work would otherwise be too hard &amp; boring to attract enough volunteers. </div>
+<div class="wiki-line">The <a href="/wiki/efficiency-tester-8d2cf4d5/">Efficiency Tester</a> instrument serves a different purpose. That instrument adds accuracy to a measure of a range of observed run times in as little time as possible. By simple arithmetic, running thru 200ms for 1,000 times necessarily takes at least 200s, aka, more than 3 minutes. That instrument runs one fragment of code at a time, but then runs that fragment many many times to try and average out any distractions that may hit the server during the run. That instrument actually can measure 200ms in as little as 10 minutes, but that instrument gives you no answer at all until after 10,000 runs and no final answer until after 30,000 runs.</div>
+<div class="wiki-line">See the <a href="https://wiki.secondlife.com/wiki/LSL_Script_Efficiency">LSL Script Efficiency</a> article for much discussion of the Efficiency Tester instrument, including recommendations on how to avoid distracting the server into spending run time running other code in parallel. Those same recommendation apply to any llGetTimestamp harness, including this instrument.</div>
+<div class="wiki-line">Please do try to find deserted places to run such benchmarks and remember to turn them off when you finish! Else naturally you'll be rudely lagging the sim for the other people sharing the sim with you, for however long you run the benchmark.</div>
+<h2 id="see-also">See Also</h2>
+<div class="wiki-line"><strong>Functions</strong></div>
+<div class="wiki-line"><a href="/functions/llGetTime/">llGetTime</a> - fetch the (often zeroed) dilated time in seconds and fractional seconds </div>
+<div class="wiki-line"><a href="/functions/llGetTimestamp/">llGetTimestamp</a> - fetch the ISO 8601 "YYYY-MM-DDThh:mm:ss.ff..fZ" string that names the calendar date and time that is now</div>
+<div class="wiki-line"><strong>Scripts</strong></div>
+<div class="wiki-line"><a href="/wiki/code-sizer-9919bcf5/">Code Sizer</a> - count bytes of code with perfect accuracy</div>
+<div class="wiki-line"><a href="/wiki/efficiency-tester-8d2cf4d5/">Efficiency Tester</a> - run as long as you please to count approximate milliseconds of run time with every more accuracy</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-resource-conservation-portal-nav-bf6ea231/">Resource Conservation Portal Nav</a>: <code>{{Resource Conservation Portal Nav|cat=process}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples}}</code></span></div>

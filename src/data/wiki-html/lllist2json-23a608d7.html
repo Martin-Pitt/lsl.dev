@@ -1,0 +1,71 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">This function takes a list and returns a <a href="http://json.org" rel="noreferrer">JSON</a> string of that list as either a json object or json array.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">To convert a json formatted string into a list use <a href="/functions/llJson2List/">llJson2List</a>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is either <code>values</code> serialized as a JSON <code>type</code>, or if an error was encountered <a href="/constants/JSON_INVALID/">JSON_INVALID</a>.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">See <a href="/wiki/json-usage-in-lsl-6a7f5995/">Json_usage_in_LSL</a></div>
+<ul>
+<li>If type is <a href="/constants/JSON_OBJECT/">JSON_OBJECT</a> the list must be a strided list of key, value pairs and a string representing a json object will be returned.</li>
+<li>If type is <a href="/constants/JSON_ARRAY/">JSON_ARRAY</a> then a string representing a json array will be returned.</li>
+<li>If type is any other string then <a href="/constants/JSON_INVALID/">JSON_INVALID</a> will be returned.</li>
+<li>Json types from the input list are inferred from the LSL data type</li>
+<li><a href="https://wiki.secondlife.com/wiki/integer">integer</a> and <a href="https://wiki.secondlife.com/wiki/float">float</a> types are encoded as <a href="/constants/JSON_NUMBER/">JSON_NUMBER</a></li>
+<li>"true" and "false" are encoded as <a href="/constants/JSON_TRUE/">JSON_TRUE</a> and <a href="/constants/JSON_FALSE/">JSON_FALSE</a>, respectively</li>
+<li>"null" is encoded as <a href="/constants/JSON_NULL/">JSON_NULL</a></li>
+<li>properly-formatted json strings in the input are kept as-is (will either be <a href="/constants/JSON_STRING/">JSON_STRING</a>, <a href="/constants/JSON_OBJECT/">JSON_OBJECT</a>, or <a href="/constants/JSON_ARRAY/">JSON_ARRAY</a>) </li>
+<li>all other strings encoded as <a href="/constants/JSON_STRING/">JSON_STRING</a>. Strings are trimmed of whitespace at the beginning and end, as if passed thru <a href="/functions/llStringTrim/">llStringTrim</a></li>
+<li>Note in particular that strings containing valid JSON numbers are converted to JSON strings, not left as JSON numbers (<a href="https://jira.secondlife.com/browse/BUG-6284" rel="noreferrer">BUG-6284</a>). This differs to the treatment that <a href="/functions/llJsonSetValue/">llJsonSetValue</a> gives to strings that contain JSON numbers, which leaves them as numbers.</li>
+</ul><span id="constants"></span><table><tr><th> Type Flags</th><th> Value</th><th> Unicode</th><th> <a href="/functions/llOrd/">Integer</a></th><th> <a href="/wiki/category-lsl-encoding-url-a2cbd91f/">URL Encoded</a></th><th> HTML Encoded</th><th> Description</th></tr><tr><td> <a href="/constants/JSON_INVALID/">JSON_INVALID</a></td><td> &#xFDD0;</td><td> U+FDDO</td><td> 64976</td><td> "%EF%B7%90"</td><td> &amp;#xFDD0;</td><td> Value returned when inputs are not well formed.</td></tr><tr><td> <a href="/constants/JSON_OBJECT/">JSON_OBJECT</a></td><td> &#xFDD1;</td><td> U+FDD1</td><td> 64977</td><td> "%EF%B7%91"</td><td> &amp;#xFDD1;</td><td> </td></tr><tr><td> <a href="/constants/JSON_ARRAY/">JSON_ARRAY</a></td><td> &#xFDD2;</td><td> U+FDD2</td><td> 64978</td><td> "%EF%B7%92"</td><td> &amp;#xFDD2;</td><td> </td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Note that string <strong>values</strong> items are interpreted as JSON, not LSL strings. Quotation marks, if required, must be added explicitly. For example, <code><a href="/functions/llJson2List/">llJson2List</a>(<a href="/functions/llList2Json/">llList2Json</a>(<a href="/constants/JSON_ARRAY/">JSON_ARRAY</a>, ["bacon", "true", "false", "null"]))</code> returns the LSL list <code>["bacon", <a href="/constants/JSON_TRUE/">JSON_TRUE</a>, <a href="/constants/JSON_FALSE/">JSON_FALSE</a>, <a href="/constants/JSON_NULL/">JSON_NULL</a>]</code>, while <code><a href="/functions/llJson2List/">llJson2List</a>(<a href="/functions/llList2Json/">llList2Json</a>(<a href="/constants/JSON_ARRAY/">JSON_ARRAY</a>, ["\"bacon\"", "\"true\"", "\"false\"", "\"null\""]))</code> returns the LSL list <code>["bacon", "true", "false", "null"]</code></li>
+<li>llJson2List does not order the JSON alphabetically, like <a href="/functions/llJsonSetValue/">llJsonSetValue</a> does!</li>
+</ul>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+       string json_msg = llList2Json(JSON_OBJECT, [&quot;C&quot;,&quot;3&quot;,&quot;B&quot;,&quot;2&quot;,&quot;A&quot;,&quot;1&quot;]);
+        llOwnerSay(&quot;llList2Json: &quot; + json_msg); // Output: llList2Json: {&quot;C&quot;:&quot;3&quot;,&quot;B&quot;:&quot;2&quot;,&quot;A&quot;:&quot;1&quot;}
+
+        json_msg = llJsonSetValue(json_msg, [&quot;D&quot;], &quot;4&quot;);
+        llOwnerSay(&quot;llJsonSetValue: &quot; + json_msg); // Output: llJsonSetValue: {&quot;A&quot;:&quot;1&quot;,&quot;B&quot;:&quot;2&quot;,&quot;C&quot;:&quot;3&quot;,&quot;D&quot;:4}
+    }
+}</code></pre></div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        list items;
+        string json;
+
+        items = [&quot;89556747-24cb-43ed-920b-47caed15465f&quot;];
+        json = llList2Json(JSON_ARRAY, items);
+        // [&quot;89556747-24cb-43ed-920b-47caed15465f&quot;]
+
+        items = [&quot;pi&quot;, 3.14, &quot;set&quot;, &quot;[1,2,3]&quot;, &quot;status&quot;, &quot;ok&quot;];
+        json = llList2Json(JSON_OBJECT, items);
+        // {&quot;pi&quot;:3.140000,&quot;set&quot;:[1,2,3],&quot;status&quot;:&quot;ok&quot;}
+
+        items = [0, 3.14, &quot;[1,2,3]&quot;, &quot;{}&quot;];
+        json = llList2Json(JSON_ARRAY, items);
+        // [0,3.140000,[1,2,3],{}]
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>string CSV2Json(string csv)
+{
+    list li = llCSV2List(csv);
+    return llList2Json(JSON_ARRAY, li);
+}
+// This function converts a comma separated values string to a Json array string. 
+// CSV strings are often used for link-messages, notecards and they are easier to type as input commands. 
+// A Json-Array can store multiple of those as a nested list within the same Json-string via JSON_APPEND.</code></pre></div>
+<ul>
+<li>You could store multiple lists that set different particle effects in the same string. Use LlList2Json() to write the string and llJson2List() to read the particle system defining lists from it. The loss in float-accuracy (Json has BAD float-to-string-conversion) does not matter as much for particle effects.</li>
+</ul>
+<ul>
+<li>You could store multiple lists, that set different llSetPrimitiveparamsFast() values for different situation (like different animation key frames), in the same Json String.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llJson2List/">llJson2List</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llJsonGetValue/">llJsonGetValue</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llJsonSetValue/">llJsonSetValue</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llJsonValueType/">llJsonValueType</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Typecast">Typecast</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13-05-20-276191"> 20/05/2013 </a></div></section>

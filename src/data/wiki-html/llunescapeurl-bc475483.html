@@ -1,0 +1,34 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is an unescaped/unencoded version of <code>url</code>, replacing <code>"%20"</code> with spaces etc.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The <a href="https://en.wikipedia.org/wiki/Hexadecimal" rel="noreferrer">hexadecimal</a> encoded representation of <a href="https://en.wikipedia.org/wiki/UTF-8" rel="noreferrer">UTF-8</a> <a href="https://en.wikipedia.org/wiki/Byte" rel="noreferrer">byte</a> encoding is the only supported means of access to non ASCII7 characters (Unicode characters).</li>
+<li>Decoding of Unicode as <code>"%u####"</code> is not supported.</li>
+<li>The <code>"+"</code> character is not decoded as a space.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>string str = &quot;http://wiki.secondlife.com/wiki/LSL Portal&quot;;
+
+default
+{
+    state_entry()
+    {
+        llOwnerSay(&quot;Plain string:\n\t&quot; + str);
+        // output: &quot;http://wiki.secondlife.com/wiki/LSL Portal&quot;
+
+        llOwnerSay(&quot;Escaped string:\n\t&quot; + llEscapeURL(str));
+        // output: &quot;http%3A%2F%2Fwiki%2Esecondlife%2Ecom%2Fwiki%2FLSL%20Portal&quot;
+
+        llOwnerSay(&quot;Escaped string unescaped again:\n\t&quot; + llUnescapeURL( llEscapeURL(str) ));
+        // output: &quot;http://wiki.secondlife.com/wiki/LSL Portal&quot;
+
+        // because escaping and unescaping are exact opposite
+        // and unescaping an escaped string returns the original
+
+
+        //  For readability&#x27;s sake it would make more sense to do:
+        llOwnerSay(&quot;For readability&#x27;s sake:\n\t&quot; + &quot;http://wiki.secondlife.com/wiki/&quot; + llEscapeURL(&quot;LSL Portal&quot;));
+        // output: &quot;http://wiki.secondlife.com/wiki/LSL%20Portal&quot;
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llEscapeURL/">llEscapeURL</a> — Opposite of llUnescapeURL</div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/UTF-8">UTF-8</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/category-lsl-base64-68dc3ec8/">Base64</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Combined_Library#unicode-integer-to-utf8">Combined Library: UnicodeIntegerToUTF8</a> — Easily convert unicode character codes to string form.</div></div></section>

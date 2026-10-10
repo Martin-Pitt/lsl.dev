@@ -1,0 +1,28 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Data Conversion}}</code></span></div>
+<div class="wiki-line">The most important thing to know about LSL CSV, it's not traditional CSV. It is not RFC 4180.</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="caveats">Caveats</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">There are four caveats with LSL CSV.</div>
+<ul>
+<li>Spaces are trimmed from the beginning and the end of entries.</li>
+<li>Anything following a "&lt;" is considered part of the same item as long as the number of "&gt;" and "&lt;" are unbalanced.</li>
+<li>All "&lt;" and "&gt;" are included in the output string.</li>
+<li>Having a "&gt;" before a "&lt;" has no effect on the output, having too many "&gt;" is not an issue.</li>
+<li>All Commas not encapsulated in "&lt;" "&gt;" will be treated as deliminators.</li>
+<li>Any datatype containing a float value when converted to a CSV may loose precision.</li>
+</ul>
+<div class="wiki-line"><pre><code>llCSV2List(&quot;&lt;&gt;,&gt;,a&quot;)   == [&quot;&lt;&gt;&quot;, &quot;&gt;&quot;, &quot;a&quot;]; //didn&#x27;t match the last &quot;&gt;&quot;
+llCSV2List(&quot;&lt;&lt;&gt;,&gt;,a&quot;)  == [&quot;&lt;&lt;&gt;,&gt;&quot;, &quot;a&quot;];   //matched everything
+llCSV2List(&quot;&lt;&lt;&lt;&gt;,&gt;,a&quot;) == [&quot;&lt;&lt;&lt;&gt;,&gt;,a&quot;];     //didn&#x27;t match the last &quot;&lt;&quot;</code></pre></div>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="examples">Examples</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><strong>One Way To Embed CSV Lists in CSV Lists</strong></div>
+<div class="wiki-line"><pre><code>string a = llList2CSV([
+        &quot;&lt;&quot;+llList2CSV([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])+&quot;&gt;&quot;,
+        &quot;&lt;&quot;+llList2CSV([&quot;d&quot;, &quot;e&quot;, &quot;f&quot;])+&quot;&gt;&quot;,
+        &quot;&lt;&quot;+llList2CSV([&quot;g&quot;, &quot;h&quot;, &quot;i&quot;])+&quot;&gt;&quot;
+    ]);</code></pre></div>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>

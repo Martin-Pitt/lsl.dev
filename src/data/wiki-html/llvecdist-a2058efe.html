@@ -1,0 +1,39 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/float">float</a> that is the undirected nonnegative distance between <code>vec_a</code> and <code>vec_b</code>.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default {
+    state_entry()
+    {
+        vector input_1 = &lt;1.0,2.0,3.0&gt;;
+        vector input_2 = &lt;3.0,2.0,1.0&gt;;
+        llOwnerSay(&quot;The distance between &quot; + (string) input_1 +
+            &quot; and &quot; + (string) input_2 + &quot; is: &quot;+(string)llVecDist(input_1, input_2) );
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>//To reset script on touch if the object has been rotated since the last script reset
+float gTolerance = 0.05;  //This corresponds to about a 3 degree rotation
+default
+{
+	state_entry()
+	{
+		llSetObjectDesc((string)llRot2Euler(llGetRot()));
+	}
+	
+	touch_start(integer total_number)
+	{
+		if (llVecDist(llRot2Euler(llGetRot()), (vector)llGetObjectDesc()) &gt; gTolerance)
+		{
+			llSay(0,&quot;This object has rotated. Automatic reset engaged.&quot;);
+			llResetScript();
+		}
+	}
+}</code></pre></div>
+<h3 id="video-tutorial">Video Tutorial</h3>
+<div class="wiki-line">https://www.youtube.com/watch?v=D0WvH58IWEo</div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>Mathematically equivalent to:</li>
+<li><a href="/functions/llVecMag/">llVecMag</a>( vec_a - vec_b )</li>
+<li><a href="/functions/llSqrt/">llSqrt</a>( (vec_b.x - vec_a.x) * (vec_b.x - vec_a.x) + (vec_b.y - vec_a.y) * (vec_b.y - vec_a.y) + (vec_b.z - vec_a.z) * (vec_b.z - vec_a.z) )</li>
+<li>Knowing this, there are ways to circumvent llVecDist for more efficient code.</li>
+<li>For example, vector v3 = (v1-v2); v3*v3 &lt; (f*f); is over twice as fast as llVecDist(v1,v2) &lt; f;</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llVecMag/">llVecMag</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llVecNorm/">llVecNorm</a></div></div></section>

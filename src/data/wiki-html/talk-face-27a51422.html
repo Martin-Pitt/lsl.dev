@@ -1,0 +1,86 @@
+<h2 id="a-reasonably-simple-way-to-count-faces">A (reasonably) simple way to "count" faces</h2>
+<div class="wiki-line">On the SL viewer, you have these awkward solution to get the number of faces. Firestorm is much nicer: on the Build floater, when you select a single face, it will tell you its face number. If all are selected, it'll say <code>ALL_FACES</code>. Simple!</div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/File:Numbers_texture.png">right</a></div>
+<div class="wiki-line">But alas, we know these things change over time. So here is a basic script which should warp a texture with numbers and select the correct number for each face. Don't forget to grab the texture first (to the right) or do your own. I've used a 1024x64 file, with numbers centred on each 64x64 block. You get 16 characters if you do it in the same way, so I've added the hexadecimal digits A-F for good measure. The theory is that doing maths with powers of 8 should be easier on the viewer and produce as little blurriness as possible. In practice... well, not really. If you wish extra-crispy, extra-sharp images, you'll probably do your own texture, but this should give you reasonable results.</div>
+<div class="wiki-line">Also, 16 digits is overkill. &lt;abbr title="As far as I know"&gt;AFAIK&lt;/abbr&gt;, the maximum number of faces that an object can have is 8 (heavilly tortured prims and meshes).</div>
+<div class="wiki-line">Now for the script: drop it and the texture inside the prim you wish to count faces:</div>
+<div class="wiki-line"><pre><code>// Just place the &quot;numbers texture&quot; inside the prim, it should work automagically.
+// The texture should be 128x1024 in size, numbered from 0-9, A-F. Each number/letter
+// should be centred on its own 128x128 box.
+//
+// (cc) 2023 by Gwyneth Llewelyn. Some rights reserved.
+// Licensed under a MIT license (https://gwyneth-llewelyn.mit-license.org/)
+//
+
+default
+{
+    state_entry()
+    {
+        if (llGetInventoryNumber(INVENTORY_TEXTURE) == 0) {
+            llOwnerSay(&quot;Please place a texture inside!&quot;);
+            llSetText(&quot;Missing texture!&quot;, &lt;0.87, 0.13, 0.15&gt;, 1.0);
+            state broken;
+        }
+
+        integer faces = llGetNumberOfSides();
+
+        llSetText((string)faces + &quot; face(s)&quot;, &lt;0.13, 0.87, 0.15&gt;, 1.0);
+
+        // We will just retrieve the first one
+        string textureName = llGetInventoryName(INVENTORY_TEXTURE, 0);
+        key textureKey = llGetInventoryKey(textureName);
+
+        if (textureKey == NULL_KEY) {
+            llOwnerSay(&quot;Texture &#x27;&quot; + textureName + &quot;&#x27; has wrong permissions, please fix it!&quot;);
+            llSetText(&quot;Texture with wrong permissions&quot;, &lt;0.87, 0.13, 0.15&gt;, 1.0);
+            state broken;
+        }
+
+        integer i;  // face number counter &amp; multiplier factor
+        float quotient = 64.0 / 1024.0; // 0.0625
+        for (i == 0; i &lt; faces; i++) {
+            float calc = -0.47 + i * quotient;   // what is this -0.47 magic number?!
+            llWhisper(PUBLIC_CHANNEL, &quot;Face &quot; + (string)i + &quot;: &quot; + (string) calc);
+            llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_TEXTURE,
+                i, textureKey, &lt;0.0625, 1.0, 0.0&gt;, &lt;calc, 0.0, 0.0&gt;, 0.0]);
+        }
+    }
+
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_INVENTORY) {
+            llResetScript();
+        }
+    }
+}
+
+state broken
+{
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_INVENTORY) {
+            llResetScript();
+        }
+    }
+}
+
+/* calculation formula:
+
+Horizontal scale: 0.0625
+Vertical scale:   1.0
+q = 64/1024 = 0.0625
+
+Face i = -0.47 * (i * q)
+
+Face 0: -0.470000
+Face 1: -0.407500
+Face 2: -0.345000
+Face 3: -0.282500
+Face 4: -0.220000
+Face 5: -0.157500
+*/</code></pre></div>
+<div class="wiki-line">For the nit-picky among you: aye, there are a few variables too many, but remember, LSL has a very basic compiler — it doesn't optimise anything — therefore, the less math is done inside a <code>for</code> loop, the merrier.</div>
+<div class="wiki-line">Note for self: this could be made even slightly more efficient by avoiding an <em>integer</em> &times; <em>float</em> multiplication. But that would make things even more complicated, &lt;abbr title="In my humble opinion"&gt;IMHO&lt;/abbr&gt;.</div>
+<div class="wiki-line">Possibly you wish to experiment in terms of performance to see what's faster: call <a href="/functions/llSetLinkPrimitiveParamsFast/">llSetLinkPrimitiveParamsFast</a> once per face, or assemble the list with all the parameters for each face first, and only <em>then</em> call <a href="/functions/llSetLinkPrimitiveParamsFast/">llSetLinkPrimitiveParamsFast</a>? I've not tested, since in my case, I'm just texturing a 6-face cube, and don't need that much speed. But if you use this script as part of something larger — say, a massive retexturing of an old build with 2,000 prims, each with 6 faces... — you might get different results depending on how you do it. I went for the quick &amp; dirty approach.</div>
+<div class="wiki-line">Oh, and &lt;abbr title="By the way"&gt;BTW&lt;/abbr&gt;, this will naturally work on OpenSimulator as well (in fact, I've tested it there!).</div>
+<div class="wiki-line"><a href="/wiki/category-lsl-b2b52844/">Category:LSL</a></div>

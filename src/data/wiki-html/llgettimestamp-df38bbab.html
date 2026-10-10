@@ -1,0 +1,56 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Appears to be accurate to milliseconds.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the current date and time in the UTC time zone in the <a href="https://en.wikipedia.org/wiki/ISO_8601" rel="noreferrer">ISO 8601</a> format <code>&quot;YYYY-MM-DDThh:mm:ss.ff..fZ&quot;</code></div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Reset tracker
+
+string BOOT_TIME;
+
+default
+{
+    state_entry()
+    {
+        BOOT_TIME = llGetTimestamp(); // state_entry is triggered on script reset.
+    }
+    
+    touch_start(integer num)
+    {
+        llSay(PUBLIC_CHANNEL, &quot;The last script was last reset @ &quot; + BOOT_TIME);
+        llSay(PUBLIC_CHANNEL, &quot;Right now it is &quot; + llGetTimestamp());
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// Greeting
+
+default
+{
+    state_entry()
+    {
+        llSetTouchText(&quot;Greet&quot;);
+    }
+    touch_start(integer num)
+    {
+        list TimeStamp = llParseString2List(llGetTimestamp(),[&quot;-&quot;,&quot;:&quot;],[&quot;T&quot;]); //Get timestamp and split into parts in a list
+        integer Hour = llList2Integer(TimeStamp,4);
+        if(Hour&lt;12)		
+            llSay(PUBLIC_CHANNEL,&quot;Good Morning, Oliver Sintim-Aboagye!&quot;);	
+        else if(Hour&lt;17)
+            llSay(PUBLIC_CHANNEL,&quot;Good Afternoon, &quot; + llDetectedName(0));		
+        else
+            llSay(PUBLIC_CHANNEL,&quot;Good Evening, &quot; + llKey2Name(llDetectedKey(0)));
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><h3 id="helper-functions">Helper Functions</h3>
+<ul>
+<li><a href="https://wiki.secondlife.com/wiki/Stamp2UnixInt">Stamp2UnixInt</a> - List format to Unix timestamp. ex: [2009, 2, 13, 3, 31, 30] to 1234567890</li>
+<li>compatible with <strong><em>llParseString2List( llGetTimestamp(), ["-", "T", ":", "."], [] )</strong></em></li>
+<li><a href="https://wiki.secondlife.com/wiki/Stamp2WeekdayStr">Stamp2WeekdayStr</a> - Weekday from (Y, M, D) ex: "Friday" from (2009, 2, 13)</li>
+<li><a href="https://wiki.secondlife.com/wiki/Millisec">Millisec</a> - Converts a timestamp string to integer milliseconds accurate to within a month.</li>
+<li><a href="https://wiki.secondlife.com/wiki/Unix2PST_PDT">Unix2PST_PDT</a> - Converts a Unix Time stamp to an SLT date/time string with PST or PDT indication as appropriate.</li>
+<li><a href="https://wiki.secondlife.com/wiki/Unix2GMTorBST">Unix2GMTorBST</a> - Converts a Unix Time stamp to a UK date/time string with GMT or BST indication as appropriate.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetDate/">llGetDate</a> — Same format but without the time.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetUnixTime/">llGetUnixTime</a> — Time in seconds since the epoch.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetTime/">llGetTime</a> — Elapsed script-time.</div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="http://www.cl.cam.ac.uk/~mgk25/iso-time.html" rel="noreferrer">ISO 8601</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://en.wikipedia.org/wiki/ISO_8601" rel="noreferrer">ISO 8601</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/code-racer-526264b3/">Code Racer</a></div> - useful benchmarks within 100 trials</div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/efficiency-tester-8d2cf4d5/">Efficiency Tester</a></div> - more accurate benchmarks within 10,000 trials</div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/LSL_Script_Efficiency">LSL_Script_Efficiency</a></div> - in-depth discussion of the Efficiency Tester</div></section>

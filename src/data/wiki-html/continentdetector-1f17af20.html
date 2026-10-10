@@ -1,0 +1,184 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<h2 id="introduction">Introduction</h2>
+<div class="wiki-line">The Second Life grid, especially the mainland parts, is organized into interesting and aesthetically-pleasing continents, with a variety of landforms and connectivities and geographies.  The continents have their own histories, their own interesting places.  But because so many people just teleport everywhere (kids these days, I tell ya), all too many people aren't aware of which continent they're on, or where they are relative to the continents, much of the time.  This script is a simple example of how one might determine this, and thereby become more Geographically Aware, and therefore more fun at parties.</div>
+<h2 id="usage">Usage</h2>
+<div class="wiki-line">To use this script, stick it into the root prim of pretty much any object, and wear that object somewhere on your person.  Whenever you teleport, or touch the object, it will tell you your global coordinates, and also what continent or other area of the grid you are on.</div>
+<h2 id="limitations-and-notes">Limitations and Notes</h2>
+<div class="wiki-line">In fact this script is mostly just a demonstration of <a href="/functions/llGetRegionCorner/">llGetRegionCorner</a>().  The division of the world into continents and other sections is strictly unofficial and approximate, the result of using the map to zip around the grid and see roughly where things seemed to start and stop.  It's relatively easy to change what's there, or to add your own areas and divisions.  (Is the old Teen Grid still around somewhere?  If anyone knows the coordinates, it'd be fun to add them also.)</div>
+<div class="wiki-line">The reason the script should be put into the root prim of an object is that only root prims get the <a href="/constants/CHANGED_TELEPORT/">CHANGED_TELEPORT</a> event.</div>
+<h2 id="the-code">The Code</h2>
+<div class="wiki-line">You may do anything you like with this code, without limitation.  Well, without limitation in the sense of me suing you, that is.  If you do illegal things with it, you might get in trouble, for instance.  And you can't do impossible things with it.</div>
+<div class="wiki-line"><pre><code>// Script by Dale Innis, January 2011.  You may do whatever you like with this script, without limitation.
+ 
+// Updated June 2011, June 2013, March 2014, December 2015, February 2021 and April 2021 by Braclo Eber.
+// Please see changelogs below for details. It was getting too long to keep at the start of the script.
+ 
+// NOTE: Due to how close some regions are to the private continents, some might indicate they are part of the continent due to how the script works.
+// -----
+ 
+// Each set of five list elements represents a grid-aligned rectangle, in the form xmin,xmax,ymin,ymax,name.
+// The code returns the FIRST one that it finds, so its okay if the rectangles overlap, as long as you put
+// the right one first.
+ 
+list map = [
+ 261888.0,267776.0,240640.0,250368.0,&quot;Bellisseria&quot;,	//West Coast
+ 267776.0,281600.0,243200.0,258048.0,&quot;Bellisseria&quot;,	//Mid to East Coast
+ 296704.0,302080.0,252928.0,256768.0,&quot;Sharp&quot;,
+ 257024.0,266240.0,229632.0,240640.0,&quot;Jeogeot&quot;,
+ 251392.0,254208.0,256000.0,257792.0,&quot;Bay City&quot;,
+ 254208.0,265984.0,250368.0,259328.0,&quot;Sansara&quot;,
+ 253696.0,259840.0,259328.0,265472.0,&quot;Heterocera&quot;,
+ 281344.0,290560.0,257280.0,268288.0,&quot;Satori&quot;,
+ 290048.0,290816.0,268288.0,269824.0,&quot;Western Blake Sea&quot;,
+ 290816.0,297216.0,265216.0,271872.0,&quot;Blake Sea&quot;,
+ 286976.0,289792.0,268032.0,269312.0,&quot;Nautilus City&quot;,
+ 283136.0,293376.0,268288.0,276992.0,&quot;Nautilus&quot;,
+ 281600.0,296960.0,276992.0,281856.0,&quot;Corsica&quot;,
+ 291840.0,295936.0,284672.0,289536.0,&quot;Gaeta I&quot;,
+ 296960.0,304640.0,276736.0,281600.0,&quot;Gaeta V&quot;,
+ 460032.0,466432.0,301824.0,307456.0,&quot;Zindra&quot;,
+ 461824.0,464384.0,307456.0,310016.0,&quot;Horizons&quot;,
+// List of private continents.
+ 117504.0,123392.0,   435200.0,440576.0,&quot;Eden&quot;,
+ 250112.0,254720.0,   245248.0,248576.0,&quot;Estate&quot;,
+ 282624.0,284416.0,   268288.0,270336.0,&quot;FairChang&quot;,
+// and then for places outside the bounds of mainland continents, some random names...
+      0.0,250000.0,     0.0,999999.0,&quot;the Western Ocean&quot;,  
+ 250000.0,265000.0,     0.0,999999.0,&quot;the West&quot;,        
+ 265000.0,280000.0,     0.0,999999.0,&quot;the Center Longitudes&quot;,         
+ 280000.0,310000.0,     0.0,999999.0,&quot;the East&quot;,          
+ 310000.0,450000.0,     0.0,999999.0,&quot;the Gap Longitudes&quot;,           
+ 450000.0,500000.0,     0.0,999999.0,&quot;the Zindra Longitudes&quot;,            
+ 500000.0,999999.0,     0.0,999999.0,&quot;the Far East&quot;
+];
+ 
+string get_continent_name(vector gc) {
+    integer count = llGetListLength(map);
+    integer i;
+    for (i=0;i&lt;count;i+=5) {
+        if ((gc.x&gt;=llList2Float( map,i )) &amp;&amp;
+            (gc.x&lt;=llList2Float( map,i+1 )) &amp;&amp;        
+            (gc.y&gt;=llList2Float( map,i+2 )) &amp;&amp;                                
+            (gc.y&lt;=llList2Float( map,i+3 )) ) return llList2String( map,i+4 );
+    }
+    return &quot;&quot;;
+}
+ 
+say_location() {
+    vector gc = llGetRegionCorner()+llGetPos();
+    llOwnerSay(&quot;Coordinates: &quot;+(string)gc.x+&quot;,&quot;+(string)gc.y);
+    string s = get_continent_name(gc);
+    if (s!=&quot;&quot;) {
+        llOwnerSay(&quot;You are in &quot;+s);
+    } else {
+        llOwnerSay(&quot;You are not in any known area.&quot;);
+    }  
+}
+ 
+default
+{
+ 
+    changed(integer change) {
+        if (change &amp; CHANGED_TELEPORT) say_location();
+    }
+ 
+    touch_start(integer total_number) {
+         say_location();
+    }
+}
+
+// Changelog
+// Created January 2011 by Dale Innis
+
+// Updated June 2011 by Braclo Eber. 
+// Some border sims of continents were missing from the detector.
+// Changed some figures to be more accurate. (Nautilus Continent &amp; Bay City Extension)
+// Changed the order of the continents to reflect the changes.
+// Included Nautilus City.
+
+// Updated June 2013 by Braclo Eber.
+// Updated coordinates for missing border regions on continents.
+
+// Updated March 2014 by Braclo Eber.
+// Small fix for Western Blake Sea,Blake Sea,Nautilus and Nautilus City. 
+
+// Updated December 2015 by Braclo Eber.
+// Added 11 private continents that currently qualify as continents as per http://slgi.wikia.com/wiki/List_Of_Continents
+
+// Updated February 2021 by Braclo Eber
+// Added Bellisseria - Split it due to the shape of the continent.
+// Added Sharp - also known as the old Teen grid.
+// Updated Eden and FairChang - Continents Moved
+// Removed Winterfell, Mar Lesbiana, Crossing Sands and Shopping - These continents does not exist anymore.
+// Removed Caledon, Wild West, Freedom and Uhre - These are not classified as continents anymore due to the requirements of at least 30 sims as per https://wiki.secondlife.com/wiki/List_Of_Continents
+
+// Updated April 2021 by Braclo Eber
+// Added the east connection of Bellisseria, connecting to Satori.
+// Added Horizons, north of Zindra.
+// Adjusted Satori, Sansara, Sharp, Corsica, Jeogeot, Black Sea, Western Blake Sea, Eden, Fairchang and Nautilus City due to new regions or border regions not being detected correctly.</code></pre></div>
+<h2 id="another-code">Another code</h2>
+<div class="wiki-line">This script is a bit more complicated. Put it into a prim (an avatar attachment or HUD attachment should be the best). I only give you some coordinates, you can add all the others. Look on the map for most remote sims of a continent or other geographical feature, then go to Gridsurvey <a href="http://www.gridsurvey.com" rel="noreferrer">Gridsurvey</a> to get the sim coordinates. You can add 40 geographical features without problems. If you want to add more, please make two scripts and put both into a prim. The script will pick-up the first continent it matches. So, if you want to detect Snowlands or Color Sims in Sansara, please put them before you put Sansara. If nothing is found, the script will answer nothing (you can add an 'else' event with an answer that no continent was detected.</div>
+<div class="wiki-line">Coordinates are available also from this wiki. Search at page <a href="https://wiki.secondlife.com/wiki/List_Of_Continents">List Of Continents</a> and the link to all continents and at page <a href="https://wiki.secondlife.com/wiki/Oceans">Oceans</a> for all oceanic coordinates. For small map structures, coordinates can be found at <a href="https://wiki.secondlife.com/wiki/List_Of_Microcontinents_And_Sim_Clusters">List Of Microcontinents And Sim Clusters</a> or at <a href="https://wiki.secondlife.com/wiki/Second_Life_Geography">Second Life Geography</a>.</div>
+<div class="wiki-line"><pre><code>//Created by Ana Imfinity
+default
+{
+    state_entry()
+    {
+    }
+    touch_start(integer Ana)
+    {
+        vector grc = llGetRegionCorner(); //This gives sim coordinates in meters
+        float grcx = grc.x; //Longitude
+        float grcy = grc.y; //Latitude
+        integer xxx = (integer)(grcx/256); //Transforms longitude from meters to sim coordinates (like Gridsurvey)
+        integer yyy = (integer)(grcy/256); //Transforms longitude from meters to sim coordinates (like Gridsurvey)
+        string continent;
+        string sim = llGetRegionName();
+// Now, see that I repeat a formula, in which the xxx and yyy are 
+//minimum and maximum latitude and longitude I found on Gridsurvey. 
+//Add new locations after this model.
+        if (xxx&gt;1134 &amp;&amp; xxx&lt;1154 &amp;&amp; yyy&gt;1039 &amp;&amp; yyy&lt;1061)
+        {
+            continent = &quot;Blake Sea Continent&quot;;
+        }
+        else if (xxx&gt;903 &amp;&amp; xxx&lt;911 &amp;&amp; yyy&gt;1019 &amp;&amp; yyy&lt;1035)
+        {
+            continent = &quot;Caledon-Winterfell Continent&quot;;
+        }
+        else if (xxx&gt;1099 &amp;&amp; xxx&lt;1160 &amp;&amp; yyy&gt;1080 &amp;&amp; yyy&lt;1101)
+        {
+            continent = &quot;Corsica Continent&quot;;
+        }
+        else if (xxx&gt;675 &amp;&amp; xxx&lt;693 &amp;&amp; yyy&gt;1193 &amp;&amp; yyy&lt;1214)
+        {
+            continent = &quot;Eden Continent&quot;;
+        }
+        else if (xxx&gt;973 &amp;&amp; xxx&lt;1009 &amp;&amp; yyy&gt;944 &amp;&amp; yyy&lt;976)
+        {
+            continent = &quot;Estate Continent&quot;;
+        }
+
+//Add here new continents (and oceans) following the model
+
+        else
+        {
+            continent = &quot;No continent detected&quot;;
+        }
+        string message = &quot;Current grid position is: &quot;+(string)(xxx)+&quot;+&quot;+(string)(yyy)+&quot;. Sim name is &quot;+sim+&quot; - &quot;+continent;
+        llOwnerSay(message);
+    }
+}</code></pre></div>
+<h2 id="see-also">See Also</h2>
+<div class="wiki-line"><strong>Functions</strong></div>
+<div class="wiki-line"><a href="/functions/llGetRegionCorner/">llGetRegionCorner</a> - to find out the global coordinates of the southwest corner of this sim</div>
+<div class="wiki-line"><a href="/functions/llOwnerSay/">llOwnerSay</a> - to tell you about it</div>
+<div class="wiki-line"><strong>Constants</strong></div>
+<div class="wiki-line"><a href="/constants/CHANGED_TELEPORT/">CHANGED_TELEPORT</a> - to see if we've teleported</div>
+<div class="wiki-line"><strong>General</strong></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Linden_Department_of_Public_Works_Roads">Linden Department of Public Works Roads</a> - shows the major continents and their Linden roads</div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/History_of_Second_Life">History of Second Life</a> - includes some discussion of the geography</div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/List_Of_Continents">List Of Continents</a></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Oceans">Oceans</a></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/List_Of_Microcontinents_And_Sim_Clusters">List Of Microcontinents And Sim Clusters</a></div>
+<div class="wiki-line"><a href="http://lalotelling.wordpress.com/sl-history" rel="noreferrer">Lalo Telling&#x27;s history page</a> - has his very nice geohistory of the early grid</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples}}</code></span></div>

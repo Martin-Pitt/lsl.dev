@@ -1,0 +1,108 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-righttoc-d8e1769b/">RightToc</a>: <code>{{RightToc}}</code></span></div>
+<h2 id="dataserver-framework">Dataserver Framework</h2>
+<h3 id="introduction">Introduction</h3>
+<div class="wiki-line">A common problem in SL is reading and parsing notecards by script. One application for this is so a script can be distributed as no-mod but still be configurable.</div>
+<div class="wiki-line">The below framework demonstrates how to setup such an interface with very little work to retool.</div>
+<div class="wiki-line">The default state reads the notecard and when it is done it activates the configuration state.</div>
+<h3 id="testimonial">Testimonial</h3>
+<div class="wiki-line">The most common problem I find is people asking about dataservers, reading from notecards to bypass variables within a notecard so you can release your script as nomod.</div>
+<div class="wiki-line">So I setup a simple system that I use time and time again that can be reused in any project.</div>
+<div class="wiki-line">The class itself is state based meaning the default state reads the notecard and then starts another state when the notecard is read and ready to use I explain this further below.</div>
+<h2 id="main-script">Main Script</h2>
+<div class="wiki-line"><pre><code>string notecard_name = &quot;configuration&quot;;  // name of notecard goes here
+
+// internals
+integer DEBUG = FALSE;
+integer line;
+key queryhandle;                   // to separate Dataserver requests
+key notecarduuid;
+
+init()
+{
+    queryhandle = llGetNotecardLine(notecard_name, line = 0);// request line
+    notecarduuid = llGetInventoryKey(notecard_name);
+}
+
+// Config data loaded from notecard, with some sane defaults
+integer channel = 1000;
+string email_address = &quot;revolution.perenti@skidzpartz.com&quot;;
+default
+{
+    changed(integer change)         
+    {
+        // We want to reload channel notecard if it changed
+        if (change &amp; CHANGED_INVENTORY)
+            if(notecarduuid != llGetInventoryKey(notecard_name))
+                init();
+    }
+
+    state_entry()
+    {
+        init();
+    }
+    
+    dataserver(key query_id, string data)
+    {
+        if (query_id == queryhandle)
+        {
+            if (data != EOF)
+            {   // not at the end of the notecard
+                // yay!  Parsing time
+                
+                // pesky whitespace
+                data = llStringTrim(data, STRING_TRIM_HEAD);
+
+                // is it a comment?
+                if (llGetSubString (data, 0, 0) != &quot;#&quot;)
+                {
+                    integer s = llSubStringIndex(data, &quot;=&quot;);
+                    if(~s)//does it have an &quot;=&quot; in it?
+                    {
+                        string token = llToLower(llStringTrim(llDeleteSubString(data, s, -1), STRING_TRIM));
+                        data = llStringTrim(llDeleteSubString(data, 0, s), STRING_TRIM);
+
+                        //Insert your token parsers here.
+                        if (token == &quot;email_address&quot;)
+                            email_address = data;
+                        else if (token == &quot;channel&quot;)
+                            channel = (integer)data;
+                    }
+                }
+
+                queryhandle = llGetNotecardLine(notecard_name, ++line);
+                if(DEBUG) llOwnerSay(&quot;Notecard Data: &quot; + data);
+            }
+            else
+            {
+                if(DEBUG) llOwnerSay(&quot;Done Reading Notecard&quot;);
+                state configuration ;
+            }
+        }
+    }
+}
+
+state configuration
+{
+ 
+    state_entry()
+    {
+        llListen(channel, &quot;&quot;, &quot;&quot;, &quot;&quot;);
+        llShout(0, &quot;Channel set to &quot; + (string)channel);
+        llShout(0, &quot;Email set to &quot; + (string)email_address);
+    }   
+}</code></pre></div>
+<h2 id="notecard">Notecard</h2>
+<div class="wiki-line"><pre><code># This is the configuration file
+channel = 1000
+email_address = phoenixcms@hotmail.co.uk
+
+# end</code></pre></div>
+<div class="wiki-line">Lines that start with "#" are comments.</div>
+<h2 id="how-it-works">How It Works</h2>
+<div class="wiki-line">The <a href="https://wiki.secondlife.com/wiki/default">default</a> <a href="https://wiki.secondlife.com/wiki/state">state</a> reads and parses all the lines in the notecard. As it reads the notecard it overwrites the default values with the values in the notecard. More specifically after each line has been validated and tokenized, the token is checked against supported tokens. If the token is supported the specific parser for the token is called, in the above example it is just a simple convert and copy. </div>
+<div class="wiki-line">For technical support, requests, etc., use the Search under the Groups Tab and search for Dazzle Software</div>
+<div class="wiki-line">If you have any problems getting this script to work either contact me in-world <a href="https://wiki.secondlife.com/wiki/User:Revolution_Perenti" rel="noreferrer">Revolution Perenti</a></div>
+<div class="wiki-line">Or visit our free scripts at our LSL scripts <a href="http://www.dazzlesoftware.org" rel="noreferrer">www.dazzlesoftware.org</a> Secondlife Open Source Section on Tutorials.</div>
+<div class="wiki-line">Latest version always available on <a href="https://marketplace.secondlife.com/p/Dazzle-Software-DataServer-API/374436" rel="noreferrer">Marketplace</a> or <a href="http://maps.secondlife.com/secondlife/Wyrd/230/83/97" rel="noreferrer">Dazzle Software via Wyrd</a></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples}}</code></span></div>

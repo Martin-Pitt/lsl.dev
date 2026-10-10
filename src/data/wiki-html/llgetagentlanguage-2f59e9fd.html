@@ -1,0 +1,74 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the language code of the preferred interface language of the user <code>avatar</code>.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><td><table><tr><th> Return</th><th> Description</th></tr><tr><td> "en"</td><td> English</td></tr><tr><td> "az"</td><td> Azerbaycanca (Azerbaijani)</td></tr><tr><td> "da"</td><td> Dansk (Danish)</td></tr><tr><td> "de"</td><td> Deutsch (German)</td></tr><tr><td> "es"</td><td> Español (Spanish)</td></tr><tr><td> "fr"</td><td> Français (French)</td></tr><tr><td> "it"</td><td> Italiano (Italian)</td></tr><tr><td> "hu"</td><td> Magyar (Hungarian)</td></tr><tr><td> "nl"</td><td> Nederlands (Dutch)</td></tr><tr><td> "pl"</td><td> Polski (Polish)</td></tr><tr><td> "pt"</td><td> Portugués (Portuguese)</td></tr><tr><td> "ru"</td><td> Русский (Russian)</td></tr><tr><td> "tr"</td><td> Türkçe (Turkish)</td></tr><tr><td> "uk"</td><td> Українська (Ukrainian)</td></tr><tr><td> "zh"</td><td> 中文 (简体) (Chinese)</td></tr><tr><td> "ja"</td><td> 日本語 (Japanese)</td></tr><tr><td> "ko"</td><td> 한국어 (Korean)</td></tr></table></td><td>If the viewer is set to "System Default" the possible return may not be in this list. See <a href="http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes" rel="noreferrer">List of ISO 639-1 codes</a> for reference. The value can also be modified by directly editing the settings.xml file or with debug settings. So the value returned by llGetAgentLanguage may not be an ISO 639-1 value at all.</td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If the user has "<code>Share language with objects</code>" disabled then this function returns an empty string.</li>
+<li>During a 1-5 seconds period after which an agent is logging in, this function will return an empty string as well, until the viewer sends the data to the simulator.</li>
+<li>Users may prefer to see the client interface in a language that is not their native language, and some may prefer to use objects in the native language of the creator, or dislike low-quality translations. Consider providing a manual language override when it is appropriate.</li>
+<li>New language/variant values may be added later. Scripts may need to be prepared for unexpected values.</li>
+<li>If the viewer is set to "System Default" the possible return may be outside the list given above. see <a href="http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes" rel="noreferrer">List of ISO 639-1 codes</a> for reference.</li>
+<li>Viewers can specify other arbitrary language strings with the 'InstallLanguage' debug setting.  For example, launching the viewer with "--set InstallLanguage american" results this function returning 'american' for the avatar. <a href="https://jira.secondlife.com/browse/VWR-12222" rel="noreferrer">VWR-12222</a></li>
+<li>If the viewer supplies a multiline value, the simulator will only accept the first line and ignore all others. <a href="https://jira.secondlife.com/browse/SVC-5503" rel="noreferrer">SVC-5503</a></li>
+<li>Older viewers may return "en-us" instead of "en".</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default{
+    touch_start( integer num_detected ){
+        //-- loop through all detected touches
+        for (num_detected -= 1; num_detected &gt; -1; num_detected -= 1 ){
+            key agent = llDetectedKey( num_detected );
+            string name = llGetDisplayName( agent );
+            string language = llGetAgentLanguage( agent );
+
+            if ((&quot;&quot; == name) || (&quot;???&quot; == name))
+                name = llDetectedName( num_detected );
+
+            //-- PUBLIC_CHANNEL is 0
+            if (language == &quot;es&quot;){
+                llSay( PUBLIC_CHANNEL, &quot;¡Hola, &quot; + name + &quot;!&quot; );
+            }else if (language == &quot;fr&quot;){
+                llSay( PUBLIC_CHANNEL, &quot;Salut, &quot; + name + &quot; !&quot; );
+            }else if (language == &quot;ja&quot;){
+                llSay( PUBLIC_CHANNEL, &quot;やあ、　&quot; + name + &quot;！&quot; );
+            }else if (language == &quot;de&quot;){
+                llSay( PUBLIC_CHANNEL, &quot;Hallo, &quot; + name + &quot;!&quot; );
+            }else if (language == &quot;en&quot;){ //-- returned by some TPVs
+                llSay( PUBLIC_CHANNEL, &quot;Hello, &quot; + name + &quot;!&quot; );
+            }else if (language == &quot;pt&quot;){
+                llSay( PUBLIC_CHANNEL, &quot;Olá!, &quot; + name + &quot;!&quot; );
+            }else if (language == &quot;ko&quot;){
+                llSay( PUBLIC_CHANNEL, &quot;안녕하세요, &quot; + name + &quot;!&quot; );
+            }else if (language == &quot;zh&quot;){
+                llSay( PUBLIC_CHANNEL, &quot;你好啊， &quot; + name + &quot;！&quot; );
+            }else{ //-- Default to &#x27;en-us&#x27; if language is unrecognized / not provided.
+                llSay( PUBLIC_CHANNEL, &quot;Hi there, &quot; + name + &quot;!&quot; );
+            }
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="history">History</h2><ul>
+<li>Introduced in <span class="wiki-template"><a href="/wiki/template-svn-6879a543/">SVN</a>: <code>{{SVN|568|rev=88085|branch=Release|anchor=file33|date=Wednesday, 21 May 2008}}</code></span></li>
+<li>Modified to only return the first line with <a href="https://jira.secondlife.com/browse/SVC-5503" rel="noreferrer">SVC-5503</a></li>
+<li>Date of Release <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.21"> 16-10-2008 </a></li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p id="vwr-12222"><a href="/wiki/template-issues-vwr-12222-b394ea55/">Template:Issues/VWR-12222</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|VWR-12222|[[llGetAgentLanguage]]() returns &quot;en&quot;, not &quot;en-us&quot; -- Bug or (new) feature?|type=bug|resolution=wont|status=clo|fc=*}}</code></pre></details><p id="svc-5503"><a href="/wiki/template-issues-svc-5503-9dc7e94e/">Template:Issues/SVC-5503</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-5503|[[llGetAgentLanguage]]() return several lines of text when griefers fiddle with settings.xml|type=bug|resolution=fixed}}</code></pre></details></section>

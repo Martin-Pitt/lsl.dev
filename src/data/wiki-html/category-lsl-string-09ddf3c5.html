@@ -1,0 +1,138 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Types}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-righttoc-d8e1769b/">RightToc</a>: <code>{{RightToc}}</code></span></div>
+<div class="wiki-line">See also <a href="/wiki/category-lsl-text-edf405a1/">Text</a>.</div>
+<div class="wiki-line">A string is text data.</div>
+<div class="wiki-line">String values are enclosed in double quotes when defined in LSL text.</div>
+<div class="wiki-line">Any character may be used in a string, except for the "NUL" character, though some will need to be escaped (see the <a href="#escape-codes">Escape Codes section</a> on this page for more info.) The "NUL" character is Unicode value U+0000 and cannot exist in an LSL string. Therefore for example llUnescapeURL("%00") results in an empty string "".</div>
+<div class="wiki-line">The length of a string is only limited by available <a href="/functions/llGetFreeMemory/">script memory</a>. (see the <a href="#string-length-restraints">String Length Restraints</a> section on this page for some operational restraints.) Note that in Mono, strings use <a href="https://en.wikipedia.org/wiki/UTF-16" rel="noreferrer">UTF-16 encoding</a> and occupy two memory bytes per character for characters U+0001 to U+FFFF, or 4 bytes for Unicode characters U+10000 and higher.</div>
+<div class="wiki-line">Strings can be concatenated (joined together) using the <strong>+</strong> operator. Note that concatenation cannot be done when defining a string as a global variable, as + is treated as an executable instruction, it's not handled by the compiler. Concatenation can only be done within executable code, i.e. inside a user defined function or in an event.</div>
+<div class="wiki-line">Some string operations can be done via built-in functions, such as those that can make text all upper and lower case. Other operations, such as replace, left, right, wrap, etc, must be done via functions invented by other LSL users (examples of which are at the bottom of this page.)</div>
+<div class="wiki-line">You have no control over the font face, size, weight or colour that string output is displayed in on user screens or on menus. The look of text that displays on screens, such as chat from a text, is controlled by users (though not many change the defaults.) You can only control whether the text is lower or upper case.</div>
+<div class="wiki-line">(The only time you have control over the colour of displayed text is when it is <a href="/functions/llSetText/">Floating Text</a>.)</div>
+<table><tr><td> String examples: <pre><code>&quot;Hello Avatar!&quot;
+&quot;Yes&quot;
+&quot;No&quot;
+&quot;It&#x27;s 10 o&#x27;clock.&quot;
+&quot;I am 21 years old!&quot;
+&quot;Help &quot; + &quot;me&quot;
+EOF
+
+//The following two strings have the same value (i.e. they will both produce text with line breaks in it.)
+
+&quot;I scream,\nyou scream,\nwe all scream,\nfor ice-cream!&quot;
+&quot;I scream,
+you scream,
+we all scream,
+for ice-cream!&quot;</code></pre></td></tr></table>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="variable-string-name">Variable: string <code>name</code>;</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><pre><code>string name;</code></pre></div>
+<div class="wiki-line">Declares a variable of type string named <strong>name</strong>, with the value <code>&quot;&quot;</code></div>
+<div class="wiki-line"><div class="wiki-related-row">variable — name — <span class="wiki-template"><code>{{#var:p_name_desc}}</code></span></div></div>
+<table></table>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="variable-string-name-value">Variable: string <code>name</code> = <code>value</code>;</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><pre><code>string name = value;</code></pre></div>
+<div class="wiki-line">Declares a variable of type string named <strong>name</strong>, with the value <strong>value</strong>.</div>
+<div class="wiki-line"><div class="wiki-related-row">variable — name — <span class="wiki-template"><code>{{#var:p_name_desc}}</code></span></div></div>
+<div class="wiki-line"><div class="wiki-related-row">expression — value — <span class="wiki-template"><code>{{#var:p_value_desc}}</code></span></div></div>
+<table></table>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="typecast-string-value"><a href="https://wiki.secondlife.com/wiki/Typecast">Typecast</a>: (string)<code>value</code></h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><pre><code>(string)value</code></pre></div>
+<div class="wiki-line">Converts <strong>value</strong> to a value of type string.</div>
+<div class="wiki-line"><div class="wiki-related-row">expression — value — <span class="wiki-template"><code>{{#var:p_value_t_desc}}</code></span></div></div>
+<table></table>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="operators"><a href="/wiki/lsl-operators-5ba19656/">Operators</a></h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">See <a href="/wiki/lsl-operators-5ba19656/">Operators</a> for more information.</div>
+<div class="wiki-line">&lt;div id="box" style="padding-left: 0.5em;padding-right: 0.5em;padding-bottom: 0.5em;"&gt;</div>
+<h3 id="combine-value1-value2">Combine: <code>value1</code> + <code>value2</code></h3>
+<div class="wiki-line"><pre><code>(value1 + value2)</code></pre></div>
+<div class="wiki-line">Combines two strings into a single string without modifying the inputs. Appends <strong>value2</strong> to <strong>value1</strong> and returns the resulting string.</div>
+<div class="wiki-line"><div class="wiki-related-row">expression — value1 — <span class="wiki-template"><code>{{#var:p_value_desc}}</code></span></div></div>
+<div class="wiki-line"><div class="wiki-related-row">expression — value2 — <span class="wiki-template"><code>{{#var:p_value_desc}}</code></span></div></div>
+<table></table>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box" style="padding-left: 0.5em;padding-right: 0.5em;padding-bottom: 0.5em;"&gt;</div>
+<h3 id="comparison-value1-value2">Comparison: <code>value1</code> == <code>value2</code></h3>
+<div class="wiki-line"><pre><code>(value1 == value2)</code></pre></div>
+<div class="wiki-line">Compares two strings, returns <code>one</code> if same length and same characters, else returns zero.</div>
+<div class="wiki-line">This operator works exactly like <code>!strcmp(<strong>value1</strong>, <strong>value2</strong>)</code> in C, thus technically differs from the counterintuitive behavior of the == operator in C and in Java.</div>
+<div class="wiki-line"><div class="wiki-related-row">expression — value1 — <span class="wiki-template"><code>{{#var:p_value_desc}}</code></span></div></div>
+<div class="wiki-line"><div class="wiki-related-row">expression — value2 — <span class="wiki-template"><code>{{#var:p_value_desc}}</code></span></div></div>
+<table></table>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box" style="padding-left: 0.5em;padding-right: 0.5em;padding-bottom: 0.5em;"&gt;</div>
+<h3 id="comparison-value1-value2">Comparison: <code>value1</code> != <code>value2</code></h3>
+<div class="wiki-line"><pre><code>(value1 != value2)</code></pre></div>
+<div class="wiki-line">Compares two strings, returns <code>zero</code> if same length and same characters, otherwise non-zero.</div>
+<div class="wiki-line">This operator works exactly like <code>strcmp(<strong>value1</strong>, <strong>value2</strong>)</code> in C, thus technically differs from the counterintuitive behavior of the != operator in C and in Java.</div>
+<div class="wiki-line"><div class="wiki-related-row">expression — value1 — <span class="wiki-template"><code>{{#var:p_value_desc}}</code></span></div></div>
+<div class="wiki-line"><div class="wiki-related-row">expression — value2 — <span class="wiki-template"><code>{{#var:p_value_desc}}</code></span></div></div>
+<table></table>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="escape-codes">Escape Codes</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<table><caption></caption><tr><th>Substring</th><th>Replaced with</th></tr><tr><td> \t </td><td> four spaces</td></tr><tr><td> \n </td><td> new line</td></tr><tr><td> \" </td><td> double quote</td></tr><tr><td> \\ </td><td> backslash</td></tr></table>
+<div class="wiki-line">Escape codes are translated when the script is compiled; not while it's running. The compiler will ignore any other combination of \ with a character by removing the \. So "\a" means "a".</div>
+<div class="wiki-line">The result is that only strings that are inside your script when it is compiled will get, say, \n turned into a "new line" character.  Text you read in from a notecard, chat, http, object name or description, etc, will not be checked for escape codes -- that same \n typed in a notecard doesn't automatically turn into a "new line" character.  You'll have to do that yourself, if you really really need it for some reason. </div>
+<div class="wiki-line">Those who are coming to LSL from such languages as C and Java may find these LSL string escape rules confusing at first. In LSL, "\n" means <a href="/functions/llUnescapeURL/">llUnescapeURL</a>("%0A"), as it does in C and Java, but "\t" means <a href="/functions/llUnescapeURL/">llUnescapeURL</a>("%20%20%20%20") rather than <a href="/functions/llUnescapeURL/">llUnescapeURL</a>("%09"). Additionally there is no "\r" escape code and "\r" will translate to "r" rather than <a href="/functions/llUnescapeURL/">llUnescapeURL</a>("%0D").</div>
+<div class="wiki-line">For runtime translation of escaped characters try the user function <a href="https://wiki.secondlife.com/wiki/Unescape">Unescape</a>.</div>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="characters-with-accents">Characters with Accents</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">It used to be that your script would not compile if you included in it a string containing a character with an accent, such as "écoutez", or punctuation not used in English, such as "¿Entiende?".</div>
+<div class="wiki-line">Sometime in late spring / early summer 2008, scripts began compiling with accents in text strings.</div>
+<div class="wiki-line">That is to say:</div>
+<div class="wiki-line"><pre><code>string hello = &quot;Avatar écoutez&quot;;</code></pre></div>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="string-length-restraints">String Length Restraints</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">As noted at the start of this page, the length of a single string is only limited by available <a href="https://wiki.secondlife.com/wiki/script_memory">script memory</a>. However, there are some operational limitations. Many <a href="/wiki/category-lsl-communications-a49c85d4/">Communications</a> functions and some other functions also impose limits on input strings. Those limits may result in error messages at runtime or "silent" truncation (i.e. you get no error notice, nor any indication that it has been done.).</div>
+<div class="wiki-line"><strong>Examples</strong></div>
+<ul>
+<li><a href="/functions/llSay/">llSay</a> -  When using llSay, any text string being said will be truncated to 1024 CHARACTERS, both under LSO and Mono. (That's 2048 bytes of memory space in Mono (UTF-16) ).</li>
+<li><a href="/functions/llGetNotecardLine/">llGetNotecardLine</a> - When reading in lines from notecards, lines longer than 1023 characters will be truncated silently. (Limit was formerly 255, however with <a href="https://releasenotes.secondlife.com/simulator/2021-10-25.565008.html" rel="noreferrer">SLS 565008</a> this has been increased.)</li>
+<li><a href="/functions/llDialog/">llDialog</a> - If the message or button texts are too long a non-fatal error is produced when the function is called.</li>
+</ul>
+<div class="wiki-line"><strong>Notes</strong><br/></div>
+<div class="wiki-line">Limits of this type are always documented, an absence of limits in the documentation means there are no known limits (that are outside the norm for the language).</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="trimming-a-string">Trimming a String</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line">Trimming a string used to require user-created functions, such as those created for the purpose in Strife Onizuka's library.</div>
+<div class="wiki-line">Now, however, there is a native LSL function, <a href="/functions/llStringTrim/">llStringTrim</a>, which can be used to remove leading and/or trailing spaces. Note though that it does not remove excess spaces that a user may have entered in the middle of a sentence or string, nor is there any other native LSL function which does.</div>
+<div class="wiki-line">The following code <em>will</em> remove both all double spaces inside a string, as well as any leading and trailing spaces; it will how ever require a substantial amount of memory overhead.</div>
+<div class="wiki-line"><pre><code>string myTrimmedText = llDumpList2String(llParseString2List(src, [&quot; &quot;], []), &quot; &quot;);</code></pre></div>
+<div class="wiki-line">When accepting user text input from chat, a notecard, or a prim name or description, or any other "free-wheeling" source, it's a good idea to always <a href="/functions/llStringTrim/">llStringTrim</a> first before beginning to work with it.</div>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="examples">Examples</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><pre><code>integer int = 48934;
+string str = (string)int;
+string str_2;
+str_2 = str;</code></pre></div>
+<div class="wiki-line">&lt;/div&gt;&lt;/div&gt;</div>
+<div class="wiki-line">&lt;div id="box"&gt;</div>
+<h2 id="useful-functions">Useful Functions</h2>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<h3 id="user-created-utility-functions">User-created utility functions</h3>
+<div class="wiki-line">These functions have been created and contributed by LSL users to perform operations not covered by built-in LSL functions.</div>
+<table><caption></caption><tr><th>function</th><th>purpose</th></tr><tr><td> <a href="/wiki/chr-5575c22d/">Chr</a> </td><td> &lt;strike&gt;Returns the Unicode character with the given code. See also <a href="https://wiki.secondlife.com/wiki/Ord">Ord</a>.&lt;/strike&gt; Built-in function: <a href="/functions/llChar/">llChar</a>.</td></tr><tr><td> <a href="/wiki/float2string-98c89af5/">Float2String</a> </td><td> Allows string output of a float in a tidy text format, with optional rounding.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/Left">Left</a> </td><td> Returns text left of a specified separator.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/Like">Like</a> </td><td> See if one word matches part of another.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/Ord">Ord</a> </td><td> &lt;strike&gt;Returns the ordinal (Unicode code) of a character. See also <a href="/wiki/chr-5575c22d/">Chr</a>.&lt;/strike&gt; Built-in function: <a href="/functions/llOrd/">llOrd</a>.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/RandomString">RandomString</a> </td><td> Creates a random string.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/RemoveHTMLTags">RemoveHTMLTags</a> </td><td> Removes HTML tags from a string ( and newline characters )</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/Right">Right</a> </td><td> Returns text right of a specified separator.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/Library_Combined_Library#str-replace">str_replace</a> </td><td> &lt;strike&gt;Replace all instances of a string with another string in a target string.&lt;/strike&gt; Built-in function: <a href="/functions/llReplaceSubString/">LlReplaceSubString</a>.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/Stristr">Stristr</a> </td><td> Returns a string from the first occurrence of needle to the end of haystack.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/SplitLine">SplitLine</a> </td><td> Insert 'new line' escape codes at certain positions of a string.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/WrapText">WrapText</a> </td><td> Break text into line lengths of your specification.</td></tr></table>
+<h3 id="text-related-items-from-the-script-library">Text-Related Items from the Script Library</h3>
+<table><tr><td> <strong>Name</strong></td><td> <strong>Creator</strong></td><td> <strong>Description</strong></td></tr><tr><td><a href="https://wiki.secondlife.com/wiki/ParseString2List">ParseString2List</a></td><td><a href="https://wiki.secondlife.com/wiki/User:Strife_Onizuka">Strife Onizuka</a></td><td>Same as <a href="/functions/llParseString2List/">llParseString2List</a> and <a href="/functions/llParseStringKeepNulls/">llParseStringKeepNulls</a>, but not limited to 8 spacers or separators. Thus substitute a call to the <a href="/functions/llParseString2List/">llParseString2List</a> and <a href="/functions/llParseStringKeepNulls/">llParseStringKeepNulls</a> functions by a call to <a href="https://wiki.secondlife.com/wiki/Parse_String_To_List">ParseString2List</a> whenever you have more than 8 separators or more than 8 spacers.</td></tr><tr><td><a href="https://wiki.secondlife.com/wiki/String_Compare">String Compare</a></td><td><a href="https://wiki.secondlife.com/wiki/User:Xaviar_Czervik">Xaviar Czervik</a></td><td>Compares two strings and reliably returns either 1, -1, or 0 if they are the same.</td></tr><tr><td><a href="https://wiki.secondlife.com/wiki/XyText_1.5">XyText</a></td><td><a href="https://wiki.secondlife.com/wiki/User:Xylor_Baysklef">Xylor Baysklef</a></td><td> Display text (up to 10 characters) on a prim. Use as many prims as desired.</td></tr><tr><td><a href="https://wiki.secondlife.com/wiki/XyyyyzText">XyyyyzText</a></td><td><a href="https://wiki.secondlife.com/wiki/User:Criz_Collins">Criz Collins</a></td><td> Display text (up to 10 characters) on a prim. Displays different text for each line instead of one single text, that will be broken into the next lines. Watch here for what that means: http://screencast.com/t/1wMLujLcEO</td></tr><tr><td><a href="https://wiki.secondlife.com/wiki/XyzzyText">XyzzyText</a></td><td><a href="https://wiki.secondlife.com/wiki/User:Thraxis_Epsilon">Thraxis Epsilon</a> and <a href="https://wiki.secondlife.com/wiki/User:Gigs_Taggart">Gigs Taggart</a></td><td> Display text (up to 10 characters) on a prim. Way more efficient than XyText.</td></tr></table>
+<div class="wiki-line">&lt;/div&gt;</div>

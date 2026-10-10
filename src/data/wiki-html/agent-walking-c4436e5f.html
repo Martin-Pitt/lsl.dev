@@ -1,0 +1,28 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Used with <a href="/functions/llGetAgentInfo/">llGetAgentInfo</a> to determine if the queried avatar is walking.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Cause a sound to be played while the wearer of the hud or attachment is walking.</div>
+<div class="wiki-line">Place this script in a Hud for the owner only to hear the sound,</div>
+<div class="wiki-line">or in an attachment for others to hear your footsteps too.</div>
+<div class="wiki-line">You'll need a sound file in the object too, with your choice of footstep sounds.</div>
+<div class="wiki-line"><pre><code>// Play a sound whenever the owner is walking
+integer   gWasWalking;             // TRUE when wearer is already walking
+string    gSound = &quot;footsteps&quot;;    // name of soundfile in inventory
+default
+{
+    state_entry()
+    {
+        // Start a timer to continuously check if the owner is walking
+        llSetTimerEvent(0.25);
+    }
+    timer()
+    {
+        integer NowWalking = llGetAgentInfo(llGetOwner()) &amp; AGENT_WALKING;
+        if  (NowWalking != gWasWalking)        // walking has stopped or started
+        {
+            llStopSound();
+            if (NowWalking)      llLoopSound(gSound, 1.0);
+        }
+        gWasWalking = NowWalking;
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-constants">See also: constants</h2><span id="constants"></span><table><tr><th> Constant</th><th> <code>Val</code></th><th> Returned if agent...</th></tr><tr><td><a href="/constants/AGENT_ALWAYS_RUN/">4096</a></td><td>0x1000</td><td>has running (<span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|Always Run}}</code></span>) enabled, or is using tap-tap-hold</td></tr><tr><td><a href="/constants/AGENT_ATTACHMENTS/">2</a></td><td>0x0002</td><td>has attachments</td></tr><tr><td><a href="/constants/AGENT_AUTOMATED/">16384</a></td><td>0x4000</td><td>is marked as a scripted agent/bot</td></tr><tr><td><a href="/constants/AGENT_AUTOPILOT/">8192</a></td><td>0x2000</td><td>is in <span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|autopilot}}</code></span> mode</td></tr><tr><td><a href="/constants/AGENT_AWAY/">64</a></td><td>0x0040</td><td>is in <span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|away}}</code></span> mode</td></tr><tr><td><a href="/constants/AGENT_BUSY/">2048</a></td><td>0x0800</td><td>is in <span class="wiki-template"><a href="/wiki/template-string-b468d060/">String</a>: <code>{{String|busy}}</code></span> mode</td></tr><tr><td><a href="/constants/AGENT_CROUCHING/">1024</a></td><td>0x0400</td><td>is crouching</td></tr><tr><td><a href="/constants/AGENT_FLOATING_VIA_SCRIPTED_ATTACHMENT/">32768</a></td><td>0x8000</td><td>is floating or hovering because of a scripted attachment</td></tr><tr><td><a href="/constants/AGENT_FLYING/">1</a></td><td>0x0001</td><td>is flying or hovering</td></tr><tr><td><a href="/constants/AGENT_IN_AIR/">256</a></td><td>0x0100</td><td>is in the air (jumping, flying or falling)</td></tr><tr><td><a href="/constants/AGENT_MOUSELOOK/">8</a></td><td>0x0008</td><td>is in mouselook</td></tr><tr><td><a href="/constants/AGENT_ON_OBJECT/">32</a></td><td>0x0020</td><td>is sitting on an object (and linked to it)</td></tr><tr><td><a href="/constants/AGENT_SCRIPTED/">4</a></td><td>0x0004</td><td>has scripted attachments</td></tr><tr><td><a href="/constants/AGENT_SITTING/">16</a></td><td>0x0010</td><td>is sitting<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|1=&quot;Sit down&quot; on the avatar context menu allows ground sits anywhere: atop the terrain, on objects or even in the air, so it is possible to sit &quot;on&quot; an object without linking.}}</code></span></td></tr><tr><td><a href="/constants/AGENT_TYPING/">512</a></td><td>0x0200</td><td>is typing</td></tr><tr><td><a href="/constants/AGENT_WALKING/">128</a></td><td>0x0080</td><td>is walking, running or crouch walking</td></tr></table></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAgentInfo/">llGetAgentInfo</a></div></div></section>

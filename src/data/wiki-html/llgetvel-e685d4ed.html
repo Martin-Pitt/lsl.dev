@@ -1,0 +1,29 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Speed is the magnitude of the velocity. Speed is measured in meter per second.<br></div>
+<div class="wiki-line">Velocity reported is relative to the <a href="https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#global">global coordinate frame</a> (the object rotation has no affect on this functions output).<br></div>
+<div class="wiki-line">For physic objects , velocity is the velocity of its center of mass <a href="/functions/llGetCenterOfMass/">llGetCenterOfMass</a> . ( When the object has some torque and has not force , position of the object moves ( it turns )  , but its center of mass is unchanged , so the velocity is null )</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/vector">vector</a> that is the velocity of the object.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//A very simple (and not very effective) way of keeping a physical object in place.
+//If you ever want to actually stop an object, use llMoveToTarget(llGetPos(), .1)
+
+default
+{
+    state_entry()
+    {
+        vector spd;
+        {
+            @loop;
+            if (llVecMag(spd = llGetVel()) &gt; .001)
+            { //We&#x27;re accelerating...
+                llApplyImpulse(-spd, 0); //Slow us down.
+            }
+        jump loop;
+        }
+    }
+}//Written by Xaviar Czervik</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">To get the velocity relative the local frame (the direction the object is pointing), divide the output of this function by that of its rotation.</div>
+<div class="wiki-line"><pre><code>vector local_vel = llGetVel() / llGetRot()</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAccel/">llGetAccel</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetOmega/">llGetOmega</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetForce/">llGetForce</a> — Gets the objects force</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetTorque/">llGetTorque</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetMass/">llGetMass</a></div></div></section>

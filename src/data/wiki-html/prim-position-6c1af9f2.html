@@ -1,0 +1,61 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">PRIM_POSITION is used to get or set the prim's position.</div></section>
+<section><h2 id="see-also-constants">See also: constants</h2><span id="constants"></span><div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/PRIM_ROTATION/">PRIM_ROTATION</a></div></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimitiveParams/">llGetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPos/">llGetPos</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetPos/">llSetPos</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLocalPos/">llGetLocalPos</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRootPosition/">llGetRootPosition</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetObjectDetails/">llGetObjectDetails</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/warpPos">warpPos</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-primitiveparam-categorize-1ca2b81a/">Template:LSL PrimitiveParam Categorize</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#ifexist:Template:LSLC{{#var:lang}}|
+ {{LSLC{{#var:lang}}|PrimitiveParams}}
+ {{LSLC{{#var:lang}}|PrimitiveParams/{{{1}}}}}
+ {{LSLC{{#var:lang}}|{{{1}}}}}
+|
+ {{LSLC|PrimitiveParams{{#var:lang}}}}
+ {{LSLC|PrimitiveParams/{{{1}}}{{#var:lang}}}}
+ {{LSLC|{{{1}}}{{#var:lang}}}}
+}}
+}}}}</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line">&lt;onlyinclude&gt;<span class="wiki-template"><code>{{#if:
+
+{{#vardefine:position_const|{{LSL Const|PRIM_POSITION|integer|6|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the prim&#x27;s position}}}}
+
+{{LSL_Function/position|positionget|region=*}}
+{{LSL_Function/position|positionset|region=*|local=*}}
+
+{{#vardefine:caveats-get|* {{LSLP|positionget|position}} is always in [[Viewer_coordinate_frames#region|region coordinates]], even if the prim is a child or the root prim of an [[attachment]].}}
+
+{{#vardefine:caveats-set|{{#ifeq:{{{1|}}}|set|**|*}} Depending upon the situation {{LSLP|positionset|position}} may need to be in [[Viewer_coordinate_frames#local|local coordinates]] or [[Viewer_coordinate_frames#region|region coordinates]], See [[llSetPos#Specification]] for details.
+{{#ifeq:{{{1|}}}|set|***|**}}It is usually not a good idea to combine [[PRIM_POSITION]] with [[LINK_SET]]. The root will treat the coordinates as world or attachment, while the children will treat them as local, yielding inconsistent results or failure. If you want to move the object as a unit, use [[LINK_ROOT]] instead.
+{{#ifeq:{{{1|}}}|set|**|*}} The range the prim can move is limited if it is an unattached root prim. The distance is capped to 10m per {{#var:position_const}} call. See [[WarpPos]]. This is a very special case. Do not rely on rule duplication of other flags - the results are undefined, and things &#x27;&#x27;will&#x27;&#x27; break in the future.
+{{#ifeq:{{{1|}}}|set|**|*}} Moving [[avatar]]s with {{#var:position_const}}
+{{#ifeq:{{{1|}}}|set|***|**}} Moving the prim the avatar sat upon does not move the avatar.
+{{#ifeq:{{{1|}}}|set|***|**}} Moving an avatar does not move the prim they sat upon.
+{{#ifeq:{{{1|}}}|set|***|**}} Sit-target coordinates do not easily map to prim coordinates, use [[llSitTarget#Useful_Snippets|UpdateSitTarget]].
+{{#ifeq:{{{1|}}}|set|***|**}} If you have explicitally set your object as &quot;static obstacle&quot; for pathfinding , the function will fail with the error in the debug channel : &quot;Unable to set prim position or scale: object contributes to the navmesh.&quot;
+{{#ifeq:{{{1|}}}|set|***|**}} If {{LSLP|positionset|position}} is greater than 54 meters away from the center, the repositioning will silently fail.
+{{#ifeq:{{{1|}}}|set|**|*}} A world object cannot be moved below the region ground level, and the midpoint of the root will be snapped to the ground instead.}}
+
+{{#switch:{{{1|}}}|set={{#vardefine:caveats|{{#var:caveats}}
+* &lt;span id=&quot;Caveats-PRIM_POSITION&quot;&gt;&lt;/span&gt; {{#var:position_const}} caveats
+{{#var:caveats-set}}{{#vardefine:caveats-set}}}}
+|get={{#vardefine:caveats|{{#var:caveats}}
+* {{LSLP|positionget|position}} is always in [[Viewer_coordinate_frames#region|region coordinates]], even if the prim is a child or the root prim of an [[attachment]].{{#vardefine:caveats-get}}}}
+}}
+
+{{#vardefine:PRIM_POSITION/SLPP&amp;A|
+Avatars sitting on the object can be moved with [[llSetLinkPrimitiveParams]] and [[PRIM_POSITION]]. This was originally a mis-feature but according to [http://jira.secondlife.com/browse/SVC-3408?focusedCommentId=88574#action_88574 Andrew Linden] LL has decided to support it.
+
+=====Examples=====
+The below example moves an avatar to x,y,z without moving the prim they are sitting on. If x,y,z is more than 54 meters away the call will silently fail. Remember x,y,z is in object relative coordinates just like any other linked prim in a set.
+
+Avatars are always the last prims in the set, so [[llGetNumberOfPrims]] can be used for a single avatar sitting on a vehicle.
+
+Example: <pre><code>llSetLinkPrimitiveParams(llGetNumberOfPrims(), [PRIM_POSITION, &lt;x,y,z&gt;]);</code></pre>
+}}
+
+}}</code></span>&lt;/onlyinclude&gt;</div></section>

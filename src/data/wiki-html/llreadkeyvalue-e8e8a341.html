@@ -1,0 +1,184 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Start an asynchronous transaction to read the value associated with the specified key (<code>k</code>) and the script's <a href="/wiki/category-lsl-experience-befb5e92/">Experience</a>.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If the key does not exist the <a href="/events/dataserver/">dataserver</a> will return a failure along with the error <a href="/constants/XP_ERROR_KEY_NOT_FOUND/">XP_ERROR_KEY_NOT_FOUND</a>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/key">key</a> that can be used to identify the corresponding <a href="/events/dataserver/">dataserver</a> event to determine if this command succeeded or failed and the results.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>key trans;
+default
+{
+    state_entry()
+    {
+        trans = llReadKeyValue(&quot;FOO&quot;);
+    }
+    dataserver(key t, string value)
+    {
+        if (t == trans)
+        {
+            // our llReadKeyValue transaction is done
+            if (llGetSubString(value, 0, 0) == &quot;1&quot;)
+            {
+                // the key-value pair was successfully read
+                llSay(0, &quot;New key-value pair value: &quot; + llGetSubString(value, 2, -1));
+            }
+            else
+            {
+                // the key-value pair failed to read
+                integer error =  (integer)llGetSubString(value, 2, -1);
+                llSay(0, &quot;Key-value failed to read: &quot; + llGetExperienceErrorMessage(error));
+            }
+        } 
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><ul>
+<li><a href="/functions/llGetExperienceErrorMessage/">llGetExperienceErrorMessage</a></li>
+<li><a href="/functions/llCreateKeyValue/">llCreateKeyValue</a></li>
+<li><a href="/functions/llReadKeyValue/">llReadKeyValue</a></li>
+<li><a href="/functions/llUpdateKeyValue/">llUpdateKeyValue</a></li>
+<li><a href="/functions/llDeleteKeyValue/">llDeleteKeyValue</a></li>
+<li><a href="/functions/llDataSizeKeyValue/">llDataSizeKeyValue</a></li>
+<li><a href="/functions/llKeyCountKeyValue/">llKeyCountKeyValue</a></li>
+<li><a href="/functions/llKeysKeyValue/">llKeysKeyValue</a></li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="bug-8895"><a href="https://wiki.secondlife.com/wiki/Template:Issues/BUG-8895">Template:Issues/BUG-8895</a></p><p><a href="/wiki/template-lsl-function-keyvalue-d7e91dc2/">Template:LSL Function/KeyValue</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_success_desc|A boolean specifying if the transaction succeeded (1) or not (0).}}
+{{#vardefine:p_error_hover|An XP_ERROR_* flag that describes why the operation failed.}}
+{{#vardefine:p_error_desc|An {{CAL|LSL Integer/experience_error{{#var:lang}}|XP_ERROR_*}} flag that describes why the operation failed.}}
+{{#vardefine:p_cdl_desc|A string that is a comma-deliminated list}}
+{{#vardefine:p_components_desc|varies depending upon success or failure of request}}
+
+{{#vardefine:p_{{{d2_name|}}}_hover|{{#var:p_{{{d2_name|}}}_hover}}{{{d2_hover|}}}}}
+{{#vardefine:p_{{{d3_name|}}}_hover|{{#var:p_{{{d3_name|}}}_hover}}{{{d3_hover|}}}}}
+{{#vardefine:p_{{{d4_name|}}}_hover|{{#var:p_{{{d4_name|}}}_hover}}{{{d4_hover|}}}}}
+{{#vardefine:p_{{{dl_name|}}}_hover|{{#var:p_{{{dl_name|}}}_hover}}{{{dl_hover|}}}}}
+
+{{#if:{{{1|}}}&lt;noinclude&gt;*&lt;/noinclude&gt;|{{LSL Function/KeyValue/Key|{{{1}}}|dataserver={{{dataserver|}}}}}}}
+{{#if:{{{key|}}}|{{LSL Function/KeyValue/Key|{{{key}}}|dataserver={{{dataserver|}}}}}}}
+{{#if:{{{2|}}}&lt;noinclude&gt;*&lt;/noinclude&gt;|{{LSL Function/KeyValue/Value|{{{2}}}|dataserver={{{dataserver|}}}}}}}
+{{#if:{{{value|}}}&lt;noinclude&gt;*&lt;/noinclude&gt;|{{LSL Function/KeyValue/Value|{{{value}}}|Note! This value may contain commas.|dataserver={{{dataserver|}}}}}}}
+
+{{#vardefine:p_{{{d2_name|}}}_desc|{{#var:p_{{{d2_name|}}}_desc}}{{{d2_desc|}}}}}
+{{#vardefine:p_{{{d3_name|}}}_desc|{{#var:p_{{{d3_name|}}}_desc}}{{{d3_desc|}}}}}
+{{#vardefine:p_{{{d4_name|}}}_desc|{{#var:p_{{{d4_name|}}}_desc}}{{{d4_desc|}}}}}
+{{#vardefine:p_{{{dl_name|}}}_desc|{{#var:p_{{{dl_name|}}}_desc}}{{{dl_desc|}}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Dataserver{{#var:lang}}}}{{#if:{{{mode|}}}|{{LSLC|Dataserver/{{{mode}}}{{#var:lang}}}}}}
+}}}}}}
+&lt;/includeonly&gt;
+
+{{#vardefine:table_text|{{PBR}}
+The string containing a comma-delimited list ({{LSLPT|cdl}}). &lt;code&gt;llDumpList2String([ [[integer]]&amp;nbsp;{{LSLPT|success}}&amp;nbsp;]&amp;nbsp;+ {{LSLPT|components}});&lt;/code&gt;
+* {{LSLPT|components}} vary depending upon success or failure of request.
+* Failure: &lt;code&gt;{{LSLPT|cdl}} = [[llDumpList2String]]([ 0, [[integer]]&amp;nbsp;{{LSLPT|error}}],&quot;,&quot;)&lt;/code&gt;
+* Success: &lt;code&gt;{{LSLPT|cdl}} = [[llDumpList2String]]([ 1{{#if:{{{d2_type|}}}{{{d2_name|}}}|, [[{{{d2_type}}}{{#var:lang}}|{{{d2_type}}}]]&amp;nbsp;{{LSLPT|{{{d2_name}}}}}{{#if:{{{d3_type|}}}{{{d3_name|}}}|, [[{{{d3_type}}}{{#var:lang}}|{{{d3_type}}}]]&amp;nbsp;{{LSLPT|{{{d3_name}}}}}{{#if:{{{d4_type|}}}{{{d4_name|}}}|, [[{{{d4_type}}}{{#var:lang}}|{{{d4_type}}}]]&amp;nbsp;{{LSLPT|{{{d4_name}}}}}}}}}}} ]{{#if:{{{dl_name|}}}|&amp;nbsp;+ {{LSLPT|{{{dl_name|}}}}})}},&quot;,&quot;)&lt;/code&gt;
+===== String Components =====
+{{{!}} style=&quot;margin-left:0em;&quot;
+{{LSL DefineRow|integer|2={{CAL|LSL Integer/boolean{{#var:lang}}|success}}|3={{#var:p_success_desc}}}}
+{{LSL DefineRow|integer|2={{CAL|LSL Integer/experience_error{{#var:lang}}|error}}|3={{#var:p_error_desc}}}}
+{{#if:{{{d2_name|}}}{{{d2_type|}}}|{{LSL DefineRow|1={{{d2_type|}}}|2={{#if:{{{d2_subtype|}}}|{{CAL|LSL {{ucfirst:{{{d2_type|}}}}}/{{{d2_subtype|}}}{{#var:lang}}|{{{d2_name|}}}}}|{{LSL_Parameter_Link|{{{d2_name|}}}}}}}|3={{#var:p_{{{d2_name|}}}_desc}}}}
+{{#if:{{{d3_name|}}}{{{d3_type|}}}|{{LSL DefineRow|1={{{d3_type|}}}|2={{#if:{{{d3_subtype|}}}|{{CAL|LSL {{ucfirst:{{{d3_type|}}}}}/{{{d3_subtype|}}}{{#var:lang}}|{{{d3_name|}}}}}|{{LSL_Parameter_Link|{{{d3_name|}}}}}}}|3={{#var:p_{{{d3_name|}}}_desc}}}}
+{{#if:{{{d4_name|}}}{{{d4_type|}}}|{{LSL DefineRow|1={{{d4_type|}}}|2={{#if:{{{d4_subtype|}}}|{{CAL|LSL {{ucfirst:{{{d4_type|}}}}}/{{{d4_subtype|}}}{{#var:lang}}|{{{d4_name|}}}}}|{{LSL_Parameter_Link|{{{d4_name|}}}}}}}|3={{#var:p_{{{d4_name|}}}_desc}}}}
+}}}}}}
+{{#if:{{{dl_name|}}}|{{LSL DefineRow|1=list|2={{#if:{{{dl_subtype|}}}|{{CAL|LSL List/{{{dl_subtype|}}}{{#var:lang}}|{{{dl_name|}}}}}|{{LSL_Parameter_Link|{{{dl_name|}}}}}}}|3={{#var:p_{{{dl_name|}}}_desc}}}}}}
+{{!}}}
+}}
+
+{{#if:{{{dataserver|}}}|
+{{#vardefine:p_{{{d2_name|}}}_hover|}}
+{{#vardefine:p_{{{d3_name|}}}_hover|}}
+{{#vardefine:p_{{{d4_name|}}}_hover|}}
+{{#vardefine:p_{{{dl_name|}}}_hover|}}
+{{#vardefine:p_{{{d2_name|}}}_desc|}}
+{{#vardefine:p_{{{d3_name|}}}_desc|}}
+{{#vardefine:p_{{{d4_name|}}}_desc|}}
+{{#vardefine:p_{{{dl_name|}}}_desc|}}
+|
+{{#vardefine:spec|{{#var:spec}}
+* Maximum memory storage: 128 MiB
+&lt;h4&gt;Dataserver&lt;/h4&gt;
+The [[dataserver]] callback parameters are:
+* A key containing the {{LSLGC|Key/handle|handle}} returned from [[{{#var:name}}]]
+* A string containing a comma-delimited list ({{LSLPT|cdl}}). &lt;code&gt;llDumpList2String([ [[integer]]&amp;nbsp;{{LSLPT|success}}&amp;nbsp;]&amp;nbsp;+ {{LSLPT|components}});&lt;/code&gt;
+** {{LSLPT|components}} vary depending upon success or failure of request.
+** Failure: &lt;code&gt;{{LSLPT|cdl}} = [[llDumpList2String]]([ 0, [[integer]]&amp;nbsp;{{LSLPT|error}}],&quot;,&quot;)&lt;/code&gt;
+** Success: &lt;code&gt;{{LSLPT|cdl}} = [[llDumpList2String]]([ 1{{#if:{{{d2_type|}}}{{{d2_name|}}}|, [[{{{d2_type}}}{{#var:lang}}|{{{d2_type}}}]]&amp;nbsp;{{LSLPT|{{{d2_name}}}}}{{#if:{{{d3_type|}}}{{{d3_name|}}}|, [[{{{d3_type}}}{{#var:lang}}|{{{d3_type}}}]]&amp;nbsp;{{LSLPT|{{{d3_name}}}}}{{#if:{{{d4_type|}}}{{{d4_name|}}}|, [[{{{d4_type}}}{{#var:lang}}|{{{d4_type}}}]]&amp;nbsp;{{LSLPT|{{{d4_name}}}}}}}}}}} ]{{#if:{{{dl_name|}}}|&amp;nbsp;+ {{LSLPT|{{{dl_name|}}}}})}},&quot;,&quot;)&lt;/code&gt;
+===== String Components =====
+{{{!}} style=&quot;margin-left:0em;&quot;
+{{LSL DefineRow|integer|2={{CAL|LSL Integer/boolean{{#var:lang}}|success}}|3={{#var:p_success_desc}}}}
+{{LSL DefineRow|integer|2={{CAL|LSL Integer/experience_error{{#var:lang}}|error}}|3={{#var:p_error_desc}}}}
+{{#if:{{{d2_name|}}}{{{d2_type|}}}|{{LSL DefineRow|1={{{d2_type|}}}|2={{#if:{{{d2_subtype|}}}|{{CAL|LSL {{ucfirst:{{{d2_type|}}}}}/{{{d2_subtype|}}}{{#var:lang}}|{{{d2_name|}}}}}|{{LSL_Parameter_Link|{{{d2_name|}}}}}}}|3={{#var:p_{{{d2_name|}}}_desc}}}}
+{{#if:{{{d3_name|}}}{{{d3_type|}}}|{{LSL DefineRow|1={{{d3_type|}}}|2={{#if:{{{d3_subtype|}}}|{{CAL|LSL {{ucfirst:{{{d3_type|}}}}}/{{{d3_subtype|}}}{{#var:lang}}|{{{d3_name|}}}}}|{{LSL_Parameter_Link|{{{d3_name|}}}}}}}|3={{#var:p_{{{d3_name|}}}_desc}}}}
+{{#if:{{{d4_name|}}}{{{d4_type|}}}|{{LSL DefineRow|1={{{d4_type|}}}|2={{#if:{{{d4_subtype|}}}|{{CAL|LSL {{ucfirst:{{{d4_type|}}}}}/{{{d4_subtype|}}}{{#var:lang}}|{{{d4_name|}}}}}|{{LSL_Parameter_Link|{{{d4_name|}}}}}}}|3={{#var:p_{{{d4_name|}}}_desc}}}}
+}}}}}}
+{{#if:{{{dl_name|}}}|{{LSL DefineRow|1=list|2={{#if:{{{dl_subtype|}}}|{{CAL|LSL List/{{{dl_subtype|}}}{{#var:lang}}|{{{dl_name|}}}}}|{{LSL_Parameter_Link|{{{dl_name|}}}}}}}|3={{#var:p_{{{dl_name|}}}_desc}}}}}}
+{{!}}}
+}}
+}}
+
+&lt;!--
+{{#if:{{{nocaveats|}}}||{{#if:{{{nogroup|}}}|
+{{#vardefine:caveats|{{#var:caveats}}}}
+*
+}}}}
+
+{{#if:{{#var:key_stuff}}||
+{{#vardefine:key_stuff|*}}
+{{#vardefine:notes|{{#var:notes}}}}
+}}
+--&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1}}}_desc}}
+|-
+{{VarPair|p_{{{2}}}_desc}}
+|-
+{{VarPair|p_{{{value}}}_desc}}
+|-
+{{VarPair|spec}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|table_text}}
+|}
+&lt;/noinclude&gt;{{#if:{{{dataserver|}}}|{{#var:table_text}}}}</code></pre></details><p><a href="/wiki/template-lsl-function-experience-33fe798f/">Template:LSL Function/Experience</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:notes|{{#var:notes}}
+&lt;h4&gt;Compiling&lt;/h4&gt;
+For a script to be associated with an {{LSLGC|Experience}}...
+* It must be compiled with a client that is Experience aware,
+* The &quot;Use Experience&quot; checkbox must be checked,
+* And one of the users Experience keys selected.
+
+{{LSL Tip|Not all [[TPV]]s have this functionality.}}
+}}
+
+{{#ifeq:{{{1|}}}&lt;noinclude&gt;true&lt;/noinclude&gt;|true|
+{{#vardefine:header_footnote_last|{{#var:header_footnote_last}}{{PBR}}
+For this {{#var:article_type}} to work, the script must be compiled into an {{LSLGC|Experience}}.{{PBR}}
+}}
+{{#vardefine:caveats|{{#var:caveats}}
+* If you recompile a script that was previously associated with an Experience but do so with a client that lacks the ability to compile scripts into an experience the script will lose the associated Experience.
+}}
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote_last}}
+|-
+{{VarPair|spec}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|notes}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><a href="/wiki/category-experience-tools-d5e9461b/">Category:Experience Tools</a></div></section>

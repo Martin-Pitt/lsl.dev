@@ -1,0 +1,180 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">The <strong>llLinksetDataFindKeys</strong> function returns a list of up to <code>count</code> keys from the datastore that match <code>pattern</code>, starting at the one indicated by <code>start</code>. If <code>count</code> is less than 1, then all keys between <code>start</code> and the end which match <code>pattern</code> are returned. If <code>count</code> minus <code>start</code> exceeds the number of matching keys, the returned list will be shorter than <code>count</code>, down to a zero-length list if <code>start</code> equals or exceeds the number of matching keys. The list is ordered alphabetically.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/list">list</a> of the keys in the datastore.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line"><code>pattern</code> is a <a href="https://en.wikipedia.org/wiki/Regular_expression" rel="noreferrer">Regular expression</a>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The maximum length for <code>pattern</code> seems to be 800 characters.</li>
+<li>There seems to be a timing restriction. If the time limit is exceeded, the function fails silently.</li>
+<li>Returns an empty list and the script continues execution.</li>
+<li>To delete keys matching an expression, use the similar <a href="/functions/llLinksetDataDeleteFound/">llLinksetDataDeleteFound</a>.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">When <code>pattern</code> matches multiple keys, <code>start</code> can be used to skip over some of the first matches.</div>
+<div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llLinksetDataWrite(&quot;ThingA_config&quot;, &quot;value&quot;);
+        llLinksetDataWrite(&quot;ThingA_data&quot;,   &quot;value&quot;);
+        llLinksetDataWrite(&quot;ThingB_config&quot;, &quot;value&quot;);
+        llLinksetDataWrite(&quot;ThingB_data&quot;,   &quot;value&quot;);
+        llLinksetDataWrite(&quot;ThingC_config&quot;, &quot;value&quot;);
+        llLinksetDataWrite(&quot;ThingC_data&quot;,   &quot;value&quot;);
+        list keys;
+
+        // Return 1 key starting from the first match.
+        keys = llLinksetDataFindKeys(&quot;Thing&quot;, 0, 1); 
+        llOwnerSay(llList2CSV(keys)); // ThingA_config
+
+        // Return 1 key after skipping the first 3 matches.
+        keys = llLinksetDataFindKeys(&quot;Thing&quot;, 3, 1); 
+        llOwnerSay(llList2CSV(keys)); // ThingB_data
+
+        // Return up to 10 keys after skipping the first match.
+        keys = llLinksetDataFindKeys(&quot;_data&quot;, 1, 10); 
+        llOwnerSay(llList2CSV(keys)); // ThingB_data, ThingC_data
+    }
+}</code></pre></div>
+<div class="wiki-line">The following regular expression code can be used to find UUID keys. (Such as those use to identify user UUID)</div>
+<div class="wiki-line"><pre><code>        list keysFound = llLinksetDataFindKeys(&quot;(?i)^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$&quot;,  0, 0);</code></pre></div>
+<div class="wiki-line">The following code can also be used to find UUID keys in LinksetData memory.</div>
+<div class="wiki-line"><pre><code>        list keysFound = llLinksetDataFindKeys(&quot;^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$&quot;,  0, 0);</code></pre></div>
+<div class="wiki-line"><em>Warning: Keep track of how many UUIDs will be returned, as too many can overwhelm script memory and cause a stack-heap crash.</em></div>
+<div class="wiki-line">The script below uses llLinksetDataFindKeys for blacklist management.</div>
+<div class="wiki-line"><pre><code>integer gDialogChannel;
+integer gDialogHandle;
+integer gManagingBlocks;
+
+startDialog(key person)
+{
+    gManagingBlocks = 0;
+    gDialogHandle = llListen(gDialogChannel, &quot;&quot;, person, &quot;&quot;);
+    llDialog(person, &quot;\nSelect action&quot;, [&quot;List blocks&quot;, &quot;Add block&quot;, &quot;Remove block&quot;], gDialogChannel);
+    llSetTimerEvent(60);
+}
+
+stopDialog()
+{
+    llSetTimerEvent(0);
+    llListenRemove(gDialogHandle);
+}
+
+default
+{
+
+    on_rez(integer sp)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        gDialogChannel = (integer)(llFrand(-10000000)-10000000);
+        llListen(PUBLIC_CHANNEL, &quot;&quot;, NULL_KEY, &quot;&quot;);;
+    }
+
+    timer()
+    {
+        stopDialog();
+    }
+
+    touch_start(integer nd)
+    {
+        key toucherKey = llDetectedKey(0);
+        if (toucherKey == llGetOwner())
+        {
+            startDialog(toucherKey);
+        }
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+
+        if (llGetAgentSize(id) == ZERO_VECTOR)
+        {
+            return;
+        }
+
+        if (channel == gDialogChannel)
+        {
+            stopDialog();
+            if (gManagingBlocks)
+            {
+                message = llStringTrim(message, STRING_TRIM);
+                if ((key)message)
+                {
+                    if (gManagingBlocks == 1)
+                    {
+                        llOwnerSay(&quot;Addition request has been sent to the blacklist storage&quot;);
+                        llLinksetDataWrite(&quot;blocklist:&quot; + message, &quot;1&quot;);
+                    }
+                    else
+                    {
+                        llOwnerSay(&quot;Removal request has been sent to the blacklist storage.&quot;);
+                        llLinksetDataDelete(&quot;blocklist:&quot; + message);
+                    }
+                }
+                else
+                {
+                    llOwnerSay(&quot;The UUID &#x27;&quot; + message + &quot;&#x27; appears to be invalid.&quot;);
+                }
+                startDialog(id);
+            }
+            else if (message == &quot;List blocks&quot;)
+            {
+                list blocks = llLinksetDataFindKeys(&quot;^blocklist:&quot;, 0, 0);
+                integer listLength = llGetListLength(blocks);
+                llOwnerSay(&quot;Blacklist items: &quot; + (string)listLength);
+                integer i;
+                while (i &lt; listLength)
+                {
+                    string record = llGetSubString(llList2String(blocks, i), 10, -1);
+                    llOwnerSay(&quot;- secondlife:///app/agent/&quot; + record + &quot;/about&quot; + &quot; - &quot; + record);
+                    ++i;
+                }
+                blocks = [];
+                startDialog(id);
+            }
+            else if (message == &quot;Add block&quot; || message == &quot;Remove block&quot;)
+            {
+                string label = &quot;add to&quot;;
+                gManagingBlocks = 1;
+                if (message == &quot;Remove block&quot;)
+                {
+                    gManagingBlocks = 2;
+                    label = &quot;remove from&quot;;
+                }
+                gDialogHandle = llListen(gDialogChannel, &quot;&quot;, id, &quot;&quot;);
+                llTextBox(id, &quot;\nPlease specify one single avatar UUID you&#x27;d like to &quot; + label + &quot; the blacklist storage.&quot;, gDialogChannel);
+                llSetTimerEvent(60);
+            }
+            return;
+        }
+
+        if (llGetListLength(llLinksetDataFindKeys(&quot;blocklist:&quot; + (string)id, 0, 1)) &gt; 0)
+        {
+            llRegionSayTo(id, 0, &quot;You&#x27;re blacklisted.&quot;);
+            return;
+        }
+
+        llRegionSayTo(id, 0, &quot;Hello there, secondlife:///app/agent/&quot; + (string)id + &quot;/about - your message: &quot; + message);
+
+    }
+
+    linkset_data(integer action, string name, string value)
+    {
+        if (action == LINKSETDATA_RESET || action == LINKSETDATA_DELETE || action == LINKSETDATA_UPDATE)
+        {
+            llOwnerSay(&quot;Blacklist storage modified.&quot;);
+        }
+    }
+
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-regular-expressions-91ecd084/">LSL Regular Expressions</a>: <code>{{LSL Regular Expressions}}</code></span></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinksetDataAvailable/">llLinksetDataAvailable</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinksetDataCountFound/">llLinksetDataCountFound</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinksetDataCountKeys/">llLinksetDataCountKeys</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinksetDataDelete/">llLinksetDataDelete</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinksetDataDeleteFound/">llLinksetDataDeleteFound</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinksetDataListKeys/">llLinksetDataListKeys</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinksetDataRead/">llLinksetDataRead</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinksetDataReset/">llLinksetDataReset</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llLinksetDataWrite/">llLinksetDataWrite</a></div></div></section>

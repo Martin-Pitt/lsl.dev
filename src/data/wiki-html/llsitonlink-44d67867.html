@@ -1,0 +1,53 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">The avatar specified by agent_id is forced to sit on the sit target of the prim indicated by the link parameter.  If the specified link is already occupied, the simulator searches down the chain of prims in the link set looking for an available sit target.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If successful, this method returns SIT_OK.  </div>
+<div class="wiki-line">If the function fails, it returns a negative number constant.</div>
+<div class="wiki-line">Link constants that indicate a single prim may be used for the link parameter.  These are LINK_ROOT and LINK_THIS.  Other constants such as LINK_SET, LINK_CHILDREN, LINK_ALL_OTHERS will return an INVALID_LINK error.</div>
+<div class="wiki-line"><strong><em>This method must be called from an experience enabled script running on land that has enabled the experience key.</strong></em>  If these conditions are not met this method returns a NOT_EXPERIENCE error.</div>
+<div class="wiki-line">The targeted avatar must also have accepted the experience.  If the user is not participating in the experience this method returns NO_EXPERIENCE_PERMISSION. If the avatar id can not be found or is not over land that has enabled the experience this method returns INVALID_AGENT.</div>
+<div class="wiki-line">If there are no valid sit targets remaining in the linkset this method returns NO_SIT_TARGET and no action is taken with the avatar.</div>
+<div class="wiki-line">If the avatar does not have access to the parcel containing the prim running this script, this call fails.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-llsitonlinkconstants-382fd184/">llSitOnLinkConstants</a>: <code>{{llSitOnLinkConstants}}</code></span></div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The SIT_OK constant is only present on Lua-enabled sims. On older sims, use it's value of 1 instead</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>integer gLinkId = LINK_THIS;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        llRequestExperiencePermissions(llDetectedKey(0), &quot;&quot;);
+    }
+
+    experience_permissions(key agent_id)
+    {
+        integer sitTest = llSitOnLink(agent_id, gLinkId);
+        if (sitTest != 1)
+        {
+            llInstantMessage(agent_id, &quot;Cannot force agent &quot; + (string)agent_id + &quot; to sit due to reason id: &quot; + (string)sitTest);
+        }
+    }
+
+    experience_permissions_denied(key agent_id, integer reason)
+    {
+        llInstantMessage(agent_id, &quot;Denied experience permissions for &quot; + (string)agent_id + &quot; due to reason id: &quot; + (string)reason);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">This function was introduced in conjunction with new <a href="/wiki/llsetprimitiveparams-193e7d67/">primitive parameter</a> constants: <a href="/constants/PRIM_ALLOW_UNSIT/">PRIM_ALLOW_UNSIT</a>, <a href="https://wiki.secondlife.com/wiki/PRIM_SCRIPTED_SITS_ONLY">PRIM_SCRIPTED_SITS_ONLY</a>, and <a href="/constants/PRIM_SIT_TARGET/">PRIM_SIT_TARGET</a>.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><ul>
+<li><a href="/functions/llLinkSitTarget/">llLinkSitTarget</a></li>
+<li><a href="/functions/llSitTarget/">llSitTarget</a></li>
+<li><a href="/functions/llSetSitText/">llSetSitText</a></li>
+<li><a href="/functions/llAvatarOnLinkSitTarget/">llAvatarOnLinkSitTarget</a></li>
+<li><a href="/functions/llAvatarOnSitTarget/">llAvatarOnSitTarget</a></li>
+<li><a href="/functions/llUnSit/">llUnSit</a></li>
+</ul>
+<h3 id="constants">Constants</h3>
+<ul>
+<li><a href="/constants/PRIM_ALLOW_UNSIT/">PRIM_ALLOW_UNSIT</a></li>
+<li><a href="/constants/PRIM_SCRIPTED_SIT_ONLY/">PRIM_SCRIPTED_SIT_ONLY</a></li>
+<li><a href="/constants/PRIM_SIT_TARGET/">PRIM_SIT_TARGET</a></li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="bug-40739"><a href="/wiki/template-issues-bug-40739-1722a96a/">Template:Issues/BUG-40739</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-40739|Redesign [[llSitOnLink]]() to use the permissions system|type=nf}}</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><a href="/wiki/category-experience-tools-d5e9461b/">Category:Experience Tools</a></div>
+<div class="wiki-line"><a href="/wiki/category-experience-tools-d5e9461b/">Category:Experience Tools</a></div></section>

@@ -1,0 +1,87 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<h4 id="greeting-card">Greeting Card</h4>
+<div class="wiki-line">--<a href="https://wiki.secondlife.com/wiki/User:BETLOG_Hax">BETLOG Hax</a> UTC+10: 20091004 0012 [SLT: 20091003 0712]</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">The prims are dimpled, root 0.0-0.5 and child 0.5-1.0</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">The child prim is cut 0.375-0.875</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">Texture repeats are adjusted accordingly</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line">You'll figure out which way to orient the prims when you link and touch it.</div>
+<div class="wiki-line"><pre><code>//==============================================================
+// BETLOG Hax
+// UTC+10: 20091003 2019 [SLT: 20091003 0319]
+// For eKitten Magic
+//==============================================================
+//        **** LICENCE START ****
+// http://creativecommons.org/licenses/by-sa/3.0/
+//             Attribution licence:
+// You must:
+//    -Include this unaltered licence information.
+//    -Supply my original script with your modified version.
+//    -Retain the original scripts&#x27; SL permissions. [+c/+m/+t]
+// Or:
+//    -Link to the wiki URL from which you copied this script.
+//          https://wiki.secondlife.com/wiki/Greeting_Card
+//    -Document: &quot;Uses parts of &lt;scriptname&gt; by BETLOG Hax&quot;
+//        **** LICENCE END ****
+//----------------------------------
+// SHARED CONFIGURATION
+//----------------------------------
+// CONFIGURATION
+string          gSound          = &quot;&quot;;//optional, one in contents will work too
+float           gVolume         = 1.0;
+//
+string          gAnim           = &quot;&quot;;//optional, one in contents will work too
+//
+float           gAngle          = 160.0;
+//----------------------------------
+// CORE CODE
+integer         gOpen;
+//----------------------------------
+f_toggle()
+{   if(gOpen)
+    {   if(gSound!=&quot;&quot;)
+            llLoopSound(gSound,gVolume);
+        if(gAnim!=&quot;&quot;)
+            llStartAnimation(gAnim);
+    }
+    else
+    {   llStopSound();
+        if(gAnim!=&quot;&quot;)
+            llStopAnimation(gAnim);
+    }
+    llSetLinkPrimitiveParams(2,[PRIM_ROTATION
+        ,llEuler2Rot(&lt;gAngle*(float)gOpen, 0.0, 0.0&gt;*DEG_TO_RAD)/llGetLocalRot()
+    ]);
+}
+//=========================================================================
+default
+{   on_rez(integer param) 
+    {   llResetScript();
+    }
+    state_entry()
+    {   if(gSound==&quot;&quot;)
+        {   string sound = llGetInventoryName(INVENTORY_SOUND,0);
+            if(sound!=&quot;&quot;)
+            {   gSound=sound;
+                llPreloadSound(gSound);
+            }
+        }
+        if(gAnim==&quot;&quot;)
+        {   string anim = llGetInventoryName(INVENTORY_ANIMATION,0);
+            if(anim!=&quot;&quot;)
+            {   gAnim=anim;
+                llPreloadSound(gAnim);
+            }
+        }
+        f_toggle();
+    }
+    touch_start(integer total_number)
+    {   gOpen=!gOpen;
+        f_toggle();
+    }
+}
+//=========================================================================</code></pre></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-examples-d1aa2221/">Category:LSL Examples</a></div>

@@ -1,0 +1,36 @@
+<section><h2 id="function-notes">Function notes</h2><ul>
+<li>If the script was loaded with <a href="/functions/llRemoteLoadScriptPin/">llRemoteLoadScriptPin</a> then that start parameter is returned.</li>
+<li>If the containing object was rezzed by <a href="/functions/llRezObjectWithParams/">llRezObjectWithParams</a> or <a href="/functions/llRezObject/">llRezObject</a> or <a href="/functions/llRezAtRoot/">llRezAtRoot</a> then the return is the <a href="/events/on_rez/">on_rez</a> parameter.</li>
+<li>If the containing object was manually rezzed, by dragging from inventory, the start parameter is 0.</li>
+</ul></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is the script start/rez parameter.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The start parameter does not survive region restarts (<a href="https://jira.secondlife.com/browse/SVC-2251" rel="noreferrer">SVC-2251</a>) or region change (<a href="https://jira.secondlife.com/browse/SVC-3258" rel="noreferrer">SVC-3258</a>, crossing or teleport).</li>
+<li>If the script is reset (using <a href="/functions/llResetScript/">llResetScript</a> or other means), the start parameter is set to 0.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    on_rez(integer param)
+    {
+        llOwnerSay(&quot;rezzed with the number &quot; + (string)param);
+    }
+    state_entry()
+    {
+        integer i = llGetStartParameter();
+        if (i)
+        {
+            llOwnerSay(&quot;I was given the number &quot; + (string)i + &quot; when I was rezzed&quot;);
+        }
+        else
+        {
+            llOwnerSay(&quot;rezzed from inventory (or rezzed/loaded with 0)&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetStartString/">llGetStartString</a> — Modern alternative that allows passing even more data.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRemoteLoadScriptPin/">llRemoteLoadScriptPin</a> — Used to load a script into a remote prim</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRezObject/">llRezObject</a> — Used to rez an object at the center of mass</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRezAtRoot/">llRezAtRoot</a> — Used to rez an object at the root</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/on_rez/">on_rez</a></div></div></section>
+<section><h2 id="known-issues">Known issues</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-issue-v1-197477c5/">Issue/V1</a>: <code>{{Issue/V1|SVC-2251|llGetStartParameter returns zero after sim restart|type=bug}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-issue-v1-197477c5/">Issue/V1</a>: <code>{{Issue/V1|SVC-3258|llGetStartParameter returns zero after change of region|type=bug}}</code></span></div></section>

@@ -1,0 +1,70 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Types}}</code></span></div>
+<h2 id="intro">Intro:</h2>
+<div class="wiki-line">A key is a <strong>universal unique identifier</strong> in Second Life for anything mostly, be it a <a href="https://wiki.secondlife.com/wiki/prim">prim</a>, <a href="/wiki/avatar-ca8e826d/">avatar</a>, <a href="/wiki/category-lsl-texture-aad2d6f0/">texture</a>, etc.</div>
+<div class="wiki-line">You may see key referred to as <a href="https://wiki.secondlife.com/wiki/UUID">UUID</a>, UID, "Asset UUID", or "asset-ID".</div>
+<div class="wiki-line">The key itself is formed of <a href="https://en.wikipedia.org/wiki/Hexidecimal" rel="noreferrer">hexadecimal</a> characters <code>[0-9a-f]</code> and each section of the key is broken up by dashes (for a total amount of 36 characters).</div>
+<div class="wiki-line"><pre><code>    key whatever = &quot;01234567-89ab-cdef-0123-456789abcdef&quot;;</code></pre></div>
+<div class="wiki-line"><strong>Some keys</strong> in Second Life are a <a href="http://en.wikipedia.org/wiki/UUID#Version_4_.28random.29" rel="noreferrer">UUID-4</a> as defined in <span class="wiki-template"><a href="/wiki/template-rfc-afd5a886/">RFC</a>: <code>{{RFC|4122|target=section-4.1.3}}</code></span>.</div>
+<div class="wiki-line"><pre><code>    key uuid = &quot;xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx&quot;;
+
+//  where:
+//      4 is 4
+//      x is [0-9a-f]
+//      y is [8-9a-b]</code></pre></div>
+<h2 id="receiving-keys">Receiving keys:</h2>
+<div class="wiki-line">There are several ways to acquire the key of something:</div>
+<ul>
+<li>Having someone supply it to you;</li>
+<li>Using a built-in <a href="/wiki/lsl-portal-079327e8/">LSL</a> <a href="/wiki/category-lsl-functions-83ba2c38/">function</a> such as <a href="/functions/llGetKey/">llGetKey</a>, <a href="/functions/llGetLinkKey/">llGetLinkKey</a> etc.</li>
+<li>In your inventory, right-clicking over something and choosing <code>Copy Asset UUID</code>. Note this will only work on items that you have full permissions to.</li>
+</ul>
+<h2 id="generating-keys">Generating keys:</h2>
+<div class="wiki-line">Built-in <a href="/wiki/lsl-portal-079327e8/">LSL</a> <a href="/wiki/category-lsl-functions-83ba2c38/">functions</a>:</div>
+<table><caption></caption><tr><th>function</th><th>purpose</th></tr><tr><td> <a href="/functions/llGenerateKey/">llGenerateKey</a> </td><td> Generates a key using <a href="http://en.wikipedia.org/wiki/UUID#Version_5_.28SHA-1_hash.29" rel="noreferrer">Version 5 (SHA-1 hash)</a> <a href="https://wiki.secondlife.com/wiki/UUID">UUID</a> generation to create a unique key.</td></tr></table>
+<div class="wiki-line">User-defined functions:</div>
+<table><caption></caption><tr><th>function</th><th>purpose</th></tr><tr><td> <a href="/wiki/generatekey-47d18aca/">GenerateKey</a> </td><td> Generates an MD5-based (version 3) type UUID. Useful for identifying link-messages and for other purposes.</td></tr><tr><td> <a href="/wiki/genuuid-0c88d1c0/">GenUUID</a> </td><td> Generates a UUID based on PHP com_create_guid.</td></tr></table>
+<h2 id="converting-keys">Converting Keys:</h2>
+<div class="wiki-line">When a key is supplied to you as a text <a href="https://wiki.secondlife.com/wiki/string">string</a>, you convert it to the key data-type like this:</div>
+<div class="wiki-line"><pre><code>key whatever = (key)&quot;01234567-89ab-cdef-0123-456789abcdef&quot;;</code></pre></div>
+<div class="wiki-line">Implicit conversion will happen automatically when supplying a string where a key is required.</div>
+<div class="wiki-line"><pre><code>key uuid = &quot;01234567-89ab-cdef-0123-456789abcdef&quot;;
+llKey2Name(&quot;01234567-89ab-cdef-0123-456789abcdef&quot;);</code></pre></div>
+<div class="wiki-line">However there is no implicit conversion with <a href="/functions/llListFindList/">llListFindList</a>. <a href="/functions/llListFindList/">llListFindList</a> requires not only the values to match but also the types. </div>
+<div class="wiki-line"><pre><code>llListFindList([&quot;01234567-89ab-cdef-0123-456789abcdef&quot;], [(key)&quot;01234567-89ab-cdef-0123-456789abcdef&quot;]) == -1;</code></pre></div>
+<h2 id="displaying-avatar-or-group-information">Displaying avatar or group information:</h2>
+<div class="wiki-line">If you know an avatar's key, you can display the avatar's name in the viewer window and chat history by using the following special URL:</div>
+<div class="wiki-line"><pre><code>llOwnerSay(&quot;secondlife:///app/agent/&quot; + (string)owner_key + &quot;/about&quot;);</code></pre></div>
+<div class="wiki-line">This displays both <a href="https://wiki.secondlife.com/wiki/Display_names">display name</a> and <a href="https://wiki.secondlife.com/wiki/Usernames">username</a> as a clickable link that brings up an avatar profile window when clicked.  It is easier than using <a href="/functions/llRequestAgentData/">llRequestAgentData</a> or <a href="/functions/llRequestUsername/">llRequestUsername</a> or <a href="/functions/llRequestDisplayName/">llRequestDisplayName</a>, since there is no need to use a <a href="/events/dataserver/">dataserver</a> event.</div>
+<div class="wiki-line">If you know a group key (as a result of calling <code><a href="/functions/llGetObjectDetails/">llGetObjectDetails</a>(<a href="https://wiki.secondlife.com/wiki/key">key</a> id, [<a href="/constants/OBJECT_GROUP/">OBJECT_GROUP</a>])</code>, or calling <code><a href="/functions/llGetParcelDetails/">llGetParcelDetails</a>(<a href="https://wiki.secondlife.com/wiki/vector">vector</a> pos, [<a href="/constants/PARCEL_DETAILS_GROUP/">PARCEL_DETAILS_GROUP</a>])</code>), you can display the group's name with the following special URL:</div>
+<div class="wiki-line"><pre><code>llOwnerSay(&quot;secondlife:///app/group/&quot; + (string)group_key + &quot;/about&quot;);</code></pre></div>
+<div class="wiki-line">This displays the group name as a clickable link that brings up a group profile window when clicked.  This is especially useful since there is no other way to do this; there is no LSL function to print out a group's name.</div>
+<div class="wiki-line">Finally, if you know a <a href="https://wiki.secondlife.com/wiki/Land#parcel">parcel</a> key (as a result of calling <code><a href="/functions/llGetParcelDetails/">llGetParcelDetails</a>(<a href="https://wiki.secondlife.com/wiki/vector">vector</a> pos, [<a href="/constants/PARCEL_DETAILS_ID/">PARCEL_DETAILS_ID</a>])</code>), you can create a clickable link that brings up a place profile window when clicked, using the following special URL:</div>
+<div class="wiki-line"><pre><code>llOwnerSay(&quot;secondlife:///app/parcel/&quot; + (string)parcel_key + &quot;/about&quot;);</code></pre></div>
+<h2 id="testing-for-a-valid-key">Testing for a valid key:</h2>
+<div class="wiki-line">To test for a valid key, just do this:</div>
+<div class="wiki-line"><pre><code>if(uuid){
+     //do something
+}</code></pre></div>
+<div class="wiki-line"><code>if(uuid)</code> will only return true if it is supplied a key that is both (A) valid, and (B) NOT a <a href="/constants/NULL_KEY/">NULL_KEY</a>.</div>
+<div class="wiki-line">Tip! In techy talk, this method is called "passing it as the parameter for a <a href="/wiki/category-lsl-conditional-969143ab/">conditional</a>"</div>
+<div class="wiki-line">Note! It is important for the above example that <code>uuid</code> be defined as a key. It can of course be typecast to be a key as well: <code>if((key)uuid)</code></div>
+<div class="wiki-line">Here is an example of how to build a function around this:</div>
+<div class="wiki-line"><pre><code>// 2:         valid key, not NULL_KEY
+// 1 (TRUE):  NULL_KEY
+// 0 (FALSE): not a key
+
+integer isKey(key in)
+{
+    if (in)
+        return 2;
+    return (in == NULL_KEY);
+}</code></pre></div>
+<h2 id="caveats">Caveats:</h2>
+<ul>
+<li>Assigning an arbitrary string to a key is allowed and the key variable retains the string value, but will be considered an invalid key unless it matches the correct key character pattern with hexadecimal digits and dashes. In most contexts invalid keys work like the NULL_KEY, e.g. if given to a function that can filter by UUID such as <a href="/functions/llListen/">llListen</a>, no filtering will be performed.</li>
+<li><pre><code>if (uuid)</code></pre> is a special case. Keys cannot be converted to <a href="https://wiki.secondlife.com/wiki/Integer">integers</a>, so logical <a href="/wiki/lsl-operators-5ba19656/">operators</a> such as <code>!</code>, <code>||</code> and <code>&amp;&amp;</code> cannot be used with keys. If you wish to do <pre><code>if (!uuid) { /* wont work */ }</code></pre> then you can use a simple workaround like so: <pre><code>if (uuid) { } else { /* will work */ }</code></pre> This is particularly useful if we wish to discard invalid string content (i.e - ensure that a key is actually a key) like so:<pre><code>if (uuid) ; else uuid = NULL_KEY;</code></pre></li>
+<li>Checking key validity with an if statement doesn't ensure the key actually refers to an asset, an avatar or anything at all, only that it has the correct structure.</li>
+<li>Be careful when adding key literals to lists, no implicit typecasting will take place. Failing to ensure that key literals are keys will cause problems with <a href="/functions/llListFindList/">llListFindList</a>.</li>
+<li>Furthermore, LSO and Mono do not work the same when it comes to typecasting strings to keys.</li>
+<li>There is a bug in LSO that LL has declined to fix, the reason given is that fixing it would break existing content.</li>
+</ul>

@@ -1,0 +1,101 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Clears (deletes) the media and all <code>params</code> from the given <code>face</code>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> that is a STATUS_* flag which details the success/failure of the operation.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/STATUS_OK/">STATUS_OK</a><span> integer</span><span> 0</span><span> m=3</span><span> c=Result of function call was success</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/STATUS_MALFORMED_PARAMS/">STATUS_MALFORMED_PARAMS</a><span> integer</span><span> 1000</span><span> m=3</span><span> c=Function was called with malformed parameters</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/STATUS_TYPE_MISMATCH/">STATUS_TYPE_MISMATCH</a><span> integer</span><span> 1001</span><span> m=3</span><span> c=Argument(s) passed to function had a type mismatch</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/STATUS_BOUNDS_ERROR/">STATUS_BOUNDS_ERROR</a><span> integer</span><span> 1002</span><span> m=3</span><span> c=Argument(s) passed to function had a bounds error</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/STATUS_NOT_FOUND/">STATUS_NOT_FOUND</a><span> integer</span><span> 1003</span><span> m=3</span><span> c=Object or other item was not found</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/STATUS_NOT_SUPPORTED/">STATUS_NOT_SUPPORTED</a><span> integer</span><span> 1004</span><span> m=3</span><span> c=Feature not supported</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/STATUS_INTERNAL_ERROR/">STATUS_INTERNAL_ERROR</a><span> integer</span><span> 1999</span><span> m=3</span><span> c=An internal error occurred</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/STATUS_WHITELIST_FAILED/">STATUS_WHITELIST_FAILED</a><span> integer</span><span> 2001</span><span> m=3</span><span> c=Whitelist Failed</span></div></div>
+<table><tr><th> Success/Failure&nbsp;Flags</th><th></th><th colspan="6"> Description</th></tr></table></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//  when dropping this script into a prim
+//  it will remove all set media-on-a-prim
+//  on all sides of the prim containing the script
+//  and then the script will delete itself
+
+
+
+publish_returned_status_flag(integer inputLink, integer inputFace, integer inputStatus)
+{
+    /* if (inputInteger == 0) */ string outputStatus = &quot;STATUS_OK&quot;;
+    if (inputStatus == 1000) outputStatus = &quot;STATUS_MALFORMED_PARAMS&quot;;
+    else if (inputStatus == 1001) outputStatus = &quot;STATUS_TYPE_MISMATCH&quot;;
+    else if (inputStatus == 1002) outputStatus = &quot;STATUS_BOUNDS_ERROR&quot;;
+    else if (inputStatus == 1003) outputStatus = &quot;STATUS_NOT_FOUND&quot;;
+    else if (inputStatus == 1004) outputStatus = &quot;STATUS_NOT_SUPPORTED&quot;;
+    else if (inputStatus == 1999) outputStatus = &quot;STATUS_INTERNAL_ERROR&quot;;
+    else if (inputStatus == 2001) outputStatus = &quot;STATUS_WHITELIST_FAILED&quot;;
+
+    // PUBLIC_CHANNEL has the integer value 0
+    llSay(PUBLIC_CHANNEL, &quot;llClearLinkMedia(link &quot; + (string)inputLink
+        + &quot;, face &quot; + (string)inputFace + &quot;) = &quot; + outputStatus + &quot;;&quot;);
+}
+
+default
+{
+    state_entry()
+    {
+        integer link = llGetLinkNumber();
+        integer numOfSides = llGetLinkNumberOfSides(link);
+        integer face;
+
+        do
+        {
+            integer clearMediaSucceeded = llClearPrimMedia(face);
+            publish_returned_status_flag(link, face, clearMediaSucceeded);
+
+            ++face;
+        }
+        while (face &lt; numOfSides);
+
+        string thisScript = llGetScriptName();
+        llRemoveInventory(thisScript);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llClearLinkMedia/">llClearLinkMedia</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetPrimMediaParams/">llSetPrimMediaParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimMediaParams/">llGetPrimMediaParams</a></div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li><span class="wiki-template"><a href="/wiki/template-svn-6879a543/">SVN</a>: <code>{{SVN|2816|rev=134947|trunk=*|anchor=|ver=|ser=}}</code></span></li>
+<li><a href="https://jira.secondlife.com/browse/SVC-4939" rel="noreferrer">SVC-4939</a></li>
+</ul></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-4939"><a href="/wiki/template-issues-svc-4939-84b6470f/">Template:Issues/SVC-4939</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-4939|[http://svn.secondlife.com/trac/linden/changeset/2816 SVN Changeset 2816 in Trunk] is immature|type=bug|dnc=*}}</code></pre></details><p><a href="/wiki/template-lsl-function-face-21ce125f/">Template:LSL Function/face</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:header|{{#var:header}}{{#if:{{{nc|}}}{{#pos:{{#var:moded}}|r}}||{{#switch:{{NAMESPACE}}|Template=|User=|[[Category:LSL Face{{#var:lang}}]][[Category:LSL Face{{#var:lang}}/{{#if:{{{return|}}}{{{returns|}}}|Get|Set}}]]}}}}}}
+
+{{#vardefine:ALL_SIDES|{{LSL Const|ALL_SIDES|integer|-1|hex=0xFFFFFFFF}}}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{LSLGC|Face{{#var:lang}}|face}} number{{#ifeq:{{{notall|}}}|*||&lt;nowiki&gt; &lt;/nowiki&gt;or {{#var:ALL_SIDES}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|face number{{#ifeq:{{{notall|}}}|*||&lt;nowiki&gt; &lt;/nowiki&gt;or ALL_SIDES (-1)}}}}
+
+{{#ifeq:{{{notall|}}}|*||{{#vardefine:facechoise|If {{LSLP|{{{1|none}}}}} is {{#var:ALL_SIDES}} then the {{#if:{{{2|}}}|{{{2|}}}|function}} {{#if:{{{get|}}}|{{{get|}}}|{{#if:{{{ALL_SIDES|}}}|{{{ALL_SIDES|}}}|works on all sides.}}}}}}}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{#if:{{{!footer|}}}||{{PBR}}
+{{#var:facechoise}}{{PBR}}}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}{{#if:{{{!footer|}}}|
+*{{#var:facechoise}}|}}{{#if:{{{return|}}}{{{returns|}}}|
+*If {{LSLP|{{{1|none}}}}} indicates a face that does not exist the {{#if:{{{2|}}}|{{{2|}}}}} {{#if:{{{return|}}}|return is {{{return|}}}| returns {{{returns|}}}}}|
+*The {{#if:{{{2|}}}|{{{2|}}}|function}} silently fails if its {{LSLP|{{{1|none}}}}} value indicates a face that does not exist.}}}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|ALL_SIDES}}
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|-
+{{VarPair|facechoise}}
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|caveats}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

@@ -1,0 +1,34 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<div class="wiki-line">The next function converts a binary value to a decimal number. Works +/- 5 times faster than <a href="/wiki/base2dec-a075d08f/">Base2Dec</a> :</div>
+<div class="wiki-line"><pre><code>integer binToDec(string val)
+{
+    integer dec = 0;
+    integer i = ~llStringLength(val);
+    while(++i)
+        dec = (dec &lt;&lt; 1) + (integer)llGetSubString(val, i, i);
+    return dec;
+}</code></pre></div>
+<div class="wiki-line">This one converts a decimal to a binary value:</div>
+<div class="wiki-line"><pre><code>string decToBin(integer val)
+{
+    string binary = (string)(val &amp; 1);
+    for(val = ((val &gt;&gt; 1) &amp; 0x7FFFffff); val; val = (val &gt;&gt; 1))
+    {
+        if (val &amp; 1)
+            binary = &quot;1&quot; + binary;
+        else
+            binary = &quot;0&quot; + binary;
+    }
+    return binary;
+}</code></pre></div>
+<div class="wiki-line">Greets from Soundless :)</div>
+<div class="wiki-line">This version of decToBin doesn't crash on negatives, is shorter source code and about 50 bytes shorter in Mono bytecode than the original, but sadly about 50% slower. &lt;&lt; and &gt;&gt; are expensive on bytecode.</div>
+<div class="wiki-line"><pre><code>string decToBin(integer val)
+{
+    string binary;
+    do
+        binary = (string) (val &amp; 1) + binary;
+    while (val /= 2);
+    return binary;
+}</code></pre></div>
+<div class="wiki-line">((Omei))</div>

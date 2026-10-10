@@ -1,0 +1,31 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Transfer ownership of the object containing this script to <code>agent_id</code>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> indicating the result of the transfer.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">Transfers ownership of an object rezzed in world to <code>agent_id</code>. The object must be transferable by its current owner and must not be an attachment.</div>
+<div class="wiki-line">Optionally this function may force the object to derez itself into the destination agent's inventory, or make a copy of itself directly into inventory.</div><span id="constants"></span><h4 id="transfer-flags">Transfer Flags</h4>
+<table><tr><th> Constant</th><th></th><td> Description </td></tr><tr><td><a href="/constants/TRANSFER_FLAG_RESERVED/">TRANSFER_FLAG_RESERVED</a></td><td>0x0001</td><td> Reserved, do not use.</td></tr><tr><td><a href="/constants/TRANSFER_FLAG_TAKE/">TRANSFER_FLAG_TAKE</a></td><td> 0x0002</td><td> When transfer is accepted, immediately take the object into inventory.</td></tr><tr><td><a href="/constants/TRANSFER_FLAG_COPY/">TRANSFER_FLAG_COPY</a></td><td> 0x0004</td><td> Give a copy of the object and place it into the destination agent's inventory.</td></tr></table>
+<h4 id="transfer-errors">Transfer Errors</h4>
+<table><tr><th> Constant</th><th></th><td> Description </td></tr><tr><td><a href="/constants/TRANSFER_OK/">TRANSFER_OK</a></td><td>0</td><td> No error detected, inventory transferred</td></tr><tr><td><a href="/constants/TRANSFER_BAD_OPTS/">TRANSFER_BAD_OPTS</a></td><td> -1</td><td> A bad option was passed in the options list.</td></tr><tr><td><a href="/constants/TRANSFER_NO_TARGET/">TRANSFER_NO_TARGET</a></td><td> -2</td><td> Could not find the receiving agent in the current region.</td></tr><tr><td><a href="/constants/TRANSFER_THROTTLE/">TRANSFER_THROTTLE</a></td><td> -3</td><td> Transfer rate exceeded the inventory transfer throttle.</td></tr><tr><td><a href="/constants/TRANSFER_NO_ITEMS/">TRANSFER_NO_ITEMS</a></td><td> -4</td><td> The list of items was empty or contained only non-transferable items.</td></tr><tr><td><a href="/constants/TRANSFER_BAD_ROOT/">TRANSFER_BAD_ROOT</a></td><td> -5</td><td> The root path specified in TRANSFER_DEST contained an invalid directory or was reduced to nothing.</td></tr><tr><td><a href="/constants/TRANSFER_NO_PERMS/">TRANSFER_NO_PERMS</a></td><td> -6</td><td> The object does not have transfer permissions.</td></tr><tr><td><a href="/constants/TRANSFER_NO_ATTACHMENT/">TRANSFER_NO_ATTACHMENT</a></td><td> -7</td><td> Can not transfer ownership of an attached object.</td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><code>agent_id</code> must be an agent in the region.</li>
+<li>There is no way to detect if the receiver ignored, rejected or blocked the transaction (aside from a <a href="/events/changed/">changed</a> event never occurring.)</li>
+<li>The function fails with a return code of <a href="/constants/TRANSFER_NO_PERMS/">TRANSFER_NO_PERMS</a> if:</li>
+<li>The object is no-transfer.</li>
+<li>The object is no-copy and <code>flags</code> includes the <a href="/constants/TRANSFER_FLAG_COPY/">TRANSFER_FLAG_COPY</a> flag.</li>
+<li>Calling this function from an attachment will fail and return <a href="/constants/TRANSFER_NO_ATTACHMENT/">TRANSFER_NO_ATTACHMENT</a></li>
+<li>WARNING: Any no-trans items in the transferred object will be removed from the object received by the target agent. If the transfer is of the object itself, these items are lost.</li>
+<li>WARNING: If the transfer is a copy, any no-copy inventory items will be present in the object received by the target agent and removed from the original.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+
+    touch_start(integer total_number)
+    {
+        llTransferOwnership(llDetectedKey(0), TRANSFER_FLAG_COPY, []);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGiveInventoryList/">llGiveInventoryList</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRemoteLoadScriptPin/">llRemoteLoadScriptPin</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetRemoteScriptAccessPin/">llSetRemoteScriptAccessPin</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llMapDestination/">llMapDestination</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/changed/">changed</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-7631"><a href="/wiki/template-issues-svc-7631-96234611/">Template:Issues/SVC-7631</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-7631|New rate throttle on [[llGiveInventory]]|type=bug}}</code></pre></details><p id="bug-5656"><a href="/wiki/template-issues-bug-5656-9a43a070/">Template:Issues/BUG-5656</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-5656|[[llGiveInventory]] fails when no-copy items are given to attachments (even no-copy ones) |type=bug|dnc=*}}</code></pre></details></section>

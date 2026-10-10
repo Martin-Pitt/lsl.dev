@@ -1,0 +1,86 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Both <code>x</code> and <code>y</code> components of <code>pos</code> are clamped to the range [0.0,&nbsp;256.0], the <code>z</code> component is ignored.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> of parcel flags (PARCEL_FLAG_*) for the parcel that includes the point <code>pos</code>.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><th> Flag</th><th> Value</th><th> Description</th></tr><tr><td> <a href="/constants/PARCEL_FLAG_ALLOW_FLY/">PARCEL_FLAG_ALLOW_FLY</a></td><td> 0x00000001</td><td> find if a parcel allows flying</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_ALLOW_SCRIPTS/">PARCEL_FLAG_ALLOW_SCRIPTS</a></td><td> 0x00000002</td><td> find if a parcel allows outside scripts</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_ALLOW_LANDMARK/">PARCEL_FLAG_ALLOW_LANDMARK</a></td><td> 0x00000008</td><td> find if a parcel allows landmarks to be created</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_ALLOW_TERRAFORM/">PARCEL_FLAG_ALLOW_TERRAFORM</a></td><td> 0x00000010</td><td> find if a parcel allows anyone to terraform the land</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_ALLOW_DAMAGE/">PARCEL_FLAG_ALLOW_DAMAGE</a></td><td> 0x00000020</td><td> find if a parcel allows damage</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_ALLOW_CREATE_OBJECTS/">PARCEL_FLAG_ALLOW_CREATE_OBJECTS</a></td><td> 0x00000040</td><td> find if a parcel allows anyone to create objects</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_USE_ACCESS_GROUP/">PARCEL_FLAG_USE_ACCESS_GROUP</a></td><td> 0x00000100</td><td> find if a parcel limits access to a group</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_USE_ACCESS_LIST/">PARCEL_FLAG_USE_ACCESS_LIST</a></td><td> 0x00000200</td><td> find if a parcel limits access to a list of residents</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_USE_BAN_LIST/">PARCEL_FLAG_USE_BAN_LIST</a></td><td> 0x00000400</td><td> find if a parcel uses a ban list, including restricting access based on payment info</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_USE_LAND_PASS_LIST/">PARCEL_FLAG_USE_LAND_PASS_LIST</a></td><td> 0x00000800</td><td> find if a parcel allows passes to be purchased</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_LOCAL_SOUND_ONLY/">PARCEL_FLAG_LOCAL_SOUND_ONLY</a></td><td> 0x00008000</td><td> find if a parcel restricts spatialized sound to the parcel</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_RESTRICT_PUSHOBJECT/">PARCEL_FLAG_RESTRICT_PUSHOBJECT</a></td><td> 0x00200000</td><td> find if a parcel restricts <a href="/functions/llPushObject/">llPushObject</a></td></tr><tr><td> <a href="/constants/PARCEL_FLAG_ALLOW_GROUP_SCRIPTS/">PARCEL_FLAG_ALLOW_GROUP_SCRIPTS</a></td><td> 0x02000000</td><td> find if a parcel allows scripts owned by group</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_ALLOW_CREATE_GROUP_OBJECTS/">PARCEL_FLAG_ALLOW_CREATE_GROUP_OBJECTS</a></td><td> 0x04000000</td><td> find if a parcel allows object creation by group members or objects</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_ALLOW_ALL_OBJECT_ENTRY/">PARCEL_FLAG_ALLOW_ALL_OBJECT_ENTRY</a></td><td> 0x08000000</td><td> find if a parcel allows all objects to enter a parcel</td></tr><tr><td> <a href="/constants/PARCEL_FLAG_ALLOW_GROUP_OBJECT_ENTRY/">PARCEL_FLAG_ALLOW_GROUP_OBJECT_ENTRY</a></td><td> 0x10000000</td><td> find if a parcel only allows group (and owner) objects to enter the parcel</td></tr></table></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>if (!(llGetParcelFlags(llGetPos()) &amp; PARCEL_FLAG_ALLOW_FLY))
+    llSay(0,&quot;You are not allowed to fly here!, Sorry!.&quot;);
+
+// Answers TRUE if rezzing is permitted, FALSE if not.
+// Rezzing can fail even if this returns TRUE due to parcel full or server errors.
+// Rezzing will always fail if this returns FALSE
+integer canRezAt(vector pos) {
+    integer parcelFlags = llGetParcelFlags(pos);
+    list parcelDetails = llGetParcelDetails(pos, [PARCEL_DETAILS_OWNER, PARCEL_DETAILS_GROUP]);
+    key parcelOwner = llList2Key(parcelDetails, 0);
+    key parcelGroup = llList2Key(parcelDetails, 1);
+ 
+    if (parcelFlags &amp; PARCEL_FLAG_ALLOW_CREATE_OBJECTS) return TRUE;
+    if (parcelOwner == llGetOwner()) return TRUE;
+    if (!llSameGroup(parcelGroup)) return FALSE;
+    if (parcelFlags &amp; PARCEL_FLAG_ALLOW_CREATE_GROUP_OBJECTS) return TRUE;
+    return FALSE;
+}
+ 
+// Answers TRUE if running scripts is permitted, FALSE if not
+integer canRunScriptsAt(vector pos) {
+    integer parcelFlags = llGetParcelFlags(pos);
+    list parcelDetails = llGetParcelDetails(pos, [PARCEL_DETAILS_OWNER, PARCEL_DETAILS_GROUP]);
+    key parcelOwner = llList2Key(parcelDetails, 0);
+    key parcelGroup = llList2Key(parcelDetails, 1);
+ 
+    if (parcelFlags &amp; PARCEL_FLAG_ALLOW_SCRIPTS) return TRUE;
+    if (parcelOwner == llGetOwner()) return TRUE;
+    if (!llSameGroup(parcelGroup)) return FALSE;
+    if (parcelFlags &amp; PARCEL_FLAG_ALLOW_GROUP_SCRIPTS) return TRUE;
+    return FALSE;
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelDetails/">llGetParcelDetails</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetRegionFlags/">llGetRegionFlags</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-position-a2dae76f/">Template:LSL Function/position</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+This template is to be used to specify setup the description for position like parameters (offsets, positions, points, etc.).
+
+Right now it&#x27;s pretty basic and easy to edit. I&#x27;m wondering if these functions should be in a position parameter specific category.
+
+====TODO====
+* add clamping flag and verbiage for out of region/range coordinates.
+&lt;/noinclude&gt;{{#if:
+
+{{#if:{{{region|}}}|
+  {{#if:{{{local|}}}|
+
+    {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region}} or [[Viewer coordinate frames#Local|local coordinates]] depending upon the situation{{{desc|}}}}}
+
+    {{#vardefine:p_{{{1|}}}_hover|position in region or local coordinates depending upon the situation{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+  |
+    {{#ifeq:{{{1|}}}|point|
+
+      {{#vardefine:p_{{{1|}}}_desc|A point in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region-local}} space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|A point in region-local space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region coordinates}}{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in region coordinates{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+|
+  {{#if:{{{local|}}}|
+
+    {{#ifeq:{{{1|}}}|offset|
+
+      {{LSL Function/offset|{{{1|}}}|local={{{local}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in [[Viewer coordinate frames#Local|local coordinates]]{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in local coordinates{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+}}
+
+}}</code></pre></details></section>

@@ -1,0 +1,38 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">This function supports md5, sha1, sha224, sha256, sha384, sha512 for <strong>algorithm</strong>.</div>
+<div class="wiki-line"><strong>secret</strong> can be any string.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the <a href="https://en.wikipedia.org/wiki/Base64" rel="noreferrer">Base64-encoded</a> <a href="https://en.wikipedia.org/wiki/HMAC" rel="noreferrer">HMAC</a> hash of <strong>msg</strong> when using hash algorithm <strong>algorithm</strong> and secret string <strong>secret</strong>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><strong>secret</strong> is passed in as UTF-8 (though stored in memory as UTF-16 in Mono).</li>
+<li>If your secret is encoded in Base64 (as is common for HMAC applications), consider <a href="/functions/llBase64ToString/">llBase64ToString</a>, but be aware of its caveats.</li>
+<li>If you are generating an HMAC hash on a different platform, you will need to ensure its implementation reads the secret as UTF-8 (or you will need to manually encode it into the correct format beforehand), or else the HMAC hashes will not match.</li>
+<li>Since <strong>secret</strong> is not Base64, and LSL does not support "NUL" (U+0000) in strings, this function cannot calculate hashes with secrets that encode into UTF-8/16 as U+0000.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        string secret = &quot;secret key&quot;;
+        
+        // Supported algorithims for llHMAC() include:
+        // md5, sha1, sha224, sha256, sha384, sha512
+        
+        string algorithm = &quot;sha1&quot;;
+        string msg = &quot;Hello, Avatar!&quot;;
+        
+        string digest = llHMAC(secret, msg, algorithm);
+        
+        // For the given secret/msg/algorithm, expect the HMAC
+        // digest to be &#x27;ffCDntkagRO5mIEtd2tYzM2Bg8I=&#x27;
+        llSay(0, &quot;HMAC digest of message &#x27;&quot; + msg + &quot;&#x27; using algorithm &quot;
+            +  algorithm + &quot; is &quot; + digest);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>This function performs no checks on <strong>secret</strong>; it can contain any value, or no value at all. Be sure to check that you are hashing using the correct <strong>secret</strong>.</li>
+<li>Since this function uses UTF-8 secrets, you should at a minimum follow "password rules": more entropy is usually better. If you need a guideline, 32+ random characters is likely enough.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSignRSA/">llSignRSA</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llVerifyRSA/">llVerifyRSA</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSHA1String/">llSHA1String</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSHA256String/">llSHA256String</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llMD5String/">llMD5String</a></div></div></section>

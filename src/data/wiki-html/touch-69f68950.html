@@ -1,0 +1,59 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered whilst an agent is clicking the task. It will continue to be triggered until the the prim/object is stopped being clicked (it triggers multiple times).</div>
+<div class="wiki-line">Triggered on touch start, each minimum event delay while held, and touch end.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If a prim <a href="/wiki/face-304afc32/">face</a> has <a href="https://wiki.secondlife.com/wiki/Navigating_Shared_Media">Shared Media</a> enabled and the avatar's viewer supports this feature, LSL scripts will not detect touches on that face. Touches from older clients will be detected.</li>
+<li>Rigged mesh attachments do not support touch events, this is because you can steer your avatar/camera by click dragging your avatar body which is what the rigged mesh replaces. The only way to get a touch event on a rigged mesh attachment is via the right click context menu and clicking the "Touch" button.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">You can use index 0 through (<code>num_detected</code>-1) with the various llDetected... functions to handle simultaneous touches at once.</div>
+<div class="wiki-line">For example, the following script shows the names of everyone touching it (click and hold) as floating text.</div>
+<div class="wiki-line"><pre><code>list touchers;
+
+default
+{
+    // Collect names of avatars touching the object.
+    touch(integer num_detected)
+    {
+        integer i;
+        for (i = 0; i &lt; num_detected; ++i)
+        {
+            string name = llDetectedName(i);
+            if (llListFindList(touchers, [name]) == -1)
+            {
+                touchers += name;
+            }
+        }
+        llSetText(&quot;I am being touched by &quot; + llList2CSV(touchers) + &quot;.&quot;, &lt;1,1,1&gt;, 1);
+    }
+
+    // Remove names of avatars as they let go.
+    touch_end(integer num_detected)
+    {
+        integer i;
+        for (i = 0; i &lt; num_detected; ++i)
+        {
+            string name = llDetectedName(i);
+            integer index = llListFindList(touchers, [name]);
+            touchers = llDeleteSubList(touchers, index, index);
+        }
+        if (llGetListLength(touchers) &gt; 0)
+        {
+            llSetText(&quot;I am being touched by &quot; + llList2CSV(touchers) + &quot;.&quot;, &lt;1,1,1&gt;, 1);
+        }
+        else
+        {
+            llSetText(&quot;&quot;, &lt;1,1,1&gt;, 1);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">For most purposes, it's usually enough to handle just with the first toucher e.g. <a href="/functions/llDetectedKey/">llDetectedKey</a>(0).</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch(integer num_detected)
+    {
+        llOwnerSay(&quot;I am being touched by &quot; + llDetectedName(0) + &quot;.&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetTouchText/">llSetTouchText</a> — Set the pie menu's text for touch-action</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llPassTouches/">llPassTouches</a> — Allows clicks captured by a child prim to be passed to the root as well</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/touch_start/">touch_start</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/touch_end/">touch_end</a></div></div></section>

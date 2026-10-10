@@ -1,0 +1,121 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Requests one <code>HTTPS://</code> (<a href="https://en.wikipedia.org/wiki/SSL" rel="noreferrer">SSL</a>) <a href="https://en.wikipedia.org/wiki/URL" rel="noreferrer">URL</a> for use by this <a href="https://wiki.secondlife.com/wiki/object">object</a>. The <a href="/events/http_request/">http_request</a> <a href="https://wiki.secondlife.com/wiki/event">event</a> is triggered with result of the request. <a href="https://wiki.secondlife.com/wiki/LSL_HTTP_server#introduction">HTTPS-in</a> uses port <code>12043</code>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/key">key</a> used for identifying the result of the request in the <a href="/events/http_request/">http_request</a> <a href="https://wiki.secondlife.com/wiki/event">event</a>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>HTTPS-in uses port <code>12043</code> (that port is in the URL returned by this method).</li>
+<li>When a <a href="https://wiki.secondlife.com/wiki/region">region</a> is (re)started all <a href="/events/http_request/">HTTP server</a> URLs are automatically released and invalidated.</li>
+<li>Use <a href="/constants/CHANGED_REGION_START/">CHANGED_REGION_START</a> to detect this so a new URL can be requested.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">Never ever forget to release a URL again which you have requested! URLs are region resources just like prims. If you take them all you can get into big trouble with the <a href="https://wiki.secondlife.com/wiki/Private_Region">region owner</a> and/or <a href="https://wiki.secondlife.com/wiki/Estate_Manager">estate managers</a>.</div></aside></div>
+<div class="wiki-line">Requesting a secure URL:</div>
+<div class="wiki-line"><pre><code>string secureUrl;
+key urlRequestId;
+key selfCheckRequestId;
+ 
+request_secure_url()
+{
+    llReleaseURL(secureUrl);
+    secureUrl = &quot;&quot;;
+ 
+    urlRequestId = llRequestSecureURL();
+}
+ 
+throw_exception(string inputString)
+{
+    key owner = llGetOwner();
+    llInstantMessage(owner, inputString);
+ 
+    // yeah, bad way to handle exceptions by restarting.
+    // However this is just a demo script...
+ 
+    llResetScript();
+}
+ 
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+ 
+    changed(integer change)
+    {
+        if (change &amp; (CHANGED_OWNER | CHANGED_INVENTORY))
+        {
+            llReleaseURL(secureUrl);
+            secureUrl = &quot;&quot;;
+ 
+            llResetScript();
+        }
+ 
+        if (change &amp; (CHANGED_REGION | CHANGED_REGION_START | CHANGED_TELEPORT))
+            request_secure_url();
+    }
+ 
+    state_entry()
+    {
+        request_secure_url();
+    }
+ 
+    http_request(key id, string method, string body)
+    {
+        integer responseStatus = 400;
+        string responseBody = &quot;Unsupported method&quot;;
+ 
+        if (method == URL_REQUEST_DENIED)
+            throw_exception(&quot;The following error occurred while attempting to get a free URL for this device:\n \n&quot; + body);
+ 
+        else if (method == URL_REQUEST_GRANTED)
+        {
+            secureUrl = body;
+            key owner = llGetOwner();
+            llLoadURL(owner, &quot;Click to visit my URL!&quot;, secureUrl);
+ 
+            // check every 5 mins for dropped URL
+            llSetTimerEvent(300.0);
+        }
+        else if (method == &quot;GET&quot;)
+        {
+            responseStatus = 200;
+            responseBody = &quot;Hello world!&quot;;
+        }
+        // else if (method == &quot;POST&quot;) ...;
+        // else if (method == &quot;PUT&quot;) ...;
+        // else if (method == &quot;DELETE&quot;) { responseStatus = 403; responseBody = &quot;forbidden&quot;; }
+ 
+        llHTTPResponse(id, responseStatus, responseBody);
+    }
+ 
+    http_response(key id, integer status, list metaData, string body)
+    {
+        if (id == selfCheckRequestId)
+        {
+            // If you&#x27;re not usually doing this,
+            // now is a good time to get used to doing it!
+            selfCheckRequestId = NULL_KEY;
+ 
+            if (status != 200)
+                request_secure_url();
+        }
+ 
+        else if (id == NULL_KEY)
+            throw_exception(&quot;Too many HTTP requests too fast!&quot;);
+    }
+ 
+    timer()
+    {
+        selfCheckRequestId = llHTTPRequest(secureUrl,
+                                [HTTP_METHOD, &quot;GET&quot;,
+                                    HTTP_VERBOSE_THROTTLE, FALSE,
+                                    HTTP_BODY_MAXLENGTH, 16384],
+                                &quot;&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestURL/">llRequestURL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetFreeURLs/">llGetFreeURLs</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llReleaseURL/">llReleaseURL</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llHTTPResponse/">llHTTPResponse</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetHTTPHeader/">llGetHTTPHeader</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/LSL_http_server">LSL http server</a></div></div></section>
+<section><h2 id="history">History</h2><ul>
+<li><span class="wiki-template"><a href="/wiki/template-svn-6879a543/">SVN</a>: <code>{{SVN|1836|rev=112899 |trunk=*|anchor=file22|ver=|ser=}}</code></span></li>
+</ul></section>

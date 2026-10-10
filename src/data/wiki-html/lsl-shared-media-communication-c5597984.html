@@ -1,0 +1,167 @@
+<h2 id="introduction">Introduction</h2>
+<div class="wiki-line">A common question about Shared Media is whether or not it can communicate with Linden Script (LSL).  Great question! The answer is: YES!  This is great news as it opens up all sort of creative possibilities. However, it's not the easiest thing to figure out. Edelman Linden shows at least one way to do it.</div>
+<div class="wiki-line">This article presents the full source code for a simple example where you can send chat messages FROM Shared Media. In addition, the Shared Media displays some time of day information received from LSL.</div>
+<div class="wiki-line">It looks like this:</div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Image:LSLp1.jpg">466px</a></div>
+<div class="wiki-line">Notice that the chat there really is the text from the Shared Media:</div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Image:LSLp2.jpg">Image:LSLp2.jpg</a></div>
+<h2 id="communication-via-http">Communication via HTTP</h2>
+<div class="wiki-line">LSL script support receiving and replying to HTTP requests. The URL for a LSL running on a sim can be obtain using <a href="/functions/llRequestURL/">llrequestURL</a>. It's this URL and HTTP request mechanism that are the key to communication with Share Media, in both directions!</div>
+<ul>
+<li>Shared Media can send a message to LSL by sending the information in an HTTP request.</li>
+<li>Shared Media can receive a message from LSL by asking for the information via an HTTP request. Asking repeatedly (also known as Polling) creates a way of making it seem like messages are being "sent".</li>
+</ul>
+<div class="wiki-line"><em>But there's a catch! And this is a BIG catch!</em></div>
+<ul>
+<li>Your Shared Media is served from your domain (in my case, uccellogames.com).</li>
+<li>The LSL URL is from a different domain - lindenlab.com</li>
+<li>The browser security model prevents your domain from looking at the data returned by a request to a different domain. (This would be a way of phishing inside of corporate firewalls, for example). Without a solution, you could send messages, but not receive responses.</li>
+</ul>
+<div class="wiki-line">As such, your domain needs to <strong>proxy</strong> requests from your Shared Media to the Linden server. The good news is that I'll show you how to do that. You can use this simple PHP script:</div>
+<div class="wiki-line"><strong>lslproxy.php</strong></div>
+<div class="wiki-line">Takes the URL of the LSL script and the data you want to have it receive as the request body.</div>
+<div class="wiki-line">&lt;php&gt;</div>
+<div class="wiki-line">&lt;?php</div>
+<div class="wiki-line">$url = $_GET['url'];</div>
+<div class="wiki-line">$data = $_GET['data'];</div>
+<div class="wiki-line">$session = curl_init($url);</div>
+<div class="wiki-line">curl_setopt($session, CURLOPT_POST, true);</div>
+<div class="wiki-line">curl_setopt($session, CURLOPT_POSTFIELDS, $data);</div>
+<div class="wiki-line">curl_setopt($session, CURLOPT_HEADER, false);</div>
+<div class="wiki-line">curl_setopt($session, CURLOPT_FOLLOWLOCATION, true); </div>
+<div class="wiki-line">curl_setopt($session, CURLOPT_RETURNTRANSFER, true);</div>
+<div class="wiki-line">$response = curl_exec($session);</div>
+<div class="wiki-line">echo $response;</div>
+<div class="wiki-line">curl_close($session);</div>
+<div class="wiki-line">?&gt;</div>
+<div class="wiki-line">&lt;/php&gt;</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-kbtip-2cd35faf/">KBtip</a>: <code>{{KBtip|You need to host it from your domain and be able to run PHP scripts.}}</code></span></div>
+<h2 id="lsl-to-shared-media-is-a-many-to-one-relationship">LSL to Shared Media is a Many-to-One Relationship</h2>
+<div class="wiki-line">It's very important that you understand that the relationship between LSL and Shared Media is a many-to-one relationship. That is, the LSL is running just one time on the Linden simulation server. The Shared Media is running on the computer of every Resident that is encountering your object. While you're deveopling content, it's easy to forget this, as you are probably looking at your object alone.  </div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-kbcaution-6c453387/">KBcaution</a>: <code>{{KBcaution| Remember, the relationship between LSL and Shared Media is a many-to-one relationship!}}</code></span></div>
+<h2 id="source-code-for-the-example">Source Code for the Example</h2>
+<h3 id="lsl-script-for-a-simple-example">LSL script for a simple example</h3>
+<div class="wiki-line">Here's the script on the object:</div>
+<div class="wiki-line">Key points:</div>
+<ul>
+<li>Note how <a href="/functions/llRequestURL/">LlRequestURL</a> is used to get the LSL URL and then passed to the HTML page as a query argument.</li>
+<li>The different types of requests from the Shared Media are identified by the first character of their request.</li>
+</ul>
+<div class="wiki-line"><pre><code>init(string scriptUrl)
+{
+    string url = &quot;http://www.uccellogames.com/media_demos/communication.html?url=&quot; + scriptUrl;
+    integer face = 4;
+    llClearPrimMedia(face);
+    llSetPrimMediaParams(face, [PRIM_MEDIA_CURRENT_URL, url, PRIM_MEDIA_AUTO_SCALE, TRUE, PRIM_MEDIA_AUTO_PLAY, TRUE, PRIM_MEDIA_PERMS_CONTROL, PRIM_MEDIA_PERM_NONE, PRIM_MEDIA_WIDTH_PIXELS, 512, PRIM_MEDIA_HEIGHT_PIXELS, 512, PRIM_MEDIA_FIRST_CLICK_INTERACT, 1]);
+}
+ 
+key gRequestURL;
+string gURL;
+   
+default
+{
+    state_entry()
+    {
+        gRequestURL = llRequestURL();
+    }
+
+    http_request(key id, string method, string body) 
+    {
+        if (id == gRequestURL) {
+            string arg = llEscapeURL(body);
+            init(arg);
+        } else {
+            // it&#x27;s a message from the Shared Media!
+            string msgType = llGetSubString(body, 0, 0);
+            string data = llGetSubString(body, 1, -1);
+            
+            if (msgType == &quot;1&quot;) {
+                // it&#x27;s a chat message!
+                llSay(0, data);
+                llHTTPResponse(id,200,&quot;&quot;);
+            } else if (msgType == &quot;2&quot;) {
+                // it&#x27;s a time of data request
+                float tod = llGetTimeOfDay( );
+                string reply = &quot;Time since last region restart or SL midnight (based on SL 4 hour day):&quot;;
+                integer hours = ((integer)tod / 3600) ;
+                integer minutes = ((integer)tod / 60) - (hours * 60);
+                reply += (string) tod + &quot; seconds which is &quot;+(string) hours+&quot;h &quot;+(string) minutes+&quot;m&quot;; 
+                llHTTPResponse(id,200, reply);
+            }                
+        }
+    }
+}</code></pre></div>
+<h3 id="communication-html">communication.html</h3>
+<div class="wiki-line">Here's the HTML for the Shared Media page:</div>
+<div class="wiki-line">Key points:</div>
+<ul>
+<li>Note the use of the "get_query_argument" Javascript function to get the URL for the LSL script.</li>
+<li>"lslRequest" is a function that glues it all together. It uses the "lslproxy.php" script (above) to send data to the LSL and provide it's textural response.</li>
+</ul>
+<div class="wiki-line">Otherwise, it's pretty straight-forward.</div>
+<div class="wiki-line">&lt;html4strict&gt;</div>
+<div class="wiki-line">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;</div>
+<div class="wiki-line">&lt;html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"&gt;</div>
+<div class="wiki-line">&lt;head&gt;</div>
+<div class="wiki-line">&lt;script type="text/javascript"&gt;</div>
+<div class="wiki-line">function get_query_argument(name, href) {</div>
+<div class="wiki-line">  href = (href) || window.location.href;</div>
+<div class="wiki-line">  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");</div>
+<div class="wiki-line">  var regexS = "[\\?&amp;]"+name+"=([^&amp;#]*)";</div>
+<div class="wiki-line">  var regex = new RegExp( regexS );</div>
+<div class="wiki-line">  var results = regex.exec(href);</div>
+<div class="wiki-line">  return (results == null ? "" : results[1]);</div>
+<div class="wiki-line">};</div>
+<div class="wiki-line">function lslRequest(data, responseHandler)</div>
+<div class="wiki-line">{</div>
+<div class="wiki-line">var url = get_query_argument("url");</div>
+<div class="wiki-line">var xmlhttp=new XMLHttpRequest();</div>
+<div class="wiki-line">xmlhttp.open("GET", "http://www.uccellogames.com/media_demos/lslproxy.php?data=" + data + "&amp;url=" + url, true);</div>
+<div class="wiki-line">xmlhttp.responseHandler = responseHandler;</div>
+<div class="wiki-line">  xmlhttp.onreadystatechange=function() {</div>
+<div class="wiki-line">if (this.readyState == 4) {</div>
+<div class="wiki-line">if (this.responseHandler) {</div>
+<div class="wiki-line">this.responseHandler(this.responseText);</div>
+<div class="wiki-line">}</div>
+<div class="wiki-line">}</div>
+<div class="wiki-line">};</div>
+<div class="wiki-line">xmlhttp.send();</div>
+<div class="wiki-line">}</div>
+<div class="wiki-line">function submit_chat()</div>
+<div class="wiki-line">{</div>
+<div class="wiki-line">var chat = escape(document.getElementById("chat").value);</div>
+<div class="wiki-line">var data = "1" + chat; // 1 indicates it's incoming chat</div>
+<div class="wiki-line">lslRequest(data, null);</div>
+<div class="wiki-line">} </div>
+<div class="wiki-line">function get_message()</div>
+<div class="wiki-line">{</div>
+<div class="wiki-line">var data = "2"; // 2 indicates it's a request for the time of day</div>
+<div class="wiki-line">lslRequest(data, </div>
+<div class="wiki-line">function(responseText) {</div>
+<div class="wiki-line">document.getElementById("lslmessage").value = responseText;</div>
+<div class="wiki-line">}</div>
+<div class="wiki-line">);</div>
+<div class="wiki-line">}</div>
+<div class="wiki-line">&lt;/script&gt;</div>
+<div class="wiki-line">&lt;/head&gt;</div>
+<div class="wiki-line">&lt;body onLoad="javascript:get_message()"&gt;</div>
+<div class="wiki-line">&lt;h3&gt;Example of Shared Media to LSL communication:&lt;/h1&gt;</div>
+<div class="wiki-line">&lt;p&gt;What you type and submit here will show up in SL chat: &lt;/p&gt;</div>
+<div class="wiki-line">&lt;p&gt;</div>
+<div class="wiki-line">&lt;input name="chat" type="text" id="chat" size="46" maxlength="50" /&gt;</div>
+<div class="wiki-line">&lt;input type="submit" name="submit" id="submit" value="Submit" onClick="javascript:submit_chat()"/&gt;</div>
+<div class="wiki-line">&lt;/p&gt;</div>
+<div class="wiki-line">&lt;h3&gt;Example of LSL to Shared Media communication:&lt;/h1&gt;</div>
+<div class="wiki-line">&lt;p&gt;Generally, this is done by polling from Shared Media to LSL - this example just asks once.&lt;/p&gt;</div>
+<div class="wiki-line">&lt;p&gt;Here's what LSL reports as the "time of day": &lt;/p&gt;</div>
+<div class="wiki-line">&lt;p&gt;</div>
+<div class="wiki-line">&lt;textarea name="lslmessage" id="lslmessage" cols="50" rows="5"&gt;&lt;/textarea&gt;</div>
+<div class="wiki-line">&lt;/p&gt;</div>
+<div class="wiki-line">&lt;/body&gt;</div>
+<div class="wiki-line">&lt;/html&gt;</div>
+<div class="wiki-line">&lt;/html4strict&gt;</div>
+<h2 id="additional-thoughts-from-edelman">Additional Thoughts from Edelman</h2>
+<div class="wiki-line">I hope you found this article useful. I tried to come up with a really simple example, but it's still pretty technical.  </div>
+<div class="wiki-line">Note that if you wanted a way to keep a state machine that all new Shared Media instances could connect to, receive current state, and receive update notifications, you certainly could do it in LSL. However, if your Shared Media is Flash based, Flash Media Server (FMS) makes this easier. Server-side Javascript on the FMS server could be used both as your proxy (instead of the PHP script) AND as your server-side state machine that already has a way to broadcast to all clients. In this case, you could keep a one-to-one relationship with your LSL instance and your FMS instance, and the many-to-one relationshpe migrates to be between the FMS instance and the Shared Media Flash clients.</div>
+<div class="wiki-line">&lt;div style="display:none;"&gt;<pre><code></code></pre>&lt;/div&gt;</div>
+<div class="wiki-line"><a href="/wiki/category-lsl-b2b52844/">Category:LSL</a> <a href="https://wiki.secondlife.com/wiki/Category:Shared_Media">Category:Shared Media</a></div>

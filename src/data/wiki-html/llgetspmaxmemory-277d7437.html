@@ -1,0 +1,35 @@
+<section><h2 id="specification">Specification</h2><div class="wiki-line">This function's behavior is dependent upon the VM the script is using. <a href="#mono">Mono</a> is the new VM, <a href="#lso">LSO</a> is the old VM. The big difference between between Mono and LSO is that Mono scripts run faster and can utilize four times more memory.</div>
+<h3 id="mono">Mono</h3>
+<div class="wiki-line">During and after a <a href="/functions/llScriptProfiler/">LlScriptProfiler</a> profiling run, llGetSPMaxMemory will return the most memory used during profiling.</div>
+<h3 id="lso">LSO</h3>
+<div class="wiki-line">This function has no effect for scripts not compiled to Mono. It will always return 16384, the fixed LSO memory size.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// need to run something for the profile to register... 
+ScriptRotate()
+{
+    llTargetOmega(&lt;0.5, 0.7, 0.2&gt;, 0.75, 0.75);
+}
+
+default
+{
+    state_entry()
+    {
+        llSetMemoryLimit( 5000 ); // set the memory limit
+        
+        // call up the profiler, execute a method, stop profiler
+        llScriptProfiler( PROFILE_SCRIPT_MEMORY );
+        ScriptRotate(); 
+        llScriptProfiler( PROFILE_NONE );
+        
+        // display memory usage...
+        llSay(0, &quot;Memory used: &quot; + (string)llGetSPMaxMemory() + &quot; bytes, total memory: &quot; + 
+            (string)llGetMemoryLimit() + &quot; bytes.&quot; );
+    }
+}
+
+// outputs 
+// Object: Memory used: 4448 bytes, total memory: 5000 bytes.</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetFreeMemory/">llGetFreeMemory</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetUsedMemory/">llGetUsedMemory</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetMemoryLimit/">llGetMemoryLimit</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetMemoryLimit/">llSetMemoryLimit</a></div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-06-17-233176"> 17/06/2011 </a></div></section>

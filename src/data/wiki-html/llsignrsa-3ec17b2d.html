@@ -1,0 +1,92 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">This function supports sha1, sha224, sha256, sha384, sha512 for <strong>algorithm</strong>.</div>
+<div class="wiki-line">Whitespace and newlines are ignored for <strong>private_key</strong>.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the <a href="https://en.wikipedia.org/wiki/Base64" rel="noreferrer">Base64-encoded</a> <a href="https://en.wikipedia.org/wiki/RSA_%28cryptosystem%29" rel="noreferrer">RSA</a> signature of <strong>msg</strong> when using hash algorithm <strong>algorithm</strong> and private RSA key <strong>private_key</strong>.  Use <a href="/functions/llVerifyRSA/">llVerifyRSA</a> to verify the the returned signature against <strong>msg</strong> using the matching public RSA key.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Despite its 60-byte cost (120 in Mono), if <strong>private_key</strong> does not include the "-----BEGIN RSA PRIVATE KEY-----" header and "-----END RSA PRIVATE KEY-----" footer, this function will throw a non-fatal error, "llSignRSA: failed to import key", and return a blank string.</li>
+<li>Any invalid <strong>algorithm</strong> will throw a non-fatal error, "llSignRSA valid algorithms are: sha1, sha224, sha256, sha384, sha512", and return a blank string.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Generate an signature, then immediately verify if it is valid.
+
+default
+{
+    state_entry()
+    {
+        // Key pair generated using LibreSSL 3.3.6
+        // For demonstration purposes only
+        string private_key = &quot;-----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEAqxXSIhFHzYO9UNEUvMMXwhB4vf32fPirCxxV/w4m88jKPmFH
+QQe9DOwj7illmvg+81vzBNGt+uNYy/2zFegUtwvxKCEioeoanRpPcvn9r/d/kXad
+WL/DyKJwHbF1EtTfPAZSl6ZIBIYis8HQ/RAln3olS705AmCKBRkbz3cZ+dTzqX1v
+7ohqqPPoCaXQFgLTMYnqU8ZTsq1Sl8BwKK735HPmKLCEjZaMn97lvzGHufY/JdRs
+dwdRHqKnpe2w2c0AzNpQtjoRCnPtj7cFgCeztjAcbdtuS8ipJTEIuBLWHCVVXIlD
+DQ6jJvIEW7tt+6kde/NUskRASd7Rtoy5AeS7cwIDAQABAoIBABwvix/7stWj55Oh
+7oWuqoJZTlsWtP4fxaYd8/kCLt6o7NDcG+4VxUqUuNKq1UdzsINNWbsohD46KE3r
+LQ7l3kvN1twioV8Ff370b7RkhSvxXX3sib2uUiYCxO/PZZdFpMVx0TeUuHauVpdA
+zhpzB4+/gtd4hCTlHLf8S/2hBJGJA9e37Vo3MqXh43QRFTD8pgjb0mUWa4xJeZlz
+3vGmQl0uMS04wX+r7Pq1HKs7gk93WeLrNhEQgRwUPgumrMGHey9eF1kDb14m3O7Z
+qWU7MWWME2lxcUV0YT/iHPfvStvLHiEdi1z2TGKkMmlHX7RGpk7Js5GGQfeEKEsv
+ihXuFmkCgYEA2y6V2+HCmViA8V1qY907z5dvG3ar9zbm3qfcJDJFoNOzDZNU0NRJ
+eZu/LhwTHW7PArAuWhxh7ENu9Bhl5FjvMuyqrMPud1Tf0GsrYKQJITgbW6IC6w/N
+a+2ZMm6VDCztS5MNNmWRCTTEecd4lnPLfyX9XYfUvUovzv5mM65Hzl0CgYEAx9Ly
+RR1tkjgiIJHmpv95MkaHg4O4NZT0eiyykRz1qENESZOtJ00l+/p4vZSOdQjwPl+q
+vjMhlZc9a2292UEy3BsBOPB/nJybLXBDFa0KYUCc3/aHGSgq+ZbUKNhdBq2c83hb
+Dpw2ajHluLtXO7D4kDGvEDLPN+/19NElI6EL9A8CgYAVRu5xS/cyH69UvvbG/wEB
+Y/f7OIf1FbVPxAfQ07iCpkppdPX018bSMVZbyYnpf4pE/olhYgP3hYxN0diCVEfU
+L7lZ0CNkHi8j8mNhnErumJ2/RXj3DK+qXIRUqvt5FRtsDLhpoW508FRqZfzEzjTh
+APUZkUgLoBoIBBYzyiVaWQKBgD3GvHmbmHVc/0f8c0drsedWIK0K+tct3ssqqGXu
+gw/rA+CPVDfTRQv6qntJwyTxh3xxDRNSMW7S2/0rZ0cUPgoIGz+kMn+TdvH8Q/Ee
+lxfr5tPinm+rmGWjOKIMCe53nA81RUlmB/iaxn9vA5ADrUS+53Vlj+SmPe7a/dVf
+A5gHAoGAbS4sMlUkUd449PT33rqx26aNKkKLI9PLxgWE7YBfwzaUkG0MBryQqP5L
+aIY2a+8ZvUeHxmY0oQfPQkH5KKbAaC0ozaXf+3qX0Gfkt8vxsh41ON5esr0tfcm2
+BFdQrdBOACefo2kOFfdMSP6KWKI3HZMJAr9SDcAiL23IQZ/wl/c=
+-----END RSA PRIVATE KEY-----&quot;;
+        
+        string public_key = &quot;-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqxXSIhFHzYO9UNEUvMMX
+whB4vf32fPirCxxV/w4m88jKPmFHQQe9DOwj7illmvg+81vzBNGt+uNYy/2zFegU
+twvxKCEioeoanRpPcvn9r/d/kXadWL/DyKJwHbF1EtTfPAZSl6ZIBIYis8HQ/RAl
+n3olS705AmCKBRkbz3cZ+dTzqX1v7ohqqPPoCaXQFgLTMYnqU8ZTsq1Sl8BwKK73
+5HPmKLCEjZaMn97lvzGHufY/JdRsdwdRHqKnpe2w2c0AzNpQtjoRCnPtj7cFgCez
+tjAcbdtuS8ipJTEIuBLWHCVVXIlDDQ6jJvIEW7tt+6kde/NUskRASd7Rtoy5AeS7
+cwIDAQAB
+-----END PUBLIC KEY-----&quot;;
+        
+        // Supported algorithims for llSignRSA() include:
+        // sha1, sha224, sha256, sha384, sha512
+        
+        string algorithm = &quot;sha1&quot;;
+        string msg = &quot;Hello, Avatar!&quot;;
+        
+        string signature = llSignRSA(private_key, msg, algorithm);
+        
+        // For the given private_key/msg/algorithm, expect the signature
+        // to resemble &#x27;SgqafXI/M70FJr5th0VR3U36L...O76Bg==&#x27;
+        llSay(0, &quot;RSA signature of message &#x27;&quot; + msg + &quot;&#x27; using algorithm &quot;
+            +  algorithm + &quot; is &quot; + signature);
+            
+        /* Now, imagine that msg and signature were transmitted to another
+        script over chat or similar.  The other script has access to public_key
+        but not to private_key, but can still verify the authenticity of msg
+        using the signature. */
+        
+        integer valid_signature = llVerifyRSA(public_key, msg, signature, algorithm);
+        
+        if(valid_signature)
+        {
+            llSay(0, &quot;Signature verified successfully!&quot;);
+        }
+        else
+        {
+            llSay(0, &quot;Signature verification failed!&quot;);
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>If you do not have an RSA key pair you wish to use already, you can easily generate an RSA key pair using <a href="https://cryptotools.net/rsagen" rel="noreferrer">this generator.</a></li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llVerifyRSA/">llVerifyRSA</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llHMAC/">llHMAC</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSHA1String/">llSHA1String</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSHA256String/">llSHA256String</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llMD5String/">llMD5String</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/JSON_Web_Token_in_LSL">JSON Web Token in LSL</a></div></div></section>

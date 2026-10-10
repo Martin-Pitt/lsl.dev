@@ -1,0 +1,156 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Types}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-righttoc-d8e1769b/">RightToc</a>: <code>{{RightToc}}</code></span></div>
+<div class="wiki-line">A list is a special kind of data type which can contain zero or more elements of any of the other data types recognised in LSL.</div>
+<div class="wiki-line">Lists are signified by square brackets surrounding their elements; the elements inside are separated by commas.</div>
+<div class="wiki-line">Examples:</div>
+<div class="wiki-line"><pre><code>[0, 1, 2, 3, 4]
+
+[&quot;Yes&quot;, &quot;No&quot;, &quot;Perhaps&quot;]</code></pre></div>
+<div class="wiki-line">(Note: to be clear for those who have other programming backgrounds, there are no arrays in LSL: only lists.)</div>
+<h4 id="diverse-data-types">Diverse Data Types</h4>
+<div class="wiki-line">Elements in a list do not need to be all of the same type. In the same list, you can store strings, integers, floats, vectors, and rotations, right side by side.</div>
+<div class="wiki-line">Example:</div>
+<div class="wiki-line"><pre><code>//a list with an integer, a float, a string, and a vector.
+[1, 14.154, &quot;Isn&#x27;t this fun?&quot;, &lt;0,0,0&gt;]</code></pre></div>
+<div class="wiki-line">However, a list may not contain another list (i.e. you can't nest them.)</div>
+<div class="wiki-line"><pre><code>[1, &quot;one&quot;, 2, &quot;two&quot;] + [3, &quot;three&quot;] returns [1, &quot;one&quot;, 2, &quot;two&quot;, 3, &quot;three&quot;]</code></pre></div>
+<div class="wiki-line">not </div>
+<div class="wiki-line"><pre><code>[1, &quot;one&quot;, 2, &quot;two&quot;, [3, &quot;three&quot;]]</code></pre></div>
+<div class="wiki-line">When you add an element to a list, the list remembers automatically what data type the value was.</div>
+<div class="wiki-line">Generally, because you're the one adding something to a list, you know what datatype is in what place in the list, and you retrieve it out of the list with the appropriate llList2&lt;type&gt; function such as: <a href="/functions/llList2String/">llList2String</a>, <a href="/functions/llList2Vector/">llList2Vector</a>, etc. (more on this later.)</div>
+<div class="wiki-line">If for some reason, though, you need to test what data type an element is in a list, you can use the <a href="/functions/llGetListEntryType/">llGetListEntryType</a> function.</div>
+<div class="wiki-line">List can be directly typecast into string</div>
+<div class="wiki-line"><pre><code>default
+{
+     touch_start(integer total_number)
+    {   
+        list MyList = [&quot;abc&quot;, 1, 2, 3.14, &lt;0,0,0&gt;];
+        llOwnerSay( (string) MyList ); // outcome:  abc123.140000&lt;0.000000, 0.000000, 0.000000&gt;
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>     integer min; integer max; integer total;
+     llSay(0, (string) [&quot;Minimum: &quot;, min, &quot;  Maximum: &quot;, max, &quot;  Total: &quot;, total] );  // requires 1 explicit cast instead of 3</code></pre></div>
+<div class="wiki-line">or can use a <a href="/wiki/do-while-509a4545/">do while</a> condition to say each list item separately</div>
+<div class="wiki-line"><pre><code>default
+{
+     touch_start(integer total_number)
+    {   
+        list MyList = [&quot;abc&quot;, &quot;def&quot;, &quot;ghi&quot;, &quot;jkl&quot;, &quot;lmn&quot;, &quot;opq&quot;];
+        integer i;
+        integer length = llGetListLength(MyList);
+        do
+            llOwnerSay(llList2String(MyList, i) );
+        while(++i &lt; length);
+    }
+}</code></pre></div>
+<h3 id="common-list-operations">Common List Operations</h3>
+<h4 id="counting-place-in-a-list-vs-list-length">Counting place in a list vs list length</h4>
+<div class="wiki-line">It is important at the outset to note the following (which can trip up even experienced minds when they are battle-weary):</div>
+<div class="wiki-line"><pre><code>[&quot;Yes&quot;, &quot;No&quot;, &quot;Perhaps&quot;]</code></pre></div>
+<div class="wiki-line">The length of this list is 3, because it has 3 elements in it. The length of a list is returned by the <a href="/functions/llGetListLength/">llGetListLength</a>() function:</div>
+<div class="wiki-line"><pre><code>integer length = llGetListLength(mylist);</code></pre></div>
+<div class="wiki-line">BUT, counting to determine an element's place in its list (aka "indexing") starts at 0 -- NOT 1.</div>
+<div class="wiki-line">The position of "Yes" in the above list is 0, "No" is at position 1, and "Perhaps" is at position 2.</div>
+<div class="wiki-line">Consequently, if you have 7 elements in a list, the last item in the list will be at position 6.</div>
+<div class="wiki-line">Positions in a list can also be counted from the right-hand end progressing to the left by using negative indexes.</div>
+<div class="wiki-line">Then the position of the right-most entry is -1, and the position of the left-most entry is the negative of the list length. </div>
+<div class="wiki-line">Thus to retrieve elements near to the end of a list, without having to know in advance its forward position, or the list length, you can just say:</div>
+<div class="wiki-line"><pre><code>string LastItem   = llList2String(myList, -1);
+string LastButOne = llList2String(mylist, -2);   // etc.</code></pre></div>
+<h4 id="adding-an-element-to-a-list">Adding an Element to a list</h4>
+<div class="wiki-line">There are several ways used to add an element to an existing list via prepending/appending:</div>
+<ul>
+<li><pre><code>myList = [new_item] + myList;   // Best method for pre-pending in Mono-LSL. Note: a single new item is presented as a list</code></pre></li>
+<li><pre><code>myList = myList + new_item;     // Best method for appending a single new entry in Mono. Note the new item is NOT presented as a list</code></pre></li>
+<li><pre><code>myList += new_item;             // appended item with simplified syntax</code></pre></li>
+<li><pre><code>myList = myList + [new1, new2]; // appended list concatenation (less efficient in Mono for a single new item)</code></pre></li>
+<li><pre><code>myList += [new1, new2];         // appended list concatenation with simplified syntax</code></pre></li>
+<li><pre><code>myList = (myList=[]) + myList + [new_item]; // Recommended for LSO. Appended list concatenation with memory fragmentation optimization</code></pre></li>
+<li><pre><code>myList = (myList=[]) + myList + new_item;   // Recommended for LSO-LSL: appended item with memory fragmentation optimization</code></pre></li>
+</ul>
+<h5 id="notes">Notes</h5>
+<ul>
+<li>Method 1 is the most memory efficient under Mono-LSL.  But not under LSO.</li>
+<li>Note that prepending the new_item <strong>without</strong> brackets <strong>negates</strong> any memory savings in Mono-LSL.</li>
+<li>Method 1 will consume more memory than other methods in LSO-LSL.</li>
+<li>As of 8/8/2009 Method 7 returns the best memory savings in LSO-LSL.</li>
+<li>Methods 2 &amp; 3 compile to the same thing.</li>
+<li>Methods 4 &amp; 5 compile to the same thing.</li>
+<li>Methods 6 &amp; 7 can result in a considerable memory savings in LSO-LSL over methods though there is an LSO-LSL VM bug that causes the string &amp; key typecasts to not stick properly: <a href="https://jira.secondlife.com/browse/SVC-1710" rel="noreferrer">SVC-1710</a>. (It helps reduce heap fragmentation, which would otherwise result in unusable blocks of heap memory)<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|This method was invented and popularized by {{User|Strife Onizuka}}|This method was invented and popularized by Strife Onizuka}}</code></span>. In Mono-LSL it provides no significant memory advantage or disadvantage.</li>
+<li>Depending upon the situation (in LSO-LSL) this method may not provide any advantage whatsoever. If in doubt profile the script with and without using this method.</li>
+</ul>
+<h4 id="joining-lists-aka-concatenation">Joining Lists (aka Concatenation)</h4>
+<div class="wiki-line">Lists can be joined simply by using the + sign:</div>
+<div class="wiki-line"><pre><code>newlist = list01 + list02;
+
+newlist = list01 + [&quot;red&quot;,&quot;brown&quot;,&lt;0,0,0&gt;];</code></pre></div>
+<div class="wiki-line">Note: The above example actually creates 3 lists in memory while the command runs, even though just one is returned. This can affect memory usage.</div>
+<div class="wiki-line">Note: Concatenation can ONLY be done by executable code in LSL, you cannot use + while declaring a global list.</div>
+<h4 id="clearing-a-list">Clearing a List</h4>
+<div class="wiki-line">To clear a list, set it equal to a null list like this:</div>
+<div class="wiki-line"><pre><code>myList = [];</code></pre></div>
+<h4 id="passing-a-list-into-a-function">Passing a List Into a Function</h4>
+<div class="wiki-line">Passing a list into a function is little different than passing any other data type, however, there are some useful cases to be aware of:</div>
+<div class="wiki-line"><pre><code>myList = llListReplaceList(myList, [&quot;myString&quot;], 2, 2);</code></pre></div>
+<div class="wiki-line">In the above code, we call <a href="/functions/llListReplaceList/">llListReplaceList</a>(), an innocent enough operation, however, due to the way passing of lists, and functions such as llListReplaceList(), <a href="/functions/llDeleteSubList/">llDeleteSubList</a>(), <a href="/functions/llList2List/">llList2List</a>() and <a href="/functions/llListSort/">llListSort</a>() (and others), work, you can end up using two, three, or even four times the amount of memory required to store your list, just by calling that function! To avoid this problem, we can use a small piece of optimisation; if you know that the list you're passing into such a function will never be read again (for example if the result of the function will overwrite the list) then we can do this:</div>
+<div class="wiki-line"><pre><code>myList = llListReplaceList((myList = []) + myList, [&quot;myString&quot;], 2, 2);</code></pre></div>
+<div class="wiki-line">The effect of this is to greatly reduce the memory usage and <a href="https://wiki.secondlife.com/wiki/LSO_Memory_Layout">fragmentation in LSO-LSL</a> but has no effect in Mono-LSL (fragmentation does not impact scripts in Mono). This technique is sometimes referred to as "Voodoo magic". This can also work for other cases other than function-calls, for example when concatenating lists (above), you may find that this nearly eliminates any memory problem:</div>
+<div class="wiki-line"><pre><code>list list1 = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
+list2 = [&quot;d&quot;, &quot;e&quot;, &quot;f&quot;];
+list3 = (list1 = list2 = []) + list1 + list2;</code></pre></div>
+<h4 id="processing-a-list-into-another-list">Processing a List Into Another List</h4>
+<div class="wiki-line">A more complex case, but sometimes when processing a large list you may find that you are producing a similarly large list as a result. In such cases there is a very large risk of running out of memory. As a result, in any case where you know you will, or might, be working on a particularly large list, it will often be worth manipulating them similarly to:</div>
+<div class="wiki-line"><pre><code>list myOutput = [];
+
+integer i = 0; integer x = myList != [];
+for (; i &lt; x; ++i) {
+    if (i &gt; 10) { // Prune list every 10 elements
+        myList = llDeleteSubList((myList = []) + myList, 0, i - 1);
+        x -= i;
+        i = 0;
+   }
+
+   // Do some work here:
+   myOutput += llList2List(myList, i, i); // A silly bit of example work
+}</code></pre></div>
+<div class="wiki-line">This method (deleting every few list entries or strides) is preferable to deleting an entry every loop, as the cost of calling llDeleteSubList() is very high. It is up to the scripter to decide what their optimal chunk-size is for pruning an input list, as you will need to balance memory use with delete cost.</div>
+<h4 id="comparing-lists">Comparing Lists</h4>
+<div class="wiki-line">Equality test on lists does not compare contents, only the length.</div>
+<div class="wiki-line">Hence:</div>
+<div class="wiki-line"><pre><code>    if ( [1,2,3,4] == [0,0,0,0] )
+    {
+        // TRUE path
+    }
+    else
+    {
+        // FALSE path
+    }</code></pre></div>
+<div class="wiki-line">will take the TRUE path.</div>
+<div class="wiki-line">The <code>!=</code> operator, on the other hand, breaks the LSL rule that comparisons only return <code>TRUE</code> or <code>FALSE</code>, and instead returns the difference of the lengths of both lists. Consequently, both statements below are equivalent, and both <code>a</code> and <code>b</code> will be equal to <code>-2</code> after executing this:</div>
+<div class="wiki-line"><pre><code>    integer a = [1,2] != [3,4,5,6];
+    integer b = llGetListLength([1,2]) - llGetListLength([3,4,5,6]);</code></pre></div>
+<div class="wiki-line">See also '<a href="https://wiki.secondlife.com/wiki/ListCompare">ListCompare</a>' for comparing if two lists are really equal including the contents.</div>
+<h2 id="strided-lists">Strided lists</h2>
+<div class="wiki-line">One common use of lists is to duplicate the functionality of structured collections of data (aka <i>structs</i>). Such collections, available in many programming languages, are absent from LSL.</div>
+<div class="wiki-line">In-world in SL, (still as of July 2008), a strided list is the closest you can get to storing limited amounts of data in some kind of structure that you can access and manipulate in a few, limited ways.</div>
+<div class="wiki-line">Strided lists allow you to store related data pieces grouped (aka "strided") in sets. You can determine how many pieces of data in each "grouping."</div>
+<div class="wiki-line">An example is best at this point. You might use a strided list to track the names, gender and rez dates of a group of avatars:</div>
+<div class="wiki-line"><pre><code>list demographics = [&quot;John Adams&quot;, &quot;male&quot;, &quot;2007-06-22&quot;, &quot;Shirley Bassey&quot;, &quot;female&quot;, &quot;2005-11-02&quot;, &quot;Matt Damon&quot;, &quot;male&quot;, &quot;2008-05-19&quot;];</code></pre></div>
+<div class="wiki-line">This example has a <i>stride</i> of three, because each grouping (or stride) has three data elements. Index 0 ("John Adams") is the start of the first instance (because list counting starts a 0), index 3 ("Shirley Bassey") is the start of the second instance, and so on.</div>
+<div class="wiki-line">It is important that the pieces of information in each grouping are always entered in the same sequence for every instance of the grouping in the list! In the example above, this means that the name needs to be always the first of the three related elements. You should consider carefully the order in which you record information because the function to sort a list, <a href="/functions/llListSort/">llListSort</a>, will only sort on the <i>first element</i> of the instances. In other words, if the avatar's rez date were the most important attribute for your script, then you would need to record it first, and the name second. If you wish to be able to sort by avatar last name rather than first name, the name should be added to the list in Lastname FirstName format (avoiding a comma, though, of course, unless you wanted LastName and FirstName treated as separate elements in the list.)</div>
+<div class="wiki-line">To add another person to the above list, you would do this:</div>
+<div class="wiki-line"><pre><code>demographics += [&quot;Dorthy Lamour&quot;, &quot;female&quot;, &quot;2010-01-22&quot;];</code></pre></div>
+<div class="wiki-line">It should be noted that when manipulating extremely large strided lists, that if you expect to be editing the lists that you may wish to use one list for each "column", this may be more complex but significantly reduces the amount of memory required when manipulating the lists, though it will be a lot more difficult to sort.</div>
+<div class="wiki-line">Here are the tools we do have for strided lists:</div>
+<div class="wiki-line">The following three (as of July 2008) native LSL functions can be used with strided lists:</div>
+<ul>
+<li><a href="/functions/llList2ListStrided/">llList2ListStrided</a></li>
+<li><a href="/functions/llListRandomize/">llListRandomize</a></li>
+<li><a href="/functions/llListSort/">llListSort</a></li>
+</ul>
+<div class="wiki-line">The function <a href="/functions/llListStatistics/">llListStatistics</a> can, with care, be used for strided lists as it will silently ignore non integer and non float items. </div>
+<div class="wiki-line">Here are some additional, user-created functions for working with strided lists:</div>
+<table><caption></caption><tr><th>function</th><th>purpose</th></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListStridedMove">ListStridedMove</a> </td><td> Moves something in a strided list to another place in the strided list.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListStridedRemove">ListStridedRemove</a> </td><td> Removes part of a strided list.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListStridedUpdate">ListStridedUpdate</a> </td><td> Updates part of a strided list.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListStridedReorder">ListStridedReorder</a> </td><td> Reorder the contents of every stride or reorder entire strides.</td></tr></table>
+<h2 id="extended-list-operations">Extended List Operations</h2>
+<div class="wiki-line">These functions have been created and contributed by LSL users to perform operations not covered by built-in LSL functions.</div>
+<table><caption></caption><tr><th>function</th><th>purpose</th></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListCast">ListCast</a> </td><td> Processes a list so that its contents are of a single-type.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/List_cast">List_cast</a> </td><td> Processes a list so that its contents are converted from strings to their respective types.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListCompare">ListCompare</a> </td><td> Compares two lists for equality</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListItemDelete">ListItemDelete</a> </td><td> Removes one element from a list.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListKeyCase">ListKeyCase</a> </td><td> Changes the values of the whole list into uppercase or lowercase based on input</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListToWholeNumbers">ListToWholeNumbers</a> </td><td> Given a list of floats, converts them all to whole numbers (aka integers.)</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListXorY">ListXorY</a> </td><td> Join two lists to make one new combined list, while also eliminating any resulting duplicates in the new list.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListXandY">ListXandY</a> </td><td> This function examines two lists, and returns a new list composed of the elements that both lists have in common. </td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListXnotY">ListXnotY</a> </td><td> Show what x list has that y list is missing. </td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListXxorY">ListXxorY</a> </td><td> Returns a new list, composed of elements that were in either original script, but not both. Note: This is not the same as getting rid duplicates by preserving just one of each duplicated item. It goes further, and removes both items. </td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListXequY">ListXequY</a> </td><td> Answers the question: is list X identical to list Y? </td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListXneqY">ListXneqY</a> </td><td> Answers the question: is list X different from list Y?</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListItemReplace">Replace</a> </td><td> Replaces a single occurrence of something in a list with something else that you specify.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/Library_Combined_Library#replace-2">Replace All</a> </td><td> Replaces all occurrences of 'from list' with those in 'to list' in 'src list'. Not as concise as the replace function above, but will handle multiple items at the same time.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ListUnique">ListUnique</a> </td><td> Given a list of elements, returns a list of only the unique individual elements in that list.</td></tr><tr><td> <a href="https://wiki.secondlife.com/wiki/ccFixListDatatypes">ccFixListDatatypes</a> </td><td> Walks a list, casts the elements to the appropriate types, and returns a fixed list. Useful for things like <a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a> when you've parsed your data out of a string.</td></tr><tr><td> <a href="/wiki/2d-pseudo-array-0562b4ee/">2D Pseudo-Array</a> </td><td> A way to emulate the behavior of a 2 dimensional array.</td></tr></table>

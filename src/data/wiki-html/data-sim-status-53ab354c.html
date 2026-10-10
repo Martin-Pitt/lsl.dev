@@ -1,0 +1,46 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Returns one of these strings.</div>
+<ul>
+<li>"up": simulator currently up and running</li>
+<li>"down": simulator currently down</li>
+<li>"starting": simulator currently starting</li>
+<li>"stopping": simulator currently stopping</li>
+<li>"crashed": simulator has crashed</li>
+<li>"unknown": simulator status unknown or unknown simulator</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>key queryData;
+
+default
+{
+    // querry immediately for simulator data on current status of sim.
+    state_entry()
+    {
+        queryData = llRequestSimulatorData( llGetRegionName(), DATA_SIM_STATUS );
+    }
+    
+    // if another owner or the region changes where the script operates in reset script
+    changed( integer isChanged )
+    {
+        if( isChanged &amp; CHANGED_REGION )
+        {
+            llResetScript();
+        }
+        
+        if( isChanged &amp; CHANGED_OWNER )
+        {
+            llResetScript();
+        }
+    }
+    
+    // how to handle the query information.
+    dataserver( key queryID, string info )
+    {
+        if( queryID == queryData )
+        {
+            // output to upper case characters the current state of the sim. 
+            llOwnerSay( &quot;This region is currently: &quot; + llToUpper(info) );
+        }
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-constants">See also: constants</h2><span id="constants"></span></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestSimulatorData/">llRequestSimulatorData</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2></section>

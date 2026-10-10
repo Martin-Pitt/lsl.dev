@@ -1,0 +1,27 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Returns a list of lines and columns where the search pattern is found in the notecard.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">Returns a list containing only <a href="/constants/NAK/">NAK</a> if the notecard is not cached.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">Searches the text of a cached notecard for lines containing the given pattern. If the notecard is not in the cache, returns a list containing a single <a href="/constants/NAK/">NAK</a>, otherwise a list of matches of the pattern in the notecard. If no matches are found, or the notecard contains embedded items, an empty list is returned.</div>
+<div class="wiki-line">Every match in the notecard is represented as a sequence of three integers:</div>
+<div class="wiki-line"><pre><code>[integer row, integer column, integer length]</code></pre></div>
+<div class="wiki-line">In other words the returned list has a stride of 3. A maximum of 64 matches are returned, resulting in a maximum list length of 192.</div>
+<div class="wiki-line">If the notecard does not exist, returns a list containing a single <a href="/constants/NAK/">NAK</a> and the script will shout an error on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a> (but the script continues to run).</div>
+<div class="wiki-line">If there is an error in the regular expression, returns an empty list and the script will shout an error on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a> (but the script continues to run).</div>
+<div class="wiki-line">Notecards are cached into a fixed-size buffer, with the oldest (least-recently read) notecard getting removed first. It is not safe to assume a notecard has been previously cached. Data for a previously cached notecard may be dropped from the cache at any time, especially on a busy server.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If notecard contains embedded inventory items (such as textures and landmarks), an empty list will be returned, regardless of the search string.</li>
+<li>No more than 64 matches are returned.</li>
+</ul></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-regular-expressions-91ecd084/">LSL Regular Expressions</a>: <code>{{LSL Regular Expressions}}</code></span></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetNumberOfNotecardLines/">llGetNumberOfNotecardLines</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetNotecardLine/">llGetNotecardLine</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetNotecardLineSync/">llGetNotecardLineSync</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-notecard-dd319050/">Template:LSL Function/notecard</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{LSL_Function/inventory|{{{1|name}}}|uuid={{{uuid|}}}|type=notecard}}{{#if:
+
+{{#vardefine:caveats|{{#var:caveats}}
+* If {{LSLP|{{{1|name}}}}} is a new empty notecard (never saved) then an error &quot;Couldn&#x27;t find notecard ~NAME~&quot; (~NAME~ being the value of {{LSLP|{{{1|name}}}}}) will be shouted on the [[DEBUG_CHANNEL]]. This is because until a notecard is saved for the first time, it does not exist as an asset only as an inventory placeholder.
+** If the notecard is {{LSLGC|Permissions/Asset|full-perms}} you can check for this with [[llGetInventoryKey]] which will return [[NULL_KEY]] in this case. However if notecard is not {{LSLGC|Permissions/Asset|full-perms}}, there is no way to avoid the error message.
+}}
+
+}}&lt;noinclude&gt;
+{{Box|Caveats|2={{#var:caveats}}}}
+&lt;/noinclude&gt;</code></pre></details></section>

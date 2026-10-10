@@ -1,0 +1,144 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Attempt to link the script's object with <code>target</code>.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line"><code>target</code> must be modifiable and have the same owner.<br/></div>
+<div class="wiki-line">This object must also be modifiable.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">The prims for the child object (<code>target</code> if <code>parent</code> is <a href="/constants/TRUE/">TRUE</a>, script's object if <code>parent</code> is <a href="/constants/FALSE/">FALSE</a>) are inserted into the parent object's link set starting at link number 2. For example, if the link order for the parent object is A1, A2, A3 and the link order of the child object is B1, B2, B3, then the link order of the resulting object will be A1, B1, B2, B3, A2, A3.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If <code>target</code> is not in the region, not a prim, or is attached to an avatar, an error is shouted on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</li>
+<li>If either the object or the <code>target</code> are not modifiable or of different owners, then an error is shouted on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</li>
+<li>If the the parent object and <code>target</code> are too far apart they will fail to link.</li>
+<li>The maximum distance is further explained here: <a href="https://wiki.secondlife.com/wiki/Linkability_Rules">Linkability Rules</a></li>
+<li>This function silently fails if called from a script inside an attachment.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Rez an object and link it as a child prim.
+string ObjectName = &quot;Object Name Here&quot;;
+// NOTE: must be a name of an object in this object&#x27;s inventory.
+
+default
+{
+    touch_start(integer count)
+    {
+        // When the object is touched, make sure we can do this before trying.
+        llRequestPermissions(llGetOwner(), PERMISSION_CHANGE_LINKS);
+    }
+    run_time_permissions(integer perm)
+    {
+        // Only bother rezzing the object if will be able to link it.
+        if (perm &amp; PERMISSION_CHANGE_LINKS)
+            llRezObject(ObjectName, llGetPos() + &lt;0,0,0.5&gt;, ZERO_VECTOR, llGetRot(), 0);
+        else
+            llOwnerSay(&quot;Sorry, we can&#x27;t link.&quot;);
+    }
+    object_rez(key id)
+    {
+        // NOTE: under some conditions, this could fail to work.
+        // This is the parent object.  Create a link to the newly-created child.
+        llCreateLink(id, TRUE);
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><pre><code>// child prim key
+key kChild = NULL_KEY;
+integer bLink = TRUE;       // we suppose this script is on a linked object
+default
+{
+    
+    state_entry()
+    {
+        // get the permission to change the link
+        llRequestPermissions(llGetOwner(), PERMISSION_CHANGE_LINKS);
+                
+        // get the child key
+        kChild = llGetLinkKey(2);
+    }
+    
+    
+    touch_start(integer nTotalCliquor)
+    {
+        if (bLink)
+        {
+            // break all my links, wait 1.5 sec
+            llBreakAllLinks();
+            llSleep(1.5);
+            
+            // i&#x27;m unlinked
+            llSay(0, &quot;Unlinked, click to link&quot;);
+            bLink = FALSE;
+        }
+        else
+        {
+            // redo my link
+            llCreateLink(kChild, TRUE);   
+            llSleep(1.5);
+            
+            // i&#x27;m linked
+            llSay(0, &quot;Linked, click to unlink&quot;);
+            bLink = TRUE;
+        }
+    }
+}               </code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llBreakLink/">llBreakLink</a> — Break a link</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llBreakAllLinks/">llBreakAllLinks</a> — Break all links</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/changed/">changed</a> — <a href="/constants/CHANGED_LINK/">CHANGED_LINK</a></div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/Linkability_Rules">Linkability Rules</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-permission-4bc8750c/">Template:LSL Function/permission</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:
+
+{{{{#if:{{#var:DEBUG_CHANNEL}}||:DEBUG_CHANNEL}}|}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|To run this function the script must request the [[{{{1}}}]] {{#if:{{{2|}}}|or [[{{{2}}}]]}} permission with [[llRequestPermissions]]{{#ifeq:{{{grant|anyone}}}|anyone||&amp;#32;and it must be granted by {{{grant|anyone}}}}}.}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|{{PBR}}
+&lt;div style=&quot;border: 1px dotted rgba(0,0,0,0.5);&quot;&gt;{{Collapsible_Table/Simple|title=&lt;h5 style=&quot;margin:0;&quot;&gt;Permissions&lt;/h5&gt;|table-style=width:100%;|autocollapse=*|content={{!}}&lt;div&gt;
+* Do not depend upon the auto-grant status of permissions. &#x27;&#x27;&#x27;Always&#x27;&#x27;&#x27; use the [[run_time_permissions]] event.
+* If the script lacks {{#if:{{{2|}}}|both the permissions [[{{{1}}}]] and [[{{{2}}}]]|the permission [[{{{1}}}]]}}, the script will shout an error on {{#var:DEBUG_CHANNEL}} and the operation fails (but the script continues to run).{{#ifeq:{{{grant|anyone&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|anyone||
+* If [[{{{1}}}]] {{#if:{{{2|}}}|or [[{{{2}}}]]}} is granted by anyone other than {{{grant|anyone}}}, then when the function is called an error will be shouted on {{#var:DEBUG_CHANNEL}}.}}
+{{{caveats|}}}{{LSL Function/permission/caveat switch|{{{1}}}}}{{#if:{{{2|}}}|{{LSL Function/permission/caveat switch|{{{2}}}}}}}&lt;/div&gt;}}&lt;/div&gt;}}}}
+
+{{#vardefine:also_events|{{#var:also_events}}
+{{LSL DefineRow||[[run_time_permissions]]|Permission receiving event}}}}
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetPermissions]]|Get the permissions granted}}
+{{LSL DefineRow||[[llGetPermissionsKey]]|Get the agent who granted permissions}}
+{{LSL DefineRow||[[llRequestPermissions]]|Request permissions}}}}
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{LSL DefineRow||[[:Category:LSL Permissions/Script|Script permissions]]|}}}}
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||[[Category:LSL Requires Permissions]]}}
+}}}}&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPairTable|also_events}}
+|-
+{{VarPairTable|also_functions}}
+|-
+{{VarPairTable|also_articles}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-prim-081edb48/">Template:LSL Function/prim</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{object|}}}|[[object]]|[[prim]]}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}|that is in the same [[region]] {{#switch:{{{sim|}}}|*=|#default={{{sim|}}}}}
+}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{object|}}}|object|prim}} UUID {{#if:{{{sim|}}}|that is in the same region {{#switch:{{{sim|}}}|*=|#default={{{sim|}}}}}
+}}}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+!var
+!value
+|-
+|desc
+|{{#var:p_{{{1|none}}}_desc}}
+|-
+|hover
+|{{#var:p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

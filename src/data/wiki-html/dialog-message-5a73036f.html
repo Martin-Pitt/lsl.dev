@@ -1,0 +1,46 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<div class="wiki-line">A simple script thats lets anyone say a messages over a dialog instead of using <a href="/functions/llSay/">llSay</a> or <a href="/functions/llShout/">llShout</a>.</div>
+<h3 id="usage-channel-dialog-message">Usage: /<code>channel</code> dialog <code>message</code></h3>
+<div class="wiki-line"><div class="wiki-related-row">integer — channel — <span class="wiki-template"><code>{{#var:p_channel_desc}}</code></span></div></div>
+<div class="wiki-line"><div class="wiki-related-row">string — message — <span class="wiki-template"><code>{{#var:p_message_desc}}</code></span></div></div>
+<table></table>
+<div class="wiki-line"><pre><code>integer channel = 1000;
+
+string token;
+string data;
+
+default
+{
+    state_entry()
+    {
+        llListen(channel, &quot;&quot;, &quot;&quot;, &quot;&quot;);
+    }
+    
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+        
+    sensor(integer num_detected)
+    { 
+        if(token == &quot;dialog&quot;)
+        {
+            integer i = 0;
+            for(; i &lt; num_detected; ++i)
+                llDialog(llDetectedKey(i), data, [], channel );
+        }
+    }
+    
+    listen(integer chan, string name, key id, string command)
+    {
+        integer s = llSubStringIndex(command,&quot; &quot;);
+        if (~s)
+        {
+            token = llDeleteSubString(command, s, -1);
+            data = llDeleteSubString(command, 0, s);
+            if(token == &quot;dialog&quot;)
+                llSensor( &quot;&quot;, &quot;&quot;, AGENT, 32, PI );
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples}}</code></span></div>

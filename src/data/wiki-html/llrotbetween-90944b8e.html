@@ -1,0 +1,51 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/rotation">rotation</a> that is the shortest rotation between the <em>direction</em> <strong>start</strong> and the <em>direction</em> <strong>end</strong></div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line"><strong>start</strong> and <strong>end</strong> are <em>directions</em> and are relative to the origin &lt;0.0, 0.0, 0.0&gt;. If you have coordinates relative to a different origin, subtract that origin from the input vectors.</div>
+<div class="wiki-line"><strong>Note that the input vectors are </strong><em>directions<strong></em>, NOT position coordinates.</strong></div>
+<div class="wiki-line">Feeding position coordinates will <strong>not</strong> work, or at minimum be very inaccurate and / or inconsistent.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><code>start * llRotBetween(start, end) == end</code> is only true if <strong>start</strong> and <strong>end</strong> have the same magnitude and neither have a magnitude of zero (see <a href="#useful-snippets"></a> for a workaround).</li>
+<li>This of course is ignoring floating point precision errors.</li>
+<li>The above is true because of vector magnitudes and not a shortcoming of this function. The <strong>rotation</strong> returned is <strong>correct</strong> regardless of magnitudes</li>
+<li>Rotations are from -PI to +PI around each axis.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Drop the below script into a prim. This script will cause the object to orient it's positive X axis towards it's owner's avatar when touched.</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+        list lTemp = llGetObjectDetails(llGetOwner(),[OBJECT_POS]); //Get the owner&#x27;s position (region coordinates)
+        vector start = llRot2Fwd(ZERO_ROTATION); //Object&#x27;s X axis is forward. (Can be substituted with llRot2Left (Y axis) or llRot2Up (Z axis). Negative values (-llRot2Fwd) can be used to spin the prim 180 degrees)
+        //start = llRot2Fwd( llAxisAngle2Rot(&lt;0,0,1&gt;,45*DEG_TO_RAD) ); //Uncommenting this line will cause the prim to point one of it&#x27;s corners towards the avatar, instead of the forward face.
+        vector end = llVecNorm(llList2Vector(lTemp,0) - llGetPos()); //Convert the owner&#x27;s position into a normalized direction vector (relative to the prim).
+        llSetLinkPrimitiveParamsFast(LINK_THIS,[PRIM_ROTATION,llRotBetween(start,end)]); //Set the prim&#x27;s rotation accordingly.
+    }
+    //llRot2Fwd(ZERO_ROTATION) is equivalent to &lt;1,0,0&gt; , llRot2Left would be &lt;0,1,0&gt; and llRot2Up would be &lt;0,0,1&gt;. Negative values ( -llRot2Fwd(ZERO_ROTATION) ) would be &lt;-1,0,0&gt;, -llRot2Left would be &lt;0,-1,0&gt; and -llRot2Up would be &lt;0,0,-1&gt;
+    //Note that a value other than ZERO_ROTATION may cause unexpected results. Unless you know the exact offset you need for your object, then leave this as-is.
+} //Jenna Huntsman</code></pre></div>
+<div class="wiki-line"><pre><code>llRotBetween(&lt;1.0, 0.0, 0.0&gt;, &lt;0.0, -1.0, 0.0&gt;)
+// will return &lt;0.00000, 0.00000, -0.70711, 0.70711&gt; (which represents -90 degrees on the z axis)
+
+llRotBetween(&lt;0.0, 0.0, 0.0&gt;, &lt;0.0, -1.0, 0.0&gt;)
+// will return &lt;0.00000, 0.00000, 0.00000, 1.00000&gt; (which represents a zero angle on all axis)
+// because &lt;0.0, 0.0, 0.0&gt; does not convey a direction.</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line">This function adjusts the magnitude of the quaternion so <code>start * llRotBetween(start, end) == end</code> is true as long as neither have a magnitude really close to zero. They do not have to have the same magnitude. (If either is too close to zero than this will return an unadjusted quaternion). While this is mathematically correct, it won't help with floating point rounding errors, so it's more accurate to say <code>start * return ≈ end</code>.</div>
+<div class="wiki-line"><pre><code>rotation RotBetween(vector start, vector end) //adjusts quaternion magnitude so (start * return == end) 
+{//Authors note: I have never had a use for this but it&#x27;s good to know how to do it if I did.
+    rotation rot = llRotBetween(start, end);
+    float d = start * start;
+    if(d)//is &#x27;start&#x27; zero?
+        if((d = llPow(end * end / d, 0.25)))//is &#x27;end&#x27; zero?
+            return &lt;rot.x * d, rot.y * d, rot.z * d, rot.s * d&gt;;
+    return rot;
+}//Strife Onizuka</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Vectors that are near opposite each other in direction may lead to erroneous results. </div>
+<div class="wiki-line"><pre><code>// First Vector is due north second vector is ALMOST due south.
+rotation lRotation = llRotBetween( &lt;0., 1., 0.&gt;, &lt;-0.001, -.1, 0.&gt; );
+llSay(0, lRotation );
+// Provides a result of &lt;1.00000, 0.00000, 0.00000, 0.00000&gt;.</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llAngleBetween/">llAngleBetween</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRot2Fwd/">llRot2Fwd</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRot2Left/">llRot2Left</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRot2Up/">llRot2Up</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llVecNorm/">llVecNorm</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-4415"><a href="/wiki/template-issues-svc-4415-8875cb5f/">Template:Issues/SVC-4415</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-4415|type=bug|[[llRotBetween]] sometimes gives erroneous results.|resolution=wont}}</code></pre></details><p id="scr-309"><a href="/wiki/template-issues-scr-309-c9991f73/">Template:Issues/SCR-309</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SCR-309|type=fs|[[llRotBetween]] has issues, give us something better|fc=*}}</code></pre></details></section>

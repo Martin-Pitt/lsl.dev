@@ -1,0 +1,169 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Instantiate <code>inventory</code> object at <code>pos</code> with velocity <code>vel</code> and rotation <code>rot</code> with start parameter <code>param</code></div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">The root of <code>inventory</code> is not at <code>pos</code> but the <a href="/functions/llGetGeometricCenter/">center</a> of <code>inventory</code> is.<br/>To have the root prim at <code>pos</code> use <a href="/functions/llRezAtRoot/">llRezAtRoot</a> instead.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Silently fails to rez <code>inventory</code> (to have it's geometric center at <code>pos</code>) if <code>pos</code> is too far from the geometric center of the object trying to rez <code>inventory</code>.</li>
+<li>If your script is mysteriously failing to rez things, make sure you haven't (say) written "<code>&lt;0.0,0.0,1.0&gt;</code>" for the <code>pos</code> parameter rather than (say) <code><a href="/functions/llGetPos/">llGetPos</a>() + &lt;0.0,0.0,1.0&gt;</code>".</li>
+<li>When scripting attachments meant to rez objects, remember that when used in the root of an (<a href="/events/attach/">attached</a>) <a href="/wiki/attachment-040d2b36/">attachment</a> <code><a href="/functions/llGetPos/">llGetPos</a></code> doesn't return the position of the attachment but instead returns the position of the avatar's bounding box geometric center. Read <a href="/functions/llGetPos/">llGetPos</a> and <a href="/functions/llParticleSystem/#caveats"> llParticleSystem Caveats</a> for more information.</li>
+<li>If the object is unattached and the owner of the object does not have copy permission  on <code>inventory</code>, the object will no longer be present in inventory after it is rezzed (so another attempt to rez (the same object) will fail); if the owner does have copy permission, then a copy is rezzed, and the original <code>inventory</code> remains in inventory.</li>
+<li>If the object is attached and the owner of the object does not have copy permission  on <code>inventory</code>, an error is shouted on <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>: "Cannot rez no copy objects from an attached object."</li>
+<li>Silently fails if you don't have offline building rights on the land. To have the right, your objects needs to <em>either</em>: </li>
+<li>Be on land you own yourself.</li>
+<li>Be on land where anyone is allowed to build, e.g. a sandbox. </li>
+<li>Be deeded to the group that owns the land.</li>
+<li>Be set to the same group that owns the land and the land have the parcel flag 'allow group to build' set.</li>
+<li>The group role "Always allow 'Create Objects'" will only work to override this when you are online, in the region, or have a child agent in the region. See <a href="#svc-3145">SVC-3145</a> in the Issues subsection of Deep Notes for more information.</li>
+<li>See <a href="/events/object_rez/">object_rez</a> for examples on how to establish communications between the rezzing object and the new prim.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+     touch_start(integer param)
+     {
+          llRezObject(&quot;Object&quot;, llGetPos() + &lt;0.0,0.0,1.0&gt;, &lt;0.0,0.0,0.0&gt;, &lt;0.0,0.0,0.0,1.0&gt;, 0);
+     }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// Rez an object on touch, with relative position, rotation, and velocity all described in the rezzing prim&#x27;s coordinate system.
+string object = &quot;Object&quot;; // Name of object in inventory
+vector relativePosOffset = &lt;2.0, 0.0, 1.0&gt;; // &quot;Forward&quot; and a little &quot;above&quot; this prim
+vector relativeVel = &lt;1.0, 0.0, 0.0&gt;; // Traveling in this prim&#x27;s &quot;forward&quot; direction at 1m/s
+rotation relativeRot = &lt;0.707107, 0.0, 0.0, 0.707107&gt;; // Rotated 90 degrees on the x-axis compared to this prim
+integer startParam = 10;
+
+default
+{
+    touch_start(integer a)
+    {
+        vector myPos = llGetPos();
+        rotation myRot = llGetRot();
+
+        vector rezPos = myPos+relativePosOffset*myRot;
+        vector rezVel = relativeVel*myRot;
+        rotation rezRot = relativeRot*myRot;
+
+        llRezObject(object, rezPos, rezVel, rezRot, startParam);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line"><strong>Maximum rez distance</strong></div>
+<ul>
+<li>The <code>distance</code> scales with the size of the object the script is in.</li>
+<li>The formula is <code>10 + llVecMag(llGetScale()) * 0.5</code></li>
+<li>The <code>distance</code> measured is between the <a href="/functions/llGetPos/">center</a> of the rezzing <code>prim</code> and the <a href="/functions/llGetPos/">center</a> of the <code>prim</code> that is rezzed.</li>
+<li>The tests did not include rezzing from or the rezzing of link_set objects.</li>
+<li>A <code>0.01</code> meter cube could rez just beyond <code>10.0</code> meters away.</li>
+<li>A <code>10.0</code> meter cube could rez just beyond <code>18.66</code> meters away.</li>
+<li>A <code>32.0</code> meter cube could rez just beyond <code>37.71</code> meters away.</li>
+<li>A <code>64.0</code> meter cube could rez just beyond <code>65.42</code> meters away.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRezObjectWithParams/">llRezObjectWithParams</a> — Modern alternative with more parameters.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRezAtRoot/">llRezAtRoot</a> — Rezzes the object at the requested position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetStartParameter/">llGetStartParameter</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGodLikeRezObject/">llGodLikeRezObject</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelFlags/#examples">LlGetParcelFlags</a> — Test if the parcel allows this script to rez</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/object_rez/">object_rez</a> — triggered when this object rezzes an object from inventory</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-3145"><a href="/wiki/template-issues-svc-3145-6c03f83a/">Template:Issues/SVC-3145</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-3145|group ROLE permissions only work for scripted rez when owner is online|type=bug}}</code></pre></details><p id="svc-6578"><a href="/wiki/template-issues-svc-6578-a996c468/">Template:Issues/SVC-6578</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-6578|llRezObject at wrong position when rezzing a linkset that was previously rotated in-world.|type=bug}}</code></pre></details><p id="svc-6686"><a href="/wiki/template-issues-svc-6686-1908df90/">Template:Issues/SVC-6686</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-6686|parcel build permissions needs whitelist|type=nf}}</code></pre></details><p id="scr-485"><a href="/wiki/template-issues-scr-485-b3dc927f/">Template:Issues/SCR-485</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SCR-485|&#x27;&#x27;&#x27;llRezTempObject&#x27;&#x27;&#x27;() - for temporarily rezzing objects|type=nf}}</code></pre></details><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-position-a2dae76f/">Template:LSL Function/position</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+This template is to be used to specify setup the description for position like parameters (offsets, positions, points, etc.).
+
+Right now it&#x27;s pretty basic and easy to edit. I&#x27;m wondering if these functions should be in a position parameter specific category.
+
+====TODO====
+* add clamping flag and verbiage for out of region/range coordinates.
+&lt;/noinclude&gt;{{#if:
+
+{{#if:{{{region|}}}|
+  {{#if:{{{local|}}}|
+
+    {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region}} or [[Viewer coordinate frames#Local|local coordinates]] depending upon the situation{{{desc|}}}}}
+
+    {{#vardefine:p_{{{1|}}}_hover|position in region or local coordinates depending upon the situation{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+  |
+    {{#ifeq:{{{1|}}}|point|
+
+      {{#vardefine:p_{{{1|}}}_desc|A point in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region-local}} space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|A point in region-local space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region coordinates}}{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in region coordinates{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+|
+  {{#if:{{{local|}}}|
+
+    {{#ifeq:{{{1|}}}|offset|
+
+      {{LSL Function/offset|{{{1|}}}|local={{{local}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in [[Viewer coordinate frames#Local|local coordinates]]{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in local coordinates{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+}}
+
+}}</code></pre></details></section>

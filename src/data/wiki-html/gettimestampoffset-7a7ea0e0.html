@@ -1,0 +1,86 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<div class="wiki-line">This function returns <a href="/functions/llGetTimestamp/">llGetTimestamp()</a> with an hour offset. It will wrap day, month and year as required. If it is passed an offset of more than 24 hours either way, it will use the offset for US Pacific Time (SL time), automatically adjusting for DST.</div>
+<div class="wiki-line"><pre><code>string  sbGetTimestamp(integer  intOffset) {
+    // Start with December for purposes of wrapping
+    list    lstDays  = [31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    string  strTimestamp = llGetTimestamp();
+
+    list    lstTime  = llParseString2List(strTimestamp, [&quot;-&quot;, &quot;:&quot;, &quot;.&quot;, &quot;T&quot;], []);
+    integer intYear  = llList2Integer(lstTime, 0);
+    integer intMonth = llList2Integer(lstTime, 1);
+    integer intDay   = llList2Integer(lstTime, 2);
+    integer intHour  = llList2Integer(lstTime, 3);
+
+    string  strYear;
+    string  strMonth;
+    string  strDay;
+    string  strHour;
+
+    if (intOffset == 0) { return strTimestamp; }
+
+    if (intOffset &lt; -24 || intOffset &gt; 24) {
+        intOffset = ((integer)llGetWallclock() - (integer)llGetGMTclock()) / 3600;
+    }
+
+    intHour+= intOffset;
+
+    // Add a day to February in leap years
+    if (intYear % 4 == 0 &amp;&amp; (intYear % 100 != 0 || intYear % 400 == 0)) {
+        lstDays = llListReplaceList(lstDays, [29], 2, 2);
+    }
+
+    if (intOffset &lt; 0) {
+        if (intHour &lt; 0) { 
+            intHour+= 24;
+            --intDay;
+        }
+
+        if (intDay &lt; 1) {
+            intDay = llList2Integer(lstDays, --intMonth);
+        }
+
+        if (intMonth &lt; 1) {
+            intMonth = 12;
+            --intYear;
+        }
+    }
+
+    if (intOffset &gt; 0) {
+        if (intHour &gt; 23) {
+            intHour-= 24;
+            ++intDay;
+        }
+
+        if (intDay &gt; llList2Integer(lstDays, intMonth)) {
+            intDay = 1;
+            ++intMonth;
+        }
+
+        if (intMonth &gt; 12) {
+            intMonth = 1;
+            ++intYear;
+        }
+    }
+
+    strYear  = (string)intYear;
+    strMonth = (string)intMonth;
+    strDay   = (string)intDay;
+    strHour  = (string)intHour;
+
+    if (llStringLength(strMonth) &lt; 2) { strMonth = &quot;0&quot; + strMonth; }
+    if (llStringLength(strDay)   &lt; 2) { strDay   = &quot;0&quot; + strDay;   }
+    if (llStringLength(strHour)  &lt; 2) { strHour  = &quot;0&quot; + strHour;  }
+
+    return
+        strYear                   + &quot;-&quot; + 
+        strMonth                  + &quot;-&quot; + 
+        strDay                    + &quot;T&quot; + 
+        strHour                   + &quot;:&quot; + 
+        llList2String(lstTime, 4) + &quot;:&quot; + 
+        llList2String(lstTime, 5) + &quot;.&quot; + 
+        llList2String(lstTime, 6) + &quot;Z&quot;;
+        // Obviously this isn&#x27;t really Z time anymore, but I left it there in case there
+        // are scripts expecting it.
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples}}</code></span></div>

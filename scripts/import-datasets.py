@@ -16,6 +16,33 @@ def slug(title):
     return stem+'-'+hashlib.sha256(title.encode()).hexdigest()[:8]
 def key(title): return title.replace('_',' ').strip().casefold()
 def section_html(sections): return '\n'.join('<section><h2 id="'+s['id']+'">'+s['title']+'</h2>'+s['html']+'</section>' for s in sections)
+WIKI_REF=('id','slug','title','namespace','source','rawPath','sharedWith')
+def wiki_ref(w): return {k:w[k] for k in WIKI_REF if k in w} if w else None
+def write_split(catalog):
+    """Write the catalog in three parts, so the site never loads rendered wiki HTML it does not need.
+
+    src/data/catalog.json        index data: definitions, categories, enums and slim wiki references
+    src/data/wiki-html/<slug>.html  rendered archive pages, loaded one at a time by /wiki/[slug]/
+    data/derived/api-wiki.json   per-API wiki sections: input for scripts/generate-mdx.py only
+    """
+    htmldir=ROOT/'src/data/wiki-html'; htmldir.mkdir(parents=True,exist_ok=True)
+    wanted=set()
+    for w in catalog['wiki']:
+        wanted.add(w['slug']+'.html')
+        path=htmldir/(w['slug']+'.html'); body=w['html']+'\n'
+        if not path.exists() or path.read_bytes()!=body.encode('utf8'): path.write_bytes(body.encode('utf8'))
+    for stale in htmldir.glob('*.html'):
+        if stale.name not in wanted: stale.unlink()
+    api={}
+    for plural in ('functions','events','constants'):
+        for e in catalog[plural]:
+            if e['wiki']: api[e['name']]={'kind':e['kind'],'title':e['wiki']['title'],'sections':e['wiki']['sections']}
+    write_json(ROOT/'data/derived/api-wiki.json',api)
+    slim=dict(catalog)
+    for plural in ('functions','events','constants','types','controls'):
+        slim[plural]=[{**e,'wiki':wiki_ref(e['wiki'])} for e in catalog[plural]]
+    slim['wiki']=[{**wiki_ref(w),'headings':[{'id':x['id'],'title':x['title']} for x in w['sections']],**({'redirectTo':w['redirectTo']} if 'redirectTo' in w else {})} for w in catalog['wiki']]
+    write_json(ROOT/'src/data/catalog.json',slim)
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--wiki',type=Path,default=ROOT/'data/sources/wiki-English.xml')
@@ -114,6 +141,40 @@ def main():
         for entry in catalog[plural]:
             found=by_title.get(key(entry['name']))
             entry['wiki']=found[0] if found else None
+    # Deprecated entries that name a replacement: the modern page lists them (search aliases and a
+    # note, indexed by search). They get no page or redirect of their own. SLua names
+    # (ll.Foo) map to LSL names (llFoo); the YAML values are otherwise used as they are.
+    by_name={e['name']:e for plural in ('functions','events','constants') for e in catalog[plural]}
+    # A deprecated constant is only an alias of its `use` target when both are used in the same
+    # context: a shared member-of group, or groups taken by the same function argument list.
+    # (PRIM_MATERIAL_FRICTION is a PRIM_* rule; FRICTION is an llSetPhysicsMaterial mask.)
+    def arg_groups(fd): return {v.get(k) for a in fd.get('arguments',[]) for v in a.values() for k in ('enum-semantics','param-semantics','param-get-semantics') if v.get(k)}
+    function_groups=[arg_groups(fd) for fd in defs.get('functions',{}).values() if not fd.get('deprecated') and not fd.get('private')]
+    def family(name): return '_'.join(name.split('_')[:3])
+    def context_problem(oldname,old,newname,new):
+        if old.get('private'): return f"{oldname} is private in the YAML (PRIM_MATERIAL_* are PRIM_* rule options; {newname} belongs to another calling context)"
+        a=set(old.get('member-of',[])); b=set(new.get('member-of',[]))
+        if a&b or any(a&g and b&g for g in function_groups): return None
+        if not a and not b and family(oldname)==family(newname): return None  # ungrouped siblings, e.g. GAME_CONTROL_AXIS_*
+        return f"different context: {oldname} is in {', '.join(sorted(a)) or 'no group'}, {newname} in {', '.join(sorted(b)) or 'no group'}, and no function takes both"
+    catalog['deprecated']=[]; skipped=[]
+    for plural,kind in (('functions','function'),('events','event'),('constants','constant')):
+        for name,d in defs.get(plural,{}).items():
+            dep=d.get('deprecated')
+            if not isinstance(dep,dict) or not dep.get('use'): continue
+            use=re.sub(r'^ll\.','ll',dep['use'])
+            if kind=='constant':
+                target=defs.get('constants',{}).get(use,{})
+                problem=context_problem(name,d,use,target)
+                if problem:
+                    skipped.append({'name':name,'use':use,'reason':problem})
+                    continue
+            found=wiki_for(name)
+            catalog['deprecated'].append({'name':name,'kind':kind,'use':use,'wiki':found[0]['slug'] if found else None})
+            if use in by_name: by_name[use].setdefault('replaces',[]).append(name)
+    for e in by_name.values():
+        if 'replaces' in e: e['replaces'].sort(key=str.lower)
+    catalog['deprecated'].sort(key=lambda x:x['name'].lower())
     labels=json.loads((ROOT/'data/sources/categories.en.json').read_text(encoding='utf8'))
     cats={}
     for plural in ('functions','events','constants'):
@@ -124,8 +185,8 @@ def main():
     for plural in ('functions','events','constants','types','controls'): catalog[plural].sort(key=lambda x:x['name'].lower())
     catalog['wiki'].sort(key=lambda x:x['title'].lower())
     catalog['meta']={'schemaVersion':1,'sourcePolicy':'Definitions are authoritative for signatures, parameter names and categories. Wiki text remains a historical community source; templates are partially rendered and original wikitext is always available.','sources':{'wiki':{'file':args.wiki.name,'sha256':digest(args.wiki)},'definitions':{'file':args.definitions.name,'sha256':digest(args.definitions)}},'counts':{k:len(catalog[k]) for k in ('functions','events','constants','categories','wiki','types','controls')},'wikiLicense':'Creative Commons Attribution-ShareAlike 3.0','wikiLicenseUrl':'https://creativecommons.org/licenses/by-sa/3.0/','definitionsLicense':'MIT','latestWikiRevision':max(w['source']['timestamp'] for w in catalog['wiki'])}
-    write_json(ROOT/'src/data/catalog.json',catalog)
-    report={'counts':catalog['meta']['counts'],'excluded':excluded,'apiWithoutWiki':{k:[e['name'] for e in catalog[k] if not e['wiki']] for k in ('functions','events','constants')},'unexpandedTemplates':sorted(renderer.unknown),'referencedTitlesWithoutLocalRoute':sorted(renderer.missing)}
+    write_split(catalog)
+    report={'counts':catalog['meta']['counts'],'excluded':excluded,'apiWithoutWiki':{k:[e['name'] for e in catalog[k] if not e['wiki']] for k in ('functions','events','constants')},'unexpandedTemplates':sorted(renderer.unknown),'referencedTitlesWithoutLocalRoute':sorted(renderer.missing),'deprecatedAliasesSkipped':skipped}
     write_json(ROOT/'data/reports/import-report.json',report)
     print(json.dumps(report['counts']))
 if __name__=='__main__': main()

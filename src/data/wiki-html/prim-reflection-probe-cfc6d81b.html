@@ -1,0 +1,63 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">PRIM_REFLECTION_PROBE is used to change the reflection probe configuration of the prim.</div>
+<div class="wiki-line">A reflection probe is a volume used for image-based lighting (IBL). It takes an image of its surroundings and uses it as the basis for reflection effects (shiny surfaces) and ambiance effects (light bouncing).</div>
+<div class="wiki-line">Typically, the viewer automatically places reflection probes. Prim-based probes enable artists to provide hints to the render engine to improve the quality of image based lighting. Only objects in the probe's influence volume are affected.</div>
+<div class="wiki-line">Lighting is most accurate when the edges of a probe volume are near the geometry that appears in reflections. For example, objects inside a room with a box shaped reflection probe that hugs the walls, floor, and ceiling would show accurate reflections and ambient lighting from the walls of the room.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>A viewer must have reflections enabled to see the effects of reflection probes.</li>
+<li>By default, the viewer auto-places reflection probes with 0.0 ambiance. Environment settings for the region or parcel can be adjusted to increase reflection probe ambiance for these auto-placed probes.</li>
+<li>Automatically-placed reflection probes do not image avatars. Imaging avatars in probes has a performance cost.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Increase the prim's reflection probe ambiance when an agent is detected in the sensor range of the prim. Decrease the probe ambiance when an agent is no longer detected.</div>
+<div class="wiki-line"><pre><code>integer probe_enabled = TRUE;
+float probe_no_agent_ambiance = 0.0;
+float probe_agent_ambiance = 1.0;
+float probe_clip_distance = 0.0;
+integer probe_flags = 0;
+
+default
+{
+    state_entry()
+    {
+        integer sensor_type = AGENT;
+        float sensor_range = 3.0;
+        float sensor_rate = 5.0;
+        llSensorRepeat(&quot;&quot;, &quot;&quot;, sensor_type, sensor_range, PI, sensor_rate);
+    }
+
+    sensor(integer num_detected)
+    {
+        llSetPrimitiveParams([PRIM_REFLECTION_PROBE, probe_enabled, probe_agent_ambiance, probe_clip_distance, probe_flags]);
+    }
+    
+    no_sensor()
+    {
+        llSetPrimitiveParams([PRIM_REFLECTION_PROBE, probe_enabled, probe_no_agent_ambiance, probe_clip_distance, probe_flags]);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetEnvironment/">LlSetEnvironment</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llReplaceEnvironment/">LlReplaceEnvironment</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLinkPrimitiveParamsFast/">llSetLinkPrimitiveParamsFast</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimitiveParams/">llGetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLinkPrimitiveParams/">llGetLinkPrimitiveParams</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-primitiveparam-categorize-1ca2b81a/">Template:LSL PrimitiveParam Categorize</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#ifexist:Template:LSLC{{#var:lang}}|
+ {{LSLC{{#var:lang}}|PrimitiveParams}}
+ {{LSLC{{#var:lang}}|PrimitiveParams/{{{1}}}}}
+ {{LSLC{{#var:lang}}|{{{1}}}}}
+|
+ {{LSLC|PrimitiveParams{{#var:lang}}}}
+ {{LSLC|PrimitiveParams/{{{1}}}{{#var:lang}}}}
+ {{LSLC|{{{1}}}{{#var:lang}}}}
+}}
+}}}}</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line">&lt;onlyinclude&gt;<span class="wiki-template"><code>{{#if:
+{{LSL_Function/boolean|boolean}}
+{{#vardefine:reflection_probe_const|{{LSL Const|PRIM_REFLECTION_PROBE|integer|44|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the prim&#x27;s reflection probe configuration}}}}
+{{#vardefine:p_ambiance_desc|Ranges from 0.0 to 100.0. Is the brightness of lighting effects from the probe, but not reflection effects. If the environment settings has nonzero reflection probe ambiance, the effective probe ambiance is the greater of the two. }}
+{{#vardefine:p_clip_distance_desc|Ranges from 0.0 to 1024.0. Is the minimum distance from the probe&#x27;s center where the surroundings are included for imaging.}}
+{{#vardefine:p_flags_desc|PRIM_REFLECTION_PROBE_* flags}}
+}}</code></span></div>
+<div class="wiki-line">&lt;/onlyinclude&gt;</div>
+<div class="wiki-line"><a href="/wiki/category-gltf-06c4ba99/">Category:glTF</a></div></section>

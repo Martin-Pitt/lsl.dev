@@ -1,0 +1,22 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Computes the orientation of the <code>local z-axis</code> relative to the parent (i.e. the root prim or the world).</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/vector">vector</a> that is the up vector defined by <code>q</code>, i.e. a unit vector pointing in the positive Z direction</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">Mathematically equivalent to:</div>
+<div class="wiki-line"><pre><code>ret = llVecNorm(&lt;0., 0., 1.&gt; * q);</code></pre></div>
+<div class="wiki-line">If <code>q</code> is known to be a unit quaternion then it can be simplified as:</div>
+<div class="wiki-line"><pre><code>ret = &lt;0., 0., 1.&gt; * q;</code></pre></div>
+<div class="wiki-line">Keep in mind that object and agent rotations will always be unit quaternions. For example, &lt;0.0, 0.0, 1.0&gt;*llGetRot() is about 25-30% faster than llRot2Up(llGetRot()) depending on the VM used. If done often and at extremely fast rates, it can be advantageous to even save &lt;0.0, 0.0, 1.0&gt; to a local/global variable and reuse it.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Move a prim 5 metres forwards along its own z axis, when touched, no matter how the object is oriented in world.
+// Works for a root or child prim
+default
+{
+    touch_start(integer total_number)
+    {
+        vector v = llRot2Up( llGetLocalRot() );
+        llSetPos( llGetLocalPos() + v * 5 );
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Can be useful to identify the orientation of the local horizontal-plane of the prim, since it's z-axis is always perpendicular to this local horizontal plane.</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRot2Left/">llRot2Left</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRot2Fwd/">llRot2Fwd</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRot2Axis/">llRot2Axis</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRot2Angle/">llRot2Angle</a></div></div></section>

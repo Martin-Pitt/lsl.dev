@@ -1,0 +1,56 @@
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns an <a href="https://wiki.secondlife.com/wiki/integer">integer</a> bitfield with the script permissions granted</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><tr><th colspan="2"> Constants</th><th> Action</th><th> Category</th><th> Granter</th><th> Automatically granted when&hellip;</th></tr><tr><td> <a href="/constants/PERMISSION_DEBIT/">PERMISSION_DEBIT</a></td><td> <code>0x2</code></td><td> take money from agent's account</td><td> <a href="/wiki/category-lsl-money-ea6713f2/">Money</a></td><td> Owner</td><td> </td></tr><tr><td> <a href="/constants/PERMISSION_TAKE_CONTROLS/">PERMISSION_TAKE_CONTROLS</a></td><td> <code>0x4</code></td><td> take agent's <a href="/events/control/">controls</a></td><td> <a href="/wiki/category-lsl-controls-e51cf15a/">Control</a></td><td> Anyone</td><td> sat on, attached</td></tr><tr><td> <a href="/constants/PERMISSION_TRIGGER_ANIMATION/">PERMISSION_TRIGGER_ANIMATION</a></td><td> <code>0x10</code></td><td> start or stop <a href="/functions/llStartAnimation/">Animations</a> on agent</td><td> <a href="/wiki/category-lsl-animation-31003bb4/">Animation</a></td><td> Anyone</td><td> sat on, attached</td></tr><tr><td> <a href="/constants/PERMISSION_ATTACH/">PERMISSION_ATTACH</a></td><td> <code>0x20</code></td><td> <a href="/functions/llAttachToAvatar/">attach</a>/<a href="/functions/llDetachFromAvatar/">detach</a> from agent</td><td> <a href="/wiki/category-lsl-attachment-f1f26364/">Attachment</a></td><td> <a href="/functions/llAttachToAvatar/">Owner</a> or <a href="/functions/llAttachToAvatarTemp/">Anyone</a></td><td> attached</td></tr><tr><td> <a href="/constants/PERMISSION_CHANGE_LINKS/">PERMISSION_CHANGE_LINKS</a></td><td> <code>0x80</code></td><td> change <a href="/wiki/category-lsl-link-22f60a44/">links</a></td><td> <a href="/wiki/category-lsl-link-22f60a44/">Link</a></td><td> Owner</td><td> </td></tr><tr><td> <a href="/constants/PERMISSION_TRACK_CAMERA/">PERMISSION_TRACK_CAMERA</a></td><td> <code>0x400</code></td><td> track the agent's <a href="/wiki/category-lsl-camera-343c0992/">camera</a> <a href="https://wiki.secondlife.com/wiki/Position">position</a> and <a href="https://wiki.secondlife.com/wiki/rotation">rotation</a></td><td> <a href="/wiki/category-lsl-camera-343c0992/">Camera</a></td><td> Anyone</td><td> sat on, attached</td></tr><tr><td> <a href="/constants/PERMISSION_CONTROL_CAMERA/">PERMISSION_CONTROL_CAMERA</a></td><td> <code>0x800</code></td><td> control the agent's camera <br />(<a href="https://wiki.secondlife.com/wiki/LlSetCameraParams_Test">must be sat on or attached; automatically revoked on stand or detach</a>)</td><td> <a href="/wiki/category-lsl-camera-343c0992/">Camera</a></td><td> Anyone</td><td> sat on, attached</td></tr><tr><td> <a href="/constants/PERMISSION_TELEPORT/">PERMISSION_TELEPORT</a></td><td> <code>0x1000</code></td><td> <a href="/functions/llTeleportAgent/">teleport</a> the agent</td><td> <a href="/wiki/category-lsl-teleport-7bed0dab/">Teleport</a></td><td> Anyone<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|handle=teleport|[[PERMISSION_TELEPORT]] cannot be held by [[llAttachToAvatarTemp|temporary attachments]].|PERMISSION_TELEPORT cannot be held be attachments.}}</code></span></td><td> </td></tr><tr><td> <a href="/constants/PERMISSION_SILENT_ESTATE_MANAGEMENT/">PERMISSION_SILENT_ESTATE_MANAGEMENT</a></td><td> <code>0x4000</code></td><td> <a href="/functions/llManageEstateAccess/">manage estate access</a> without notifying the owner of changes</td><td> <a href="/wiki/category-lsl-estate-aebc841c/">Estate</a></td><td> Owner</td><td> </td></tr><tr><td> <a href="/constants/PERMISSION_OVERRIDE_ANIMATIONS/">PERMISSION_OVERRIDE_ANIMATIONS</a></td><td> <code>0x8000</code></td><td> configure the overriding of default <a href="/functions/llStartAnimation/">animations</a> on agent</td><td> <a href="/wiki/category-lsl-animation-31003bb4/">Animation</a></td><td> Anyone</td><td> attached</td></tr><tr><td> <a href="/constants/PERMISSION_RETURN_OBJECTS/">PERMISSION_RETURN_OBJECTS</a></td><td> <code>0x10000</code></td><td> Used by <a href="/functions/llReturnObjectsByOwner/">llReturnObjectsByOwner</a> and <a href="/functions/llReturnObjectsByID/">llReturnObjectsByID</a> to return objects from parcels</td><td> <a href="/wiki/category-lsl-cleanup-9caa74f8/">Cleanup</a></td><td> Owner, Group Owner</td><td> </td></tr><tr><td> <a href="/constants/PERMISSION_PRIVILEGED_LAND_ACCESS/">PERMISSION_PRIVILEGED_LAND_ACCESS</a></td><td> <code>0x80000</code></td><td> Grants the script privileged access to land parcel functions, such as parcel sale. Used by <a href="/functions/llSetParcelForSale/">llSetParcelForSale</a>.</td><td> <a href="https://wiki.secondlife.com/wiki/Category:LSL_Land">Land</a></td><td> Owner</td><td></td></tr><tr><td> <a href="/constants/PERMISSION_GAME_CONTROL/">PERMISSION_GAME_CONTROL</a></td><td> <code>0x100000</code></td><td> Permission to receive <a href="/events/game_control/">game_control</a> input events.</td><td> <a href="/wiki/category-lsl-controls-e51cf15a/">Control</a></td><td> Anyone</td><td> sat on, attached</td></tr></table></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(),
+        //Comment out any of the following lines for fun
+            PERMISSION_DEBIT |
+            PERMISSION_TAKE_CONTROLS |
+            PERMISSION_TRIGGER_ANIMATION |
+            PERMISSION_ATTACH |
+            PERMISSION_CHANGE_LINKS |
+            PERMISSION_TRACK_CAMERA |
+            PERMISSION_CONTROL_CAMERA |
+            0);
+    }
+    touch_start(integer a)
+    {
+        integer perm = llGetPermissions();
+        if(perm &amp; PERMISSION_DEBIT)
+            llOwnerSay(&quot;Can use llGiveMoney&quot;);
+        if(perm &amp; PERMISSION_TAKE_CONTROLS)
+            llOwnerSay(&quot;Can use llTakeControls&quot;);
+        if(perm &amp; PERMISSION_TRIGGER_ANIMATION)
+            llOwnerSay(&quot;Can use llStartAnimation&quot;);
+        if(perm &amp; PERMISSION_ATTACH)
+            llOwnerSay(&quot;Can use llAttachToAvatar&quot;);
+        if(perm &amp; PERMISSION_CHANGE_LINKS)
+            llOwnerSay(&quot;Can use llCreateLink&quot;);
+        if(perm &amp; PERMISSION_TRACK_CAMERA)
+            llOwnerSay(&quot;Can use llGetCameraPos&quot;);
+        if(perm &amp; PERMISSION_CONTROL_CAMERA)
+            llOwnerSay(&quot;Can use llSetCameraParams&quot;);
+    }
+    run_time_permissions(integer perm)
+    {
+        if(perm &amp; PERMISSION_DEBIT)
+            llOwnerSay(&quot;Can use llGiveMoney&quot;);
+        if(perm &amp; PERMISSION_TAKE_CONTROLS)
+            llOwnerSay(&quot;Can use llTakeControlls&quot;);
+        if(perm &amp; PERMISSION_TRIGGER_ANIMATION)
+            llOwnerSay(&quot;Can use llStartAnimation&quot;);
+        if(perm &amp; PERMISSION_ATTACH)
+            llOwnerSay(&quot;Can use llAttachToAvatar&quot;);
+        if(perm &amp; PERMISSION_CHANGE_LINKS)
+            llOwnerSay(&quot;Can use llCreateLink&quot;);
+        if(perm &amp; PERMISSION_TRACK_CAMERA)
+            llOwnerSay(&quot;Can use llGetCameraPos&quot;);
+        if(perm &amp; PERMISSION_CONTROL_CAMERA)
+            llOwnerSay(&quot;Can use llSetCameraParams&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPermissionsKey/">llGetPermissionsKey</a> — Get the avatar who granted permissions.</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestPermissions/">llRequestPermissions</a> — Request permissions</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/run_time_permissions/">run_time_permissions</a> — Permission receiver event</div></div></section>

@@ -1,0 +1,80 @@
+<div class="wiki-line"><span class="wiki-template"><code>{{#if:
+
+{{#vardefine:p_loop_hover|Executes once, then executes condition.}}
+{{#vardefine:p_condition_hover|If condition executes true, it then loops back and executes loop again.}}
+
+{{#vardefine:p_loop_desc|Executes once, then executes {{LSLP|condition}}.}}
+{{#vardefine:p_condition_desc|If condition executes true, it then loops back and executes {{LSLP|loop}} again.}}
+
+}}</code></span><span class="wiki-template"><a href="/wiki/template-lsl-conditional-2771dd5b/">LSL Conditional</a>: <code>{{LSL_Conditional
+|statement=do while
+|statement_header
+|statement_desc=Any of the statements can be null statements. A do...while loop is slightly faster than a while or for loop, and requires fewer bytes of memory than a while or for loop. (However, the speed increase and byte difference does not apply to scripts compiled in Mono)
+|statement_title=do {{LSL Param|loop}} while ({{LSL Param|condition}});
+|p1_name=loop
+|p2_name=condition
+|constants
+|spec
+|caveats
+|examples=<pre><code>//Counts from 1 to 5
+default
+{
+    state_entry()
+    {
+        integer olf;   // Without applied value an integer will be defaulted to zero.
+        do
+            llSay(0, (string) (++olf));       // Increment before the while condition 
+        while (olf &lt; 5);                    // On the first pass/loop olf = 1
+    }
+}</code></pre><pre><code>//Counts from 0 to 4
+default
+{
+    state_entry()
+    {
+        integer olf;
+        do
+            llSay(0, (string)olf);    // olf is still equal to zero at first iteration
+        while (++olf &lt; 5);            // Increments then does the while-test
+    }
+}</code></pre><pre><code>//Counts from 0 to 4 and comments as it loops (block statement demo)
+default
+{
+    state_entry()
+    {
+        integer olf;
+        do
+        {   // Curly brackets are required since there is more than one statement within the do-loop
+            llSay(0, (string)olf);    
+            llSay(0, &quot;looping&quot;);
+        }
+        while (++olf &lt; 5);
+    }
+}</code></pre><pre><code>//Practical example of where a do/while loop is more immediately useful than a while loop:
+//Note that a sensor event always contains input data, so the &#x27;do&#x27; always has something to process
+    sensor(integer num)
+    {   
+        if (num &gt; 12)
+            num = 12;
+        do
+        {   
+            // --num decrements num before using it to pick up a detected avatar&#x27;s name. Thus we retrieve #11 through #0
+            gNameList += [llGetSubString(llDetectedName(--num), 0, 23)];    //sometimes avatar names are too long for dialog display
+            gKeyList  += [llDetectedKey(num)];    //we will dialog select avatar by name, but still need their key
+                                                  //even if their name has not been truncated above
+        }  while (num &gt; 0);
+        llDialog(llGetOwner(), &quot;Choose an avatar.&quot;, gNameList, gDlgChan);  //channel is pre-defined when llSensor is triggered
+    }</code></pre>
+|helpers
+|also_header
+|also_functions
+|also_tests
+|also_articles
+|also_footer
+|notes
+|mode
+|deprecated
+|cat1=Conditional
+|cat2
+|cat3
+|cat4
+}}</code></span></div>

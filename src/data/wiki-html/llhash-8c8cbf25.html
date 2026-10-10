@@ -1,0 +1,47 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Returns a 32bit hash for the provided string.  Returns 0 if the input string is empty.</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">The SDBM algorithm provides a good general purpose hash function with a fairly even distribution across the 32 bit space in the general case. </div>
+<div class="wiki-line">The characters fed into the hash function are 32bit wide. </div>
+<div class="wiki-line"><pre><code>U32 SDBMHash(const std::wstring &amp;val)
+{
+    U32 hash(0);
+
+    for(const wchar_t &amp;c: val)
+    {
+        hash = c + (hash &lt;&lt; 6) + (hash &lt;&lt; 16) - hash;
+    }
+    return hash;
+}</code></pre></div>
+<div class="wiki-line">In LSL:</div>
+<div class="wiki-line"><pre><code>integer llSDBMHash(string value)
+{
+    integer hash = 0;
+    integer index = 0;
+    for (index = 0; index &lt; llStringLength(value); ++index)
+    {
+        hash = llOrd(value, index) + (hash &lt;&lt; 6) + (hash &lt;&lt; 16) - hash;
+    }
+    
+    return hash;
+}</code></pre></div></section>
+<section><h2 id="caveats">Caveats</h2><div class="wiki-line">This hash value is not cryptographically secure and should not be used as part of any security protocol. </div>
+<div class="wiki-line">SDBM provides a good distribution of hash values across its range, however with only </div>
+<div class="wiki-line">32 bits the chance of a collision is unacceptably high.(with 1000 entries, the odds for a collision are about 1 in 10000.)</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Given the combination of the object name and the owner's key generate a unique number.  This number could be used for things</div>
+<div class="wiki-line">like selecting a chat channel that has a low probability of colliding with another object. </div>
+<div class="wiki-line"><pre><code>integer pickIDForObject()
+{
+    /* Generate an arbitrary integer ID for the combination of the
+     * object name and the ower&#x27;s key.  This value could be used 
+     * for selecting a chat/listen channel. 
+     */
+    string obj_name = llGetObjectName();
+    key obj_owner = llGetOwner();
+    
+    integer hash = llHash(obj_name + (string)obj_owner);
+    
+    return hash;
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llOrd/">llOrd</a> — Convert a character into an ordinal</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llChar/">llChar</a> — Convert an ordinal into a character</div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://en.wikipedia.org/wiki/List_of_hash_functions" rel="noreferrer">List of hash functions</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="https://preshing.com/20110504/hash-collision-probabilities/" rel="noreferrer">Hash Collision Probabilities</a></div></div></section>

@@ -1,0 +1,61 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Requests <code>data</code> about <code>region</code>. When <code>data</code> is available the <a href="/events/dataserver/">dataserver</a> event will be raised.</div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/key">key</a> for a <a href="/events/dataserver/">dataserver</a> event response.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><div class="wiki-line"><span class="wiki-template"><code>{{#if:
+
+
+{{#vardefine:InsertRows|13}}
+
+}}</code></span></div>
+<table><tr><th colspan="2"> <code>data</code> Constant</th><th> Type</th><th colspan="4"> Description</th></tr><tr><td> <a href="/constants/DATA_SIM_POS/">DATA_SIM_POS</a></td><td> 5</td><td> (<a href="https://wiki.secondlife.com/wiki/vector">vector</a>)</td><td colspan="4"> The regions <a href="https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#global">global position</a>.</td></tr><tr><td rowspan="7"> <a href="/constants/DATA_SIM_STATUS/">DATA_SIM_STATUS</a></td><td rowspan="7"> 6</td><td rowspan="7"> <a href="https://wiki.secondlife.com/wiki/string">string</a></td><th> Value</th><th colspan="3"> Description</th></tr><tr><td> "up"</td><td colspan="3"> region currently up and running</td></tr><tr><td> "down"</td><td colspan="3"> region currently down</td></tr><tr><td> "starting"</td><td colspan="3"> region currently starting</td></tr><tr><td> "stopping"</td><td colspan="3"> region currently stopping</td></tr><tr><td> "crashed"</td><td colspan="3"> region has crashed</td></tr><tr><td> "unknown"</td><td colspan="3"> region status unknown or unknown region</td></tr><tr><td rowspan="5"> <a href="/constants/DATA_SIM_RATING/">DATA_SIM_RATING</a></td><td rowspan="5"> 7</td><td rowspan="5"> <a href="https://wiki.secondlife.com/wiki/string">string</a></td><th> Value</th><th colspan="3"> Maturity rating</th></tr><tr><td> "PG"</td><td colspan="3"> <span class="wiki-template"><a href="/wiki/template-mrg-810dff17/">mrg</a>: <code>{{mrg}}</code></span></td></tr><tr><td> "MATURE"</td><td colspan="3"> <span class="wiki-template"><a href="/wiki/template-mrm-818c0ed5/">mrm</a>: <code>{{mrm}}</code></span></td></tr><tr><td> "ADULT"</td><td colspan="3"> <span class="wiki-template"><a href="/wiki/template-mra-766023a4/">mra</a>: <code>{{mra}}</code></span></td></tr><tr><td> "UNKNOWN"</td><td colspan="3"> rating or region unknown</td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>There is no DATA_SIM_MAXPRIMS flag (but <code><a href="/functions/llGetEnv/">llGetEnv</a>("region_product_name")</code> returns the region type). <a href="#svc-4921">SVC-4921</a></li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Hide objects in PG or unknown regions</div>
+<div class="wiki-line"><pre><code>key         gRateingQuery       =   NULL_KEY        ;
+
+show()
+{
+    llSetLinkAlpha( LINK_SET, 1.0, ALL_SIDES );
+}//show
+
+hide()
+{
+     llSetLinkAlpha( LINK_SET, 0.0, ALL_SIDES );
+}//hide
+
+default
+{
+    on_rez(integer Setting)
+    {
+        llResetScript();
+    }//on_rez
+    
+    state_entry()
+    {
+        gRateingQuery = llRequestSimulatorData( llGetRegionName(), DATA_SIM_RATING );
+    }//state_entry
+   
+    changed(integer ItChanged)
+    {
+        if (ItChanged &amp; CHANGED_OWNER)      llResetScript();
+        if (ItChanged &amp; CHANGED_REGION)     llResetScript();
+    }//changed
+    
+    dataserver(key query_id, string data)
+    {
+        if (query_id == gRateingQuery)
+        {
+            if (data == &quot;MATURE&quot; || data == &quot;ADULT&quot;)        show();
+            else if (data == &quot;UNKNOWN&quot; || data == &quot;PG&quot;)     hide();
+        }//gRateingQuery
+    }//dataserver
+    
+}//default</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Global Position in meters</div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetEnv/">llGetEnv</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelDetails/">llGetParcelDetails</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelFlags/">llGetParcelFlags</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelMaxPrims/">llGetParcelMaxPrims</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetParcelPrimCount/">llGetParcelPrimCount</a></div></div></section>
+<section><h2 id="tests">Tests</h2><div class="wiki-line"><div class="wiki-related-row"><a href="https://wiki.secondlife.com/wiki/llRequestSimulatorData_Test">llRequestSimulatorData Test</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-2596"><a href="/wiki/template-issues-svc-2596-ff59f0ff/">Template:Issues/SVC-2596</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-2596|Script [[dataserver]] events become permanently blocked until sim restart|type=bug|resolution=fixed}}</code></pre></details><p id="svc-4921"><a href="/wiki/template-issues-svc-4921-b9eedd22/">Template:Issues/SVC-4921</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-4921|Please add a way to get the region type (&quot;full&quot;, &quot;homestead&quot;, &quot;openspace&quot;) to llRequestSimulatorData|type=nf|resolution=wont|status=clo}}</code></pre></details><p id="bug-5031"><a href="/wiki/template-issues-bug-5031-59d3bf37/">Template:Issues/BUG-5031</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-5031|[[llRequestSimulatorData]] for [[DATA_SIM_POS]] returns same position for multiple regions|type=bug|dnc=*}}</code></pre></details></section>

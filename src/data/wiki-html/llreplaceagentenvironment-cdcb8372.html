@@ -1,0 +1,49 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">The llReplaceAgentEnvironment function overrides the current region and parcel environment seen by an agent. The new environment persists until the agent crosses to a new region or this function is called with the NULL_KEY or empty string in the environment parameter for the particular agent, doing so will strip all environmental settings applied to this agent as part of the experience. This function must be executed as part of an experience.</div></section>
+<section><h2 id="specification">Specification</h2><span id="constants"></span><table><caption> <strong>Return Values</strong></caption><tr><th>Value</th><th>Constant</th><th>Description</th></tr><tr><td> ENV_OK </td><td> 1 </td><td> The agent has been instructed to change their environment.</td></tr><tr><td> ENV_NOT_EXPERIENCE </td><td> -1 </td><td>The script is not running as part of an experience with a valid experience key.</td></tr><tr><td> ENV_NO_EXPERIENCE_PERMISSION </td><td> -2 </td><td> The agent has not granted permission.</td></tr><tr><td> ENV_NO_ENVIRONMENT </td><td> -3 </td><td> The environment inventory object could not be found.</td></tr><tr><td> ENV_INVALID_AGENT </td><td> -4 </td><td> Unable to find specified agent.</td></tr><tr><td> ENV_NO_EXPERIENCE_LAND </td><td> -7 </td><td> The experience has not been enabled or can not run on the land.</td></tr><tr><td> ENV_THROTTLE </td><td> -8 </td><td> The scripts have exceeded the throttle.  Wait and retry the request.</td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>The agent's viewer may choose to ignore this command.</li>
+<li>An environment set locally on the viewer will override any environment set from this function.</li>
+<li>If a UUID is passed as the environment parameter and that UUID does not specify an environment setting, the viewer quietly ignores the instruction.</li>
+<li>The ENV_OK constant is only present on Lua-enabled sims. On older sims, use it's value of 1 instead</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>string gEnvironment = &quot;A-12AM&quot;; // Can be asset&#x27;s name in object&#x27;s inventory or the asset ID
+float gTransitionTime = 3.0;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        key person = llDetectedKey(0);
+        if (llGetAgentSize(person) != ZERO_VECTOR)
+        {
+            llRequestExperiencePermissions(person, &quot;&quot;);
+        }
+        else
+        {
+            llInstantMessage(person, &quot;You need to be in the same region to change environment&quot;);
+        }
+    }
+
+    experience_permissions(key agent_id)
+    {
+        integer envTest = llReplaceAgentEnvironment(agent_id, gTransitionTime, gEnvironment);
+        if (envTest == 1)
+        {
+            llRegionSayTo(agent_id, 0, &quot;Applying environment for &quot; + (string)agent_id);
+        }
+        else
+        {
+            llRegionSayTo(agent_id, 0, &quot;Cannot apply environment for &quot; + (string)agent_id + &quot; due to reason id: &quot; + (string)envTest);
+        }
+    }
+
+    experience_permissions_denied(key agent_id, integer reason)
+    {
+        llRegionSayTo(agent_id, 0, &quot;Denied experience permissions for &quot; + (string)agent_id + &quot; due to reason id: &quot; + (string)reason);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetEnvironment/">llGetEnvironment</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetAgentEnvironment/">llSetAgentEnvironment</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetEnvironment/">llSetEnvironment</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llReplaceEnvironment/">llReplaceEnvironment</a></div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><a href="/wiki/category-experience-tools-d5e9461b/">Category:Experience Tools</a></div></section>

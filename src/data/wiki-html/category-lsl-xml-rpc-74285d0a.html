@@ -1,0 +1,281 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|ml=*}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Communications}}</code></span></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-kbwarning-e5dd1efa/">KBwarning</a>: <code>{{KBwarning|1=&#x27;&#x27;&#x27;THESE FUNCTIONS NO LONGER WORK&#x27;&#x27;&#x27; - LSL XML-RPC functionality has been removed from Second Life. (See [https://community.secondlife.com/blogs/entry/13007-shutting-down-lsl-xml-rpc/ this blog post] for the shutdown announcement, and [https://community.secondlife.com/forums/topic/488396-http-body-length-questions/?do=findComment&amp;comment=2473694 this forum post], and [http://web.archive.org/web/20150103182352/http://community.secondlife.com/t5/Technology-General/HTTP-In-and-LSL-Communications/ba-p/646366 this blog older entry] to read about the original deprecation discussion.) This page is provided for historical context only. }}</code></span></div>
+<div class="wiki-line"><a href="http://en.wikipedia.org/wiki/XMLRPC" rel="noreferrer">XML-RPC</a> is a standard for sending Procedure Calls (e.g. function calls) to Remote systems.  It sends <a href="http://en.wikipedia.org/wiki/XML" rel="noreferrer">XML</a> data over HTTP that remote system then handles.</div>
+<div class="wiki-line">LSL receives XML-RPC requests and passes them to the prim specified.  It may not establish this connection, but it may reply and keep two-way communication with that server.  These responses seem to be able to transport the largest amount of data out of Second Life (vs. <a href="/events/email/">Email</a> and <a href="/wiki/category-lsl-http-218669ab/">HTTP</a> Requests).</div>
+<h3 id="note">NOTE:</h3>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-kbcaution-6c453387/">KBcaution</a>: <code>{{KBcaution|width=100%|XML-RPC requests often time-out due to the front-end server being overloaded.  LL has continued to upgrade the server hardware periodically, but it has remained unreliable.  LL developers have advised that the XML-RPC design isn&#x27;t scalable (due to the single server bottle-neck) and that the service is &quot;deprecated&quot;.  They suggest using [[:Category:LSL HTTP|LSL HTTP]] as an alternative. If an XML-RPC request does time-out the script&#x27;s remote_data event may or may not be triggered (and any script response is lost). See [http://web.archive.org/web/20150103182352/http://community.secondlife.com/t5/Technology-General/HTTP-In-and-LSL-Communications/ba-p/646366 this blog entry] for more about the future of XML-RPC.}}</code></span></div>
+<h3 id="important-implementation-note">IMPORTANT IMPLEMENTATION NOTE:</h3>
+<div class="wiki-line">The current implementation of XML-RPC only allows ONE request to be queued on the front-end server (xmlrpc.secondlife.com) at a time. Any additional requests to the same data channel overwrite any pending one. This has serious ramifications for the design of XML-RPC communications where the in-world object could receive requests faster than it can respond to them. In addition, the 3-second delay in <a href="/wiki/llremotedatareply-4bedf1da/">llRemoteDataReply</a> exacerbates this problem even more.</div>
+<div class="wiki-line">The observed issue is this: if you send multiple quick requests to an in-world object via XML-RPC, one which is scripted to perform some processing and then return a response (via llRemoteDataReply), there is a potential for earlier requests to get lost on the front end server (they still should generate <a href="/wiki/remote-data-3ce63638/">remote_data</a> events, though), and have the response meant for an earlier request end up being passed back to a later one, while the earlier requests will time out back at your external application.</div>
+<div class="wiki-line">As a result, if you intend to do any serious work with XML-RPC, you will have to design your external client application to manually serialize all requests to each individual RPC channel. That means you have to wait for a response from the previous request before you attempt to send the next one. If you don't care about receiving responses, then this problem is not an issue, as all requests seem to get passed on to the script, regardless of the queueing issue.</div>
+<div class="wiki-line">Also note that there is NO way to get around the 3-second delay for llRemoteDataReply; you cannot use the multiple-slave-comm-script trick which uses multiple scripts with <a href="/functions/llMessageLinked/">llMessageLinked</a> to concurrently deal with XML-RPC replies from the same source, because XML-RPC channels are *script-specific*, NOT *object-specific*.</div>
+<div class="wiki-line">For more information, see these forum threads <a href="http://forums.secondlife.com/showthread.php?t=158437" rel="noreferrer">here</a> and <a href="http://forums-archive.secondlife.com/139/c2/158585/1.html#post1379244" rel="noreferrer">here</a>.</div>
+<h2 id="other-resources">Other Resources</h2>
+<ul>
+<li><a href="http://www.xmlrpc.com/" rel="noreferrer">XMLRPC.com</a></li>
+<li><a href="http://scripts.incutio.com/xmlrpc/" rel="noreferrer">Incutio&#x27;s XML-RPC PHP library</a> (broken link; try <a href="https://github.com/hobbez/IXR_Library" rel="noreferrer">PHP7+ compatible replacement for IXR_Library.php</a> or any other port/replacement available on GitHub; another reliable source for a well-maintained port is <a href="https://developer.wordpress.org/reference/classes/ixr_server/" rel="noreferrer">WordPress itself</a>)</li>
+<li><a href="http://perisic.com/sl/" rel="noreferrer">A simple form to launch an XMLRPC request into Second Life</a></li>
+</ul>
+<h2 id="examples">Examples</h2>
+<h2 id="php">php</h2>
+<div class="wiki-line">To initialize a xmlrpc from an external server you'll need some kind of web-application.</div>
+<div class="wiki-line">One language to create a webapplication in is PHP.</div>
+<div class="wiki-line">Here is an example of how to send a xmlrpc message to your SL-script from a webserver using PHP:</div>
+<div class="wiki-line"><pre><code>&lt;?php
+	echo &#x27;&lt;pre&gt;&#x27;;
+	$channel = &quot;&quot;; //Fill in the channel you are using (key)
+	$intvalue = &quot;&quot;; //Fill in the intvalue you are using (integer)
+	$strvalue = &quot;&quot;; //Fill in the strvalue you are using (string)
+	$xmldata = &quot;&lt;?xml version=\&quot;1.0\&quot;?&gt;&lt;methodCall&gt;&lt;methodName&gt;llRemoteData&lt;/methodName&gt;
+&lt;params&gt;&lt;param&gt;&lt;value&gt;&lt;struct&gt;
+&lt;member&gt;&lt;name&gt;Channel&lt;/name&gt;&lt;value&gt;&lt;string&gt;&quot;.$channel.&quot;&lt;/string&gt;&lt;/value&gt;&lt;/member&gt;
+&lt;member&gt;&lt;name&gt;IntValue&lt;/name&gt;&lt;value&gt;&lt;int&gt;&quot;.$intvalue.&quot;&lt;/int&gt;&lt;/value&gt;&lt;/member&gt;
+&lt;member&gt;&lt;name&gt;StringValue&lt;/name&gt;&lt;value&gt;&lt;string&gt;&quot;.$strvalue.&quot;&lt;/string&gt;&lt;/value&gt;&lt;/member&gt;
+&lt;/struct&gt;&lt;/value&gt;&lt;/param&gt;&lt;/params&gt;&lt;/methodCall&gt;&quot;;
+	echo sendToHost(&quot;xmlrpc.secondlife.com&quot;, &quot;POST&quot;, &quot;/cgi-bin/xmlrpc.cgi&quot;, $xmldata);
+	echo &#x27;&lt;/pre&gt;&#x27;;
+	
+	function sendToHost($host,$method,$path,$data,$useragent=0)
+	{ 
+		$buf=&quot;&quot;;
+		// Supply a default method of GET if the one passed was empty 
+		if (empty($method)) 
+			$method = &#x27;GET&#x27;; 
+		$method = strtoupper($method); 
+	
+		$fp = fsockopen($host, 80, $errno, $errstr, 30);
+	
+		if( !$fp )
+		{
+			$buf = &quot;$errstr ($errno)&lt;br /&gt;\n&quot;;
+		}else
+		{
+			if ($method == &#x27;GET&#x27;) 
+			$path .= &#x27;?&#x27; . $data; 
+			fputs($fp, &quot;$method $path HTTP/1.1\r\n&quot;); 
+			fputs($fp, &quot;Host: $host\r\n&quot;); 
+			fputs($fp, &quot;Content-type: text/xml\r\n&quot;); 
+			fputs($fp, &quot;Content-length: &quot; . strlen($data) . &quot;\r\n&quot;); 
+			if ($useragent) 
+				fputs($fp, &quot;User-Agent: MSIE\r\n&quot;); 
+			fputs($fp, &quot;Connection: close\r\n\r\n&quot;); 
+			if ($method == &#x27;POST&#x27;) 
+				fputs($fp, $data); 
+			while (!feof($fp)) 
+				$buf .= fgets($fp,128); 
+			fclose($fp); 
+		}
+		return $buf; 
+	} 
+?&gt;</code></pre></div>
+<h2 id="perl">perl</h2>
+<div class="wiki-line">The perl code and corresponding LSL code to contact an object in Second Life is given below. The perl code makes use of the RPC::XML module. You can run the perl code from the command line. It creates an rpc object and sends a message to an object that is rezzed on the grid. Note that you have to supply the UUID of the object within the perl code.</div>
+<div class="wiki-line">The perl code sends the message that contains the string "Message to pass" and the number "2007." The LSL code responds by sending the string "I got it" and the number "2008."</div>
+<div class="wiki-line"><pre><code>#!/usr/bin/perl
+# 
+
+use RPC::XML;
+use RPC::XML::Parser;
+use RPC::XML::Client;
+
+my $llURL = &quot;http://xmlrpc.secondlife.com/cgi-bin/xmlrpc.cgi&quot;;
+$P = RPC::XML::Parser-&gt;new();
+
+my $cli = RPC::XML::Client-&gt;new($llURL);
+my $req = RPC::XML::request-&gt;new(
+        &quot;llRemoteData&quot;,
+        {&#x27;Channel&#x27; =&gt; RPC::XML::string-&gt;new(&quot;UUID for the open channel from the object GOES HERE!&quot;),
+        &#x27;IntValue&#x27; =&gt; RPC::XML::int-&gt;new(2007),
+        &#x27;StringValue&#x27; =&gt; RPC::XML::string-&gt;new(&quot;message to pass&quot;)});
+
+#  Print out the message to send
+print &quot;ref(req): &quot;,ref($req),&quot;\n&quot;;
+$xml = $req-&gt;as_string();
+print &quot;Length: &quot;,$req-&gt;length,&quot;\n\n&quot;,$xml,&quot;\n\n&quot;;
+
+$res = $P-&gt;parse($xml);
+print ref($res),&quot;\n&quot;;
+if (ref($res)) {
+    %h = %{$res-&gt;args-&gt;[0]-&gt;value};
+    foreach $lupe (keys %h) {
+       print &quot;$lupe: $h{$lupe}\n&quot;;
+    }
+}
+
+#  Submit the request to send the information above.
+my $resp = $cli-&gt;send_request($req);
+
+
+#  Print out the response
+print &quot;\n\n\nResponse\n&quot;;
+print &quot;ref(resp): &quot;,ref($resp),&quot;\n&quot;;
+$xml = $resp-&gt;as_string();
+print &quot;Length: &quot;,$resp-&gt;length,&quot;\n\n&quot;,$xml,&quot;\n\n&quot;;
+
+$res = $P-&gt;parse($xml);
+print ref($res),&quot;\n&quot;;
+if (ref($res)) {
+    %h = %{$res-&gt;value};
+    foreach $lupe (keys %h) {
+       $val =  $h{$lupe};
+       print &quot;$lupe: $val\n&quot;;
+    }
+}</code></pre></div>
+<h2 id="java">Java</h2>
+<div class="wiki-line">This Java code uses the org.apache.xmlrpc library, a jar file for this can be found at http://www.perisic.com/xmlrpc/cis69mc.jar (the code has been tested with this). See http://perisic.com/xmlrpc for a simple introduction into Java &amp; XMLRPC if necessary. </div>
+<ul>
+<li>Save the code in a file named SLClient.java and download the jar file cis69mc.jar from the location above.</li>
+<li>Add the channel id where it says '&lt;add channel id here!!!&gt;', so this line may eventually look similar to <code>theData.put("Channel", "24a2c834-c984-9209-78df-20608d4c8ade");</code></li>
+<li>Compile the code with the command: javac -classpath "cis69mc.jar;." SLClient.jar (you may get a note about unchecked or unsafe operations, ignore that).  </li>
+<li>Run the code with the command: java -classpath "cis69mc.jar;." SLClient </li>
+</ul>
+<div class="wiki-line"><pre><code>import java.util.*;
+import org.apache.xmlrpc.*;
+
+public class SLClient {
+ public static void main (String [] args) {
+  try {
+   Hashtable theData = new Hashtable(); 
+   XmlRpcClient server = new XmlRpcClient(&quot;http://xmlrpc.secondlife.com/cgi-bin/xmlrpc.cgi&quot;); //
+   theData.put(&quot;Channel&quot;, &quot;&lt;add channel id here!!!&gt;&quot;); 
+   theData.put(&quot;IntValue&quot;, 2483); 
+   theData.put(&quot;StringValue&quot;, &quot;The date is: &quot;+ (new Date()).toString() ); 
+   Vector params = new Vector(); 
+   params.add(theData); 
+   
+   Object result = server.execute(&quot;llRemoteData&quot;, params ); 
+  
+  } catch (Exception exception) {
+   System.err.println(&quot;SL_Client: &quot; + exception);
+   exception.printStackTrace(); 
+   }
+  }
+}</code></pre></div>
+<h2 id="visual-basic-6">Visual Basic 6</h2>
+<div class="wiki-line">This piece of Visual Basic 6 code makes use of the Microsoft WinSock 6.0 control. Make a new project, and place a Winsock control on the form.</div>
+<div class="wiki-line"><pre><code>Dim Channel As String
+Dim IntValue As Integer
+Dim StrValue As String
+Dim XMLData As String
+
+Private Sub Form_Load()
+    Channel = &quot;&lt;add channel id here!!!&gt;&quot;
+    IntValue = 2007
+    StrValue = &quot;This is a test string.&quot;
+    XMLData = &quot;&lt;?xml version=&quot;&quot;1.0&quot;&quot;?&gt;&lt;methodCall&gt;&lt;methodName&gt;llRemoteData&lt;/methodName&gt;&lt;params&gt;&lt;param&gt;&lt;value&gt;&lt;struct&gt;&quot;
+    XMLData = XMLData &amp; &quot;&lt;member&gt;&lt;name&gt;Channel&lt;/name&gt;&lt;value&gt;&lt;string&gt;&quot; &amp; Channel &amp; &quot;&lt;/string&gt;&lt;/value&gt;&lt;/member&gt;&quot;
+    XMLData = XMLData &amp; &quot;&lt;member&gt;&lt;name&gt;IntValue&lt;/name&gt;&lt;value&gt;&lt;int&gt;&quot; &amp; CStr(IntValue) &amp; &quot;&lt;/int&gt;&lt;/value&gt;&lt;/member&gt;&quot;
+    XMLData = XMLData &amp; &quot;&lt;member&gt;&lt;name&gt;StringValue&lt;/name&gt;&lt;value&gt;&lt;string&gt;&quot; &amp; StrValue &amp; &quot;&lt;/string&gt;&lt;/value&gt;&lt;/member&gt;&quot;
+    XMLData = XMLData &amp; &quot;&lt;/struct&gt;&lt;/value&gt;&lt;/param&gt;&lt;/params&gt;&lt;/methodCall&gt;&quot;
+
+    Winsock1.Connect &quot;xmlrpc.secondlife.com&quot;, 80
+End Sub
+
+Private Sub Winsock1_Connect()
+    WinsockSend &quot;POST /cgi-bin/xmlrpc.cgi HTTP/1.1&quot; &amp; vbCrLf
+    WinsockSend &quot;Host: xmlrpc.secondlife.com&quot; &amp; vbCrLf
+    WinsockSend &quot;Content-type: text/xml&quot; &amp; vbCrLf
+    WinsockSend &quot;Content-length: &quot; &amp; CStr(Len(XMLData)) &amp; vbCrLf
+    WinsockSend &quot;Connection: close&quot; &amp; vbCrLf &amp; vbCrLf
+    WinsockSend XMLData &amp; vbCrLf
+End Sub
+
+Private Sub Winsock1_DataArrival(ByVal bytesTotal As Long)
+    Dim TempStr As String
+    Winsock1.GetData TempStr
+    MsgBox TempStr
+End Sub
+
+Sub WinsockSend(str As String)
+    Winsock1.SendData str
+End Sub</code></pre></div>
+<h2 id="command-line-curl">Command line curl</h2>
+<div class="wiki-line">If you want to debug XML-RPC from the command line you can use "curl" to do so.  Put this in a file called <code>rpc.xml</code>, replacing the UUID for Channel with your script's channel id:</div>
+<div class="wiki-line"><pre><code>&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;methodCall&gt;
+    &lt;methodName&gt;llRemoteData&lt;/methodName&gt;
+    &lt;params&gt;
+        &lt;param&gt;
+            &lt;value&gt;
+                &lt;struct&gt;
+                    &lt;member&gt;
+                        &lt;name&gt;Channel&lt;/name&gt;
+                        &lt;value&gt;&lt;string&gt;1ee246fc-e60d-2fd3-6242-f5fc5d19850f&lt;/string&gt;&lt;/value&gt;
+                    &lt;/member&gt;
+                    &lt;member&gt;
+                        &lt;name&gt;IntValue&lt;/name&gt;
+                        &lt;value&gt;&lt;int&gt;42&lt;/int&gt;&lt;/value&gt;
+                    &lt;/member&gt;
+                    &lt;member&gt;
+                        &lt;name&gt;StringValue&lt;/name&gt;
+                        &lt;value&gt;&lt;string&gt;Hello, world!&lt;/string&gt;&lt;/value&gt;
+                    &lt;/member&gt;
+                &lt;/struct&gt;
+            &lt;/value&gt;
+        &lt;/param&gt;
+    &lt;/params&gt;
+&lt;/methodCall&gt;</code></pre></div>
+<div class="wiki-line">Then call curl to make a POST to the XMLRPC server:</div>
+<div class="wiki-line"><pre><code>curl --verbose --data &quot;@rpc.xml&quot; http://xmlrpc.secondlife.com/cgi-bin/xmlrpc.cgi</code></pre></div>
+<h2 id="lsl-server-code">LSL Server Code</h2>
+<div class="wiki-line">Corresponding LSL code (copy and paste this code as a script in an object, save and rezz it, a message with the channel id (and other stuff) will be printed):</div>
+<div class="wiki-line"><pre><code>key remoteChannel;
+init() {
+    llOpenRemoteDataChannel(); // create an XML-RPC channel
+    llOwnerSay(&quot;My key is &quot; + (string)llGetKey());
+}
+
+default {
+    state_entry() {
+        init();
+    }
+    
+    state_exit() {
+        return;
+    }
+                                
+    on_rez(integer param) {
+        llResetScript();        
+    }
+                                
+    remote_data(integer type, key channel, key message_id, string sender, integer ival, string sval) {
+         if (type == REMOTE_DATA_CHANNEL) { // channel created
+             llSay(DEBUG_CHANNEL,&quot;Channel opened for REMOTE_DATA_CHANNEL&quot; + 
+                (string)channel + &quot; &quot; + (string)message_id + &quot; &quot; + (string)sender + &quot; &quot; +                         
+                (string)ival + &quot; &quot; + (string)sval);
+             remoteChannel = channel;
+             llOwnerSay(&quot;Ready to receive requests on channel \&quot;&quot; + (string)channel + &quot;\&quot;&quot;);                        
+             state receiving; // start handling requests
+         } else {
+             llSay(DEBUG_CHANNEL,&quot;Unexpected event type&quot;); 
+         }                      
+     }                 
+}                     
+                                
+
+state receiving {
+
+    state_entry() {
+        llOwnerSay(&quot;Ready to receive information from outside SL&quot;);
+    }  
+    
+    state_exit() {
+        llOwnerSay(&quot;No longer receiving information from outside SL.&quot;);
+        llCloseRemoteDataChannel(remoteChannel);
+    }
+    
+    on_rez(integer param) {
+        llResetScript();
+    }
+    
+    remote_data(integer type, key channel, key message_id, string sender, integer ival, string sval) {
+        if (type == REMOTE_DATA_REQUEST) { // handle requests sent to us
+             llSay(DEBUG_CHANNEL,&quot;Request received for REMOTE_DATA_REQUEST &quot; + (string)channel + &quot; &quot; +
+                (string)message_id + &quot; &quot; + (string)sender + &quot; &quot; + (string)ival + &quot; &quot; + (string)sval);
+            llRemoteDataReply(channel,NULL_KEY,&quot;I got it&quot;,2008);
+            llOwnerSay(&quot;I just received data in &quot;+ llGetRegionName() + 
+                        &quot; at position &quot; + (string)llGetPos() + &quot;\n&quot; +
+                       &quot;The string was &quot; +  sval + &quot;\nThe number was &quot; + (string)ival + &quot;.&quot;);
+        }
+    }
+}</code></pre></div>

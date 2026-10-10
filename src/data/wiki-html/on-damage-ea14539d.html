@@ -1,0 +1,82 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">This event is triggered when damage has been inflicted on an avatar or task in the world but before damage has been applied or distributed.</div>
+<div class="wiki-line">All llDetected* functions that are normally available within a collision event are available while processing this event. Additionally the <a href="/functions/llDetectedDamage/">llDetectedDamage</a> and <a href="/functions/llAdjustDamage/">llAdjustDamage</a> methods may be called while processing this event.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Requires the region to <a href="/functions/llGetEnv/">allow damage adjustment</a> for the event to run</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>string damageType2String(integer type)
+{
+    if (type == DAMAGE_TYPE_GENERIC)
+        return &quot;generic&quot;;
+    else if (type == DAMAGE_TYPE_ACID)
+        return &quot;acid&quot;;
+    else if (type == DAMAGE_TYPE_BLUDGEONING)
+        return &quot;bludgeoning&quot;;
+    else if (type == DAMAGE_TYPE_COLD)
+        return &quot;cold&quot;;
+    else if (type == DAMAGE_TYPE_ELECTRIC)
+        return &quot;electric&quot;;
+    else if (type == DAMAGE_TYPE_FIRE)
+        return &quot;fire&quot;;
+    else if (type == DAMAGE_TYPE_FORCE)
+        return &quot;force&quot;;
+    else if (type == DAMAGE_TYPE_NECROTIC)
+        return &quot;necrotic&quot;;
+    else if (type == DAMAGE_TYPE_PIERCING)
+        return &quot;piercing&quot;;
+    else if (type == DAMAGE_TYPE_POISON)
+        return &quot;poison&quot;;
+    else if (type == DAMAGE_TYPE_PSYCHIC)
+        return &quot;psychic&quot;;
+    else if (type == DAMAGE_TYPE_RADIANT)
+        return &quot;radiant&quot;;
+    else if (type == DAMAGE_TYPE_SLASHING)
+        return &quot;slashing&quot;;
+    else if (type == DAMAGE_TYPE_SONIC)
+        return &quot;sonic&quot;;
+    else if (type == DAMAGE_TYPE_EMOTIONAL)
+        return &quot;emotional&quot;;
+
+    return &quot;type &quot; + (string)type;
+}
+
+default
+{
+    on_death()
+    {
+        llSay(0, &quot;I&#x27;ll be back!&quot;);
+    }
+    
+    on_damage(integer count)
+    {
+        integer index;
+        for (index = 0; index &lt; count; ++index)
+        {
+            key object = llDetectedKey(index);
+            string object_name = llDetectedName(index);
+            key owner = llDetectedOwner(index);
+            key rezzer = llDetectedRezzer(index);
+            list damage = llDetectedDamage(index);
+            
+            string owner_name = llKey2Name(owner);
+            string rezzer_name = llKey2Name(rezzer);
+            
+            llSay(0, &quot;I was struck by &quot; + object_name + &quot;{&quot; + (string)object + &quot;} owned by &quot; +        
+                owner_name + &quot;{&quot; + (string)owner + &quot;} rezzed by &quot; +
+                rezzer_name + &quot;{&quot; + (string)rezzer + &quot;} for &quot; +
+                (string)llList2Float(damage, 0) + &quot; points of &quot; + damageType2String(llList2Integer(damage, 1)) +
+                &quot; damage (originally &quot; + (string)llList2Float(damage, 2));
+            
+            float new_damage = llList2Float(damage, 0) / 2.0;
+            
+            llSay(0, &quot;Reducing damage by 50% to &quot; + (string)new_damage);
+            llAdjustDamage(index, new_damage);
+            llSay(0, &quot;llDetectDamage = [&quot; + llDumpList2String(llDetectedDamage(index), &quot;, &quot;) + &quot;]&quot;);
+        }
+        
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDetectedDamage/">llDetectedDamage</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llAdjustDamage/">llAdjustDamage</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llDamage/">llDamage</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/on_death/">on_death</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/events/final_damage/">final_damage</a></div></div></section>

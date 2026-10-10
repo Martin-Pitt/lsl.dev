@@ -1,0 +1,229 @@
+<div class="wiki-line">'''</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header}}</code></span></div>
+<h2 id="display-script">Display script</h2>
+<div class="wiki-line">'''</div>
+<div class="wiki-line">This script is an experimentation to operate the property of persistence of particles to show the matrix of corresponding points in every characters. </div>
+<div class="wiki-line">Billing is refresh every 30 sec</div>
+<div class="wiki-line"><pre><code>//////////////////////////////////////////////////////////////////// 
+//
+//  AbcText
+//  by Ange Capalini
+//  Originally Written  10/31/2011
+//  code released to the public domain
+// 
+//////////////////////////////////////////////////////////////////// 
+
+
+//==================================================================
+//               INSTRUCTIONS
+//==================================================================
+//
+//  - set Max Particles to 4096
+//  - create white cube &quot;board&quot; &lt;15.500, 0.010, 0.800&gt;
+//  - create red cube &quot;cursor&quot; &lt;0.050, 0.010, 0.030&gt; &amp; drop AbcText
+//  - link cursor (child) to board (root)
+//  - send message &lt;= 25 char. to chanel 20
+//  - that&#x27;s all folk&#x27;s
+//
+/////////////////////////////////////////////////////////////////////
+
+
+//===========================================
+//               CONSTANTS
+//===========================================
+float  Size_Point = 0.1; //pixel size
+string Txt_Point = &quot;&quot;;  //pixel texture
+vector Color_Point = &lt; 0., 0., 1. &gt;; //pixel color
+vector Size_Affich = &lt;15.5, .01, .8&gt;; //display size
+
+//===========================================
+//           GLOBALS VARIABLES
+//===========================================
+list Alphabet = [   &quot; &quot;,
+                    &quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;, &quot;E&quot;, &quot;F&quot;, &quot;G&quot;, &quot;H&quot;, &quot;I&quot;, &quot;J&quot;, &quot;K&quot;, &quot;L&quot;, &quot;M&quot;,
+                    &quot;N&quot;, &quot;O&quot;, &quot;P&quot;, &quot;Q&quot;, &quot;R&quot;, &quot;S&quot;, &quot;T&quot;, &quot;U&quot;, &quot;V&quot;, &quot;W&quot;, &quot;X&quot;, &quot;Y&quot;, &quot;Z&quot;,
+
+                    &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;, &quot;f&quot;, &quot;g&quot;, &quot;h&quot;, &quot;i&quot;, &quot;j&quot;, &quot;k&quot;, &quot;l&quot;, &quot;m&quot;,
+                    &quot;n&quot;, &quot;o&quot;, &quot;p&quot;, &quot;q&quot;, &quot;r&quot;, &quot;s&quot;, &quot;t&quot;, &quot;u&quot;, &quot;v&quot;, &quot;w&quot;, &quot;x&quot;, &quot;y&quot;, &quot;z&quot;,
+
+                    &quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;, 
+                    
+                    &quot;:&quot;, &quot;&#x27;&quot;, &quot;,&quot;, &quot;!&quot;, &quot;?&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;-&quot;, &quot;é&quot;, &quot;è&quot;, &quot;à&quot;     ];
+                    
+//char matrix 6 x 5 points
+list Matrices = [ &quot; &quot;, 
+                    &quot;011001001010010111101001000000&quot;, //A
+                    &quot;111001001011100100101110000000&quot;,
+                    &quot;011001000010000100000110000000&quot;,
+                    &quot;111001001010010100101110000000&quot;,
+                    &quot;111001000011100100001110000000&quot;,
+                    &quot;111001000011100100001000000000&quot;,
+                    &quot;011101000010110100100111000000&quot;,
+                    &quot;100101001011110100101001000000&quot;,
+                    &quot;111000100001000010001110000000&quot;,
+                    &quot;001100001000010100100110000000&quot;,
+                    &quot;100101010011000101001001000000&quot;,
+                    &quot;100001000010000100001110000000&quot;,
+                    &quot;100011101110101100011000100000&quot;,
+                    &quot;100101101010110100101001000000&quot;,
+                    &quot;011001001010010100100110000000&quot;,
+                    &quot;111001001010010111001000000000&quot;,
+                    &quot;011001001010010100100110000010&quot;,
+                    &quot;111001001010010111001001000000&quot;,
+                    &quot;011101000001100000101110000000&quot;,
+                    &quot;111000100001000010000100000000&quot;,
+                    &quot;100101001010010100100110000000&quot;,
+                    &quot;100101001010100101000100000000&quot;,
+                    &quot;100011010110101101010101000000&quot;,
+                    &quot;100101001001100100101001000000&quot;,
+                    &quot;100101001001110000100110000000&quot;,
+                    &quot;111100001001100100001111000000&quot;, //Z
+    
+                    &quot;000000110010010100100111000000&quot;, //a
+                    &quot;100001110010010100101110000000&quot;,
+                    &quot;000000110010000100000110000000&quot;,
+                    &quot;000100111010010100100111000000&quot;,
+                    &quot;000000111010010101000111000000&quot;,
+                    &quot;011001000011000100001000000000&quot;,
+                    &quot;011001001010010011100001001100&quot;,
+                    &quot;100001110010010100101001000000&quot;,
+                    &quot;100000000010000100001000000000&quot;,
+                    &quot;001000000000100001000010011000&quot;,
+                    &quot;100001001010100110101001000000&quot;,
+                    &quot;100001000010000100001000000000&quot;,
+                    &quot;000001101010101101011010100000&quot;,
+                    &quot;000001110010010100101001000000&quot;,
+                    &quot;000000110010010100100110000000&quot;,
+                    &quot;111001001010010111001000010000&quot;,
+                    &quot;011101001010010011100001000010&quot;,
+                    &quot;000001010011000100001000000000&quot;,
+                    &quot;000000111011000001101110000000&quot;,
+                    &quot;010001110001000010000100000000&quot;,
+                    &quot;000001001010010100100111000000&quot;,
+                    &quot;000001001010010100100110000000&quot;,
+                    &quot;000001010110101101010101000000&quot;,
+                    &quot;000001001001100011001001000000&quot;,
+                    &quot;100101001010010011100001001100&quot;,
+                    &quot;000001111000100010001111000000&quot;, //z
+    
+                    &quot;011001001010010100100110000000&quot;, //0
+                    &quot;011000010000100001000010000000&quot;,
+                    &quot;111000001001100100001111000000&quot;,
+                    &quot;111000001001100000101110000000&quot;,
+                    &quot;001000110010100111100010000000&quot;,
+                    &quot;111101000011100000101110000000&quot;,
+                    &quot;011001000011100100100110000000&quot;,
+                    &quot;111100001000100010000100000000&quot;,
+                    &quot;011001001001100100100110000000&quot;,
+                    &quot;011001001001110000100110000000&quot;, //9
+                    
+                    &quot;000000000000100000000010000000&quot;, //:
+                    &quot;000100010000000000000000000000&quot;,
+                    &quot;000000000000000000100010000000&quot;,
+                    &quot;001000010000100000000010000000&quot;,
+                    &quot;001000101000010001000000000100&quot;,
+                    &quot;010101111101010111110101000000&quot;, 
+                    &quot;000000000000000000000010000000&quot;, 
+                    &quot;000010001000100010001000000000&quot;, 
+                    &quot;000000000001110000000000000000&quot;, 
+                    &quot;000100110010010101000111000000&quot;,
+                    &quot;010000111010010101000111000000&quot;,
+                    &quot;010000110010010100100111000000&quot;  //à
+                    ];
+
+list    Particle_Parameters=[];
+vector  Origine;
+string  Texte;
+integer id_Phrase;
+integer len_Phrase;
+integer id_Lettre;
+string  Lettre;
+string  matrice_Lettre;
+vector  point_zero;
+integer x;
+integer z;
+
+//===========================================
+//        SET PARTICLES
+//===========================================
+
+init_particles(){
+
+    Particle_Parameters = [  
+           PSYS_SRC_TEXTURE, Txt_Point, 
+           PSYS_PART_START_SCALE, &lt; Size_Point, Size_Point, FALSE &gt;, 
+           PSYS_PART_END_SCALE,   &lt; Size_Point, Size_Point, FALSE &gt;, 
+           PSYS_PART_START_COLOR, Color_Point,    
+           PSYS_PART_END_COLOR,   Color_Point, 
+           
+           PSYS_SRC_BURST_PART_COUNT, (integer)1, 
+           PSYS_SRC_BURST_RATE, (float) 0.0,  
+           PSYS_PART_MAX_AGE, (float) 30.0, 
+            
+           PSYS_SRC_PATTERN, (integer) 1,
+              
+           PSYS_PART_FLAGS,
+           PSYS_PART_EMISSIVE_MASK
+           ];
+}
+
+//===========================================
+//          SET DISPLAY
+//===========================================
+affichage (string phrase) {
+
+    integer len_Phrase = llStringLength(phrase)-1;  
+    for(id_Phrase = 0; id_Phrase &lt;= len_Phrase;++id_Phrase){ 
+        Lettre = llGetSubString(phrase, id_Phrase, id_Phrase);
+        id_Lettre = llListFindList(Alphabet, [Lettre]);
+        matrice_Lettre = llList2String(Matrices, id_Lettre); 
+        z=0; 
+        do{ 
+            x=0;
+            do{
+                if( (integer)llGetSubString(matrice_Lettre, x + 5*z, x + 5*z) ) {
+                    llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_POSITION, point_zero + &lt; x*Size_Point, 0.0, -z*Size_Point &gt; ]);
+                    llParticleSystem( Particle_Parameters );
+                    llSleep(0.12);
+                    llParticleSystem( [] );
+                }
+            } while( ++x &lt;= 4);
+        } while( ++z &lt;= 5);
+        
+        point_zero += &lt; 6. * Size_Point, 0.0, 0.0 &gt;; //locate next char
+    }
+}
+/////////////////////////////////////
+///////////////////////////////////// 
+/////////////////////////////////////
+/////////////////////////////////////
+
+
+default {
+
+    state_entry() {
+
+        llListen(20, &quot;&quot;, llGetOwner(), &quot;&quot;);
+        init_particles(); 
+        Origine = &lt; (-0.48 * Size_Affich.x) , (-1.25 * Size_Point) , (0.3 * Size_Affich.z)  &gt;; //raz cursor
+    }
+
+    listen( integer channel, string name, key id, string msg ) {
+
+        Texte = msg;
+        point_zero = Origine;    //raz cursor         
+        llSetTimerEvent(30.);
+        affichage(Texte);
+    } 
+    
+    timer(){
+
+        point_zero = Origine;  //raz cursor
+        affichage(Texte);
+    }
+
+    on_rez(integer param) {llResetScript();}
+    changed(integer mask) {if(mask &amp; CHANGED_OWNER) {llResetScript();}} 
+      
+}</code></pre></div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Library|AbcText}}</code></span></div>

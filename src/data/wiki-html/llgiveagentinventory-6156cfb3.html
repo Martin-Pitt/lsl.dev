@@ -1,0 +1,26 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Gives <strong>inventory</strong> items to <strong>agent</strong>, creating a new <strong>folder</strong> to put them in.</div></section>
+<section><h2 id="specification">Specification</h2><ul>
+<li>The target must be an avatar in the same region as the sending object, or must have recently been in the region.</li>
+<li>Places the inventory items in a newly created folder in the avatar's inventory (even if there is a folder by the same name, a new one is created).</li>
+<li>If a path of root folders has been specified, the function will ensure that those folders exist but will not recreate them if they already exist.</li>
+</ul><span id="constants"></span><h4 id="transfer-options">Transfer Options</h4>
+<table><tr><th> Flags</th><th></th><td> Parameters</td><th> Description </th></tr><tr><td><a href="/constants/TRANSFER_DEST/">TRANSFER_DEST</a></td><td>0</td><td> [ TRANSFER_DEST, string ]</td><td>Sets a root path that will be used as the parent for folder. If the root path does not exist it will be created. If it already exists in the target inventory it will be reused. Path folders are separated by a "|" character. The path may have have up to 4 folders in it. Note that transfers to certain system folders (such as 'Trash') are disallowed. Examples:<br> "Objects|Vehicles|My Motorcycle Company"<br> "Clothing|Shoes|Breedables"<br> "My Store|Home &amp; Garden|"</td></tr><tr><td><a href="/constants/TRANSFER_FLAGS/">TRANSFER_FLAGS</a></td><td>1</td><td> [ TRANSFER_FLAGS, integer ]</td><td> There are no flags defined at this time.</td></tr></table>
+<h4 id="transfer-errors">Transfer Errors</h4>
+<table><tr><th> Constant</th><th></th><td> Description </td></tr><tr><td><a href="/constants/TRANSFER_OK/">TRANSFER_OK</a></td><td>0</td><td> No error detected, inventory transferred</td></tr><tr><td><a href="/constants/TRANSFER_BAD_OPTS/">TRANSFER_BAD_OPTS</a></td><td> -1</td><td> A bad option was passed in the options list.</td></tr><tr><td><a href="/constants/TRANSFER_NO_TARGET/">TRANSFER_NO_TARGET</a></td><td> -2</td><td> Could not find the receiving agent in the current region.</td></tr><tr><td><a href="/constants/TRANSFER_THROTTLE/">TRANSFER_THROTTLE</a></td><td> -3</td><td> Transfer rate exceeded the inventory transfer throttle.</td></tr><tr><td><a href="/constants/TRANSFER_NO_ITEMS/">TRANSFER_NO_ITEMS</a></td><td> -4</td><td> The list of items was empty or contained only non-transferable items.</td></tr><tr><td><a href="/constants/TRANSFER_BAD_ROOT/">TRANSFER_BAD_ROOT</a></td><td> -5</td><td> The root path specified in TRANSFER_DEST contained an invalid directory or was reduced to nothing.</td></tr><tr><td><a href="/constants/TRANSFER_NO_PERMS/">TRANSFER_NO_PERMS</a></td><td> -6</td><td> The object does not have transfer permissions.</td></tr><tr><td><a href="/constants/TRANSFER_NO_ATTACHMENT/">TRANSFER_NO_ATTACHMENT</a></td><td> -7</td><td> Can not transfer ownership of an attached object.</td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Any no-copy items in <strong>inventory</strong> will be excluded from transfer.</li>
+<li>Any no-transfer items in <strong>inventory</strong> will be excluded from transfer if <strong>agent</strong> is not the script owner.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">In this example, the object inventory needs to contain two objects named <em>Item 1</em> and <em>Item 2</em>. The destination folder will be named <em>Destination Folder</em> and will be created under the main folder <em>Objects</em>, in the sub-folder <em>Subfolder</em>. If <em>Subfolder</em> does not exist, it will be created.</div>
+<div class="wiki-line">If the object gets touched for a second time, the sub-folder <em>Subfolder</em> will <strong>not</strong> be duplicated, however the destination folder <em>Destination Folder</em> <strong>will</strong> be duplicated.</div>
+<div class="wiki-line">If <em>Item 1</em> and/or <em>Item 2</em> do not exist, the transfer will silently fail partially or completely.</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer total_number)
+    {
+        llGiveAgentInventory(llDetectedKey(0), &quot;Destination Folder&quot;, [&quot;Item 1&quot;,&quot;Item 2&quot;], [TRANSFER_DEST, &quot;Objects|Subfolder&quot;] );
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGiveInventory/">llGiveInventory</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGiveInventoryList/">llGiveInventoryList</a></div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/changed/">changed</a></div></div></section>

@@ -1,0 +1,132 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Set the running state of the script <code>name</code>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Cannot be used to restart a script that has encountered a <a href="/wiki/category-lsl-error-d8dc68a3/">run-time error</a>.</li>
+<li>Cannot be used to start a script that has been added via <a href="/functions/llGiveInventory/">llGiveInventory</a>.  Scripts sent via <a href="/functions/llRemoteLoadScriptPin/">llRemoteLoadScriptPin</a>, and which have the running state set FALSE by that command, may be started.</li>
+<li>The script appears to stop when its time slice ends, not sooner. If a script tries to stop itself then some LSL code following the llSetScriptState call may be executed before the script stops.</li>
+<li>If a script is paused by llSetScriptState and is then either re-rezzed, in a region during a restart, or moved into a different region, the script's memory is reset.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//Stops the Script, at some non-deterministic time later, until invoked with TRUE, in another script
+llSetScriptState(llGetScriptName(),FALSE);
+// Stall until end of time slice
+llSleep(0.1);</code></pre></div>
+<div class="wiki-line"><pre><code>//Starts Another Script
+llSetScriptState(&quot;somescript&quot;,TRUE);</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetScriptState/">llGetScriptState</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llResetOtherScript/">llResetOtherScript</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-1853"><a href="/wiki/template-issues-svc-1853-b6a0c20e/">Template:Issues/SVC-1853</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-1853|Scripts deactivated by [[llSetScriptState]] are reset when the region is reset, when they are taken into inventory and re-rezzed and when crossing sim boundaries.|type=bug|status=wont}}</code></pre></details><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-boolean-c769e8e3/">Template:LSL Function/boolean</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:nbdv|{{#switch:{{uc:{{{default|}}}}}|T|TRUE=true|F|FALSE=false}}}}
+
+{{#vardefine:p_{{{1|}}}_desc|{{#if:{{{bool|}}}|{{HoverLink|boolean{{#var:lang}}|A type that can only be true or false|boolean}},}} {{{pd|}}} {{#if:{{{bool|}}}{{{pd|}}}|{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}|{{ucfirst:{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}}}}} {{#vardefineecho:TRUE|{{LSL Const{{#var:lang}}|TRUE|integer|1}}}}{{#vardefine:FALSE|{{LSL Const{{#var:lang}}|FALSE|integer|0}}}}{{#if:{{{non-zero|}}}|{{Footnote|handle=non-zero|Any value that is not zero/{{#var:FALSE}} is treated the same as {{#var:TRUE}}. This behavior should not be depended upon.|Any value that is not zero/FALSE is treated the same as TRUE. This behavior should not be depended upon.}}}}{{#ifeq:{{#var:nbdv}}|true|&amp;#32;({{HoverText|default|default for new objects etc}})}} {{#if:{{{td|}}}|{{{td|}}}|enables}}, {{#ifeq:{{{if|}}}|*|if|{{{if|}}}}} {{#var:FALSE}}{{#ifeq:{{#var:nbdv}}|false|&amp;#32;({{HoverText|default|default for new objects etc}})}} {{#if:{{{fd|}}}|{{{fd|}}}|disables}}}}
+
+{{#vardefine:p_{{{1|}}}_hover|{{#if:{{{bool|}}}|boolean,}} {{#if:{{{ph|}}}|{{{ph|}}}|{{{pd|}}}}} {{#if:{{{bool|}}}{{{pd|}}}{{{ph|}}}|{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}|{{ucfirst:{{#ifeq:{{{if|}}}|*|if|{{{if|}}}}}}}}} TRUE{{#ifeq:{{#var:nbdv}}|true|&amp;#32;(default)}} {{#if:{{{th|}}}|{{{th|}}}|{{#if:{{{td|}}}|{{{td|}}}|enables}}}}, {{#ifeq:{{{if|}}}|*|if|{{{if|}}}}} FALSE{{#ifeq:{{#var:nbdv}}|false|&amp;#32;(default)}} {{#if:{{{fh|}}}|{{{fh|}}}|{{#if:{{{fd|}}}|{{{fd|}}}|disables}}}}}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|default=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|default=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|bool=*|if=*|non-zero=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|bool=*|if=*|non-zero=*|pd=1|ph=2|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+{| {{Prettytable}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAME}}|bool|if=when|non-zero=*|td=3|th=4|fd=5|fh=6}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAME}}|bool|if=when|non-zero=*|td=3|th=4|fd=5|fh=6}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_bool_desc}}
+|-
+{{VarPair|p_bool_hover}}
+|-
+{{Footnotes}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

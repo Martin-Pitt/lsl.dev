@@ -1,0 +1,205 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Specify a list of positions, orientations, and timings to be followed by an object. The object will be smoothly moved between those keyframes by the simulator.</div>
+<div class="wiki-line">Collisions with other nonphysical or keyframed objects will be ignored (no script events will fire and collision processing will not occur). Collisions with physical objects will be computed and reported, but the keyframed object will be unaffected by those collisions. (The physical object will be affected, however.)</div></section>
+<section><h2 id="specification">Specification</h2><div class="wiki-line">The following flags will be supported within the <em>options</em> list:</div>
+<ul>
+<li><a href="/constants/KFM_MODE/">KFM_MODE</a> followed by one of: <a href="/constants/KFM_LOOP/">KFM_LOOP</a>, <a href="/constants/KFM_REVERSE/">KFM_REVERSE</a>, <a href="/constants/KFM_FORWARD/">KFM_FORWARD</a>, or <a href="/constants/KFM_PING_PONG/">KFM_PING_PONG</a> will specify the playback mode. Defaults to <a href="/constants/KFM_FORWARD/">KFM_FORWARD</a>. Must be specified when the keyframe list is provided.</li>
+<li><a href="/constants/KFM_DATA/">KFM_DATA</a> followed by a bitwise combination of: <a href="/constants/KFM_TRANSLATION/">KFM_TRANSLATION</a> and <a href="/constants/KFM_ROTATION/">KFM_ROTATION</a>. By default both rotations and translations must be provided. If you specify one or the other, you should only include translations or rotations in your keyframe list. Must be specified at the time the keyframe list is provided.</li>
+<li><a href="/constants/KFM_COMMAND/">KFM_COMMAND</a> followed by one of: <a href="/constants/KFM_CMD_STOP/">KFM_CMD_STOP</a>, <a href="/constants/KFM_CMD_PLAY/">KFM_CMD_PLAY</a>, <a href="/constants/KFM_CMD_PAUSE/">KFM_CMD_PAUSE</a>. STOP will pause the animation AND reset it to the beginning. PAUSE will pause the animation without resetting. PLAY will resume a paused or stopped animation. </li>
+</ul>
+<div class="wiki-line">Note that if <a href="/constants/KFM_COMMAND/">KFM_COMMAND</a> is provided in the options list, it must be the only option in the list, and cannot be specified in the same function call that sets the keyframes list.</div>
+<div class="wiki-line">Inter-region movement is supported; simply specify a target keyframe that would place the object outside the sim boundaries and it will cross over. This seems to provide the same effect as pausing the animation when it is in limbo between the two regions, but the viewer continues to interpolate its movement. It will jump back to the sim border and continue on the same speed, although the time between waypoints will be increased due to the sim crossing. Make sure you factor this into your system.</div>
+<div class="wiki-line">Since keyframed motion is a prim property rather than restricted to the script that called it, you can use multiple scripts to control, pause, or restart the same keyframed motion without passing the original keyframe list provided. Just pass an empty list for keyframes list, and the <a href="/constants/KFM_COMMAND/">KFM_COMMAND</a> followed by the command in the options list.</div><span id="constants"></span><div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_COMMAND/">KFM_COMMAND</a><span> integer</span><span> 0</span><span> b=[&nbsp;</span><span> e=&nbsp;]</span><span> s=rowspan="1"</span><span> s1=id="KFM_COMMAND"</span><span> s=rowspan=4</span><span> c=Sets the command</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_CMD_PLAY/">KFM_CMD_PLAY</a><span> integer</span><span> 0</span><span> m=3</span><span> c=?</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_CMD_STOP/">KFM_CMD_STOP</a><span> integer</span><span> 1</span><span> m=3</span><span> c=?</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_CMD_PAUSE/">KFM_CMD_PAUSE</a><span> integer</span><span> 2</span><span> m=3</span><span> c=?</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_MODE/">KFM_MODE</a><span> integer</span><span> 1</span><span> b=[&nbsp;</span><span> e=&nbsp;]</span><span> s=rowspan="1"</span><span> s1=id="KFM_MODE"</span><span> s=rowspan=5</span><span> c=Sets the playback mode</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_FORWARD/">KFM_FORWARD</a><span> integer</span><span> 0</span><span> m=3</span><span> c=?</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_LOOP/">KFM_LOOP</a><span> integer</span><span> 1</span><span> m=3</span><span> c=?</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_PING_PONG/">KFM_PING_PONG</a><span> integer</span><span> 2</span><span> m=3</span><span> c=?</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_REVERSE/">KFM_REVERSE</a><span> integer</span><span> 3</span><span> m=3</span><span> c=?</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_DATA/">KFM_DATA</a><span> integer</span><span> 2</span><span> b=[&nbsp;</span><span> e=&nbsp;]</span><span> s=rowspan="1"</span><span> s1=id="KFM_DATA"</span><span> s=rowspan=3</span><span> c=Sets what data the <strong>keyframes</strong> contain</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_ROTATION/">KFM_ROTATION</a><span> integer</span><span> 0x1</span><span> m=3</span><span> c=?</span></div></div>
+<div class="wiki-line"><div class="wiki-constant-row"><a href="/constants/KFM_TRANSLATION/">KFM_TRANSLATION</a><span> integer</span><span> 0x2</span><span> m=3</span><span> c=?</span></div></div>
+<table><tr><th colspan="2"> <code>options</code> flags</th><th colspan="2"> Additional&nbsp;Parameters</th><th colspan="6"> Description</th></tr><tr><td colspan="2" rowspan="4"> [ <a href="https://wiki.secondlife.com/wiki/integer">integer</a>&nbsp;<code>command</code> ]</td><td colspan="6"> <span class="wiki-template"><code>{{#var:comment}}</code></span></td></tr><tr><td colspan="2" rowspan="5"> [ <a href="https://wiki.secondlife.com/wiki/integer">integer</a>&nbsp;<code>mode</code> ]</td><td colspan="6"> <span class="wiki-template"><code>{{#var:comment}}</code></span>Defaults to <a href="/constants/KFM_FORWARD/">KFM_FORWARD</a></td></tr><tr><td colspan="2" rowspan="3"> [ <a href="https://wiki.secondlife.com/wiki/integer">integer</a>&nbsp;<code>fields</code> ]</td><td colspan="6"> Defaults to (<a href="/constants/KFM_ROTATION/">KFM_ROTATION</a> | <a href="/constants/KFM_TRANSLATION/">KFM_TRANSLATION</a>)</td></tr></table></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>This function does not work in attachments.</li>
+<li>This function can only be called on NON-physical objects. In the future it could be extended to support physical objects, but this is more complicated as collisions could prevent the object from reaching its goal positions on time.</li>
+<li>You cannot use scripts to move any prim in the linkset while the keyframed motion is active. If you must, first pause and restart it with <a href="/constants/KFM_CMD_PLAY/">KFM_CMD_PLAY</a> when done. <a href="#pause-play">#Example</a></li>
+<li>Collisions with avatars affect the angular movement of the object and it may not reach the final rotation.</li>
+<li>This function can only be called on the root prim of a linkset.</li>
+<li>This function requires the linkset to use the Prim Equivalency system. However, it keyframed objects will not receive the dynamics penalty and can have a physics weight of up to 64.</li>
+<li>Linear velocity greater than Second Life's maximum of 250 meters per second will produce an error on DEBUG_CHANNEL.</li>
+<li>llSetKeyframedMotion is implemented in terms of frames and not real time. To avoid a drift from the expected positions and rotations, use times which are integer multiples of 1/45, e.g. 20.0/45.0, 40.0/45.0, 90.0/45.0, etc. <a href="http://community.secondlife.com/t5/LSL-Scripting/llSetKeyframedMotion-turning-a-corner/td-p/1225219" rel="noreferrer">Forum Thread</a> KFM claims delta times must be larger than 0.1 seconds; in practice, however, delta times slightly over 0.1 will produce an error on DEBUG_CHANNEL. Testing shows a minimum delta time is about 6/45 (.13333) seconds.</li>
+<li>Natural drift can still occur; for best results use <a href="/events/moving_end/">moving_end</a> to determine when the animation has ended and confirm the target position with <a href="/functions/llSetPos/">llSetPos</a>.  Or you can use <a href="/events/at_target/">at_target</a> or <a href="/events/at_rot_target/">at_rot_target</a>.</li>
+<li>There are a few bugs in the avatar animation system that may cause strange looking animations to play when standing on a moving platform (e.g., walking in place, feet-at-pelvis). We hope to fix these in the future, but doing so is out of scope for this feature.</li>
+<li>As with dynamic objects, objects moving using this function are paused when they are selected by an avatar with adequate permissions (object owner, passenger, etc). When such an avatar deselects the object, motion resumes, even if the object had been paused using <a href="/constants/KFM_CMD_PAUSE/">KFM_CMD_PAUSE</a>.</li>
+<li>A Keyframed motion is a <strong>prim property</strong> in some respect. When a <a href="/constants/KFM_LOOP/">KFM_LOOP</a> or <a href="/constants/KFM_PING_PONG/">KFM_PING_PONG</a> is initiated the <strong>the motion</strong> is <strong>preserved after the script is removed</strong>. I.E. The prim will continue what motion it had. It will survive take and copy. It will survive server restart.</li>
+<li>Interregion movement is far from perfect. Crossing from sim 1 to sim 2 using a Key Frame list with numerous frames on a curved path will pick up conspicuous errors on the crossing and when reversed by [ <a href="/constants/KFM_MODE/">KFM_MODE</a>, <a href="/constants/KFM_REVERSE/">KFM_REVERSE</a> ] the object will stay in sim 2 and never return to sim 1</li>
+<li>Unlike <a href="/functions/llSetPos/">llSetPos</a>, <a href="/constants/PRIM_POSITION/">PRIM_POSITION</a> and related functions, keyframed motion <strong>can</strong> move objects below the region ground level, but the behavior becomes increasingly unstable beyond a short distance. Attempting to correct position drift after keyframed motion with calls to such functions will cause the object to snap to the ground level instead, which may be unexpected.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">A KFM object must use the new Prim Equivalency system in order to work. One of many ways to achieve this is to make sure the object uses Convex Hull for its physics shape. (Mainly new prims need a workaround like this. Mesh objects always use the new Prim Equivalency system.)</div>
+<div class="wiki-line"><pre><code>llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_PHYSICS_SHAPE_TYPE, PRIM_PHYSICS_SHAPE_CONVEX]);</code></pre></div>
+<div class="wiki-line">This is a simple example of back-and-forth or "ping pong" motion, using only positions and time.</div>
+<div class="wiki-line"><pre><code>llSetKeyframedMotion([&lt;0.0, 0.0, 10.0&gt;, 5, &lt;0.0, 0.0, -10.0&gt;, 5], [KFM_DATA, KFM_TRANSLATION, KFM_MODE, KFM_PING_PONG]);</code></pre></div>
+<div class="wiki-line">This example includes position, rotation, and time.</div>
+<div class="wiki-line"><pre><code>llSetKeyframedMotion(
+    [&lt;0.0, 0.0, 10.0&gt;, llEuler2Rot(&lt;90, 45, 180&gt; * DEG_TO_RAD), 5,
+     &lt;0.0, 0.0, -10.0&gt;, llEuler2Rot(&lt;270, 225, 360&gt; * DEG_TO_RAD), 5],
+    [KFM_MODE, KFM_REVERSE]);</code></pre></div>
+<h3 id="pause-play">Pause-Play</h3>
+<div class="wiki-line">If you need to update a KFM object's position, you will need to pause KFM and continue it afterwards.</div>
+<div class="wiki-line"><pre><code>llSetKeyframedMotion([],[KFM_COMMAND, KFM_CMD_PAUSE]);
+// Modify prim positions here
+llSetKeyframedMotion([],[KFM_COMMAND, KFM_CMD_PLAY]);</code></pre></div>
+<h3 id="sample-script-key-framed-follower">Sample Script - Key Framed Follower</h3>
+<div class="wiki-line">Under some circumstances, rotations will generate a run-time error unless they are normalized. This script illustrates a way to use llKeyframedMotion to create a follower -- think, for example, of a cart behind a vehicle -- using normalized target rotation.</div>
+<div class="wiki-line"><pre><code>key scriptedObjectToFollow = &quot;daf4847b-967d-bff6-69c0-fd7022241be7&quot;;
+integer isSensorRepeatOn;
+
+rotation NormalizeRotation(rotation Q)
+{
+    float MagQ = llSqrt(Q.x*Q.x + Q.y*Q.y +Q.z*Q.z + Q.s*Q.s);
+    return &lt;Q.x/MagQ, Q.y/MagQ, Q.z/MagQ, Q.s/MagQ&gt;;
+}
+
+default
+{
+    state_entry()
+    {
+        llSetLinkPrimitiveParamsFast(LINK_ROOT, [
+            PRIM_PHYSICS_SHAPE_TYPE, PRIM_PHYSICS_SHAPE_CONVEX,
+            PRIM_LINK_TARGET, LINK_ALL_CHILDREN,
+            PRIM_PHYSICS_SHAPE_TYPE, PRIM_PHYSICS_SHAPE_NONE
+        ]);
+    }
+
+    touch_start(integer total_number)
+    {
+        isSensorRepeatOn = !isSensorRepeatOn;
+
+        if (isSensorRepeatOn)
+        {
+            llSay(PUBLIC_CHANNEL, &quot;Sensor repeat switched on!&quot;);
+            llSensorRepeat(&quot;&quot;, scriptedObjectToFollow, SCRIPTED, 10.0, PI, 0.3);
+        }
+        else
+        {
+            llSensorRemove();
+        }
+    }
+
+    sensor(integer num_detected)
+    {
+        vector ownPosition = llGetPos();
+        rotation ownRotation = llGetRot();
+        vector detectedPosition = llDetectedPos(0);
+        rotation detectedRotation = llDetectedRot(0);
+
+        vector kfmPosition = (detectedPosition - ownPosition) + &lt;-1.0, 0.0, 0.2&gt; * detectedRotation;
+        rotation kfmRotation = NormalizeRotation(detectedRotation / ownRotation);
+        llSetKeyframedMotion([kfmPosition, kfmRotation, 0.15], []);
+    }
+}</code></pre></div>
+<h3 id="universal-hinged-motion-in-8-key-frames">Universal Hinged Motion in 8 Key Frames</h3>
+<div class="wiki-line">The script will turn a box prim around one edge parallel to the prim's Y-axis<br></div>
+<div class="wiki-line">The script will work for any prim orientation<br></div>
+<div class="wiki-line">Note that the smallest accepted time per frame is 1/9S=0.11111111S and NOT 0.1S<br></div>
+<div class="wiki-line"><pre><code>float angleEnd=PI_BY_TWO;
+float speed=0.2; // m/S
+float steps=8.0; // number of Key Frames
+float step=0.0;
+list KFMlist=[];
+vector V;
+integer open=TRUE;
+vector basePos;
+rotation baseRot;
+
+float motion_time( float mt)
+{
+    mt = llRound(45.0*mt)/45.0;
+    if ( mt &gt; 0.11111111 ) return mt;
+    else return 0.11111111;
+}
+
+default
+{
+    state_entry()
+    {
+        llSetMemoryLimit(0x2000);
+        llSetPrimitiveParams([PRIM_PHYSICS_SHAPE_TYPE, PRIM_PHYSICS_SHAPE_CONVEX]);
+        basePos = llGetPos();
+        baseRot = llGetRot();
+        vector v1 = 0.5*llGetScale()*llGetRot();
+        rotation deltaRot = llEuler2Rot(&lt; 0.0, angleEnd/steps, 0.0&gt;);
+        while ( step &lt; steps )
+        {
+            V = v1*llAxisAngle2Rot(llRot2Left(llGetRot()), angleEnd*step/steps);
+            V = v1*llAxisAngle2Rot(llRot2Left(llGetRot()), angleEnd*(step+1.0)/steps) - V;
+            KFMlist += [V, deltaRot, motion_time(llVecMag(V)/speed)];
+            step += 1.0;
+        }
+    }
+    touch_end( integer n)
+    {
+        llSetKeyframedMotion( [], []);
+        if ( open )
+        {
+            llSetPrimitiveParams([PRIM_POSITION, basePos, PRIM_ROTATION, baseRot]);
+            llSetKeyframedMotion( KFMlist, []);
+        }
+        else
+        {
+            llSetKeyframedMotion( KFMlist, [KFM_MODE, KFM_REVERSE]);
+        }
+        open = !open;
+    }
+    on_rez( integer n) { llResetScript(); }
+}</code></pre></div>
+<div class="wiki-line">After editing prim position, rotation and/or size the script should be reset in order to update the motion</div>
+<h3 id="continuous-spin">Continuous Spin</h3>
+<div class="wiki-line">The following example does the same thing as using llTargetOmega(&lt;0.0,0.0,1.0&gt;,PI,1.0) to make a prim rotate continuously around its Z-axis, assuming that the prim is set to convex hull and is non-physical.</div>
+<div class="wiki-line"><pre><code>integer gON;
+
+default
+{
+    touch_end(integer total_number)
+    {
+        if (gON = !gON)
+        {
+            // Make repeated rotations of PI radians, each taking 1 seconds
+            rotation r = llEuler2Rot(&lt;0.0, 0.0, PI&gt;);
+            llSetKeyframedMotion(
+                [
+                    r, 1,
+                    r, 1
+                ], 
+                [KFM_DATA, KFM_ROTATION, KFM_MODE, KFM_LOOP]
+            );
+            return;
+        }
+
+        llSetKeyframedMotion([], []);
+    }
+}</code></pre></div>
+<h3 id="more-examples">More Examples</h3>
+<ul>
+<li><a href="https://wiki.secondlife.com/wiki/User:Tapple_Gao/3D_Spinning_Pendulum_Motion">3D Spinning Pendulum Motion</a>, Suitable for spinning tops, swings, tire swings. Highly configurable</li>
+<li><a href="https://wiki.secondlife.com/wiki/User:Dora_Gustafson/Harmonic_Oscillator_motion">Oscillator Motion in 12 Key Frames</a></li>
+<li><a href="https://wiki.secondlife.com/wiki/User:Dora_Gustafson/Pendulum_motion">Simple Pendulum Motion in 24 Key Frames</a>, a good motion for a swing</li>
+</ul></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line">Potential Use Cases:</div>
+<ul>
+<li>Elevators</li>
+<li>Moving platforms</li>
+<li>Trains/Fixed-Track Vehicles</li>
+<li>Moving doors/walls/gates</li>
+<li>Windmills and other machines</li>
+</ul>
+<div class="wiki-line">Targeted coordinate systems: The Translation is in Global coordinates, the Rotation in Local coordinates</div>
+<ul>
+<li>Say: a move on the X-axis will move the object along the global, region X-axis no matter how the object is rotated</li>
+<li>Say: a rotate around the X-axis will rotate the object around it's local, prim X-axis no matter the object's rotation</li>
+<li>When the object is not rotated in the global system you won't notice the difference</li>
+</ul></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-11-09-244706"> 09/11/2011 </a></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="scr-345"><a href="/wiki/template-issues-scr-345-20eec194/">Template:Issues/SCR-345</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SCR-345|[[llSetKeyframedMotion]]() does not support inter-region motion|type=bug|resolution=fixed|status=closed}}</code></pre></details><p id="scr-346"><a href="/wiki/template-issues-scr-346-f03ce767/">Template:Issues/SCR-346</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SCR-346|Option for viewer-only [[llSetKeyframedMotion]]() functionality|type=nf}}</code></pre></details><p id="svc-7796"><a href="/wiki/template-issues-svc-7796-79de1144/">Template:Issues/SVC-7796</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-7796|Curve Interpolation for [[llSetKeyframedMotion]]()|type=nf}}</code></pre></details><p id="bug-7743"><a href="/wiki/template-issues-bug-7743-3ff1ec0e/">Template:Issues/BUG-7743</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-7743|Bezier Curve Support for [[llSetKeyframedMotion]]()|type=nf}}</code></pre></details><p id="bug-7767"><a href="/wiki/template-issues-bug-7767-d414feb7/">Template:Issues/BUG-7767</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-7767|&#x27;&#x27;&#x27;KFM_STRICT_TIMING&#x27;&#x27;&#x27; for [[llSetKeyframedMotion]]()|type=nf}}</code></pre></details><p id="bug-7882"><a href="/wiki/template-issues-bug-7882-cc164dd6/">Template:Issues/BUG-7882</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{issues|BUG-7882|&#x27;&#x27;&#x27;KFM_SYNC_TIME&#x27;&#x27;&#x27; - Synchronised Timing for [[llSetKeyframedMotion]]()|type=nf}}</code></pre></details></section>

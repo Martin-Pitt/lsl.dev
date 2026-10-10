@@ -1,0 +1,131 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Stop animation <code>anim</code> for agent that granted <a href="/constants/PERMISSION_TRIGGER_ANIMATION/">PERMISSION_TRIGGER_ANIMATION</a> if the permission has not been revoked.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>If the animation to be stopped is the only playing animation (as found via <a href="/functions/llGetAnimationList/">llGetAnimationList</a>), it will continue to play to its end (if looped it will continue indefinitely)</li>
+<li>if you must stop a looped animation, playing a single frame non-looped one immediately after stopping it, at low priority, will clear the list.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer detected)
+    {
+        llRequestPermissions(llDetectedKey(0), PERMISSION_TRIGGER_ANIMATION);
+    }
+    run_time_permissions(integer perm)
+    {
+        if (perm &amp; PERMISSION_TRIGGER_ANIMATION)
+        {
+            llStartAnimation(&quot;sit&quot;);
+            llOwnerSay(&quot;animation will end in 5 seconds&quot;);
+            llSetTimerEvent(5.0);
+        }
+    }
+    timer()
+    {
+        llSetTimerEvent(0.0);
+        llStopAnimation(&quot;sit&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><div class="wiki-line"><pre><code>llStopAnimation(llGetAnimationOverride(&quot;Sitting&quot;))</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetAnimationList/">llGetAnimationList</a> — Gets a list of playing animations</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llStartAnimation/">llStartAnimation</a> — Starts playing an animation</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-3860"><a href="/wiki/template-issues-svc-3860-9129d08c/">Template:Issues/SVC-3860</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-3860|type=bug|[[llStopAnimation]](&quot;[[Internal_Animations|prejump]]&quot;) freezes avatar}}</code></pre></details><p><a href="/wiki/template-lsl-function-permission-4bc8750c/">Template:LSL Function/permission</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:
+
+{{{{#if:{{#var:DEBUG_CHANNEL}}||:DEBUG_CHANNEL}}|}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|To run this function the script must request the [[{{{1}}}]] {{#if:{{{2|}}}|or [[{{{2}}}]]}} permission with [[llRequestPermissions]]{{#ifeq:{{{grant|anyone}}}|anyone||&amp;#32;and it must be granted by {{{grant|anyone}}}}}.}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|{{PBR}}
+&lt;div style=&quot;border: 1px dotted rgba(0,0,0,0.5);&quot;&gt;{{Collapsible_Table/Simple|title=&lt;h5 style=&quot;margin:0;&quot;&gt;Permissions&lt;/h5&gt;|table-style=width:100%;|autocollapse=*|content={{!}}&lt;div&gt;
+* Do not depend upon the auto-grant status of permissions. &#x27;&#x27;&#x27;Always&#x27;&#x27;&#x27; use the [[run_time_permissions]] event.
+* If the script lacks {{#if:{{{2|}}}|both the permissions [[{{{1}}}]] and [[{{{2}}}]]|the permission [[{{{1}}}]]}}, the script will shout an error on {{#var:DEBUG_CHANNEL}} and the operation fails (but the script continues to run).{{#ifeq:{{{grant|anyone&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|anyone||
+* If [[{{{1}}}]] {{#if:{{{2|}}}|or [[{{{2}}}]]}} is granted by anyone other than {{{grant|anyone}}}, then when the function is called an error will be shouted on {{#var:DEBUG_CHANNEL}}.}}
+{{{caveats|}}}{{LSL Function/permission/caveat switch|{{{1}}}}}{{#if:{{{2|}}}|{{LSL Function/permission/caveat switch|{{{2}}}}}}}&lt;/div&gt;}}&lt;/div&gt;}}}}
+
+{{#vardefine:also_events|{{#var:also_events}}
+{{LSL DefineRow||[[run_time_permissions]]|Permission receiving event}}}}
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetPermissions]]|Get the permissions granted}}
+{{LSL DefineRow||[[llGetPermissionsKey]]|Get the agent who granted permissions}}
+{{LSL DefineRow||[[llRequestPermissions]]|Request permissions}}}}
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{LSL DefineRow||[[:Category:LSL Permissions/Script|Script permissions]]|}}}}
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||[[Category:LSL Requires Permissions]]}}
+}}}}&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPairTable|also_events}}
+|-
+{{VarPairTable|also_functions}}
+|-
+{{VarPairTable|also_articles}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-inventory-e08b399b/">Template:LSL Function/inventory</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;includeonly&gt;{{#if:
+{{:DEBUG_CHANNEL}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the {{LSLGC|Inventory|inventory}} {{#if:{{{remote|}}}|of the {{#if:{{{target|}}}|[[{{{target|}}}|target]]|target}} prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a {{HoverLink|UUID|Universally Unique IDentifier}}{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty}}}}}}}{{#var:p_{{{1|none}}}_desc}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{AAn|{{#if:{{{insert|}}}|{{{insert}}}|{{#if:{{{type|}}}|{{{type}}}|item}}}}}} in the inventory {{#if:{{{remote|}}}|of the target prim|of the prim this script is in}}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|{{#if:{{{empty|}}}|,|&amp;#32;or}} a UUID{{#if:{{{type|}}}|&amp;#32;of {{AAn|{{{type}}}|{{{type_hover|{{{type}}}}}}}}}}}}{{#if:{{{empty|}}}|&amp;#32;or an empty string{{#ifeq:{{{empty}}}|*||&amp;#32;{{{empty_hover|{{{empty}}}}}}}}}}{{#var:p_{{{1|none}}}_hover}}}}
+
+{{#vardefine:caveats{{#var:direction}}|{{#if:{{#if:{{{no_caveat|}}}||{{{1|}}}}}|{{#var:caveats{{#var:direction}}}}
+{{#if:{{{empty|}}}|* If {{LSLP|{{{1}}}}} is not an empty string and...
+**{{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}.
+|* If {{LSLP|{{{1}}}}} is missing from the prim&amp;#39;s inventory {{#if:{{{full|}}}|or not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}}} {{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|and it is not a {{HoverLink|UUID|Universally Unique IDentifier}}}} {{#if:{{{type|}}}|or it is not {{AAn|{{{type|item}}}}}}} then {{#if:{{{silent|}}}|it fails silently|an error is shouted on {{#var:DEBUG_CHANNEL}}}}. }}{{#ifeq:{{{uuid|}}}{{{UUID|}}}|true|
+* If {{LSLP|{{{1}}}}} is a {{HoverLink|UUID|Universally Unique IDentifier}} then there are no new [[:Category:LSL_Permissions/Asset|asset permissions]] consequences for the object.
+** The resulting object develops no new usage restrictions that might have occurred if the asset had been placed in the prims inventory.}}|{{#var:caveats{{#var:direction}}}}}}}}
+
+{{{{#if:{{{volume|}}}|LSL Function/volume}}|{{{volume|}}}|}}
+
+}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{Multi-lang}}
+{{UpdateLink}}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+{| {{Prettytable}} {{#vardefine:caveats}}{{#vardefine:p_ta_desc}}{{#vardefine:p_ta_hover}}
+|+&lt;code&gt;&lt;nowiki&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}&lt;/nowiki&gt;&lt;/code&gt;{{{{FULLPAGENAMEE}}|ta|type=landmark|uuid=true|empty=(for teleporting within the same region)}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_ta_desc}}
+|-
+{{VarPair|p_ta_hover}}
+|}
+
+&lt;/noinclude&gt;</code></pre></details></section>

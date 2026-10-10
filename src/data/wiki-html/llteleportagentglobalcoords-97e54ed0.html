@@ -1,0 +1,281 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Teleports an <code>agent</code> to <code>region_coordinates</code> within a region specified by <code>global_coordinates</code>.</div>
+<div class="wiki-line">A region's global coordinates can be retrieved using <code><a href="/functions/llRequestSimulatorData/">llRequestSimulatorData</a>("region name", DATA_SIM_POS)</code></div>
+<div class="wiki-line">If the destination is in the current region, the avatar will land facing <code>look_at</code> as a position within that region. Otherwise, <code>look_at</code> is treated as a unit direction.</div></section>
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">The combination of <a href="/functions/llRequestSimulatorData/">llRequestSimulatorData</a> and <a href="/functions/llTeleportAgentGlobalCoords/">llTeleportAgentGlobalCoords</a> allows agents to be teleported to regions by region name.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li><strong>This function can only teleport the owner of the object</strong> (unless part of an <a href="/wiki/category-experience-tools-d5e9461b/">Experience</a>).</li>
+<li>Teleports are throttled</li>
+<li>This function cannot be used in a script in an object attached using <a href="/functions/llAttachToAvatarTemp/">llAttachToAvatarTemp</a>.</li>
+<li>Sitting avatars cannot be teleported using this function. You must <a href="/functions/llUnSit/">llUnSit</a> them first.</li>
+<li>This function does not override a parcel's teleport settings, i.e. if the parcel has a landing zone enabled the avatar will be teleported there.</li>
+<li>If the script is part of an experience that the avatar has granted permission, then this function may teleport them without being the owner and it will override parcel teleport routing.</li>
+<li>When <code>look_at</code> treated treated as a direction, a valid input should be <code>&lt;llCos(angle), llSin(angle), 0.0&gt;</code>.</li>
+<li>In other words, it should be a <strong>unit vector</strong> corresponding to the avatar turning <strong>angle</strong> radians from north.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Basic example:</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TELEPORT);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (PERMISSION_TELEPORT &amp; perm)
+        {
+            vector global_coord = &lt;232704, 291072, 0&gt;;
+            vector region_pos = &lt;122, 122, 40&gt;;
+            llTeleportAgentGlobalCoords(llGetPermissionsKey(), global_coord, region_pos, ZERO_VECTOR);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">Similar to the above, but also keeps track of current global coordinate and adjusts the <strong>look_at</strong> value based on whether the destination is the current region or a different one. This ensures that the avatar will always be facing the same direction regardless of whether they're teleporting within the region or to another one.</div>
+<div class="wiki-line">The script keeps track of the current region's global coordinate in <strong>state_entry</strong> and <strong>changed</strong> events, which is later used to check whether the destination has the same global coordinates.</div>
+<div class="wiki-line"><pre><code>vector current_region;
+
+default
+{
+    state_entry()
+    {
+        // Get current global coordinate when the script starts.
+        llRequestSimulatorData(llGetRegionName(), DATA_SIM_POS);
+    }
+
+    changed(integer change)
+    {
+        if (!(change &amp; CHANGED_REGION)) return;
+
+        // Get current region coordinate when entering a new region.
+        llRequestSimulatorData(llGetRegionName(), DATA_SIM_POS);
+    }
+
+    dataserver(key query, string data)
+    {
+        // Save llRequestSimulatorData response.
+        current_region = (vector)data;
+    }
+
+    touch_start(integer num_detected)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TELEPORT);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (!(PERMISSION_TELEPORT &amp; perm)) return;
+
+        vector global_coord = &lt;232704, 291072, 0&gt;;
+        vector region_pos = &lt;122, 122, 40&gt;;
+
+        float angle = 45 * DEG_TO_RAD;
+        vector look_at = &lt;llCos(angle), llSin(angle), 0&gt;;
+
+        if (current_region == global_coord) {
+            // When teleporting within the current region, we should use a position within the region instead.
+            look_at = region_pos + look_at;
+        }
+
+        llTeleportAgentGlobalCoords(llGetPermissionsKey(), global_coord, region_pos, look_at);
+    }
+}</code></pre></div>
+<div class="wiki-line">Older example:</div>
+<div class="wiki-line"><pre><code>string simName = &quot;Help Island Public&quot;;
+vector simGlobalCoords;
+
+vector landingPoint = &lt;128.0, 128.0, 24.0&gt;;
+
+key owner;
+
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    changed(integer change)
+    {
+        if (change &amp; CHANGED_OWNER)
+            llResetScript();
+    }
+
+    state_entry()
+    {
+        owner = llGetOwner();
+
+        llRequestPermissions(owner, PERMISSION_TELEPORT);
+        llRequestSimulatorData(simName, DATA_SIM_POS);
+    }
+
+    touch_start(integer total_number)
+    {
+        key id = llDetectedKey(0);
+
+        if (id == owner)
+        {
+            if (simGlobalCoords == ZERO_VECTOR)
+            {
+                llOwnerSay(&quot;Config error, tp request was denied. Please try again!&quot;);
+                llResetScript();
+            }
+            else
+            {
+                llOwnerSay(&quot;Teleporting you to: http://maps.secondlife.com/secondlife/&quot;
+                    + llEscapeURL(simName) + &quot;/&quot; + (string)llRound(landingPoint.x)
+                    + &quot;/&quot; + (string)llRound(landingPoint.y) + &quot;/&quot; + (string)llRound(landingPoint.z) + &quot;/&quot;);
+
+                llTeleportAgentGlobalCoords(owner, simGlobalCoords, landingPoint, ZERO_VECTOR);
+            }
+        }
+        else
+        {
+            // llRegionSayTo is faster than llInstantMessage and we can assume
+            // that the touching avatar is within the same sim
+
+            llRegionSayTo(id, PUBLIC_CHANNEL,
+                &quot;Sorry, I can&#x27;t tp you. You&#x27;re NOT my owner!&quot;);
+        }
+    }
+
+    run_time_permissions(integer perm)
+    {
+        // if permission request has been denied (read ! as not)
+        if (!(perm &amp; PERMISSION_TELEPORT))
+        {
+            llOwnerSay(&quot;I need permissions to teleport you!&quot;);
+            llRequestPermissions(owner, PERMISSION_TELEPORT);
+        }
+    }
+
+//  dataserver event only called if data is returned
+//  or in other words, if you request data for a sim that does
+//  not exist this event will NOT be called
+
+    dataserver(key query_id, string data)
+    {
+        simGlobalCoords = (vector)data;
+        // llOwnerSay(&quot;Sim global coords: &quot; + (string)simGlobalCoords);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRequestSimulatorData/">llRequestSimulatorData</a> — Useful for requesting simulator position</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llTeleportAgent/">llTeleportAgent</a> — Teleporting agents to a landmark or position in the region.</div></div></section>
+<section><h2 id="history">History</h2><div class="wiki-line">Date of Release  <a href="https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-24-262437"> 24/07/2012 </a></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p id="bug-4062"><a href="/wiki/template-issues-bug-4062-597a092c/">Template:Issues/BUG-4062</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|BUG-4062|[[llTeleportAgent]]() and [[llTeleportAgentGlobalCoords]]() can break any script in any [[attachment|attached]] object that contains a [[changed]] event.|type=bug|resolution=fixed}}</code></pre></details><p id="svc-7987"><a href="/wiki/template-issues-svc-7987-b137265f/">Template:Issues/SVC-7987</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-7987|llTeleportAgent always points in the positive Y direction on teleport|type=bug|resolution=wont}}</code></pre></details><p><a href="/wiki/template-lsl-function-position-a2dae76f/">Template:LSL Function/position</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;
+This template is to be used to specify setup the description for position like parameters (offsets, positions, points, etc.).
+
+Right now it&#x27;s pretty basic and easy to edit. I&#x27;m wondering if these functions should be in a position parameter specific category.
+
+====TODO====
+* add clamping flag and verbiage for out of region/range coordinates.
+&lt;/noinclude&gt;{{#if:
+
+{{#if:{{{region|}}}|
+  {{#if:{{{local|}}}|
+
+    {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region}} or [[Viewer coordinate frames#Local|local coordinates]] depending upon the situation{{{desc|}}}}}
+
+    {{#vardefine:p_{{{1|}}}_hover|position in region or local coordinates depending upon the situation{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+  |
+    {{#ifeq:{{{1|}}}|point|
+
+      {{#vardefine:p_{{{1|}}}_desc|A point in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region-local}} space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|A point in region-local space{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which {{String|owns}} the object.|region coordinates}}{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in region coordinates{{#ifeq:{{{region|}}}|noZ|&amp;#32;(z component is ignored)}}{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+|
+  {{#if:{{{local|}}}|
+
+    {{#ifeq:{{{1|}}}|offset|
+
+      {{LSL Function/offset|{{{1|}}}|local={{{local}}}}}
+
+    |
+
+      {{#vardefine:p_{{{1|}}}_desc|position in [[Viewer coordinate frames#Local|local coordinates]]{{{desc|}}}}}
+
+      {{#vardefine:p_{{{1|}}}_hover|position in local coordinates{{#if:{{{hover|}}}|{{{hover|}}}|{{{desc|}}}}}}}
+
+    }}
+  }}
+}}
+
+}}</code></pre></details><p><a href="/wiki/template-lslp-7ff6581f/">Template:LSLP</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSLPT|{{{1|}}}|{{{2|}}}|{{{3|}}}}}&lt;noinclude&gt;
+
+Same exact syntax as [[Template:LSL Param]].
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-permission-4bc8750c/">Template:LSL Function/permission</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:
+
+{{{{#if:{{#var:DEBUG_CHANNEL}}||:DEBUG_CHANNEL}}|}}
+
+{{#vardefine:header_footnote|{{#var:header_footnote}}{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|To run this function the script must request the [[{{{1}}}]] {{#if:{{{2|}}}|or [[{{{2}}}]]}} permission with [[llRequestPermissions]]{{#ifeq:{{{grant|anyone}}}|anyone||&amp;#32;and it must be granted by {{{grant|anyone}}}}}.}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|{{PBR}}
+&lt;div style=&quot;border: 1px dotted rgba(0,0,0,0.5);&quot;&gt;{{Collapsible_Table/Simple|title=&lt;h5 style=&quot;margin:0;&quot;&gt;Permissions&lt;/h5&gt;|table-style=width:100%;|autocollapse=*|content={{!}}&lt;div&gt;
+* Do not depend upon the auto-grant status of permissions. &#x27;&#x27;&#x27;Always&#x27;&#x27;&#x27; use the [[run_time_permissions]] event.
+* If the script lacks {{#if:{{{2|}}}|both the permissions [[{{{1}}}]] and [[{{{2}}}]]|the permission [[{{{1}}}]]}}, the script will shout an error on {{#var:DEBUG_CHANNEL}} and the operation fails (but the script continues to run).{{#ifeq:{{{grant|anyone&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|anyone||
+* If [[{{{1}}}]] {{#if:{{{2|}}}|or [[{{{2}}}]]}} is granted by anyone other than {{{grant|anyone}}}, then when the function is called an error will be shouted on {{#var:DEBUG_CHANNEL}}.}}
+{{{caveats|}}}{{LSL Function/permission/caveat switch|{{{1}}}}}{{#if:{{{2|}}}|{{LSL Function/permission/caveat switch|{{{2}}}}}}}&lt;/div&gt;}}&lt;/div&gt;}}}}
+
+{{#vardefine:also_events|{{#var:also_events}}
+{{LSL DefineRow||[[run_time_permissions]]|Permission receiving event}}}}
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetPermissions]]|Get the permissions granted}}
+{{LSL DefineRow||[[llGetPermissionsKey]]|Get the agent who granted permissions}}
+{{LSL DefineRow||[[llRequestPermissions]]|Request permissions}}}}
+{{#vardefine:also_articles|{{#var:also_articles}}
+{{LSL DefineRow||[[:Category:LSL Permissions/Script|Script permissions]]|}}}}
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||[[Category:LSL Requires Permissions]]}}
+}}}}&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|header_footnote}}
+|-
+{{VarPair|caveats}}
+|-
+{{VarPairTable|also_events}}
+|-
+{{VarPairTable|also_functions}}
+|-
+{{VarPairTable|also_articles}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><a href="/wiki/category-experience-tools-d5e9461b/">Category:Experience Tools</a></div></section>

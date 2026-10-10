@@ -1,0 +1,151 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lsl-header-1f822ae7/">LSL Header</a>: <code>{{LSL Header|lm=*}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|JSON|*Json usage in LSL}}</code></span></div>
+<h3 id="overview">Overview</h3>
+<div class="wiki-line"><a href="http://www.json.org/" rel="noreferrer">JSON</a> (JavaScript Object Notation) is a language and architecture independent, lightweight text format used for <a href="http://en.wikipedia.org/wiki/Serialization" rel="noreferrer">serializing data structures</a>, much as <a href="http://en.wikipedia.org/wiki/XML" rel="noreferrer">XML</a> does for documents but in a much more compact form. At its most basic level JSON text is merely a string, but one that follows a <a href="http://tools.ietf.org/html/rfc4627" rel="noreferrer">set of rules</a> in it's construction. These rules allow the encoding, manipulation, storing, transmission and decoding of complex data structures in a terse, readable form. JSON text can be used for interacting with other applications that are JSON-aware and is commonly used for web client-server communications.</div>
+<div class="wiki-line">JSON text can also be used to implement <a href="http://en.wikipedia.org/wiki/Object_(computer_science)" rel="noreferrer">primitive objects</a>, <a href="http://en.wikipedia.org/wiki/Database" rel="noreferrer">databases</a>, complex data structures such as <a href="http://en.wikipedia.org/wiki/Array_data_type" rel="noreferrer">multi-dimensional arrays</a> and <a href="http://en.wikipedia.org/wiki/Associative_array" rel="noreferrer">associative arrays</a>, as well as abstract data types such as <a href="http://en.wikipedia.org/wiki/LIFO_(computing)" rel="noreferrer">stacks</a>, <a href="http://en.wikipedia.org/wiki/FIFO_(computing)" rel="noreferrer">queues</a> and <a href="http://en.wikipedia.org/wiki/Linked_list" rel="noreferrer">linked lists</a>. Of course, lacking native support in LSL for any of that, such implementations would be somewhat primitive and require coding of the necessary functionality (such as getAllKeys(), getArrayLength(), deleteItem(), as well as iterator operators etc). But these limitations should not stop anyone from considering adding JSON text to their "coding toolbelt", since there are possible benefits such as data encapsulation, lessened memory footprint of lengthy lists, as well as nesting of compound data structures, to name a few.  It might be helpful to use a <a href="https://json-csv.com" rel="noreferrer">JSON to CSV</a> converter if you wish to view or parse the data in a spreadsheet.</div>
+<div class="wiki-line">An LSL based test script of these functions can be found at <a href="https://wiki.secondlife.com/wiki/Json_usage_in_LSL/TestScript">Json_usage_in_LSL/TestScript</a>. The full list of JSON functions can be found at <a href="/wiki/category-lsl-json-d0f9c2d9/">Category:LSL_JSON</a>.</div>
+<h3 id="type-conversions">Type Conversions</h3>
+<div class="wiki-line">JSON has native data types that differ from <a href="https://wiki.secondlife.com/wiki/LSL_Types">LSL Types</a>. JSON Value types can be determined with <a href="/functions/llJsonValueType/">llJsonValueType</a>. However, all Values retrieved from JSON text will be a <a href="https://wiki.secondlife.com/wiki/String">String</a> and may require explicit conversion before being used further (ie <em>(float)"3.109000"</em> and <em>(vector)"&lt;1.00000, 1.00000, 1.00000&gt;"</em>).</div>
+<ul>
+<li><strong>Number</strong> - <a href="/constants/JSON_NUMBER/">JSON_NUMBER</a> includes both LSL <a href="https://wiki.secondlife.com/wiki/Integer">Integer</a> and <a href="https://wiki.secondlife.com/wiki/Float">Float</a> types (but <strong>not</strong> <em>Inf</em> and <em>NaN</em>, which must be explicitly converted to <a href="https://wiki.secondlife.com/wiki/String">String</a> before encoding). <strong><em>NOTE:</strong></em> <a href="https://wiki.secondlife.com/wiki/Float">Float</a> values will be converted as per the LSL <a href="https://wiki.secondlife.com/wiki/Typecast">string conversion rules</a>- to 6 decimal place precision, with padded zeros or rounding used, except within vectors and rotations, where 5 decimal place precision results (ie  6.1 =&gt; <strong>6.100000</strong> and &lt;1,1,1&gt; =&gt;  <strong>"&lt;1.00000, 1.00000, 1.00000&gt;"</strong>).</li>
+<li><strong>String</strong> - <a href="/constants/JSON_STRING/">JSON_STRING</a> equivalent to LSL <a href="https://wiki.secondlife.com/wiki/String">String</a>. <strong><em>NOTE:</strong></em> The LSL types <a href="https://wiki.secondlife.com/wiki/Key">Key</a>, <a href="https://wiki.secondlife.com/wiki/Rotation">Rotation</a>, and <a href="https://wiki.secondlife.com/wiki/Vector">Vector</a> will be converted to their String representation when encoded within a JSON text, either implicitly using <a href="/functions/llList2Json/">llList2Json</a> or explicitly before using <a href="/functions/llJsonSetValue/">llJsonSetValue</a>, and are always returned as a <a href="https://wiki.secondlife.com/wiki/String">String</a> when retrieved by <a href="/functions/llJsonGetValue/">llJsonGetValue</a>.  LSL strings which both begin and end with "<strong>\"</strong>" are interpreted literally as JSON strings, while those without are parsed when converted into JSON.</li>
+<li><strong>Array</strong> - <a href="/constants/JSON_ARRAY/">JSON_ARRAY</a> similar to the LSL <a href="https://wiki.secondlife.com/wiki/List">List</a>. This is a bracket-enclosed group of Values which are separated with commas ("<em>[Value, Value, ... ]</em>"). The Values are retrieved by use of a zero-based Index (<strong><em>NOTE:</strong></em> Negative indices are <strong>not</strong> supported!). A Value may be an Array or an Object, allowing "nesting", and an empty Array ("<em>[]</em>") is allowed.</li>
+<li><strong>Object</strong> - <a href="/constants/JSON_OBJECT/">JSON_OBJECT</a> similar to a <a href="https://wiki.secondlife.com/wiki/List#strided-lists">Strided List</a> with a stride of 2, this is a curly brace-enclosed group of comma-separated "Key":Value pairs ("<em>{"Key":Value, "Key":Value, ... }</em>". The Values are retrieved by use of the "Key", which <strong>must</strong> be a String. A Value may be an Array or an Object, allowing "nesting", and an empty Object ("<em>{}</em>") is allowed. </li>
+<li>the Boolean constants <strong>true</strong> and <strong>false</strong> - <a href="/constants/JSON_TRUE/">JSON_TRUE</a> and <a href="/constants/JSON_FALSE/">JSON_FALSE</a>. <strong><em>NOTE:</strong></em> These are not to be confused with the LSL <a href="/constants/TRUE/">TRUE</a> and <a href="/constants/FALSE/">FALSE</a> (which are overloaded integers) and they cannot be directly used in comparative testing (so, instead of <code>if(jsonReturn)</code>, you must use <code>if(jsonReturn == JSON_TRUE)</code>.</li>
+<li>the constant <strong>null</strong> - <a href="/constants/JSON_NULL/">JSON_NULL</a> which represents an empty, valueless placeholder and has no equivalent in LSL.</li>
+<li><a href="/constants/JSON_INVALID/">JSON_INVALID</a> - not a Value as such, but a possible return flag representing a failed operation within a JSON text (such as trying to retrieve a Value from a non-existent address within the text or attempting to set a Value in an Array with an out of bounds index). This flag should be checked for whenever dealing with unknown JSON text and when debugging your own manipulations to avoid erroneous code operation.</li>
+</ul>
+<h3 id="lsl-methods">LSL Methods</h3>
+<h4 id="specifying-json-elements">Specifying JSON Elements</h4>
+<div class="wiki-line"><a href="/functions/llJsonGetValue/">llJsonGetValue</a>, <a href="/functions/llJsonValueType/">llJsonValueType</a> and <a href="/functions/llJsonSetValue/">llJsonSetValue</a> each take the same first two arguments:</div>
+<div class="wiki-line">1. a JSON value in the form of a <a href="https://wiki.secondlife.com/wiki/String">string</a>, and   </div>
+<div class="wiki-line">2. a set of specifiers in the form of a <a href="https://wiki.secondlife.com/wiki/List">list</a>.</div>
+<div class="wiki-line"><a href="/functions/llJsonSetValue/">llJsonSetValue</a> additionally takes a third an argument: </div>
+<div class="wiki-line">3. a JSON value in the form of a <a href="https://wiki.secondlife.com/wiki/String">string</a>. </div>
+<div class="wiki-line">To understand specifiers, one must generally understand that JSON data is structured in a <a href="http://en.wikipedia.org/wiki/Nested_set_model" rel="noreferrer">nested set model</a>. LSL's built-in JSON parser uses the supplied "specifiers" list to perform <a href="http://en.wikipedia.org/wiki/Tree_traversal" rel="noreferrer">tree traversal</a> on the nodes of the supplied JSON <a href="http://en.wikipedia.org/wiki/Tree_(data_structure)" rel="noreferrer">tree data structure</a>. A JSON tree may be visualized as a set of hierarchical levels of parents and children. Each level is contained within <strong>curly braces {for objects, which are lists of members, that are defined as key-value pairs}</strong> or <strong>square braces [for arrays of elements, which are defined as single values]</strong>. </div>
+<div class="wiki-line">When JSON is presented in human-readable form, it is traditionally formatted such that the first parent level of organization is indented farthest to the left, and each more deeply-nested child level of organization is indented farther and farther to the right. The left-most level of nodes have no parents, only children. They begin with the very first member that appears after the initial "{" character of the JSON string (if it starts as an object), or the first element that appears after the initial "[" character (if it starts as an array). A node is considered as being a parent only if it has a non-null JSON object or array as its value.</div>
+<div class="wiki-line">With that parent-child tree data structure in mind, the specifiers list that you supply in the above functions tell LSL's JSON parser how to <a href="http://en.wikipedia.org/wiki/Tree_(data_structure)#Traversal_methods" rel="noreferrer">walk the tree</a> of the JSON data that you have supplied with the first argument of the function. The first specifier in the list tells the LSL JSON parser which node to walk to first. The next specifier tells it which of that node's children to walk to. Once the LSL parser has "walked" to the last destination node specified by your list of specifiers, it will then perform the function on the JSON value that it finds there. </div>
+<div class="wiki-line">If, anywhere along the line, any of the specified nodes do not exist, <a href="/functions/llJsonGetValue/">llJsonGetValue</a> and <a href="/functions/llJsonValueType/">llJsonValueType</a> will almost always return <a href="/constants/JSON_INVALID/">JSON_INVALID</a>. However there is a rare exception: if any specifier in the list leads to a node that has no characters in its JSON string value, <a href="/constants/JSON_NULL/">JSON_NULL</a> will be returned instead of <a href="/constants/JSON_INVALID/">JSON_INVALID</a> — no matter what might come after it in the specifiers list. For example in:</div>
+<div class="wiki-line"><pre><code>string example = &quot;{\&quot;parent\&quot;:,}&quot;; 
+string test1 = llJsonGetValue(example, [&quot;parent&quot;]);
+string test2 = llJsonGetValue(example, [&quot;parent that doesn&#x27;t exist&quot;, &quot;etc.&quot;]);</code></pre> </div>
+<div class="wiki-line"><strong>test1</strong> and <strong>test2</strong> will both be <a href="/constants/JSON_NULL/">JSON_NULL</a>. </div>
+<div class="wiki-line">The same is true for arrays: a specifier pointing to any element of a valid array will return <a href="/constants/JSON_NULL/">JSON_NULL</a> anywhere there is no JSON value specified at given position in the array:</div>
+<div class="wiki-line"><pre><code>string example = &quot;{\&quot;parent\&quot;:[ , ,  , , ]}&quot;;
+string test1 = llJsonGetValue(example, [&quot;parent&quot;, 2]);
+string test2 = llJsonGetValue(example, [&quot;parent&quot;, 1, &quot;child that does not exist&quot;, &quot;etc.&quot;]);</code></pre></div>
+<div class="wiki-line"><strong>test1</strong> and <strong>test2</strong> will also both be <a href="/constants/JSON_NULL/">JSON_NULL</a>. </div>
+<div class="wiki-line">These types of scenarios may be useful in determining valid JSON paths for the setter: in all the scenarios where <a href="/constants/JSON_NULL/">JSON_NULL</a> is returned, the same set of specifiers is able to be successfully used for <a href="/functions/llJsonSetValue/">llJsonSetValue</a>. However if <a href="/constants/JSON_INVALID/">JSON_INVALID</a> is returned, there is no guarantee the setter won't return an error.</div>
+<div class="wiki-line">For <a href="/functions/llJsonGetValue/">llJsonGetValue</a>, if a JSON value is present at the specified node, it will be returned by the function. The value may an object that contains no valid JSON data, so be careful. Such an object will be deemed a <a href="/constants/JSON_OBJECT/">JSON_OBJECT</a> by <a href="/functions/llJsonValueType/">llJsonValueType</a>, even if its contents are not valid JSON. Therefore, it's always best to check the <a href="/functions/llJsonValueType/">llJsonValueType</a> of any specified value to make sure it's valid before using the information in your script. </div>
+<div class="wiki-line"><aside class="wiki-note"><div class="wiki-line">Counter-intuitiveness warning! If there exist multiple members with the same name in the same object at the same child-level, a specifier that points to that name will be interpreted by LSL as pointing to the member closest to the end of the string! This behavior is opposite from the behavior of <a href="/functions/llListFindList/">llListFindList</a> and <a href="/functions/llSubStringIndex/">llSubStringIndex</a>, which always find the match that is closest to the beginning of the list or string, respectively!</div></aside></div>
+<div class="wiki-line">The specifiers list may only consist of strings/keys (for object member keys), and integers (for array element positions), which define a path to the desired value in a JSON compound object.</div>
+<ul>
+<li>An empty list specifies the entire Json value.</li>
+<li>If the list is not empty, each element of the list is used to select the element at the same level of nesting in the JSON value:</li>
+<li>if the specifier list element is a string, then the corresponding element in the JSON value must be an object and the list element selects the value whose JSON name exactly matches the string.</li>
+<li>if the specifier list element is an integer, then the corresponding element in the JSON value must be an array and the list element is used as a zero-based index into the Json array.</li>
+<li>Additionally llJsonSetValue accepts <a href="/constants/JSON_APPEND/">JSON_APPEND</a> as a specifier to indicate appending the value to the end of the array at that level. Be careful because if the value at that level is not an array, it will be overwritten and replaced with the array you're setting! </li>
+</ul>
+<div class="wiki-line">For example, given the JSON value:</div>
+<div class="wiki-line"><pre><code>{
+    &quot;alpha&quot;: 1,
+    &quot;beta&quot;: [
+       &quot;x&quot;,
+       &quot;y&quot;,
+       &quot;z&quot;
+    ],
+    &quot;gamma&quot;: {
+       &quot;a&quot;: 3.2,
+       &quot;b&quot;: true
+    }
+}</code></pre></div>
+<div class="wiki-line">the contents of the string returned would be:</div>
+<div class="wiki-line"><pre><code>llJsonGetValue(value, [&quot;alpha&quot;])        ⇒    1
+llJsonGetValue(value, [&quot;beta&quot;])         ⇒    [&quot;x&quot;, &quot;y&quot;, &quot;z&quot;]
+llJsonGetValue(value, [&quot;beta&quot;, 2])      ⇒    z
+llJsonGetValue(value, [&quot;gamma&quot;, &quot;a&quot;])   ⇒    3.2</code></pre></div>
+<div class="wiki-line"><code><a href="/functions/llJsonSetValue/">llJsonSetValue</a>(string json, list specifiers, string value_to_set)</code> will force the resulting JSON to conform with the specifiers supplied, as long as the specified path is traversable.</div>
+<h3 id="json-interrogation-and-validation">JSON Interrogation and Validation</h3>
+<div class="wiki-line">To determine the type of a JSON value:</div>
+<div class="wiki-line"><pre><code>string type = llJsonValueType( string json, list specifiers );</code></pre></div>
+<div class="wiki-line">:returns one of several following special <a href="https://wiki.secondlife.com/wiki/constants">constants</a> (see table below). Each constant has a name, <code>JSON_XXXX</code>, which unlike most LSL constants is not an integer — instead, it's a single-character string. The single character is not printable but has a specific character code (from <a href="/functions/llOrd/">llOrd</a>) in the range of 64,976-64,984 or escape value (from <a href="/functions/llEscapeURL/">llEscapeURL</a>) in the range of %EF%B7%90–97. The below table shows each constant's invocation and escape code:</div>
+<table><tr><th> Type Flags</th><th> Value</th><th> Unicode</th><th> <a href="/functions/llOrd/">Integer</a></th><th> <a href="/wiki/category-lsl-encoding-url-a2cbd91f/">URL Encoded</a></th><th> HTML Encoded</th><th> Description</th></tr><tr><td> <a href="/constants/JSON_INVALID/">JSON_INVALID</a></td><td> &#xFDD0;</td><td> U+FDDO</td><td> 64976</td><td> "%EF%B7%90"</td><td> &amp;#xFDD0;</td><td> Value returned when inputs are not well formed.</td></tr><tr><td> <a href="/constants/JSON_OBJECT/">JSON_OBJECT</a></td><td> &#xFDD1;</td><td> U+FDD1</td><td> 64977</td><td> "%EF%B7%91"</td><td> &amp;#xFDD1;</td><td> </td></tr><tr><td> <a href="/constants/JSON_ARRAY/">JSON_ARRAY</a></td><td> &#xFDD2;</td><td> U+FDD2</td><td> 64978</td><td> "%EF%B7%92"</td><td> &amp;#xFDD2;</td><td> </td></tr><tr><td> <a href="/constants/JSON_NUMBER/">JSON_NUMBER</a></td><td> &#xFDD3;</td><td> U+FDD3</td><td> 64979</td><td> "%EF%B7%93"</td><td> &amp;#xFDD3;</td><td> </td></tr><tr><td> <a href="/constants/JSON_STRING/">JSON_STRING</a></td><td> &#xFDD4;</td><td> U+FDD4</td><td> 64980</td><td> "%EF%B7%94"</td><td> &amp;#xFDD4;</td><td> </td></tr><tr><td> <a href="/constants/JSON_NULL/">JSON_NULL</a></td><td> &#xFDD5;</td><td> U+FDD5</td><td> 64981</td><td> "%EF%B7%95"</td><td> &amp;#xFDD5;</td><td> </td></tr><tr><td> <a href="/constants/JSON_TRUE/">JSON_TRUE</a></td><td> &#xFDD6;</td><td> U+FDD6</td><td> 64982</td><td> "%EF%B7%96"</td><td> &amp;#xFDD6;</td><td> </td></tr><tr><td> <a href="/constants/JSON_FALSE/">JSON_FALSE</a></td><td> &#xFDD7;</td><td> U+FDD7</td><td> 64983</td><td> "%EF%B7%97"</td><td> &amp;#xFDD7;</td><td> </td></tr><tr><td> <a href="/constants/JSON_DELETE/">JSON_DELETE</a></td><td> &#xFDD8;</td><td> U+FDD8</td><td> 64984</td><td> "%EF%B7%98"</td><td> &amp;#xFDD8;</td><td> Used with <a href="/functions/llJsonSetValue/">llJsonSetValue</a> to remove a key-value pair.</td></tr></table>
+<h3 id="json-to-lsl-conversion">JSON to LSL Conversion</h3>
+<div class="wiki-line">To directly extract a JSON value to an LSL string:</div>
+<div class="wiki-line"><pre><code>string value = llJsonGetValue( string json, list specifiers );</code></pre></div>
+<ul>
+<li><em>json</em> is a string containing a valid JSON array or object value</li>
+<li><em>specifiers</em> is a list of specifiers (see <a href="#specifying-json-elements"></a>)</li>
+<li>returns a JSON string</li>
+<li>if the specifiers do not indicate a value that exists in the input, <a href="/constants/JSON_INVALID/">JSON_INVALID</a> is returned</li>
+</ul>
+<div class="wiki-line">To convert a JSON compound value (either an array or an object) to an LSL List:</div>
+<div class="wiki-line"><pre><code>list values = llJson2List( string json );</code></pre></div>
+<ul>
+<li><em>json</em> is a string containing a valid JSON array or object value</li>
+<li>If the string in <em>json</em> is not a valid JSON object or array, a list with a single item matching the conversion above is returned.</li>
+</ul>
+<h3 id="recursive-parsing">Recursive Parsing</h3>
+<div class="wiki-line">Since any value in a JSON array or object may be any arbitrary type, including an array or object, the parsing methods must handle nested values.  Nested arrays or objects are not converted, but remain LSL String values.  If an LSL script needs to use the components in such a nested value, it must explicitly pass that string to the appropriate method.  For example, the following JSON value is passed to <a href="/functions/llJson2List/">llJson2List</a>:</div>
+<div class="wiki-line"><pre><code>{
+    &quot;alpha&quot;: 1,
+    &quot;beta&quot;: [
+       &quot;x&quot;,
+       &quot;y&quot;,
+       &quot;z&quot;
+    ],
+    &quot;gamma&quot;: {
+       &quot;a&quot;: 3.2,
+       &quot;b&quot;: true
+    }
+}</code></pre></div>
+<div class="wiki-line">The result would be an LSL list with a stride of 2: the first elements of the 3 strides would be "alpha", "beta", and "gamma".  The second element of the first stride would be the integer 1, but the second elements of the other two strides would be LSL strings containing the JSON representation of the array '[ "x", "y", "z" ]' and object '{ a: 3.2, b: true }' respectively.</div>
+<h3 id="lsl-to-json">LSL to JSON</h3>
+<div class="wiki-line">To convert a list to json:</div>
+<div class="wiki-line"><pre><code>string json = llList2Json( string type, list values );</code></pre></div>
+<ul>
+<li><em>type</em> must be either <a href="/constants/JSON_ARRAY/">JSON_ARRAY</a> or <a href="/constants/JSON_OBJECT/">JSON_OBJECT</a></li>
+<li><em>values</em> is the list to be converted to JSON.</li>
+</ul>
+<div class="wiki-line">:Produces an LSL String containing a JSON compound value, either an array or an object depending on type, containing the values in the input list.  </div>
+<div class="wiki-line">:If type is <a href="/constants/JSON_ARRAY/">JSON_ARRAY</a>, the list may contain values of any LSL type; they are converted as described in Type Conversions above.  </div>
+<div class="wiki-line">:If type is <a href="/constants/JSON_OBJECT/">JSON_OBJECT</a>, the list must have a stride of 2.  The first value of each stride must be a string.  The second value of each stride may be any LSL type, and are converted as described in Type Conversions above. <a href="/constants/JSON_INVALID/">JSON_INVALID</a> is returned if the stride is not 2.</div>
+<div class="wiki-line">:<a href="/constants/JSON_INVALID/">JSON_INVALID</a> is returned if any other string or JSON type is specified as the type.</div>
+<div class="wiki-line">To directly set a JSON value within a string:</div>
+<div class="wiki-line"><pre><code>string jsonresult = llJsonSetValue( string json, list specifiers, string value );</code></pre></div>
+<ul>
+<li><em>json</em> is a string containing a valid JSON array or object value</li>
+<li><em>specifiers</em> is a list of specifiers (see <a href="#specifying-json-elements"></a>)</li>
+<li><em>value</em> the value to be inserted into the specified place in JSON</li>
+<li>Returns the newly modified JSON string</li>
+</ul>
+<div class="wiki-line">:The only failure mode for <a href="/functions/llJsonSetValue/">llJsonSetValue</a> is if an array index is specified in specifiers that is negative (but not <a href="/constants/JSON_APPEND/">JSON_APPEND</a>) or greater than the list size. In all other cases the JSON is modified so that the set can succeed. For example, if an integer is specified for a level that is an object, the object will be removed completely and replaced with an array. If the object key does not exist it will be added, and <a href="/constants/JSON_APPEND/">JSON_APPEND</a> or an index one larger than the last item in an array can be used to append to an array. These features are to allow building a Json string with <a href="/functions/llJsonSetValue/">llJsonSetValue</a>.</div>
+<h3 id="recursive-construction-of-compound-json-values">Recursive Construction of Compound JSON Values</h3>
+<div class="wiki-line">Since LSL does not support nested lists, the construction method may only be used to convert a single level; to create a JSON array or object whose values are nested arrays or objects, the LSL script must first construct the nested values and then pass those values as strings to another construction method call.  For example, to construct the JSON value:</div>
+<div class="wiki-line"><pre><code>{
+    &quot;alpha&quot;: 1,
+    &quot;beta&quot;: [
+       &quot;x&quot;,
+       &quot;y&quot;,
+       &quot;z&quot;
+    ],
+    &quot;gamma&quot;: {
+       &quot;a&quot;: 3.2,
+       &quot;b&quot;: true
+    }
+}</code></pre></div>
+<div class="wiki-line">The following sequence could be used:</div>
+<div class="wiki-line"><pre><code>string gamma_value = llList2Json( JSON_OBJECT, [ &quot;a&quot;, 3.2, &quot;b&quot;, JSON_TRUE ] );
+string beta_value  = llList2Json( JSON_ARRAY, [ &quot;\&quot;x\&quot;&quot;, &quot;\&quot;y\&quot;&quot;, &quot;\&quot;z\&quot;&quot; ] );
+string value       = llList2Json( JSON_OBJECT,[ &quot;alpha&quot;, 1, &quot;beta&quot;, beta_value, &quot;gamma&quot;, gamma_value ] );</code></pre></div>
+<div class="wiki-line">or the equivalent without the intermediate variables:</div>
+<div class="wiki-line"><pre><code>string value =
+    llList2Json( JSON_OBJECT,
+        [&quot;alpha&quot;, 1,
+         &quot;beta&quot;, llList2Json( JSON_ARRAY, [ &quot;\&quot;x\&quot;&quot;, &quot;\&quot;y\&quot;&quot;, &quot;\&quot;z\&quot;&quot; ] ),
+         &quot;gamma&quot;, llList2Json( JSON_OBJECT, [ &quot;a&quot;, 3.2, &quot;b&quot;, JSON_TRUE ] )]
+    );</code></pre></div>
+<div class="wiki-line"><strong><em>NOTE</strong></em> the use of the <strong>JSON_TRUE</strong> constant in the above to obtain the bare word 'true' for the value of ["gamma", "b"]. If one had used the LSL constant <a href="/constants/TRUE/">TRUE</a>, they would've incorrectly obtained an integer '1'. The same applies for 'false'. Do not use the LSL <a href="/constants/TRUE/">TRUE</a> or <a href="/constants/FALSE/">FALSE</a> constants, use the correct JSON_* type constants or the LSL strings "true" or "false". For the JSON value 'null', either use the LSL constant <strong>JSON_NULL</strong> or the LSL string "null".</div>
+<h3 id="limitations">Limitations</h3>
+<ul>
+<li>JSON support in LSL does not support all the escape codes specified in <a href="http://www.ietf.org/rfc/rfc4627.txt" rel="noreferrer">RFC 4627</a>.  Instead, behavior for escape codes is consistent with general LSL <a href="https://wiki.secondlife.com/wiki/string">string</a> behavior: <a href="https://wiki.secondlife.com/wiki/String#escape-codes">String</a>.</li>
+</ul>

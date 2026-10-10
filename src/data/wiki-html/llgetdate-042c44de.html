@@ -1,0 +1,59 @@
+<section><h2 id="function-notes">Function notes</h2><div class="wiki-line">If you wish to know the time as well use: <a href="/functions/llGetTimestamp/">llGetTimestamp</a> which uses the format <span class="wiki-template"><a href="/wiki/template-nowrap-f17d8afe/">NoWrap</a>: <code>{{NoWrap|&quot;YYYY-MM-DDThh:mm:ss.ff..fZ&quot;}}</code></span></div></section>
+<section><h2 id="return-value-notes">Return value notes</h2><div class="wiki-line">Returns a <a href="https://wiki.secondlife.com/wiki/string">string</a> that is the current date in the UTC time zone in the format <span class="wiki-template"><a href="/wiki/template-nowrap-f17d8afe/">NoWrap</a>: <code>{{NoWrap|&quot;YYYY-MM-DD&quot;}}</code></span>.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>// Birthday surprise
+default
+{
+    state_entry()
+    {   
+        llSetTimerEvent(0.1);
+    }
+
+    timer()
+    {
+        if(llGetDate() == &quot;2009-02-15&quot;)
+            llSetText(&quot;HAPPY BIRTHDAY!&quot;, &lt;0,1,0&gt;, 1.0);
+        else
+            llSetText(&quot;A surprise is coming...&quot;, &lt;0,1,0&gt;, 1.0);
+         
+        llSetTimerEvent(3600.0);  // check every hour. 
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// Function to calculate the numeric day of year
+integer dayOfYear(integer year, integer month, integer day)
+{
+    return day + (month - 1) * 30 + (((month &gt; 8) + month) / 2)
+        - ((1 + (((!(year % 4)) ^ (!(year % 100)) ^ (!(year % 400))) | (year &lt;= 1582))) &amp;&amp; (month &gt; 2));
+}
+
+default
+{
+    touch_end(integer count)
+    {
+        list dateComponents = llParseString2List(llGetDate(), [&quot;-&quot;], []);
+        integer year  = (integer) llList2String(dateComponents, 0);
+        integer month = (integer) llList2String(dateComponents, 1);
+        integer day   = (integer) llList2String(dateComponents, 2);
+        llSay(0, &quot;The current day of the year is &quot; + (string) dayOfYear(year, month, day));
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// Function to calculate whether a current year is a leap year
+
+integer is_leap_year( integer year ) 
+{     
+    if( year % 4 )         return FALSE;   // Not a leap year under any circumstances     
+    if( year &lt;= 1582 )     return TRUE;    // In the Julian calender before 24 February 1582, every fourth year was a leap year
+    if( !( year % 400 ))   return TRUE;    // A leap century is a leap year if divisible by 400 
+    if( !( year % 100 ))   return FALSE;   // Any other century is not a leap year  
+    return TRUE;                           // It is divisible by 4 and not a century and not Julian, therefore it is a leap year
+}</code></pre></div>
+<div class="wiki-line">The previous script is way unnecessary for Avatar age, SL sales history etc. Here is all that is needed for 99% of SL applications.</div>
+<div class="wiki-line">This code is in fact valid for all years from 1901 to 2099, as 2000 was a leap year.</div>
+<div class="wiki-line"><pre><code>    if (year % 4)          //  TRUE if NOT a leap year</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><h3 id="helper-functions">Helper Functions</h3>
+<ul>
+<li><a href="https://wiki.secondlife.com/wiki/Stamp2UnixInt">Timestamp: list format to Unix timestamp</a> - ex: [2009, 2, 13, 3, 31, 30] to 1234567890</li>
+<li>compatible with <a href="/functions/llParseString2List/">llParseString2List</a>( <a href="/functions/llGetDate/">llGetDate</a>(), ["-"], [] ) (reports as first second of given day)</li>
+<li><a href="https://wiki.secondlife.com/wiki/Stamp2WeekdayStr">Timestamp: Weekday from (Y, M, D)</a> - ex: "Friday" from (Y, M, D)</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetTimestamp/">llGetTimestamp</a> — Same format but with the time.</div></div></section>
+<section><h2 id="see-also-articles">See also: articles</h2><div class="wiki-line"><div class="wiki-related-row"><a href="http://www.cl.cam.ac.uk/~mgk25/iso-time.html" rel="noreferrer">ISO 8601</a></div></div></section>

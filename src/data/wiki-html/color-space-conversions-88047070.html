@@ -1,0 +1,222 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-toc-right-3812ccdf/">TOC right</a>: <code>{{TOC right}}</code></span></div>
+<div class="wiki-line">A collection of <a href="https://en.wikipedia.org/wiki/Color_space" rel="noreferrer">color space</a> conversion functions. Although all colors in Second Life are RGB, other color spaces may offer more comfortable ways of specifying colors and generating more pleasing gradients than straight interpolations between RGB colors.</div>
+<div class="wiki-line">Hue-based color spaces are commonly used in color pickers. Second Life viewers usually provide a <a href="#hsl">HSL</a> color selector, and most other programs provide one of either HSL or <a href="#hsv-hsb">HSV/HSB</a>, with other possible color spaces available.</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-clear-707f7763/">clear</a>: <code>{{clear}}</code></span></div>
+<h2 id="hsv-hsb">HSV/HSB</h2>
+<div class="wiki-line">More detail: <a href="https://en.wikipedia.org/wiki/HSL_and_HSV" rel="noreferrer">HSL and HSV</a>.</div>
+<div class="wiki-line">HSV and HSB are synonyms, standing for <em>Hue</em>, <em>Saturation</em> and <em>Value</em> or <em>Brightness</em>.</div>
+<ul>
+<li>Hue is the perceived hue and wraps around in its range, forming a color circle.</li>
+<li>Saturation is the "grayness" of the color: maximum saturation gives the most intense color, minimum gives grays.</li>
+<li>Value/brightness determine the "blackness" of the color: maximum value gives the brightest color, minimum gives black.</li>
+</ul>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-caution-f1df2e5e/">caution</a>: <code>{{caution|These functions are optimized for performance and don&#x27;t do input verification. See [[#Clamping Functions|clamping functions]] if you need to ensure the inputs are in the correct range.}}</code></span></div>
+<div class="wiki-line"><pre><code>// Takes a Hue-Saturation-Value(/Brightness) vector
+// H in range [0, 1[
+// S, V in range [0, 1]
+// Returns a LSL RGB vector
+vector hsv2rgb(vector hsv) {
+    if(hsv.y) {
+        float ht = 6*hsv.x; integer i = (integer)ht; float f = ht-i;
+        if(i == 0) return &lt;hsv.z, hsv.z*(1-hsv.y*(1-f)), hsv.z*(1-hsv.y)&gt;;
+        else if(i == 1) return &lt;hsv.z*(1-hsv.y*f), hsv.z, hsv.z*(1-hsv.y)&gt;;
+        else if(i == 2) return &lt;hsv.z*(1-hsv.y), hsv.z, hsv.z*(1-hsv.y*(1-f))&gt;;
+        else if(i == 3) return &lt;hsv.z*(1-hsv.y), hsv.z*(1-hsv.y*f), hsv.z&gt;;
+        else if(i == 4) return &lt;hsv.z*(1-hsv.y*(1-f)), hsv.z*(1-hsv.y), hsv.z&gt;;
+        else return &lt;hsv.z, hsv.z*(1-hsv.y), hsv.z*(1-hsv.y*f)&gt;;
+    }
+    return &lt;hsv.z, hsv.z, hsv.z&gt;;
+}
+
+// Takes a LSL RGB vector
+// Returns a HSV vector
+// H in range [0, 1[
+// S, V in range [0, 1]
+vector rgb2hsv(vector c) {
+    float min = c.x; if(c.y &lt; min) min = c.y; if(c.z &lt; min) min = c.z;
+    float max = c.x; if(c.y &gt;= max) max = c.y; if(c.z &gt;= max) max = c.z;
+    if(min == max) return &lt;0, 0, max&gt;;
+    float d; float h;
+    if(min == c.x) { d = c.y-c.z; h = 3; }
+    else if(min == c.z) { d = c.x-c.y; h = 1; }
+    else { d = c.z-c.x; h = 5; }
+    return &lt;(h-d/(max-min))*0.166666666667, (max-min)/max, max&gt;;
+}</code></pre></div>
+<h2 id="hsl">HSL</h2>
+<div class="wiki-line">More detail: <a href="https://en.wikipedia.org/wiki/HSL_and_HSV" rel="noreferrer">HSL and HSV</a>.</div>
+<div class="wiki-line">HSL stands for <em>Hue</em>, <em>Saturation</em> and <em>Lightness</em> or <em>Luminance</em>. HSL is available in the SL viewer color picker.</div>
+<ul>
+<li>Hue is the perceived hue and wraps around in its range, forming a color circle.</li>
+<li>Saturation is the "grayness" of the color: maximum saturation gives the most intense color, minimum gives grays.</li>
+<li>Lightness/luminance determine the "whiteness" and "blackness" of the color: maximum value gives white, minimum gives black and the middle point gives the most intense color.</li>
+</ul>
+<div class="wiki-line">See <a href="https://wiki.secondlife.com/wiki/uHSL2RGB">uHSL2RGB</a> and <a href="https://wiki.secondlife.com/wiki/uRGB2HSL">uRGB2HSL</a>. Note that the linked functions may take differently styled inputs compared to ones in this page.</div>
+<h2 id="hsluv-hpluv">HSLuv/HPLuv</h2>
+<div class="wiki-line">More detail: <a href="https://en.wikipedia.org/wiki/HSLuv" rel="noreferrer">HSLuv</a> and <a href="https://hsluv.org" rel="noreferrer">HSLuv.org</a>.</div>
+<div class="wiki-line">HSLuv is a color space that attempts to combine the human-friendliness of HSV/HSL with the perceived luminous/chromatic stability of the <a href="https://en.wikipedia.org/wiki/CIELUV%23Cylindrical_representation_%28CIELCh%29" rel="noreferrer">CIE LCh(uv)</a> color space. The conversion is multi-step and rather convoluted, containing many "magic numbers" that are not explained here; see <a href="https://www.hsluv.org/math/" rel="noreferrer">HSLuv math</a> and <a href="https://www.hsluv.org/implementations/" rel="noreferrer">other implementations</a>.</div>
+<ul>
+<li>Hue is the perceived hue and wraps around in its range, forming a color circle.</li>
+<li>Saturation is the "grayness" of the color: maximum saturation gives the most intense color, minimum gives grays. Using saturation over 1.0 may also produce usable colors, but the resulting RGB value may not be within spec.</li>
+<li>Luminance determine the "whiteness" and "blackness" of the color: maximum value gives white, minimum gives black and the middle point gives the most intense color.</li>
+<li>Although the parameters are like <a href="#hsl">HSL</a>, the results are different.</li>
+<li>Using S and L outside the [0, 1] range may also produce usable colors, but the resulting RGB values won't be within spec.</li>
+<li>There is currently no LSL implementation for RGB-&gt;HSLuv on this page.</li>
+</ul>
+<div class="wiki-line">HPLuv is a variation of HSLuv that maintains a very stable perceived luminosity, but produces only desaturated/pastel colors. Its parameters are the same as HSLuv.</div>
+<ul>
+<li>No info for what P stands for. </li>
+<li>Using P and L outside the [0, 1] range may also produce usable colors, but the resulting RGB value won't be within spec and the luminous uniformity degrades.</li>
+<li>There is currently no LSL implementation for RGB-&gt;HPLuv on this page.</li>
+</ul>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-caution-f1df2e5e/">caution</a>: <code>{{caution|These functions don&#x27;t verify their inputs. See [[#Clamping Functions|clamping functions]] if you need to ensure the inputs are in the correct range.}}</code></span></div>
+<div class="wiki-line"><pre><code>// Takes a Hue-Saturation-Luminance vector
+// H in range [0, 1[
+// S, L in range [0, 1], can also be overdriven
+// Returns a LSL RGB vector
+vector hsluv2rgb(vector col) {
+    // HSLuv to LCh(uv), except in hCL order
+    float hcos = llCos(TWO_PI*col.x); float hsin = llSin(TWO_PI*col.x);
+    float l = (col.z+0.16); l = l*l*l/1.560896; if(l &lt; 0.0088564516) l = col.z/9.032962962;
+    if(l) {
+        float temp; list intercepts;
+        temp = col.z*-6.3705630182411/(hsin+8.0217391304349*hcos);
+        if(temp &gt;= 0) intercepts += temp;
+        temp = col.z*((l-1)*769860.0)/(l*-120846.46173275+126452)/
+               (hsin-hcos*l*969398.79085627/(l*-120846.46173275+126452));
+        if(temp &gt;= 0) intercepts += temp;
+        temp = col.z*-3.6495554177681/(hsin-1.3259649910233*hcos);
+        if(temp &gt;= 0) intercepts += temp;
+        temp = col.z*((l-1)*769860.0)/(l*-210946.24190439+126452)/
+               (hsin-hcos*l*-279707.33175316/(l*-210946.24190439+126452));
+        if(temp &gt;= 0) intercepts += temp;
+        temp = col.z*1.1091899201577/(hsin+0.12162162162162*hcos);
+        if(temp &gt;= 0) intercepts += temp;
+        temp = col.z*((l-1)*769860.0)/(l*694074.10400063+126452)/
+               (hsin-hcos*l*-84414.418054130/(l*694074.10400063+126452));
+        if(temp &gt;= 0) intercepts += temp;
+        col.y *= llListStatistics(LIST_STAT_MIN, intercepts);
+    } else return &lt;0, 0, 0&gt;;
+    // hCL to Luv
+    col = &lt;col.z, hcos*col.y, hsin*col.y&gt;;
+    // Luv to XYZ, except in YXZ order
+    float u = col.y/(13*col.x)+0.19783000664283;
+    float v = col.z/(13*col.x)+0.46831999493879;
+    if(col.x &gt; 0.08) { col.x = (col.x+0.16)/1.16; col.x *= col.x*col.x; } else col.x /= 9.032962962;
+    col.y = -9*col.x*u/(-4*v);
+    col.z = (9*col.x-15*v*col.x-v*col.y)/(3*v);
+    // YXZ to linear RGB
+    col = &lt;col.y*3.240969941904521+col.x*-1.537383177570093+col.z*-0.498610760293,
+           col.y*-0.96924363628087+col.x*1.87596750150772+col.z*0.041555057407175,
+           col.y*0.055630079696993+col.x*-0.20397695888897+col.z*1.056971514242878&gt;;
+    // linear RGB to sRGB
+    if(col.x &gt; 0.0031308) col.x = 1.055*llPow(col.x, 0.41666666666667)-0.055; else col.x = 12.92*col.x;
+    if(col.y &gt; 0.0031308) col.y = 1.055*llPow(col.y, 0.41666666666667)-0.055; else col.y = 12.92*col.y;
+    if(col.z &gt; 0.0031308) col.z = 1.055*llPow(col.z, 0.41666666666667)-0.055; else col.z = 12.92*col.z;
+    return col;
+}
+
+// Takes a Hue-P-Luminance vector
+// H in range [0, 1[
+// P, L in range [0, 1], can also be overdriven
+// Returns a LSL RGB vector
+vector hpluv2rgb(vector col) {
+    // HPLuv to LCh(uv), except in hCL order
+    float l = (col.z+0.16); l = l*l*l/1.560896; if(l &lt; 0.0088564516) l = col.z/9.032962962;
+    if(l) {
+        float nom; float den; list intercepts;
+        intercepts += col.z*0.78806252071086;
+        nom = col.z*((l-1)*769860.0)/(l*-120846.46173275+126452); if(nom&lt;0) nom = -nom;
+        den = (l*969398.79085627/(l*-120846.46173275+126452)); den = llSqrt(den*den+1);
+        intercepts += nom/den;
+        intercepts += col.z*2.1974976111232;
+        nom = col.z*((l-1)*769860.0)/(l*-210946.24190439+126452); if(nom&lt;0) nom = -nom;
+        den = (l*-279707.33175316/(l*-210946.24190439+126452)); den = llSqrt(den*den+1);
+        intercepts += nom/den;
+        intercepts += col.z*1.1010763526520;
+        nom = col.z*((l-1)*769860.0)/(l*694074.10400063+126452); if(nom&lt;0) nom = -nom;
+        den = (l*-84414.418054130/(l*694074.10400063+126452)); den = llSqrt(den*den+1);
+        intercepts += nom/den;
+        col.y *= llListStatistics(LIST_STAT_MIN, intercepts);
+    } else return &lt;0, 0, 0&gt;;
+    // hCL to Luv
+    col = &lt;col.z, llCos(TWO_PI*col.x)*col.y, llSin(TWO_PI*col.x)*col.y&gt;;
+    // Luv to XYZ, except in YXZ order
+    float u = col.y/(13*col.x)+0.19783000664283;
+    float v = col.z/(13*col.x)+0.46831999493879;
+    if(col.x &gt; 0.08) { col.x = (col.x+0.16)/1.16; col.x *= col.x*col.x; } else col.x /= 9.032962962;
+    col.y = -9*col.x*u/(-4*v);
+    col.z = (9*col.x-15*v*col.x-v*col.y)/(3*v);
+    // YXZ to linear RGB
+    col = &lt;col.y*3.240969941904521+col.x*-1.537383177570093+col.z*-0.498610760293,
+           col.y*-0.96924363628087+col.x*1.87596750150772+col.z*0.041555057407175,
+           col.y*0.055630079696993+col.x*-0.20397695888897+col.z*1.056971514242878&gt;;
+    // linear RGB to sRGB
+    if(col.x &gt; 0.0031308) col.x = 1.055*llPow(col.x, 0.41666666666667)-0.055; else col.x = 12.92*col.x;
+    if(col.y &gt; 0.0031308) col.y = 1.055*llPow(col.y, 0.41666666666667)-0.055; else col.y = 12.92*col.y;
+    if(col.z &gt; 0.0031308) col.z = 1.055*llPow(col.z, 0.41666666666667)-0.055; else col.z = 12.92*col.z;
+    return col;
+}</code></pre></div>
+<div class="wiki-line">&lt;div class="mw-collapsible mw-collapsed"&gt;The HSLuv LSL code is heavily modified from the Javascript version, MIT licensed:</div>
+<div class="wiki-line">&lt;div class="mw-collapsible-content"&gt;<pre><code>Copyright (c) 2012-2022 Alexei Boronine
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+LSL port 2023 Frionil Fang.</code></pre>&lt;/div&gt;</div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<h2 id="linear-rgb">Linear RGB</h2>
+<div class="wiki-line">Typically colors shown on screen are in the <a href="https://en.wikipedia.org/wiki/sRGB" rel="noreferrer">sRGB</a> color space, but some features, such as <a href="/constants/PRIM_POINT_LIGHT/">point lights</a> expect linear RGB color instead.</div>
+<div class="wiki-line">See the built in functions <a href="/functions/llsRGB2Linear/">llsRGB2Linear</a> and <a href="/functions/llLinear2sRGB/">llLinear2sRGB</a>.</div>
+<h2 id="clamping-functions">Clamping Functions</h2>
+<div class="wiki-line">Hue-based colors are often specified with hue as degrees (0-360°) and saturation/value/lightness/luminance as a value from 0 to 100. Likewise, RGB colors are often given as integers in the range 0-255, as opposed to the LSL colors in the range 0-1. The conversion into the range expected on this page requires just simple division.</div>
+<div class="wiki-line"><pre><code>// Scales a hue-style color vector into [0, 1] range
+vector hxx_scale(vector hxx) {
+    return &lt;hxx.x/360.0, hxx.y/100.0, hxx.z/100.0&gt;;
+}
+
+// Scales an integer color vector into [0, 1] LSL color range
+vector rgb_scale(vector rgb) {
+    return rgb/255.0;
+}</code></pre></div>
+<div class="wiki-line">To ensure color vectors are in the proper range before calling a conversion, you can clamp/wrap them with the following helper functions. If necessary, scale the colors first.</div>
+<div class="wiki-line"><pre><code>// Wraps &amp; clamps a hue-style color vector
+// Hue wrapped to the range [0, 1[
+// Others clamped to [0, 1]
+vector hxx_clamp(vector hxx) {
+    hxx.x -= (integer)hxx.x;
+    if(hxx.x &lt; 0) hxx.x = 1-hxx.x;
+    if(hxx.y &lt; 0) hxx.y = 0; else if(hxx.y &gt; 1) hxx.y = 1;
+    if(hxx.z &lt; 0) hxx.z = 0; else if(hxx.z &gt; 1) hxx.z = 1;
+    return hxx;
+}
+
+// Clamps a RGB vector to the [0, 1] range
+vector rgb_clamp(vector rgb) {
+    if(rgb.x &lt; 0) rgb.x = 0; else if(rgb.x &gt; 1) rgb.x = 1;
+    if(rgb.y &lt; 0) rgb.y = 0; else if(rgb.y &gt; 1) rgb.y = 1;
+    if(rgb.z &lt; 0) rgb.z = 0; else if(rgb.z &gt; 1) rgb.z = 1;
+    return rgb;
+}</code></pre></div>
+<h2 id="visual-examples">Visual Examples</h2>
+<div class="wiki-line">These images show a visual comparison of some of the colorspaces described, rendered inworld with above functions on a 64x24 grid. Hue ranges from 0 to 1 horizontally, saturation from 0 to 1 vertically. Value/lightness/luminosity depend on the image.</div>
+<div class="wiki-line">&lt;gallery&gt;</div>
+<div class="wiki-line">File:Colorspace_HSV.png|HSV: value range 0.5-1. Extreme saturation, uneven perceived brightness.</div>
+<div class="wiki-line">File:Colorspace_HSLuv.png|HSLuv: luminosity 0.5. Gentle saturation, smoother perceived brightness.</div>
+<div class="wiki-line">File:Colorspace_HPLuv.png|HPLuv: luminosity 0.5. Low saturation, very smooth perceived brightness.</div>
+<div class="wiki-line">&lt;/gallery&gt;</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Color}}</code></span><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|User-Defined functions}}</code></span></div>

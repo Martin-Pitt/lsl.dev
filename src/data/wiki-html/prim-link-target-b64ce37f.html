@@ -1,0 +1,125 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Used to get or set multiple links with a single PrimParameters call.</div></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    touch_start(integer num_detected)
+    {
+    //  color the root prim red and the first linked-prim green
+        llSetLinkPrimitiveParamsFast(LINK_ROOT,
+                [PRIM_COLOR, ALL_SIDES, &lt;1.0, 0.0, 0.0&gt;, (float)TRUE,
+            PRIM_LINK_TARGET, 2,
+                PRIM_COLOR, ALL_SIDES, &lt;0.0, 1.0, 0.0&gt;, (float)TRUE]);
+
+    //  instead of:
+    //  llSetLinkPrimitiveParamsFast(LINK_ROOT,
+    //          [PRIM_COLOR, ALL_SIDES, &lt;1.0, 0.0, 0.0&gt;, (float)TRUE]);
+    //  llSetLinkPrimitiveParamsFast(2,
+    //          [PRIM_COLOR, ALL_SIDES, &lt;0.0, 1.0, 0.0&gt;, (float)TRUE]);
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>//  assume that you have a global list &quot;gPanels&quot; loaded with the link numbers of prims
+//  named &quot;panel&quot; and that the global integer parameter &quot;gON&quot; has been defined ....
+
+    touch_start(integer num)
+    {
+    //  basic on/off switch
+        gON = !gON;
+
+    //  conditions which will change on touch
+    //  white panel
+        list WhichWay = [PRIM_COLOR, ALL_SIDES, &lt;1.0, 1.0, 1.0&gt;, (float)TRUE];
+
+        if (gON)//  red panel
+            WhichWay = [PRIM_COLOR, ALL_SIDES, &lt;1.0, 0.0, 0.0&gt;, (float)TRUE];
+
+    //  to accumulate the parameter list that will be affected by SLPPF in this event
+        list params;
+        integer numberOfPrims = llGetNumberOfPrims();
+
+    //  Links in a linkset start numbering with 1
+        integer index = 1;
+        do
+        {
+        //  build the parameters list, in the format PRIM_LINK_TARGET, link number, parameters
+            params += [PRIM_LINK_TARGET, llList2Integer(gPanels, index)] + WhichWay;
+        }
+        while (++index &lt; numberOfPrims);
+
+    //  apply the parameters to all &quot;panel&quot; prims
+        llSetLinkPrimitiveParamsFast(LINK_SET, params);
+    }</code></pre></div></section>
+<section><h2 id="see-also-constants">See also: constants</h2><span id="constants"></span><div class="wiki-line"><span class="wiki-template"><code>{{#var:constants_nb}}</code></span></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSetLinkPrimitiveParamsFast/">llSetLinkPrimitiveParamsFast</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetLinkPrimitiveParams/">llGetLinkPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/wiki/llsetprimitiveparams-193e7d67/">llSetPrimitiveParams</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llGetPrimitiveParams/">llGetPrimitiveParams</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-primitiveparam-categorize-1ca2b81a/">Template:LSL PrimitiveParam Categorize</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#ifexist:Template:LSLC{{#var:lang}}|
+ {{LSLC{{#var:lang}}|PrimitiveParams}}
+ {{LSLC{{#var:lang}}|PrimitiveParams/{{{1}}}}}
+ {{LSLC{{#var:lang}}|{{{1}}}}}
+|
+ {{LSLC|PrimitiveParams{{#var:lang}}}}
+ {{LSLC|PrimitiveParams/{{{1}}}{{#var:lang}}}}
+ {{LSLC|{{{1}}}{{#var:lang}}}}
+}}
+}}}}</code></pre></details></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line">&lt;noinclude&gt;<span class="wiki-template"><code>{{#if:
+HACK!
+{{:PRIM_NAME|{{{1|}}}}}
+{{:PRIM_DESC|{{{1|}}}}}
+{{:PRIM_SLICE|{{{1|}}}}}
+{{:PRIM_COLOR|{{{1|}}}}}
+{{:PRIM_GLOW|{{{1|}}}}}
+{{:PRIM_TEXGEN|{{{1|}}}}}
+{{:PRIM_TEXTURE|{{{1|}}}}}
+{{:PRIM_TEXT|{{{1|}}}}}
+{{:PRIM_FULLBRIGHT|{{{1|}}}}}
+{{:PRIM_BUMP_SHINY|{{{1|}}}}}
+{{:PRIM_MATERIAL|{{{1|}}}}}
+{{:PRIM_TYPE|{{{1|}}}}}
+{{:PRIM_TYPE_BOX|{{{1|}}}}}
+{{:PRIM_TYPE_SCULPT|{{{1|}}}}}
+{{:PRIM_PHANTOM|{{{1|}}}}}
+{{:PRIM_TEMP_ON_REZ|{{{1|}}}}}
+{{:PRIM_PHYSICS|{{{1|}}}}}
+{{:PRIM_SIZE|{{{1|}}}}}
+{{:PRIM_POSITION|{{{1|}}}}}
+{{:PRIM_POS_LOCAL|{{{1|}}}}}
+{{:PRIM_ROTATION|{{{1|}}}}}
+{{:PRIM_ROT_LOCAL|{{{1|}}}}}
+{{:PRIM_FLEXIBLE|{{{1|}}}}}
+{{:PRIM_POINT_LIGHT|{{{1|}}}}}
+{{:PRIM_OMEGA|{{{1|}}}}}
+{{:PRIM_PHYSICS_SHAPE_TYPE|{{{1|}}}}}
+
+
+}}</code></span>&lt;onlyinclude&gt;<span class="wiki-template"><code>{{#if:
+
+I don&#x27;t know what the restrictions should be so I&#x27;m going to silently emit the group flags (via nogroup and nocaveats).
+{{LSL Function/link|link_target|nogroup=*|nocaveats=*}}
+
+{{#vardefine:link_target_const|{{LSL Const|PRIM_LINK_TARGET|integer|34|c=Used to set the link target of {{GetSet|{{{1|}}}|llGetPrimitiveParams|llSetPrimitiveParams}}}}}}
+
+{{#ifeq:{{{1|}}}|set||
+Only run this if it&#x27;s a get.
+{{#vardefine:caveats|{{#var:caveats}}
+*If {{#ifeq:{{{2}}}|link|{{LSLP|link}} (or}} {{#var:link_target_const}}&#x27;s {{LSLP|link_target}}{{#ifeq:{{{2}}}|link|)}} describes a seated avatar...
+** Flags not explicitly mentioned have obvious values.
+** {{#var:name_const}} will return the avatar&#x27;s {{LSLGC|Legacy Name|legacy name}}.
+** {{#var:desc_const}} will return &lt;code&gt;{{HoverText|{{String}}|An empty string}}&lt;/code&gt;.
+** {{#var:type_const}} will return &lt;code&gt;[[[PRIM_TYPE_BOX]], [[PRIM_HOLE_DEFAULT]], &lt;0., 1., 0.&gt;, 0., [[ZERO_VECTOR]], &lt;1., 1., 0.&gt;, [[ZERO_VECTOR]]]&lt;/code&gt;
+** {{#var:slice_const}} will return &lt;code&gt;[&lt;0., 1., 0.&gt;]&lt;/code&gt;
+** {{#var:material_const}} will return &lt;code&gt;[[PRIM_MATERIAL_FLESH]]&lt;/code&gt;.
+** {{#var:temponrez_const}} will return &lt;code&gt;[[FALSE]]&lt;/code&gt;.
+** {{#var:phantom_const}} will return &lt;code&gt;[[FALSE]]&lt;/code&gt;.
+** {{#var:size_const}} will return &lt;code&gt;[[llGetAgentSize]]([[llGetLinkKey]]({{LSLP|link}}))&lt;/code&gt;.
+** {{#var:text_const}} will return &lt;code&gt;[&quot;&quot;, [[ZERO_VECTOR]], 1.]&lt;/code&gt;.
+** {{#var:light_const}} will return &lt;code&gt;[[[FALSE]], [[ZERO_VECTOR]], 0., 0., 0.]&lt;/code&gt;.
+** {{#var:flexible_const}} will return &lt;code&gt;[[[FALSE]], 0, 0., 0., 0., 0., [[ZERO_VECTOR]]]&lt;/code&gt;.
+** {{#var:color_const}}, {{#var:texture_const}}, {{#var:glow_const}}, {{#var:fullbright_const}}, {{#var:bumpshiny_const}}, {{#var:texgen_const}}
+*** will return &lt;code&gt;[]&lt;/code&gt; and report a script error to the owner: &quot;texture info cannot be accessed for avatars.&quot; 
+}}
+}}
+
+}}</code></span>&lt;/onlyinclude&gt;</div></section>

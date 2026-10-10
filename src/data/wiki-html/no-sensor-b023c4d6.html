@@ -1,0 +1,40 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Result of a call to <a href="/functions/llSensor/">llSensor</a> or <a href="/functions/llSensorRepeat/">llSensorRepeat</a>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>sensor/no_sensor are not always the best solution:</li>
+<li>To determine if something is in/out of range is overkill. For this situation use: <a href="/functions/llGetObjectDetails/">llGetObjectDetails</a> as you will see in the <a href="#useful-snippets">Useful&amp;nbsp;Snippets</a> section.</li>
+<li>To determine if an avatar is in the region, try <a href="/functions/llGetAgentSize/">llGetAgentSize</a></li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>//List all avatars in range.
+default 
+{
+     on_rez(integer i) 
+     {
+          llSensor(&quot;&quot;, &quot;&quot;, AGENT_BY_LEGACY_NAME, 96.0, PI);   // Detect any avatars within a 96 metre radius sphere
+     }
+     sensor(integer number_detected) 
+     {
+          integer i = 0;
+          do 
+          {
+               llOwnerSay(llDetectedName(i) + &quot; is &quot; + (string) llVecDist(llGetPos(), llDetectedPos(i) ) + &quot;m away.&quot;);
+          }
+          while(++i &lt; number_detected);
+     }
+     no_sensor() 
+     {
+          llOwnerSay(&quot;No avatars in range.&quot;);
+     }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><pre><code>//An alternative solution for find out if a user is not in range
+//No sensor is used so the above caveat doesn&#x27;t apply.
+
+integer InRange(key uuid, float distance)
+{
+    list data = llGetObjectDetails(uuid, [OBJECT_POS]);
+    if(data == [])
+        return 0;
+    return llVecDist(llList2Vector(data, 0), llGetPos()) &lt;= distance;
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSensor/">llSensor</a></div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSensorRepeat/">llSensorRepeat</a></div></div></section>
+<section><h2 id="additional">Additional wiki content</h2><div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-issues-svc-2409-84fa882b/">Issues/SVC-2409</a>: <code>{{Issues/SVC-2409}}</code></span></div></section>

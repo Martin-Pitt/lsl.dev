@@ -1,0 +1,294 @@
+<h2 id="autohud-constructor-v1-0-0">AutoHUD constructor v1.0.0</h2>
+<div class="wiki-line">Automatic assembly of stacked text element HUD. [Typically used to track avatars in your vicinity.]</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line"><b>This script ONLY assembles the HUD prims and then deletes itself.</b></div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line"><b>DESIGNED TO DISPLAY 1 TEXT ELEMENT PER PRIM</b></div>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><pre><code>//https://wiki.secondlife.com/wiki/AutoHUD_constructor
+//
+// BETLOG Hax
+// AEST: 20090113 1346 [SLT:  20090112 2046]
+// Total rewrite of a script called &#x27;Align&#x27; by Zwagoth Klaar.
+// This script features a different layout of prims, specifically so the displayed text is over
+// the same prim (typically this is not the case, making touch events confusing as they have
+// to reference the previous linkset prim). This layout avoids that.
+// Optimized for finer tuned text positioning and sexy texturing.
+// Intended to facilitate use of an array of llDetectedTouchXX buttons on the main panel.
+//
+// WTF?: Arrays prims into a vertical array suitable for avatar-listing HUDs.
+// HOW?: 1] Rez a bunch of boxes 2] link them together 3] add this script to the root prim.
+//
+//=========================================================================
+// ---LICENCE START---
+// http://creativecommons.org/licenses/by-sa/3.0/
+// ie: Attribution licence:
+//   Give me credit by leaving it in the script I created.
+//   Supply my original script with your modified version.
+//   Refer to the wiki URL from which you copied this script.
+//      https://wiki.secondlife.com/wiki/AutoHUD_constructor
+// ---LICENCE END---
+//=========================================================================
+
+//----------------------------------
+// SHARED CONFIGURATION
+integer     gPIN                    = 652212; //CHANGE ME
+//----------------------------------
+// CONFIGURATION
+//
+vector      gDisplayScale           = &lt;0.22,0.06, 0.01&gt;;//&lt;0.22,0.055, 0.01&gt;;
+vector      gDisplayColor           = &lt;0.0, 0.25, 0.25&gt;;
+float       gDisplayAlpha           = 0.5;
+//----------------------------------
+// CORE CODE
+//
+//----------------------------------
+f_initPrimLayout()
+{   llSetRemoteScriptAccessPin(gPIN);
+    llSetObjectName(llGetScriptName());
+    llOwnerSay(&quot;STARTING: processing initial prim layout&quot;);
+    llSetPrimitiveParams([
+        PRIM_SIZE,&lt;0.055,0.22,0.015&gt;
+        ,PRIM_ROTATION, llEuler2Rot(&lt;0.0, 90.0, 180.0&gt;*DEG_TO_RAD)
+//HALF of the CONTROL PANEL (8 main function button slots)
+        ,9, 0, 0, &lt;0.125000, 0.625000, 0.0&gt;, 0.0, &lt;0.0, 0.0, 0.0&gt;, &lt;1.0, 1.0, 0.0&gt;, &lt;0.0, 0.0, 0.0&gt;
+//WHOLE CONTROL PANEL (16 main function button slots)
+//        ,9, 0, 0, &lt;0.0, 1.0, 0.0&gt;, 0.0, &lt;0.0, 0.0, 0.0&gt;, &lt;1.0, 1.0, 0.0&gt;, &lt;0.0, 0.0, 0.0&gt;
+        ,PRIM_COLOR, ALL_SIDES, &lt;1.0, 1.0, 1.0&gt;, 0.5
+        ,PRIM_TEXTURE, ALL_SIDES, TEXTURE_BLANK, &lt;1,1,0&gt;, &lt;0.0,0.0,0&gt;, 0*DEG_TO_RAD 
+        ,PRIM_TEXTURE, 4,&quot;0c4f66d1-048b-a66e-0c7e-0d40a0b9cd82&quot;, &lt;1,1,0&gt;, &lt;0.0,0.0,0&gt;, 270*DEG_TO_RAD 
+    ]);
+    integer p;
+    integer link = p = llGetNumberOfPrims();
+    while(link&gt;1)
+    {   llSetLinkPrimitiveParams(link, [
+            PRIM_POSITION, &lt;(gDisplayScale.y*0.5*0.6)*(link-1), 0.0, gDisplayScale.z*(link-1)&gt; 
+            ,PRIM_SIZE, gDisplayScale
+            ,PRIM_ROTATION, llEuler2Rot(&lt;0.0, 90.0, 90.0&gt;*DEG_TO_RAD)
+            ,9, 0, 0, &lt;0.375000, 0.875000, 0.0&gt;, 0.0, &lt;0.0, 0.0, 0.0&gt;
+                , &lt;1.0, 1.58750000, 0.0&gt;, &lt;0.0, 0.0, 0.0&gt;
+            ,PRIM_COLOR, ALL_SIDES, &lt;1.0, 1.0, 1.0&gt;, 0.0
+            ,PRIM_COLOR, 2, gDisplayColor, gDisplayAlpha
+            ,PRIM_TEXTURE, ALL_SIDES, TEXTURE_BLANK, &lt;1,1,0&gt;, &lt;0.0,0.0,0&gt;, 0*DEG_TO_RAD  
+            ,PRIM_TEXTURE, 2, &quot;650f8650-e924-cf51-5603-a1bb03cfab59&quot;, &lt;1,1,0&gt;, &lt;0,0,0&gt;, 0*DEG_TO_RAD 
+        ]);
+        --link;
+    }
+    llOwnerSay(&quot;COMPLETED: processing prim layout&quot;);
+    llRemoveInventory(llGetScriptName());
+}
+//======================================================================================
+default
+{   on_rez(integer start_param)
+    {   llResetScript();
+    }
+    state_entry()
+    {   f_initPrimLayout();
+    }
+}
+//======================================================================================
+// ORIGINAL LICENCE :
+//  GNU GENERAL PUBLIC LICENSE - Version 3, 29 June 2007
+//  http://www.gnu.org/licenses/gpl-3.0.txt
+//
+//ZWAGOTHS ORIGINAL SCRIPT:
+// *******************************************************************************
+//
+// I give tech support for advanced+interesting topics only. 
+// Otherwise dont ask me for tech support. I won&#x27;t give it.
+// But I will accept tips sent to Zwagoth Klaar :-)
+//
+// Copyright (C) 2008 Zwagoth Klaar
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  U
+//
+//default
+//{
+//    state_entry()
+//    {
+//        vector scale = &lt;0.6,0.032, 0.01&gt;;
+//        integer link;
+//        for(link = 2;link &lt;= (llGetNumberOfPrims()+1);link++)
+//        {
+//            llSetLinkPrimitiveParams(link, [PRIM_POSITION, ZERO_VECTOR + &lt;0,(scale.y-0.012)*(link-1),0&gt; ,PRIM_SIZE,scale]);
+//        }
+//        llSetLinkPrimitiveParams(1, [PRIM_SIZE,(scale - &lt;0.15,0,0&gt;)]);
+//    }
+//
+//    touch_start(integer total_number)
+//    {
+//        vector scale = &lt;0.5,0.032, 0.01&gt;;
+//        integer link;
+//        for(link = 2;link &lt;= (llGetNumberOfPrims()+1);link++)
+//        {
+//            llSetLinkPrimitiveParams(link, [PRIM_POSITION, ZERO_VECTOR + &lt;0,(scale.y-0.012)*(link-1),0&gt; ,PRIM_SIZE,scale]);
+//        }
+//        llSetLinkPrimitiveParams(1, [PRIM_SIZE,(scale - &lt;0.15,0,0&gt;)]);
+//    }
+//}
+//======================================================================================</code></pre></div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<h2 id="autohud-constructor-v2-0-0">AutoHUD constructor v2.0.0</h2>
+<div class="wiki-line">Automatic assembly of stacked text element HUD. [Typically used to track avatars in your vicinity.]</div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line"><b>This script ONLY assembles the HUD prims and then deletes itself.</b></div>
+<div class="wiki-line"><br></div>
+<div class="wiki-line"><b>DESIGNED TO DISPLAY 6 TEXT ELEMENTS PER PRIM, TO SPEED UP LINKMESSAGING..</b></div>
+<div class="wiki-line">&lt;div style="padding: 0.5em;"&gt;</div>
+<div class="wiki-line"><pre><code>//https://wiki.secondlife.com/wiki/AutoHUD_constructor
+//
+// BETLOG Hax
+// AEST: 20090124 1605 [SLT:  20090123 2305]
+// Total rewrite of a script called &#x27;Align&#x27; by Zwagoth Klaar.
+// This script features a better layout of prims, specifically so the displayed text is over
+// the same prim (typically this is not the case, making touch events confusing as they have
+// to reference the previous linkset prim). This layout avoids that.
+// Optimized for finer tuned text positioning and sexy texturing.
+// Intended to facilitite use of an array of llDetectedTouchXX buttons on the main panel.
+//
+//  v2.0.0 - DISPLAYS 6 TEXT ELEMENTS PER BLOCK, TO SPEED UP LINKMESSAGING.
+//
+// WTF?: Arrays prims into a vertical array suitable for avatar-listing HUDs.
+// HOW?: 1] Rez a bunch of boxes 2] link them together 3] add this script to the root prim.
+//
+//=========================================================================
+// ---LICENCE START---
+// http://creativecommons.org/licenses/by-sa/3.0/
+// ie: Attribution licence:
+//   Give me credit by leaving it in the script I created.
+//   Supply my original script with your modified version.
+//   Refer to the wiki URL from which you copied this script.
+//      https://wiki.secondlife.com/wiki/AutoHUD_constructor
+// ---LICENCE END---
+//=========================================================================
+
+//----------------------------------
+// SHARED CONFIGURATION
+integer     gPIN                    = 652212; //CHANGE ME
+//----------------------------------
+// CONFIGURATION
+//
+vector      gTextScale              = &lt;0.25, 0.21, 0.01&gt;;
+vector      gTextColor              = &lt;0.0, 0.25, 0.25&gt;;
+float       gTextAlpha              = 0.5;
+//----------------------------------
+// CORE CODE
+//----------------------------------
+f_initPrimLayout()
+{   llSetRemoteScriptAccessPin(gPIN);
+    llSetObjectName(llGetScriptName());
+    llOwnerSay(&quot;STARTING: processing initial prim layout&quot;);
+    llSetPrimitiveParams([
+        PRIM_SIZE,&lt;0.055,0.25,0.01&gt;
+        ,PRIM_ROTATION, llEuler2Rot(&lt;0.0, 90.0, 180.0&gt;*DEG_TO_RAD)
+//HALF of the CONTROL PANEL (8 main function button slots)
+        ,9, 0, 0, &lt;0.125000, 0.625000, 0.0&gt;, 0.0, &lt;0.0, 0.0, 0.0&gt;, &lt;1.0, 1.0, 0.0&gt;, &lt;0.0, 0.0, 0.0&gt;
+//WHOLE CONTROL PANEL (16 main function button slots)
+//        ,9, 0, 0, &lt;0.0, 1.0, 0.0&gt;, 0.0, &lt;0.0, 0.0, 0.0&gt;, &lt;1.0, 1.0, 0.0&gt;, &lt;0.0, 0.0, 0.0&gt;
+        ,PRIM_COLOR, ALL_SIDES, &lt;1.0, 1.0, 1.0&gt;, 0.5
+        ,PRIM_TEXTURE, ALL_SIDES, TEXTURE_BLANK, &lt;1,1,0&gt;, &lt;0.0,0.0,0&gt;, 0*DEG_TO_RAD 
+        ,PRIM_TEXTURE, 4,&quot;0c4f66d1-048b-a66e-0c7e-0d40a0b9cd82&quot;, &lt;1,1,0&gt;, &lt;0.0,0.0,0&gt;, 270*DEG_TO_RAD 
+    ]);
+    integer p;
+    integer link = p = llGetNumberOfPrims();
+    float o;
+    vector s = llGetScale();
+    float height = gTextScale.y*0.5;
+    while(link&gt;1)
+    {   o = (s.x*0.5)-(height*0.125);
+        if (link &gt; 2)
+            o += (height*0.875)*(link-2); 
+        llSetLinkPrimitiveParams(link, [
+            PRIM_POSITION, &lt;o, 0.0, gTextScale.z*(link-1)&gt; 
+            ,PRIM_SIZE, gTextScale
+            ,PRIM_ROTATION, llEuler2Rot(&lt;0.0, 90.0, 90.0&gt;*DEG_TO_RAD)
+            ,9, 0, 0, &lt;0.375, 0.875, 0.0&gt;, 0.0, &lt;0.0, 0.0, 0.0&gt;
+                , &lt;1.0, 1.875, 0.0&gt;, &lt;0.0, 0.0, 0.0&gt;
+            ,PRIM_COLOR, ALL_SIDES, &lt;1.0, 1.0, 1.0&gt;, 0.0
+            ,PRIM_COLOR, 2, gTextColor, gTextAlpha
+            ,PRIM_TEXTURE, ALL_SIDES, TEXTURE_BLANK, &lt;1,1,0&gt;, &lt;0.0,0.0,0&gt;, 0*DEG_TO_RAD  
+            ,PRIM_TEXTURE, 2, &quot;650f8650-e924-cf51-5603-a1bb03cfab59&quot;
+                , &lt;1,6,0&gt;, &lt;0,0.5,0&gt;, 0*DEG_TO_RAD 
+        ]);
+        --link;
+    }
+    llOwnerSay(&quot;COMPLETED: processing prim layout&quot;);
+    llRemoveInventory(llGetScriptName());
+}
+//======================================================================================
+default
+{   on_rez(integer start_param)
+    {   llResetScript();
+    }
+    state_entry()
+    {   f_initPrimLayout();
+    }
+}
+//======================================================================================
+// ORIGINAL LICENCE :
+//  GNU GENERAL PUBLIC LICENSE - Version 3, 29 June 2007
+//  http://www.gnu.org/licenses/gpl-3.0.txt
+//
+//ZWAGOTHS ORIGINAL SCRIPT:
+// *******************************************************************************
+//
+// I give tech support for advanced+interesting topics only. 
+// Otherwise dont ask me for tech support. I won&#x27;t give it.
+// But I will accept tips sent to Zwagoth Klaar :-)
+//
+// Copyright (C) 2008 Zwagoth Klaar
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  U
+//
+//default
+//{
+//    state_entry()
+//    {
+//        vector scale = &lt;0.6,0.032, 0.01&gt;;
+//        integer link;
+//        for(link = 2;link &lt;= (llGetNumberOfPrims()+1);link++)
+//        {
+//            llSetLinkPrimitiveParams(link, [PRIM_POSITION, ZERO_VECTOR + &lt;0,(scale.y-0.012)*(link-1),0&gt; ,PRIM_SIZE,scale]);
+//        }
+//        llSetLinkPrimitiveParams(1, [PRIM_SIZE,(scale - &lt;0.15,0,0&gt;)]);
+//    }
+//
+//    touch_start(integer total_number)
+//    {
+//        vector scale = &lt;0.5,0.032, 0.01&gt;;
+//        integer link;
+//        for(link = 2;link &lt;= (llGetNumberOfPrims()+1);link++)
+//        {
+//            llSetLinkPrimitiveParams(link, [PRIM_POSITION, ZERO_VECTOR + &lt;0,(scale.y-0.012)*(link-1),0&gt; ,PRIM_SIZE,scale]);
+//        }
+//        llSetLinkPrimitiveParams(1, [PRIM_SIZE,(scale - &lt;0.15,0,0&gt;)]);
+//    }
+//}
+//======================================================================================</code></pre></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Image:HaxHUD_60_avatars_20090417a.png">Tracking 60 avatars on 10 display prims, HUD consists of 13 prims and 14 scripts in total, or 12 if weapon and auxillary function scripts were removed.</a></div>
+<div class="wiki-line">&lt;/div&gt;</div>
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-lslc-46547cdb/">LSLC</a>: <code>{{LSLC|Examples|AutoHUD_constructor}}</code></span></div>

@@ -1,0 +1,189 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">The purpose of this function is to allow scripts in the same object to communicate. It triggers a <a href="/events/link_message/">link_message</a> <a href="https://wiki.secondlife.com/wiki/event">event</a> with the same parameters <code>num</code>, <code>str</code>, and <code>id</code> in all scripts in the prim(s) described by <code>link</code>.</div></section>
+<section><h2 id="function-guidance">Function guidance</h2><div class="wiki-line">You can use <code>id</code> as a second string field<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|In LSL the [[key]] type is implemented as a [[string]] (but with different operators and restrictions). [[typecast|Typecasting]] between string and key types has no effect on the data contained.}}</code></span>. The sizes of <code>str</code> and <code>id</code> are only limited by available script memory.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>A script can hear its own linked messages if <code>link</code> targets the prim it is in<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|There are four ways for a script to target itself: by [[llGetLinkNumber|precise link number]], [[LINK_THIS]], [[LINK_SET]] and [[LINK_ALL_CHILDREN]] (if the prim is a child prim).}}</code></span>. This creates the possibility of an infinite loop (a bad thing); be very careful about how messages are handled and passed along.</li>
+<li>Messages sent via <a href="/functions/llMessageLinked/">llMessageLinked</a> to a script that is <a href="/functions/llSleep/">sleeping</a>, <a href="/wiki/lsl-delay-d1cb4fc2/">delayed</a>, or <a href="https://wiki.secondlife.com/wiki/lag">lagged</a>, are queued until the end of the delay. The <a href="https://wiki.secondlife.com/wiki/event">event</a> queue can hold 64 <a href="https://wiki.secondlife.com/wiki/event">events</a>.</li>
+<li>If an <a href="https://wiki.secondlife.com/wiki/event">event</a> is received and the queue is full the <a href="https://wiki.secondlife.com/wiki/event">event</a> is silently dropped.</li>
+<li>Avoid sending link_messages to large numbers of scripts simultaneously as it can cause lag spike. This most often happens when using the multi-prim <code>LINK_*</code> flags and can cause script execution to slow or halts.</li>
+<li>Avoid sending link_messages to a target faster than they can be handled. Doing so risks filling the <a href="https://wiki.secondlife.com/wiki/event">event</a> queue and subsequent messages being silently discarded.</li>
+<li>When a script <a href="https://wiki.secondlife.com/wiki/state">state</a> changes, all pending <a href="https://wiki.secondlife.com/wiki/event">events</a> are deleted, including queued link_messages.</li>
+<li>If <code>link</code> is an invalid link number then the function silently fails.</li>
+<li>If <code>str</code> &amp; <code>id</code> exceed the available memory of a script that catches the resulting <a href="/events/link_message/">link_message</a> <a href="https://wiki.secondlife.com/wiki/event">event</a>, that script will crash with a <a href="https://wiki.secondlife.com/wiki/LSL_Errors#script-run-time-error-stack-heap-collision">Stack-Heap Collision</a>.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line"><pre><code>default
+{
+    // assumptions  // object name: LSLWiki // script name: _lslwiki
+    state_entry()
+    {
+        llMessageLinked(LINK_THIS, 0, llGetScriptName(), &quot;&quot;);
+    }
+
+    link_message(integer sender_num, integer num, string msg, key id)
+    {
+        llOwnerSay(msg);
+        // the owner of object LSLWiki will hear
+        // LSLWiki:_lslwiki
+    }
+}</code></pre></div>
+<h3 id="infinite-loop">Infinite Loop</h3>
+<div class="wiki-line"><pre><code>Message_Control(integer l, integer n) // Message_Total_Lack_Of_Control
+{
+    integer r = (++n); // Increment the value of n.
+    llMessageLinked( l, r, &quot;&quot;, &quot;&quot;); // Send the result to l
+}
+
+default
+{
+    state_entry()
+    {
+        Message_Control(LINK_SET, 0); // Tell all the scripts in the object that we have state_entered.
+    }
+    link_message(integer Sender, integer Number, string String, key Key) // This script is in the object too.
+    {
+        Message_Control(Sender, Number); // No filtering condition exists.
+        llOwnerSay(((string)Number)); // Look at all the pretty numbers!
+    }
+}</code></pre></div></section>
+<section><h2 id="helper-functions">Helper functions</h2><span id="useful-snippets"></span><div class="wiki-line"><pre><code>default
+{
+    // Quick and dirty debugging link_messages
+    link_message(integer sender_num, integer num, string msg, key id)
+    {
+        llSay(DEBUG_CHANNEL, llList2CSV([sender_num, num, msg, id]));
+    }
+}</code></pre></div>
+<div class="wiki-line"><pre><code>// This is just an example script, you shouldn&#x27;t handle link message within single script this way.
+
+default
+{
+    // To propagate an unlimted number of arguments of any type.
+    // Presumed, the separator string isn&#x27;t used in any source string!
+    state_entry()
+    {
+        list my_list = [1, 2.0, &quot;a string&quot;, &lt;1, 2, 3&gt;, &lt;1, 2, 3, 4&gt;, llGetOwner()];
+        string list_parameter = llDumpList2String(my_list, &quot;|&quot;);    // Convert the list to a string
+        llMessageLinked(LINK_THIS, 0, list_parameter, &quot;&quot;);
+    }
+
+    link_message(integer sender_num, integer num, string list_argument, key id)
+    {
+        list re_list = llParseString2List(list_argument, [&quot;|&quot;], []);    // Parse the string back to a list
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li>Using <a href="/functions/llMessageLinked/">llMessageLinked</a> in a single prim object allows developers to mitigate some <a href="https://wiki.secondlife.com/wiki/Limits#scripting">LSL limits</a> by breaking up functionality between cooperating scripts and synchronizing actions. When you do this, be extremely careful not to create infinite loops as mentioned above.</li>
+<li>Estimated <code>.25</code> to <code>.50</code> delay between receiving and sending of <a href="/functions/llMessageLinked/">llMessageLinked</a> has been observed by some users</li>
+<li>Some users have noted occasional failures of linked messages when sending a message to a large number of receiving scripts in different prims using <a href="/constants/LINK_SET/">LINK_SET</a>, <a href="/constants/LINK_ALL_OTHERS/">LINK_ALL_OTHERS</a>, &amp; <a href="/constants/LINK_ALL_CHILDREN/">LINK_ALL_CHILDREN</a>. If you encounter this problem, a workaround is to place all child prim scripts in a single prim, using targeted functions like <a href="/wiki/llsetlinkprimitiveparams-a653d977/">llSetLinkPrimitiveParams</a> to modify the prim in which the script previously resided. -- <a href="https://wiki.secondlife.com/wiki/User:Void_Singer">Void Singer</a></li>
+<li>This function seems to create a lower lag level then <a href="/functions/llListen/">llListen</a> since it does not need a listener.</li>
+</ul></section>
+<section><h2 id="see-also-events">See also: events</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/events/link_message/">link_message</a></div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p><a href="/wiki/template-lsl-function-link-8049cdf0/">Template:LSL Function/link</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{LSL Injection Test}}{{#if:
+
+{{#vardefine:header|{{#var:header}}
+{{#switch:{{#if:{{{nc|}}}|Template|{{NAMESPACE}}}}|Template=|User=|}}}}
+
+&lt;includeonly&gt;
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Link{{#var:lang}}}}{{#if:{{{mode|}}}|{{LSLC|Link/{{{mode}}}{{#var:lang}}}}}}
+}}}}}}
+&lt;/includeonly&gt;
+
+{{#if:{{{nlf|}}}{{{noconst|}}}{{#var:link_constants}}||
+{{#vardefine:constants_nb|
+{{{!}} style={{{ostyle|}}}
+{{!}}- valign=&quot;top&quot;
+{{!}}
+{{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! colspan=&quot;2&quot; {{!}}Flag
+!Description
+{{!}}-
+{{!}} {{LSL Const|LINK_ROOT|integer|1|c={{{verb|refers to}}} the root prim in a multi-prim linked set}}
+{{!}} {{#var:value}}
+{{!}} {{{verb|refers to}}} the [[Link#Root_Prim|root]] prim in a multi-prim linked set{{Footnote|handle=LINK_ROOT|LINK_ROOT does not work on single [[prim]] [[object|objects]]. Unless there is an avatar sitting on the [[object]].}}
+{{#if:{{{nogroup|}}}||{{!}}-
+{{!}} {{LSL Const|LINK_SET|integer|-1|c={{{verb|refers to}}} all prims}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LINK_ALL_OTHERS|integer|-2|c={{{verb|refers to}}} all other prims}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}}}
+{{!}}}
+{{!}}
+{{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! colspan=&quot;2&quot; {{!}}Flag
+!Description
+{{!}}-
+{{#if:{{{nogroup|}}}||{{!}} {{LSL Const|LINK_ALL_CHILDREN|integer|-3|c={{{verb|refers to}}} all children, (everything but the root)}}
+{{!}} {{#var:value}}
+{{!}} {{{verb|refers to}}} all children, (everything but the [[Link#Root_Prim|root]])}}
+{{!}}-
+{{!}} {{LSL Const|LINK_THIS|integer|-4|c={{{verb|refers to}}} the prim the script is in}}
+{{!}} {{#var:value}}
+{{!}} {{{verb|refers to}}} the [[prim]] the [[script]] is in
+{{!}}}
+{{!}}}
+{{#var:constants_nb}}}}
+{{#vardefine:link_constants|*}}
+}}
+
+{{#vardefine:p_{{{1|}}}_desc|[[Link]] number ({{#if:{{{nounlinked|}}}||0: {{HoverText|unlinked|When an object is made up of only one prim, and there are no avatars seated upon it, the link number of the (root) prim is zero.}},&amp;#32;}}1: {{HoverText|[[Link#Root_Prim|root]] prim|When an object is made up of multiple prims or there is an avatar seated upon the object, the root prim&#x27;s link number is one}}, &amp;gt;1: child prims{{#if:{{{noavatar|}}}||&amp;#32;and {{HoverText|seated avatars|Avatars sitting on objects are assigned link numbers. They are always greater than prim link numbers.}}}}) {{#if:{{{nlf|}}}||or a &lt;code&gt;LINK_*&lt;/code&gt; [[flag]]}}{{{2|}}}&amp;#32;}}
+{{#vardefine:p_{{{1|}}}_hover|Link number ({{#if:{{{nounlinked|}}}||0: unlinked,&amp;#32;}}1: root prim, &amp;gt;1: child prims{{#if:{{{noavatar|}}}||&amp;#32;and seated avatars}}) {{#if:{{{nlf|}}}||or a LINK_* flag}}{{#if:{{{3|}}}|{{{3|}}}|{{{2|}}}}}&amp;#32;}}
+
+{{#if:{{{nocaveats|}}}||{{#if:{{{noavatar|}}}|
+{{#vardefine:caveats|
+*{{LSLP|{{{1|}}}}} cannot be a {{HoverText|seated avatar|Avatars sitting on objects are assigned link numbers. They are always greater than link numbers of prims.}}.
+{{#var:caveats}}}}
+}}{{#if:{{{nogroup|}}}|
+{{#vardefine:caveats|
+*{{LSLP|{{{1|}}}}} needs to be either an actual [[llGetLinkNumber|link number]] or a link constants that equate to a single prim, such as [[LINK_ROOT]] and [[LINK_THIS]].
+**[[LINK_SET]], [[LINK_ALL_CHILDREN]] and [[LINK_ALL_OTHERS]] will not work.
+{{#var:caveats}}}}
+}}}}
+
+{{#if:{{#var:link_stuff}}||
+{{#vardefine:link_stuff|*}}
+{{#vardefine:notes|
+&lt;h3&gt;Link Numbers&lt;/h3&gt;
+Each prim that makes up an [[object]] has an address, a link number. To access a specific [[prim]] in the [[object]], the [[prim]]&#x27;s link number must be known. In addition to [[prim|prims]] having link numbers, avatars seated upon the [[object]] do as well.
+* If an [[object]] consists of only one [[prim]], and there are no avatars seated upon it, the ([[Link#Root_Prim|root]]) [[prim]]&#x27;s link number is zero.
+* However, if the [[object]] is made up of multiple prims or there is an avatar seated upon the [[object]], the [[Link#Root_Prim|root]] [[prim]]&#x27;s link number is one.
+
+When an avatar sits on an [[object]], it is added to the end of the link set and will have the largest link number. In addition to this, while an avatar is seated upon an object, the object is unable to link or unlink prims without [[llUnSit|unseating]] all avatars first.
+&lt;h4&gt;Counting Prims &amp; Avatars&lt;/h4&gt;
+There are two functions of interest when trying to find the number of prims and avatars on an object.
+* &lt;code&gt;[[llGetNumberOfPrims]]()&lt;/code&gt; - Returns the number of [[prim|prims]] and seated avatars.
+* &lt;code&gt;[[llGetObjectPrimCount]]([[llGetKey]]())&lt;/code&gt; - Returns only the number of [[prim|prims]] in the [[object]] but will return zero for attachments.
+
+&lt;syntaxhighlight lang=&quot;lsl2&quot;&gt;integer GetPrimCount() { //always returns only the number of prims
+    if(llGetAttached())//Is it attached?
+        return llGetNumberOfPrims();//returns avatars and prims but attachments can&#x27;t be sat on.
+    return llGetObjectPrimCount(llGetKey());//returns only prims but won&#x27;t work on attachments.
+}&lt;/syntaxhighlight&gt;See [[llGetNumberOfPrims]] for more about counting prims and avatars.
+
+&lt;h4&gt;Errata&lt;/h4&gt;
+If a script located in a [[Link#Child_Prim|child]] prim erroneously attempts to access link 0, it will get or set the property of the linkset&#x27;s [[Link#Root_Prim|root]] prim.  This bug ({{jira|BUG-5049}}) is preserved for broken legacy scripts. {{PBR}}
+{{#var:notes}}
+}}
+
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetLinkNumber]]|Returns the link number of the [[prim]] the script is in.}}}}
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|}}}_desc}}
+|-
+{{VarPairTable|also_functions}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPair|notes}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

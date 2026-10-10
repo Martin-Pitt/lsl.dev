@@ -1,0 +1,176 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Triggered when the object rezzes an object.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>Triggers in all running scripts with an <a href="/events/object_rez/">object_rez</a> event, AND in the same <strong>prim</strong> as the script calling <a href="/functions/llRezObject/">llRezObject</a> or <a href="/functions/llRezAtRoot/">llRezAtRoot</a>.</li>
+<li>Does NOT trigger in linked prims.</li>
+<li>A message sent to the rezzed object may arrive before the object has had a chance to opened a listen channel and is ready to receive <a href="/events/listen/">listen</a> events unless you provide for a communication handshake between the rezzer and the new object.</li>
+<li>Objects that have opened a listen channel before being rezzed (for example in <a href="/events/state_entry/">state_entry</a>) will be able to receive messages as soon as object_rez is triggered.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><h4 id="rez-with-handshake-communication">Rez with handshake communication</h4>
+<div class="wiki-line">The rezzer script will create a new object ("rezzee") and wait for a message from it before sending inventory items to the new object. Once all inventory items have been sent, the rezzer will send a message to the new object, letting it know the process is finished.</div>
+<div class="wiki-line"><pre><code>// The rezzer and rezzee must use the same communication channel.
+integer COM_CHANNEL = -17974594;
+string REZZEE_NAME = &quot;Rezzee&quot;;
+
+// These are expected messages between rezzer and rezzee.
+string CMD_REZZEE_READY = &quot;REZZEE_READY&quot;;
+string CMD_REZZER_DONE = &quot;REZZER_DONE&quot;;
+
+key rezzee_key;
+
+default
+{
+	touch_start(integer num_detected)
+	{
+		// A separate state is used to disable touch-events and remove listens.
+		// This prevents multiple objects from being rezzed until the previous one
+		// has finished receiving everything it needs.
+		state rez_new_object;
+	}
+}
+
+state rez_new_object
+{
+	state_entry()
+	{
+		// Listen for messages on the shared channel, from objects with the correct name.
+		llListen(COM_CHANNEL, REZZEE_NAME, &quot;&quot;, &quot;&quot;);
+
+		// Rez the object with the shared channel as the rez-parameter.
+		vector position = llGetPos() + &lt;0, 0, 1&gt;;
+		llRezObject(REZZEE_NAME, position, ZERO_VECTOR, ZERO_ROTATION, COM_CHANNEL);
+	}
+
+	object_rez(key id)
+	{
+		// The object has rezzed in-world. It may not have called llListen yet,
+		// so we&#x27;ll save its UUID and wait for a message from it.
+		rezzee_key = id;
+	}
+
+	listen(integer channel, string name, key id, string message)
+	{
+		// Check that the &#x27;ready&#x27; message was sent by the object we rezzed last.
+		if (message == CMD_REZZEE_READY &amp;&amp; id == rezzee_key)
+		{
+			// Send inventory to the new object.
+			integer i = llGetInventoryNumber(INVENTORY_NOTECARD);
+			while (i--)
+			{
+				string name = llGetInventoryName(INVENTORY_NOTECARD, i);
+				llGiveInventory(id, name);
+			}
+
+			// Let the new object know it&#x27;s ready, and return to original state.
+			llRegionSayTo(id, COM_CHANNEL, CMD_REZZER_DONE);
+			state default;
+		}
+	}
+}</code></pre></div>
+<div class="wiki-line">The script in the new object ("rezzee") will let the rezzer know when it's prepared to receive communications.</div>
+<div class="wiki-line"><pre><code>// These are expected messages between rezzer and rezzee.
+string CMD_REZZEE_READY = &quot;REZZEE_READY&quot;;
+string CMD_REZZER_DONE = &quot;REZZER_DONE&quot;;
+
+// These will be determined after this object is created by another object.
+integer com_channel;
+key rezzer_key;
+
+default
+{
+	on_rez(integer start_param)
+	{
+		// A separate state is used to prevent other functionality from happening
+		// while this object waits for its rezzer to finish sending everything it needs.
+		com_channel = start_param;
+		state wait_for_configuration;
+	}
+}
+
+state wait_for_configuration
+{
+	state_entry()
+	{
+		// Get the key of the object which rezzed this object.
+		list details = llGetObjectDetails(llGetKey(), [OBJECT_REZZER_KEY]);
+		rezzer_key = llList2Key(details, 0);
+
+		// Listen for messages on the shared channel, from only the rezzer.
+		llListen(com_channel, &quot;&quot;, rezzer_key, &quot;&quot;);
+
+		// Prepare to receive inventory, then tell the rezzer we&#x27;re ready.
+		llAllowInventoryDrop(TRUE);
+		llRegionSayTo(rezzer_key, com_channel, CMD_REZZEE_READY);
+	}
+
+	listen( integer channel, string name, key id, string message )
+	{
+		// Check that the &#x27;done&#x27; message was sent by the rezzer.
+		if (message == CMD_REZZER_DONE &amp;&amp; id == rezzer_key)
+		{
+			// Return to the original state to continue normal functionality.
+			state default;
+		}
+	}
+
+	state_exit()
+	{
+		// Turn off inventory drop. Changing state will also remove listens.
+		llAllowInventoryDrop(FALSE);
+	}
+}</code></pre></div>
+<h4 id="rez-and-communicate-without-handshake">Rez and communicate without handshake</h4>
+<div class="wiki-line">If the new object has already opened a listen channel before being rezzed, a handshake is not necessary because the object_rez event will not trigger until the object is fully initialized.</div>
+<div class="wiki-line">This is how a script in the new object can pre-open a listen channel:</div>
+<div class="wiki-line"><pre><code>// The rezzer and rezzee must use the same communication channel.
+integer COM_CHANNEL = -17974594;
+
+default
+{
+    // This event is triggered when the script starts
+    // and doesn&#x27;t trigger again when this object is rezzed,
+    // which means the listener will be open as soon as a new copy is rezzed.
+    state_entry()
+    {
+        llListen(COM_CHANNEL, &quot;&quot;, &quot;&quot;, &quot;&quot;);
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        // Get the key of the object which rezzed this object.
+        list details = llGetObjectDetails(llGetKey(), [OBJECT_REZZER_KEY]);
+        key rezzer_key = llList2Key(details, 0);
+
+        if (id == rezzer_key)
+        {
+            // The message could be anything useful, such as
+            // position data, sound/texture/avatar UUID, etc.
+            llOwnerSay(&quot;I heard: &quot; + message);
+        }
+    }
+}</code></pre></div>
+<div class="wiki-line">And this is how it would simplify the rezzer script:</div>
+<div class="wiki-line"><pre><code>// The rezzer and rezzee must use the same communication channel.
+integer COM_CHANNEL = -17974594;
+string REZZEE_NAME = &quot;Rezzee&quot;;
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        // Rez the object. The shared channel isn&#x27;t included
+        // because the new object is already listening to it.
+        vector position = llGetPos() + &lt;0, 0, 1&gt;;
+        llRezObject(REZZEE_NAME, position, ZERO_VECTOR, ZERO_ROTATION, 0);
+    }
+
+    object_rez(key id)
+    {
+        // The object has rezzed in-world.
+        // We can message it directly because we know it&#x27;s listening.
+        llRegionSayTo(id, COM_CHANNEL, &quot;Are you there?&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRezObject/">llRezObject</a> — Used to rez an object at the center of mass</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRezAtRoot/">llRezAtRoot</a> — Used to rez an object at the root</div></div></section>
+<section><h2 id="see-also-events">See also: events</h2><div class="wiki-line"><div class="wiki-related-row"><a href="/events/on_rez/">on_rez</a> — Triggered when the object the script is in is rezzed</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-2926"><a href="/wiki/template-issues-svc-2926-918d6574/">Template:Issues/SVC-2926</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-2926|[[object_rez]]() erroneously triggers on full parcel|type=bug|resolution=wont}}</code></pre></details><p id="svc-3421"><a href="/wiki/template-issues-svc-3421-bd220a89/">Template:Issues/SVC-3421</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-3421|Possible Mono bug with [[object_rez]]|type=bug|resolution=cr}}</code></pre></details></section>

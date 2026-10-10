@@ -1,0 +1,68 @@
+---
+/**
+ * At-a-glance listing of a constant group, after slua.dev's reference pages: one LSL line per
+ * member with its type and value (or, for rule/parameter lists, the arguments that follow it)
+ * and the definition's description as a trailing comment. Every line comes from the LSL
+ * definitions; edit the YAML, not this block. Usage: <ConstantGroup name="RezParam" />
+ *
+ * Long groups whose names share a second word (PRIM_TEXTURE_*, PRIM_MEDIA_*) are sub-grouped
+ * under comment headers.
+ */
+import { catalog, constantsInGroup, constantGroupHref } from '../../lib/catalog';
+import { inlineLsl } from '../../lib/inline-lsl';
+interface Props { name: string; title?: string }
+const { name, title } = Astro.props;
+const info = (catalog.enums as Record<string, any>)[name];
+const members = constantsInGroup(name) as any[];
+if (!info || !members.length) throw new Error(`<ConstantGroup name="${name}" />: no constant group "${name}" with public members in the LSL definitions.`);
+const isRules = info.type.startsWith('param') || members.some(c => c.definition.values);
+const isFlag = info.type.includes('flag');
+const argType = (t: string) => (t === 'boolean' ? 'integer' : t);
+const literal = (c: any) => {
+	const v = c.value;
+	if (isFlag && typeof v === 'number' && v >= 0) return '0x' + v.toString(16).toUpperCase().padStart(v > 0xffff ? 8 : 4, '0');
+	return c.type === 'string' || c.type === 'key' ? JSON.stringify(String(v)) : String(v);
+};
+const code = (c: any) => {
+	if (isRules) {
+		const args = (c.definition.values || []).map((a: any) => `${argType(a['value-type'] ?? a.type ?? '')} ${a.name}`.trim());
+		return [c.name, ...args].join(', ');
+	}
+	return `${c.type} ${c.name} = ${literal(c)};`;
+};
+// Sub-groups: the word after the shared prefix, when that splits a long group into real clusters.
+const prefix = info.prefix || '';
+const word = (n: string) => n.slice(prefix.length).split('_')[0];
+const counts = new Map<string, number>();
+for (const c of members) counts.set(word(c.name), (counts.get(word(c.name)) ?? 0) + 1);
+const clusters = [...counts.values()].filter(n => n > 1).length;
+const split = members.length >= 12 && clusters >= 2;
+const cluster = (c: any) => (split && counts.get(word(c.name))! > 1 ? word(c.name) : '');
+// Definition order, but each cluster gathered where its first member appears; unclustered members first.
+const firstSeen = new Map<string, number>();
+members.forEach((c, i) => { if (!firstSeen.has(cluster(c))) firstSeen.set(cluster(c), cluster(c) ? i + 1 : 0); });
+const ordered = split ? members.map((c, i) => [c, i] as const).sort(([a, i], [b, j]) => firstSeen.get(cluster(a))! - firstSeen.get(cluster(b))! || i - j).map(([c]) => c) : members;
+const rows: { header?: string; html?: string }[] = [];
+let last: string | undefined;
+for (const c of ordered) {
+	const w = cluster(c);
+	if (split && w !== last) { rows.push({ header: w ? `${prefix}${w}_*` : 'Other' }); last = w; }
+	const desc = c.description.split('\n')[0];
+	rows.push({ html: await inlineLsl(`${code(c)}${desc ? ' // ' + desc : ''}`, { self: undefined }) });
+}
+---
+<figure class="lsl-glance not-content">
+	<figcaption>{title ?? <>From the LSL definitions: <a href={constantGroupHref(name)}>{name}</a>{isRules && ' (rule, then its arguments)'}</>}</figcaption>
+	<pre>{rows.map(r => r.header !== undefined
+		? <span class="lsl-glance-header">// {r.header}</span>
+		: <span class="lsl-glance-line"><Fragment set:html={r.html} /></span>)}</pre>
+</figure>
+<style>
+	.lsl-glance { margin: 1rem 0; border: 1px solid var(--sl-color-hairline); border-radius: .6rem; background: var(--sl-color-gray-7, var(--sl-color-black)); overflow: hidden; }
+	.lsl-glance figcaption { padding: .45rem 1rem; font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); border-bottom: 1px solid var(--sl-color-hairline); }
+	.lsl-glance pre { margin: 0; padding: .75rem 1rem; font-family: var(--__sl-font-mono); font-size: var(--sl-text-xs); line-height: 1.6; white-space: normal; }
+	.lsl-glance-line, .lsl-glance-header { display: block; white-space: pre-wrap; padding-inline-start: 2ch; text-indent: -2ch; overflow-wrap: break-word; }
+	.lsl-glance-header { color: var(--sl-color-gray-3); margin-top: .6rem; }
+	.lsl-glance-header:first-child { margin-top: 0; }
+	.lsl-glance :global(code.lsl-inline) { padding: 0; background: none; border: 0; font-size: inherit; white-space: pre-wrap; }
+</style>

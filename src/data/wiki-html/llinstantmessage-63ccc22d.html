@@ -1,0 +1,130 @@
+<section><h2 id="wiki-description">Wiki description</h2><div class="wiki-line">Sends an Instant Message specified in the <a href="https://wiki.secondlife.com/wiki/string">string</a> <code>message</code> to the user specified by <code>user</code>.</div></section>
+<section><h2 id="function-guidance">Function guidance</h2><div class="wiki-line">To send a message directly to an <a href="https://wiki.secondlife.com/wiki/object">object</a>, use <a href="/functions/llRegionSayTo/">llRegionSayTo</a>.</div></section>
+<section><h2 id="caveats">Caveats</h2><ul>
+<li>All <a href="https://wiki.secondlife.com/wiki/object">object</a> IMs are throttled at a maximum of 2500 per 30mins, per owner, per <a href="https://wiki.secondlife.com/wiki/region">region</a>, in a rolling window. This includes IMs sent after the throttle is in place.</li>
+<li>Throttled IMs are dropped. for implementation see <a href="/functions/llInstantMessage/#notes">notes</a> below.</li>
+<li>Messages longer than 1023 bytes will be truncated to 1023 bytes<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|As of Feb 26th, 2013, in all sims, instant messages are now truncated to 1023 bytes to prevent certain types of delivery failure. (See [https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13.02.15.270481 Release Notes for Second Life Server 13.02.15.270481]).}}</code></span>. This can convey 1023 ASCII characters, or fewer<span class="wiki-template"><a href="/wiki/template-footnote-963d0aff/">Footnote</a>: <code>{{Footnote|Around 512 UTF-8 characters such as &#x27;&#x27;&#x27;á&#x27;&#x27;&#x27;.}}</code></span> if non-ASCII characters are present.</li>
+</ul>
+<ul>
+<li>If the specified user is logged in, <code>message</code> will appear in the chat window and will not logged by the InstantMessage logging facility.</li>
+<li>If the specified user is not signed in, the messages will be delivered to their email just like a regular instant message, if the user has enabled email for their account.</li>
+<li>If messages are sent to the same user by the same object within about 65 seconds, they will be bundled together in a single email.</li>
+</ul></section>
+<section><h2 id="examples">Examples</h2><div class="wiki-line">Tell the owner somebody touched the object:</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start( integer total_num )
+    {        
+        llInstantMessage( llGetOwner(), &quot;Someone touched me&quot; );
+    }
+}</code></pre></div>
+<div class="wiki-line">Send an IM to a detected avatar only</div>
+<div class="wiki-line"><pre><code>default
+{
+    touch_start( integer total_num )
+    {
+        llInstantMessage( llDetectedKey(0), &quot;Hands Off!&quot;);
+    }
+}</code></pre></div></section>
+<section><h2 id="notes">Notes</h2><ul>
+<li><a href="/functions/llRegionSayTo/">llRegionSayTo</a> may be a better choice if the target is in the same region as the object sending the message, as it has no built-in delay and can communicate directly with objects, as well as with avatars and their attachments.</li>
+<li>Instant Messaging allows communication from an object to an avatar anywhere on the Grid. However, an object cannot receive an Instant Message. </li>
+<li>Using <a href="/functions/llInstantMessage/">llInstantMessage</a> from one or more child scripts will avoid delays in the main script. Child scripts will still be subject to delays, <a href="https://wiki.secondlife.com/wiki/LSL_Event_Queue">message queue</a> limits, and region throttles.</li>
+<li>Throttling Implementation (Kelly Linden):</li>
+<li>The throttle is on all IMs from the object owner. It does not disable all IMs in the region, but does disable all IMs from the owner of the object.</li>
+<li>The throttle is not per object, but per owner. Splitting the spamming object into multiple objects will not help unless owned by different people. This also means that owning multiple almost too spammy objects will cause you to hit the limit.</li>
+<li>2500 IMs in 30 minutes will trigger the block.</li>
+<li>IMs that are blocked continue to count against the throttle. The IM count must drop below 2500 before any IMs will be delivered.</li>
+<li>The IM count of the previous window is used to approximate the rolling window. If it is 20% into the current window the IM count will be the current count + 80% of the previous count. This allows us to approximate a rolling average, however it has the behavior that a flood of IMs can have an effect on the throttle for double the window length. This is why in practice the throttle behaves more like 5k in 1hr than 2.5k in 30min.</li>
+</ul></section>
+<section><h2 id="see-also-functions">See also: functions</h2><span id="see-also"></span><div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llOwnerSay/">llOwnerSay</a> — Sends chat region wide to owner</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRegionSay/">llRegionSay</a> — Sends chat region wide</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llRegionSayTo/">llRegionSayTo</a> — Sends chat region wide to a specific prim/avatar</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llWhisper/">llWhisper</a> — Sends chat limited to 10 meters</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llSay/">llSay</a> — Sends chat limited to 20 meters</div></div>
+<div class="wiki-line"><div class="wiki-related-row"><a href="/functions/llShout/">llShout</a> — Sends chat limited to 100 meters</div></div></section>
+<section><h2 id="shared-wiki-helpers">Shared wiki helpers</h2><p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p><p id="svc-92"><a href="/wiki/template-issues-svc-92-dcae6555/">Template:Issues/SVC-92</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{Issues|SVC-92|&#x27;&#x27;&#x27;llTargetSay&#x27;&#x27;&#x27;() - region-wide direct communication|type=nf|status=pub|resolution=fixed}}</code></pre></details><p><a href="/wiki/template-lsl-function-avatar-6d623806/">Template:LSL Function/avatar</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}&lt;noinclude&gt;{{Multi-lang|category=LSL}}&lt;/noinclude&gt;{{#if:
+
+{{#vardefine:p_{{{1|none}}}_desc|avatar {{#if:{{{group|}}}|or group}} {{HoverLink|UUID|Universally Unique Identifier}} {{#if:{{{sim|}}}{{{region|}}}|that is in the same [[region]] {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region{{Footnote|handle=known}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|avatar {{#if:{{{group|}}}|or group}} UUID {{#if:{{{sim|}}}{{{region|}}}|that is in the same region {{#ifeq:{{{sim|}}}{{{region|}}}|known|or is otherwise known to the region}}}}}}
+
+&lt;includeonly&gt;
+{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{LSLC|Avatar/As A Parameter||{{#var:lang}}}}}}
+}}}}
+&lt;/includeonly&gt;
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|}
+&lt;/noinclude&gt;</code></pre></details><p><a href="/wiki/template-lsl-function-chat-144925b5/">Template:LSL Function/chat</a></p><details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>{{LSL Injection Test}}{{#if:
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}{{LSLC|Communications{{#var:lang}}}}}}}}&lt;/includeonly&gt;
+
+{{#if:{{{1|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|
+
+&lt;includeonly&gt;{{#if:{{{nc|}}}||{{#vardefine:hidden-text|{{#var:hidden-text}}{{LSLC|Chat{{#var:lang}}}}}}}}&lt;/includeonly&gt;
+
+{{#vardefine:fc-neither|{{#ifeq:{{#if:{{{np|}}}|*}}{{#if:{{{nd|}}}|*}}|**|*}}}}
+
+{{#if:{{#var:fc-neither}}|{{LSL Constants/Chat}}|
+{{#vardefine:constants_nb|{{LSL Constants/Chat|np={{{np|}}}|nd={{{nd|}}}|direct={{{direct|}}}}}
+{{#var:constants_nb}}}}}}
+
+{{#if:{{{np|}}}||{{Footnote|handle=channel_zero|Channel zero is also known as: {{#var:PUBLIC_CHANNEL}}, open chat, local chat and public chat|Channel zero is also known as: PUBLIC_CHANNEL, open chat, local chat and public chat}}}}
+
+{{#vardefine:p_{{{1|none}}}_desc|{{#if:{{{input|}}}|input|output}} {{LSLGC|Chat|chat}} channel, any integer value {{#if:{{#var:fc-neither}}|except zero{{Footnote|handle=channel_zero}} and {{#var:DEBUG_CHANNEL}}|{{#if:{{{np|}}}|except zero{{Footnote|handle=channel_zero}}}}{{#if:{{{nd|}}}|except {{#var:DEBUG_CHANNEL}}}}}}}}
+
+{{#vardefine:p_{{{1|none}}}_hover|{{#if:{{{input|}}}|input|output}} chat channel, any integer value {{#if:{{#var:fc-neither}}|except zero (PUBLIC_CHANNEL) and DEBUG_CHANNEL|{{#if:{{{np|}}}|except zero (PUBLIC_CHANNEL)}}{{#if:{{{nd|}}}|except DEBUG_CHANNEL}}}}}}
+
+{{#ifeq:{{#var:fc-neither}}{{{1|&lt;noinclude&gt;{{{1}}}&lt;/noinclude&gt;}}}{{{dialog|}}}|{{{1}}}|
+{{#vardefine:caveats|{{#var:caveats}}
+*Messages sent on {{#if:{{{np|}}}||channel zero{{Footnote|handle=channel_zero}} {{#if:{{{nd|}}}||and}}}} {{#if:{{{nd|}}}||{{#var:DEBUG_CHANNEL}}}} are throttled to a rate of &lt;200/10sec, per region, per owner/user.
+**Once the rate is exceeded, all following messages on {{#if:{{{np|}}}||channel zero {{#if:{{{nd|}}}||or}}}} {{#if:{{{nd|}}}||{{#var:DEBUG_CHANNEL}}}} will be dropped until the send rate is again below 200/10sec for the previous 10 sec. Dropped messages, despite being dropped still count against the limit.}}
+}}
+
+}}
+
+{{#if:{{{2|&lt;noinclude&gt;*&lt;/noinclude&gt;}}}|
+
+{{#if:{{{input|}}}|
+{{#vardefine:p_{{{2|none_}}}_desc|{{#if:{{{ph|}}}|{{{ph|}}}|{{{pd|}}}}} message}}
+|
+{{#if:{{{dialog|}}}|
+{{#vardefine:p_{{{2|none_}}}_desc|message to be displayed in the {{{dialog|}}}}}
+|
+{{#vardefine:p_{{{2|none_}}}_desc|message to be transmitted}}
+}}
+}}
+
+}}
+
+}}&lt;noinclude&gt;
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_{{{1|none}}}_desc}}
+|-
+{{VarPair|p_{{{1|none}}}_hover}}
+|-
+{{VarPair|p_{{{2|none_}}}_desc}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPair|examples}}
+|-
+{{VarPairTable|footnotes}}
+|}
+&lt;/noinclude&gt;</code></pre></details></section>

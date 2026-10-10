@@ -1,13 +1,34 @@
 ---
+/**
+ * CC BY-SA 3.0 credit for content adapted from the Second Life Wiki. Links go to the live article
+ * (never an old revision). Every page and template the content was built from is named with the
+ * revision that was imported; the headline date is the newest of them.
+ *
+ * `source` is either a catalog wiki source ({ title, url, historyUrl, updated, sources: [{ title,
+ * revisionId, timestamp }] }) or an MDX `source` frontmatter block ({ wiki, url, date, sources:
+ * [{ wiki, revision, date }] }).
+ */
 const { source } = Astro.props;
+const WIKI = 'https://wiki.secondlife.com/wiki/';
+const live = (title: string) => WIKI + encodeURI(title.replace(/ /g, '_')).replace(/\?/g, '%3F');
+const title: string = source.title ?? source.wiki;
+const day = (d: unknown) => (d instanceof Date ? d.toISOString() : String(d ?? '')).slice(0, 10);
+const pages = (source.sources?.length ? source.sources : [{ title, revisionId: source.revisionId ?? source.revision, timestamp: source.timestamp ?? source.date }])
+	.map((s: any) => ({ title: s.title ?? s.wiki, revision: String(s.revisionId ?? s.revision ?? ''), date: day(s.timestamp ?? s.date) }));
+const updated = day(source.updated ?? source.date ?? source.timestamp) || pages.map((p: any) => p.date).sort().at(-1);
+const historyUrl = source.historyUrl ?? `${live(title)}?action=history`;
 ---
 <footer class="wiki-attribution" data-pagefind-ignore>
   <strong>From the Second Life Wiki</strong>
-  <p>Community documentation adapted from <a href={source.revisionUrl || source.url}>{source.title}</a>,
+  <p>Community documentation adapted from <a href={source.url}>{title}</a>,
   by Linden Research, Inc. and contributing residents.
-  <a href={source.historyUrl}>View contributors and history</a>.</p>
+  <a href={historyUrl}>View contributors and history</a>.</p>
+  <p>{pages.length > 1 ? 'Built from these wiki pages, as imported:' : 'Imported wiki revision:'}</p>
+  <ul class="wiki-sources">
+    {pages.map((p: any) => <li><a href={live(p.title)}>{p.title}</a> (revision {p.revision}, <time datetime={p.date}>{p.date}</time>)</li>)}
+  </ul>
   <p>Licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>.
-  {source.timestamp && <> Source revision: <time datetime={source.timestamp}>{source.timestamp.slice(0,10)}</time>.</>}
+  {updated && <> Last wiki edit: <time datetime={updated}>{updated}</time>.</>}
   Formatting and links have been adapted for this site; API metadata follows the LSL definitions.</p>
 </footer>
-<style>.wiki-attribution{margin-top:3rem;padding:1.2rem 1.4rem;border:1px solid var(--sl-color-hairline);border-radius:.7rem;font-size:.85rem;color:var(--sl-color-gray-2)}.wiki-attribution p{margin:.5rem 0 0}</style>
+<style>.wiki-attribution{margin-top:3rem;padding:1.2rem 1.4rem;border:1px solid var(--sl-color-hairline);border-radius:.7rem;font-size:.85rem;color:var(--sl-color-gray-2)}.wiki-attribution p{margin:.5rem 0 0}.wiki-attribution .wiki-sources{margin:.3rem 0 0;padding-left:1.2rem}.wiki-attribution .wiki-sources li{margin:0}</style>

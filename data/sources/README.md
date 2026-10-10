@@ -56,7 +56,8 @@ python -m unittest discover -s scripts/lib -p 'test_*.py'
 Optional `--wiki PATH --definitions PATH` inputs allow local refreshes. Copy accepted
 new snapshots into this directory so future default runs use the same source.
 The importer deterministically writes `src/data/catalog.json`,
-`public/wiki-source/*.txt`, and `data/reports/import-report.json`.
+`data/derived/wiki-source/*.txt` (raw wikitext for the importer's tests, `generate-mdx.py` and
+the CI determinism check; not deployed), and `data/reports/import-report.json`.
 
 ## Content policy and rendering limits
 
@@ -73,8 +74,8 @@ templates are clearly linked to their archived template page or external source.
 It is not a MediaWiki runtime: parser functions, dynamic transclusion, nested table
 layout, images, arbitrary HTML and some formatting are not reproduced. No scripts,
 iframes, remote images or unsafe HTML from wiki pages execute. Full original
-wikitext is always retained at each page's `rawPath`; use it for material that the
-partial rendering cannot display. Missing link targets remain ordinary external
+wikitext is always retained in `data/derived/wiki-source/<slug>.txt`; use it for material
+that the partial rendering cannot display. Readers are linked to the live wiki article instead. Missing link targets remain ordinary external
 links and are never fetched by the importer.
 
 The report inventories missing API wiki pages, unsupported templates and targets

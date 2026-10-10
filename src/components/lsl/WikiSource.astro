@@ -1,18 +1,16 @@
 ---
 /**
- * Footer of an API page: the "original wiki source" note and CC BY-SA attribution, from the page's
- * `source` frontmatter (written by scripts/generate-mdx.py). Renders nothing without a source.
+ * Footer of an API page: a link to the live wiki article and the CC BY-SA attribution, from the
+ * page's `source` frontmatter (written by scripts/generate-mdx.py). Renders nothing without a source.
  */
 import WikiAttribution from '../reference/WikiAttribution.astro';
 const source = (Astro.locals as any).starlightRoute?.entry?.data?.source;
-const url = source?.url;
-const revisionUrl = source && `${url}?oldid=${source.revision}`;
 ---
 {source && (
 	<div class="wiki-content">
 		<details class="source-note" data-pagefind-ignore><summary>Original wiki source</summary>
-			<p>Some wiki templates and tables need their original context. <a href={source.raw}>Read the complete source text</a> or <a href={revisionUrl}>open this wiki revision</a>. Technical wording and examples are retained from the source; historical guidance may differ from current behavior.</p>
+			<p>Some wiki templates and tables need their original context. <a href={source.url}>View this article on the Second Life Wiki</a>. Technical wording and examples are retained from the source; historical guidance may differ from current behavior.</p>
 		</details>
-		<WikiAttribution source={{ title: source.wiki, url, revisionUrl, historyUrl: `${url}?action=history`, timestamp: source.date instanceof Date ? source.date.toISOString() : String(source.date) }} />
+		<WikiAttribution source={source} />
 	</div>
 )}

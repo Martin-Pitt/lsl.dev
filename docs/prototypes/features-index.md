@@ -107,7 +107,7 @@ is kept only for reference.
 ## E: features by category (LSL Portal style)
 
 Modelled on the LSL Portal's "LSL Features by category" column
-(`public/wiki-source/lsl-portal-079327e8.txt`). It has the same dual view: a flat **A–Z** of 36
+(`data/derived/wiki-source/lsl-portal-079327e8.txt`). It has the same dual view: a flat **A–Z** of 36
 topics next to a **topic tree** (Avatar › Animation/Attachment/Camera/Controls/Sit,
 Communications › Chat/Dialog/HTTP/XML-RPC, Detection › Collision/Sensor/Touch, Inventory ›
 Creator/Notecard/Owner, Primitive › Effects › Light/Particles, Face › Alpha/Color/Texture,

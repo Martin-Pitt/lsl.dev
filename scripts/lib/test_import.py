@@ -151,8 +151,12 @@ class DatasetTests(unittest.TestCase):
                 self.assertNotRegex((e['wiki'] or {}).get('html',''),r'<code>\{\{:?LSL[ _]Constants',e['name'])
     def test_source_coverage_and_original_revision(self):
         for page in self.c['wiki']:
-            self.assertTrue((ROOT/'public'/page['rawPath'].lstrip('/')).is_file())
+            self.assertTrue((ROOT/'data/derived/wiki-source'/(page['slug']+'.txt')).is_file())
+            self.assertNotIn('rawPath',page)
             self.assertTrue(page['source']['revisionId'])
+        self.assertEqual(len(list((ROOT/'data/derived/wiki-source').glob('*.txt'))),len(self.c['wiki']))
+        # Raw wikitext is not deployed.
+        self.assertFalse((ROOT/'public/wiki-source').exists())
         say=next(x for x in self.c['functions'] if x['name']=='llSay')
         self.assertEqual(say['wiki']['source']['revisionId'],'1218534')
         self.assertIn('Examples',[s['title'] for s in say['wiki']['sections']])
@@ -167,11 +171,73 @@ class DatasetTests(unittest.TestCase):
         self.assertIn('integer values',html.unescape(re.sub('<[^>]+>','',caveat)))
     def test_actual_llsay_example_is_verbatim(self):
         page=next(e['wiki'] for e in self.c['functions'] if e['name']=='llSay')
-        raw=(ROOT/'public'/page['rawPath'].lstrip('/')).read_text(encoding='utf8')
+        raw=(ROOT/'data/derived/wiki-source'/(page['slug']+'.txt')).read_text(encoding='utf8')
         source=re.search(r'<syntaxhighlight[^>]*>(.*?)</syntaxhighlight>',raw,re.S)[1].strip('\n')
         rendered=next(s['html'] for s in page['sections'] if s['id']=='examples')
         code=re.search(r'<pre><code>(.*?)</code></pre>',rendered,re.S)[1]
         self.assertEqual(source,html.unescape(code))
+    def sources_of(self):
+        api=[e['wiki']['source'] for k in ('functions','events','constants') for e in self.c[k] if e['wiki']]
+        return api+[w['source'] for w in self.c['wiki']]
+    def test_attribution_date_is_newest_source_and_links_are_live(self):
+        for src in self.sources_of():
+            self.assertTrue(src['sources'],src['title'])
+            self.assertEqual(src['updated'],max(s['timestamp'] for s in src['sources']),src['title'])
+            self.assertEqual(src['sources'][0]['title'],src['title'])
+            self.assertEqual(src['sources'][0]['revisionId'],src['revisionId'])
+            self.assertEqual(len({s['title'].casefold() for s in src['sources']}),len(src['sources']))
+            self.assertNotIn('oldid',src['url']); self.assertNotIn('revisionUrl',src)
+            self.assertTrue(src['historyUrl'].endswith('?action=history'))
+    def test_attribution_names_transcluded_pages(self):
+        api={e['name']:e['wiki']['source'] for k in ('functions','events','constants') for e in self.c[k] if e['wiki']}
+        titles=[s['title'] for s in api['llRezObjectWithParams']['sources']]
+        self.assertIn('LSL Constants/llRezObjectWithParams',titles)
+        self.assertIn('Template:Issues/STORM-1718',[s['title'] for s in api['llDialog']['sources']])
+    def test_wrapper_pages_credit_their_target(self):
+        mod=__import__('importlib').import_module
+        src=next(e for e in self.c['functions'] if e['name']=='llSetLinkPrimitiveParamsFast')['wiki']['source']
+        self.assertEqual(src['title'],'LlSetPrimitiveParams')
+        self.assertEqual(src['url'],'https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParamsFast')
+        self.assertEqual(src['redirectFrom']['title'],'LlSetLinkPrimitiveParamsFast')
+        self.assertNotIn('LlSetLinkPrimitiveParamsFast',[s['title'] for s in src['sources']])
+        self.assertGreater(src['updated'],src['redirectFrom']['timestamp'])
+    def test_wrapper_detection(self):
+        import importlib.util
+        spec=importlib.util.spec_from_file_location('import_datasets',ROOT/'scripts/import-datasets.py')
+        m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+        self.assertEqual(m.wrapper_target('#redirect[[llSetPrimitiveParams#llSetLinkPrimitiveParamsFast]]\n{{:llSetPrimitiveParams|default=llSetLinkPrimitiveParamsFast}}\n'),('llSetPrimitiveParams','llSetLinkPrimitiveParamsFast'))
+        self.assertEqual(m.wrapper_target('{{:LlParticleSystem}}\n[[Category:LSL Functions]]'),('LlParticleSystem',''))
+        self.assertEqual(m.wrapper_target('#REDIRECT [[LlFoo]]'),('LlFoo',''))
+        self.assertIsNone(m.wrapper_target('{{:LlFoo}}\nSome text of its own.'))
+        self.assertIsNone(m.wrapper_target('{{LSL Function|func=llFoo}}'))
+    def test_mdx_attribution_date_is_newest_source(self):
+        import yaml
+        pages=0
+        for f in (ROOT/'src/content/docs').glob('*/*.mdx'):
+            text=f.read_text(encoding='utf8')
+            self.assertNotRegex(text,r'(?m)^\s+raw:',f.name)
+            m=re.match(r'---\n(.*?)\n---\n',text,re.S)
+            src=(yaml.safe_load(m[1]) or {}).get('source') if m else None
+            if not src: continue
+            pages+=1
+            self.assertNotIn('oldid',src['url'],f.name)
+            dates=[str(s['date']) for s in src['sources']]
+            self.assertEqual(str(src['date']),max(dates),f.name)
+            for s in src['sources']: self.assertIn(f"{s['wiki']} (revision {s['revision']}, {s['date']})",src['license'],f.name)
+        self.assertGreater(pages,1000)
+    def test_no_links_to_raw_wiki_source(self):
+        # Neither the site sources nor a build output may link the retired /wiki-source/ downloads.
+        for base in ('src/components','src/pages','src/content','src/lib'):
+            for f in (ROOT/base).rglob('*'):
+                if f.suffix in ('.astro','.ts','.mdx','.md','.mjs','.js'):
+                    self.assertNotRegex(f.read_text(encoding='utf8'),r'(?<!derived)/wiki-source/',str(f))
+        self.assertNotIn('/wiki-source/',(ROOT/'src/data/catalog.json').read_text(encoding='utf8'))
+        import os
+        build=Path(os.environ.get('LSL_BUILD_DIR') or ROOT/'dist')
+        if not build.is_dir(): self.skipTest('no build output; set LSL_BUILD_DIR or run astro build')
+        self.assertFalse((build/'wiki-source').exists())
+        bad=[str(f) for f in build.rglob('*.html') if re.search(r'''(?:href|src)=["'][^"']*/wiki-source/''',f.read_text(encoding='utf8'))]
+        self.assertEqual(bad[:10],[])
     def test_shared_primitive_article_keeps_caveats_and_table(self):
         page=next(e for e in self.c['wiki'] if e['title']=='LlSetPrimitiveParams')
         sections={s['id']:s['html'] for s in page['sections']}

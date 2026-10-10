@@ -1,6 +1,6 @@
 /**
  * PROTOTYPE data for E (/prototypes/features/e/) and F (/prototypes/landing/): the LSL Portal's
- * "LSL Features by category" column (public/wiki-source/lsl-portal-079327e8.txt) mapped onto
+ * "LSL Features by category" column (data/derived/wiki-source/lsl-portal-079327e8.txt) mapped onto
  * lsl.dev pages. Temporary; see docs/prototypes/features-index.md.
  *
  * Refs: `f:<feature>`, `c:<category>`, `g:<constant group>`, or a `/path/`. A topic with no `to`

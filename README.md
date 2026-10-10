@@ -28,7 +28,7 @@ In the past, automated requests got 403 responses and probably contributed to a 
 
 - All wiki content comes from the checked-in export `data/sources/wiki-English.xml`.
 - `scripts/import-datasets.py` and `scripts/check-built-links.py` use only local files.
-- Rendered pages can *link* to `wiki.secondlife.com` (source, revision and history links
+- Rendered pages can *link* to `wiki.secondlife.com` (live article and history links
   for attribution). The site never *embeds* remote wiki assets, and
   `test:links` fails if any `<img>`, `<script>` or `<iframe>` has a remote `src`.
 - Do not validate external links by fetching them.
@@ -65,7 +65,7 @@ data/derived/api-wiki.json  DERIVED: per-API wiki sections, input of the MDX gen
 src/content/docs/{functions,events,constants}/  HAND-EDITED MDX: one page per public API (see docs/editing-api-pages.md)
 src/data/mdx-pages.json  generator state: signature and wiki revision each page was generated from
 src/data/topic-guides.json  hand-curated category summaries and task links
-public/wiki-source/*.txt DERIVED: raw wikitext per archived page (downloadable)
+data/derived/wiki-source/*.txt  DERIVED: raw wikitext per archived page (tests, generator, CI; not deployed)
 data/reports/            DERIVED/diagnostic: import, link and dependency reports
 src/lib/catalog.ts       typed access to catalog.json
 src/pages/               data-driven routes (see below)
@@ -103,7 +103,7 @@ feature areas, categories and indexes, never to individual functions or constant
 | Curated | `src/data/topic-guides.json`, `src/content/docs/**` | Edited by hand |
 | Generated index | `src/data/feature-clusters.json` | `node scripts/feature-index.mjs` after editing feature pages |
 | Curated, generated once | `src/content/docs/{functions,events,constants}/*.mdx` | Created by `bun run generate:mdx` when missing, then edited by hand; never overwritten |
-| Derived | `src/data/catalog.json`, `src/data/wiki-html/`, `data/derived/`, `public/wiki-source/*.txt`, `data/reports/import-report.json` | Written by `bun run import:data`, never edited by hand |
+| Derived | `src/data/catalog.json`, `src/data/wiki-html/`, `data/derived/` (including `wiki-source/*.txt`), `data/reports/import-report.json` | Written by `bun run import:data`, never edited by hand |
 | Diagnostic | `data/reports/built-links.json`, `data/reports/npm-audit*.json`, `data/reports/dependency-audit.md` | Written by checks/audits |
 
 Derived files are committed so that `astro build` needs only Node, not Python or the
@@ -163,7 +163,7 @@ reads other local files instead of the default snapshots. No network is involved
 ## Regeneration and tests
 
 ```sh
-bun run import:data     # rewrites catalog.json, public/wiki-source/, import-report.json
+bun run import:data     # rewrites catalog.json, data/derived/ (incl. wiki-source/), import-report.json
 bun run test:data       # importer/renderer unit tests
 bun run build
 bun run test:links
@@ -173,7 +173,7 @@ git diff --stat         # derived output should change only where the sources ch
 CI (`.github/workflows/lsl-sync.yml`, on pull requests touching `data/`, `scripts/`
 or `src/data/`, and on manual dispatch) installs `scripts/requirements.txt` and runs
 the unit tests. It then reruns the importer and fails if `src/data/catalog.json`,
-`src/data/wiki-html`, `data/derived`, `public/wiki-source` or `data/reports/import-report.json`
+`src/data/wiki-html`, `data/derived` or `data/reports/import-report.json`
 differ from what is committed, and runs `generate-mdx.py --check`, which fails if a public API has
 no page or a page has no public API. The hand-edited MDX is never regenerated in CI. The workflow makes
 no network requests to the wiki and pushes nothing. Deployment
@@ -190,14 +190,18 @@ Top-level keys:
   `slug`, `description`, `signature`, `returnType`, `parameters[]` (`name`, `type`,
   `description`), `categories[]`, `definition` (the full original YAML record:
   energy, sleep, func-id, flags, etc.), `wiki` (a reference to the matched archive page: `id`,
-  `slug`, `title`, `source`, `rawPath`, `sharedWith`; or null) and, on modern entries, `replaces`
+  `slug`, `title`, `source`, `sharedWith`; or null; `source` is the provenance of this API's prose) and, on modern entries, `replaces`
   (deprecated names whose `deprecated.use` points here in the same context).
 - `constants`: the same fields plus `type`, `value` and `groups`.
 - `categories`: `id`, `label`, and lists of `functions`, `events`, `constants`.
 - `deprecated`: deprecated entries with a same-context replacement (`name`, `kind`, `use`).
 - `wiki`: archive pages with `id`, `slug`, `title`, `namespace`, `headings` (the rendered HTML
-  is in `src/data/wiki-html/<slug>.html`), `rawPath` (link to `public/wiki-source/<slug>.txt`), and `source`
-  (`title`, `url`, `revisionId`, `timestamp`, `contributor`, `revisionUrl`, `historyUrl`).
+  is in `src/data/wiki-html/<slug>.html`; the raw wikitext is in `data/derived/wiki-source/<slug>.txt`),
+  and `source`: `title` and `url` of the live article the content comes from (for a wrapper page
+  that only redirects to or transcludes another article, that article, with the anchor), its
+  `revisionId`, `timestamp` and `contributor`, `historyUrl`, `sources` (that article plus every
+  page and template the renderer transcluded, each with `title`, `revisionId`, `timestamp`),
+  `updated` (the newest `sources` timestamp) and, for wrappers, `redirectFrom`.
 - `enums`: enum groups from the definitions (for example `AgentInfo`, `AttachPoint`).
 
 Current counts: 501 functions, 42 events, 1,042 constants, 62 categories, 2,266 wiki
@@ -229,7 +233,7 @@ shown as escaped invocations that link to their archived template page, so no co
 is invented. Injected helper templates appear under "Shared wiki helpers" with their
 original source and a note that their conditionals were not evaluated. Wiki HTML,
 scripts and iframes never run. When the rendering is incomplete, the full original
-wikitext is always available at the page's `rawPath`.
+wikitext is kept in `data/derived/wiki-source/<slug>.txt`, and readers are linked to the live article.
 
 ## Updating the snapshots
 
@@ -250,12 +254,13 @@ wikitext is always available at the page's `rawPath`.
 - **Site code:** MIT, see `LICENSE`.
 - **LSL definitions** (`data/sources/lsl_definitions.yaml`): MIT, see
   `data/sources/definitions-LICENSE`.
-- **Wiki content** (`data/sources/wiki-English.xml`, `public/wiki-source/`, and the
+- **Wiki content** (`data/sources/wiki-English.xml`, `data/derived/wiki-source/`, and the
   rendered wiki prose on API and archive pages): written by Second Life Wiki contributors
   under **Creative Commons Attribution-ShareAlike 3.0**
   (https://creativecommons.org/licenses/by-sa/3.0/). It is not covered by the MIT code
-  license. Each page shows its original title, revision ID, timestamp, latest-revision
-  contributor, and links to the source revision and full history. The contributor shown
+  license. Each page names every wiki page and template its content was built from, with the
+  imported revision ID and date of each (the headline date is the newest), and links to the live
+  article and its full history. The contributor shown
   is only the latest editor; the history link gives the full attribution chain.
   Derivative reuse must keep this attribution and the CC BY-SA terms.
 

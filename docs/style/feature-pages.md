@@ -1,6 +1,6 @@
 # Feature page style — modelled on Category:LSL Combat2
 
-Source: `public/wiki-source/category-lsl-combat2-1973b561.txt` (local snapshot; the user's own page).
+Source: `data/derived/wiki-source/category-lsl-combat2-1973b561.txt` (local snapshot; the user's own page).
 Do not fetch the live wiki.
 
 ## What makes it good

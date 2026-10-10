@@ -26,7 +26,7 @@
 
 ## Completed implementation
 1. Offline importer scripts/import-datasets.py, scripts/lib/* and scripts/requirements.txt (PyYAML==6.0.3). Generated src/data/catalog.json and data/reports/*.
-2. Catalog: 501 public functions,42 events,1042 constants,62 categories,2266 wiki archive pages,7 types,10 controls. All raw wiki text under public/wiki-source/*.txt.
+2. Catalog: 501 public functions,42 events,1042 constants,62 categories,2266 wiki archive pages,7 types,10 controls. All raw wiki text under data/derived/wiki-source/*.txt.
 3. Safe partial wiki renderer: local links, code, lists, known inline helpers, structural sections, Headless shared function pages, primitive set/get tables. Technical prose retained; unknown templates retain escaped invocation rather than invented content. Inject helpers provide original local helper source with unevaluated-conditional notice. It is NOT full MediaWiki expansion.
 4. All500 documented public functions map to wiki; llFindNotecardTextCount exists only in YAML and must not claim deployed availability. Wiki provenance contains original title/revision/date/contributor/history link.
 5. Modern teal/ink Starlight shell, responsive custom header/homepage/native navigation/theme/search. Site site=https://lsl.dev. Compact sidebar indexes, no thousand-entry sidebar.

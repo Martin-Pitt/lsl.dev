@@ -13,8 +13,33 @@ def entry(name, kind='function', params=(('integer', 'a'),), ret='void'):
     ps = [{'name': n, 'type': t, 'description': ''} for t, n in params]
     sig = (ret + ' ' if ret != 'void' else '') + f"{name}({', '.join(t + ' ' + n for t, n in params)})"
     return {'name': name, 'kind': kind, 'description': f'Does {name} things.', 'signature': sig, 'returnType': ret, 'parameters': ps, 'categories': [], 'definition': {},
-            'wiki': {'slug': name.lower(), 'title': name, 'rawPath': f'/wiki-source/{name.lower()}.txt',
-                     'source': {'title': name, 'url': f'https://wiki.secondlife.com/wiki/{name}', 'revisionId': '1', 'timestamp': '2024-01-01T00:00:00Z', 'contributor': 'X'}}}
+            'wiki': {'slug': name.lower(), 'title': name,
+                     'source': {'title': name, 'url': f'https://wiki.secondlife.com/wiki/{name}', 'revisionId': '1', 'timestamp': '2024-01-01T00:00:00Z', 'contributor': 'X',
+                                'updated': '2025-03-04T00:00:00Z', 'historyUrl': f'https://wiki.secondlife.com/wiki/{name}?action=history',
+                                'sources': [{'title': name, 'revisionId': '1', 'timestamp': '2024-01-01T00:00:00Z'},
+                                            {'title': 'Template:Issues/X-1', 'revisionId': '7', 'timestamp': '2025-03-04T00:00:00Z'}]}}}
+
+
+class SourceFrontmatterTests(unittest.TestCase):
+    def test_frontmatter_lists_every_source_and_newest_date(self):
+        fm = gen.frontmatter(entry('llFoo'))
+        self.assertIn('  date: 2025-03-04\n', fm)
+        self.assertIn('  revision: 1\n', fm)
+        self.assertIn('    - { wiki: "Template:Issues/X-1", revision: 7, date: 2025-03-04 }', fm)
+        self.assertIn('articles llFoo (revision 1, 2024-01-01) and Template:Issues/X-1 (revision 7, 2025-03-04), CC BY-SA 3.0.', fm)
+        self.assertNotIn('raw:', fm); self.assertNotIn('oldid', fm)
+
+    def test_refresh_touches_only_the_source_block(self):
+        old = ('---\ntitle: "llFoo"\nslug: "functions/llFoo"\ncategory: functions\ndescription: "Hand written."\nsource:\n'
+               '  wiki: "LlFoo"\n  url: https://wiki.secondlife.com/wiki/LlFoo\n  revision: 1\n  date: 2024-01-01\n  contributor: "X"\n'
+               '  raw: /wiki-source/llfoo.txt\n  license: "old"\n  note: "kept"\nsidebar:\n  order: 3\n---\nBody {x}\n\n<WikiSource />\n')
+        new = gen.refresh_source(old, entry('llFoo'))
+        self.assertTrue(new.endswith('---\nBody {x}\n\n<WikiSource />\n'))
+        self.assertIn('description: "Hand written."\n', new)
+        self.assertIn('  note: "kept"\nsidebar:\n  order: 3\n---', new)
+        self.assertNotIn('raw:', new); self.assertNotIn('"old"', new)
+        self.assertIn('  date: 2025-03-04\n', new)
+        self.assertIsNone(gen.refresh_source(new, entry('llFoo')))
 
 
 class GeneratorTests(unittest.TestCase):

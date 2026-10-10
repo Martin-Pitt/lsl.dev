@@ -16,8 +16,51 @@ def slug(title):
     return stem+'-'+hashlib.sha256(title.encode()).hexdigest()[:8]
 def key(title): return title.replace('_',' ').strip().casefold()
 def section_html(sections): return '\n'.join('<section><h2 id="'+s['id']+'">'+s['title']+'</h2>'+s['html']+'</section>' for s in sections)
-WIKI_REF=('id','slug','title','namespace','source','rawPath','sharedWith')
+WIKI_REF=('id','slug','title','namespace','source','sharedWith')
 def wiki_ref(w): return {k:w[k] for k in WIKI_REF if k in w} if w else None
+WIKI_URL='https://wiki.secondlife.com/wiki/'
+def wiki_url(title,fragment=''):
+    return WIKI_URL+quote(title.replace(' ','_'),safe='/:')+('#'+quote(fragment.strip().replace(' ','_'),safe='/:.') if fragment.strip() else '')
+CATEGORY=re.compile(r'\[\[\s*category\s*:[^\]]*\]\]',re.I)
+REDIRECT=re.compile(r'^\s*#redirect\s*:?\s*\[\[:?([^\]|]+)(?:\|[^\]]*)?\]\]',re.I)
+TRANSCLUSION=re.compile(r'^\s*\{\{:([^|}]+)(?:\|[^{}]*)?\}\}',re.I)
+def wrapper_target(text):
+    """(title, fragment) of the page a wrapper points at, or None.
+
+    A wrapper page has no content of its own: its wikitext is only a #redirect and/or a single
+    {{:Page}} transclusion (whitespace and categories ignored), e.g. LlSetLinkPrimitiveParamsFast is
+    `#redirect[[llSetPrimitiveParams#llSetLinkPrimitiveParamsFast]]` plus `{{:llSetPrimitiveParams|...}}`.
+    """
+    rest=CATEGORY.sub('',text); redirect=REDIRECT.match(rest)
+    if redirect: rest=rest[redirect.end():]
+    transclusion=TRANSCLUSION.match(rest)
+    if transclusion: rest=rest[transclusion.end():]
+    if rest.strip() or not (redirect or transclusion): return None
+    if redirect:
+        title,_,fragment=redirect[1].partition('#')
+        return title.strip(),fragment.strip()
+    return transclusion[1].strip(),''
+OWN={}  # id(record) -> the page's own revision; record['source'] is replaced by its provenance
+def source_ref(record):
+    src=OWN[id(record)]; return {'title':record['title'],'revisionId':src['revisionId'],'timestamp':src['timestamp']}
+def provenance(record,text,used,resolve):
+    """Attribution for content built from `record`: the page itself (or, for a wrapper, the page it
+    points at) and every local page or template the renderer pulled in, each with its revision.
+    `url` is the live article (never an old revision); `updated` is the newest source timestamp."""
+    primary,fragment,via=record,'',None
+    target=wrapper_target(text)
+    if target:
+        found=resolve(target[0])
+        if found: primary,fragment,via=found[0],target[1],record
+    pages=[primary]+[r for r in used if r is not via]
+    seen=set(); sources=[]
+    for r in pages:
+        k=r['title'].replace('_',' ').casefold()
+        if k not in seen: seen.add(k); sources.append(source_ref(r))
+    own=OWN[id(primary)]
+    src={'title':primary['title'],'url':wiki_url(primary['title'],fragment),'revisionId':own['revisionId'],'timestamp':own['timestamp'],'updated':max(x['timestamp'] for x in sources),'contributor':own['contributor'],'historyUrl':wiki_url(primary['title'])+'?action=history','sources':sources}
+    if via: src['redirectFrom']=source_ref(via)
+    return src
 def write_split(catalog):
     """Write the catalog in three parts, so the site never loads rendered wiki HTML it does not need.
 
@@ -63,9 +106,8 @@ def main():
         title=p.findtext('m:title',namespaces=ns); rev=p.find('m:revision',ns)
         get=lambda name:rev.findtext('m:'+name,default='',namespaces=ns)
         s=slug(title)
-        record={'id':p.findtext('m:id',namespaces=ns),'slug':s,'title':title,'namespace':int(p.findtext('m:ns',default='0',namespaces=ns)), 'html':'','sections':[], 'source':{'title':title,'url':'https://wiki.secondlife.com/wiki/'+quote(title.replace(' ','_'),safe='/:'),'revisionId':get('id'),'timestamp':get('timestamp'),'contributor':rev.findtext('m:contributor/m:username',default=rev.findtext('m:contributor/m:ip',default='',namespaces=ns),namespaces=ns)},'rawPath':'/wiki-source/'+s+'.txt'}
-        record['source']['revisionUrl']=record['source']['url']+'?oldid='+get('id')
-        record['source']['historyUrl']=record['source']['url']+'?action=history'
+        record={'id':p.findtext('m:id',namespaces=ns),'slug':s,'title':title,'namespace':int(p.findtext('m:ns',default='0',namespaces=ns)), 'html':'','sections':[], 'source':{'title':title,'url':'https://wiki.secondlife.com/wiki/'+quote(title.replace(' ','_'),safe='/:'),'revisionId':get('id'),'timestamp':get('timestamp'),'contributor':rev.findtext('m:contributor/m:username',default=rev.findtext('m:contributor/m:ip',default='',namespaces=ns),namespaces=ns)}}
+        OWN[id(record)]=dict(record['source'])
         text=get('text'); records.append((record,text)); by_title[key(title)]=(record,text)
         routes[title.replace('_',' ').casefold()]='/wiki/'+s+'/'
     catalog={'meta':{},'functions':[],'events':[],'constants':[],'categories':[],'wiki':[],'types':[],'controls':[],'enums':defs.get('enums',{})}
@@ -97,17 +139,27 @@ def main():
             if redirect and not re.sub(r'\s*#redirect\s*\[\[[^\]]*\]\]','',found[1],count=1,flags=re.I).strip():
                 found=by_title.get(key(redirect[1]),found)
         return found or hosts.get(key(name))
-    rawdir=ROOT/'public/wiki-source'; rawdir.mkdir(parents=True,exist_ok=True)
+    def resolve(title):
+        return renderer.transclusion_source(':'+title)
+    # Original wikitext, for the importer's tests, generate-mdx.py and the CI determinism check.
+    # Not deployed: readers get the rendered pages and a link to the live article.
+    rawdir=ROOT/'data/derived/wiki-source'; rawdir.mkdir(parents=True,exist_ok=True)
+    wanted=set()
     for record,text in records:
+        renderer.take_used()
         record['sections']=page_sections(text,renderer)
         record['html']=section_html(record['sections']) if record['sections'] else renderer.render(text)
+        record['source']=provenance(record,text,renderer.take_used(),resolve)
         redirect=re.match(r'\s*#redirect\s*\[\[([^\]]+)\]\]',text,re.I)
         if redirect:
             target,_,fragment=redirect[1].partition('#')
             route=routes.get(target.replace('_',' ').casefold())
             if route: record['redirectTo']=route+('#'+anchor(fragment) if fragment else '')
-        (rawdir/(record['slug']+'.txt')).write_text(text,encoding='utf8')
+        raw=rawdir/(record['slug']+'.txt'); wanted.add(raw.name)
+        if not raw.exists() or raw.read_bytes()!=text.encode('utf8'): raw.write_bytes(text.encode('utf8'))
         catalog['wiki'].append(record)
+    for stale in rawdir.glob('*.txt'):
+        if stale.name not in wanted: stale.unlink()
     def family(record,text):
         # Entries share a family when they use the same host article, directly or by transclusion.
         shared=re.search(r'\{\{:([^|}]+)',re.sub(r'\s*#redirect\s*\[\[[^\]]*\]\]','',text,count=1,flags=re.I))
@@ -131,6 +183,7 @@ def main():
             found=wiki_for(entry['name'])
             if not found: continue
             record,text=found
+            renderer.take_used()
             sections=page_sections(text,renderer,variant=entry['name'])
             for x in sections:
                 if x['id'].startswith('see-also'): x['html']=drop_deprecated(x['html'])
@@ -143,6 +196,7 @@ def main():
                 else: sections.append({'id':'related-variants','title':'Related functions','html':'<p>These functions are documented by the same wiki article as this one:</p><ul>'+items+'</ul>'})
             wiki={k:v for k,v in record.items() if k!='redirectTo'}; wiki['sections']=sections
             wiki['html']=section_html(sections) if sections else renderer.render(text)
+            wiki['source']=provenance(record,text,renderer.take_used(),resolve)
             if key(record['title'])!=key(entry['name']): wiki['sharedWith']=record['title']
             entry['wiki']=wiki
     for plural in ('types','controls'):
@@ -192,7 +246,7 @@ def main():
     catalog['categories']=sorted(cats.values(),key=lambda x:x['label'])
     for plural in ('functions','events','constants','types','controls'): catalog[plural].sort(key=lambda x:x['name'].lower())
     catalog['wiki'].sort(key=lambda x:x['title'].lower())
-    catalog['meta']={'schemaVersion':1,'sourcePolicy':'Definitions are authoritative for signatures, parameter names and categories. Wiki text remains a historical community source; templates are partially rendered and original wikitext is always available.','sources':{'wiki':{'file':args.wiki.name,'sha256':digest(args.wiki)},'supplements':[{'file':x.name,'sha256':digest(x)} for x in supplements],'definitions':{'file':args.definitions.name,'sha256':digest(args.definitions)}},'counts':{k:len(catalog[k]) for k in ('functions','events','constants','categories','wiki','types','controls')},'wikiLicense':'Creative Commons Attribution-ShareAlike 3.0','wikiLicenseUrl':'https://creativecommons.org/licenses/by-sa/3.0/','definitionsLicense':'MIT','latestWikiRevision':max(w['source']['timestamp'] for w in catalog['wiki'])}
+    catalog['meta']={'schemaVersion':1,'sourcePolicy':'Definitions are authoritative for signatures, parameter names and categories. Wiki text remains a historical community source; templates are partially rendered; source.sources lists every wiki page and template each page was built from, with its revision.','sources':{'wiki':{'file':args.wiki.name,'sha256':digest(args.wiki)},'supplements':[{'file':x.name,'sha256':digest(x)} for x in supplements],'definitions':{'file':args.definitions.name,'sha256':digest(args.definitions)}},'counts':{k:len(catalog[k]) for k in ('functions','events','constants','categories','wiki','types','controls')},'wikiLicense':'Creative Commons Attribution-ShareAlike 3.0','wikiLicenseUrl':'https://creativecommons.org/licenses/by-sa/3.0/','definitionsLicense':'MIT','latestWikiRevision':max(w['source']['timestamp'] for w in catalog['wiki'])}
     write_split(catalog)
     report={'counts':catalog['meta']['counts'],'excluded':excluded,'apiWithoutWiki':{k:[e['name'] for e in catalog[k] if not e['wiki']] for k in ('functions','events','constants')},'unexpandedTemplates':sorted(renderer.unknown),'referencedTitlesWithoutLocalRoute':sorted(renderer.missing),'deprecatedAliasesSkipped':skipped}
     write_json(ROOT/'data/reports/import-report.json',report)

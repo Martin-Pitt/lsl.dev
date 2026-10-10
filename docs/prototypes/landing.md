@@ -4,7 +4,7 @@ URL: http://localhost:4321/prototypes/landing/ (source `src/pages/prototypes/lan
 Status: exploration. No banner, noindex, out of search and sidebar (see
 [features-index.md](features-index.md)).
 
-Modelled on the whole LSL Portal page (`public/wiki-source/lsl-portal-079327e8.txt`), in the
+Modelled on the whole LSL Portal page (`data/derived/wiki-source/lsl-portal-079327e8.txt`), in the
 site's own Starlight/slua.dev styles. It uses the `splash` template (no sidebar, max 82 rem wide)
 for a wide, dense layout. There are three columns at 72 rem and up, two between 50 and 72 rem
 (features spanning two rows), and one at 375 px. Checked in light and dark at 1280 and 375 px

@@ -21,6 +21,10 @@ Options:
   --accept NAME   mark a drifted page as reviewed: record the current signature/revision (repeatable;
                   --accept all accepts every drifted page)
   --only NAME     generate only the named missing page(s) (repeatable)
+  --refresh-sources  rewrite only the `source:` frontmatter block of existing pages from the catalog
+                  (provenance: live URL, every wiki source with its revision, license line); the rest
+                  of the frontmatter and the body stay byte-for-byte as they are
+  --skip NAME     with --refresh-sources: leave the named page(s) alone (repeatable)
   --root PATH     project root (tests)
 """
 from __future__ import annotations
@@ -62,22 +66,65 @@ def yaml_str(s: str) -> str:
     return json.dumps(s, ensure_ascii=False)
 
 
+def license_line(sources) -> str:
+    """'Content from the Second Life Wiki articles A (revision 1, 2024-01-31), B (...) and C (...), CC BY-SA 3.0.'"""
+    parts = [f"{s['title']} (revision {s['revisionId']}, {s['timestamp'][:10]})" for s in sources]
+    names = parts[0] if len(parts) == 1 else ', '.join(parts[:-1]) + ' and ' + parts[-1]
+    return f"Content from the Second Life Wiki article{'s' if len(parts) > 1 else ''} {names}, CC BY-SA 3.0."
+
+
+SOURCE_KEYS = ('wiki', 'url', 'revision', 'date', 'contributor', 'license', 'sources', 'redirectFrom', 'raw')
+
+
+def source_lines(src) -> list[str]:
+    """The generated `source:` frontmatter block. `url` is the live article (with the anchor of a
+    wrapper page's target); `revision` is that article's revision; `date` is the newest of all
+    `sources` (the article plus every transcluded page and template the importer used)."""
+    sources = src.get('sources') or [{'title': src['title'], 'revisionId': src['revisionId'], 'timestamp': src.get('timestamp') or ''}]
+    lines = ['source:',
+             f"  wiki: {yaml_str(src['title'])}",
+             f"  url: {src['url']}",
+             f"  revision: {src['revisionId']}",
+             f"  date: {(src.get('updated') or src.get('timestamp') or '')[:10]}",
+             f"  contributor: {yaml_str(src.get('contributor') or '')}",
+             f"  license: {yaml_str(license_line(sources))}",
+             '  sources:']
+    lines += [f"    - {{ wiki: {yaml_str(s['title'])}, revision: {s['revisionId']}, date: {s['timestamp'][:10]} }}" for s in sources]
+    via = src.get('redirectFrom')
+    if via:
+        lines.append(f"  redirectFrom: {{ wiki: {yaml_str(via['title'])}, revision: {via['revisionId']}, date: {via['timestamp'][:10]} }}")
+    return lines
+
+
 def frontmatter(entry) -> str:
     lines = ['---', f"title: {yaml_str(entry['name'])}", f"slug: {yaml_str(PLURAL[entry['kind']] + '/' + entry['name'])}", f"category: {PLURAL[entry['kind']]}"]
     w = entry.get('wiki')
-    if w:
-        src = w['source']
-        date = (src.get('timestamp') or '')[:10]
-        lines += ['source:',
-                  f"  wiki: {yaml_str(src['title'])}",
-                  f"  url: {src['url']}",
-                  f"  revision: {src['revisionId']}",
-                  f"  date: {date}",
-                  f"  contributor: {yaml_str(src.get('contributor') or '')}",
-                  f"  raw: {w['rawPath']}",
-                  f"  license: {yaml_str('Content from the Second Life Wiki article ' + src['title'] + ' (revision ' + src['revisionId'] + ', ' + date + '), CC BY-SA 3.0.')}"]
+    if w: lines += source_lines(w['source'])
     lines.append('---')
     return '\n'.join(lines)
+
+
+def refresh_source(text: str, entry) -> str | None:
+    """`text` with its frontmatter `source:` block regenerated, or None when there is nothing to do.
+
+    Only the lines of the `source:` block change. Other frontmatter keys, keys inside `source:`
+    that the generator does not own, and the whole body are kept exactly as they are."""
+    w = entry.get('wiki')
+    m = re.match(r'---\n(.*?\n)---(\n|$)', text, re.S)
+    if not w or not m: return None
+    fm = m[1].split('\n')[:-1]
+    start = next((i for i, l in enumerate(fm) if l.rstrip() == 'source:'), None)
+    if start is None: return None
+    end = start + 1
+    while end < len(fm) and (fm[end].startswith(' ') or not fm[end].strip()): end += 1
+    kept, own = [], False
+    for line in fm[start + 1:end]:
+        k = re.match(r'  (\w+):', line)
+        if k: own = k[1] in SOURCE_KEYS
+        if not own: kept.append(line)
+    new = fm[:start] + source_lines(w['source']) + kept + fm[end:]
+    out = '---\n' + '\n'.join(new) + '\n' + text[m.end(1):]
+    return None if out == text else out
 
 
 GROUPS_WITH_MEMBERS: set = set()
@@ -151,7 +198,7 @@ def param_review(entry):
     """Compare each YAML parameter description with the wiki's p<n>_desc of the same position."""
     w = entry.get('wiki')
     if not w or w.get('sharedWith') or not entry['parameters']: return []
-    raw = ROOT_DIR / 'public' / w['rawPath'].lstrip('/')
+    raw = ROOT_DIR / 'data/derived/wiki-source' / (w['slug'] + '.txt')
     if not raw.exists(): return []
     text = raw.read_text(encoding='utf8')
     head = next((t for t in templates(text) if t['name'] in ('LSL Function', 'LSL Event')), None)
@@ -342,6 +389,8 @@ def main(argv=None) -> int:
     ap.add_argument('--force', action='append', default=[], metavar='NAME')
     ap.add_argument('--accept', action='append', default=[], metavar='NAME')
     ap.add_argument('--only', action='append', default=[], metavar='NAME')
+    ap.add_argument('--refresh-sources', action='store_true')
+    ap.add_argument('--skip', action='append', default=[], metavar='NAME')
     ap.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[1])
     args = ap.parse_args(argv)
     root = args.root
@@ -361,6 +410,17 @@ def main(argv=None) -> int:
     by_name = {e['name']: e for e in entries}
     for name in args.force:
         if name not in by_name: ap.error(f'--force {name}: not a public function, event or constant')
+    if args.refresh_sources:
+        changed = []
+        for e in entries:
+            path = page_path(root, e)
+            if e['name'] in args.skip or not path.exists(): continue
+            text = path.read_bytes().decode('utf8')
+            out = refresh_source(text, e)
+            if out is not None:
+                path.write_bytes(out.encode('utf8')); changed.append(f"{PLURAL[e['kind']]}/{e['name']}")
+        print(f"source frontmatter refreshed on {len(changed)} pages")
+        return 0
     state_path = root / 'src/data/mdx-pages.json'
     state = json.loads(state_path.read_text(encoding='utf8')) if state_path.exists() else {}
     pages = existing_pages(root)

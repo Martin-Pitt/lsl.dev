@@ -1,12 +1,34 @@
 ---
-// <Attribution title="Combat Log" page="Combat_Log" /> or with children for custom text.
-// CC BY-SA 3.0 credit line for content adapted from the Second Life Wiki. `page` is the wiki page
-// name as in its URL; the link is a plain external link (never fetched).
+// <Attribution pages={['Combat Log', 'COMBAT_CHANNEL']} what="Adapted from the Second Life Wiki pages" />
+// CC BY-SA 3.0 credit line for content adapted from the Second Life Wiki. `pages` are wiki titles
+// (as in their URL or with spaces). Each is looked up in the local import, which names the revision
+// and date of the page and of every page or template it transcludes; the credit lists them all and
+// gives the newest date. Links go to the live wiki articles (never fetched, never an old revision).
+// The single-page form <Attribution title="Combat Log" page="Combat_Log" /> still works.
 import './features.css';
-interface Props { title?: string; page?: string; what?: string }
-const { title, page, what = 'Adapted from the Second Life Wiki page' } = Astro.props;
+import catalog from '../../data/catalog.json';
+interface Props { pages?: string[]; title?: string; page?: string; what?: string }
+const { pages: titles = [], title, page, what } = Astro.props;
+const WIKI = 'https://wiki.secondlife.com/wiki/';
+const norm = (t: string) => t.replace(/_/g, ' ').trim().toLowerCase();
+const live = (t: string) => WIKI + encodeURI(t.replace(/ /g, '_')).replace(/\?/g, '%3F');
+const byTitle = new Map((catalog as any).wiki.map((w: any) => [norm(w.title), w]));
+const named = [...titles, ...(page ? [page] : [])];
+const credited = named.map((t) => {
+	const w: any = byTitle.get(norm(t));
+	if (!w) throw new Error(`Attribution: wiki page "${t}" is not in the local import`);
+	return { title: w.source.title, url: w.source.url };
+});
+const seen = new Set<string>();
+const sources = named.flatMap((t) => (byTitle.get(norm(t)) as any).source.sources)
+	.filter((s: any) => !seen.has(norm(s.title)) && seen.add(norm(s.title)));
+const extra = sources.filter((s: any) => !credited.some((c) => norm(c.title) === norm(s.title)));
+const newest = sources.map((s: any) => s.timestamp.slice(0, 10)).sort().at(-1);
+const lead = what ?? `Adapted from the Second Life Wiki page${credited.length > 1 ? 's' : ''}`;
+const rev = (t: string) => sources.find((s: any) => norm(s.title) === norm(t));
 ---
 <p class="feature-attribution">
-	{Astro.slots.has('default') ? <slot /> : <>{what} <a href={`https://wiki.secondlife.com/wiki/${page}`} rel="external">{title}</a>, by Second Life Wiki contributors,</>}
-	{' '}under <a href="https://creativecommons.org/licenses/by-sa/3.0/" rel="external">CC BY-SA 3.0</a>.
+	{lead}{' '}
+	{credited.map((c, i) => <>{i > 0 && (i === credited.length - 1 ? ' and ' : ', ')}<a href={c.url} rel="external">{credited.length === 1 && title ? title : c.title}</a> (revision {rev(c.title).revisionId}, {rev(c.title).timestamp.slice(0, 10)})</>)}{extra.length > 0 && <>, including the transcluded {extra.map((s: any, i: number) => <>{i > 0 && (i === extra.length - 1 ? ' and ' : ', ')}<a href={live(s.title)} rel="external">{s.title}</a> (revision {s.revisionId}, {s.timestamp.slice(0, 10)})</>)}</>}{credited.length > 0 && <>; <a href={`${credited[0].url.split('#')[0]}?action=history`} rel="external">history</a></>}, by Second Life Wiki contributors, under <a href="https://creativecommons.org/licenses/by-sa/3.0/" rel="external">CC BY-SA 3.0</a>.
+	Last wiki edit: <time datetime={newest}>{newest}</time>.
 </p>

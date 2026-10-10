@@ -1,4 +1,4 @@
-"""Check generated local routes and raw-source downloads without network access."""
+"""Check generated local routes without network access; fail on links to the retired /wiki-source/ files."""
 from pathlib import Path
 from html.parser import HTMLParser
 from urllib.parse import urlsplit,unquote
@@ -12,7 +12,7 @@ class Links(HTMLParser):
   if a.get('id'):self.ids.add(a['id'])
   if tag=='a' and a.get('href'):self.links.append(a['href'])
   if tag in ['img','script','iframe'] and a.get('src'):self.assets.append(a['src'])
-missing={};remote=[];count=0;ids={};fragments=[];archive=[]
+missing={};remote=[];count=0;ids={};fragments=[];archive=[];raw=[]
 # API pages must not send readers to the /wiki/ archive (its templates are only partly rendered).
 api_page=lambda page:page.startswith(('/functions/','/events/','/constants/'))
 for file in sorted(root.rglob('*.html')):
@@ -24,6 +24,7 @@ for file in sorted(root.rglob('*.html')):
    path=u.path or page
    fragments.append((page,path if path.endswith('.html') else path.rstrip('/')+'/index.html',unquote(u.fragment)))
   if u.scheme or u.netloc or not u.path.startswith('/'):continue
+  if u.path.startswith('/wiki-source/'):raw.append({'page':page,'href':href})
   if api_page(page) and u.path.startswith('/wiki/') and u.path.strip('/')!='wiki':archive.append({'page':page,'href':href})
   target=root/unquote(u.path).lstrip('/')
   if not target.is_file() and not (target/'index.html').is_file():missing.setdefault(href,[]).append(str(file.relative_to(root)))
@@ -39,6 +40,8 @@ path=Path(__file__).resolve().parents[1]/'data/reports/built-links.json';path.pa
 print(f'Checked {count} HTML pages: {len(missing)} broken local destinations, {len(remote)} remote assets.')
 print(f'Fragment links: {len(fragments)} checked, {sum(map(len,unresolved.values()))} unresolved ({len(unresolved)} distinct, {len(api_unresolved)} on API pages); see data/reports/built-links.json.')
 print(f'API pages linking to the /wiki/ archive: {len(archive)}.')
+print(f'Links to raw /wiki-source/ files (not deployed): {len(raw)}.')
+for r_ in raw[:30]:print('raw link',r_['href'],'from',r_['page'])
 # Deep pages have no sidebar link of their own; src/routeData.ts marks the closest entry current.
 import re
 samples=['functions/llRezObjectWithParams','functions/llDialog','events/touch_start','constants/REZ_POS','constants/groups/RezParam','categories/chat','wiki']
@@ -53,4 +56,4 @@ print(f'Sidebar: {len(samples)-len(sidebar_bad)} of {len(samples)} sample deep p
 for b in sidebar_bad:print('sidebar',b)
 for k,v in list(missing.items())[:30]:print(k,'from',v[0])
 for a in archive[:30]:print('archive link',a['href'],'from',a['page'])
-if missing or remote or archive or sidebar_bad:sys.exit(1)
+if missing or remote or archive or raw or sidebar_bad:sys.exit(1)

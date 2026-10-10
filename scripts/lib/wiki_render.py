@@ -63,6 +63,17 @@ class Renderer:
         self.api = False  # API pages reference large shared tables instead of inlining them
         self.missing = set()
         self.transcluded = set()  # titles of local pages expanded in place
+        self.used = {}  # per-page provenance: casefolded title -> source record of every local page pulled in
+
+    def use(self, record):
+        """Note that content from a local wiki page (article or template) went into the current page."""
+        self.transcluded.add(record['title'])
+        self.used.setdefault(record['title'].replace('_',' ').casefold(), record)
+
+    def take_used(self):
+        """Return the pages used since the last call, in first-use order, and start a new page."""
+        used, self.used = list(self.used.values()), {}
+        return used
 
     def link(self, target, label=None):
         target, _, fragment = target.strip().partition('#')
@@ -115,7 +126,7 @@ class Renderer:
                 if named: params[named[1]]=value[named.end():].strip()
                 else: position+=1; params[str(position)]=value.strip()
             body=self.expand(substitute(template_body(source[1]),params),depth+1)
-            self.transcluded.add(source[0]['title'])
+            self.use(source[0])
             text=text[:n['start']]+'\n'+body.strip('\n')+'\n'+text[n['end']:]; changed=True
         if changed and depth==0:
             # Transcluded pages sit inside a section of the including page; keep their headings below it.
@@ -176,6 +187,7 @@ class Renderer:
                     branch=max(branches,key=lambda b:b['end']-b['start'])
                     body=branch['parts'][2][2]
                     body=body.replace('{{{1|}}}',args[0])
+                    self.use(source[0])
                     rendered='<p>Archived '+html.escape(args[0])+' parameter table from '+self.link(source[0]['title'])+'. Variable-based or conditional cells retain their original syntax.</p>'+self.render(body,depth+1)
                 else:
                     rendered=self.link('Template:'+name)+': <code>'+html.escape(text[n['start']:n['end']])+'</code>'
@@ -332,6 +344,7 @@ def page_sections(text, renderer, depth=0, variant=None):
                     if source and source[0]['namespace']==0:
                         sections=page_sections(source[1],renderer,depth+1,variant)
                         if sections:
+                            renderer.use(source[0])
                             note={'id':'shared-article','title':'Shared wiki article','html':'<p>This page transcludes '+renderer.link(source[0]['title'])+'. The following text is from that archived revision.</p>'}
                             return [note]+sections
         return []
@@ -383,6 +396,7 @@ def page_sections(text, renderer, depth=0, variant=None):
                 issue=re.match(r'Issues/([A-Za-z]+-\d+)$',tname(helper['name']))
                 content='<p'+(' id="'+anchor(issue[1])+'"' if issue else '')+'>'+renderer.link(label)+'</p>'
                 if source:
+                    renderer.use(source[0])
                     content+='<details><summary>Original shared helper source (conditional wiki logic is not evaluated)</summary><pre class="wiki-source"><code>'+html.escape(source[1])+'</code></pre></details>'
                 helpers.append(content)
         sections.append({'id':'shared-wiki-helpers','title':'Shared wiki helpers','html':'<p>The original page also injects shared parameter notes, caveats or issue information through these helpers. Their conditional MediaWiki logic is not reproduced here; inspect the preserved helper source for additional material.</p>'+''.join(helpers)})

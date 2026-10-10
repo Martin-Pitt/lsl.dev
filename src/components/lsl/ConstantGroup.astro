@@ -1,60 +1,119 @@
 ---
 /**
- * At-a-glance listing of a constant group, after slua.dev's reference pages: one LSL line per
- * member with its type and value (or, for rule/parameter lists, the arguments that follow it)
- * and the definition's description as a trailing comment. Every line comes from the LSL
- * definitions; edit the YAML, not this block. Usage: <ConstantGroup name="RezParam" />
+ * At-a-glance listing of a constant group, after slua.dev's reference pages: one highlighted LSL
+ * line per member. Types, values and argument shapes are carried by the code itself; comments
+ * only add what the code cannot say.
  *
- * Long groups whose names share a second word (PRIM_TEXTURE_*, PRIM_MEDIA_*) are sub-grouped
- * under comment headers.
+ *   <ConstantGroup name="RezParam" />                                   value / rule lines from the definitions
+ *   <ConstantGroup name="PrimParam" order={primParams} />               hand-edited groups (src/data/rule-groups/)
+ *   <ConstantGroup name="PrimParam" order={primParams} mode="get" />    getter notation: [ RULE, request ] → [ returns ]
+ *
+ * Without `order`, long groups whose names share a second word (PRIM_TEXTURE_*) are
+ * sub-grouped under comment headers. With `order`, every public member must appear exactly
+ * once and each header links to the `###` section of the same id (see docs/editing-api-pages.md).
  */
 import { catalog, constantsInGroup, constantGroupHref } from '../../lib/catalog';
 import { inlineLsl } from '../../lib/inline-lsl';
-interface Props { name: string; title?: string }
-const { name, title } = Astro.props;
+import type { RuleSection, RuleLine } from '../../data/rule-groups/types';
+interface Props { name: string; title?: string; order?: RuleSection[]; mode?: 'set' | 'get' }
+const { name, title, order, mode = 'set' } = Astro.props;
 const info = (catalog.enums as Record<string, any>)[name];
 const members = constantsInGroup(name) as any[];
 if (!info || !members.length) throw new Error(`<ConstantGroup name="${name}" />: no constant group "${name}" with public members in the LSL definitions.`);
+const byName = new Map((catalog.constants as any[]).map(c => [c.name, c]));
 const isRules = info.type.startsWith('param') || members.some(c => c.definition.values);
 const isFlag = info.type.includes('flag');
-const argType = (t: string) => (t === 'boolean' ? 'integer' : t);
+// LSL spellings of the definitions' semantic types.
+const lslType = (t: string) => ({ boolean: 'integer', asset: 'string', uuid: 'key' } as Record<string, string>)[t] ?? t;
 const literal = (c: any) => {
 	const v = c.value;
 	if (isFlag && typeof v === 'number' && v >= 0) return '0x' + v.toString(16).toUpperCase().padStart(v > 0xffff ? 8 : 4, '0');
 	return c.type === 'string' || c.type === 'key' ? JSON.stringify(String(v)) : String(v);
 };
-const code = (c: any) => {
-	if (isRules) {
-		const args = (c.definition.values || []).map((a: any) => `${argType(a['value-type'] ?? a.type ?? '')} ${a.name}`.trim());
-		return [c.name, ...args].join(', ');
-	}
-	return `${c.type} ${c.name} = ${literal(c)};`;
-};
-// Sub-groups: the word after the shared prefix, when that splits a long group into real clusters.
-const prefix = info.prefix || '';
-const word = (n: string) => n.slice(prefix.length).split('_')[0];
-const counts = new Map<string, number>();
-for (const c of members) counts.set(word(c.name), (counts.get(word(c.name)) ?? 0) + 1);
-const clusters = [...counts.values()].filter(n => n > 1).length;
-const split = members.length >= 12 && clusters >= 2;
-const cluster = (c: any) => (split && counts.get(word(c.name))! > 1 ? word(c.name) : '');
-// Definition order, but each cluster gathered where its first member appears; unclustered members first.
-const firstSeen = new Map<string, number>();
-members.forEach((c, i) => { if (!firstSeen.has(cluster(c))) firstSeen.set(cluster(c), cluster(c) ? i + 1 : 0); });
-const ordered = split ? members.map((c, i) => [c, i] as const).sort(([a, i], [b, j]) => firstSeen.get(cluster(a))! - firstSeen.get(cluster(b))! || i - j).map(([c]) => c) : members;
-const rows: { header?: string; html?: string }[] = [];
-let last: string | undefined;
-for (const c of ordered) {
-	const w = cluster(c);
-	if (split && w !== last) { rows.push({ header: w ? `${prefix}${w}_*` : 'Other' }); last = w; }
-	const desc = c.description.split('\n')[0];
-	rows.push({ html: await inlineLsl(`${code(c)}${desc ? ' // ' + desc : ''}`, { self: undefined }) });
+type Arg = { type: string; name: string; request?: boolean };
+const parseArgs = (s: string): Arg[] => s.split(',').map(a => a.trim()).filter(Boolean).map(a => { const [type, ...n] = a.split(/\s+/); return { type, name: n.join(' ') }; });
+/** Typed arguments of a constant: explicit, else definition values, else a `[NAME, …]` shape quoted in its description. */
+function argsOf(c: any, explicit?: string): Arg[] {
+	if (explicit !== undefined) return parseArgs(explicit);
+	const vals = c?.definition?.values as any[] | undefined;
+	if (vals?.length) return vals.map(a => ({ type: lslType(a['value-type'] ?? a.type ?? ''), name: a.name, request: a.access === 'arg' }));
+	const m = c && new RegExp(`\\[\\s*${c.name}\\s*,([^\\]]+)\\]`).exec(c.description ?? '');
+	return m ? parseArgs(m[1]).filter(a => a.name) : [];
 }
+// In getter notation the face (or link) selector is passed; everything else is returned.
+const isRequest = (a: Arg) => a.request || a.name === 'face' || a.name === 'link_target';
+const list = (items: string[]) => (items.length ? `[ ${items.join(', ')} ]` : '[]');
+const fmt = (a: Arg) => `${a.type} ${a.name}`.trim();
+function ruleCode(head: string[], args: Arg[]) {
+	if (mode === 'get') {
+		const req = args.filter(isRequest), ret = args.filter(a => !isRequest(a));
+		return `${list([...head, ...req.map(fmt)])} → ${list(ret.map(fmt))}`;
+	}
+	return list([...head, ...args.map(fmt)]);
+}
+/** First sentence of a description, minus any `[RULE, …]` shape it restates. */
+const gist = (d: string) => (d.split('\n')[0].replace(/\[[^\]]*\]/g, '').replace(/\s+/g, ' ').replace(/\s+([,.;])/g, '$1').trim().match(/^.*?[.!?](?=\s|$)/)?.[0] ?? d.split('\n')[0]).trim();
+const withComment = (code: string, comment?: string) => (comment ? `${code}  // ${comment}` : code);
+const html = (code: string) => inlineLsl(code, { self: undefined });
+
+type Row = { header?: string; href?: string; html?: string; indent?: boolean };
+const rows: Row[] = [];
+if (order) {
+	const want = new Set(members.map(c => c.name));
+	const seen = new Set<string>();
+	for (const section of order) {
+		rows.push({ header: section.title, href: `#${section.id}` });
+		for (const entry of section.rules) {
+			const r: RuleLine = typeof entry === 'string' ? { rule: entry } : entry;
+			if (!want.has(r.rule)) throw new Error(`<ConstantGroup name="${name}" order>: ${r.rule} is not a public member of ${name}.`);
+			if (seen.has(r.rule)) throw new Error(`<ConstantGroup name="${name}" order>: ${r.rule} is listed twice.`);
+			seen.add(r.rule);
+			const c = byName.get(r.rule);
+			const note = mode === 'get' ? r.getNote ?? r.note : r.note;
+			if (r.forms) {
+				// Multi-form rule: one line per form; the note goes on the first.
+				for (const [i, f] of r.forms.entries()) {
+					const fc = byName.get(f.name);
+					const fargs = argsOf(fc, f.args);
+					const code = mode === 'get' ? `${list([r.rule])} → ${list([f.name, ...fargs.map(fmt)])}` : list([r.rule, f.name, ...fargs.map(fmt)]);
+					rows.push({ html: await html(withComment(code, i === 0 ? note : undefined)) });
+				}
+			} else if (mode === 'get' && r.setOnly) {
+				rows.push({ html: await html(withComment(list([r.rule]), note)) });
+			} else {
+				rows.push({ html: await html(withComment(ruleCode([r.rule], argsOf(c, r.args)), note)) });
+			}
+		}
+	}
+	const missing = members.filter(c => !seen.has(c.name)).map(c => c.name);
+	if (missing.length) throw new Error(`<ConstantGroup name="${name}" order>: missing ${missing.join(', ')}. Add them to the order data.`);
+} else {
+	const code = (c: any) => (isRules ? ruleCode([c.name], argsOf(c)) : `${c.type} ${c.name} = ${literal(c)};`);
+	// Sub-groups: the word after the shared prefix, when that splits a long group into real clusters.
+	const prefix = info.prefix || '';
+	const word = (n: string) => n.slice(prefix.length).split('_')[0];
+	const counts = new Map<string, number>();
+	for (const c of members) counts.set(word(c.name), (counts.get(word(c.name)) ?? 0) + 1);
+	const clusters = [...counts.values()].filter(n => n > 1).length;
+	const split = members.length >= 12 && clusters >= 2;
+	const cluster = (c: any) => (split && counts.get(word(c.name))! > 1 ? word(c.name) : '');
+	// Definition order, but each cluster gathered where its first member appears; unclustered members first.
+	const firstSeen = new Map<string, number>();
+	members.forEach((c, i) => { if (!firstSeen.has(cluster(c))) firstSeen.set(cluster(c), cluster(c) ? i + 1 : 0); });
+	const ordered = split ? members.map((c, i) => [c, i] as const).sort(([a, i], [b, j]) => firstSeen.get(cluster(a))! - firstSeen.get(cluster(b))! || i - j).map(([c]) => c) : members;
+	let last: string | undefined;
+	for (const c of ordered) {
+		const w = cluster(c);
+		if (split && w !== last) { rows.push({ header: w ? `${prefix}${w}_*` : 'Other' }); last = w; }
+		rows.push({ html: await html(withComment(code(c), c.description ? gist(c.description) : undefined)) });
+	}
+}
+const caption = mode === 'get' ? ' (rule and request, then what it returns)' : isRules ? ' (rule, then its arguments)' : '';
 ---
 <figure class="lsl-glance not-content">
-	<figcaption>{title ?? <>From the LSL definitions: <a href={constantGroupHref(name)}>{name}</a>{isRules && ' (rule, then its arguments)'}</>}</figcaption>
+	<figcaption>{title ?? <>From the LSL definitions: <a href={constantGroupHref(name)}>{name}</a>{caption}</>}</figcaption>
 	<pre>{rows.map(r => r.header !== undefined
-		? <span class="lsl-glance-header">// {r.header}</span>
+		? <span class="lsl-glance-header">// {r.href ? <a href={r.href}>{r.header}</a> : r.header}</span>
 		: <span class="lsl-glance-line"><Fragment set:html={r.html} /></span>)}</pre>
 </figure>
 <style>
@@ -64,5 +123,7 @@ for (const c of ordered) {
 	.lsl-glance-line, .lsl-glance-header { display: block; white-space: pre-wrap; padding-inline-start: 2ch; text-indent: -2ch; overflow-wrap: break-word; }
 	.lsl-glance-header { color: var(--sl-color-gray-3); margin-top: .6rem; }
 	.lsl-glance-header:first-child { margin-top: 0; }
+	.lsl-glance-header a { color: inherit; text-decoration: underline; text-decoration-color: var(--sl-color-gray-5); text-underline-offset: .2em; }
+	.lsl-glance-header a:hover { color: var(--sl-color-text-accent); }
 	.lsl-glance :global(code.lsl-inline) { padding: 0; background: none; border: 0; font-size: inherit; white-space: pre-wrap; }
 </style>

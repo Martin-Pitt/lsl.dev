@@ -3,22 +3,30 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import ApiLinkList from '../../../components/reference/ApiLinkList.astro';
 import ConstantGroup from '../../../components/lsl/ConstantGroup.astro';
 import { catalog, apiHref, constantsInGroup } from '../../../lib/catalog';
+import { ruleGroupOrders } from '../../../data/rule-groups';
 export function getStaticPaths() {
 	return Object.keys(catalog.enums).filter(g => constantsInGroup(g).length > 0).map(group => ({ params: { group }, props: { group } }));
 }
 const { group } = Astro.props as { group: string };
 const info = (catalog.enums as Record<string, any>)[group];
 const members = constantsInGroup(group);
+const order = ruleGroupOrders[group];
+// With a hand-edited order the table follows the same sections, so the block's header links resolve here too.
+const byName = new Map(members.map(c => [c.name, c]));
+const sections = order ? order.map(s => ({ ...s, members: s.rules.map(r => byName.get(typeof r === 'string' ? r : r.rule)!) })) : [{ title: '', id: '', members }];
 const users = catalog.functions.filter(f => JSON.stringify((f as any).parameters).includes(`"${group}"`) || ((f as any).parameters as any[]).some(p => p['enum-semantics'] === group || p.enum === group));
 ---
 <StarlightPage frontmatter={{ title: group, description: info.tooltip || `${group} constants.`, editUrl: false }}>
 	<p>{info.tooltip || `Constants in the ${group} ${info.type === 'flag' ? 'flag set' : 'enum'}.`} {info.type === 'flag' && 'These are flags and can be combined with bitwise OR.'}</p>
 	<p><a href="/constants/groups/">All constant groups</a></p>
-	<ConstantGroup name={group} title="At a glance, from the LSL definitions" />
+	<ConstantGroup name={group} order={order} title="At a glance, from the LSL definitions" />
 	<h2 id="constants">Constants</h2>
-	<div class="table-scroll"><table>
-		<thead><tr><th>Constant</th><th>Type</th><th>Value</th><th>Description</th></tr></thead>
-		<tbody>{members.map(c => <tr><td><a href={apiHref('constant', c.name)}><code>{c.name}</code></a></td><td>{(c as any).type}</td><td><code>{String((c as any).value)}</code></td><td>{c.description}</td></tr>)}</tbody>
-	</table></div>
+	{sections.map(s => (<>
+		{s.title && <h3 id={s.id}>{s.title}</h3>}
+		<div class="table-scroll"><table>
+			<thead><tr><th>Constant</th><th>Type</th><th>Value</th><th>Description</th></tr></thead>
+			<tbody>{s.members.map(c => <tr><td><a href={apiHref('constant', c.name)}><code>{c.name}</code></a></td><td>{(c as any).type}</td><td><code>{String((c as any).value)}</code></td><td>{c.description}</td></tr>)}</tbody>
+		</table></div>
+	</>))}
 	{users.length > 0 && (<><h2 id="used-by">Used by</h2><ApiLinkList names={users.map(f => f.name)} /></>)}
 </StarlightPage>

@@ -73,7 +73,7 @@ All are imported from `~/components/lsl`.
 | Component | Use |
 | --- | --- |
 | `<LSLFunction name="…" />`, `<LSLEvent name="…" />`, `<LSLConstant name="…" />` | The data-driven page header. One per page, right after the imports. The build fails if the name is not a public API (renamed, removed or deprecated). Add `description` (`<LSLConstant name="REZ_POS" description />`) to show the definitions' one-line description when the page has no prose of its own; otherwise the prose below is the description. |
-| `<ConstantGroup name="RezParam" />` | slua.dev-style at-a-glance block: one LSL line per group member with type and value (or the arguments of a rule), and the definition text as a comment. Long groups are sub-grouped by name. Put it at the top of a Specification section for rule lists (`llSetLinkPrimitiveParamsFast`, `llParticleSystem`, …). Group names are the YAML `member-of`/`param-semantics` names; `/constants/groups/` lists them. |
+| `<ConstantGroup name="RezParam" />` | slua.dev-style at-a-glance block: one highlighted LSL line per group member. Types, values (`integer REZ_POS = 1;`) and argument shapes (`[ REZ_POS, vector position, integer relative, integer at_root ]`) are code, taken from the definitions; the comment is only the first sentence of the description, with any restated shape removed. Long groups are sub-grouped by name. Put it at the top of a Specification section for rule lists. Long rule lists get `order={…}` and `mode="get"`; see [Grouping a long rules list](#grouping-a-long-rules-list). Group names are the YAML `member-of`/`param-semantics` names; `/constants/groups/` lists them. |
 | `<InlineSyntax code="REZ_POS, vector pos" />` | Highlighted inline LSL where backticks are not enough (inside HTML tables, after a link). |
 | `<WikiSource />` | The "original wiki source" note and attribution footer, from the frontmatter. Last line of the page. |
 
@@ -98,6 +98,60 @@ Links: point at our own pages (`/functions/…/`, `/constants/groups/…/`, `/ca
 `/features/…/`) or at the live wiki (`https://wiki.secondlife.com/wiki/…`). Never link API
 pages to the `/wiki/` archive; its templates are only partly rendered (`npm run test:links`
 and `npm run test:data` fail on such links).
+
+## Grouping a long rules list
+
+A rules list with dozens of entries (`PRIM_*`, `PSYS_*`, `OBJECT_*`) reads best like slua.dev's
+math library page: one code block, sorted and grouped by everyday usage and related functionality,
+each group headed by a comment that links to a `###` section with the details. The PRIM_* rules
+on [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/),
+[llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/),
+[llGetPrimitiveParams](/functions/llGetPrimitiveParams/) and `/constants/groups/PrimParam/` are the
+worked example.
+
+1. **Order data.** Add `src/data/rule-groups/<name>.ts` exporting `RuleSection[]` (types in
+   `types.ts`): sections in order of usefulness, each `{ title, id, rules }`, most useful rule first.
+   A rule is its name, or `{ rule, args?, note?, getNote?, forms? }`:
+   - `args`: typed arguments, e.g. `"integer face, vector color, float alpha"`. Leave it out when the
+     YAML `values` already define the shape (or the YAML description quotes `[RULE, type name, …]`).
+     Otherwise take the names from the wiki's rules template (`public/wiki-source/template-lsl-constants-*`).
+     Never invent a shape; leave the line without arguments and say so in the commit.
+   - `setOnly: true`: getter pages show `[ RULE ]` and the note, with no return list (`PRIM_PROJECTOR`).
+   - `forms`: one line per form for a multi-form rule (`PRIM_TYPE` → `PRIM_TYPE_BOX`, …, `PRIM_TYPE_SCULPT`).
+   - `note` / `getNote`: at most one short comment, and only what the code cannot say: a limit,
+     a unit, a constant family (`PRIM_TEXGEN_*`), a get/set difference (`set only`). Never restate a
+     parameter name or type.
+   - `id` must equal Starlight's slug of the section heading (`Position and orientation` →
+     `position-and-orientation`).
+
+   The build fails if a public member of the group is missing, listed twice, or not in the group, so
+   new rules in the YAML cannot be silently dropped.
+2. **Block.** In the Specification section:
+
+   ```mdx
+   import { primParams } from '~/data/rule-groups/prim-params';
+
+   ## Specification
+
+   {/* Sorted/grouped based on everyday usage and related functionality. */}
+   <ConstantGroup name="PrimParam" order={primParams} />
+   ```
+
+   Getter pages add `mode="get"`. Notation: `[ RULE, request arguments ] → [ returned values ]`; the
+   request arguments are `face` (YAML `access: arg`) and `link_target`, everything else is returned.
+   A rule with no request arguments reads `[ PRIM_NAME ] → [ string name ]`.
+3. **Sections.** Below the block, one `### <title>` per section with a `params-list` table: the rule as a
+   link followed by `<InlineSyntax code=", typed, args" />`, and the exact wiki wording (description,
+   limits, caveats, linked constant groups such as `[PRIM_TEXGEN_*](/constants/groups/PrimTexgen/)`).
+   Long-form text lives here, never in the block.
+4. **Group page.** Register the order in `src/data/rule-groups/index.ts` so `/constants/groups/<name>/`
+   uses the same block and splits its constants table under the same `###` ids.
+5. **Check.** `npm run test:links` fails if a header link has no matching section.
+
+Candidates not converted yet: [llParticleSystem](/functions/llParticleSystem/) (PSYS_*),
+[llRezObjectWithParams](/functions/llRezObjectWithParams/) (REZ_*),
+[llGetObjectDetails](/functions/llGetObjectDetails/) (OBJECT_*), [llSetPrimMediaParams](/functions/llSetPrimMediaParams/) (PRIM_MEDIA_*),
+[llSetCameraParams](/functions/llSetCameraParams/) (CAMERA_*), [llGetParcelDetails](/functions/llGetParcelDetails/) (PARCEL_DETAILS_*).
 
 ## Adding a page
 

@@ -54,3 +54,8 @@ sizes, in the site header and next to slua.dev's logo. The chosen design then re
   was the round-one favourite.
 - **Favicon:** expect a simplified version of the mark at 16 px, because the L serifs disappear at
   that size.
+
+## Final
+
+Prototype **33 Left Fold** with **18**'s lettering, kept in [design/logo/](../../design/logo/) with
+its generator. The prototype folders were retired after the choice was made.

@@ -5,7 +5,9 @@
  * Everything is derived from the URL and the catalog, so it works for content pages (MDX) and
  * for the Astro routes alike.
  */
-import { catalog, categoryMap, categoryHref, constantGroupHref, featureByCategory, featureHref, featuresForApi } from './catalog';
+import { catalog, categoryMap, constantGroupHref, featureByCategory, featureHref } from './catalog';
+import { featuresForApi } from './features';
+import { categoryLinkHref as categoryHref } from './categories';
 import { primaryFeature } from './primary-feature';
 
 export type Crumb = { label: string; href?: string };

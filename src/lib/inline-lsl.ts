@@ -59,7 +59,9 @@ export async function inlineLsl(code: string, opts: InlineOptions = {}): Promise
 		if ((!dark || dark.toLowerCase() === fg.dark) && (!light || light.toLowerCase() === fg.light)) return inner;
 		return `<span style="--shiki-dark:${escape(dark ?? 'inherit')};--shiki-light:${escape(light ?? 'inherit')}">${inner}</span>`;
 	}).join('')).join('\n');
-	return `<code class="lsl-inline">${body}</code>`;
+	// Expressions and other multi-word snippets may wrap at spaces; single identifiers never break.
+	const cls = /\s/.test(code.trim()) ? 'lsl-inline lsl-phrase' : 'lsl-inline';
+	return `<code class="${cls}">${body}</code>`;
 }
 
 async function replaceAsync(text: string, re: RegExp, fn: (...m: string[]) => Promise<string>) {

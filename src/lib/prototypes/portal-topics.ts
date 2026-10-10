@@ -37,9 +37,10 @@ export function resolve(ref: string): Link {
 }
 
 /** The portal's flat A-Z (left sub-column). "Needs Example" (a wiki maintenance list) is left out. */
-export const topicsAZ: Topic[] = [
+const rawAZ: Topic[] = [
 	{ label: 'Alpha', to: 'f:textures', also: ['g:AlphaMode'] },
 	{ label: 'Animation', to: 'c:avatar_animation', also: ['c:object_animation'] },
+	{ label: 'Animesh', to: 'f:animesh', also: ['c:object_animation'] },
 	{ label: 'Attachments', to: 'c:attachments', also: ['g:AttachPoint'] },
 	{ label: 'Avatar', to: 'f:avatar', also: ['c:avatar'] },
 	{ label: 'Camera', to: 'f:camera', also: ['g:CameraParam'] },
@@ -50,6 +51,7 @@ export const topicsAZ: Topic[] = [
 	{ label: 'Controls', to: 'f:input', also: ['g:ControlButton'] },
 	{ label: 'Dataserver', to: 'c:dataserver' },
 	{ label: 'Dialog', to: 'f:dialog' },
+	{ label: 'Events', to: 'f:events' },
 	{ label: 'Experience', to: 'f:experience', also: ['c:experience_data'] },
 	{ label: 'Face', to: 'f:textures', also: ['g:Faces'] },
 	{ label: 'Group' },
@@ -60,6 +62,9 @@ export const topicsAZ: Topic[] = [
 	{ label: 'Linkset Data', to: 'c:linkset_data', also: ['f:data-storage'] },
 	{ label: 'Lists', to: 'c:list', also: ['f:data-transmission'] },
 	{ label: 'Math', to: 'f:math', also: ['c:math'] },
+	{ label: 'Money', to: 'f:money' },
+	{ label: 'Parcels & Regions', to: 'f:land', also: ['c:parcel', 'c:region'] },
+	{ label: 'Pathfinding', to: 'f:pathfinding' },
 	{ label: 'Permissions', to: 'c:permissions', also: ['g:ScriptPermission'] },
 	{ label: 'Physics', to: 'f:physics' },
 	{ label: 'Primitive', to: 'f:prims', also: ['g:PrimParam'] },
@@ -81,7 +86,7 @@ export const topicsAZ: Topic[] = [
 ];
 
 /** The portal's nested topic tree (right sub-column). */
-export const topicTree: Topic[] = [
+const rawTree: Topic[] = [
 	{ label: 'Avatar', to: 'f:avatar', children: [
 		{ label: 'Animation', to: 'c:avatar_animation' },
 		{ label: 'Attachment', to: 'c:attachments' },
@@ -111,11 +116,14 @@ export const topicTree: Topic[] = [
 		{ label: 'Sound', to: 'f:sound' },
 		{ label: 'Video', to: 'c:parcel_media' },
 	] },
+	{ label: 'Money', to: 'f:money' },
 	{ label: 'Movement', to: 'f:movement', children: [
 		{ label: 'Physics', to: 'f:physics', children: [{ label: 'Damping' }, { label: 'Hover' }] },
+		{ label: 'Pathfinding', to: 'f:pathfinding' },
 		{ label: 'Rotation', to: 'c:quaternion' },
 	] },
 	{ label: 'Object', to: 'c:object', children: [
+		{ label: 'Animesh', to: 'f:animesh' },
 		{ label: 'Dataserver', to: 'c:dataserver' },
 		{ label: 'Linkset Data', to: 'c:linkset_data' },
 		{ label: 'Link', to: 'f:linkset' },
@@ -133,7 +141,8 @@ export const topicTree: Topic[] = [
 			{ label: 'Texture', to: 'f:textures' },
 		] },
 	] },
-	{ label: 'Region', to: 'c:region', children: [
+	{ label: 'Parcels & Regions', to: 'f:land', children: [
+		{ label: 'Region', to: 'c:region' },
 		{ label: 'Ground', to: 'g:GroundTextureParam' },
 		{ label: 'Parcel', to: 'c:parcel' },
 		{ label: 'Security', to: 'c:land_moderation' },
@@ -141,6 +150,7 @@ export const topicTree: Topic[] = [
 	] },
 	{ label: 'Script', to: 'c:script', children: [
 		{ label: 'Error', children: [{ label: 'Math Errors' }] },
+		{ label: 'Events', to: 'f:events' },
 		{ label: 'Keywords', to: '/controls/' },
 		{ label: 'Math', to: 'f:math' },
 		{ label: 'Types', to: '/types/' },
@@ -150,12 +160,25 @@ export const topicTree: Topic[] = [
 function walk(ts: Topic[], path: string[] = []): { topic: Topic; path: string[] }[] {
 	return ts.flatMap(t => [{ topic: t, path: [...path, t.label] }, ...walk(t.children ?? [], [...path, t.label])]);
 }
-const all = [...walk(topicsAZ), ...walk(topicTree)];
+const all = [...walk(rawAZ), ...walk(rawTree)];
 // Resolve every ref once at build time so a typo fails the build.
 for (const { topic } of all) for (const r of [topic.to, ...(topic.also ?? [])]) if (r) resolve(r);
 
 /** Topics with no lsl.dev page, as "Parent › Child" paths, de-duplicated. */
 export const gaps = [...new Set(all.filter(x => !x.topic.to).map(x => x.path.join(' › ')))];
-/** lsl.dev features that no portal topic points at (shown as "Also on lsl.dev"). */
+/** lsl.dev features that no portal topic points at; the build fails until each is placed. */
 const referenced = new Set(all.flatMap(x => [x.topic.to, ...(x.topic.also ?? [])]).flatMap(r => r ? [resolve(r)] : []).filter(l => l.kind === 'feature').map(l => l.href.split('/')[2]));
 export const unmappedFeatures = featurePages.filter(f => !referenced.has(f.id));
+
+/** Drop topics with no lsl.dev page (keeping a pageless parent only if a child survives). */
+function prune(ts: Topic[]): Topic[] {
+	return ts.flatMap(t => {
+		const children = t.children ? prune(t.children) : undefined;
+		if (!t.to && !children?.length) return [];
+		return [{ ...t, children: children?.length ? children : undefined }];
+	});
+}
+const byLabel = (a: Topic, b: Topic) => a.label.localeCompare(b.label);
+if (unmappedFeatures.length) throw new Error(`portal-topics: place these features in a topic: ${unmappedFeatures.map(f => f.id).join(', ')}`);
+export const topicsAZ: Topic[] = prune(rawAZ).sort(byLabel);
+export const topicTree: Topic[] = prune(rawTree).sort(byLabel);

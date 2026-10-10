@@ -42,7 +42,7 @@ const rawAZ: Topic[] = [
 	{ label: 'Animation', to: 'c:avatar_animation', also: ['c:object_animation'] },
 	{ label: 'Animesh', to: 'f:animesh', also: ['c:object_animation'] },
 	{ label: 'Attachments', to: 'c:attachments', also: ['g:AttachPoint'] },
-	{ label: 'Avatar', to: 'f:avatar', also: ['c:avatar'] },
+	{ label: 'Avatars', to: 'f:avatar', also: ['c:avatar'] },
 	{ label: 'Camera', to: 'f:camera', also: ['g:CameraParam'] },
 	{ label: 'Collision', to: 'f:physics', also: ['c:detected'] },
 	{ label: 'Color', to: 'f:textures' },
@@ -58,7 +58,7 @@ const rawAZ: Topic[] = [
 	{ label: 'Inventory', to: 'f:inventory|c:prim_inventory', also: ['c:prim_inventory', 'g:InventoryType'] },
 	{ label: 'JSON', to: 'c:json', also: ['f:data-transmission'] },
 	{ label: 'Light', to: 'f:effects' },
-	{ label: 'Link', to: 'f:linkset', also: ['g:Link'] },
+	{ label: 'Linksets', to: 'f:linkset', also: ['g:Link'] },
 	{ label: 'Linkset Data', to: 'c:linkset_data', also: ['f:data-storage'] },
 	{ label: 'Lists', to: 'c:list', also: ['f:data-transmission'] },
 	{ label: 'Math', to: 'f:math', also: ['c:math'] },
@@ -67,7 +67,7 @@ const rawAZ: Topic[] = [
 	{ label: 'Pathfinding', to: 'f:pathfinding' },
 	{ label: 'Permissions', to: 'c:permissions', also: ['g:ScriptPermission'] },
 	{ label: 'Physics', to: 'f:physics' },
-	{ label: 'Primitive', to: 'f:prims', also: ['g:PrimParam'] },
+	{ label: 'Prims', to: 'f:prims', also: ['g:PrimParam'] },
 	{ label: 'Rotation', to: 'c:quaternion', also: ['f:math'] },
 	{ label: 'Scripts', to: 'c:script' },
 	{ label: 'Sensor', to: 'c:sensor' },
@@ -78,7 +78,7 @@ const rawAZ: Topic[] = [
 		{ label: 'String', to: 'c:string' },
 	] },
 	{ label: 'Teleport', to: 'c:teleport' },
-	{ label: 'Texture', to: 'f:textures' },
+	{ label: 'Textures & Materials', to: 'f:textures' },
 	{ label: 'Time', to: 'c:time' },
 	{ label: 'Vehicle', to: 'c:vehicles', also: ['g:VehicleType'] },
 	{ label: 'Video', to: 'c:parcel_media', also: ['c:prim_media'] },
@@ -87,7 +87,7 @@ const rawAZ: Topic[] = [
 
 /** The portal's nested topic tree (right sub-column). */
 const rawTree: Topic[] = [
-	{ label: 'Avatar', to: 'f:avatar', children: [
+	{ label: 'Avatars', to: 'f:avatar', children: [
 		{ label: 'Animation', to: 'c:avatar_animation' },
 		{ label: 'Attachment', to: 'c:attachments' },
 		{ label: 'Camera', to: 'f:camera' },
@@ -126,19 +126,19 @@ const rawTree: Topic[] = [
 		{ label: 'Animesh', to: 'f:animesh' },
 		{ label: 'Dataserver', to: 'c:dataserver' },
 		{ label: 'Linkset Data', to: 'c:linkset_data' },
-		{ label: 'Link', to: 'f:linkset' },
+		{ label: 'Linksets', to: 'f:linkset' },
 		{ label: 'Vehicle', to: 'c:vehicles' },
 	] },
 	{ label: 'Permissions', to: 'c:permissions', children: [
 		{ label: 'Asset', to: 'c:asset_permissions' },
 		{ label: 'Script', to: 'g:ScriptPermission' },
 	] },
-	{ label: 'Primitive', to: 'f:prims', children: [
+	{ label: 'Prims', to: 'f:prims', children: [
 		{ label: 'Effects', to: 'f:effects', children: [{ label: 'Light' }, { label: 'Particles', to: 'c:particles' }] },
 		{ label: 'Face', to: 'g:Faces', children: [
 			{ label: 'Alpha', to: 'g:AlphaMode' },
 			{ label: 'Color', to: 'f:textures' },
-			{ label: 'Texture', to: 'f:textures' },
+			{ label: 'Textures & Materials', to: 'f:textures' },
 		] },
 	] },
 	{ label: 'Parcels & Regions', to: 'f:land', children: [
@@ -182,3 +182,9 @@ const byLabel = (a: Topic, b: Topic) => a.label.localeCompare(b.label);
 if (unmappedFeatures.length) throw new Error(`portal-topics: place these features in a topic: ${unmappedFeatures.map(f => f.id).join(', ')}`);
 export const topicsAZ: Topic[] = prune(rawAZ).sort(byLabel);
 export const topicTree: Topic[] = prune(rawTree).sort(byLabel);
+
+/** Styling kind for a topic: feature styling only when the topic is the feature itself. */
+export function topicKind(t: Topic): Link['kind'] | 'topic' {
+	const l = resolve(t.to!);
+	return l.kind === 'feature' && l.label !== t.label ? 'topic' : l.kind;
+}

@@ -1,6 +1,6 @@
 ---
 // PROTOTYPE: one nested list of portal topics (recursive). Gaps render as plain text.
-import { resolve, type Topic } from '../../lib/prototypes/portal-topics';
+import { resolve, topicKind, type Topic } from '../../lib/prototypes/portal-topics';
 interface Props { topics: Topic[]; showAlso?: boolean }
 const { topics, showAlso = true } = Astro.props;
 ---
@@ -8,9 +8,9 @@ const { topics, showAlso = true } = Astro.props;
 	{topics.map(t => (
 		<li>
 			{t.to
-				? <a class={`k-${resolve(t.to).kind}`} href={resolve(t.to).href}>{t.label}</a>
+				? <a class={`k-${topicKind(t)}`} href={resolve(t.to).href}>{t.label}</a>
 				: <span class="gap">{t.label}<span class="gap-tag">no page</span></span>}
-			{showAlso && t.also && <span class="also">{t.also.map(r => resolve(r)).map(l => <a href={l.href}>{l.kind === 'group' ? <code>{l.label}</code> : l.label}</a>)}</span>}
+			{showAlso && t.also && <span class="also">{t.also.map(r => resolve(r)).map(l => <a class={`k-${l.kind}`} href={l.href}>{l.kind === 'group' ? <code>{l.label}</code> : l.label}</a>)}</span>}
 			{t.children && <Astro.self topics={t.children} showAlso={showAlso} />}
 		</li>
 	))}
@@ -21,9 +21,14 @@ const { topics, showAlso = true } = Astro.props;
 	.topics li { margin: 0; padding: .0625rem 0; line-height: 1.4; }
 	.topics a { text-decoration: none; }
 	.topics a:hover { text-decoration: underline; }
-	.topics a.k-feature { font-weight: 600; }
+	/* One style per kind, everywhere: features are bold accent links; categories, topics and pages
+	   are plain text-coloured links; constant groups are code. */
+	.topics a { color: var(--sl-color-gray-1); }
+	.topics a:hover { color: var(--sl-color-text-accent); }
+	.topics a.k-feature { font-weight: 600; color: var(--sl-color-text-accent); }
 	.also { margin-left: .375rem; font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); }
 	.also a { color: var(--sl-color-gray-2); }
+	.also a.k-feature { color: var(--sl-color-text-accent); }
 	.also a + a::before { content: '· '; color: var(--sl-color-gray-4); }
 	.also code { font-size: inherit; }
 	.gap { color: var(--sl-color-gray-3); }

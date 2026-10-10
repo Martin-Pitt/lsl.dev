@@ -36,7 +36,8 @@ ref=s[s.index('>Reference</span>'):s.index('>Features</span>')]
 for href in ['/features/combat/','/categories/','/constants/','/types/','/controls/']:
  check((s if href.startswith('/features/') else ref).count(f'href="{href}"')==1,f'{href} is listed again besides the split label (Overview child not removed)')
 # A nested group without an overview link stays a single toggle, not large.
-check(re.search(r'<details class="nested-group[^"]*"[^>]*>\s*<summary[^>]*>\s*<span class="group-label[^"]*">\s*<span[^>]*>Avatars</span>',s),'category group Avatars is not a plain nested toggle')
+# Category groups (one per feature) are split controls: the label opens the feature page.
+check('href="/features/avatar/"' in ref and re.search(r'<a href="/features/avatar/"[^>]*split-link',ref),'Categories › Avatars is not a split control linking the feature page')
 # A feature with a single category is a plain link under Categories, not a one-item collapsible.
 check(not re.search(r'<span class="group-label[^"]*">\s*<span[^>]*>Combat</span>',ref),'Categories › Combat is a one-item collapsible')
 check('href="/categories/combat/"' in ref,'Categories › Combat is not a direct category link')

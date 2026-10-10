@@ -15,13 +15,21 @@ export const onRequest = defineRouteMiddleware((context) => {
 	const route = context.locals.starlightRoute;
 	const all = links(route.sidebar as Entry[]);
 	const current = all.filter(l => l.isCurrent);
-	// The same page can be linked twice (e.g. an overview link
-	// and a split-group label). Keep only the most deeply nested match, so the page opens in its own section.
+	// The same page can be linked twice (e.g. a feature page under Features and as the overview of its
+	// category group under Reference › Categories). Prefer the match inside the top-level section the
+	// URL belongs to; among those, the most deeply nested one.
 	if (current.length > 1) {
 		const depth = new Map<Entry, number>();
-		const walk = (es: Entry[], d: number) => es.forEach(e => e.type === 'link' ? depth.set(e, d) : walk(e.entries, d + 1));
-		walk(route.sidebar as Entry[], 0);
-		const keep = current.reduce((a, b) => (depth.get(b)! > depth.get(a)! ? b : a));
+		const top = new Map<Entry, string>();
+		const walk = (es: Entry[], d: number, section: string) => es.forEach(e => {
+			if (e.type === 'link') { depth.set(e, d); top.set(e, section); }
+			else walk(e.entries, d + 1, d === 0 ? (e as any).label : section);
+		});
+		walk(route.sidebar as Entry[], 0, '');
+		const seg = context.url.pathname.split('/')[1];
+		const home = seg === 'features' ? 'Features' : seg === 'fundamentals' ? 'Fundamentals' : 'Reference';
+		const score = (l: Entry) => (top.get(l) === home ? 1000 : 0) + depth.get(l)!;
+		const keep = current.reduce((a, b) => (score(b) > score(a) ? b : a));
 		for (const l of current) if (l !== keep) l.isCurrent = false;
 	}
 	if (current.length) return;

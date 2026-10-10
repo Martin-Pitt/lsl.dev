@@ -60,7 +60,11 @@ const referenceCategories = features
 	.filter(f => f.categories.length > 0)
 	.map(f => f.categories.length === 1
 		? categoryItem(f.categories[0])
-		: { label: f.title, collapsed: true, items: f.categories.map(categoryItem) })
+		: { label: f.title, collapsed: true, items: [
+			// Split control: the label opens the feature page (the overview), the chevron lists its categories.
+			{ label: 'Overview', link: `/features/${f.id}/`, attrs: { 'data-sidebar-group-link': '' } },
+			...f.categories.map(categoryItem),
+		] })
 	.sort((a, b) => a.label.localeCompare(b.label));
 /** Flat, in slua.dev order (alphabetical by slug): Features Overview, then one entry per feature page.
  * lsl.dev additions beyond slua.dev's set (Inventory) slot in alphabetically. */

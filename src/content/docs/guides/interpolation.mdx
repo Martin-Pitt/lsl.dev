@@ -179,20 +179,22 @@ rotation InterpolateRotationCosine(rotation a, rotation b, float t)
     return InterpolateRotation(a, b, (1.0 - llCos(t * PI)) / 2.0);
 }
 
-// Cubic rotation interpolation: two interpolations, a to b and c to d, blended with weight 2t(1 - t).
-// Starts at a and ends at b; c and d pull the middle of the path towards them.
+// Cubic rotation interpolation, matching the other cubic functions: runs from b (t = 0) to c (t = 1),
+// with the neighbouring rotations a and d bending the path. It blends the interpolation b to c with
+// the interpolation a to d, weighted 2t(1 - t).
 rotation InterpolateRotationCubic(rotation a, rotation b, rotation c, rotation d, float t)
 {
     return InterpolateRotation(
-        InterpolateRotation(a, b, t),
-        InterpolateRotation(c, d, t),
+        InterpolateRotation(b, c, t),
+        InterpolateRotation(a, d, t),
         (2.0 * t) * (1.0 - t)
     );
 }
 ```
 
-`InterpolateRotationCubic` does not pass through **c** or **d**: the weight of the second
-interpolation is 0.0 at both ends and peaks at 0.5 when **t** is 0.5.
+`InterpolateRotationCubic` passes through **b** and **c** at the ends; **a** and **d** only bend the
+path between them. The weight of the a-to-d interpolation is 0.0 at both ends and peaks at 0.5
+when **t** is 0.5.
 
 ## Stepping towards a target
 
@@ -257,6 +259,10 @@ Changes from the original:
   `(from_min - from) / (from_min - from_max)`, is rewritten as the equal
   `(from - from_min) / (from_max - from_min)`, and `RescaleClamped` calls `Rescale` instead of
   repeating it.
+- **`interpolateRotationCubic` now uses the same point order as the other cubics.** The original
+  ran from **a** to **b**, with **c** and **d** pulling the middle. It now runs from **b** to **c**,
+  with **a** and **d** bending the path, by blending b-to-c with a-to-d (same construction and
+  weight).
 - **`interpolateVectorCubic` used a different convention from `interpolateFloatCubic`.** It
   computed `P = (c - d) - (b - a)` and returned `... + (d - b) * t + a`, a curve from **a** at
   **t** = 0 to **d** at **t** = 1, while the float version ran from **b** to **c**. Both now use

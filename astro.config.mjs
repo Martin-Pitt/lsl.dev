@@ -6,6 +6,34 @@ import rehypeInlineLsl from './src/lib/rehype-inline-lsl.ts';
 import { loadFeatures } from './scripts/feature-index.mjs';
 import { singleMemberCategories } from './src/lib/category-members.mjs';
 
+/** The sidebar is built from the feature pages when this config loads. In dev, reload it when a
+ * feature page is added or removed, or when an edit changes what the sidebar shows (titles,
+ * sub-pages, categories), so new features appear without restarting the dev server by hand. */
+function reloadSidebarOnFeatureChanges() {
+	const dir = 'src/content/docs/features';
+	const snapshot = () => JSON.stringify(loadFeatures().map(f => [f.id, f.title, f.categories, f.subpages.map(s => [s.title, s.href])]));
+	return {
+		name: 'reload-sidebar-on-feature-changes',
+		hooks: {
+			'astro:server:setup': ({ server, logger }) => {
+				let last = snapshot();
+				const isFeature = (/** @type {string} */ file) => file.replaceAll('\\', '/').includes(dir) && file.endsWith('.mdx');
+				const check = (/** @type {string} */ file, /** @type {boolean} */ always) => {
+					if (!isFeature(file)) return;
+					const next = snapshot();
+					if (!always && next === last) return;
+					last = next;
+					logger.info('Feature pages changed; reloading the sidebar.');
+					server.restart();
+				};
+				server.watcher.on('add', f => check(f, true));
+				server.watcher.on('unlink', f => check(f, true));
+				server.watcher.on('change', f => check(f, false));
+			},
+		},
+	};
+}
+
 /**
  * Navigation mirrors slua.dev: Fundamentals, Reference, Features, Guides, plus the wiki archive.
  * The Reference sidebar goes down to categories, grouped by feature, but never lists
@@ -48,7 +76,7 @@ export default defineConfig({
 	site: 'https://lsl.dev',
 	// Inline `code` and links to API pages in Markdown/MDX are highlighted as LSL (see the plugin).
 	markdown: { rehypePlugins: [rehypeInlineLsl] },
-	integrations: [starlight({
+	integrations: [reloadSidebarOnFeatureChanges(), starlight({
 		title: 'LSL Dev',
 		favicon: '/favicon.svg',
 		description: 'Unofficial developer documentation for the Linden Scripting Language (LSL) of Second Life.',

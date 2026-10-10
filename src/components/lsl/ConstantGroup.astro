@@ -6,7 +6,7 @@
  *
  *   <ConstantGroup name="RezParam" />                                   value / rule lines from the definitions
  *   <ConstantGroup name="PrimParam" order={primParams} />               hand-edited groups (src/data/rule-groups/)
- *   <ConstantGroup name="PrimParam" order={primParams} mode="get" />    getter notation: [ RULE, request ] → [ returns ]
+ *   <ConstantGroup name="PrimParam" order={primParams} mode="get" />    getter notation: RULE, request → returns
  *
  * Without `order`, long groups whose names share a second word (PRIM_TEXTURE_*) are
  * sub-grouped under comment headers. With `order`, every public member must appear exactly
@@ -42,7 +42,8 @@ function argsOf(c: any, explicit?: string): Arg[] {
 }
 // In getter notation the face (or link) selector is passed; everything else is returned.
 const isRequest = (a: Arg) => a.request || a.name === 'face' || a.name === 'link_target';
-const list = (items: string[]) => (items.length ? `[ ${items.join(', ')} ]` : '[]');
+/** Rule lines are written without list brackets, as in the original specs: `PRIM_COLOR, integer face, …`. */
+const list = (items: string[]) => items.join(', ');
 const fmt = (a: Arg) => `${a.type} ${a.name}`.trim();
 function ruleCode(head: string[], args: Arg[]) {
 	if (mode === 'get') {

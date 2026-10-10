@@ -37,11 +37,14 @@ category: functions
 source:                              # provenance of the wiki-derived prose (CC BY-SA 3.0)
   wiki: "LlDialog"
   url: https://wiki.secondlife.com/wiki/LlDialog
-  revision: 1216157
-  date: 2024-01-31
+  revision: 1216157                  # the article's imported revision (provenance; links stay live)
+  date: 2024-01-31                   # newest date among `sources`
   contributor: "Wulfie Reanimator"
-  raw: /wiki-source/lldialog-18697202.txt
-  license: "Content from the Second Life Wiki article LlDialog (revision 1216157, 2024-01-31), CC BY-SA 3.0."
+  license: "Content from the Second Life Wiki articles LlDialog (revision 1216157, 2024-01-31), Template:Issues/VWR-17064 (revision 754023, 2010-02-25), ... and Template:LSL Function/chat (revision 1192932, 2014-08-23), CC BY-SA 3.0."
+  sources:                           # the article plus every page/template the importer transcluded
+    - { wiki: "LlDialog", revision: 1216157, date: 2024-01-31 }
+    - { wiki: "Template:Issues/VWR-17064", revision: 754023, date: 2010-02-25 }
+    - { wiki: "Template:LSL Function/chat", revision: 1192932, date: 2014-08-23 }
 ---
 import { LSLFunction, WikiSource } from '~/components/lsl';
 
@@ -114,7 +117,7 @@ worked example.
    A rule is its name, or `{ rule, args?, note?, getNote?, forms? }`:
    - `args`: typed arguments, e.g. `"integer face, vector color, float alpha"`. Leave it out when the
      YAML `values` already define the shape (or the YAML description quotes `[RULE, type name, …]`).
-     Otherwise take the names from the wiki's rules template (`public/wiki-source/template-lsl-constants-*`).
+     Otherwise take the names from the wiki's rules template (`data/derived/wiki-source/template-lsl-constants-*`).
      Never invent a shape; leave the line without arguments and say so in the commit.
    - `setOnly: true`: getter pages show `[ RULE ]` and the note, with no return list (`PRIM_PROJECTOR`).
    - `forms`: one line per form for a multi-form rule (`PRIM_TYPE` → `PRIM_TYPE_BOX`, …, `PRIM_TYPE_SCULPT`).
@@ -139,7 +142,7 @@ worked example.
 
    Getter pages add `mode="get"`. Notation: `[ RULE, request arguments ] → [ returned values ]`; the
    request arguments are `face` (YAML `access: arg`) and `link_target`, everything else is returned.
-   A rule with no request arguments reads `[ PRIM_NAME ] → [ string name ]`.
+   A rule with no request arguments reads `PRIM_NAME → string name`. Lines carry no list brackets.
 3. **Sections, only when needed.** Most groups need nothing below the block: put what matters in the
    shape and a short comment. Only a group the block can't explain (e.g. Shape, with its `PRIM_TYPE`
    forms) gets `details: true` and a `### <title>` section with the exact wiki wording; its header

@@ -6,6 +6,7 @@
  * for the Astro routes alike.
  */
 import { catalog, categoryMap, categoryHref, constantGroupHref, featureByCategory, featureHref, featuresForApi } from './catalog';
+import { primaryFeature } from './primary-feature';
 
 export type Crumb = { label: string; href?: string };
 /** Chip kinds keep their own visual style; `kind` is also read out to screen readers. */
@@ -47,14 +48,20 @@ export function pageNav(pathname: string, title: string, siblings: { label: stri
 	if (SECTIONS[section]) crumbs.push(SECTIONS[section]);
 	if (entry) {
 		const groups: string[] = entry.groups ?? [];
-		const category = entry.categories[0];
+		const category: string | undefined = entry.categories[0];
+		// Middle crumb: the API's primary feature (src/lib/primary-feature-rules.mjs); without one, the
+		// constant group or the category. Constants: Constants › feature › group › name.
+		const primary = primaryFeature(entry);
+		if (primary) crumbs.push({ label: primary.title, href: featureHref(primary.id) });
 		if (entry.kind === 'constant' && groups[0]) crumbs.push({ label: groups[0], href: constantGroupHref(groups[0]) });
-		else if (category) crumbs.push({ label: categoryMap.get(category)?.label || category, href: categoryHref(category) });
+		else if (!primary && category) crumbs.push({ label: categoryMap.get(category)?.label || category, href: categoryHref(category) });
 		for (const g of groups) chips.push({ label: g, href: constantGroupHref(g), kind: 'Group' });
 		for (const id of entry.categories) chips.push({ label: categoryMap.get(id)?.label || id, href: categoryHref(id), kind: 'Category' });
 		const fs = featuresForApi(entry);
-		chips.push(...featureChips(fs));
-		// Closest sidebar entry: the primary category, else a feature area, else the index.
+		// The primary feature is already the breadcrumb; its chip would repeat it.
+		chips.push(...featureChips(fs.filter(f => f.id !== primary?.id)));
+		// Closest sidebar entry: the primary feature, else a category, else another feature area, else the index.
+		if (primary) sidebar.push(featureHref(primary.id));
 		for (const id of entry.categories) sidebar.push(categoryHref(id));
 		for (const f of fs) sidebar.push(featureHref(f.id));
 		for (const g of groups) sidebar.push(constantGroupHref(g));
@@ -78,5 +85,5 @@ export function pageNav(pathname: string, title: string, siblings: { label: stri
 		sidebar.push(...parts.map((_, i) => '/' + parts.slice(0, parts.length - i).join('/') + '/'));
 	}
 	crumbs.push({ label: title });
-	return { crumbs, chips, sidebar };
+	return { crumbs, chips, sidebar: [...new Set(sidebar)] };
 }

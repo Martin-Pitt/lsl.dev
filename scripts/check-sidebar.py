@@ -18,7 +18,7 @@ def attr(tag,name):
 s=sidebar('/features/combat/')
 # Top level: sections with an overview page are split controls whose label keeps the large heading
 # style; the overview is not listed again as a child.
-TOP=[('Fundamentals','/fundamentals/'),('Reference','/reference/'),('Features','/features/')]
+TOP=[('Fundamentals','/fundamentals/'),('Reference','/reference/'),('Features','/features/'),('Guides','/guides/'),('Recipes','/recipes/')]
 for label,href in TOP:
  m=re.search(r'<li class="split-group top-split[^"]*">\s*<div class="split-row[^"]*">\s*<a href="'+re.escape(href)+r'"[^>]*class="split-link[^"]*"[^>]*>\s*<span class="large[^"]*">'+label+'</span>',s)
  check(m,f'top-level section {label} is not a split control with a large label linking {href}')
@@ -55,15 +55,15 @@ check('href="/categories/combat/"' in ref,'Categories › Combat is not a direct
 sub=sidebar('/features/combat/combat-log/')
 a,b,d=split(sub,'Combat')
 check(attr(b,'aria-expanded')=='true' and attr(a,'aria-current') is None,'Combat is not open (or wrongly current) on a sub-page')
-# Fundamentals has its own pages (src/content/docs/fundamentals/) plus Learn LSL, never Reference pages.
+# Fundamentals has its own pages (src/content/docs/fundamentals/), never Reference pages.
 def section(html,start,end):
  at=lambda l:html.rindex('<li',0,html.index(f'>{l}</span>'))
  return html[at(start):at(end)]
 fund=section(s,'Fundamentals','Reference')
 hrefs=re.findall(r'href="([^"]*)"',fund)
-check('/fundamentals/' in hrefs and '/guides/' in hrefs,'Fundamentals lacks its overview or Learn LSL')
+check('/fundamentals/' in hrefs,'Fundamentals lacks its overview')
 check(len(hrefs)>2,'Fundamentals has no concept pages')
-for h in hrefs:check(h.startswith('/fundamentals/') or h=='/guides/',f'Fundamentals links outside /fundamentals/: {h}')
+for h in hrefs:check(h.startswith('/fundamentals/'),f'Fundamentals links outside /fundamentals/: {h}')
 # Reference pages open in Reference, Fundamentals pages in Fundamentals.
 def current(page):
  h=sidebar(page);m=re.search(r'<a [^>]*aria-current="page"[^>]*>',h)

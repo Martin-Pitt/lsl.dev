@@ -13,7 +13,7 @@ with no horizontal scroll (`img/landing-*.png`).
 ## Layout
 
 1. **Intro**: one sentence on what LSL and lsl.dev are, then **"Want to learn LSL?"** linking to
-   `/guides/`.
+   `/guides/learn-lsl/`.
 2. **Language reference**: Constants (count, *By group*), Events, Flow control with the keywords
    `if else for while do-while jump return state`, Functions with **A–L / L–T / T–Z**
    (`/functions/#from-a|l|t`, anchors added to the catalog), Operators, States (`state`,

@@ -119,7 +119,7 @@ export default defineConfig({
 			{
 				label: 'Fundamentals',
 				collapsed: true,
-				items: [{ autogenerate: { directory: 'fundamentals' } }, { label: 'Learn LSL', link: '/guides/' }],
+				items: [{ autogenerate: { directory: 'fundamentals' } }],
 			},
 			{
 				label: 'Reference',
@@ -143,6 +143,8 @@ export default defineConfig({
 				],
 			},
 			{ label: 'Features', collapsed: true, items: [{ label: 'Features Overview', link: '/features/', attrs: { 'data-sidebar-group-link': '' } }, ...featureItems] },
+			{ label: 'Guides', collapsed: true, items: [{ autogenerate: { directory: 'guides' } }] },
+			{ label: 'Recipes', collapsed: true, items: [{ autogenerate: { directory: 'recipes' } }] },
 			{ label: 'Wiki archive', link: '/wiki/' },
 			{ label: 'About these docs', link: '/about/' },
 		],

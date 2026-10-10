@@ -25,7 +25,8 @@ const SECTIONS: Record<string, Crumb> = {
 	fundamentals: { label: 'Fundamentals', href: '/fundamentals/' },
 	types: { label: 'Types', href: '/types/' },
 	controls: { label: 'Flow control', href: '/controls/' },
-	guides: { label: 'Learn LSL', href: '/guides/' },
+	guides: { label: 'Guides', href: '/guides/' },
+	recipes: { label: 'Recipes', href: '/recipes/' },
 	reference: { label: 'Reference', href: '/reference/' },
 };
 const KINDS: Record<string, any[]> = { functions: catalog.functions, events: catalog.events, constants: catalog.constants };

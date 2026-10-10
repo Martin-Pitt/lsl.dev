@@ -27,6 +27,7 @@ class RenderTests(unittest.TestCase):
         self.assertIn('href="/reference/limits/#building"',r.link('Limits#Building','limits'))
         self.assertIn('href="/reference/limits/"',r.link('Limits'))
         self.assertNotIn('limits',r.missing)
+        self.assertIn('href="/features/viewer-uris/"',r.link('Viewer_URI_Name_Space','Viewer URI Name Space'))
     def test_local_links_and_escaped_label(self):
         result=self.r.render('[[llSay|<test>]] [[state_entry]]')
         self.assertIn('href="/functions/llSay/"',result)
@@ -127,13 +128,14 @@ class DatasetTests(unittest.TestCase):
                     e['wiki']['sections']=api[e['name']]['sections']
                     e['wiki']['html']='\n'.join('<section><h2 id="'+s['id']+'">'+s['title']+'</h2>'+s['html']+'</section>' for s in e['wiki']['sections'])
     def test_counts_and_exclusions(self):
-        self.assertEqual(len(self.c['wiki']),2268)  # wiki-English.xml plus new pages from wiki-supplement-*.xml
+        self.assertEqual(len(self.c['wiki']),2271)  # wiki-English.xml plus new pages from wiki-supplement-*.xml
         self.assertEqual(len(self.c['functions']),501)
         for kind in ('functions','events','constants'):
             self.assertTrue(all(not x['definition'].get('private') and not x['definition'].get('deprecated') for x in self.c[kind]))
     def test_supplement_pages_are_merged(self):
         limits=next(w for w in self.c['wiki'] if w['title']=='Limits')
         self.assertEqual(limits['source']['revisionId'],'1218965')
+        self.assertEqual(next(w for w in self.c['wiki'] if w['title']=='Viewer URI Name Space')['source']['revisionId'],'1219168')
         self.assertIn('wiki-supplement-limits.xml',[x['file'] for x in self.c['meta']['sources']['supplements']])
         titles=[w['title'] for w in self.c['wiki']]
         self.assertIn('Template:Jira',titles); self.assertIn('Template:JIRA',titles)  # case-distinct titles stay separate

@@ -1,0 +1,122 @@
+---
+title: "Viewer URIs"
+description: "secondlife:// and secondlife:///app/ links that the viewer turns into clickable names, profiles, groups, places, teleports and other actions in chat and dialogs."
+---
+import { Attribution, Box, Column, Columns, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+The Second Life viewer recognises its own kind of link: text that starts with `secondlife://`. When a script writes one into [local chat](/functions/llSay/) or a [dialog](/functions/llDialog/), the viewer highlights it as a clickable link, often with custom formatting including icons. A click can open a profile, show a group, offer a teleport, put a place on the world map, or replace the link with an avatar's name. These links are handled by the viewer, not the simulator, so a script only has to build the right string.
+
+This is not a scripting API. There are no functions for it. It is a set of text conventions that combine with ordinary chat and dialog functions, plus the keys and names a script already has.
+
+Viewer URIs are an lsl.dev addition. They are not one of slua.dev's features.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- There are two forms. A **region location**, `secondlife://<region_name>/<local_x>/<local_y>/<local_z>`, logs in to that region or, if logged in, shows information and offers a teleport. An **application URI**, `secondlife:///app/…`, with three slashes, controls the user interface directly
+  - The full list of forms, with their parameters, is in the [URI reference](/features/viewer-uris/reference/)
+  - Most `secondlife:///app` URLs only work from browser instances running inside Second Life, because of a denial-of-service attack that used teleport links to force repeated teleports
+- In chat, dialogs and other user interface elements, these URLs are highlighted as clickable links. A script can put one in front of people by
+  - [speaking in local chat](/functions/llSay/), [telling only its owner](/functions/llOwnerSay/) or [speaking privately to one avatar](/functions/llRegionSayTo/)
+  - writing it into the message of a [dialog with buttons](/functions/llDialog/), where some application URLs also receive special formatting
+  - writing it into the prompt of a [text box](/functions/llTextBox/), which is also a dialog
+  - [sending an instant message](/functions/llInstantMessage/). Older viewers showed clickable links, without formatting, in IM history
+- [Agent links](/features/viewer-uris/reference/#appagent) work from an avatar's key
+  - They can [show the avatar's display name](/features/viewer-uris/reference/#appagent), their username, or both, in place of the link. Each viewer fills in the name, so the script needs no [display name request](/functions/llRequestDisplayName/) and no `dataserver` event
+  - Others open the profile, the inspect dialog, an IM session, the pay dialog, a friendship or teleport offer, or block and unblock the avatar
+  - The key usually comes from [whoever touched or was detected](/functions/llDetectedKey/), or from the [object's owner](/functions/llGetOwner/)
+- [Group links](/features/viewer-uris/reference/#appgroup) open a group's profile or inspect dialog; a script can [read its object's group](/constants/OBJECT_GROUP/) to build one
+- Place links name a region and a position inside it, as [map links](/features/viewer-uris/reference/#appworldmap) or [teleport links](/features/viewer-uris/reference/#appteleport)
+  - Scripts get the [region's name](/functions/llGetRegionName/) and the [object's position](/functions/llGetPos/) to fill them in. Positions default to 128, 128 and 0 when left out
+  - A script can also [open the world map](/functions/llMapDestination/) for an avatar without a link
+- [Object links](/features/viewer-uris/reference/#appobjectim) display an info dialog for an object, from its [key](/functions/llGetKey/), with optional name, owner, group ownership and location parameters. Values in the query need [escaping](/functions/llEscapeURL/)
+- Other links open the inventory, search, help, floaters and keybindings, or add, remove and wear outfit folders
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions used with viewer URIs">
+
+The functions that show these links to people, and the ones that supply the keys, names and positions they are built from.
+
+<Signatures names={[
+  "llSay", "llOwnerSay", "llRegionSayTo", "llInstantMessage", "llDialog", "llTextBox",
+  "llDetectedKey", "llGetKey", "llGetObjectDetails",
+  "llGetRegionName", "llEscapeURL", "llMapDestination"
+]} />
+
+</Box>
+<Box title="URI reference" href="/features/viewer-uris/reference/">
+
+Every `secondlife://` and `secondlife:///app/` form from the wiki's Viewer URI Name Space page, with its parameters, login query parameters and the keybinding actions.
+
+</Box>
+<Box title="Names without a dataserver request">
+
+[`llGetDisplayName`](/functions/llGetDisplayName/) only works for avatars in the region or in the cache, and [`llRequestDisplayName`](/functions/llRequestDisplayName/) answers through `dataserver`. To only *show* a name, the `/displayname`, `/username` and `/completename` agent links are simpler.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+Here are the functions in detail.
+
+<Signatures names={[
+  "llSay", "llOwnerSay", "llRegionSayTo", "llInstantMessage", "llDialog", "llTextBox",
+  "llDetectedKey", "llGetKey", "llGetObjectDetails",
+  "llGetRegionName", "llEscapeURL", "llMapDestination"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [`llSay`](/functions/llSay/), [`llOwnerSay`](/functions/llOwnerSay/) and [`llRegionSayTo`](/functions/llRegionSayTo/) — the usual ways to put a link in an avatar's chat
+  - [`PUBLIC_CHANNEL`](/constants/PUBLIC_CHANNEL/) — The open local chat channel (0)
+- [`llDetectedKey`](/functions/llDetectedKey/) — The wiki's own example: `"secondlife:///app/agent/" + (string)llDetectedKey(0) + "/inspect"` in a `touch_start` event
+- [`llGetObjectDetails`](/functions/llGetObjectDetails/) — Keys for object and group links
+  - [`OBJECT_GROUP`](/constants/OBJECT_GROUP/) — The object's group key, for `secondlife:///app/group/<group_id>/about`
+  - [`OBJECT_OWNER`](/constants/OBJECT_OWNER/) — The owner's key, for an agent link or the `&owner=` parameter of an object link
+- [`secondlife:///app/chat/<channel>/<text>`](/features/viewer-uris/reference/#appchat) — any channel number greater than 0 except [`DEBUG_CHANNEL`](/constants/DEBUG_CHANNEL/)
+
+</Box>
+
+## Example
+
+The example from the wiki page: whoever touches the object is named in chat with a link to their inspect dialog.
+
+```lsl
+string Who(key id)
+{
+    return "secondlife:///app/agent/" + (string)id + "/inspect";
+}
+
+default
+{
+    touch_start(integer num)
+    {
+        llSay(0, "Touched by " + Who(llDetectedKey(0)) + "." );
+    }
+}
+```
+
+## Related
+
+- Second Life wiki: [Viewer URI Name Space](https://wiki.secondlife.com/wiki/Viewer_URI_Name_Space), [SLURL](https://wiki.secondlife.com/wiki/SLURL)
+
+<SeeAlso items={[
+  "feature:communications", "feature:dialog", "feature:avatar", "feature:land",
+  "category:chat"
+]}>
+  <Planned>Recipe: a greeter that names visitors with agent links</Planned>
+  <Planned>Recipe: a landmark giver that posts teleport links</Planned>
+</SeeAlso>
+
+<Attribution>Concepts and the example are adapted from the Second Life Wiki page <a href="https://wiki.secondlife.com/wiki/Viewer_URI_Name_Space?oldid=1219168" rel="external">Viewer URI Name Space</a> (revision 1219168, 6 October 2026), by Second Life Wiki contributors,</Attribution>
+
+<FeatureFooter
+  related={["communications", "dialog", "avatar", "land"]}
+/>

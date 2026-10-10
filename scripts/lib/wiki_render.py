@@ -51,6 +51,7 @@ def anchor(s):
 # page's heading ids must match. Value: (route, route used when a fragment is given).
 LOCAL_PAGES = {
     'limits': ('/reference/limits/', '/reference/limits/'),
+    'viewer uri name space': ('/features/viewer-uris/', '/features/viewer-uris/reference/'),
 }
 
 class Renderer:

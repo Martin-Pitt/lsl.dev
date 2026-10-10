@@ -433,7 +433,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetNumberOfSides | functions | Prims (prims) | main |
 | llGetObjectAnimationNames | functions | Animesh (animesh) | main |
 | llGetObjectDesc | functions | Prims (prims) | main + category |
-| llGetObjectDetails | functions | Linksets (linkset) | main |
+| llGetObjectDetails | functions | Linksets (linkset) | main + category |
 | llGetObjectLinkKey | functions | Data Transmission (data-transmission) | main |
 | llGetObjectMass | functions | Linksets (linkset) | main + smallest |
 | llGetObjectName | functions | Prims (prims) | main + category |
@@ -462,7 +462,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetRegionFPS | functions | Parcels & Regions (land) | main |
 | llGetRegionMoonDirection | functions | Environments (environments) | main |
 | llGetRegionMoonRotation | functions | Environments (environments) | main |
-| llGetRegionName | functions | Parcels & Regions (land) | main |
+| llGetRegionName | functions | Parcels & Regions (land) | main + category |
 | llGetRegionSunDirection | functions | Environments (environments) | main |
 | llGetRegionSunRotation | functions | Environments (environments) | main |
 | llGetRegionTimeDilation | functions | Parcels & Regions (land) | main + category |
@@ -513,7 +513,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llHTTPRequest | functions | Communications (communications) | main + category |
 | llHTTPResponse | functions | Communications (communications) | main |
 | llInsertString | functions | Data Transmission (data-transmission) | main |
-| llInstantMessage | functions | Communications (communications) | main |
+| llInstantMessage | functions | Communications (communications) | main + category |
 | llIntegerToBase64 | functions | Data Transmission (data-transmission) | main |
 | llIsFriend | functions | Avatars (avatar) | main |
 | llIsLinkGLTFMaterial | functions | Textures & Materials (textures) | main |
@@ -590,7 +590,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llOpenFloater | functions | Communications (communications) | main |
 | llOrd | functions | Data Transmission (data-transmission) | main |
 | llOverMyLand | functions | Parcels & Regions (land) | main |
-| llOwnerSay | functions | Communications (communications) | main |
+| llOwnerSay | functions | Communications (communications) | main + category |
 | llParcelMediaCommandList | functions | Parcels & Regions (land) | main |
 | llParcelMediaQuery | functions | Parcels & Regions (land) | main |
 | llParseString2List | functions | Data Transmission (data-transmission) | main |
@@ -607,7 +607,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llPushObject | functions | Physics (physics) | main + category |
 | llReadKeyValue | functions | Experience (experience) | main + smallest |
 | llRegionSay | functions | Communications (communications) | main |
-| llRegionSayTo | functions | Communications (communications) | main |
+| llRegionSayTo | functions | Communications (communications) | main + category |
 | llReleaseControls | functions | Input (input) | main |
 | llReleaseURL | functions | Communications (communications) | main |
 | llRemoteLoadScriptPin | functions | Prims (prims) | main + smallest |
@@ -652,7 +652,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llRotTargetRemove | functions | Movement (movement) | main |
 | llRound | functions | Math (math) | main |
 | llSameGroup | functions | Avatars (avatar) | main |
-| llSay | functions | Communications (communications) | main |
+| llSay | functions | Communications (communications) | main + category |
 | llScaleByFactor | functions | Linksets (linkset) | main + category |
 | llScaleTexture | functions | Textures & Materials (textures) | main |
 | llScriptDanger | functions | Events (events) | minor |

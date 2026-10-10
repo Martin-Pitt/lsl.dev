@@ -19,7 +19,7 @@ class FeaturePageTests(unittest.TestCase):
         ('prims', 'Prims'), ('sound', 'Sound'), ('textures', 'Textures & Materials'),
     ]
     # lsl.dev additions beyond slua.dev's set, slotted in alphabetically (slug order).
-    LSL_DEV_FEATURES = [('inventory', 'Inventory')]
+    LSL_DEV_FEATURES = [('inventory', 'Inventory'), ('viewer-uris', 'Viewer URIs')]
     OLD_CLUSTERS = ['combat', 'avatars', 'input', 'communication', 'experiences', 'objects', 'appearance',
                     'physics', 'pathfinding', 'land', 'data', 'http', 'inventory', 'money', 'effects', 'sound',
                     'script', 'math', 'text', 'sensing']

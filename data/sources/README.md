@@ -22,6 +22,13 @@ catalog without requiring Python or access to the original Windows download path
     revision 1218965 of 2026-07-26; `Template:References` (revision 1178626) is also
     new. The other 19 templates have the same revision IDs as `wiki-English.xml`.
     Hand-edited reference page: `src/content/docs/reference/limits.mdx`.
+  - `wiki-supplement-viewer-uri.xml`: the user's export of the "Viewer URI Name Space"
+    page and the templates it uses, copied from `Second+Life+Wiki-20261010122522.xml` on
+    10 October 2026 (SHA-256
+    `c968fbd6294dfecea789f8a22a6b42c03634298739fe65ebbabf5686fa9bb356`). The page is
+    revision 1219168 of 2026-10-06; `Template:ProtocolNav` and `Template:Underline` are
+    also new. The other 6 templates have the same revision IDs as `wiki-English.xml`.
+    Hand-edited feature: `src/content/docs/features/viewer-uris.mdx` and its sub-page.
 - `lsl_definitions.yaml`: snapshot of the user's local `lsl-definitions` checkout.
   Authoritative for public LSL signatures, argument names/descriptions, return types,
   constant values, enum relationships, and topic categories. Its SHA-256 is included

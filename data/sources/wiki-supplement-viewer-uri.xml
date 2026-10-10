@@ -1,0 +1,521 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.11/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.11/ http://www.mediawiki.org/xml/export-0.11.xsd" version="0.11" xml:lang="en">
+  <siteinfo>
+    <sitename>Second Life Wiki</sitename>
+    <dbname>pwiki</dbname>
+    <base>https://wiki.secondlife.com/wiki/Main_Page</base>
+    <generator>MediaWiki 1.45.3</generator>
+    <case>first-letter</case>
+    <namespaces>
+      <namespace key="-2" case="first-letter">Media</namespace>
+      <namespace key="-1" case="first-letter">Special</namespace>
+      <namespace key="0" case="first-letter" />
+      <namespace key="1" case="first-letter">Talk</namespace>
+      <namespace key="2" case="first-letter">User</namespace>
+      <namespace key="3" case="first-letter">User talk</namespace>
+      <namespace key="4" case="first-letter">Project</namespace>
+      <namespace key="5" case="first-letter">Project talk</namespace>
+      <namespace key="6" case="first-letter">File</namespace>
+      <namespace key="7" case="first-letter">File talk</namespace>
+      <namespace key="8" case="first-letter">MediaWiki</namespace>
+      <namespace key="9" case="first-letter">MediaWiki talk</namespace>
+      <namespace key="10" case="first-letter">Template</namespace>
+      <namespace key="11" case="first-letter">Template talk</namespace>
+      <namespace key="12" case="first-letter">Help</namespace>
+      <namespace key="13" case="first-letter">Help talk</namespace>
+      <namespace key="14" case="first-letter">Category</namespace>
+      <namespace key="15" case="first-letter">Category talk</namespace>
+      <namespace key="100" case="first-letter">Linden Lab Official</namespace>
+      <namespace key="101" case="first-letter">Linden Lab Official talk</namespace>
+      <namespace key="102" case="first-letter">Viewerhelp</namespace>
+      <namespace key="103" case="first-letter">Viewerhelp talk</namespace>
+      <namespace key="104" case="first-letter">Article officiel de Linden Lab</namespace>
+      <namespace key="105" case="first-letter">Article officiel de Linden Lab talk</namespace>
+      <namespace key="106" case="first-letter">Linden Lab公認</namespace>
+      <namespace key="107" case="first-letter">Linden Lab公認 talk</namespace>
+      <namespace key="108" case="first-letter">Articolo ufficiale Linden Lab</namespace>
+      <namespace key="109" case="first-letter">Articolo ufficiale Linden Lab talk</namespace>
+      <namespace key="110" case="first-letter">Artigo oficial da Linden Lab</namespace>
+      <namespace key="111" case="first-letter">Artigo oficial da Linden Lab talk</namespace>
+      <namespace key="112" case="first-letter">Artículo oficial de Linden Lab</namespace>
+      <namespace key="113" case="first-letter">Artículo oficial de Linden Lab talk</namespace>
+      <namespace key="114" case="first-letter">Linden Lab Offiziell</namespace>
+      <namespace key="115" case="first-letter">Linden Lab Offiziell talk</namespace>
+      <namespace key="274" case="first-letter">Widget</namespace>
+      <namespace key="275" case="first-letter">Widget talk</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>Viewer URI Name Space</title>
+    <ns>0</ns>
+    <id>10236</id>
+    <revision>
+      <id>1219168</id>
+      <parentid>1218509</parentid>
+      <timestamp>2026-10-06T16:38:20Z</timestamp>
+      <contributor>
+        <username>Gwyneth Llewelyn</username>
+        <id>230</id>
+      </contributor>
+      <comment>/* Syntax */ Adding the missing functions introduced in 7.1, as per https://feedback.secondlife.com/web-features/p/update-https-wikisecondlifecom-wiki-viewer-uri-name-space-to-document-newly-adde and made alphabetic order more consistent</comment>
+      <origin>1219168</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="12101" sha1="k5eelahldw35v8f9zpybg3q8jp803rx" xml:space="preserve">{{ProtocolNav}}
+
+== Overview ==
+
+The SL client supports {{Wikipedia|URI|links}} of the format {{mono|&lt;nowiki&gt;secondlife://Region/123/45/67/&lt;region name&gt;&lt;/nowiki&gt;}}, which have traditionally specified a region name and {{mono|x/y/z}} location.  This means "run Second Life viewer and show Region on the world map".
+
+The new {{Wikipedia|URI|URL scheme}} has 3 slashes&lt;ref name="RFC3986"&gt;Two slashes for the beginning of the authority section — for HTTP requests, this is the name of the server (optionally with the port) — here it's empty; followed by a third slash, terminating the authority section. See https://www.rfc-editor.org/rfc/rfc3986#section-3.2 . Because Second Life is omitting the 'authority' part, that section is empty, thus the three slashes; note that Second Life is ''not'' the only example of an 'authorityless' communications protocol; there are plenty of other examples.&lt;/ref&gt;, and allows direct control of the user interface and login.  For example, {{mono|&lt;nowiki&gt;secondlife:///app/login&lt;/nowiki&gt;}}
+
+Most {{mono|&lt;nowiki&gt;secondlife:///app&lt;/nowiki&gt;}} URLs only work from browser instances running inside Second Life because of a denial-of-service attack using {{mono|&lt;nowiki&gt;secondlife:///app/teleport&lt;/nowiki&gt;}} links to force repeated teleports.  [[SLURL]]s that work with external browsers include:
+* {{mono|&lt;nowiki&gt;secondlife://&lt;region name&gt;&lt;/nowiki&gt;}}
+* {{mono|&lt;nowiki&gt;secondlife:///app/login&lt;/nowiki&gt;}}
+
+In chat, dialogs and other user interface elements, these URLs will be highlighted as clickable links, often with custom formatting including icons. The full functionality is available in Viewer 2.0 and up. Clickable links without formatting were available only in older versions' chat and [[Instant Message|IM]] history.
+
+These links also may be known as ''Viewer URL Namespace'', ''SLAPP URLs'' or ''Application [[SLURL]]''.
+
+== Syntax ==
+
+'''&lt;nowiki&gt;secondlife://&lt;/nowiki&gt;'''
+: '''&lt;region_name&gt;''' log in to this region or, if logged in, show information and offer teleport
+:: '''/&lt;local_x&gt;''' optional X position, defaults to 128
+::: '''/&lt;local_y&gt;''' optional Y position, defaults to 128
+:::: '''/&lt;local_z&gt;''' optional Z position, defaults to 0
+
+: '''/app'''
+:: '''/add_folder''' ''(see '''wear_folder''')''
+::: '''/?folder_id=&lt;inventory_folder_uuid&gt;''' add contents of specified folder to outfit (7.1)
+::: '''/?folder_name=&lt;library_folder_name&gt;''' add contents of named Library folder to outfit
+:: '''/agent'''
+::: '''/&lt;agent_id&gt;'''
+:::: '''/about''' open agent's profile, with 2nd Life tab selected
+:::: '''/completename''' replaces the URL with the avatar's display and user names,
+::::: e.g., "hmm &lt;nowiki&gt;secondlife:///app/agent/eea40b5a-553d-4a07-b1ca-9f6e2f867814/complete&lt;/nowiki&gt; wow" in chat becomes "hmm Cerise (cerise.sorbet) wow" (2.4); see {{LSLGC|Avatar/Name}} for more details.
+:::: '''/displayname''' replaces the URL with the avatar's display name (2.4)
+:::: '''/im''' starts an IM session with the agent (2.0)
+:::: '''/inspect''' displays info dialog for agent (2.0)
+:::: '''/mention''' creates a link for the agent; the agent's viewer may notify them with sound and highlight if they hear the message. (7?)
+:::: '''/offerteleport''' displays the teleport offer dialog (2.0)
+:::: '''/pay''' displays the resident pay dialog (2.0)
+:::: '''/requestfriend''' displays the friendship offer dialog (2.0)
+:::: '''/mute''' add to block list (2.0)
+:::: '''/unmute''' remove from block list (2.0)
+:::: '''/username''' replaces the URL with the avatar's username e.g. "user.name" (2.4)
+:: '''/appearance'''
+::: '''/show''' displays the sidebar appearance tab (2.0)
+:: '''/balance'''
+::: '''/request''' request a [[L$]] balance update from the server (2.0)
+:: '''/chat'''
+::: '''/&lt;channel&gt;''' any channel number greater than 0&lt;ref&gt;The public (chat) channel, also written as [[PUBLIC_CHANNEL]]&lt;/ref&gt; except [[DEBUG_CHANNEL]].
+:::: '''/&amp;lt;text&gt;'''
+:: '''/classified'''
+::: '''/&lt;classified_id&gt;'''
+:::: '''/about''' open floater describing classified
+:: '''/event'''
+::: '''/&lt;event_id&gt;'''
+:::: '''/about''' open floater describing event
+:: '''/experience'''
+::: '''/&lt;experience_id&gt;'''
+:::: '''/profile''' open floater describing experience
+:: '''/group'''
+::: '''/&lt;group_id&gt;'''
+:::: '''/about''' open floater describing group
+::: '''/create''' opens the create group dialog (1.20)
+:::: '''/inspect''' displays info dialog for group (2.0)
+::: '''/list'''
+:::: '''/show''' opens the list of groups to which the user belongs (1.20)
+:: '''/help'''
+::: '''/&lt;help_query&gt;''' optional help topic (2.0)
+:: '''/inventory'''
+::: '''/&lt;inventory_id&gt;'''
+:::: '''/select''' inventory offer (2.0)
+::: '''/show''' opens the inventory sidebar tab (2.0)
+:: '''/keybinding'''
+::: {{underline|Movement controls}}
+::: '''/walk_to''' Walk to location mouse cursor points to
+::: '''/teleport_to''' Teleport to the location the mouse cursor points to, but not all locations allow direct teleportation, so you might be teleported closer to the destination instead
+::: '''/push_forward''' Move Forward
+::: '''/push_backward''' Move Backward 
+::: '''/turn_left''' Left
+::: '''/turn_right''' Right
+::: '''/slide_left''' Strafe left
+::: '''/slide_right''' Strafe right
+::: '''/jump''' Jump/Up
+::: '''/push_down''' Down
+::: '''/run_forward''' Run Forward
+::: '''/run_backward''' Run Backward
+::: '''/run_left''' Run Left
+::: '''/run_right''' Run Right
+::: '''/toggle_run''' Toggle Run
+::: '''/toggle_fly''' Fly/Stop flying
+::: '''/toggle_sit''' Sit/Stand
+::: '''/stop_moving''' Stop Moving
+::: {{underline|Camera controls}}
+::: '''/look_up''' Look Up
+::: '''/look_down''' Look Down
+::: '''/move_forward''' Camera Forward
+::: '''/move_backward''' Camera Backward
+::: '''/move_forward_fast''' Camera Forward Fast
+::: '''/move_backward_fast''' Camera Backward Fast
+::: '''/spin_over''' Camera Spin Over
+::: '''/spin_under''' Camera Spin Under
+::: '''/pan_up''' Camera Pan Up
+::: '''/pan_down''' Camera Pan Down
+::: '''/pan_left''' Camera Pan Left
+::: '''/pan_right''' Camera Pan Right
+::: '''/pan_in''' Camera Pan In
+::: '''/pan_out''' Camera Pan Out
+::: '''/spin_around_ccw''' Camera spins around counterclockwise
+::: '''/spin_around_cw''' Camera spins around clockwise
+::: '''/move_forward_sitting''' Camera Forward Sitting
+::: '''/move_backward_sitting''' Camera Backward Sitting
+::: '''/spin_over_sitting''' Camera Spin Over Sitting
+::: '''/spin_under_sitting''' Camera Spin Under Sitting
+::: '''/spin_around_ccw_sitting''' Camera spins around counterclockwise while sitting
+::: '''/spin_around_cw_sitting''' Camera spins around clockwise while sitting
+::: {{underline|Editing controls}}
+::: '''/edit_avatar_move_backward''' Camera Backward
+::: '''/edit_avatar_move_forward''' Camera Forward
+::: '''/edit_avatar_spin_ccw''' Camera spins around avatar counterclockwise
+::: '''/edit_avatar_spin_cw''' Camera spins around avatar clockwise
+::: '''/edit_avatar_spin_over''' Camera spins over avatar
+::: '''/edit_avatar_spin_under''' Camera spins under avatar
+::: {{underline|Sound and Media controls}}
+::: '''/script_trigger_lbutton''' Interact (Script LMB 🖰)
+::: '''/start_chat''' Start Chat
+::: '''/start_gesture''' Start Gesture
+::: '''/toggle_enable_media''' Play/Stop All Media
+::: '''/toggle_pause_media''' Play/Pause Media
+::: '''/voice_follow_key''' Voice
+::: '''/toggle_voice''' Toggle Voice
+:::: {{underline|Control modes}}
+:::: '''?mode=''' "first_person" or 0, "third_person" or 1, "edit_avatar" or 2, "sitting" or 3.
+::::: e.g., secondlife:///app/keybinding/push_forward?mode=sitting
+:: '''/login''' log in on launch. External and internal browsers.
+::: See below for query parameters; of course, values are URL-escaped.
+:: '''/maptrackavatar'''
+::: '''/&lt;friend_id&gt;''' finds a friend on the world map, requires permission (2.4)
+:: '''/objectim'''
+::: '''/&lt;object_id&gt;''' displays an info dialog for the object sending this message (2.0)
+:::: '''?name=&lt;object_name&gt;'''
+:::: '''&amp;owner=&lt;owner_id&gt;'''
+:::: '''&amp;groupowned=true''' (add if the object is deeded to a group)
+:::: '''&amp;slurl=&lt;region&gt;/&lt;x&gt;/&lt;y&gt;/&lt;z&gt;'''
+:: '''/openfloater'''
+::: '''/&lt;floater_name&gt;''' e.g., "preferences", "people", "places", "picks", "destinations", "profile"
+:: '''/parcel'''
+::: '''/&lt;parcel_id&gt;'''
+:::: '''/about''' open floater describing place
+:: '''&lt;strike&gt;/region'''
+::: '''/&lt;region_id&gt;'''
+:::: '''/about''' information from the database about that region? list of parcels? covenant?&lt;/strike&gt;
+:: '''/remove_folder''' ''(see '''wear_folder''')''
+::: '''/?folder_id=&lt;inventory_folder_uuid&gt;''' remove contents of specified folder from outfit (7.1)
+::: '''/?folder_name=&lt;library_folder_name&gt;''' remove contents of named Library folder from outfit
+:: '''/search'''
+::: '''/&lt;category&gt;''' "all", "people", "places", "events", "groups", "wiki", "destinations", "classifieds"
+:::: '''/&lt;search_term&gt;''' opens a search floater with matching results (2.0)
+:: '''/sharewithavatar'''
+::: '''/&lt;agent_id&gt;''' open an inventory share/IM window for the agent (2.4)
+:: '''/teleport'''
+::: '''/&lt;region_name&gt;''' teleport instantly to this region, no dialog
+:::: '''/&lt;local_x&gt;''' optional X position, defaults to 128
+::::: '''/&lt;local_y&gt;''' optional Y position, defaults to 128
+:::::: '''/&lt;local_z&gt;''' optional Z position, defaults to 0
+:: '''/voicecallavatar'''
+::: '''/&lt;agent_id&gt;''' start a private voice session (2.4)
+:: '''/wear_folder'''
+::: '''/?folder_id=&lt;inventory_folder_uuid&gt;''' replace outfit with contents of specified folder (2.6)
+::: '''/?folder_name=&lt;library_folder_name&gt;''' replace outfit with contents of named Library folder
+:: '''/worldmap''' open the map with this destination selected (2.0)
+::: '''/&lt;region_name&gt;'''
+:::: '''/&lt;local_x&gt;''' optional X position, defaults to 128
+::::: '''/&lt;local_y&gt;''' optional Y position, defaults to 128
+:::::: '''/&lt;local_z&gt;''' optional Z position, defaults to 0
+
+This could be extended to things like:
+: '''/app/event/&lt;event_id&gt;/subscribe''' to register for notifications
+: '''/app/parcel/&lt;parcel_id&gt;/teleport''' to teleport to a specific location
+
+== Login Query Parameters ==
+{| border="1"
+|- 
+| first || the account first name
+|-
+| last || the account last name
+|-
+| session || the secure session id
+|-
+| location || login location, format TBD, optional
+|}
+
+== Second Life Wiki formatting ==
+
+When adding {{mono|&lt;nowiki&gt;secondlife://&lt;/nowiki&gt;}} links using the above syntax to a Second Life Wiki page, you can enclose your links in squared brackets (thus turning them into a standard Wiki external link), which also gives you the chance of changing the displayed text. Example:  
+
+ &lt;kbd&gt;&lt;nowiki&gt;[secondlife:///app/objectim/190f571d-fdf1-8f6c-4e9d-973e9b5e0566?name=ObjectName&amp;owner=c93c3129-2250-4c79-a5f7-8c755ca2707e&amp;groupowned=true&amp;slurl=Location/128/128/27 ObjectName]&lt;/nowiki&gt;&lt;/kbd&gt;
+
+will display as 
+
+ [secondlife:///app/objectim/190f571d-fdf1-8f6c-4e9d-973e9b5e0566?name=ObjectName&amp;owner=c93c3129-2250-4c79-a5f7-8c755ca2707e&amp;groupowned=true&amp;slurl=Location/128/128/27 ObjectName]
+
+In this case you will also need to ensure the object name has been escaped.
+
+Sometimes, having the link clickable (which will attempt to launch the Second Life Viewer to open it), is not desirable. Instead, to display the {{Wikipedia|URI}} itself without making it clickable, surround it with {{mono|&lt;nowiki&gt;&lt;nowiki&gt;...&lt;/nowiki&gt;&lt;/nowiki&gt;}}. For example:
+
+ &lt;kbd&gt;'''&lt;nowiki&gt;&lt;nowiki&gt;secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about&lt;/nowiki&gt;&lt;/nowiki&gt;'''&lt;/kbd&gt;
+
+will display as
+
+ &lt;nowiki&gt;secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about&lt;/nowiki&gt;
+
+whereas
+
+ &lt;kbd&gt;'''&lt;nowiki&gt;secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about&lt;/nowiki&gt;'''&lt;/kbd&gt;
+
+will display the whole link and make it clickable, e.g.:
+
+ secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about
+
+== LSL Examples ==
+
+&lt;syntaxhighlight lang="lsl2"&gt;
+string Who(key id)
+{
+    return "secondlife:///app/agent/" + (string)id + "/inspect";
+}
+ 
+default
+{
+    touch_start(integer num)
+    {
+        llSay(0, "Touched by " + Who(llDetectedKey(0)) + "." );
+    }
+}
+&lt;/syntaxhighlight&gt;
+
+[[Category:Name Spaces]]
+[[Category:Search]]
+[[Category:LSL Chat]]
+[[Category:LSL_Dialog]]</text>
+      <sha1>k5eelahldw35v8f9zpybg3q8jp803rx</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:NavBullet</title>
+    <ns>10</ns>
+    <id>2311</id>
+    <revision>
+      <id>5851</id>
+      <parentid>3241</parentid>
+      <timestamp>2007-01-19T05:18:44Z</timestamp>
+      <contributor>
+        <username>Rob Linden</username>
+        <id>2</id>
+      </contributor>
+      <origin>5851</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="188" sha1="rd3wel3in386uovxtsrcbl4uemlo9tl" xml:space="preserve">[[{{{1}}}|{{{alt|{{{1}}}}}}]]{{ #ifeq: {{{parent}}}|{{{1}}}|
+{{{indent}}}* {{PAGENAME}}|}}{{ #ifeq: {{{grandparent}}}|{{{1}}}|
+{{{indent}}}* [[{{{parent}}}]]
+{{{indent}}}** {{PAGENAME}}|}}</text>
+      <sha1>rd3wel3in386uovxtsrcbl4uemlo9tl</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:OSWikiLearnBox</title>
+    <ns>10</ns>
+    <id>1425</id>
+    <revision>
+      <id>1154429</id>
+      <parentid>1027043</parentid>
+      <timestamp>2011-09-28T12:44:24Z</timestamp>
+      <contributor>
+        <username>Oz Linden</username>
+        <id>182012</id>
+      </contributor>
+      <minor/>
+      <comment>removed links to some items that are not relevant to current ways of doing things</comment>
+      <origin>1154429</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="1191" sha1="okgamsaq2bo1209pg9wpd4kphwkm0b5" xml:space="preserve">&lt;div class="floatright"&gt;&lt;div class="navbox" style="width: 200px"&gt;
+&lt;center&gt;[[Open Source Portal]]&lt;/center&gt;
+*'''[[Documentation|Learning the System]]'''
+** [[Features|Features Specifications and Documentation]]{{ #ifeq: {{{parent}}}|Features|
+*** {{PAGENAME}}|}}{{ #ifeq: {{{grandparent}}}|Features|
+*** [[{{{parent}}}]]
+**** {{PAGENAME}}|}}
+** [[Viewer architecture|Viewer Architecture]]{{ #ifeq: {{{parent}}}|Viewer architecture|
+*** {{PAGENAME}}|}}
+** {{NavBullet|Viewer source|alt=Viewer Source Code|indent=**|parent={{{parent}}}|grandparent={{{grandparent}}}}}
+** [[Server architecture|Server Architecture]]{{ #ifeq: {{{parent}}}|Server architecture|
+*** {{PAGENAME}}|}}
+** [[Protocol|Protocol Documentation]]{{ #ifeq: {{{parent}}}|Protocol|
+*** {{PAGENAME}}|}}{{ #ifeq: {{{grandparent}}}|Protocol|
+*** [[{{{parent}}}]]
+**** {{PAGENAME}}|}}
+** [[Third Party Libraries]]{{ #ifeq: {{{parent}}}|Third Party Libraries|
+*** {{PAGENAME}}|}}
+** {{NavBullet|Coding standard|alt=Coding Standard|indent=**|parent={{{parent}}}}}
+** [[:Category:Glossary|Glossary]]
+*[[Open Source Portal#Ways to Participate|Ways to Participate]]
+&lt;/div&gt;&lt;/div&gt;
+&lt;includeonly&gt;[[Category:Open Source Portal]]&lt;/includeonly&gt;</text>
+      <sha1>okgamsaq2bo1209pg9wpd4kphwkm0b5</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Mono</title>
+    <ns>10</ns>
+    <id>18801</id>
+    <revision>
+      <id>1211404</id>
+      <parentid>1146524</parentid>
+      <timestamp>2022-09-14T07:44:23Z</timestamp>
+      <contributor>
+        <username>Gwyneth Llewelyn</username>
+        <id>230</id>
+      </contributor>
+      <comment>Updated Template:Mono (or Template:Code) to use the same code as on wiki.openstreetmap.org</comment>
+      <origin>1211404</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="645" sha1="abje1wpsst19okt63urrul6vbv2bcwu" xml:space="preserve">{{#if: {{{highlight|}}}
+| &lt;span lang="en" dir="ltr" class="mw-content-ltr" style="unicode-bidi:embed;unicode-bidi:isolate;font-size:10pt;line-height:1.4;white-space:pre-wrap"&gt;{{#tag:syntaxhighlight|{{{code|{{{1}}}}}}|lang={{{lang|{{{2|text}}}}}}|inline=inline}}&lt;/span&gt;
+| &lt;span lang="en" dir="ltr" class="mw-content-ltr" style="unicode-bidi:embed;unicode-bidi:isolate;font-size:10pt;line-height:1.4;margin:1px;font-family:monospace;font-weight:normal;font-style:normal;background:#FFF;color:#333;border:1px solid #EEE;padding:1px;white-space:pre-wrap" class="plainlinks"&gt;{{{code|{{{1}}}}}}&lt;/span&gt;
+}}&lt;/span&gt;&lt;noinclude&gt;{{Documentation}}&lt;/noinclude&gt;</text>
+      <sha1>abje1wpsst19okt63urrul6vbv2bcwu</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:LSLGC</title>
+    <ns>10</ns>
+    <id>3441</id>
+    <revision>
+      <id>1212351</id>
+      <parentid>7887</parentid>
+      <timestamp>2022-09-24T18:11:44Z</timestamp>
+      <contributor>
+        <username>Gwyneth Llewelyn</username>
+        <id>230</id>
+      </contributor>
+      <comment>Added doc link</comment>
+      <origin>1212351</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="100" sha1="rhft9a967k0a947cltkgydhdy57bcwr" xml:space="preserve">[[:Category:LSL {{{1}}}|{{#if:{{{2|}}}|{{{2}}}|{{{1}}}}}]]&lt;noinclude&gt;
+{{Documentation}}
+&lt;/noinclude&gt;</text>
+      <sha1>rhft9a967k0a947cltkgydhdy57bcwr</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Wikipedia</title>
+    <ns>10</ns>
+    <id>3406</id>
+    <revision>
+      <id>1212086</id>
+      <parentid>1212084</parentid>
+      <timestamp>2022-09-19T02:32:59Z</timestamp>
+      <contributor>
+        <username>Gwyneth Llewelyn</username>
+        <id>230</id>
+      </contributor>
+      <comment>Small adaptation, with urlencode, and attempt to give an error if {{{1}}} is not passed. This was tricky to get it right!</comment>
+      <origin>1212086</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="526" sha1="rb70c0abzcl9li6e9vz3o0ylgf8rmk8" xml:space="preserve">{{#if:{{{1&lt;noinclude&gt;|Pagename&lt;/noinclude&gt;}}}|
+  {{#ifeq:{{{icon|}}}|no
+    | &lt;!--empty--&gt;
+    | [[File:Wikipedia-16px.png|16px|alt="Wikipedia logo"]]&amp;thinsp;&lt;!--
+--&gt;}}[https://{{#if:{{{lang|}}}|{{{lang|en}}}|{{Langcode|en}}}}.wikipedia.org/wiki/{{urlencode:{{{1}}}|WIKI}} {{{2|{{{1}}}}}}]&lt;!--
+--&gt;| {{error|1=Missing page name}}&lt;!--
+--&gt;}}&lt;noinclude&gt;
+&lt;nowiki&gt;{{Wikipedia|Pagename|display text|icon=no|lang=destination language (currently: &lt;/nowiki&gt;{{Langcode|(unknown)}}&lt;nowiki&gt;)}}&lt;/nowiki&gt;&lt;!--
+--&gt;{{Documentation}}&lt;/noinclude&gt;</text>
+      <sha1>rb70c0abzcl9li6e9vz3o0ylgf8rmk8</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Langcode</title>
+    <ns>10</ns>
+    <id>208003</id>
+    <revision>
+      <id>1211342</id>
+      <parentid>1211267</parentid>
+      <timestamp>2022-09-13T20:02:10Z</timestamp>
+      <contributor>
+        <username>Gwyneth Llewelyn</username>
+        <id>230</id>
+      </contributor>
+      <comment>Using a pre-Lua version from wiki.openstreetmap.org</comment>
+      <origin>1211342</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="4113" sha1="r9pqw2h68pqnrw54of167gia61y2xms" xml:space="preserve">{{#if:{{{1|}}}|{{#switch:{{#sub:{{lc:{{{1|}}}}}|0|1}}|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z={{lc:{{{1|}}}}}|#default=en}}
+|{{lc:{{#switch:{{UC:{{{namespace|{{SUBJECTSPACE}}}}}}}
+ |DE|FR|ES|IT|JA|NL|RU={{{namespace|{{SUBJECTSPACE}}}}}&lt;!--Detect 7 languages with an EXISTING dedicated namespaces. DO NOT add here any language without a dedicated namespace on this wiki--&gt;
+ |#default={{#switch:{{#pos:{{{pagename|{{PAGENAME}}}}}|:}}&lt;!--Then test page prefixes terminated by ":" in page title for languages without dedicated namespaces--&gt;
+  |2={{#sub:{{{pagename|{{PAGENAME}}}}}|0|2}}&lt;!--2-letter prefixes before ":" assumed to be language codes--&gt;
+  |3={{#switch:{{Ucfirst:{{#sub:{{{pagename|{{PAGENAME}}}}}|0|3}}}}
+   |Key|POI|Tag|Way=en&lt;!--Known 3-letter English prefixes which are NOT used as language codes--&gt;
+   |#default={{#sub:{{{pagename|{{PAGENAME}}}}}|0|3}}}}&lt;!--Other 3-letter prefixes assumed to be language codes--&gt;
+  |5={{#ifeq:{{#sub:{{{pagename|{{PAGENAME}}}}}|2|1}}|-|{{#sub:{{{pagename|{{PAGENAME}}}}}|0|5}}|en}}&lt;!--2-letter language"-"2-letter country/region(deprecated). Other 5-chars prefixes assumed 
+to be part of English title--&gt;
+  |6={{#ifeq:{{#sub:{{{pagename|{{PAGENAME}}}}}|3|1}}|-|{{#sub:{{{pagename|{{PAGENAME}}}}}|0|6}}|en}}&lt;!--3-letter language"-"2-letter country/region(deprecated). Other 6-chars prefixes assumed 
+to be part of English title--&gt;
+  |7={{#ifeq:{{#sub:{{{pagename|{{PAGENAME}}}}}|2|1}}|-|{{#switch:{{#sub:{{{pagename|{{PAGENAME}}}}}|3|4}}&lt;!--2-letter language"-"lowercase 4-letter script. Other 7-chars prefixes assumed to 
+be part of English title--&gt;
+|adlm|afak|aghb|ahom|arab|aran|armi|armn|avst|bali|bamu|bass|batk|beng|bhks|blis|bopo|brah|brai|bugi|buhd|cakm|cans|cari|cham|cher|cirt|copt|cpmn|cprt|cyrl|cyrs|deva|dogr|dsrt|dupl|egyd|egyh|egyp|elba|ethi|geok|geor|glag|gong|gonm|goth|gran|grek|gujr|guru|hanb|hang|hani|hano|hans|hant|hatr|hebr|hira|hluw|hmng|hmnp|hrkt|hung|inds|ital|jamo|java|jpan|jurc|kali|kana|khar|khmr|khoj|kitl|kits|knda|kore|kpel|kthi|lana|laoo|latf|latg|latn|leke|lepc|limb|lina|linb|lisu|loma|lyci|lydi|mahj|maka|mand|mani|marc|maya|medf|mend|merc|mero|mlym|modi|mong|moon|mroo|mtei|mult|mymr|narb|nbat|newa|nkdb|nkgb|nkoo|nshu|ogam|olck|orkh|orya|osge|osma|palm|pauc|perm|phag|phli|phlp|phlv|phnx|piqd|plrd|prti|rjng|roro|runr|samr|sara|sarb|saur|sgnw|shaw|shrd|shui|sidd|sind|sinh|sora|soyo|sund|sylo|syrc|syre|syrj|syrn|tagb|takr|tale|talu|taml|tang|tavt|telu|teng|tfng|tglg|thaa|thai|tibt|tirh|ugar|vaii|visp|wara|wcho|wole|xpeo|xsux|yiii|zanb={{#sub:{{{pagename|{{PAGENAME}}}}}|0|7}}|#default=en}}|en}}
+  |8={{#ifeq:{{#sub:{{{pagename|{{PAGENAME}}}}}|3|1}}|-|{{#switch:{{#sub:{{{pagename|{{PAGENAME}}}}}|4|4}}&lt;!--3-letter language"-"lowercase 4-letter script. Other 8-chars prefixes assumed to 
+be part of English title--&gt;
+|adlm|afak|aghb|ahom|arab|aran|armi|armn|avst|bali|bamu|bass|batk|beng|bhks|blis|bopo|brah|brai|bugi|buhd|cakm|cans|cari|cham|cher|cirt|copt|cpmn|cprt|cyrl|cyrs|deva|dogr|dsrt|dupl|egyd|egyh|egyp|elba|ethi|geok|geor|glag|gong|gonm|goth|gran|grek|gujr|guru|hanb|hang|hani|hano|hans|hant|hatr|hebr|hira|hluw|hmng|hmnp|hrkt|hung|inds|ital|jamo|java|jpan|jurc|kali|kana|khar|khmr|khoj|kitl|kits|knda|kore|kpel|kthi|lana|laoo|latf|latg|latn|leke|lepc|limb|lina|linb|lisu|loma|lyci|lydi|mahj|maka|mand|mani|marc|maya|medf|mend|merc|mero|mlym|modi|mong|moon|mroo|mtei|mult|mymr|narb|nbat|newa|nkdb|nkgb|nkoo|nshu|ogam|olck|orkh|orya|osge|osma|palm|pauc|perm|phag|phli|phlp|phlv|phnx|piqd|plrd|prti|rjng|roro|runr|samr|sara|sarb|saur|sgnw|shaw|shrd|shui|sidd|sind|sinh|sora|soyo|sund|sylo|syrc|syre|syrj|syrn|tagb|takr|tale|talu|taml|tang|tavt|telu|teng|tfng|tglg|thaa|thai|tibt|tirh|ugar|vaii|visp|wara|wcho|wole|xpeo|xsux|yiii|zanb={{#sub:{{{pagename|{{PAGENAME}}}}}|0|8}}|#default=en}}|en}}
+  |#default=en&lt;!--assume English if no prefix found(may be wrong for some pages with translated titles that still don't use a language prefix);otherwise all prefixes before ":" with any other 
+lengths are assumed to be also part of an English title--&gt;
+}}}}}}}}&lt;noinclude&gt;&lt;noinclude&gt;{{Documentation}}&lt;/noinclude&gt;</text>
+      <sha1>r9pqw2h68pqnrw54of167gia61y2xms</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:ProtocolNav</title>
+    <ns>10</ns>
+    <id>1585</id>
+    <revision>
+      <id>2019</id>
+      <timestamp>2006-11-18T00:47:38Z</timestamp>
+      <contributor>
+        <username>Rob Linden</username>
+        <id>2</id>
+      </contributor>
+      <origin>2019</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="136" sha1="g585axsupq751r31jgi6ypckzb5y32u" xml:space="preserve">{{ #ifeq:{{{parent| }}}|{{{parent|u}}}|{{OSWikiLearnBox|grandparent=Protocol|parent={{{parent}}}}}|{{OSWikiLearnBox|parent=Protocol}} }}</text>
+      <sha1>g585axsupq751r31jgi6ypckzb5y32u</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Underline</title>
+    <ns>10</ns>
+    <id>152813</id>
+    <revision>
+      <id>843233</id>
+      <timestamp>2010-04-06T17:46:38Z</timestamp>
+      <contributor>
+        <username>Strife Onizuka</username>
+        <id>179</id>
+      </contributor>
+      <comment>Underlines text passed in first parameter</comment>
+      <origin>843233</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="55" sha1="cw3hd6qy4v0gtcaavthbih3m7toazih" xml:space="preserve">&lt;span style="text-decoration:underline;"&gt;{{{1}}}&lt;/span&gt;</text>
+      <sha1>cw3hd6qy4v0gtcaavthbih3m7toazih</sha1>
+    </revision>
+  </page>
+</mediawiki>

@@ -17,6 +17,7 @@ export function apiHref(name: string) {
 }
 /** Hand-picked key APIs, where the first names a page links are not the most useful shortcuts. */
 const keyApiNames: Record<string, string[]> = {
+	'viewer-uris': ['llSay', 'llDialog', 'llDetectedKey', 'llGetRegionName'],
 	inventory: ['llGetInventoryName', 'llGiveInventory', 'llRezObjectWithParams', 'llDerezObject', 'llGetNotecardLineSync'],
 };
 /** Key APIs: `keyApiNames`, else the first names a feature page links (its <ApiLinks> come first). */
@@ -54,6 +55,7 @@ const purposes: Record<string, string> = {
 	prims: 'Shape, size and params of prims',
 	sound: 'Play, loop and trigger sounds',
 	textures: 'Textures, colors, alpha and PBR materials',
+	'viewer-uris': 'Clickable names, profiles and places in chat',
 };
 export function purpose(f: FeaturePage) { return purposes[f.id] ?? f.description; }
 
@@ -66,13 +68,13 @@ const icons: Record<string, string> = {
 	'data-storage': 'document', 'data-transmission': 'random', dialog: 'list-format', effects: 'sun',
 	environments: 'moon', events: 'setting', experience: 'approve-check', input: 'pencil', inventory: 'seti:folder', land: 'translate',
 	linkset: 'external', math: 'seti:clock', money: 'seti:shell', movement: 'rocket', pathfinding: 'right-arrow',
-	physics: 'information', prims: 'seti:default', sound: 'seti:audio', textures: 'seti:image',
+	physics: 'information', prims: 'seti:default', sound: 'seti:audio', textures: 'seti:image', 'viewer-uris': 'link',
 };
 export function icon(f: FeaturePage) { return icons[f.id] ?? 'document'; }
 
 /** Editorial "most used" order, highest first (Serial Position). Replace with analytics when available. */
 const usageOrder = ['communications', 'events', 'input', 'prims', 'inventory', 'avatar', 'textures', 'data-storage', 'dialog',
-	'movement', 'effects', 'sound', 'data-transmission', 'linkset', 'physics', 'math', 'money', 'land', 'experience',
+	'movement', 'effects', 'sound', 'data-transmission', 'linkset', 'physics', 'math', 'money', 'viewer-uris', 'land', 'experience',
 	'camera', 'combat', 'environments', 'animesh', 'pathfinding'];
 /** How many cards the "Most used" section shows. */
 export const mostUsedCount = 6;
@@ -81,6 +83,7 @@ export const mostUsedCount = 6;
 const tasks: { task: string; feature: string; apis: string[] }[] = [
 	{ task: 'React when someone touches my object', feature: 'input', apis: ['touch_start', 'llDetectedKey'] },
 	{ task: 'Say something in chat or listen to it', feature: 'communications', apis: ['llSay', 'llListen', 'listen'] },
+	{ task: 'Link to an avatar or place in chat', feature: 'viewer-uris', apis: ['llSay', 'llDetectedKey', 'llGetRegionName'] },
 	{ task: 'Show a menu with buttons', feature: 'dialog', apis: ['llDialog', 'listen'] },
 	{ task: 'Run code every few seconds', feature: 'events', apis: ['llSetTimerEvent', 'timer'] },
 	{ task: 'Store data that survives a reset', feature: 'data-storage', apis: ['llLinksetDataWrite', 'llLinksetDataRead'] },

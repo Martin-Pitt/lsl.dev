@@ -27,7 +27,7 @@ LOCAL_REPLACEMENTS = {
 
 
 # Feature pages added after the conversion (lsl.dev additions beyond slua.dev's set).
-ADDED_FEATURES = {'inventory'}
+ADDED_FEATURES = {'inventory', 'viewer-uris'}
 # Home categories moved to an added feature: category -> (old home, new home).
 MOVED_CATEGORIES = {
     'prim_inventory': ('prims', 'inventory'),

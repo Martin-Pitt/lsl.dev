@@ -1,0 +1,240 @@
+{{ProtocolNav}}
+
+== Overview ==
+
+The SL client supports {{Wikipedia|URI|links}} of the format {{mono|<nowiki>secondlife://Region/123/45/67/<region name></nowiki>}}, which have traditionally specified a region name and {{mono|x/y/z}} location.  This means "run Second Life viewer and show Region on the world map".
+
+The new {{Wikipedia|URI|URL scheme}} has 3 slashes<ref name="RFC3986">Two slashes for the beginning of the authority section — for HTTP requests, this is the name of the server (optionally with the port) — here it's empty; followed by a third slash, terminating the authority section. See https://www.rfc-editor.org/rfc/rfc3986#section-3.2 . Because Second Life is omitting the 'authority' part, that section is empty, thus the three slashes; note that Second Life is ''not'' the only example of an 'authorityless' communications protocol; there are plenty of other examples.</ref>, and allows direct control of the user interface and login.  For example, {{mono|<nowiki>secondlife:///app/login</nowiki>}}
+
+Most {{mono|<nowiki>secondlife:///app</nowiki>}} URLs only work from browser instances running inside Second Life because of a denial-of-service attack using {{mono|<nowiki>secondlife:///app/teleport</nowiki>}} links to force repeated teleports.  [[SLURL]]s that work with external browsers include:
+* {{mono|<nowiki>secondlife://<region name></nowiki>}}
+* {{mono|<nowiki>secondlife:///app/login</nowiki>}}
+
+In chat, dialogs and other user interface elements, these URLs will be highlighted as clickable links, often with custom formatting including icons. The full functionality is available in Viewer 2.0 and up. Clickable links without formatting were available only in older versions' chat and [[Instant Message|IM]] history.
+
+These links also may be known as ''Viewer URL Namespace'', ''SLAPP URLs'' or ''Application [[SLURL]]''.
+
+== Syntax ==
+
+'''<nowiki>secondlife://</nowiki>'''
+: '''<region_name>''' log in to this region or, if logged in, show information and offer teleport
+:: '''/<local_x>''' optional X position, defaults to 128
+::: '''/<local_y>''' optional Y position, defaults to 128
+:::: '''/<local_z>''' optional Z position, defaults to 0
+
+: '''/app'''
+:: '''/add_folder''' ''(see '''wear_folder''')''
+::: '''/?folder_id=<inventory_folder_uuid>''' add contents of specified folder to outfit (7.1)
+::: '''/?folder_name=<library_folder_name>''' add contents of named Library folder to outfit
+:: '''/agent'''
+::: '''/<agent_id>'''
+:::: '''/about''' open agent's profile, with 2nd Life tab selected
+:::: '''/completename''' replaces the URL with the avatar's display and user names,
+::::: e.g., "hmm <nowiki>secondlife:///app/agent/eea40b5a-553d-4a07-b1ca-9f6e2f867814/complete</nowiki> wow" in chat becomes "hmm Cerise (cerise.sorbet) wow" (2.4); see {{LSLGC|Avatar/Name}} for more details.
+:::: '''/displayname''' replaces the URL with the avatar's display name (2.4)
+:::: '''/im''' starts an IM session with the agent (2.0)
+:::: '''/inspect''' displays info dialog for agent (2.0)
+:::: '''/mention''' creates a link for the agent; the agent's viewer may notify them with sound and highlight if they hear the message. (7?)
+:::: '''/offerteleport''' displays the teleport offer dialog (2.0)
+:::: '''/pay''' displays the resident pay dialog (2.0)
+:::: '''/requestfriend''' displays the friendship offer dialog (2.0)
+:::: '''/mute''' add to block list (2.0)
+:::: '''/unmute''' remove from block list (2.0)
+:::: '''/username''' replaces the URL with the avatar's username e.g. "user.name" (2.4)
+:: '''/appearance'''
+::: '''/show''' displays the sidebar appearance tab (2.0)
+:: '''/balance'''
+::: '''/request''' request a [[L$]] balance update from the server (2.0)
+:: '''/chat'''
+::: '''/<channel>''' any channel number greater than 0<ref>The public (chat) channel, also written as [[PUBLIC_CHANNEL]]</ref> except [[DEBUG_CHANNEL]].
+:::: '''/&lt;text>'''
+:: '''/classified'''
+::: '''/<classified_id>'''
+:::: '''/about''' open floater describing classified
+:: '''/event'''
+::: '''/<event_id>'''
+:::: '''/about''' open floater describing event
+:: '''/experience'''
+::: '''/<experience_id>'''
+:::: '''/profile''' open floater describing experience
+:: '''/group'''
+::: '''/<group_id>'''
+:::: '''/about''' open floater describing group
+::: '''/create''' opens the create group dialog (1.20)
+:::: '''/inspect''' displays info dialog for group (2.0)
+::: '''/list'''
+:::: '''/show''' opens the list of groups to which the user belongs (1.20)
+:: '''/help'''
+::: '''/<help_query>''' optional help topic (2.0)
+:: '''/inventory'''
+::: '''/<inventory_id>'''
+:::: '''/select''' inventory offer (2.0)
+::: '''/show''' opens the inventory sidebar tab (2.0)
+:: '''/keybinding'''
+::: {{underline|Movement controls}}
+::: '''/walk_to''' Walk to location mouse cursor points to
+::: '''/teleport_to''' Teleport to the location the mouse cursor points to, but not all locations allow direct teleportation, so you might be teleported closer to the destination instead
+::: '''/push_forward''' Move Forward
+::: '''/push_backward''' Move Backward 
+::: '''/turn_left''' Left
+::: '''/turn_right''' Right
+::: '''/slide_left''' Strafe left
+::: '''/slide_right''' Strafe right
+::: '''/jump''' Jump/Up
+::: '''/push_down''' Down
+::: '''/run_forward''' Run Forward
+::: '''/run_backward''' Run Backward
+::: '''/run_left''' Run Left
+::: '''/run_right''' Run Right
+::: '''/toggle_run''' Toggle Run
+::: '''/toggle_fly''' Fly/Stop flying
+::: '''/toggle_sit''' Sit/Stand
+::: '''/stop_moving''' Stop Moving
+::: {{underline|Camera controls}}
+::: '''/look_up''' Look Up
+::: '''/look_down''' Look Down
+::: '''/move_forward''' Camera Forward
+::: '''/move_backward''' Camera Backward
+::: '''/move_forward_fast''' Camera Forward Fast
+::: '''/move_backward_fast''' Camera Backward Fast
+::: '''/spin_over''' Camera Spin Over
+::: '''/spin_under''' Camera Spin Under
+::: '''/pan_up''' Camera Pan Up
+::: '''/pan_down''' Camera Pan Down
+::: '''/pan_left''' Camera Pan Left
+::: '''/pan_right''' Camera Pan Right
+::: '''/pan_in''' Camera Pan In
+::: '''/pan_out''' Camera Pan Out
+::: '''/spin_around_ccw''' Camera spins around counterclockwise
+::: '''/spin_around_cw''' Camera spins around clockwise
+::: '''/move_forward_sitting''' Camera Forward Sitting
+::: '''/move_backward_sitting''' Camera Backward Sitting
+::: '''/spin_over_sitting''' Camera Spin Over Sitting
+::: '''/spin_under_sitting''' Camera Spin Under Sitting
+::: '''/spin_around_ccw_sitting''' Camera spins around counterclockwise while sitting
+::: '''/spin_around_cw_sitting''' Camera spins around clockwise while sitting
+::: {{underline|Editing controls}}
+::: '''/edit_avatar_move_backward''' Camera Backward
+::: '''/edit_avatar_move_forward''' Camera Forward
+::: '''/edit_avatar_spin_ccw''' Camera spins around avatar counterclockwise
+::: '''/edit_avatar_spin_cw''' Camera spins around avatar clockwise
+::: '''/edit_avatar_spin_over''' Camera spins over avatar
+::: '''/edit_avatar_spin_under''' Camera spins under avatar
+::: {{underline|Sound and Media controls}}
+::: '''/script_trigger_lbutton''' Interact (Script LMB 🖰)
+::: '''/start_chat''' Start Chat
+::: '''/start_gesture''' Start Gesture
+::: '''/toggle_enable_media''' Play/Stop All Media
+::: '''/toggle_pause_media''' Play/Pause Media
+::: '''/voice_follow_key''' Voice
+::: '''/toggle_voice''' Toggle Voice
+:::: {{underline|Control modes}}
+:::: '''?mode=''' "first_person" or 0, "third_person" or 1, "edit_avatar" or 2, "sitting" or 3.
+::::: e.g., secondlife:///app/keybinding/push_forward?mode=sitting
+:: '''/login''' log in on launch. External and internal browsers.
+::: See below for query parameters; of course, values are URL-escaped.
+:: '''/maptrackavatar'''
+::: '''/<friend_id>''' finds a friend on the world map, requires permission (2.4)
+:: '''/objectim'''
+::: '''/<object_id>''' displays an info dialog for the object sending this message (2.0)
+:::: '''?name=<object_name>'''
+:::: '''&owner=<owner_id>'''
+:::: '''&groupowned=true''' (add if the object is deeded to a group)
+:::: '''&slurl=<region>/<x>/<y>/<z>'''
+:: '''/openfloater'''
+::: '''/<floater_name>''' e.g., "preferences", "people", "places", "picks", "destinations", "profile"
+:: '''/parcel'''
+::: '''/<parcel_id>'''
+:::: '''/about''' open floater describing place
+:: '''<strike>/region'''
+::: '''/<region_id>'''
+:::: '''/about''' information from the database about that region? list of parcels? covenant?</strike>
+:: '''/remove_folder''' ''(see '''wear_folder''')''
+::: '''/?folder_id=<inventory_folder_uuid>''' remove contents of specified folder from outfit (7.1)
+::: '''/?folder_name=<library_folder_name>''' remove contents of named Library folder from outfit
+:: '''/search'''
+::: '''/<category>''' "all", "people", "places", "events", "groups", "wiki", "destinations", "classifieds"
+:::: '''/<search_term>''' opens a search floater with matching results (2.0)
+:: '''/sharewithavatar'''
+::: '''/<agent_id>''' open an inventory share/IM window for the agent (2.4)
+:: '''/teleport'''
+::: '''/<region_name>''' teleport instantly to this region, no dialog
+:::: '''/<local_x>''' optional X position, defaults to 128
+::::: '''/<local_y>''' optional Y position, defaults to 128
+:::::: '''/<local_z>''' optional Z position, defaults to 0
+:: '''/voicecallavatar'''
+::: '''/<agent_id>''' start a private voice session (2.4)
+:: '''/wear_folder'''
+::: '''/?folder_id=<inventory_folder_uuid>''' replace outfit with contents of specified folder (2.6)
+::: '''/?folder_name=<library_folder_name>''' replace outfit with contents of named Library folder
+:: '''/worldmap''' open the map with this destination selected (2.0)
+::: '''/<region_name>'''
+:::: '''/<local_x>''' optional X position, defaults to 128
+::::: '''/<local_y>''' optional Y position, defaults to 128
+:::::: '''/<local_z>''' optional Z position, defaults to 0
+
+This could be extended to things like:
+: '''/app/event/<event_id>/subscribe''' to register for notifications
+: '''/app/parcel/<parcel_id>/teleport''' to teleport to a specific location
+
+== Login Query Parameters ==
+{| border="1"
+|- 
+| first || the account first name
+|-
+| last || the account last name
+|-
+| session || the secure session id
+|-
+| location || login location, format TBD, optional
+|}
+
+== Second Life Wiki formatting ==
+
+When adding {{mono|<nowiki>secondlife://</nowiki>}} links using the above syntax to a Second Life Wiki page, you can enclose your links in squared brackets (thus turning them into a standard Wiki external link), which also gives you the chance of changing the displayed text. Example:  
+
+ <kbd><nowiki>[secondlife:///app/objectim/190f571d-fdf1-8f6c-4e9d-973e9b5e0566?name=ObjectName&owner=c93c3129-2250-4c79-a5f7-8c755ca2707e&groupowned=true&slurl=Location/128/128/27 ObjectName]</nowiki></kbd>
+
+will display as 
+
+ [secondlife:///app/objectim/190f571d-fdf1-8f6c-4e9d-973e9b5e0566?name=ObjectName&owner=c93c3129-2250-4c79-a5f7-8c755ca2707e&groupowned=true&slurl=Location/128/128/27 ObjectName]
+
+In this case you will also need to ensure the object name has been escaped.
+
+Sometimes, having the link clickable (which will attempt to launch the Second Life Viewer to open it), is not desirable. Instead, to display the {{Wikipedia|URI}} itself without making it clickable, surround it with {{mono|<nowiki><nowiki>...</nowiki></nowiki>}}. For example:
+
+ <kbd>'''<nowiki><nowiki>secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about</nowiki></nowiki>'''</kbd>
+
+will display as
+
+ <nowiki>secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about</nowiki>
+
+whereas
+
+ <kbd>'''<nowiki>secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about</nowiki>'''</kbd>
+
+will display the whole link and make it clickable, e.g.:
+
+ secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about
+
+== LSL Examples ==
+
+<syntaxhighlight lang="lsl2">
+string Who(key id)
+{
+    return "secondlife:///app/agent/" + (string)id + "/inspect";
+}
+ 
+default
+{
+    touch_start(integer num)
+    {
+        llSay(0, "Touched by " + Who(llDetectedKey(0)) + "." );
+    }
+}
+</syntaxhighlight>
+
+[[Category:Name Spaces]]
+[[Category:Search]]
+[[Category:LSL Chat]]
+[[Category:LSL_Dialog]]

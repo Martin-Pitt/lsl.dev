@@ -1,0 +1,203 @@
+<div class="wiki-line"><span class="wiki-template"><a href="/wiki/template-protocolnav-78e45e8f/">ProtocolNav</a>: <code>{{ProtocolNav}}</code></span></div>
+<h2 id="overview">Overview</h2>
+<div class="wiki-line">The SL client supports <a href="https://en.wikipedia.org/wiki/URI" rel="noreferrer">links</a> of the format <code>secondlife://Region/123/45/67/&lt;region name&gt;</code>, which have traditionally specified a region name and <code>x/y/z</code> location.  This means "run Second Life viewer and show Region on the world map".</div>
+<div class="wiki-line">The new <a href="https://en.wikipedia.org/wiki/URI" rel="noreferrer">URL scheme</a> has 3 slashes&lt;ref name="RFC3986"&gt;Two slashes for the beginning of the authority section — for HTTP requests, this is the name of the server (optionally with the port) — here it's empty; followed by a third slash, terminating the authority section. See https://www.rfc-editor.org/rfc/rfc3986#section-3.2 . Because Second Life is omitting the 'authority' part, that section is empty, thus the three slashes; note that Second Life is <em>not</em> the only example of an 'authorityless' communications protocol; there are plenty of other examples.&lt;/ref&gt;, and allows direct control of the user interface and login.  For example, <code>secondlife:///app/login</code></div>
+<div class="wiki-line">Most <code>secondlife:///app</code> URLs only work from browser instances running inside Second Life because of a denial-of-service attack using <code>secondlife:///app/teleport</code> links to force repeated teleports.  <a href="https://wiki.secondlife.com/wiki/SLURL">SLURL</a>s that work with external browsers include:</div>
+<ul>
+<li><code>secondlife://&lt;region name&gt;</code></li>
+<li><code>secondlife:///app/login</code></li>
+</ul>
+<div class="wiki-line">In chat, dialogs and other user interface elements, these URLs will be highlighted as clickable links, often with custom formatting including icons. The full functionality is available in Viewer 2.0 and up. Clickable links without formatting were available only in older versions' chat and <a href="https://wiki.secondlife.com/wiki/Instant_Message">IM</a> history.</div>
+<div class="wiki-line">These links also may be known as <em>Viewer URL Namespace</em>, <em>SLAPP URLs</em> or <em>Application <a href="https://wiki.secondlife.com/wiki/SLURL">SLURL</a></em>.</div>
+<h2 id="syntax">Syntax</h2>
+<div class="wiki-line"><strong>secondlife://</strong></div>
+<div class="wiki-line">: <strong>&lt;region_name&gt;</strong> log in to this region or, if logged in, show information and offer teleport</div>
+<div class="wiki-line">:: <strong>/&lt;local_x&gt;</strong> optional X position, defaults to 128</div>
+<div class="wiki-line">::: <strong>/&lt;local_y&gt;</strong> optional Y position, defaults to 128</div>
+<div class="wiki-line">:::: <strong>/&lt;local_z&gt;</strong> optional Z position, defaults to 0</div>
+<div class="wiki-line">: <strong>/app</strong></div>
+<div class="wiki-line">:: <strong>/add_folder</strong> <em>(see <strong>wear_folder</strong>)</em></div>
+<div class="wiki-line">::: <strong>/?folder_id=&lt;inventory_folder_uuid&gt;</strong> add contents of specified folder to outfit (7.1)</div>
+<div class="wiki-line">::: <strong>/?folder_name=&lt;library_folder_name&gt;</strong> add contents of named Library folder to outfit</div>
+<div class="wiki-line">:: <strong>/agent</strong></div>
+<div class="wiki-line">::: <strong>/&lt;agent_id&gt;</strong></div>
+<div class="wiki-line">:::: <strong>/about</strong> open agent's profile, with 2nd Life tab selected</div>
+<div class="wiki-line">:::: <strong>/completename</strong> replaces the URL with the avatar's display and user names,</div>
+<div class="wiki-line">::::: e.g., "hmm secondlife:///app/agent/eea40b5a-553d-4a07-b1ca-9f6e2f867814/complete wow" in chat becomes "hmm Cerise (cerise.sorbet) wow" (2.4); see <a href="/wiki/category-lsl-avatar-name-1fcd5f3e/">Avatar/Name</a> for more details.</div>
+<div class="wiki-line">:::: <strong>/displayname</strong> replaces the URL with the avatar's display name (2.4)</div>
+<div class="wiki-line">:::: <strong>/im</strong> starts an IM session with the agent (2.0)</div>
+<div class="wiki-line">:::: <strong>/inspect</strong> displays info dialog for agent (2.0)</div>
+<div class="wiki-line">:::: <strong>/mention</strong> creates a link for the agent; the agent's viewer may notify them with sound and highlight if they hear the message. (7?)</div>
+<div class="wiki-line">:::: <strong>/offerteleport</strong> displays the teleport offer dialog (2.0)</div>
+<div class="wiki-line">:::: <strong>/pay</strong> displays the resident pay dialog (2.0)</div>
+<div class="wiki-line">:::: <strong>/requestfriend</strong> displays the friendship offer dialog (2.0)</div>
+<div class="wiki-line">:::: <strong>/mute</strong> add to block list (2.0)</div>
+<div class="wiki-line">:::: <strong>/unmute</strong> remove from block list (2.0)</div>
+<div class="wiki-line">:::: <strong>/username</strong> replaces the URL with the avatar's username e.g. "user.name" (2.4)</div>
+<div class="wiki-line">:: <strong>/appearance</strong></div>
+<div class="wiki-line">::: <strong>/show</strong> displays the sidebar appearance tab (2.0)</div>
+<div class="wiki-line">:: <strong>/balance</strong></div>
+<div class="wiki-line">::: <strong>/request</strong> request a <a href="https://wiki.secondlife.com/wiki/L%24">L$</a> balance update from the server (2.0)</div>
+<div class="wiki-line">:: <strong>/chat</strong></div>
+<div class="wiki-line">::: <strong>/&lt;channel&gt;</strong> any channel number greater than 0&lt;ref&gt;The public (chat) channel, also written as <a href="/constants/PUBLIC_CHANNEL/">PUBLIC_CHANNEL</a>&lt;/ref&gt; except <a href="/constants/DEBUG_CHANNEL/">DEBUG_CHANNEL</a>.</div>
+<div class="wiki-line">:::: <strong>/&lt;text&gt;</strong></div>
+<div class="wiki-line">:: <strong>/classified</strong></div>
+<div class="wiki-line">::: <strong>/&lt;classified_id&gt;</strong></div>
+<div class="wiki-line">:::: <strong>/about</strong> open floater describing classified</div>
+<div class="wiki-line">:: <strong>/event</strong></div>
+<div class="wiki-line">::: <strong>/&lt;event_id&gt;</strong></div>
+<div class="wiki-line">:::: <strong>/about</strong> open floater describing event</div>
+<div class="wiki-line">:: <strong>/experience</strong></div>
+<div class="wiki-line">::: <strong>/&lt;experience_id&gt;</strong></div>
+<div class="wiki-line">:::: <strong>/profile</strong> open floater describing experience</div>
+<div class="wiki-line">:: <strong>/group</strong></div>
+<div class="wiki-line">::: <strong>/&lt;group_id&gt;</strong></div>
+<div class="wiki-line">:::: <strong>/about</strong> open floater describing group</div>
+<div class="wiki-line">::: <strong>/create</strong> opens the create group dialog (1.20)</div>
+<div class="wiki-line">:::: <strong>/inspect</strong> displays info dialog for group (2.0)</div>
+<div class="wiki-line">::: <strong>/list</strong></div>
+<div class="wiki-line">:::: <strong>/show</strong> opens the list of groups to which the user belongs (1.20)</div>
+<div class="wiki-line">:: <strong>/help</strong></div>
+<div class="wiki-line">::: <strong>/&lt;help_query&gt;</strong> optional help topic (2.0)</div>
+<div class="wiki-line">:: <strong>/inventory</strong></div>
+<div class="wiki-line">::: <strong>/&lt;inventory_id&gt;</strong></div>
+<div class="wiki-line">:::: <strong>/select</strong> inventory offer (2.0)</div>
+<div class="wiki-line">::: <strong>/show</strong> opens the inventory sidebar tab (2.0)</div>
+<div class="wiki-line">:: <strong>/keybinding</strong></div>
+<div class="wiki-line">::: <span class="wiki-template"><a href="/wiki/template-underline-deb6e821/">underline</a>: <code>{{underline|Movement controls}}</code></span></div>
+<div class="wiki-line">::: <strong>/walk_to</strong> Walk to location mouse cursor points to</div>
+<div class="wiki-line">::: <strong>/teleport_to</strong> Teleport to the location the mouse cursor points to, but not all locations allow direct teleportation, so you might be teleported closer to the destination instead</div>
+<div class="wiki-line">::: <strong>/push_forward</strong> Move Forward</div>
+<div class="wiki-line">::: <strong>/push_backward</strong> Move Backward </div>
+<div class="wiki-line">::: <strong>/turn_left</strong> Left</div>
+<div class="wiki-line">::: <strong>/turn_right</strong> Right</div>
+<div class="wiki-line">::: <strong>/slide_left</strong> Strafe left</div>
+<div class="wiki-line">::: <strong>/slide_right</strong> Strafe right</div>
+<div class="wiki-line">::: <strong>/jump</strong> Jump/Up</div>
+<div class="wiki-line">::: <strong>/push_down</strong> Down</div>
+<div class="wiki-line">::: <strong>/run_forward</strong> Run Forward</div>
+<div class="wiki-line">::: <strong>/run_backward</strong> Run Backward</div>
+<div class="wiki-line">::: <strong>/run_left</strong> Run Left</div>
+<div class="wiki-line">::: <strong>/run_right</strong> Run Right</div>
+<div class="wiki-line">::: <strong>/toggle_run</strong> Toggle Run</div>
+<div class="wiki-line">::: <strong>/toggle_fly</strong> Fly/Stop flying</div>
+<div class="wiki-line">::: <strong>/toggle_sit</strong> Sit/Stand</div>
+<div class="wiki-line">::: <strong>/stop_moving</strong> Stop Moving</div>
+<div class="wiki-line">::: <span class="wiki-template"><a href="/wiki/template-underline-deb6e821/">underline</a>: <code>{{underline|Camera controls}}</code></span></div>
+<div class="wiki-line">::: <strong>/look_up</strong> Look Up</div>
+<div class="wiki-line">::: <strong>/look_down</strong> Look Down</div>
+<div class="wiki-line">::: <strong>/move_forward</strong> Camera Forward</div>
+<div class="wiki-line">::: <strong>/move_backward</strong> Camera Backward</div>
+<div class="wiki-line">::: <strong>/move_forward_fast</strong> Camera Forward Fast</div>
+<div class="wiki-line">::: <strong>/move_backward_fast</strong> Camera Backward Fast</div>
+<div class="wiki-line">::: <strong>/spin_over</strong> Camera Spin Over</div>
+<div class="wiki-line">::: <strong>/spin_under</strong> Camera Spin Under</div>
+<div class="wiki-line">::: <strong>/pan_up</strong> Camera Pan Up</div>
+<div class="wiki-line">::: <strong>/pan_down</strong> Camera Pan Down</div>
+<div class="wiki-line">::: <strong>/pan_left</strong> Camera Pan Left</div>
+<div class="wiki-line">::: <strong>/pan_right</strong> Camera Pan Right</div>
+<div class="wiki-line">::: <strong>/pan_in</strong> Camera Pan In</div>
+<div class="wiki-line">::: <strong>/pan_out</strong> Camera Pan Out</div>
+<div class="wiki-line">::: <strong>/spin_around_ccw</strong> Camera spins around counterclockwise</div>
+<div class="wiki-line">::: <strong>/spin_around_cw</strong> Camera spins around clockwise</div>
+<div class="wiki-line">::: <strong>/move_forward_sitting</strong> Camera Forward Sitting</div>
+<div class="wiki-line">::: <strong>/move_backward_sitting</strong> Camera Backward Sitting</div>
+<div class="wiki-line">::: <strong>/spin_over_sitting</strong> Camera Spin Over Sitting</div>
+<div class="wiki-line">::: <strong>/spin_under_sitting</strong> Camera Spin Under Sitting</div>
+<div class="wiki-line">::: <strong>/spin_around_ccw_sitting</strong> Camera spins around counterclockwise while sitting</div>
+<div class="wiki-line">::: <strong>/spin_around_cw_sitting</strong> Camera spins around clockwise while sitting</div>
+<div class="wiki-line">::: <span class="wiki-template"><a href="/wiki/template-underline-deb6e821/">underline</a>: <code>{{underline|Editing controls}}</code></span></div>
+<div class="wiki-line">::: <strong>/edit_avatar_move_backward</strong> Camera Backward</div>
+<div class="wiki-line">::: <strong>/edit_avatar_move_forward</strong> Camera Forward</div>
+<div class="wiki-line">::: <strong>/edit_avatar_spin_ccw</strong> Camera spins around avatar counterclockwise</div>
+<div class="wiki-line">::: <strong>/edit_avatar_spin_cw</strong> Camera spins around avatar clockwise</div>
+<div class="wiki-line">::: <strong>/edit_avatar_spin_over</strong> Camera spins over avatar</div>
+<div class="wiki-line">::: <strong>/edit_avatar_spin_under</strong> Camera spins under avatar</div>
+<div class="wiki-line">::: <span class="wiki-template"><a href="/wiki/template-underline-deb6e821/">underline</a>: <code>{{underline|Sound and Media controls}}</code></span></div>
+<div class="wiki-line">::: <strong>/script_trigger_lbutton</strong> Interact (Script LMB 🖰)</div>
+<div class="wiki-line">::: <strong>/start_chat</strong> Start Chat</div>
+<div class="wiki-line">::: <strong>/start_gesture</strong> Start Gesture</div>
+<div class="wiki-line">::: <strong>/toggle_enable_media</strong> Play/Stop All Media</div>
+<div class="wiki-line">::: <strong>/toggle_pause_media</strong> Play/Pause Media</div>
+<div class="wiki-line">::: <strong>/voice_follow_key</strong> Voice</div>
+<div class="wiki-line">::: <strong>/toggle_voice</strong> Toggle Voice</div>
+<div class="wiki-line">:::: <span class="wiki-template"><a href="/wiki/template-underline-deb6e821/">underline</a>: <code>{{underline|Control modes}}</code></span></div>
+<div class="wiki-line">:::: <strong>?mode=</strong> "first_person" or 0, "third_person" or 1, "edit_avatar" or 2, "sitting" or 3.</div>
+<div class="wiki-line">::::: e.g., secondlife:///app/keybinding/push_forward?mode=sitting</div>
+<div class="wiki-line">:: <strong>/login</strong> log in on launch. External and internal browsers.</div>
+<div class="wiki-line">::: See below for query parameters; of course, values are URL-escaped.</div>
+<div class="wiki-line">:: <strong>/maptrackavatar</strong></div>
+<div class="wiki-line">::: <strong>/&lt;friend_id&gt;</strong> finds a friend on the world map, requires permission (2.4)</div>
+<div class="wiki-line">:: <strong>/objectim</strong></div>
+<div class="wiki-line">::: <strong>/&lt;object_id&gt;</strong> displays an info dialog for the object sending this message (2.0)</div>
+<div class="wiki-line">:::: <strong>?name=&lt;object_name&gt;</strong></div>
+<div class="wiki-line">:::: <strong>&amp;owner=&lt;owner_id&gt;</strong></div>
+<div class="wiki-line">:::: <strong>&amp;groupowned=true</strong> (add if the object is deeded to a group)</div>
+<div class="wiki-line">:::: <strong>&amp;slurl=&lt;region&gt;/&lt;x&gt;/&lt;y&gt;/&lt;z&gt;</strong></div>
+<div class="wiki-line">:: <strong>/openfloater</strong></div>
+<div class="wiki-line">::: <strong>/&lt;floater_name&gt;</strong> e.g., "preferences", "people", "places", "picks", "destinations", "profile"</div>
+<div class="wiki-line">:: <strong>/parcel</strong></div>
+<div class="wiki-line">::: <strong>/&lt;parcel_id&gt;</strong></div>
+<div class="wiki-line">:::: <strong>/about</strong> open floater describing place</div>
+<div class="wiki-line">:: <strong>&lt;strike&gt;/region</strong></div>
+<div class="wiki-line">::: <strong>/&lt;region_id&gt;</strong></div>
+<div class="wiki-line">:::: <strong>/about</strong> information from the database about that region? list of parcels? covenant?&lt;/strike&gt;</div>
+<div class="wiki-line">:: <strong>/remove_folder</strong> <em>(see <strong>wear_folder</strong>)</em></div>
+<div class="wiki-line">::: <strong>/?folder_id=&lt;inventory_folder_uuid&gt;</strong> remove contents of specified folder from outfit (7.1)</div>
+<div class="wiki-line">::: <strong>/?folder_name=&lt;library_folder_name&gt;</strong> remove contents of named Library folder from outfit</div>
+<div class="wiki-line">:: <strong>/search</strong></div>
+<div class="wiki-line">::: <strong>/&lt;category&gt;</strong> "all", "people", "places", "events", "groups", "wiki", "destinations", "classifieds"</div>
+<div class="wiki-line">:::: <strong>/&lt;search_term&gt;</strong> opens a search floater with matching results (2.0)</div>
+<div class="wiki-line">:: <strong>/sharewithavatar</strong></div>
+<div class="wiki-line">::: <strong>/&lt;agent_id&gt;</strong> open an inventory share/IM window for the agent (2.4)</div>
+<div class="wiki-line">:: <strong>/teleport</strong></div>
+<div class="wiki-line">::: <strong>/&lt;region_name&gt;</strong> teleport instantly to this region, no dialog</div>
+<div class="wiki-line">:::: <strong>/&lt;local_x&gt;</strong> optional X position, defaults to 128</div>
+<div class="wiki-line">::::: <strong>/&lt;local_y&gt;</strong> optional Y position, defaults to 128</div>
+<div class="wiki-line">:::::: <strong>/&lt;local_z&gt;</strong> optional Z position, defaults to 0</div>
+<div class="wiki-line">:: <strong>/voicecallavatar</strong></div>
+<div class="wiki-line">::: <strong>/&lt;agent_id&gt;</strong> start a private voice session (2.4)</div>
+<div class="wiki-line">:: <strong>/wear_folder</strong></div>
+<div class="wiki-line">::: <strong>/?folder_id=&lt;inventory_folder_uuid&gt;</strong> replace outfit with contents of specified folder (2.6)</div>
+<div class="wiki-line">::: <strong>/?folder_name=&lt;library_folder_name&gt;</strong> replace outfit with contents of named Library folder</div>
+<div class="wiki-line">:: <strong>/worldmap</strong> open the map with this destination selected (2.0)</div>
+<div class="wiki-line">::: <strong>/&lt;region_name&gt;</strong></div>
+<div class="wiki-line">:::: <strong>/&lt;local_x&gt;</strong> optional X position, defaults to 128</div>
+<div class="wiki-line">::::: <strong>/&lt;local_y&gt;</strong> optional Y position, defaults to 128</div>
+<div class="wiki-line">:::::: <strong>/&lt;local_z&gt;</strong> optional Z position, defaults to 0</div>
+<div class="wiki-line">This could be extended to things like:</div>
+<div class="wiki-line">: <strong>/app/event/&lt;event_id&gt;/subscribe</strong> to register for notifications</div>
+<div class="wiki-line">: <strong>/app/parcel/&lt;parcel_id&gt;/teleport</strong> to teleport to a specific location</div>
+<h2 id="login-query-parameters">Login Query Parameters</h2>
+<table><tr><td> first </td><td> the account first name</td></tr><tr><td> last </td><td> the account last name</td></tr><tr><td> session </td><td> the secure session id</td></tr><tr><td> location </td><td> login location, format TBD, optional</td></tr></table>
+<h2 id="second-life-wiki-formatting">Second Life Wiki formatting</h2>
+<div class="wiki-line">When adding <code>secondlife://</code> links using the above syntax to a Second Life Wiki page, you can enclose your links in squared brackets (thus turning them into a standard Wiki external link), which also gives you the chance of changing the displayed text. Example:  </div>
+<div class="wiki-line"> &lt;kbd&gt;[secondlife:///app/objectim/190f571d-fdf1-8f6c-4e9d-973e9b5e0566?name=ObjectName&amp;owner=c93c3129-2250-4c79-a5f7-8c755ca2707e&amp;groupowned=true&amp;slurl=Location/128/128/27 ObjectName]&lt;/kbd&gt;</div>
+<div class="wiki-line">will display as </div>
+<div class="wiki-line"> [secondlife:///app/objectim/190f571d-fdf1-8f6c-4e9d-973e9b5e0566?name=ObjectName&amp;owner=c93c3129-2250-4c79-a5f7-8c755ca2707e&amp;groupowned=true&amp;slurl=Location/128/128/27 ObjectName]</div>
+<div class="wiki-line">In this case you will also need to ensure the object name has been escaped.</div>
+<div class="wiki-line">Sometimes, having the link clickable (which will attempt to launch the Second Life Viewer to open it), is not desirable. Instead, to display the <a href="https://en.wikipedia.org/wiki/URI" rel="noreferrer">URI</a> itself without making it clickable, surround it with <code>&lt;nowiki&gt;...&lt;/nowiki&gt;</code>. For example:</div>
+<div class="wiki-line"> &lt;kbd&gt;<strong>&lt;nowiki&gt;secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about&lt;/nowiki&gt;</strong>&lt;/kbd&gt;</div>
+<div class="wiki-line">will display as</div>
+<div class="wiki-line"> secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about</div>
+<div class="wiki-line">whereas</div>
+<div class="wiki-line"> &lt;kbd&gt;<strong>secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about</strong>&lt;/kbd&gt;</div>
+<div class="wiki-line">will display the whole link and make it clickable, e.g.:</div>
+<div class="wiki-line"> secondlife:///app/group/8db35111-979b-14a7-6a74-b47be86ce04f/about</div>
+<h2 id="lsl-examples">LSL Examples</h2>
+<div class="wiki-line"><pre><code>string Who(key id)
+{
+    return &quot;secondlife:///app/agent/&quot; + (string)id + &quot;/inspect&quot;;
+}
+ 
+default
+{
+    touch_start(integer num)
+    {
+        llSay(0, &quot;Touched by &quot; + Who(llDetectedKey(0)) + &quot;.&quot; );
+    }
+}</code></pre></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Category:Name_Spaces">Category:Name Spaces</a></div>
+<div class="wiki-line"><a href="https://wiki.secondlife.com/wiki/Category:Search">Category:Search</a></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-chat-72477c0b/">Category:LSL Chat</a></div>
+<div class="wiki-line"><a href="/wiki/category-lsl-dialog-9e9f44b8/">Category:LSL_Dialog</a></div>

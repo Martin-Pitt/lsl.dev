@@ -82,6 +82,7 @@ const rawAZ: Topic[] = [
 	{ label: 'Time', to: 'c:time' },
 	{ label: 'Vehicle', to: 'c:vehicles', also: ['g:VehicleType'] },
 	{ label: 'Video', to: 'c:parcel_media', also: ['c:prim_media'] },
+	{ label: 'Viewer URIs', to: 'f:viewer-uris', also: ['c:chat'] },
 	{ label: 'World', to: 'c:region', also: ['f:environments'] },
 ];
 
@@ -98,6 +99,7 @@ const rawTree: Topic[] = [
 		{ label: 'Chat', to: 'c:chat' },
 		{ label: 'Dialog', to: 'f:dialog' },
 		{ label: 'HTTP', to: 'c:web' },
+		{ label: 'Viewer URIs', to: 'f:viewer-uris' },
 		{ label: 'XML-RPC' },
 	] },
 	{ label: 'Detection', to: 'c:detected', children: [

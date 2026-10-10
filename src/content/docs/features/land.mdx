@@ -1,0 +1,149 @@
+---
+title: "Parcels & Regions"
+description: "Land from a script's point of view: regions, parcels, estates and moderation."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+Land is divided into regions (simulators), which belong to estates and are split into parcels. Each level has an owner and settings that limit what scripts can do there: whether scripts run, objects can be built, damage is on, or avatars may enter.
+
+Scripts can read information about the land they are on. Changing it, or moderating visitors, needs the object to be owned by the land owner (or the right group, or estate manager).
+
+The sky and water of a parcel or region are covered by [Environments](/features/environments/); teleporting between places by [Avatars](/features/avatar/).
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Parcels have [details](/functions/llGetParcelDetails/), [flags](/functions/llGetParcelFlags/), [prim counts](/functions/llGetParcelPrimCount/) and [limits](/functions/llGetParcelMaxPrims/), [owners](/functions/llGetLandOwnerAt/) and [sale](/functions/llSetParcelForSale/) settings
+  - A script can check whether it is [over its owner's land](/functions/llOverMyLand/) and [who owns the prims](/functions/llGetParcelPrimOwners/) on it
+  - [Parcel media](/functions/llParcelMediaCommandList/) and [music URLs](/functions/llSetParcelMusicURL/) are set per parcel
+- Regions have a [name](/functions/llGetRegionName/), a [position on the grid](/functions/llGetRegionCorner/), [flags](/functions/llGetRegionFlags/), [agent counts](/functions/llGetRegionAgentCount/), performance and [simulator data](/functions/llRequestSimulatorData/)
+  - [Regional settings](/functions/llGetEnv/) are read by name
+  - The object hears when its [region has just come online](/constants/CHANGED_REGION_START/)
+  - The [ground](/functions/llGround/) can be read and, with rights, [changed](/functions/llModifyLand/)
+- Moderation is for land owners and managers
+  - [Ban](/functions/llAddToLandBanList/) and [pass](/functions/llAddToLandPassList/) lists, [ejecting](/functions/llEjectFromLand/), [sending home](/functions/llTeleportAgentHome/)
+  - [Returning objects](/functions/llReturnObjectsByOwner/) needs [PERMISSION_RETURN_OBJECTS](/constants/PERMISSION_RETURN_OBJECTS/)
+- Estate managers' objects can [manage the estate access lists](/functions/llManageEstateAccess/) for agents and groups
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llGetParcelDetails", "llGetParcelFlags", "llGetLandOwnerAt", "llGetRegionName",
+  "llGetRegionFlags", "llGetEnv", "llRequestSimulatorData", "llEjectFromLand",
+  "llReturnObjectsByOwner", "llManageEstateAccess"
+]} />
+
+</Box>
+<Box title="Parcels" id="parcels-summary" href="#parcels">
+
+Parcel details, flags, prim counts and limits, owners and sale.
+
+More on the [Second Life Wiki](https://wiki.secondlife.com/wiki/Category:LSL_Parcel).
+
+</Box>
+<Box title="Estates" id="estates-summary" href="#estates">
+
+Estate access lists for agents and groups.
+
+More on the [Second Life Wiki](https://wiki.secondlife.com/wiki/Category:LSL_Estate).
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+### Parcel functions
+
+<Signatures names={[
+  "llGetParcelDetails", "llGetParcelFlags", "llGetParcelPrimCount",
+  "llGetParcelMaxPrims", "llGetParcelPrimOwners", "llGetLandOwnerAt",
+  "llOverMyLand", "llSetParcelForSale", "llParcelMediaCommandList",
+  "llParcelMediaQuery", "llSetParcelMusicURL", "llGetParcelMusicURL"
+]} descriptions />
+
+### Region functions
+
+<Signatures names={[
+  "llGetRegionName", "llGetRegionCorner", "llGetRegionFlags", "llGetEnv",
+  "llGetRegionAgentCount", "llGetAgentList", "llRequestSimulatorData",
+  "llGetSimulatorHostname", "llGetRegionFPS", "llGetRegionTimeDilation",
+  "llGetSimStats", "llEdgeOfWorld", "llModifyLand", "llSetGroundTexture",
+  "llGround", "llGroundRepel", "CHANGED_REGION_START"
+]} descriptions />
+
+### Moderation and estate functions
+
+<Signatures names={[
+  "llAddToLandBanList", "llRemoveFromLandBanList", "llResetLandBanList",
+  "llAddToLandPassList", "llRemoveFromLandPassList", "llResetLandPassList",
+  "llEjectFromLand", "llTeleportAgentHome", "llReturnObjectsByID",
+  "llReturnObjectsByOwner", "PERMISSION_RETURN_OBJECTS", "llManageEstateAccess"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llGetParcelDetails](/functions/llGetParcelDetails/) — [parcel details](/constants/groups/ParcelDetailsParam/) to read, including [teleport routing](/constants/groups/ParcelTeleportRouting/)
+- [llGetParcelFlags](/functions/llGetParcelFlags/) — [parcel flags](/constants/groups/ParcelFlag/)
+- [llGetParcelPrimCount](/functions/llGetParcelPrimCount/) — [prim count categories](/constants/groups/ParcelPrimCountCategory/)
+- [llSetParcelForSale](/functions/llSetParcelForSale/) — [sale parameters](/constants/groups/ParcelSaleParam/) and [errors](/constants/groups/ParcelSaleError/)
+- [llParcelMediaCommandList](/functions/llParcelMediaCommandList/) — [media commands](/constants/groups/ParcelMediaCommand/); [llParcelMediaQuery](/functions/llParcelMediaQuery/) — [media queries](/constants/groups/ParcelMediaQuery/)
+- [llReturnObjectsByOwner](/functions/llReturnObjectsByOwner/) — [scope](/constants/groups/ReturnObjectsScope/) and [errors](/constants/groups/ReturnObjectsError/)
+- [llGetRegionFlags](/functions/llGetRegionFlags/) — [region flags](/constants/groups/RegionFlag/)
+- [llRequestSimulatorData](/functions/llRequestSimulatorData/) — [simulator data](/constants/groups/SimulatorData/); [llGetSimStats](/functions/llGetSimStats/) — [simulator stats](/constants/groups/SimulatorStat/)
+- [llGetAgentList](/functions/llGetAgentList/) — [scope](/constants/groups/AgentListScope/)
+- [llModifyLand](/functions/llModifyLand/) — [actions](/constants/groups/ModifyLandAction/) and [brushes](/constants/groups/ModifyLandBrush/); [llSetGroundTexture](/functions/llSetGroundTexture/) — [parameters](/constants/groups/GroundTextureParam/)
+- [llManageEstateAccess](/functions/llManageEstateAccess/) — [estate access actions](/constants/groups/EstateAccessParam/)
+
+</Box>
+
+## Moderation
+
+<ConstantGroups names={["ReturnObjectsScope", "ReturnObjectsError"]} />
+
+<SeeAlso items={["category:land_moderation"]} />
+
+## Parcels
+
+<ConstantGroups names={[
+  "ParcelDetailsParam", "ParcelFlag", "ParcelPrimCountCategory",
+  "ParcelSaleParam", "ParcelSaleError", "ParcelTeleportRouting",
+  "ParcelMediaCommand", "ParcelMediaQuery"
+]} />
+
+<SeeAlso items={[
+  "category:parcel", "category:parcel_media", "wiki:Category:LSL Parcel",
+  "wiki:CatRegion|Script library: region and parcel"
+]}>
+  <Planned>Guide: parcel and region scripting rights</Planned>
+</SeeAlso>
+
+## Regions
+
+<ConstantGroups names={[
+  "RegionFlag", "SimulatorData", "SimulatorStat", "ModifyLandAction",
+  "ModifyLandBrush", "GroundTextureParam", "AgentListScope"
+]} />
+
+<SeeAlso items={["category:region", "wiki:Category:LSL Region"]} />
+
+## Estates
+
+<ConstantGroups names={["EstateAccessParam"]} />
+
+<SeeAlso items={["wiki:Category:LSL Estate"]} />
+
+## Related
+
+<SeeAlso items={["feature:environments", "feature:avatar", "feature:pathfinding"]} />
+
+<FeatureFooter
+  related={["environments", "avatar", "money"]}
+  categories={["parcel", "parcel_media", "land_moderation", "region"]}
+/>

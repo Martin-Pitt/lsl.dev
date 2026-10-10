@@ -1,0 +1,130 @@
+---
+title: "Linksets"
+description: "Objects made of several linked prims: link numbers, linking, rezzing and object details."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+An object is a linkset: one root prim plus any child prims, moving and rezzing as a unit. Each prim has a link number. The root is 1 when there are several prims, and 0 in a single-prim object. Seated avatars are added after the prims.
+
+Most prim functions have a Link variant that works on any prim by link number, so one script can control the whole object. What a single prim looks like is covered by [Prims](/features/prims/).
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Every prim has a [link number](/functions/llGetLinkNumber/); the object has a [number of prims](/functions/llGetNumberOfPrims/) (including seated avatars) and a [prim count](/functions/llGetObjectPrimCount/)
+  - Special link constants address [the root](/constants/LINK_ROOT/), [this prim](/constants/LINK_THIS/), [all prims](/constants/LINK_SET/), [all others](/constants/LINK_ALL_OTHERS/) or [all children](/constants/LINK_ALL_CHILDREN/)
+  - [Names](/functions/llGetLinkName/) and [keys](/functions/llGetLinkKey/) help find a prim by role instead of by number, because numbers change when the object is relinked
+- [Linking](/functions/llCreateLink/) and [unlinking](/functions/llBreakLink/) need PERMISSION_CHANGE_LINKS from the owner
+  - The [changed](/events/changed/) event reports [CHANGED_LINK](/constants/CHANGED_LINK/)
+- One script can [set](/functions/llSetLinkPrimitiveParamsFast/) or [read](/functions/llGetLinkPrimitiveParams/) many properties of any prim, or several prims, in one call
+  - Scripts in different prims talk with [link messages](/functions/llMessageLinked/)
+- The object as a whole has a [root position](/functions/llGetRootPosition/), a [bounding box](/functions/llGetBoundingBox/), a [mass](/functions/llGetObjectMass/) and an owner, and can be [scaled](/functions/llScaleByFactor/) as a unit
+  - [Details of other objects](/functions/llGetObjectDetails/) are read by key
+- Objects in inventory can be [rezzed](/functions/llRezObject/) with a position, velocity and parameters
+  - [llRezObjectWithParams](/functions/llRezObjectWithParams/) sets many properties at rez time
+  - The child receives the start parameter in [on_rez](/events/on_rez/)
+  - Objects can [delete themselves](/functions/llDie/) or [derez others they own](/functions/llDerezObject/)
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llGetLinkNumber", "llGetNumberOfPrims", "llGetLinkName", "llGetLinkKey",
+  "llCreateLink", "llBreakLink", "llSetLinkPrimitiveParamsFast", "llGetLinkPrimitiveParams",
+  "llMessageLinked", "llRezObjectWithParams", "on_rez", "changed"
+]} />
+
+</Box>
+<Box title="Rezzing" href="https://wiki.secondlife.com/wiki/Category:LSL_Rez">
+
+Rez objects from inventory, pass them a start parameter or string, and derez them later.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+### Link numbers functions
+
+<Signatures names={[
+  "llGetLinkNumber", "llGetNumberOfPrims", "llGetObjectPrimCount",
+  "llGetLinkName", "llGetLinkKey", "llGetLinkNumberOfSides", "LINK_ROOT",
+  "LINK_SET", "LINK_THIS", "LINK_ALL_OTHERS", "LINK_ALL_CHILDREN"
+]} descriptions />
+
+### Linking and unlinking
+
+<Signatures names={["llCreateLink", "llBreakLink", "llBreakAllLinks", "changed", "CHANGED_LINK", "PERMISSION_CHANGE_LINKS"]} descriptions />
+
+### Controlling every prim
+
+<Signatures names={[
+  "llSetLinkPrimitiveParamsFast", "llGetLinkPrimitiveParams",
+  "llSetLinkColor", "llSetLinkAlpha", "llSetLinkTexture", "llMessageLinked"
+]} descriptions />
+
+### The object as a whole functions
+
+<Signatures names={[
+  "llGetRootPosition", "llGetRootRotation", "llGetBoundingBox",
+  "llGetGeometricCenter", "llGetCenterOfMass", "llGetObjectMass",
+  "llGetObjectDetails", "llGetOwnerKey", "llGetCreator", "llScaleByFactor",
+  "llGetMaxScaleFactor", "llGetMinScaleFactor"
+]} descriptions />
+
+### Rezzing objects functions
+
+<Signatures names={[
+  "llRezObjectWithParams", "llRezObject", "llRezAtRoot", "object_rez",
+  "on_rez", "llGetStartParameter", "llGetStartString", "llDie",
+  "llDerezObject", "llGodLikeRezObject"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- Link functions take a link number or a [link constant](/constants/groups/Links/) (some take only [one link](/constants/groups/Link/))
+- [llGetObjectDetails](/functions/llGetObjectDetails/) — OBJECT_\* [details](/constants/groups/ObjectDetailsParam/) of any object by key
+- [llRezObjectWithParams](/functions/llRezObjectWithParams/) — REZ_\* [parameters](/constants/groups/RezParam/) and [flags](/constants/groups/RezFlag/)
+- [llDerezObject](/functions/llDerezObject/) — [derez modes](/constants/groups/DerezMode/)
+  - [DEREZ_DIE](/constants/DEREZ_DIE/) — immediately delete (kill) the object
+
+</Box>
+
+## Link numbers
+
+<ConstantGroups names={["Link", "Links"]} />
+
+<SeeAlso>
+  <Planned>Recipe: finding prims by name</Planned>
+</SeeAlso>
+
+## The object as a whole
+
+<ConstantGroups names={["ObjectDetailsParam"]} />
+
+<SeeAlso items={["category:object"]} />
+
+## Rezzing objects
+
+<ConstantGroups names={["RezParam", "RezFlag", "DerezMode"]} />
+
+<SeeAlso items={[
+  "category:rez", "wiki:Category:LSL Rez",
+  "wiki:CatRezzers|Script library: rezzers"
+]} />
+
+## Related
+
+<SeeAlso items={["category:linkset", "feature:prims"]} />
+
+<FeatureFooter
+  related={["prims", "physics", "avatar"]}
+  categories={["linkset", "object", "rez"]}
+  archive={["Category:LSL Link"]}
+/>

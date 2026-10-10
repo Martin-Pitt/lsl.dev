@@ -1,0 +1,145 @@
+---
+title: "Movement"
+description: "Moving objects: non-physical positioning, keyframed motion, and physical movement."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+There are three ways to move an object. Non-physical movement sets the position and rotation directly. Keyframed motion plays a smooth path computed by the region. Physical movement applies forces and lets the [physics](/features/physics/) engine move the object.
+
+Non-physical and keyframed movement are predictable and suit doors, platforms and rides. Physical movement suits vehicles, balls and projectiles.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Non-physical movement sets the [position](/functions/llSetPos/) and [rotation](/functions/llSetRot/) in one step
+  - [llSetRegionPos](/functions/llSetRegionPos/) moves up to the region's size in one call; [llSetPos](/functions/llSetPos/) is limited per call (up to 10m)
+  - Child prims use [local coordinates](/functions/llSetLocalRot/)
+- [Keyframed motion](/functions/llSetKeyframedMotion/): give a list of position and rotation offsets with times, and the region moves the object smoothly, looping or ping-ponging if asked
+  - Works on non-physical objects and costs little script time
+- Physical objects move by [impulses](/functions/llApplyImpulse/), [forces](/functions/llSetForce/), velocities and targets
+  - [Move-to](/functions/llMoveToTarget/) and [look-at](/functions/llLookAt/) targets act like springs
+  - [llSetVelocity](/functions/llSetVelocity/) and [llSetAngularVelocity](/functions/llSetAngularVelocity/) set motion directly
+- Position and rotation [targets](/functions/llTarget/) fire [events](/events/at_target/) when the object arrives or leaves, without polling
+  - [moving_start](/events/moving_start/) and [moving_end](/events/moving_end/) report when the object starts and stops moving
+- [llTargetOmega](/functions/llTargetOmega/) spins an object
+  - On non-physical objects the spin is drawn by the viewer only, so it costs nothing on the region
+- The [vehicle](/functions/llSetVehicleType/) engine adds tuned motors, friction and stabilisers on top of physics
+  - Choose a vehicle type, then adjust [parameters](/functions/llSetVehicleFloatParam/) and [flags](/functions/llSetVehicleFlags/)
+  - Vehicles are steered with [captured controls](/features/input/)
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llSetPos", "llSetRegionPos", "llSetRot", "llSetKeyframedMotion", "llMoveToTarget",
+  "llApplyImpulse", "llSetVelocity", "llTarget", "at_target", "llTargetOmega",
+  "llSetVehicleType"
+]} />
+
+</Box>
+<Box title="Vehicles" id="vehicles-summary" href="#vehicles">
+
+A vehicle type plus float, vector and rotation parameters and flags tune motors, friction and stabilisers.
+
+More on the [Second Life Wiki](https://wiki.secondlife.com/wiki/Category:LSL_Vehicle).
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+### Non-physical movement
+
+<Signatures names={[
+  "llSetPos", "llSetRegionPos", "llSetRot", "llSetLocalRot", "llGetPos",
+  "llGetRot", "llGetLocalPos", "llGetLocalRot", "llSetScale", "llGetScale"
+]} descriptions />
+
+### Keyframed motion functions
+
+<Signatures names={["llSetKeyframedMotion"]} descriptions />
+
+### Physical movement
+
+<Signatures names={[
+  "llMoveToTarget", "llStopMoveToTarget", "llLookAt", "llRotLookAt",
+  "llStopLookAt", "llApplyImpulse", "llApplyRotationalImpulse",
+  "llSetVelocity", "llSetAngularVelocity", "llSetForce", "llSetTorque",
+  "llSetForceAndTorque", "llSetHoverHeight", "llStopHover", "llGroundRepel",
+  "llSetBuoyancy", "llGetVel", "llGetAccel", "llGetOmega"
+]} descriptions />
+
+### Targets
+
+<Signatures names={[
+  "llTarget", "llTargetRemove", "at_target", "not_at_target", "llRotTarget",
+  "llRotTargetRemove", "at_rot_target", "not_at_rot_target", "moving_start",
+  "moving_end"
+]} descriptions />
+
+### Spinning
+
+<Signatures names={["llTargetOmega"]} descriptions />
+
+### Vehicles functions
+
+<Signatures names={[
+  "llSetVehicleType", "llSetVehicleFloatParam", "llSetVehicleVectorParam",
+  "llSetVehicleRotationParam", "llSetVehicleFlags", "llRemoveVehicleFlags"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) — move or spin any prim by link number
+  - [PRIM_POSITION](/constants/PRIM_POSITION/) and [PRIM_ROTATION](/constants/PRIM_ROTATION/) — position and rotation
+  - [PRIM_POS_LOCAL](/constants/PRIM_POS_LOCAL/) and [PRIM_ROT_LOCAL](/constants/PRIM_ROT_LOCAL/) — local position and rotation of a prim
+  - [PRIM_OMEGA](/constants/PRIM_OMEGA/) — client-side rotation, analogous to llTargetOmega
+- [llSetKeyframedMotion](/functions/llSetKeyframedMotion/) — [options](/constants/groups/KeyframedMotionParam/), [modes](/constants/groups/KeyframedMotionMode/), [commands](/constants/groups/KeyframedMotionCommand/) and [data flags](/constants/groups/KeyframedMotionData/)
+  - [KFM_MODE](/constants/KFM_MODE/) — playback mode, defaults to KFM_FORWARD
+  - [KFM_COMMAND](/constants/KFM_COMMAND/) — play, stop, or pause the motion
+  - [KFM_DATA](/constants/KFM_DATA/) — whether keyframes hold translation, rotation or both
+- [llSetVehicleType](/functions/llSetVehicleType/) — [vehicle types](/constants/groups/VehicleType/), then [float](/constants/groups/VehicleFloatParam/), [vector](/constants/groups/VehicleVectorParam/) and [rotation](/constants/groups/VehicleRotationParam/) parameters and [flags](/constants/groups/VehicleFlag/)
+
+</Box>
+
+## Keyframed motion
+
+<ConstantGroups names={[
+  "KeyframedMotionParam", "KeyframedMotionMode", "KeyframedMotionCommand",
+  "KeyframedMotionData"
+]} />
+
+<SeeAlso>
+  <Planned>Recipe: door or platform with keyframed motion</Planned>
+</SeeAlso>
+
+## Vehicles
+
+<ConstantGroups names={[
+  "VehicleType", "VehicleFloatParam", "VehicleVectorParam",
+  "VehicleRotationParam", "VehicleFlag"
+]} />
+
+<SeeAlso items={[
+  "category:vehicles", "wiki:Category:LSL Vehicle", "feature:input",
+  "feature:camera", "feature:pathfinding",
+  "wiki:CatVehicles|Script library: vehicles"
+]}>
+  <Planned>Guide: tuning a vehicle</Planned>
+</SeeAlso>
+
+## Related
+
+<SeeAlso items={["feature:physics"]} />
+
+<FeatureFooter
+  related={["physics", "math", "pathfinding"]}
+  categories={["movement", "vehicles"]}
+  archive={["Category:LSL Movement"]}
+/>

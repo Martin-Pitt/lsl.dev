@@ -1,0 +1,154 @@
+---
+title: "Data Transmission"
+description: "Serialising and parsing data to pass it between scripts, services and storage."
+redirectFrom: ["text"]
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+Chat, link messages, linkset data, notecards and HTTP all carry strings. Lists, numbers, vectors, rotations and keys must be turned into strings to be sent or stored, then parsed back on the other side.
+
+This page is about formats, not channels: see [communications](/features/communications/) for how strings travel and [data storage](/features/data-storage/) for where they are kept.
+
+Choose a format both sides understand: a delimited string for simple fields, CSV for lists of values, JSON for nested data or web services, and Base64 for binary or compact values.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- The most common format is a list [joined with a separator](/functions/llDumpList2String/)
+  - Parsing [splits it again](/functions/llParseString2List/) (or [keeps empty fields](/functions/llParseStringKeepNulls/))
+  - Typecasts or llList2\* functions such as [llList2Integer](/functions/llList2Integer/) convert each field to its type; [llGetListEntryType](/functions/llGetListEntryType/) tells what a field holds
+  - [CSV](/functions/llList2CSV/) is a ready-made variant, [parsed back](/functions/llCSV2List/) into a list
+- [JSON](/functions/llList2Json/) represents nested objects and arrays, and is the format web services expect
+  - LSL can build JSON from lists, [read](/functions/llJsonGetValue/) and [change](/functions/llJsonSetValue/) values by path, and [convert JSON arrays and objects back to lists](/functions/llJson2List/)
+- Encoding
+  - [Base64](/functions/llStringToBase64/) makes arbitrary text or [integers](/functions/llIntegerToBase64/) safe to embed in other formats
+  - [URL escaping](/functions/llEscapeURL/) prepares values for HTTP
+  - Characters convert to [codepoints](/functions/llOrd/) and [back](/functions/llChar/)
+- Parsing strings: string functions [find](/functions/llSubStringIndex/), [cut](/functions/llGetSubString/) and [replace](/functions/llReplaceSubString/) text
+  - Strings are UTF-8 internally but indexed by character
+- Working with lists: received lists often need [searching](/functions/llListFindList/), [slicing](/functions/llList2List/), [sorting](/functions/llListSort/) or reshaping
+  - [Strided lists](/functions/llList2ListStrided/) store records as repeating groups of fields
+- Keys (UUIDs) identify avatars, objects and assets
+  - [Generate unique keys](/functions/llGenerateKey/) for request IDs and records
+- Integrity: [hashes](/functions/llComputeHash/), [HMACs](/functions/llHMAC/) and [RSA signatures](/functions/llSignRSA/) let a receiver check that a message has not been changed and came from the expected sender
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llDumpList2String", "llParseString2List", "llList2CSV", "llCSV2List",
+  "llList2Json", "llJson2List", "llJsonGetValue", "llJsonSetValue",
+  "llStringToBase64", "llBase64ToString", "llGenerateKey", "llHMAC"
+]} />
+
+</Box>
+<Box title="JSON" href="https://wiki.secondlife.com/wiki/Json_usage_in_LSL">
+
+Build with [llList2Json](/functions/llList2Json/) using [JSON_OBJECT](/constants/JSON_OBJECT/) or [JSON_ARRAY](/constants/JSON_ARRAY/); a missing path or bad input gives [JSON_INVALID](/constants/JSON_INVALID/).
+
+</Box>
+<Box title="Types" href="/types/list/">
+
+See the [list](/types/list/), [string](/types/string/) and [key](/types/key/) types.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+### Lists and delimited strings
+
+<Signatures names={[
+  "llDumpList2String", "llParseString2List", "llParseStringKeepNulls",
+  "llList2CSV", "llCSV2List", "llList2String", "llList2Integer",
+  "llList2Float", "llList2Key", "llList2Vector", "llList2Rot",
+  "llGetListEntryType"
+]} descriptions />
+
+### JSON functions
+
+<Signatures names={["llList2Json", "llJson2List", "llJsonGetValue", "llJsonSetValue", "llJsonValueType"]} descriptions />
+
+### Encoding
+
+<Signatures names={[
+  "llStringToBase64", "llBase64ToString", "llIntegerToBase64",
+  "llBase64ToInteger", "llXorBase64", "llEscapeURL", "llUnescapeURL",
+  "llChar", "llOrd"
+]} descriptions />
+
+### Parsing strings
+
+<Signatures names={[
+  "llSubStringIndex", "llGetSubString", "llDeleteSubString", "llInsertString",
+  "llReplaceSubString", "llStringLength", "llStringTrim", "llToLower",
+  "llToUpper"
+]} descriptions />
+
+### Working with lists
+
+<Signatures names={[
+  "llGetListLength", "llList2List", "llList2ListSlice", "llList2ListStrided",
+  "llListFindList", "llListFindListNext", "llListFindStrided",
+  "llListInsertList", "llListReplaceList", "llDeleteSubList", "llListSort",
+  "llListSortStrided", "llListRandomize", "llListStatistics"
+]} descriptions />
+
+### Keys and identifiers
+
+<Signatures names={[
+  "llGenerateKey", "llGetKey", "llGetLinkKey", "llGetObjectLinkKey",
+  "llGetOwnerKey"
+]} descriptions />
+
+### Integrity and signatures
+
+<Signatures names={[
+  "llHash", "llComputeHash", "llHMAC", "llMD5String", "llSHA1String",
+  "llSHA256String", "llSignRSA", "llVerifyRSA"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llList2Json](/functions/llList2Json/) — what to build
+  - [JSON_OBJECT](/constants/JSON_OBJECT/) — the list is strided key-value pairs, encoded as an object
+  - [JSON_ARRAY](/constants/JSON_ARRAY/) — the list is encoded as an array
+  - [JSON_INVALID](/constants/JSON_INVALID/) — returned for badly formed input, an invalid type, or a nonexistent location
+- [llJsonSetValue](/functions/llJsonSetValue/) — [JSON_APPEND](/constants/JSON_APPEND/) appends to the array at the given level
+- [llJsonValueType](/functions/llJsonValueType/) — returns a type such as [JSON_STRING](/constants/JSON_STRING/) or [JSON_NUMBER](/constants/JSON_NUMBER/)
+- [llGetListEntryType](/functions/llGetListEntryType/) — field types
+  - [TYPE_INTEGER](/constants/TYPE_INTEGER/), [TYPE_FLOAT](/constants/TYPE_FLOAT/), [TYPE_STRING](/constants/TYPE_STRING/), [TYPE_KEY](/constants/TYPE_KEY/), [TYPE_VECTOR](/constants/TYPE_VECTOR/), [TYPE_ROTATION](/constants/TYPE_ROTATION/) — the stored type
+  - [TYPE_INVALID](/constants/TYPE_INVALID/) — the entry is invalid
+- [llStringTrim](/functions/llStringTrim/) — which end to trim
+  - [STRING_TRIM](/constants/STRING_TRIM/) — both ends
+  - [STRING_TRIM_HEAD](/constants/STRING_TRIM_HEAD/) — the beginning
+  - [STRING_TRIM_TAIL](/constants/STRING_TRIM_TAIL/) — the end
+- [llListStatistics](/functions/llListStatistics/) — operations such as [LIST_STAT_MEAN](/constants/LIST_STAT_MEAN/), [LIST_STAT_MEDIAN](/constants/LIST_STAT_MEDIAN/), [LIST_STAT_SUM](/constants/LIST_STAT_SUM/) or [LIST_STAT_STD_DEV](/constants/LIST_STAT_STD_DEV/)
+
+</Box>
+
+## Reference
+
+<ConstantGroups names={["ListEntryType", "StringTrimType", "ListStatisticsOperation"]} />
+
+## Related
+
+<SeeAlso items={[
+  "/types/list/|list type", "category:list", "category:json", "wiki:Json usage in LSL",
+  "category:data_conversion", "/types/string/|string type", "category:string",
+  "/types/key/|key type", "category:uuid", "category:cryptography"
+]}>
+  <Planned>Guide: sending nested data as JSON</Planned>
+  <Planned>Guide: parsing strings and typecasting fields</Planned>
+</SeeAlso>
+
+<FeatureFooter
+  related={["communications", "data-storage"]}
+  categories={["json", "data_conversion", "string", "list", "uuid", "cryptography"]}
+/>

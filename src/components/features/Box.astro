@@ -1,0 +1,13 @@
+---
+// <Box title="Combat Log" href="/wiki/combat-log-…/"> Markdown… </Box>
+// A bordered panel with an h2 heading (linked when `href` is set), as on the wiki's Combat2 page.
+// Use inside <Column> for the two-column top, or on its own for a full-width panel.
+interface Props { title: string; href?: string; id?: string }
+const { title, href } = Astro.props;
+const id = Astro.props.id ?? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+import './features.css';
+---
+<section class="feature-box" aria-labelledby={id}>
+	<h2 id={id}>{href ? <a href={href}>{title}</a> : title}</h2>
+	<div class="feature-box-body"><slot /></div>
+</section>

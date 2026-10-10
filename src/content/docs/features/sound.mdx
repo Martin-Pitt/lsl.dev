@@ -1,0 +1,93 @@
+---
+title: "Sound"
+description: "Playing, looping, triggering and synchronising sounds, including collision sounds."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+A prim plays sounds from its inventory or by asset key. Attached sounds follow the prim, and a prim has one attached sound at a time. Triggered sounds play at a fixed position and can overlap.
+
+Volume runs from 0.0 to 1.0. Sound radius, queueing and preloading help sounds start on time and stay in range.
+
+Streaming music is not a prim sound: it belongs to the [parcel](#parcel-music).
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Attached sounds: [play once](/functions/llPlaySound/), [loop](/functions/llLoopSound/) or [stop](/functions/llStopSound/)
+  - Only one sound is attached to a prim at a time; a new one replaces it
+  - The Link variants [play](/functions/llLinkPlaySound/) and [stop](/functions/llLinkStopSound/) on any prim in the linkset
+- Triggered sounds [play at the prim's position](/functions/llTriggerSound/) without being attached to it, optionally [limited to a box](/functions/llTriggerSoundLimited/)
+  - They do not move with the object and cannot be stopped or adjusted
+- [Adjust the volume](/functions/llAdjustSoundVolume/) of a playing sound, [limit how far it carries](/functions/llSetSoundRadius/), and [preload sounds](/functions/llPreloadSound/) so they play without delay
+- With [queueing](/functions/llSetSoundQueueing/) on, the next sound waits for the current one to finish
+  - Engines and weapons play a start sound, a loop for as long as needed, and an end sound without a pop at the transitions
+- A [master loop](/functions/llLoopSoundMaster/) and [slave sounds](/functions/llLoopSoundSlave/) keep several prims in time with each other
+- [Replace the default collision sound](/functions/llCollisionSound/); rezzed projectiles get their sounds [at rez time](/functions/llRezObjectWithParams/)
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llPlaySound", "llLoopSound", "llStopSound", "llTriggerSound", "llLinkPlaySound",
+  "llAdjustSoundVolume", "llSetSoundRadius", "llPreloadSound", "llSetSoundQueueing"
+]} />
+
+</Box>
+<Box title="Start-loop-end sounds" href="/functions/llSetSoundQueueing/">
+
+Call llSetSoundQueueing(TRUE), then queue a start sound, a looped sound and an end sound; each waits for the one before it. The queue is one level deep.
+
+</Box>
+<Box title="Parcel music" href="/functions/llSetParcelMusicURL/">
+
+Streaming music belongs to the parcel, not the prim. The object owner must match the landowner or land group.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llPlaySound", "llLoopSound", "llStopSound", "llTriggerSound", "llTriggerSoundLimited",
+  "llLinkPlaySound", "llLinkStopSound", "llAdjustSoundVolume", "llLinkAdjustSoundVolume",
+  "llSetSoundRadius", "llLinkSetSoundRadius", "llPreloadSound",
+  "llSetSoundQueueing", "llLinkSetSoundQueueing",
+  "llLoopSoundMaster", "llLoopSoundSlave", "llPlaySoundSlave", "llCollisionSound"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llLinkPlaySound](/functions/llLinkPlaySound/) — playback flags ([PlaySoundFlag](/constants/groups/PlaySoundFlag/))
+  - [SOUND_PLAY](/constants/SOUND_PLAY/) — Play once, attached (default)
+  - [SOUND_LOOP](/constants/SOUND_LOOP/) — Loop until stopped
+  - [SOUND_TRIGGER](/constants/SOUND_TRIGGER/) — Trigger once at the prim's position, not attached; overrides the other flags
+  - [SOUND_SYNC](/constants/SOUND_SYNC/) — Synchronise to the nearest [sound master](/functions/llLoopSoundMaster/)
+- [llRezObjectWithParams](/functions/llRezObjectWithParams/) — set a projectile's sounds before the object exists
+  - [REZ_SOUND](/constants/REZ_SOUND/) — Attach and play a sound, optionally looping
+  - [REZ_SOUND_COLLIDE](/constants/REZ_SOUND_COLLIDE/) — Sound to play on collision with an object, the ground or an avatar
+- [llCollisionSound](/functions/llCollisionSound/) — an empty string only suppresses collision sounds ([Physics](/features/physics/))
+- [llSetParcelMusicURL](/functions/llSetParcelMusicURL/) and [llGetParcelMusicURL](/functions/llGetParcelMusicURL/) — the parcel's streaming music URL ([Land](/features/land/))
+
+</Box>
+
+## Constant groups
+
+<ConstantGroups names={["PlaySoundFlag"]} />
+
+## Related
+
+<SeeAlso items={["feature:physics", "feature:land", "category:sound", "wiki:Category:LSL Sound"]}>
+  <Planned>Recipe: trigger a random sound from a list of keys</Planned>
+  <Planned>Guide: start-loop-end sounds for engines and weapons</Planned>
+</SeeAlso>
+
+<FeatureFooter
+  related={["effects", "physics", "land"]}
+  categories={["sound"]}
+/>

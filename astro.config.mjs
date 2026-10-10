@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { readFileSync } from 'node:fs';
+import { loadFeatures, featureRedirects } from './scripts/feature-index.mjs';
 
 /**
  * Navigation mirrors slua.dev: Fundamentals, Reference, Features, Guides, plus the wiki archive.
@@ -9,23 +10,30 @@ import { readFileSync } from 'node:fs';
  * individual functions or constants; those are reached from category pages, the filtered
  * catalogs and search.
  */
-/** @type {any} */
-const features = JSON.parse(readFileSync('./src/data/feature-clusters.json', 'utf-8'));
+/** Feature pages are src/content/docs/features/*.mdx; categories come from each page's <FeatureFooter>. */
+const features = loadFeatures();
 /** @type {any} */
 const catalog = JSON.parse(readFileSync('./src/data/catalog.json', 'utf-8'));
 const categoryLabel = new Map(catalog.categories.map((/** @type {any} */ c) => [c.id, c.label]));
 
-const referenceCategories = features.features
-	.filter((/** @type {any} */ f) => f.categories.length > 0)
-	.map((/** @type {any} */ f) => ({
+const referenceCategories = features
+	.filter(f => f.categories.length > 0)
+	.map(f => ({
 		label: f.title,
 		collapsed: true,
-		items: f.categories.map((/** @type {string} */ id) => ({ label: categoryLabel.get(id) ?? id, link: `/categories/${id}/` })),
+		items: f.categories.map(id => ({ label: categoryLabel.get(id) ?? id, link: `/categories/${id}/` })),
 	}));
 /** Flat, in slua.dev order: Features Overview, then one entry per feature page. */
-const featureItems = features.features.map((/** @type {any} */ f) => ({ label: f.title, link: `/features/${f.id}/` }));
-/** Retired feature-cluster slugs keep working. */
-const redirects = Object.fromEntries(Object.entries(features.redirects).map(([from, to]) => [`/features/${from}/`, `/features/${to}/`]));
+const featureItems = features.map(f => f.subpages.length === 0
+	? { label: f.title, link: `/features/${f.id}/` }
+	: {
+		/** A feature with sub-pages (features/<id>/<topic>.mdx) becomes a collapsed group. */
+		label: f.title,
+		collapsed: true,
+		items: [{ label: 'Overview', link: `/features/${f.id}/` }, ...f.subpages.map(s => ({ label: s.title, link: s.href }))],
+	});
+/** Retired feature-cluster slugs keep working (`redirectFrom` in each page's frontmatter). */
+const redirects = Object.fromEntries(Object.entries(featureRedirects(features)).map(([from, to]) => [`/features/${from}/`, `/features/${to}/`]));
 
 export default defineConfig({
 	site: 'https://lsl.dev',

@@ -1,0 +1,141 @@
+---
+title: "Pathfinding"
+description: "Navmesh pathfinding: static path queries and pathfinding characters."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signature, Signatures } from '../../../components/features';
+
+Pathfinding uses the region's navmesh, a map of walkable surfaces built from the land and from objects marked as walkable or obstacles. Scripts can use it in two ways.
+
+The light approach asks the navmesh for a path with [llGetStaticPath](/functions/llGetStaticPath/) and moves the object along it with [keyframed motion](/functions/llSetKeyframedMotion/) or your own movement code. Active pathfinding turns the object into a [character](/functions/llCreateCharacter/), a physics capsule the region steers.
+
+Characters are limited in movement and physics, so the light approach often works better. Pathfinding is not a general game AI: for grid-based games or better paths, a script can run [its own search](#alternatives).
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- The navmesh is built from the land and from objects, each with a [pathfinding type](/constants/OBJECT_PATHFINDING_TYPE/)
+  - Objects take part as [walkable surfaces](/constants/OPT_WALKABLE/), [static obstacles](/constants/OPT_STATIC_OBSTACLE/), movable obstacles, [exclusion volumes](/constants/OPT_EXCLUSION_VOLUME/) or [material volumes](/constants/OPT_MATERIAL_VOLUME/)
+  - Read any object's type with [llGetObjectDetails](/functions/llGetObjectDetails/)
+- Static paths (recommended)
+  - Ask for [a list of points between two positions](/functions/llGetStaticPath/) for a character of a given size and [type](/constants/CHARACTER_TYPE/)
+  - It ignores movable obstacles and works in any region regardless of dynamic pathfinding status
+  - [Snap a position to the navmesh](/functions/llGetClosestNavPoint/) before asking for a path
+  - Move along the points with [keyframed motion](/functions/llSetKeyframedMotion/)
+- Characters
+  - [Turn the linkset into a character](/functions/llCreateCharacter/), [change its settings](/functions/llUpdateCharacter/), or [make it a normal object again](/functions/llDeleteCharacter/)
+  - A character has a [size](/constants/CHARACTER_RADIUS/), [speed](/constants/CHARACTER_DESIRED_SPEED/), turning and [avoidance](/constants/CHARACTER_AVOIDANCE_MODE/) settings, and a [type](/constants/CHARACTER_TYPE/) that affects which navmesh surfaces it prefers
+- Behaviours: characters can [navigate to a point](/functions/llNavigateTo/), [patrol](/functions/llPatrolPoints/), [wander](/functions/llWanderWithin/), [pursue](/functions/llPursue/), [evade](/functions/llEvade/) and [flee](/functions/llFleeFrom/)
+  - [Commands](/functions/llExecCharacterCmd/) stop pathfinding or make the character jump
+  - [path_update](/events/path_update/) reports progress and failures; [moving_start](/events/moving_start/) and [moving_end](/events/moving_end/) fire as the object starts and stops
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llGetStaticPath", "llGetClosestNavPoint", "llCreateCharacter", "llUpdateCharacter",
+  "llDeleteCharacter", "llNavigateTo", "llPursue", "llExecCharacterCmd", "path_update"
+]} />
+
+</Box>
+<Box title="Static paths" href="/functions/llGetStaticPath/">
+
+The recommended approach: get waypoints from the static navmesh, then move with [llSetKeyframedMotion](/functions/llSetKeyframedMotion/) or your own code.
+
+</Box>
+<Box title="Alternatives" id="alternatives-summary" href="#alternatives">
+
+For grid-based games or better paths, run your own search, such as A\* over a grid, and test lines of sight with [raycasts](/functions/llCastRay/).
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures>
+<Signature name="llGetStaticPath">Returns waypoints between two positions on the static navmesh for a character of the given radius; takes [CHARACTER_TYPE](/constants/CHARACTER_TYPE/) in its params</Signature>
+<Signature name="llGetClosestNavPoint">Returns the closest position on the navmesh to a point, or an empty list if none is found</Signature>
+<Signature name="llSetKeyframedMotion">Smoothly moves a non-physical object through positions, rotations and times; use it to follow a static path</Signature>
+<Signature name="llCreateCharacter">Converts the linkset into a pathfinding character, required to use the character functions</Signature>
+<Signature name="llUpdateCharacter">Updates the character's settings</Signature>
+<Signature name="llDeleteCharacter">Converts the linkset back to a standard physical object</Signature>
+<Signature name="llNavigateTo">Navigates to a position in the current or adjacent regions</Signature>
+<Signature name="llPatrolPoints">Patrols through a list of points in order</Signature>
+<Signature name="llWanderWithin">Wanders around a central point within a bounding distance</Signature>
+<Signature name="llPursue">Pursues a target, optionally [intercepting](/constants/PURSUIT_INTERCEPT/) it</Signature>
+<Signature name="llEvade">Evades a target, hiding from it if a hiding spot is available</Signature>
+<Signature name="llFleeFrom">Keeps a given distance from a position</Signature>
+<Signature name="llExecCharacterCmd">Sends a command to the pathing system; currently only stopping or jumping</Signature>
+<Signature name="path_update">Triggered on changes or failures in the character's status, such as [reaching the goal](/constants/PU_GOAL_REACHED/)</Signature>
+<Signature name="moving_start">Triggered when the object starts moving</Signature>
+<Signature name="moving_end">Triggered when the object stops moving</Signature>
+</Signatures>
+
+</Box>
+
+<Box title="Additional">
+
+- [llGetStaticPath](/functions/llGetStaticPath/) — path query options ([GetStaticPathParam](/constants/groups/GetStaticPathParam/))
+  - [CHARACTER_TYPE](/constants/CHARACTER_TYPE/) — Preferred surface type, a [CharacterType](/constants/groups/CharacterType/) such as [CHARACTER_TYPE_A](/constants/CHARACTER_TYPE_A/) (humanoid) or [CHARACTER_TYPE_NONE](/constants/CHARACTER_TYPE_NONE/)
+- [llGetClosestNavPoint](/functions/llGetClosestNavPoint/) — options ([GetClosestNavPointParam](/constants/groups/GetClosestNavPointParam/))
+  - [GCNP_RADIUS](/constants/GCNP_RADIUS/) — How far out to search for a navigation point
+  - [GCNP_STATIC](/constants/GCNP_STATIC/) — Use the static navmesh, ignoring dynamic obstacles
+- [llCreateCharacter](/functions/llCreateCharacter/) and [llUpdateCharacter](/functions/llUpdateCharacter/) — character settings ([CharacterParam](/constants/groups/CharacterParam/))
+  - [CHARACTER_RADIUS](/constants/CHARACTER_RADIUS/), [CHARACTER_LENGTH](/constants/CHARACTER_LENGTH/) — Size of the collision capsule
+  - [CHARACTER_ORIENTATION](/constants/CHARACTER_ORIENTATION/) — Capsule orientation ([CharacterOrientation](/constants/groups/CharacterOrientation/))
+  - [CHARACTER_DESIRED_SPEED](/constants/CHARACTER_DESIRED_SPEED/), [CHARACTER_MAX_SPEED](/constants/CHARACTER_MAX_SPEED/) — Desired and maximum speed
+  - [CHARACTER_AVOIDANCE_MODE](/constants/CHARACTER_AVOIDANCE_MODE/) — What the character avoids ([CharacterAvoidanceMode](/constants/groups/CharacterAvoidanceMode/)); [AVOID_NONE](/constants/AVOID_NONE/) disables avoidance
+  - [TRAVERSAL_TYPE](/constants/TRAVERSAL_TYPE/) — Movement traversal type ([CharacterTraversalType](/constants/groups/CharacterTraversalType/))
+  - [CHARACTER_STAY_WITHIN_PARCEL](/constants/CHARACTER_STAY_WITHIN_PARCEL/) — Keep the character on its starting parcel
+- [llExecCharacterCmd](/functions/llExecCharacterCmd/) — commands ([CharacterCommand](/constants/groups/CharacterCommand/))
+  - [CHARACTER_CMD_STOP](/constants/CHARACTER_CMD_STOP/) — Stops any current pathfinding operation
+  - [CHARACTER_CMD_SMOOTH_STOP](/constants/CHARACTER_CMD_SMOOTH_STOP/) — Stops it in a smooth fashion
+  - [CHARACTER_CMD_JUMP](/constants/CHARACTER_CMD_JUMP/) — Jumps; the first option is a height between 0.1m and 2.0m
+- [llNavigateTo](/functions/llNavigateTo/) — [FORCE_DIRECT_PATH](/constants/FORCE_DIRECT_PATH/) moves in a straight line
+- [llPatrolPoints](/functions/llPatrolPoints/) — [PATROL_PAUSE_AT_WAYPOINTS](/constants/PATROL_PAUSE_AT_WAYPOINTS/) pauses at each waypoint
+- [llWanderWithin](/functions/llWanderWithin/) — [WANDER_PAUSE_AT_WAYPOINTS](/constants/WANDER_PAUSE_AT_WAYPOINTS/) pauses after each waypoint
+- [llPursue](/functions/llPursue/) — [PURSUIT_OFFSET](/constants/PURSUIT_OFFSET/) offsets the goal from the target; [PURSUIT_INTERCEPT](/constants/PURSUIT_INTERCEPT/) predicts the target's position
+- [path_update](/events/path_update/) — the type is a [CharacterPathUpdateType](/constants/groups/CharacterPathUpdateType/)
+  - [PU_GOAL_REACHED](/constants/PU_GOAL_REACHED/) — The character reached its goal
+  - [PU_SLOWDOWN_DISTANCE_REACHED](/constants/PU_SLOWDOWN_DISTANCE_REACHED/) — The character is near its goal
+  - [PU_FAILURE_UNREACHABLE](/constants/PU_FAILURE_UNREACHABLE/) — A previously valid goal became unreachable
+- [llGetObjectDetails](/functions/llGetObjectDetails/) — [OBJECT_PATHFINDING_TYPE](/constants/OBJECT_PATHFINDING_TYPE/) returns an OPT_\* value ([ObjectPathfindingType](/constants/groups/ObjectPathfindingType/))
+  - [OPT_CHARACTER](/constants/OPT_CHARACTER/), [OPT_AVATAR](/constants/OPT_AVATAR/) — Characters and avatars
+  - [OPT_LEGACY_LINKSET](/constants/OPT_LEGACY_LINKSET/) — Movable obstacles, movable phantoms, physical and volumedetect objects
+  - [OPT_OTHER](/constants/OPT_OTHER/) — Attachments, Linden trees and grass
+- [llGetSimStats](/functions/llGetSimStats/) — [SIM_STAT_PCT_CHARS_STEPPED](/constants/SIM_STAT_PCT_CHARS_STEPPED/) is the percentage of characters updated each frame
+
+</Box>
+
+## Constant groups
+
+<ConstantGroups names={[
+  "GetStaticPathParam", "GetClosestNavPointParam", "CharacterType", "CharacterParam",
+  "CharacterAvoidanceMode", "CharacterOrientation", "CharacterTraversalType",
+  "CharacterNavigateParam", "CharacterPatrolPointsParam", "CharacterWanderWithinParam",
+  "CharacterPursueParam", "CharacterCommand", "CharacterPathUpdateType", "ObjectPathfindingType"
+]} />
+
+## Alternatives
+
+For grid-based games or better paths, a script can run its own search, such as A\* over a grid, and use [raycasts](/functions/llCastRay/) to test lines of sight.
+
+<Signatures names={["llCastRay"]} />
+
+## Related
+
+<SeeAlso items={[
+  "category:pathfinding", "wiki:Category:Pathfinding", "wiki:Category:LSL Pathfinding Types",
+  "feature:movement", "feature:animesh", "feature:math"
+]}>
+  <Planned>Recipe: following a static path with keyframed motion</Planned>
+  <Planned>Recipe: A\* search over a grid</Planned>
+</SeeAlso>
+
+<FeatureFooter
+  related={["movement", "animesh", "physics"]}
+  categories={["pathfinding"]}
+/>

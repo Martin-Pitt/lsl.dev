@@ -1,0 +1,88 @@
+---
+title: "Money"
+description: "Linden dollar (L$) payments: receiving money, paying out and vendor patterns."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+Objects can receive L$ from avatars and, with the owner's permission, pay L$ out. Vendors, tip jars, rentals and games are built from these few functions.
+
+Receiving needs no permission: the [money](/events/money/) event fires when someone pays the object. Paying out needs [PERMISSION_DEBIT](/constants/PERMISSION_DEBIT/), granted by the owner. Handle it carefully, because a bug can spend the owner's money.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Receiving payments
+  - The [money](/events/money/) event fires when someone pays the object
+  - The pay dialog shows a default amount and quick-pay buttons, which the script [controls](/functions/llSetPayPrice/)
+  - Set the [click action](/functions/llSetClickAction/) to [pay](/constants/CLICK_ACTION_PAY/) to open it on click
+- Paying out
+  - The owner grants PERMISSION_DEBIT through [llRequestPermissions](/functions/llRequestPermissions/)
+  - [llTransferLindenDollars](/functions/llTransferLindenDollars/) returns a transaction key, and reports success or failure in [transaction_result](/events/transaction_result/)
+  - [llGiveMoney](/functions/llGiveMoney/) is the older call with no result
+- Vendors
+  - After payment, a vendor checks the amount and [gives the item](/functions/llGiveInventory/), refunding wrong amounts
+  - Several items can be [given as a folder](/functions/llGiveAgentInventory/), and [agent data](/functions/llRequestAgentData/) can be looked up
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "money", "llSetPayPrice", "llTransferLindenDollars", "transaction_result",
+  "llGiveMoney", "llGiveInventory"
+]} />
+
+</Box>
+<Box title="Money on the wiki" href="https://wiki.secondlife.com/wiki/Category:LSL_Money">
+
+The wiki's category of money functions and events.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "money", "llSetPayPrice", "llSetClickAction", "CLICK_ACTION_PAY",
+  "llRequestPermissions", "PERMISSION_DEBIT", "llTransferLindenDollars",
+  "transaction_result", "llGiveMoney", "llGiveInventory", "llGiveAgentInventory",
+  "llRequestAgentData"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llSetPayPrice](/functions/llSetPayPrice/) — suggests the default amount and the four quick-pay buttons ([pay buttons](/constants/groups/PayButton/))
+  - [PAY_HIDE](/constants/PAY_HIDE/) — hide the specified quick pay button completely
+  - [PAY_DEFAULT](/constants/PAY_DEFAULT/) — use the default value for the specified quick pay button
+- [llSetClickAction](/functions/llSetClickAction/)
+  - [CLICK_ACTION_PAY](/constants/CLICK_ACTION_PAY/) — opens the pay dialog when the prim is clicked or touched
+- [transaction_result](/events/transaction_result/) — on failure, reports a [transfer error](/constants/groups/TransferError/)
+
+</Box>
+
+## Receiving payments
+
+<ConstantGroups names={["PayButton"]} />
+
+## Paying out
+
+<ConstantGroups names={["TransferError"]} />
+
+## Related
+
+<SeeAlso items={[
+  "category:money", "wiki:Category:LSL Money", "feature:avatar",
+  "feature:land", "wiki:CatMoney|Script library: money"
+]}>
+  <Planned>Recipe: vendor with refunds</Planned>
+</SeeAlso>
+
+<FeatureFooter
+  related={["avatar", "prims"]}
+  categories={["money"]}
+/>

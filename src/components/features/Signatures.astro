@@ -1,0 +1,46 @@
+---
+// <Signatures names={["llDamage", "on_damage", "PRIM_DAMAGE"]} />
+//   Compact table: return type (or "event", or a constant's type) | linked name with typed parameters.
+// <Signatures names={[...]} descriptions />
+//   Adds each entry's one-line description from LSL Definitions.
+// Hand-written descriptions: put <Signature name="llDamage">Markdown with [links](/...)</Signature>
+// children inside; they are added as rows after `names`, in the order written.
+// Unknown names fail the build.
+import { apiMap, apiHref } from '../../lib/catalog';
+interface Props { names?: string[]; descriptions?: boolean }
+const { names = [], descriptions = false } = Astro.props;
+const entries = names.map(name => {
+	const e = apiMap.get(name) as any;
+	if (!e) throw new Error(`<Signatures>: "${name}" is not a public function, event or constant`);
+	return e;
+});
+const hasRows = Astro.slots.has('default');
+const typeOf = (e: any) => e.kind === 'event' ? 'event' : e.kind === 'constant' ? e.type : e.returnType;
+import './features.css';
+---
+<table class="signatures not-content">
+	<tbody>
+		{entries.map(e => (
+			<tr>
+				<td class="sig-type"><code>{typeOf(e)}</code></td>
+				<td class="sig-name">
+					<code><a href={apiHref(e.kind, e.name)}>{e.name}</a>{e.kind === 'constant' ? <> = {e.value}</> : <>({e.parameters.map((p: any, i: number) => <>{i > 0 && ', '}<span class="sig-ptype">{p.type}</span> {p.name}</>)})</>}</code>
+					{descriptions && e.description && <div class="sig-desc">{e.description}</div>}
+				</td>
+			</tr>
+		))}
+		{hasRows && <slot />}
+	</tbody>
+</table>
+<style is:global>
+	.signatures { width: 100%; border-collapse: collapse; margin: .5rem 0 0; font-size: var(--sl-text-sm); }
+	.signatures td { padding: .3rem .5rem .3rem 0; vertical-align: top; border-bottom: 1px solid var(--sl-color-hairline); }
+	.signatures tr:last-child td { border-bottom: 0; }
+	.signatures .sig-type { width: 1%; white-space: nowrap; text-align: right; color: var(--sl-color-gray-3); }
+	.signatures .sig-type code, .signatures .sig-name code { font-size: var(--sl-text-xs); background: none; padding: 0; overflow-wrap: anywhere; }
+	.signatures .sig-name a { font-weight: 600; text-decoration: none; }
+	.signatures .sig-ptype { color: var(--sl-color-gray-3); }
+	.signatures .sig-desc { margin-top: .15rem; color: var(--sl-color-gray-2); line-height: 1.4; }
+	.signatures .sig-desc p { margin: 0; }
+	@media (max-width: 40rem) { .signatures .sig-type { white-space: normal; } }
+</style>

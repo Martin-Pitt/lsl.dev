@@ -1,0 +1,1117 @@
+{
+  "$comment": "Feature pages: one entry per slua.dev feature page, with the same slug, title and order. 'categories' are each feature's home categories (every definition category belongs to exactly one feature; used by the category and reference indexes). Section items are canonical API names, groups are constant groups, links point to features, categories, local wiki archive pages or site pages. 'redirects' keeps the retired cluster slugs working. Validated by scripts/lib/test_import.py.",
+  "features": [
+    {
+      "id": "animesh",
+      "title": "Animesh",
+      "description": "Animated mesh objects: rigged mesh that plays skeletal animations without an avatar.",
+      "intro": [
+        "Animesh is rigged mesh that has its own skeleton, so an object can play avatar-style animations by itself. Pets, NPCs, creatures and moving decor are typical uses.",
+        "The object must be rigged mesh with the Animated Mesh option enabled in the build tools. A script in the object then starts and stops animations from the object's own inventory. No permission is needed, because the script animates its own object rather than an avatar."
+      ],
+      "sections": [
+        {
+          "title": "Play animations",
+          "text": ["Animations are referred to by inventory name or asset key. Several can run at once and blend by priority, as they do on avatars."],
+          "items": ["llStartObjectAnimation", "llStopObjectAnimation", "llGetObjectAnimationNames"],
+          "links": [{ "category": "object_animation" }]
+        },
+        {
+          "title": "Move and steer",
+          "text": ["Animesh moves like any other object. For walking creatures, keyframed motion or pathfinding characters are the usual choices, with animations started and stopped to match the motion."],
+          "items": ["llSetKeyframedMotion", "llCreateCharacter", "llNavigateTo", "moving_start", "moving_end", "path_update"],
+          "links": [{ "feature": "movement" }, { "feature": "pathfinding" }]
+        },
+        {
+          "title": "Appearance",
+          "text": ["Animesh faces take textures and materials like other mesh. Attachments can also be animesh, and their animations play on the attachment, not on the wearer."],
+          "links": [{ "feature": "textures" }, { "feature": "avatar" }, { "wiki": "Animesh User Guide" }]
+        }
+      ],
+      "categories": ["object_animation"],
+      "related": ["avatar", "movement", "pathfinding"]
+    },
+    {
+      "id": "avatar",
+      "title": "Avatars",
+      "description": "Avatars in scripting: identifying agents, permissions, attachments, sitting, animations and teleports.",
+      "intro": [
+        "Scripts never own an avatar. They find avatars nearby or in the region, read public information about them, and act on them only with a permission the avatar has granted.",
+        "Most avatar control follows the same pattern: call llRequestPermissions, wait for run_time_permissions, then use the functions that permission unlocks. Attachments and sitting avatars grant some permissions automatically."
+      ],
+      "sections": [
+        {
+          "title": "Find and identify avatars",
+          "text": ["Avatars are identified by key. Names come in two forms: the legacy/user name and the changeable display name. Some lookups are asynchronous and answer in the dataserver event."],
+          "items": ["llGetAgentList", "llGetRegionAgentCount", "llGetAgentInfo", "llGetAgentSize", "llGetAgentLanguage", "llGetDisplayName", "llGetUsername", "llKey2Name", "llName2Key", "llRequestAgentData", "llRequestDisplayName", "llRequestUsername", "llRequestUserKey", "llGetOwner", "llIsFriend", "llSameGroup", "llGetVisualParams", "dataserver"],
+          "groups": ["AgentInfo", "AgentData", "AgentDataPaymentInfo", "AgentListScope"]
+        },
+        {
+          "title": "Permissions",
+          "text": ["Permissions are granted per script, to one avatar at a time. Request only what you need; granting is remembered until the script resets or another avatar grants."],
+          "items": ["llRequestPermissions", "run_time_permissions", "llGetPermissions", "llGetPermissionsKey"],
+          "groups": ["ScriptPermission"],
+          "links": [{ "category": "permissions" }, { "wiki": "Category:LSL Permissions" }]
+        },
+        {
+          "title": "Giving items to avatars",
+          "text": ["Objects can hand inventory items or folders to an avatar. The receiver may need to accept the offer, and no-copy items leave the object's inventory."],
+          "items": ["llGiveInventory", "llGiveInventoryList", "llGiveAgentInventory"],
+          "groups": ["GiveAgentInventoryParam"],
+          "links": [{ "category": "avatar_inventory" }]
+        },
+        {
+          "title": "Attachments",
+          "text": ["An attachment is an object worn on an avatar at an attach point. Scripts can attach with PERMISSION_ATTACH, detach themselves, and inspect what an avatar is wearing. HUDs are attachments on the HUD points."],
+          "items": ["llAttachToAvatar", "llAttachToAvatarTemp", "llDetachFromAvatar", "llGetAttached", "llGetAttachedList", "llGetAttachedListFiltered", "attach", "llWorldPosToHUD"],
+          "groups": ["AttachPoint", "AttachedListFilterParam", "AttachedListFilterFlag"],
+          "links": [{ "category": "attachments" }, { "wiki": "Category:LSL Attachment" }]
+        },
+        {
+          "title": "Sitting (sit targets)",
+          "text": ["A sit target fixes where and how an avatar sits on a prim. Sitting avatars become part of the linkset, after the prims, so the link numbers after the last prim are avatars. Sit flags control unsitting, collisions and damage while seated."],
+          "items": ["llSitTarget", "llLinkSitTarget", "llAvatarOnSitTarget", "llAvatarOnLinkSitTarget", "llSetSitText", "llSitOnLink", "llUnSit", "llSetLinkSitFlags", "llGetLinkSitFlags", "changed"],
+          "groups": ["SitFlag", "SitError"],
+          "links": [{ "category": "sit" }, { "wiki": "Category:LSL Sit" }]
+        },
+        {
+          "title": "Animations",
+          "text": ["With PERMISSION_TRIGGER_ANIMATION a script can start and stop animations on the avatar. With PERMISSION_OVERRIDE_ANIMATIONS it can replace the default animation for each animation state (standing, walking, flying and so on)."],
+          "items": ["llStartAnimation", "llStopAnimation", "llGetAnimation", "llGetAnimationList", "llSetAnimationOverride", "llGetAnimationOverride", "llResetAnimationOverride"],
+          "links": [{ "category": "avatar_animation" }, { "wiki": "Category:LSL Animation" }]
+        },
+        {
+          "title": "Teleporting and moving avatars",
+          "text": ["llTeleportAgent needs PERMISSION_TELEPORT (or an experience). Landowners can send avatars home or eject them. Avatars can also be turned or pushed."],
+          "items": ["llTeleportAgent", "llTeleportAgentGlobalCoords", "llTeleportAgentHome", "llMapDestination", "llSetAgentRot", "llPushObject"],
+          "links": [{ "category": "teleport" }, { "feature": "land" }]
+        }
+      ],
+      "categories": ["avatar", "avatar_animation", "attachments", "sit", "teleport", "permissions", "avatar_inventory"],
+      "related": ["camera", "input", "animesh", "experience"],
+      "wiki": ["Category:LSL Avatar"]
+    },
+    {
+      "id": "camera",
+      "title": "Camera",
+      "description": "Controlling and reading an avatar's camera from scripts.",
+      "intro": [
+        "Each avatar has one camera, controlled by the viewer. Scripts can suggest a default view when someone sits, take over the camera with permission, or read where the camera is.",
+        "Two permissions are involved: PERMISSION_CONTROL_CAMERA to set camera parameters and PERMISSION_TRACK_CAMERA to read the camera position and rotation. PERMISSION_CONTROL_CAMERA is automatically granted for attached or sat-on objects, so HUDs, seats and vehicles get it without a prompt."
+      ],
+      "sections": [
+        {
+          "title": "Sit camera",
+          "text": ["The simplest camera control needs no permission: set an eye and focus offset on the prim, and the viewer uses it when an avatar sits there. llSetLinkCamera does the same for any prim in the linkset."],
+          "items": ["llSetCameraEyeOffset", "llSetCameraAtOffset", "llSetLinkCamera", "llSitTarget"]
+        },
+        {
+          "title": "Scripted camera",
+          "text": ["Camera parameters set the camera position, focus, distance, lag and thresholds, and can lock either point in place. They stay in effect until cleared. Vehicles, follow cameras and cutscenes are built this way."],
+          "items": ["llSetCameraParams", "llClearCameraParams", "llForceMouselook"],
+          "groups": ["CameraParam"]
+        },
+        {
+          "title": "Reading the camera",
+          "text": ["With PERMISSION_TRACK_CAMERA a script can read the avatar's camera position, rotation, field of view and aspect ratio, for example to aim along the view or place a HUD element in the world."],
+          "items": ["llGetCameraPos", "llGetCameraRot", "llGetCameraFOV", "llGetCameraAspect", "llWorldPosToHUD"]
+        },
+        {
+          "title": "Permissions and controls",
+          "text": ["Camera scripts are usually paired with control capture, so the user can steer while the script drives the view."],
+          "items": ["llRequestPermissions", "run_time_permissions"],
+          "groups": ["ScriptPermission"],
+          "links": [{ "feature": "input" }, { "feature": "avatar" }, { "category": "camera" }, { "wiki": "Category:LSL Camera" }, { "wiki": "FollowCam" }]
+        }
+      ],
+      "categories": ["camera"],
+      "related": ["avatar", "input", "movement"]
+    },
+    {
+      "id": "combat",
+      "title": "Combat",
+      "description": "The combat system: damage, health, death, damage types, projectiles and the combat log.",
+      "intro": [
+        "Combat (originally Combat2) is the standard way to build damage systems in Second Life. Damage is dealt to avatars and to objects that have health, it can be inspected and changed before it is applied, and every hit is reported on the combat log.",
+        "Damage works only where the parcel allows it. Region owners can set throttles, limits and what happens on death through the region's environment settings."
+      ],
+      "sections": [
+        {
+          "title": "Dealing damage",
+          "text": ["Objects deal damage by colliding with a damage value set, or directly with llDamage. Projectiles usually get their damage and damage type at rez time."],
+          "items": ["llDamage", "llSetDamage", "PRIM_DAMAGE", "REZ_DAMAGE", "REZ_DAMAGE_TYPE", "llRezObjectWithParams"],
+          "groups": ["DamageType"]
+        },
+        {
+          "title": "Receiving damage",
+          "text": ["on_damage fires before damage is applied, where llAdjustDamage can reduce, increase or cancel each hit. final_damage reports what was applied. Detected functions identify the source, type and rezzer."],
+          "items": ["on_damage", "final_damage", "llAdjustDamage", "llDetectedDamage", "llDetectedRezzer", "llDetectedOwner", "llDetectedKey"]
+        },
+        {
+          "title": "Health and death",
+          "text": ["Avatars and objects with PRIM_HEALTH have health. When it reaches zero the avatar dies (by region rules) or the object is destroyed. on_death reports an avatar's death to its attachments."],
+          "items": ["llGetHealth", "PRIM_HEALTH", "on_death", "OBJECT_HEALTH", "OBJECT_DAMAGE", "OBJECT_DAMAGE_TYPE", "DAMAGEABLE"]
+        },
+        {
+          "title": "Combat log",
+          "text": ["The region broadcasts combat events as JSON on COMBAT_CHANNEL from COMBAT_LOG_ID. Scripts can listen to it for scoring, kill feeds and auditing."],
+          "items": ["COMBAT_CHANNEL", "COMBAT_LOG_ID", "llListen", "listen", "llJsonGetValue"],
+          "links": [{ "wiki": "Combat Log" }]
+        },
+        {
+          "title": "Region and seating rules",
+          "text": ["Region combat settings are read with llGetEnv. Seats can protect their sitters from damage with sit flags."],
+          "items": ["llGetEnv", "llGetParcelFlags", "PARCEL_FLAG_ALLOW_DAMAGE", "llSetLinkSitFlags", "SIT_FLAG_NO_DAMAGE"]
+        },
+        {
+          "title": "Weapons and projectiles",
+          "text": ["Guns and spells combine several features: control capture or mouselook for input, rezzing physical projectiles with parameters, raycasts for hitscan weapons, and sounds and particles for feedback."],
+          "items": ["llCastRay", "llRezObjectWithParams", "REZ_PARAM_STRING", "llGetStartString", "llDerezObject"],
+          "links": [{ "feature": "input" }, { "feature": "physics" }, { "feature": "effects" }, { "feature": "sound" }, { "wiki": "Category:LSL Combat2" }, { "wiki": "Damage Types" }]
+        }
+      ],
+      "categories": ["combat"],
+      "related": ["physics", "input", "linkset"]
+    },
+    {
+      "id": "communications",
+      "title": "Communications",
+      "description": "Communication between scripts, objects, avatars and external systems.",
+      "intro": [
+        "Scripts talk through a few channels, each with its own reach: chat for nearby objects and avatars, link messages inside one object, linkset data shared by all scripts in an object, and HTTP or email for the outside world.",
+        "Pick the narrowest channel that works. It is cheaper for the region and easier to secure."
+      ],
+      "sections": [
+        {
+          "title": "Owner say",
+          "text": ["llOwnerSay sends text only to the object's owner. It is the usual way to report status and debug output."],
+          "items": ["llOwnerSay", "llInstantMessage"]
+        },
+        {
+          "title": "Chat and listeners",
+          "text": ["Chat is sent on an integer channel. Channel 0 is public chat; other channels are invisible to people. Range depends on the function: whisper, say and shout reach further, llRegionSay reaches the whole region, and llRegionSayTo targets one avatar or object.", "A listener filters by channel, and optionally by name, key and message. Each open listener costs the region, so remove or disable listeners you no longer need."],
+          "items": ["llSay", "llWhisper", "llShout", "llRegionSay", "llRegionSayTo", "llListen", "llListenControl", "llListenRemove", "listen"],
+          "groups": ["Channel", "ChannelNonPublic"],
+          "links": [{ "category": "chat" }, { "wiki": "Listen" }, { "wiki": "Category:LSL Chat" }, { "planned": "Guide: listeners and channels" }]
+        },
+        {
+          "title": "Link messages",
+          "text": ["llMessageLinked sends an integer, a string and a key to scripts in one prim, or to all prims, of the same linkset. The link_message event receives them along with the sender's link number."],
+          "items": ["llMessageLinked", "link_message"],
+          "groups": ["Links"],
+          "links": [{ "wiki": "Link message" }]
+        },
+        {
+          "title": "Linkset data",
+          "text": ["Linkset data is key-value storage shared by every script in the object. Scripts can pass state to each other through it, and the linkset_data event reports changes."],
+          "items": ["llLinksetDataWrite", "llLinksetDataRead", "linkset_data"],
+          "links": [{ "feature": "data-storage" }]
+        },
+        {
+          "title": "HTTP requests",
+          "text": ["llHTTPRequest calls an external web server, or another object's URL, and the answer arrives in http_response. Requests are throttled, and the response body is truncated to a maximum length."],
+          "items": ["llHTTPRequest", "http_response", "llEscapeURL", "llUnescapeURL"],
+          "groups": ["HTTPRequestParam", "HTTPContentType"],
+          "links": [{ "category": "web" }, { "wiki": "Category:LSL HTTP" }]
+        },
+        {
+          "title": "Web server (HTTP-in)",
+          "text": ["An object can act as a small web server. Request a URL, and each incoming request arrives in http_request, which you answer with llHTTPResponse. URLs are temporary: they are lost when the object changes region or the region restarts, so request a new one then."],
+          "items": ["llRequestURL", "llRequestSecureURL", "llReleaseURL", "http_request", "llHTTPResponse", "llGetHTTPHeader", "llSetContentType", "llGetFreeURLs", "CHANGED_REGION_START"],
+          "groups": ["HTTPResponseError"],
+          "links": [{ "wiki": "HTTP Server URL Registration" }, { "planned": "Guide: an object as a web server" }]
+        },
+        {
+          "title": "Email",
+          "text": ["Objects can send email, and receive it at their own address by polling."],
+          "items": ["llEmail", "llTargetedEmail", "llGetNextEmail", "email"],
+          "groups": ["EmailTarget"],
+          "links": [{ "wiki": "Category:LSL Email" }]
+        },
+        {
+          "title": "Viewer interaction",
+          "text": ["Scripts can ask the viewer to show a dialog, open a URL, show a map location or open a floater."],
+          "items": ["llDialog", "llTextBox", "llLoadURL", "llMapDestination", "llMapBeacon", "llOpenFloater"],
+          "links": [{ "feature": "dialog" }]
+        }
+      ],
+      "categories": ["chat", "avatar_communication", "script_communication", "web"],
+      "related": ["data-transmission", "data-storage", "dialog"],
+      "wiki": ["Category:LSL Communications"]
+    },
+    {
+      "id": "data-storage",
+      "title": "Data Storage",
+      "description": "Where scripts can keep data: script memory, linkset data, experience storage, notecards and object properties.",
+      "intro": [
+        "Script memory is small and lost on reset, so larger or longer-lived scripts store data elsewhere. Each store has a different size, lifetime, speed and audience.",
+        "As a rule: linkset data for an object's own persistent state, experience key-value storage for data shared across objects and regions, notecards for read-only configuration, and an external server through HTTP for anything bigger."
+      ],
+      "sections": [
+        {
+          "title": "Script memory",
+          "text": ["Global variables persist until the script resets. Each script has a memory limit, which can be read and lowered."],
+          "items": ["llGetFreeMemory", "llGetUsedMemory", "llGetSPMaxMemory", "llGetMemoryLimit", "llSetMemoryLimit"],
+          "links": [{ "wiki": "LSL Script Memory" }]
+        },
+        {
+          "title": "Linkset data",
+          "text": ["Up to 128 KiB of string key-value pairs stored in the object, readable and writable by every script in it. It survives script resets, taking the object into inventory and rezzing it again. Keys can be protected with a password.", "Spreading data across many keys is cheaper than reading and rewriting one large value."],
+          "items": ["llLinksetDataWrite", "llLinksetDataRead", "llLinksetDataDelete", "llLinksetDataWriteProtected", "llLinksetDataReadProtected", "llLinksetDataDeleteProtected", "llLinksetDataFindKeys", "llLinksetDataListKeys", "llLinksetDataCountKeys", "llLinksetDataCountFound", "llLinksetDataDeleteFound", "llLinksetDataAvailable", "llLinksetDataReset", "linkset_data"],
+          "groups": ["LinksetDataAction", "LinksetDataError"],
+          "links": [{ "category": "linkset_data" }, { "wiki": "Linkset data" }]
+        },
+        {
+          "title": "Experience persistent storage",
+          "text": ["Scripts compiled to an experience share a key-value store that any object in that experience can use, anywhere on the grid. Every call is asynchronous and answers in the dataserver event."],
+          "items": ["llCreateKeyValue", "llReadKeyValue", "llUpdateKeyValue", "llDeleteKeyValue", "llKeysKeyValue", "llKeyCountKeyValue", "llDataSizeKeyValue", "dataserver"],
+          "groups": ["ExperienceError"],
+          "links": [{ "feature": "experience" }, { "category": "experience_data" }]
+        },
+        {
+          "title": "Notecards",
+          "text": ["Notecards are read-only text in the object's inventory, good for configuration that users edit by hand. Lines can be read synchronously when the notecard is cached, or asynchronously through dataserver."],
+          "items": ["llGetNotecardLineSync", "llGetNotecardLine", "llGetNumberOfNotecardLines", "llFindNotecardTextSync", "dataserver", "CHANGED_INVENTORY"],
+          "links": [{ "category": "notecard" }, { "wiki": "Category:LSL Notecard" }]
+        },
+        {
+          "title": "Object properties",
+          "text": ["Small values can live in an object's name or description, or in a prim's hover text or other prim parameters. Start parameters and start strings pass data to an object as it is rezzed."],
+          "items": ["llSetObjectDesc", "llGetObjectDesc", "llSetObjectName", "llGetObjectName", "llGetStartParameter", "llGetStartString", "REZ_PARAM_STRING"],
+          "links": [{ "feature": "prims" }]
+        },
+        {
+          "title": "External storage",
+          "text": ["For large or shared data, send it to a web service over HTTP and fetch it back when needed."],
+          "items": ["llHTTPRequest", "http_response"],
+          "links": [{ "feature": "communications" }, { "feature": "data-transmission" }, { "planned": "Guide: choosing where to store data" }]
+        }
+      ],
+      "categories": ["linkset_data", "data_storage", "notecard", "dataserver"],
+      "related": ["data-transmission", "communications", "experience"]
+    },
+    {
+      "id": "data-transmission",
+      "title": "Data Transmission",
+      "description": "Serialising and parsing data to pass it between scripts, services and storage.",
+      "intro": [
+        "Chat, link messages, linkset data, notecards and HTTP all carry strings. Lists, numbers, vectors, rotations and keys must be turned into strings to be sent or stored, then parsed back on the other side.",
+        "Choose a format both sides understand: a delimited string for simple fields, CSV for lists of values, JSON for nested data or web services, and Base64 for binary or compact values."
+      ],
+      "sections": [
+        {
+          "title": "Lists and delimited strings",
+          "text": ["The most common format is a list joined with a separator. Parsing splits it again, and typecasts or llList2* functions convert each field to its type."],
+          "items": ["llDumpList2String", "llParseString2List", "llParseStringKeepNulls", "llList2CSV", "llCSV2List", "llList2String", "llList2Integer", "llList2Float", "llList2Key", "llList2Vector", "llList2Rot", "llGetListEntryType"],
+          "groups": ["ListEntryType"],
+          "links": [{ "href": "/types/list/", "label": "list type" }, { "category": "list" }]
+        },
+        {
+          "title": "JSON",
+          "text": ["JSON represents nested objects and arrays, and is the format web services expect. LSL can build JSON from lists, read and change values by path, and convert JSON arrays and objects back to lists."],
+          "items": ["llList2Json", "llJson2List", "llJsonGetValue", "llJsonSetValue", "llJsonValueType", "JSON_OBJECT", "JSON_ARRAY", "JSON_INVALID"],
+          "links": [{ "category": "json" }, { "wiki": "Json usage in LSL" }, { "planned": "Guide: sending nested data as JSON" }]
+        },
+        {
+          "title": "Encoding",
+          "text": ["Base64 makes arbitrary text or integers safe to embed in other formats. URL escaping prepares values for HTTP."],
+          "items": ["llStringToBase64", "llBase64ToString", "llIntegerToBase64", "llBase64ToInteger", "llXorBase64", "llEscapeURL", "llUnescapeURL", "llChar", "llOrd"],
+          "links": [{ "category": "data_conversion" }]
+        },
+        {
+          "title": "Parsing strings",
+          "text": ["String functions find, cut and replace text. Strings are UTF-8 internally but indexed by character."],
+          "items": ["llSubStringIndex", "llGetSubString", "llDeleteSubString", "llInsertString", "llReplaceSubString", "llStringLength", "llStringTrim", "llToLower", "llToUpper"],
+          "groups": ["StringTrimType"],
+          "links": [{ "href": "/types/string/", "label": "string type" }, { "category": "string" }, { "planned": "Guide: parsing strings and typecasting fields" }]
+        },
+        {
+          "title": "Working with lists",
+          "text": ["Received lists often need searching, slicing, sorting or reshaping. Strided lists store records as repeating groups of fields."],
+          "items": ["llGetListLength", "llList2List", "llList2ListSlice", "llList2ListStrided", "llListFindList", "llListFindListNext", "llListFindStrided", "llListInsertList", "llListReplaceList", "llDeleteSubList", "llListSort", "llListSortStrided", "llListRandomize", "llListStatistics"],
+          "groups": ["ListStatisticsOperation"]
+        },
+        {
+          "title": "Keys and identifiers",
+          "text": ["Keys (UUIDs) identify avatars, objects and assets. Generate unique keys for request IDs and records."],
+          "items": ["llGenerateKey", "llGetKey", "llGetLinkKey", "llGetObjectLinkKey", "llGetOwnerKey"],
+          "links": [{ "href": "/types/key/", "label": "key type" }, { "category": "uuid" }]
+        },
+        {
+          "title": "Integrity and signatures",
+          "text": ["Hashes, HMACs and RSA signatures let a receiver check that a message has not been changed and came from the expected sender."],
+          "items": ["llHash", "llComputeHash", "llHMAC", "llMD5String", "llSHA1String", "llSHA256String", "llSignRSA", "llVerifyRSA"],
+          "links": [{ "category": "cryptography" }]
+        }
+      ],
+      "categories": ["json", "data_conversion", "string", "list", "uuid", "cryptography"],
+      "related": ["communications", "data-storage"]
+    },
+    {
+      "id": "dialog",
+      "title": "Dialog",
+      "description": "Dialog menus and text boxes, and how scripts handle the answers.",
+      "intro": [
+        "llDialog shows a blue menu with a message and up to 12 buttons. llTextBox asks for a line of text. In both cases the viewer makes the avatar say the answer on a channel the script chose, so a dialog is really a listener plus a prompt.",
+        "Simple menus are easy; multi-page menus, several users at once and timeouts take more design. For complex interfaces, a HUD built from prims can be a better fit."
+      ],
+      "sections": [
+        {
+          "title": "Show a menu",
+          "text": ["Buttons are a list of short labels. Use a large negative random channel so other scripts and people are unlikely to collide with it."],
+          "items": ["llDialog", "llTextBox", "llFrand"]
+        },
+        {
+          "title": "Handle the answer",
+          "text": ["Open a listener on the dialog channel, filtered to the avatar's key, before showing the dialog. The reply arrives in listen. Remove the listener after the answer, or after a timeout set with a timer."],
+          "items": ["llListen", "listen", "llListenRemove", "llListenControl", "llSetTimerEvent", "timer"],
+          "groups": ["ChannelNonPublic"]
+        },
+        {
+          "title": "Opening menus",
+          "text": ["Menus are usually opened by touch. The touch text and click action change what the viewer shows on hover and click."],
+          "items": ["touch_start", "llDetectedKey", "llSetTouchText", "llSetClickAction"],
+          "groups": ["ClickAction"],
+          "links": [{ "feature": "input" }, { "category": "user_interface" }]
+        },
+        {
+          "title": "Other viewer prompts",
+          "text": ["Scripts can also open a web page, a map location or a floater, and give items with an accept prompt."],
+          "items": ["llLoadURL", "llMapDestination", "llMapBeacon", "llOpenFloater", "llGiveInventory"],
+          "groups": ["MapBeaconParam"]
+        },
+        {
+          "title": "Guides and alternatives",
+          "text": ["Multi-page menus, menu state machines and prim HUDs are covered in the archived wiki articles."],
+          "links": [{ "wiki": "Dialog Menus" }, { "wiki": "Category:LSL Dialog" }, { "wiki": "DialogPlus" }, { "feature": "communications" }, { "feature": "avatar" }, { "wiki": "CatDialogs", "label": "Script library: dialogs" }, { "wiki": "CatHUD", "label": "Script library: HUDs" }, { "planned": "Recipe: multi-page dialog menu" }, { "planned": "Guide: building a prim HUD" }]
+        }
+      ],
+      "categories": ["user_interface"],
+      "related": ["communications", "input"]
+    },
+    {
+      "id": "effects",
+      "title": "Effects",
+      "description": "Visual effects: particle systems, hover text, texture animation, light and glow.",
+      "intro": [
+        "Effects are visual features rendered by the viewer from a few parameters set by a script. Once set, most of them keep running with no further script activity.",
+        "High quality effects often combine features: a technical mesh shape made in a modelling tool such as Blender, with an animated texture and glow, can look like particles while costing far less."
+      ],
+      "sections": [
+        {
+          "title": "Particle systems",
+          "text": ["A prim can emit one particle system, described by a list of rules for the emitter pattern, particle lifetime, size, color, speed, texture and flags. Combine flags with the bitwise OR operator (|). An empty list stops the system."],
+          "items": ["llParticleSystem", "llLinkParticleSystem"],
+          "groups": ["ParticleParam", "ParticleFlag", "ParticleSourcePattern", "ParticleBlendFunc"],
+          "links": [{ "category": "particles" }, { "wiki": "Category:LSL Particles" }, { "wiki": "CatParticles", "label": "Script library: particles" }, { "planned": "Recipe: particle effect presets" }]
+        },
+        {
+          "title": "Hover text",
+          "text": ["Floating text above a prim, with a color and alpha. It is a prim property, so it stays when the script is removed."],
+          "items": ["llSetText", "PRIM_TEXT"],
+          "links": [{ "wiki": "Category:LSL Floating Text" }]
+        },
+        {
+          "title": "Texture animations",
+          "text": ["Texture animation plays frames from a grid on a texture, or scrolls, rotates or scales the texture, entirely in the viewer."],
+          "items": ["llSetTextureAnim", "llSetLinkTextureAnim"],
+          "groups": ["TextureAnimMode"],
+          "links": [{ "feature": "textures" }, { "planned": "Guide: technical mesh with texture animation" }]
+        },
+        {
+          "title": "Light, glow and full bright",
+          "text": ["Prims can be point lights or projectors, and faces can glow or ignore lighting. PBR materials add emissive color."],
+          "items": ["PRIM_POINT_LIGHT", "PRIM_PROJECTOR", "PRIM_GLOW", "PRIM_FULLBRIGHT", "llSetLinkPrimitiveParamsFast"],
+          "links": [{ "wiki": "Category:LSL Light" }, { "feature": "prims" }]
+        },
+        {
+          "title": "Media and sound",
+          "text": ["Web pages on faces and sound round out many effects."],
+          "links": [{ "feature": "textures" }, { "feature": "sound" }, { "category": "effects" }]
+        }
+      ],
+      "categories": ["particles", "effects"],
+      "related": ["textures", "sound", "prims"],
+      "wiki": ["Category:LSL Effects"]
+    },
+    {
+      "id": "environments",
+      "title": "Environments",
+      "description": "Environment settings (EEP): sky, water, day cycles, sun and moon.",
+      "intro": [
+        "Environments, from the Environmental Enhancement Project (EEP), define the sky, water and day cycle. Regions and parcels have an environment, and each avatar can see an override on top of it.",
+        "Scripts can read the sun and moon positions, change a parcel's or region's environment where the owner allows it, and give a single avatar a temporary environment through an experience."
+      ],
+      "sections": [
+        {
+          "title": "Read the environment",
+          "text": ["Sun and moon direction and rotation, day length and offset, and individual environment settings at a position."],
+          "items": ["llGetEnvironment", "llGetSunDirection", "llGetSunRotation", "llGetMoonDirection", "llGetMoonRotation", "llGetRegionSunDirection", "llGetRegionSunRotation", "llGetRegionMoonDirection", "llGetRegionMoonRotation", "llGetDayLength", "llGetDayOffset", "llGetRegionDayLength", "llGetRegionDayOffset", "llGetTimeOfDay", "llGetRegionTimeOfDay"],
+          "groups": ["EnvironmentParamReadOnly"]
+        },
+        {
+          "title": "Parcel and region environment",
+          "text": ["llReplaceEnvironment swaps in a whole environment asset; llSetEnvironment changes individual settings. Both need the land rights to change the environment."],
+          "items": ["llReplaceEnvironment", "llSetEnvironment"],
+          "groups": ["EnvironmentParam", "EnvironmentError"],
+          "links": [{ "category": "parcel_appearance" }, { "wiki": "LSL Constants/llSetEnvironment", "label": "llSetEnvironment parameters" }, { "planned": "Guide: changing and replacing an environment" }]
+        },
+        {
+          "title": "Per-avatar environment",
+          "text": ["Inside an experience, a script can override what one avatar sees, with a transition time. The override is temporary."],
+          "items": ["llReplaceAgentEnvironment", "llSetAgentEnvironment"],
+          "links": [{ "feature": "experience" }, { "category": "region_appearance" }]
+        },
+        {
+          "title": "Weather and ground",
+          "text": ["Wind, water height and the ground shape are region properties scripts can read."],
+          "items": ["llWind", "llWater", "llGround", "llGroundNormal", "llGroundSlope", "llGroundContour"],
+          "links": [{ "feature": "land" }]
+        }
+      ],
+      "categories": ["parcel_appearance", "region_appearance"],
+      "related": ["land", "experience"]
+    },
+    {
+      "id": "events",
+      "title": "Events",
+      "description": "The event model: states, event handlers, timers and detection.",
+      "intro": [
+        "LSL scripts are event driven. The script does nothing until something happens: a touch, a message, a timer, a collision. Then the matching event handler in the current state runs to completion.",
+        "Events wait in a queue while a handler runs. Keep handlers short; long work blocks every other event in the script."
+      ],
+      "sections": [
+        {
+          "title": "States",
+          "text": ["Every script starts in the default state. Each state has its own handlers. Changing state fires state_exit and then state_entry, and removes listeners and sensors from the old state.", "There is no runtime subscription to events: a state receives the events it has handlers for. To stop receiving one, change to a state without that handler, or remove its source with llListenRemove, llSensorRemove or llSetTimerEvent(0.0)."],
+          "items": ["state_entry", "state_exit", "on_rez", "llResetScript", "llResetOtherScript", "llSetScriptState", "llGetScriptState", "llGetScriptName"],
+          "links": [{ "href": "/controls/default/", "label": "default" }, { "href": "/controls/state/", "label": "state" }, { "wiki": "Category:LSL State" }, { "planned": "Guide: switching event handlers with states" }]
+        },
+        {
+          "title": "Timers and time",
+          "text": ["Each script has one timer. Delays such as llSleep pause the whole script. Time functions read script time, region time and real-world time."],
+          "items": ["llSetTimerEvent", "timer", "llSleep", "llMinEventDelay", "llGetTime", "llResetTime", "llGetAndResetTime", "llGetUnixTime", "llGetTimestamp", "llGetDate", "llGetWallclock", "llGetGMTclock"],
+          "links": [{ "category": "time" }]
+        },
+        {
+          "title": "Changes",
+          "text": ["changed reports changes to the object: inventory, links, owner, region, teleports, shape and more. Test the flags with the bitwise AND operator (&)."],
+          "items": ["changed"],
+          "groups": ["ChangeType"]
+        },
+        {
+          "title": "Detection",
+          "text": ["Touch, collision, sensor and damage events can report several detections at once. The event's number parameter says how many; llDetected* functions read each one by index, and only inside that event."],
+          "items": ["llDetectedKey", "llDetectedName", "llDetectedOwner", "llDetectedGroup", "llDetectedType", "llDetectedPos", "llDetectedRot", "llDetectedVel", "llDetectedLinkNumber", "llDetectedGrab"],
+          "groups": ["DetectType"],
+          "links": [{ "category": "detected" }]
+        },
+        {
+          "title": "Sensors",
+          "text": ["A sensor scans a cone around the object for avatars or objects, once or repeatedly, and reports the nearest results in sensor, or no_sensor when nothing is found."],
+          "items": ["llSensor", "llSensorRepeat", "llSensorRemove", "sensor", "no_sensor"],
+          "links": [{ "category": "sensor" }]
+        },
+        {
+          "title": "Events by feature",
+          "text": ["Most events belong to a feature. Start from the event index, or from the feature you are working on."],
+          "items": ["touch_start", "listen", "link_message", "collision_start", "control", "dataserver", "http_request", "run_time_permissions"],
+          "links": [{ "href": "/events/", "label": "All events" }, { "feature": "input" }, { "feature": "communications" }, { "feature": "physics" }, { "wiki": "Category:LSL Events" }, { "wiki": "Event Order" }]
+        },
+        {
+          "title": "Script health",
+          "text": ["Memory, script time and profiling help find scripts that slow the region."],
+          "items": ["llGetFreeMemory", "llGetUsedMemory", "llScriptProfiler", "llGetEnergy", "llGetRegionFPS", "llGetRegionTimeDilation", "llGetSimStats", "llScriptDanger"],
+          "groups": ["ScriptProfileMode", "SimulatorStat"],
+          "links": [{ "category": "script" }]
+        }
+      ],
+      "categories": ["script", "time", "detected", "sensor"],
+      "related": ["input", "communications", "physics"]
+    },
+    {
+      "id": "experience",
+      "title": "Experience",
+      "description": "Experience tools: permissions granted once per experience, persistent key-value storage and experience-only abilities.",
+      "intro": [
+        "An experience groups scripts under one identity. An avatar accepts the experience once, and from then on its scripts can animate, teleport, attach to or take controls from that avatar without asking again, wherever the experience is allowed.",
+        "Scripts join an experience when they are compiled with it selected. Experiences also bring a shared key-value store and abilities that ordinary scripts do not have."
+      ],
+      "sections": [
+        {
+          "title": "Experience permissions",
+          "text": ["llRequestExperiencePermissions asks the avatar to accept the experience, or grants silently if they already have. The answer arrives in experience_permissions or experience_permissions_denied."],
+          "items": ["llRequestExperiencePermissions", "experience_permissions", "experience_permissions_denied", "llAgentInExperience", "llGetPermissions"],
+          "groups": ["ScriptPermission"]
+        },
+        {
+          "title": "Experience details and errors",
+          "text": ["Read the experience a script belongs to, and turn error codes into messages."],
+          "items": ["llGetExperienceDetails", "llGetExperienceErrorMessage"],
+          "groups": ["ExperienceError"]
+        },
+        {
+          "title": "Persistent key-value storage",
+          "text": ["A store shared by all scripts in the experience, across objects and regions. All calls are asynchronous."],
+          "items": ["llCreateKeyValue", "llReadKeyValue", "llUpdateKeyValue", "llDeleteKeyValue", "llKeysKeyValue", "llKeyCountKeyValue", "llDataSizeKeyValue", "dataserver"],
+          "links": [{ "feature": "data-storage" }, { "category": "experience_data" }]
+        },
+        {
+          "title": "Abilities through an experience",
+          "text": ["With experience permissions, scripts can seat an avatar on an object, attach temporary items, teleport the avatar and set an environment for that avatar alone. llSitOnLink and the per-avatar environment functions require an experience."],
+          "items": ["llSitOnLink", "llAttachToAvatarTemp", "llReplaceAgentEnvironment", "llSetAgentEnvironment", "llTeleportAgent"],
+          "links": [{ "feature": "avatar" }, { "feature": "environments" }, { "wiki": "Category:Experience Tools" }, { "wiki": "Category:LSL Experience" }, { "planned": "Guide: creating an experience and compiling scripts to it" }]
+        }
+      ],
+      "categories": ["experience", "experience_data"],
+      "related": ["avatar", "data-storage", "environments"]
+    },
+    {
+      "id": "input",
+      "title": "Input",
+      "description": "Input from users: touch, keyboard and mouse controls, and gamepads.",
+      "intro": [
+        "Users interact with objects by clicking them, and with scripted vehicles, weapons and HUDs through captured controls. A script can capture movement keys and the mouse button, and read gamepad buttons and axes.",
+        "Touch needs no permission. Controls need PERMISSION_TAKE_CONTROLS; gamepads need PERMISSION_GAME_CONTROL and viewer support."
+      ],
+      "sections": [
+        {
+          "title": "Touch events (clicking objects)",
+          "text": ["touch_start, touch and touch_end follow a click from press to release, and several avatars can touch at once. The touch position functions give the face and surface coordinates, which makes single-prim buttons possible."],
+          "items": ["touch_start", "touch", "touch_end", "llDetectedTouchFace", "llDetectedTouchST", "llDetectedTouchUV", "llDetectedTouchPos", "llDetectedTouchNormal", "llDetectedTouchBinormal", "llDetectedLinkNumber", "llDetectedKey", "llPassTouches"],
+          "groups": ["PassMode"],
+          "links": [{ "category": "touch" }, { "wiki": "LSL Touch Position" }, { "wiki": "CatTouchDetection", "label": "Script library: touch detection" }, { "planned": "Recipe: buttons on one prim with touch positions" }]
+        },
+        {
+          "title": "Click actions",
+          "text": ["A click action changes what a left-click does: touch, sit, pay, open, play media, or nothing. Setting a HUD root to ignore clicks lets each interactive prim choose its own cursor."],
+          "items": ["llSetClickAction", "PRIM_CLICK_ACTION", "llSetTouchText"],
+          "groups": ["ClickAction"]
+        },
+        {
+          "title": "Keyboard and mouse controls",
+          "text": ["llTakeControls captures movement keys and the left mouse button. control reports which keys are held and which changed. Controls can also pass through to normal movement."],
+          "items": ["llRequestPermissions", "llTakeControls", "llReleaseControls", "control", "run_time_permissions", "llForceMouselook", "llGetAgentInfo"],
+          "groups": ["ControlButton"],
+          "links": [{ "category": "input" }, { "wiki": "Category:LSL Controls" }, { "planned": "Guide: capturing controls for a vehicle or weapon" }]
+        },
+        {
+          "title": "Gamepad controls",
+          "text": ["Gamepad input is available on all regions of the main grid; viewer support is still in progress. game_control reports buttons and axes."],
+          "items": ["PERMISSION_GAME_CONTROL", "game_control", "llGetGameControlMode", "llGetGameControlModeButtons", "llGetGameControlModeAxes"],
+          "groups": ["GameControlButton", "GameControlMode"],
+          "links": [{ "wiki": "Game control" }, { "wiki": "Category:LSL GameControls" }]
+        },
+        {
+          "title": "Text and menus",
+          "text": ["For choices and typed input, use dialogs, text boxes or chat commands."],
+          "links": [{ "feature": "dialog" }, { "feature": "communications" }, { "feature": "camera" }]
+        }
+      ],
+      "categories": ["touch", "input"],
+      "related": ["dialog", "camera", "avatar"]
+    },
+    {
+      "id": "land",
+      "title": "Parcels & Regions",
+      "description": "Land from a script's point of view: regions, parcels, estates and moderation.",
+      "intro": [
+        "Land is divided into regions (simulators), which belong to estates and are split into parcels. Each level has an owner and settings that limit what scripts can do there: whether scripts run, objects can be built, damage is on, or avatars may enter.",
+        "Scripts can read information about the land they are on. Changing it, or moderating visitors, needs the object to be owned by the land owner (or the right group, or estate manager)."
+      ],
+      "sections": [
+        {
+          "title": "Moderation",
+          "text": ["Ban and pass lists, ejecting, sending home and returning objects are for land owners and managers."],
+          "items": ["llAddToLandBanList", "llRemoveFromLandBanList", "llResetLandBanList", "llAddToLandPassList", "llRemoveFromLandPassList", "llResetLandPassList", "llEjectFromLand", "llTeleportAgentHome", "llReturnObjectsByID", "llReturnObjectsByOwner", "PERMISSION_RETURN_OBJECTS"],
+          "groups": ["ReturnObjectsScope", "ReturnObjectsError"],
+          "links": [{ "category": "land_moderation" }]
+        },
+        {
+          "title": "Parcels",
+          "text": ["Parcel details, flags, prim counts and limits, owners and sale. Parcel media and music URLs are set per parcel."],
+          "items": ["llGetParcelDetails", "llGetParcelFlags", "llGetParcelPrimCount", "llGetParcelMaxPrims", "llGetParcelPrimOwners", "llGetLandOwnerAt", "llOverMyLand", "llSetParcelForSale", "llParcelMediaCommandList", "llParcelMediaQuery", "llSetParcelMusicURL", "llGetParcelMusicURL"],
+          "groups": ["ParcelDetailsParam", "ParcelFlag", "ParcelPrimCountCategory", "ParcelSaleParam", "ParcelSaleError", "ParcelTeleportRouting", "ParcelMediaCommand", "ParcelMediaQuery"],
+          "links": [{ "category": "parcel" }, { "category": "parcel_media" }, { "wiki": "Category:LSL Parcel" }, { "wiki": "CatRegion", "label": "Script library: region and parcel" }, { "planned": "Guide: parcel and region scripting rights" }]
+        },
+        {
+          "title": "Regions",
+          "text": ["Region name, position on the grid, flags, agent counts, performance and simulator data. The ground can be read and, with rights, changed."],
+          "items": ["llGetRegionName", "llGetRegionCorner", "llGetRegionFlags", "llGetEnv", "llGetRegionAgentCount", "llGetAgentList", "llRequestSimulatorData", "llGetSimulatorHostname", "llGetRegionFPS", "llGetRegionTimeDilation", "llGetSimStats", "llEdgeOfWorld", "llModifyLand", "llSetGroundTexture", "llGround", "llGroundRepel", "CHANGED_REGION_START"],
+          "groups": ["RegionFlag", "SimulatorData", "SimulatorStat", "ModifyLandAction", "ModifyLandBrush", "GroundTextureParam", "AgentListScope"],
+          "links": [{ "category": "region" }, { "wiki": "Category:LSL Region" }]
+        },
+        {
+          "title": "Estates",
+          "text": ["Estate managers' objects can manage the estate access lists for agents and groups."],
+          "items": ["llManageEstateAccess"],
+          "groups": ["EstateAccessParam"],
+          "links": [{ "wiki": "Category:LSL Estate" }]
+        },
+        {
+          "title": "Environment and travel",
+          "text": ["The sky and water of a parcel or region, and teleporting between places."],
+          "links": [{ "feature": "environments" }, { "feature": "avatar" }, { "feature": "pathfinding" }]
+        }
+      ],
+      "categories": ["parcel", "parcel_media", "land_moderation", "region"],
+      "related": ["environments", "avatar", "money"]
+    },
+    {
+      "id": "linkset",
+      "title": "Linksets",
+      "description": "Objects made of several linked prims: link numbers, linking, rezzing and object details.",
+      "intro": [
+        "An object is a linkset: one root prim plus any child prims, moving and rezzing as a unit. Each prim has a link number. The root is 1 when there are several prims, and 0 in a single-prim object. Seated avatars are added after the prims.",
+        "Most prim functions have a Link variant that works on any prim by link number, so one script can control the whole object."
+      ],
+      "sections": [
+        {
+          "title": "Link numbers",
+          "text": ["Special link constants address the root, this prim, all prims or all others. Names and keys help find a prim by role instead of by number, because numbers change when the object is relinked."],
+          "items": ["llGetLinkNumber", "llGetNumberOfPrims", "llGetObjectPrimCount", "llGetLinkName", "llGetLinkKey", "llGetLinkNumberOfSides", "LINK_ROOT", "LINK_SET", "LINK_THIS", "LINK_ALL_OTHERS", "LINK_ALL_CHILDREN"],
+          "groups": ["Link", "Links"],
+          "links": [{ "planned": "Recipe: finding prims by name" }]
+        },
+        {
+          "title": "Linking and unlinking",
+          "text": ["Changing links needs PERMISSION_CHANGE_LINKS from the owner. The changed event reports CHANGED_LINK."],
+          "items": ["llCreateLink", "llBreakLink", "llBreakAllLinks", "CHANGED_LINK", "changed"],
+          "links": [{ "category": "linkset" }]
+        },
+        {
+          "title": "Controlling every prim",
+          "text": ["Set or read many properties of any prim, or several prims, in one call."],
+          "items": ["llSetLinkPrimitiveParamsFast", "llGetLinkPrimitiveParams", "llSetLinkColor", "llSetLinkAlpha", "llSetLinkTexture", "llMessageLinked"],
+          "links": [{ "feature": "prims" }]
+        },
+        {
+          "title": "The object as a whole",
+          "text": ["Position, rotation and size of the object, its root, bounding box, mass and owner, and details of other objects by key."],
+          "items": ["llGetRootPosition", "llGetRootRotation", "llGetBoundingBox", "llGetGeometricCenter", "llGetCenterOfMass", "llGetObjectMass", "llGetObjectDetails", "llGetOwnerKey", "llGetCreator", "llScaleByFactor", "llGetMaxScaleFactor", "llGetMinScaleFactor"],
+          "groups": ["ObjectDetailsParam"],
+          "links": [{ "category": "object" }]
+        },
+        {
+          "title": "Rezzing objects",
+          "text": ["Objects in inventory can be rezzed with a position, velocity and parameters; llRezObjectWithParams sets many properties at rez time. The child receives the start parameter in on_rez. Objects can also delete themselves or derez others they own."],
+          "items": ["llRezObjectWithParams", "llRezObject", "llRezAtRoot", "object_rez", "on_rez", "llGetStartParameter", "llGetStartString", "llDie", "llDerezObject", "llGodLikeRezObject"],
+          "groups": ["RezParam", "RezFlag", "DerezMode"],
+          "links": [{ "category": "rez" }, { "wiki": "Category:LSL Rez" }, { "wiki": "CatRezzers", "label": "Script library: rezzers" }]
+        }
+      ],
+      "categories": ["linkset", "object", "rez"],
+      "related": ["prims", "physics", "avatar"],
+      "wiki": ["Category:LSL Link"]
+    },
+    {
+      "id": "math",
+      "title": "Math",
+      "description": "Numbers, angles, vectors, rotations, random numbers and interpolation.",
+      "intro": [
+        "LSL has integers and floats, plus vector and rotation types for 3D work. Rotations are quaternions; you rarely need their components, because conversion functions translate them to and from Euler angles, axes and angle-axis form.",
+        "These building blocks cover projectile trajectories, look-at rotations, simple inverse kinematics with trigonometry, noise and procedural patterns, and numeric integration for custom physics."
+      ],
+      "sections": [
+        {
+          "title": "Basic math",
+          "text": ["Absolute values, rounding, powers, roots and logarithms. Integer and float operators follow the usual rules; dividing integers truncates."],
+          "items": ["llAbs", "llFabs", "llRound", "llFloor", "llCeil", "llPow", "llSqrt", "llLog", "llLog10", "llModPow", "llListStatistics"],
+          "links": [{ "href": "/types/integer/", "label": "integer type" }, { "href": "/types/float/", "label": "float type" }, { "category": "math" }]
+        },
+        {
+          "title": "Angles and trigonometry",
+          "text": ["Angles are in radians. DEG_TO_RAD and RAD_TO_DEG convert, and PI, TWO_PI and PI_BY_TWO are constants."],
+          "items": ["llSin", "llCos", "llTan", "llAsin", "llAcos", "llAtan2", "PI", "TWO_PI", "PI_BY_TWO", "DEG_TO_RAD", "RAD_TO_DEG"],
+          "links": [{ "category": "math_trig" }, { "planned": "Recipe: simple inverse kinematics with trigonometry" }]
+        },
+        {
+          "title": "Vectors",
+          "text": ["Vectors hold positions, velocities, scales and colors. Length, normalisation and distance functions, plus the dot (*) and cross (%) operators, cover most vector math."],
+          "items": ["llVecMag", "llVecNorm", "llVecDist", "ZERO_VECTOR"],
+          "links": [{ "href": "/types/vector/", "label": "vector type" }, { "category": "vector" }, { "category": "math_3d" }, { "planned": "Recipe: projectile trajectories" }]
+        },
+        {
+          "title": "Quaternions (rotations)",
+          "text": ["Multiply rotations to combine them, and multiply a vector by a rotation to rotate it. Convert to and from Euler angles, axes and angle-axis, and find the rotation between two directions."],
+          "items": ["llEuler2Rot", "llRot2Euler", "llAxisAngle2Rot", "llRot2Angle", "llRot2Axis", "llAxes2Rot", "llRot2Fwd", "llRot2Left", "llRot2Up", "llRotBetween", "llAngleBetween", "ZERO_ROTATION"],
+          "links": [{ "href": "/types/rotation/", "label": "rotation type" }, { "category": "quaternion" }, { "wiki": "Category:LSL Rotation" }]
+        },
+        {
+          "title": "Random numbers",
+          "text": ["llFrand returns a random float up to a limit. Shuffle lists with llListRandomize, and make unique identifiers with llGenerateKey."],
+          "items": ["llFrand", "llListRandomize", "llGenerateKey"],
+          "links": [{ "planned": "Recipe: Perlin noise maps" }]
+        },
+        {
+          "title": "Interpolation and color",
+          "text": ["Linear interpolation is a + (b - a) * t for floats, vectors and colors. Convert colors between sRGB and linear space before blending them."],
+          "items": ["llLinear2sRGB", "llsRGB2Linear"],
+          "links": [{ "wiki": "Category:LSL Math" }, { "feature": "physics" }, { "feature": "movement" }, { "planned": "Recipe: numeric integration for custom physics" }]
+        }
+      ],
+      "categories": ["math", "math_3d", "math_trig", "quaternion", "vector"],
+      "related": ["movement", "physics"]
+    },
+    {
+      "id": "money",
+      "title": "Money",
+      "description": "Linden dollar (L$) payments: receiving money, paying out and vendor patterns.",
+      "intro": [
+        "Objects can receive L$ from avatars and, with the owner's permission, pay L$ out. Vendors, tip jars, rentals and games are built from these few functions.",
+        "Receiving needs no permission: the money event fires when someone pays the object. Paying out needs PERMISSION_DEBIT, granted by the owner. Handle it carefully, because a bug can spend the owner's money."
+      ],
+      "sections": [
+        {
+          "title": "Receiving payments",
+          "text": ["The pay dialog shows a default amount and quick-pay buttons, which the script controls. Set the click action to pay to open it on click."],
+          "items": ["money", "llSetPayPrice", "llSetClickAction", "CLICK_ACTION_PAY"],
+          "groups": ["PayButton"]
+        },
+        {
+          "title": "Paying out",
+          "text": ["llTransferLindenDollars returns a transaction key, and reports success or failure in transaction_result. llGiveMoney is the older call with no result."],
+          "items": ["llRequestPermissions", "PERMISSION_DEBIT", "llTransferLindenDollars", "transaction_result", "llGiveMoney"],
+          "groups": ["TransferError"]
+        },
+        {
+          "title": "Vendors",
+          "text": ["After payment, a vendor checks the amount and gives the item, refunding wrong amounts."],
+          "items": ["llGiveInventory", "llGiveAgentInventory", "llRequestAgentData"],
+          "links": [{ "category": "money" }, { "wiki": "Category:LSL Money" }, { "feature": "avatar" }, { "feature": "land" }, { "wiki": "CatMoney", "label": "Script library: money" }, { "planned": "Recipe: vendor with refunds" }]
+        }
+      ],
+      "categories": ["money"],
+      "related": ["avatar", "prims"]
+    },
+    {
+      "id": "movement",
+      "title": "Movement",
+      "description": "Moving objects: non-physical positioning, keyframed motion, and physical movement.",
+      "intro": [
+        "There are three ways to move an object. Non-physical movement sets the position and rotation directly. Keyframed motion plays a smooth path computed by the region. Physical movement applies forces and lets the physics engine move the object.",
+        "Non-physical and keyframed movement are predictable and suit doors, platforms and rides. Physical movement suits vehicles, balls and projectiles."
+      ],
+      "sections": [
+        {
+          "title": "Non-physical movement",
+          "text": ["Set the position and rotation in one step. llSetRegionPos moves up to the region's size in one call; llSetPos is limited per call. Child prims use local coordinates."],
+          "items": ["llSetPos", "llSetRegionPos", "llSetRot", "llSetLocalRot", "llGetPos", "llGetRot", "llGetLocalPos", "llGetLocalRot", "llSetScale", "llGetScale", "PRIM_POSITION", "PRIM_ROTATION", "PRIM_POS_LOCAL", "PRIM_ROT_LOCAL"]
+        },
+        {
+          "title": "Keyframed motion",
+          "text": ["Give a list of position and rotation offsets with times, and the region moves the object smoothly, looping or ping-ponging if asked. Works on non-physical objects and costs little script time."],
+          "items": ["llSetKeyframedMotion"],
+          "groups": ["KeyframedMotionParam", "KeyframedMotionMode", "KeyframedMotionCommand", "KeyframedMotionData"],
+          "links": [{ "planned": "Recipe: door or platform with keyframed motion" }]
+        },
+        {
+          "title": "Physical movement",
+          "text": ["Physical objects move by impulses, forces, velocities and targets. Move-to and look-at targets act like springs; llSetVelocity and llSetAngularVelocity set motion directly."],
+          "items": ["llMoveToTarget", "llStopMoveToTarget", "llLookAt", "llRotLookAt", "llStopLookAt", "llApplyImpulse", "llApplyRotationalImpulse", "llSetVelocity", "llSetAngularVelocity", "llSetForce", "llSetTorque", "llSetForceAndTorque", "llSetHoverHeight", "llStopHover", "llGroundRepel", "llSetBuoyancy", "llGetVel", "llGetAccel", "llGetOmega"],
+          "links": [{ "feature": "physics" }]
+        },
+        {
+          "title": "Targets",
+          "text": ["Position and rotation targets fire events when the object arrives or leaves, without polling."],
+          "items": ["llTarget", "llTargetRemove", "at_target", "not_at_target", "llRotTarget", "llRotTargetRemove", "at_rot_target", "not_at_rot_target", "moving_start", "moving_end"]
+        },
+        {
+          "title": "Spinning",
+          "text": ["llTargetOmega spins an object. On non-physical objects the spin is drawn by the viewer only, so it costs nothing on the region."],
+          "items": ["llTargetOmega", "PRIM_OMEGA"]
+        },
+        {
+          "title": "Vehicles",
+          "text": ["The vehicle engine adds tuned motors, friction and stabilisers on top of physics. Choose a vehicle type, then adjust parameters and flags."],
+          "items": ["llSetVehicleType", "llSetVehicleFloatParam", "llSetVehicleVectorParam", "llSetVehicleRotationParam", "llSetVehicleFlags", "llRemoveVehicleFlags"],
+          "groups": ["VehicleType", "VehicleFloatParam", "VehicleVectorParam", "VehicleRotationParam", "VehicleFlag"],
+          "links": [{ "category": "vehicles" }, { "wiki": "Category:LSL Vehicle" }, { "feature": "input" }, { "feature": "camera" }, { "feature": "pathfinding" }, { "wiki": "CatVehicles", "label": "Script library: vehicles" }, { "planned": "Guide: tuning a vehicle" }]
+        }
+      ],
+      "categories": ["movement", "vehicles"],
+      "related": ["physics", "math", "pathfinding"],
+      "wiki": ["Category:LSL Movement"]
+    },
+    {
+      "id": "pathfinding",
+      "title": "Pathfinding",
+      "description": "Navmesh pathfinding: static path queries and pathfinding characters.",
+      "intro": [
+        "Pathfinding uses the region's navmesh, a map of walkable surfaces built from the land and from objects marked as walkable or obstacles. Scripts can use it in two ways.",
+        "The light approach asks the navmesh for a path with llGetStaticPath and moves the object along it with keyframed motion or your own movement code. Active pathfinding turns the object into a character, a physics capsule the region steers. Characters are limited in movement and physics, so the light approach often works better."
+      ],
+      "sections": [
+        {
+          "title": "Static paths (recommended)",
+          "text": ["llGetStaticPath returns a list of points between two positions for a character of a given size and type. llGetClosestNavPoint snaps a position to the navmesh."],
+          "items": ["llGetStaticPath", "llGetClosestNavPoint", "llSetKeyframedMotion"],
+          "groups": ["GetStaticPathParam", "GetClosestNavPointParam", "CharacterType"],
+          "links": [{ "planned": "Recipe: following a static path with keyframed motion" }]
+        },
+        {
+          "title": "Characters",
+          "text": ["A character has a size, speed, turning and avoidance settings, and a type that affects which navmesh surfaces it prefers."],
+          "items": ["llCreateCharacter", "llUpdateCharacter", "llDeleteCharacter"],
+          "groups": ["CharacterParam", "CharacterAvoidanceMode", "CharacterOrientation", "CharacterTraversalType"]
+        },
+        {
+          "title": "Behaviours",
+          "text": ["Characters can navigate to a point, patrol, wander, pursue, evade and flee. path_update reports progress and failures."],
+          "items": ["llNavigateTo", "llPatrolPoints", "llWanderWithin", "llPursue", "llEvade", "llFleeFrom", "llExecCharacterCmd", "path_update", "moving_start", "moving_end"],
+          "groups": ["CharacterNavigateParam", "CharacterPatrolPointsParam", "CharacterWanderWithinParam", "CharacterPursueParam", "CharacterCommand", "CharacterPathUpdateType"]
+        },
+        {
+          "title": "Navmesh objects",
+          "text": ["Objects take part in the navmesh as walkable surfaces, static or movable obstacles, exclusion volumes or material volumes. Their pathfinding type can be read."],
+          "items": ["OBJECT_PATHFINDING_TYPE", "llGetObjectDetails"],
+          "groups": ["ObjectPathfindingType"],
+          "links": [{ "category": "pathfinding" }, { "wiki": "Category:Pathfinding" }, { "wiki": "Category:LSL Pathfinding Types" }]
+        },
+        {
+          "title": "Alternatives",
+          "text": ["For grid-based games or better paths, a script can run its own search, such as A* over a grid, and use raycasts to test lines of sight."],
+          "items": ["llCastRay"],
+          "links": [{ "feature": "movement" }, { "feature": "animesh" }, { "feature": "math" }, { "planned": "Recipe: A* search over a grid" }]
+        }
+      ],
+      "categories": ["pathfinding"],
+      "related": ["movement", "animesh", "physics"]
+    },
+    {
+      "id": "physics",
+      "title": "Physics",
+      "description": "Physical objects: status flags, mass, materials, collisions, forces and raycasts.",
+      "intro": [
+        "A physical object is simulated by the physics engine: it has mass, falls, collides and responds to forces. Non-physical objects stay where they are put but still collide with physical ones.",
+        "Physics settings cover the object's status, its shape and material, how it collides, and what it reports when it hits something."
+      ],
+      "sections": [
+        {
+          "title": "Status flags",
+          "text": ["Physical, phantom, temporary and the rotation locks are set as object status flags. Volume detect makes an object phantom while still reporting collisions."],
+          "items": ["llSetStatus", "llGetStatus", "PRIM_PHYSICS", "PRIM_PHANTOM", "PRIM_TEMP_ON_REZ", "llVolumeDetect"],
+          "groups": ["ObjectStatusParam"]
+        },
+        {
+          "title": "Mass, shape and materials",
+          "text": ["Mass depends on size and density. Physics materials set gravity, friction, density and restitution. The physics shape type changes how the engine sees the prim."],
+          "items": ["llGetMass", "llGetMassMKS", "llGetObjectMass", "llGetCenterOfMass", "llSetPhysicsMaterial", "llGetPhysicsMaterial", "PRIM_PHYSICS_SHAPE_TYPE", "PRIM_MATERIAL"],
+          "groups": ["PhysicsMaterialParam", "PhysicsMaterialPreset", "PhysicsShapeType"],
+          "links": [{ "wiki": "CatPhysics", "label": "Script library: physics" }, { "planned": "Guide: physics materials" }]
+        },
+        {
+          "title": "Collisions",
+          "text": ["Collision events report contacts with objects and avatars, and land_collision events with the ground. Filters and pass-through settings narrow what is reported."],
+          "items": ["collision_start", "collision", "collision_end", "land_collision_start", "land_collision", "land_collision_end", "llCollisionFilter", "llPassCollisions", "llCollisionSound", "llDetectedVel"],
+          "links": [{ "wiki": "Category:LSL Collision Events" }]
+        },
+        {
+          "title": "Forces and impulses",
+          "text": ["Forces act continuously; impulses act once. llPushObject pushes other objects and avatars where the parcel allows it."],
+          "items": ["llApplyImpulse", "llApplyRotationalImpulse", "llSetForce", "llGetForce", "llSetTorque", "llGetTorque", "llSetBuoyancy", "llPushObject", "llSetVelocity", "llGetVel"],
+          "links": [{ "feature": "movement" }]
+        },
+        {
+          "title": "Raycasts",
+          "text": ["llCastRay traces a line through the region and returns what it hits, filtered by type, for line of sight, hitscan weapons and placement."],
+          "items": ["llCastRay"],
+          "groups": ["RayCastParam", "RayCastRejectType", "RayCastData", "RayCastError"]
+        },
+        {
+          "title": "Region physics",
+          "text": ["Physics performance depends on the region. Time dilation and physics statistics show how busy it is."],
+          "items": ["llGetRegionTimeDilation", "llGetSimStats", "llGetEnergy", "OBJECT_PHYSICS_COST"],
+          "links": [{ "category": "physics" }, { "wiki": "Category:LSL Physics" }, { "feature": "combat" }]
+        }
+      ],
+      "categories": ["physics"],
+      "related": ["movement", "combat", "prims"]
+    },
+    {
+      "id": "prims",
+      "title": "Prims",
+      "description": "Prim properties and primitive params: shape, size, appearance, light, text and inventory.",
+      "intro": [
+        "A prim is the basic building block of an object, whether a parametric shape, a sculpt or mesh. Each prim has properties: position, rotation and size; shape; faces with textures and colors; light, glow and text; physics settings; and its own inventory.",
+        "Primitive params read and write almost all of these in one call, as a list of PRIM_* rules followed by their values. Specific functions cover the common cases."
+      ],
+      "sections": [
+        {
+          "title": "Primitive params",
+          "text": ["llSetLinkPrimitiveParamsFast sets rules on any prim; PRIM_LINK_TARGET switches prims inside one list. llGetLinkPrimitiveParams reads them back."],
+          "items": ["llSetLinkPrimitiveParamsFast", "llGetLinkPrimitiveParams", "llGetPrimitiveParams", "PRIM_LINK_TARGET"],
+          "groups": ["PrimParam", "PrimParamGet"],
+          "links": [{ "wiki": "Category:LSL PrimitiveParams" }, { "wiki": "CatPrims", "label": "Script library: prims" }, { "planned": "Guide: primitive params rule lists" }]
+        },
+        {
+          "title": "Position, rotation and size",
+          "text": ["Placement and scale, from basic setters to scaling the whole object."],
+          "items": ["llSetPos", "llSetRot", "llSetScale", "llGetScale", "llScaleByFactor", "PRIM_SIZE"],
+          "links": [{ "feature": "movement" }, { "feature": "linkset" }]
+        },
+        {
+          "title": "Shape",
+          "text": ["Parametric shapes (box, cylinder, prism, sphere, torus, tube, ring) take cut, hollow, twist and other parameters. Sculpts and mesh use the sculpt type."],
+          "items": ["PRIM_TYPE", "llGetNumberOfSides", "llGetLinkNumberOfSides"],
+          "groups": ["PrimType", "PrimTypeHole", "PrimTypeSculptType", "PrimTypeSculptFlag"]
+        },
+        {
+          "title": "Faces",
+          "text": ["Textures, colors, alpha, materials and media are set per face. ALL_SIDES applies to every face."],
+          "items": ["ALL_SIDES", "PRIM_TEXTURE", "PRIM_COLOR"],
+          "groups": ["Faces"],
+          "links": [{ "feature": "textures" }]
+        },
+        {
+          "title": "Light, glow, text and flexi",
+          "text": ["Visual properties beyond the faces: point light, glow, hover text and flexible paths."],
+          "items": ["PRIM_POINT_LIGHT", "PRIM_GLOW", "PRIM_TEXT", "PRIM_FLEXIBLE", "llSetText"],
+          "links": [{ "feature": "effects" }]
+        },
+        {
+          "title": "Name, description and interaction",
+          "text": ["Prim name and description, touch and sit text, click action and pay price."],
+          "items": ["llSetObjectName", "llGetObjectName", "llSetObjectDesc", "llGetObjectDesc", "llSetTouchText", "llSetSitText", "llSetClickAction", "llSetPayPrice", "llGetKey"],
+          "links": [{ "category": "prim_properties" }]
+        },
+        {
+          "title": "Prim inventory",
+          "text": ["Each prim holds inventory: scripts, notecards, textures, sounds, animations and objects. Scripts list and inspect it, give or remove items, and react to changes."],
+          "items": ["llGetInventoryNumber", "llGetInventoryName", "llGetInventoryType", "llGetInventoryKey", "llGetInventoryCreator", "llGetInventoryDesc", "llGetInventoryAcquireTime", "llRequestInventoryData", "llRemoveInventory", "llAllowInventoryDrop", "llRemoteLoadScriptPin", "llSetRemoteScriptAccessPin", "CHANGED_INVENTORY", "CHANGED_ALLOWED_DROP"],
+          "groups": ["InventoryType"],
+          "links": [{ "category": "prim_inventory" }, { "wiki": "Category:LSL Inventory" }]
+        },
+        {
+          "title": "Permissions and ownership",
+          "text": ["Objects and inventory items carry next-owner permissions (copy, modify, transfer). Scripts can read them, and transfer the object's ownership in some cases."],
+          "items": ["llGetObjectPermMask", "llSetObjectPermMask", "llGetInventoryPermMask", "llSetInventoryPermMask", "llTransferOwnership", "llGetCreator", "llGetOwner"],
+          "groups": ["AssetPermission", "AssetPermissionCategory", "AssetPermissionCategoryFlag", "TransferOwnershipFlag"],
+          "links": [{ "category": "asset_permissions" }, { "category": "prim" }, { "wiki": "Category:LSL Prim" }]
+        }
+      ],
+      "categories": ["prim", "prim_properties", "prim_inventory", "asset_permissions"],
+      "related": ["linkset", "textures", "physics", "effects"]
+    },
+    {
+      "id": "sound",
+      "title": "Sound",
+      "description": "Playing, looping, triggering and synchronising sounds, including collision sounds.",
+      "intro": [
+        "A prim plays sounds from its inventory or by asset key. Attached sounds follow the prim, and a prim has one attached sound at a time. Triggered sounds play at a fixed position and can overlap.",
+        "Volume runs from 0.0 to 1.0. Sound radius, queueing and preloading help sounds start on time and stay in range."
+      ],
+      "sections": [
+        {
+          "title": "Play, loop and trigger",
+          "text": ["llPlaySound plays once on the prim, llLoopSound repeats, and llTriggerSound plays at the prim's position without being attached to it. The Link variants act on any prim in the linkset."],
+          "items": ["llPlaySound", "llLoopSound", "llStopSound", "llTriggerSound", "llTriggerSoundLimited", "llLinkPlaySound", "llLinkStopSound"],
+          "groups": ["PlaySoundFlag"],
+          "links": [{ "planned": "Recipe: trigger a random sound from a list of keys" }]
+        },
+        {
+          "title": "Volume, radius and preloading",
+          "text": ["Adjust the volume of a playing sound, limit how far it carries, and preload sounds so they play without delay."],
+          "items": ["llAdjustSoundVolume", "llLinkAdjustSoundVolume", "llSetSoundRadius", "llLinkSetSoundRadius", "llPreloadSound"]
+        },
+        {
+          "title": "Queueing and start-loop-end",
+          "text": ["With queueing on, the next sound waits for the current one to finish. That lets engines and weapons play a start sound, a loop for as long as needed, and an end sound without a pop at the transitions."],
+          "items": ["llSetSoundQueueing", "llLinkSetSoundQueueing"],
+          "links": [{ "planned": "Guide: start-loop-end sounds for engines and weapons" }]
+        },
+        {
+          "title": "Synchronised sounds",
+          "text": ["A master loop and slave sounds keep several prims in time with each other."],
+          "items": ["llLoopSoundMaster", "llLoopSoundSlave", "llPlaySoundSlave"]
+        },
+        {
+          "title": "Collision sounds",
+          "text": ["llCollisionSound replaces the default collision sound. For rezzed projectiles, REZ_SOUND and REZ_SOUND_COLLIDE set the sound and collision sound before the object exists."],
+          "items": ["llCollisionSound", "llRezObjectWithParams", "REZ_SOUND", "REZ_SOUND_COLLIDE"],
+          "links": [{ "feature": "physics" }]
+        },
+        {
+          "title": "Parcel music and media",
+          "text": ["Streaming music belongs to the parcel, not the prim."],
+          "items": ["llSetParcelMusicURL", "llGetParcelMusicURL"],
+          "links": [{ "feature": "land" }, { "category": "sound" }, { "wiki": "Category:LSL Sound" }]
+        }
+      ],
+      "categories": ["sound"],
+      "related": ["effects", "physics", "land"]
+    },
+    {
+      "id": "textures",
+      "title": "Textures & Materials",
+      "description": "Everything on a prim face: textures, colors and alpha, Blinn-Phong and PBR materials, media.",
+      "intro": [
+        "Each face of a prim has its own surface. The original (Blinn-Phong) system combines a diffuse texture, color, alpha, normal and specular maps. PBR materials, based on glTF, use base color, normal, metallic-roughness and emissive maps, and can be overridden per face.",
+        "The two systems are set separately. Blinn-Phong texture repeats, offsets and rotation are set with PRIM_TEXTURE, PRIM_NORMAL and PRIM_SPECULAR; PBR transforms are set with the PRIM_GLTF_* rules or glTF overrides."
+      ],
+      "sections": [
+        {
+          "title": "Textures",
+          "text": ["Set a texture by inventory name or key, and adjust repeats, offset and rotation."],
+          "items": ["llSetTexture", "llSetLinkTexture", "llGetTexture", "llScaleTexture", "llOffsetTexture", "llRotateTexture", "llGetTextureScale", "llGetTextureOffset", "llGetTextureRot", "PRIM_TEXTURE", "PRIM_TEXGEN"],
+          "groups": ["PrimTexgen"],
+          "links": [{ "wiki": "Category:LSL Texture" }, { "planned": "Guide: Blinn-Phong and PBR offsets, repeats and rotation" }]
+        },
+        {
+          "title": "Colors and alpha",
+          "text": ["Colors are vectors from 0.0 to 1.0. Alpha runs from 0.0 (invisible) to 1.0. The alpha mode sets how transparent textures are drawn."],
+          "items": ["llSetColor", "llGetColor", "llSetLinkColor", "llSetAlpha", "llGetAlpha", "llSetLinkAlpha", "PRIM_COLOR", "PRIM_ALPHA_MODE", "CHANGED_COLOR"],
+          "groups": ["AlphaMode"],
+          "links": [{ "wiki": "Category:LSL Color" }, { "wiki": "Category:LSL Alpha" }]
+        },
+        {
+          "title": "Blinn-Phong materials",
+          "text": ["Normal and specular maps, shininess and bump presets add surface detail to the legacy system."],
+          "items": ["PRIM_NORMAL", "PRIM_SPECULAR", "PRIM_BUMP_SHINY", "PRIM_FULLBRIGHT", "PRIM_GLOW"],
+          "groups": ["PrimBump", "PrimShiny"]
+        },
+        {
+          "title": "PBR materials",
+          "text": ["Apply a material asset to faces, or override parts of it (base color, alpha, metallic, roughness, emissive) without replacing it."],
+          "items": ["llSetRenderMaterial", "llSetLinkRenderMaterial", "llGetRenderMaterial", "llIsLinkGLTFMaterial", "llSetLinkGLTFOverrides", "PRIM_RENDER_MATERIAL", "PRIM_GLTF_BASE_COLOR", "PRIM_GLTF_NORMAL", "PRIM_GLTF_METALLIC_ROUGHNESS", "PRIM_GLTF_EMISSIVE", "CHANGED_RENDER_MATERIAL"],
+          "groups": ["GLTFOverride", "GLTFAlphaMode"],
+          "links": [{ "wiki": "Category:GlTF" }, { "planned": "Guide: PBR materials and glTF overrides" }]
+        },
+        {
+          "title": "Reflection probes",
+          "text": ["Reflection probes control what PBR surfaces reflect nearby."],
+          "items": ["PRIM_REFLECTION_PROBE"],
+          "groups": ["ReflectionProbeType"]
+        },
+        {
+          "title": "Texture animations",
+          "text": ["Frame animation and scrolling are covered under Effects."],
+          "items": ["llSetTextureAnim", "llSetLinkTextureAnim"],
+          "links": [{ "feature": "effects" }]
+        },
+        {
+          "title": "Media on a prim",
+          "text": ["A face can show a web page. Media settings control the URL, size, controls and who may interact."],
+          "items": ["llSetPrimMediaParams", "llGetPrimMediaParams", "llClearPrimMedia", "llSetLinkMedia", "llGetLinkMedia", "llClearLinkMedia", "CHANGED_MEDIA"],
+          "groups": ["PrimMediaParam", "PrimMediaControl", "PrimMediaPerm", "PrimMediaError"],
+          "links": [{ "category": "prim_media" }, { "category": "media" }, { "wiki": "Category:LSL Prim Media" }]
+        }
+      ],
+      "categories": ["prim_appearance", "prim_media", "media"],
+      "related": ["prims", "effects"]
+    }
+  ],
+  "redirects": {
+    "objects": "prims",
+    "appearance": "textures",
+    "avatars": "avatar",
+    "communication": "communications",
+    "experiences": "experience",
+    "data": "data-storage",
+    "http": "communications",
+    "inventory": "prims",
+    "script": "events",
+    "text": "data-transmission",
+    "sensing": "events"
+  }
+}

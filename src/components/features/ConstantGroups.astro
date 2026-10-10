@@ -1,0 +1,12 @@
+---
+// <ConstantGroups names={["DamageType"]} />: links to constant group pages with member counts.
+import { constantGroupHref, constantsInGroup } from '../../lib/catalog';
+interface Props { names: string[] }
+const groups = Astro.props.names.map(g => {
+	const n = constantsInGroup(g).length;
+	if (!n) throw new Error(`<ConstantGroups>: "${g}" has no public constants`);
+	return { g, n };
+});
+import './features.css';
+---
+<p class="feature-row not-content"><span class="label">Constant groups</span> {groups.map(({ g, n }) => <a href={constantGroupHref(g)}>{g} <small>{n}</small></a>)}</p>

@@ -1,0 +1,25 @@
+---
+// <ApiLinks names={["llDamage", "on_damage", "PRIM_HEALTH"]} />
+// Each function, event or constant with a link and its description from LSL Definitions.
+// An unknown name fails the build.
+import { apiMap, apiHref } from '../../lib/catalog';
+interface Props { names: string[] }
+const entries = Astro.props.names.map(name => {
+	const e = apiMap.get(name);
+	if (!e) throw new Error(`<ApiLinks>: "${name}" is not a public function, event or constant`);
+	return e;
+});
+import './features.css';
+---
+<ul class="api-links not-content">
+	{entries.map(e => (
+		<li><a href={apiHref(e.kind, e.name)}><code>{e.name}</code></a>{e.description && <span class="desc" title={e.description}>{e.description}</span>}</li>
+	))}
+</ul>
+<style>
+	.api-links { list-style: none; padding: 0; margin: .75rem 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: .5rem 1rem; }
+	.api-links li { margin: 0; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; }
+	.api-links a { text-decoration: none; overflow-wrap: anywhere; }
+	.api-links code { font-size: var(--sl-text-xs); }
+	.desc { font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>

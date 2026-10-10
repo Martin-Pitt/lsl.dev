@@ -1,0 +1,120 @@
+---
+title: "Textures & Materials"
+description: "Everything on a prim face: textures, colors and alpha, Blinn-Phong and PBR materials, media."
+redirectFrom: ["appearance"]
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+Each face of a prim has its own surface. The original (Blinn-Phong) system combines a diffuse texture, color, alpha, normal and specular maps. PBR materials, based on glTF, use base color, normal, metallic-roughness and emissive maps, and can be overridden per face.
+
+The two systems are set separately. Blinn-Phong texture repeats, offsets and rotation are set with [PRIM_TEXTURE](/constants/PRIM_TEXTURE/), [PRIM_NORMAL](/constants/PRIM_NORMAL/) and [PRIM_SPECULAR](/constants/PRIM_SPECULAR/); PBR transforms are set with the PRIM_GLTF_\* rules or [glTF overrides](/functions/llSetLinkGLTFOverrides/).
+
+Shape, light, glow and other prim properties live under [Prims](/features/prims/); texture animation under [Effects](/features/effects/).
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Textures: [set one by inventory name or key](/functions/llSetTexture/), [on any prim](/functions/llSetLinkTexture/), and [read it back](/functions/llGetTexture/)
+  - Adjust [repeats](/functions/llScaleTexture/), [offset](/functions/llOffsetTexture/) and [rotation](/functions/llRotateTexture/); the [mapping mode](/constants/PRIM_TEXGEN/) sets how repeats are measured
+- Colors are vectors from 0.0 to 1.0, [set per face](/functions/llSetColor/)
+  - [Alpha](/functions/llSetAlpha/) runs from 0.0 (invisible) to 1.0
+  - The [alpha mode](/constants/PRIM_ALPHA_MODE/) sets how transparent textures are drawn
+- Blinn-Phong materials: [normal](/constants/PRIM_NORMAL/) and [specular](/constants/PRIM_SPECULAR/) maps, [shininess and bump presets](/constants/PRIM_BUMP_SHINY/) add surface detail to the legacy system
+  - [Full bright](/constants/PRIM_FULLBRIGHT/) and [glow](/constants/PRIM_GLOW/) change how a face is lit
+- PBR materials: [apply a material asset](/functions/llSetRenderMaterial/) to faces, or [override parts of it](/functions/llSetLinkGLTFOverrides/) (base color, alpha, metallic, roughness, emissive) without replacing it
+  - [Check whether a face uses PBR](/functions/llIsLinkGLTFMaterial/)
+- [Reflection probes](/constants/PRIM_REFLECTION_PROBE/) control what PBR surfaces reflect nearby
+- [Frame animation and scrolling](/functions/llSetTextureAnim/) are covered under [Effects](/features/effects/)
+- A face can [show a web page](/functions/llSetPrimMediaParams/); media settings control the URL, size, controls and who may interact
+- The [changed](/events/changed/) event reports [color](/constants/CHANGED_COLOR/), [material](/constants/CHANGED_RENDER_MATERIAL/) and [media](/constants/CHANGED_MEDIA/) changes
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llSetTexture", "llSetLinkTexture", "llSetColor", "llSetAlpha", "llSetRenderMaterial",
+  "llSetLinkGLTFOverrides", "llSetLinkPrimitiveParamsFast", "llSetPrimMediaParams", "changed"
+]} />
+
+</Box>
+<Box title="PBR materials" href="https://wiki.secondlife.com/wiki/Category:GlTF">
+
+Setting a render material clears most PRIM_GLTF_\* properties on the face, except repeats, offsets and rotation.
+
+</Box>
+<Box title="Media on a prim" href="https://wiki.secondlife.com/wiki/Category:LSL_Prim_Media">
+
+Media functions return a STATUS_\* code ([PrimMediaError](/constants/groups/PrimMediaError/)) detailing success or failure.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llSetTexture", "llSetLinkTexture", "llGetTexture", "llScaleTexture", "llOffsetTexture",
+  "llRotateTexture", "llGetTextureScale", "llGetTextureOffset", "llGetTextureRot",
+  "llSetColor", "llGetColor", "llSetLinkColor", "llSetAlpha", "llGetAlpha", "llSetLinkAlpha",
+  "llSetRenderMaterial", "llSetLinkRenderMaterial", "llGetRenderMaterial",
+  "llIsLinkGLTFMaterial", "llSetLinkGLTFOverrides",
+  "llSetTextureAnim", "llSetLinkTextureAnim",
+  "llSetPrimMediaParams", "llGetPrimMediaParams", "llClearPrimMedia",
+  "llSetLinkMedia", "llGetLinkMedia", "llClearLinkMedia"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) — Blinn-Phong face rules
+  - [PRIM_TEXTURE](/constants/PRIM_TEXTURE/) — Diffuse texture, repeats, offsets and rotation
+  - [PRIM_TEXGEN](/constants/PRIM_TEXGEN/) — Mapping mode ([PrimTexgen](/constants/groups/PrimTexgen/)): [default](/constants/PRIM_TEXGEN_DEFAULT/) or [planar](/constants/PRIM_TEXGEN_PLANAR/)
+  - [PRIM_COLOR](/constants/PRIM_COLOR/) — Color and alpha, from 0.0 (clear) to 1.0 (solid)
+  - [PRIM_ALPHA_MODE](/constants/PRIM_ALPHA_MODE/) — [Blend](/constants/PRIM_ALPHA_MODE_BLEND/), [none](/constants/PRIM_ALPHA_MODE_NONE/), [mask](/constants/PRIM_ALPHA_MODE_MASK/) with a cutoff, or [emissive](/constants/PRIM_ALPHA_MODE_EMISSIVE/) ([AlphaMode](/constants/groups/AlphaMode/))
+  - [PRIM_NORMAL](/constants/PRIM_NORMAL/) — Normal map with its own repeats, offsets and rotation
+  - [PRIM_SPECULAR](/constants/PRIM_SPECULAR/) — Specular map plus color, glossiness and environment
+  - [PRIM_BUMP_SHINY](/constants/PRIM_BUMP_SHINY/) — Shininess ([PrimShiny](/constants/groups/PrimShiny/)) and bump preset ([PrimBump](/constants/groups/PrimBump/))
+  - [PRIM_FULLBRIGHT](/constants/PRIM_FULLBRIGHT/), [PRIM_GLOW](/constants/PRIM_GLOW/) — Full-bright rendering and glow intensity
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) — PBR face rules
+  - [PRIM_RENDER_MATERIAL](/constants/PRIM_RENDER_MATERIAL/) — The material asset on a face
+  - [PRIM_GLTF_BASE_COLOR](/constants/PRIM_GLTF_BASE_COLOR/) — Base color, alpha mode ([GLTFAlphaMode](/constants/groups/GLTFAlphaMode/)), alpha cutoff and double-sided; colors in linear space
+  - [PRIM_GLTF_NORMAL](/constants/PRIM_GLTF_NORMAL/) — Normal map
+  - [PRIM_GLTF_METALLIC_ROUGHNESS](/constants/PRIM_GLTF_METALLIC_ROUGHNESS/) — Occlusion, metallic and roughness
+  - [PRIM_GLTF_EMISSIVE](/constants/PRIM_GLTF_EMISSIVE/) — Emission tint in linear space
+  - [PRIM_REFLECTION_PROBE](/constants/PRIM_REFLECTION_PROBE/) — Make the object a reflection probe ([ReflectionProbeType](/constants/groups/ReflectionProbeType/)): [box](/constants/PRIM_REFLECTION_PROBE_BOX/), [dynamic](/constants/PRIM_REFLECTION_PROBE_DYNAMIC/) or [mirror](/constants/PRIM_REFLECTION_PROBE_MIRROR/)
+- [llSetLinkGLTFOverrides](/functions/llSetLinkGLTFOverrides/) — individual overrides ([GLTFOverride](/constants/groups/GLTFOverride/)), such as [OVERRIDE_GLTF_BASE_COLOR_FACTOR](/constants/OVERRIDE_GLTF_BASE_COLOR_FACTOR/), [OVERRIDE_GLTF_METALLIC_FACTOR](/constants/OVERRIDE_GLTF_METALLIC_FACTOR/), [OVERRIDE_GLTF_ROUGHNESS_FACTOR](/constants/OVERRIDE_GLTF_ROUGHNESS_FACTOR/) and [OVERRIDE_GLTF_EMISSIVE_FACTOR](/constants/OVERRIDE_GLTF_EMISSIVE_FACTOR/)
+- [llSetPrimMediaParams](/functions/llSetPrimMediaParams/) and [llSetLinkMedia](/functions/llSetLinkMedia/) — media settings ([PrimMediaParam](/constants/groups/PrimMediaParam/))
+  - [PRIM_MEDIA_CURRENT_URL](/constants/PRIM_MEDIA_CURRENT_URL/), [PRIM_MEDIA_HOME_URL](/constants/PRIM_MEDIA_HOME_URL/) — Current and home URL
+  - [PRIM_MEDIA_AUTO_PLAY](/constants/PRIM_MEDIA_AUTO_PLAY/) — Play when a resident can view it
+  - [PRIM_MEDIA_PERMS_INTERACT](/constants/PRIM_MEDIA_PERMS_INTERACT/) — Who may interact ([PrimMediaPerm](/constants/groups/PrimMediaPerm/))
+  - Navigation controls: [standard](/constants/PRIM_MEDIA_CONTROLS_STANDARD/) or [mini](/constants/PRIM_MEDIA_CONTROLS_MINI/) ([PrimMediaControl](/constants/groups/PrimMediaControl/))
+- [changed](/events/changed/) — [CHANGED_COLOR](/constants/CHANGED_COLOR/), [CHANGED_TEXTURE](/constants/CHANGED_TEXTURE/), [CHANGED_RENDER_MATERIAL](/constants/CHANGED_RENDER_MATERIAL/), [CHANGED_MEDIA](/constants/CHANGED_MEDIA/)
+
+</Box>
+
+## Constant groups
+
+<ConstantGroups names={[
+  "PrimTexgen", "AlphaMode", "PrimBump", "PrimShiny", "GLTFOverride", "GLTFAlphaMode",
+  "ReflectionProbeType", "PrimMediaParam", "PrimMediaControl", "PrimMediaPerm", "PrimMediaError"
+]} />
+
+## Related
+
+<SeeAlso items={[
+  "wiki:Category:LSL Texture", "wiki:Category:LSL Color", "wiki:Category:LSL Alpha",
+  "wiki:Category:GlTF", "feature:effects", "category:prim_media", "category:media",
+  "wiki:Category:LSL Prim Media"
+]}>
+  <Planned>Guide: Blinn-Phong and PBR offsets, repeats and rotation</Planned>
+  <Planned>Guide: PBR materials and glTF overrides</Planned>
+</SeeAlso>
+
+<FeatureFooter
+  related={["prims", "effects"]}
+  categories={["prim_appearance", "prim_media", "media"]}
+/>

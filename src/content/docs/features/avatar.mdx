@@ -1,0 +1,174 @@
+---
+title: "Avatars"
+description: "Avatars in scripting: identifying agents, permissions, attachments, sitting, animations and teleports."
+redirectFrom: ["avatars"]
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, SeeAlso, Signatures } from '../../../components/features';
+
+Scripts never own an avatar. They find avatars nearby or in the region, read public information about them, and act on them only with a permission the avatar has granted.
+
+Most avatar control follows the same pattern: call [llRequestPermissions](/functions/llRequestPermissions/), wait for [run_time_permissions](/events/run_time_permissions/), then use the functions that permission unlocks. Attachments and sitting avatars grant some permissions automatically.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Avatars are identified by key
+  - [List the avatars](/functions/llGetAgentList/) on the parcel or region, or [count them](/functions/llGetRegionAgentCount/)
+  - Names come in two forms: the legacy/[user name](/functions/llGetUsername/) and the changeable [display name](/functions/llGetDisplayName/)
+  - Some lookups are asynchronous and answer in the [dataserver](/events/dataserver/) event
+- Permissions are granted per script, to one avatar at a time
+  - Request only what you need; granting is remembered until the script resets or another avatar grants
+  - [Check what is granted](/functions/llGetPermissions/) and [by whom](/functions/llGetPermissionsKey/)
+- Objects can [give inventory](/functions/llGiveInventory/) items or [folders](/functions/llGiveInventoryList/) to an avatar
+  - The receiver may need to accept the offer, and no-copy items leave the object's inventory
+- An [attachment](#attachments) is an object worn on an avatar at an attach point
+  - Scripts can [attach](/functions/llAttachToAvatar/) with [PERMISSION_ATTACH](/constants/PERMISSION_ATTACH/), [detach themselves](/functions/llDetachFromAvatar/), and [inspect what an avatar is wearing](/functions/llGetAttachedList/)
+  - HUDs are attachments on the HUD points
+- A [sit target](/functions/llSitTarget/) fixes where and how an avatar sits on a prim
+  - Sitting avatars become part of the linkset, after the prims, so the link numbers after the last prim are avatars
+  - [Sit flags](/functions/llSetLinkSitFlags/) control unsitting, collisions and damage while seated
+- Animations
+  - With [PERMISSION_TRIGGER_ANIMATION](/constants/PERMISSION_TRIGGER_ANIMATION/) a script can [start](/functions/llStartAnimation/) and [stop](/functions/llStopAnimation/) animations on the avatar
+  - With [PERMISSION_OVERRIDE_ANIMATIONS](/constants/PERMISSION_OVERRIDE_ANIMATIONS/) it can [replace the default animation](/functions/llSetAnimationOverride/) for each animation state (standing, walking, flying and so on)
+- Teleporting and moving
+  - [llTeleportAgent](/functions/llTeleportAgent/) needs [PERMISSION_TELEPORT](/constants/PERMISSION_TELEPORT/) (or an [experience](/features/experience/))
+  - Landowners can [send avatars home](/functions/llTeleportAgentHome/) or eject them (see [land](/features/land/))
+  - Avatars can also be [turned](/functions/llSetAgentRot/) or [pushed](/functions/llPushObject/)
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llGetAgentList", "llGetAgentInfo", "llRequestPermissions", "run_time_permissions",
+  "llGiveInventory", "llAttachToAvatar", "attach", "llSitTarget", "changed",
+  "llStartAnimation", "llSetAnimationOverride", "llTeleportAgent"
+]} />
+
+</Box>
+<Box title="Attachments" href="/categories/attachments/">
+
+An object worn at an attach point gets an [attach](/events/attach/) event; [llGetAttached](/functions/llGetAttached/) tells which point it is on.
+
+</Box>
+<Box title="Sitting" href="/categories/sit/">
+
+Sitting and standing change the linkset, reported by [changed](/events/changed/) with [CHANGED_LINK](/constants/CHANGED_LINK/); [llAvatarOnSitTarget](/functions/llAvatarOnSitTarget/) tells who sat.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+### Find and identify avatars
+
+<Signatures names={[
+  "llGetAgentList", "llGetRegionAgentCount", "llGetAgentInfo",
+  "llGetAgentSize", "llGetAgentLanguage", "llGetDisplayName", "llGetUsername",
+  "llKey2Name", "llName2Key", "llRequestAgentData", "llRequestDisplayName",
+  "llRequestUsername", "llRequestUserKey", "llGetOwner", "llIsFriend",
+  "llSameGroup", "llGetVisualParams", "dataserver"
+]} descriptions />
+
+### Permissions
+
+<Signatures names={["llRequestPermissions", "run_time_permissions", "llGetPermissions", "llGetPermissionsKey"]} descriptions />
+
+### Giving items
+
+<Signatures names={["llGiveInventory", "llGiveInventoryList", "llGiveAgentInventory"]} descriptions />
+
+### Wearing objects
+
+<Signatures names={[
+  "llAttachToAvatar", "llAttachToAvatarTemp", "llDetachFromAvatar",
+  "llGetAttached", "llGetAttachedList", "llGetAttachedListFiltered", "attach",
+  "llWorldPosToHUD"
+]} descriptions />
+
+### Sit targets
+
+<Signatures names={[
+  "llSitTarget", "llLinkSitTarget", "llAvatarOnSitTarget",
+  "llAvatarOnLinkSitTarget", "llSetSitText", "llSitOnLink", "llUnSit",
+  "llSetLinkSitFlags", "llGetLinkSitFlags", "changed"
+]} descriptions />
+
+### Animations
+
+<Signatures names={[
+  "llStartAnimation", "llStopAnimation", "llGetAnimation",
+  "llGetAnimationList", "llSetAnimationOverride", "llGetAnimationOverride",
+  "llResetAnimationOverride"
+]} descriptions />
+
+### Teleporting and moving
+
+<Signatures names={[
+  "llTeleportAgent", "llTeleportAgentGlobalCoords", "llTeleportAgentHome",
+  "llMapDestination", "llSetAgentRot", "llPushObject"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llGetAgentList](/functions/llGetAgentList/) — scope of the list
+  - [AGENT_LIST_PARCEL](/constants/AGENT_LIST_PARCEL/) — agents on the same parcel as the script
+  - [AGENT_LIST_PARCEL_OWNER](/constants/AGENT_LIST_PARCEL_OWNER/) — agents on any parcel in the region with the same owner as this parcel
+  - [AGENT_LIST_REGION](/constants/AGENT_LIST_REGION/) — agents anywhere in the region
+- [llGetAgentInfo](/functions/llGetAgentInfo/) — bit flags describing the avatar, for example
+  - [AGENT_SITTING](/constants/AGENT_SITTING/) — the avatar is sitting
+  - [AGENT_FLYING](/constants/AGENT_FLYING/) — flying or hovering
+  - [AGENT_AUTOMATED](/constants/AGENT_AUTOMATED/) — registered with Linden Lab as an automated agent (bot)
+- [llRequestAgentData](/functions/llRequestAgentData/) — answers in [dataserver](/events/dataserver/)
+  - [DATA_ONLINE](/constants/DATA_ONLINE/) — whether the agent is online
+  - [DATA_NAME](/constants/DATA_NAME/) — the legacy name
+  - [DATA_BORN](/constants/DATA_BORN/) — account creation date
+  - [DATA_PAYINFO](/constants/DATA_PAYINFO/) — payment status, a mask of [PAYMENT_INFO_ON_FILE](/constants/PAYMENT_INFO_ON_FILE/) and [PAYMENT_INFO_USED](/constants/PAYMENT_INFO_USED/)
+- [llRequestPermissions](/functions/llRequestPermissions/) — the avatar permissions
+  - [PERMISSION_ATTACH](/constants/PERMISSION_ATTACH/) — attach to or detach from the agent
+  - [PERMISSION_TRIGGER_ANIMATION](/constants/PERMISSION_TRIGGER_ANIMATION/) — start or stop animations
+  - [PERMISSION_OVERRIDE_ANIMATIONS](/constants/PERMISSION_OVERRIDE_ANIMATIONS/) — override default animations
+  - [PERMISSION_TELEPORT](/constants/PERMISSION_TELEPORT/) — teleport the agent with llTeleportAgent
+  - [PERMISSION_TAKE_CONTROLS](/constants/PERMISSION_TAKE_CONTROLS/) and [PERMISSION_CONTROL_CAMERA](/constants/PERMISSION_CONTROL_CAMERA/) — see [input](/features/input/) and [camera](/features/camera/)
+- [llGiveAgentInventory](/functions/llGiveAgentInventory/) — options for the transfer
+  - [TRANSFER_DEST](/constants/TRANSFER_DEST/) — destination root folder
+  - [TRANSFER_FLAGS](/constants/TRANSFER_FLAGS/) — flags controlling the transfer
+- [llGetAttachedListFiltered](/functions/llGetAttachedListFiltered/) — filter options
+  - [FILTER_INCLUDE](/constants/FILTER_INCLUDE/) — include a specific attachment point
+  - [FILTER_FLAGS](/constants/FILTER_FLAGS/) with [FILTER_FLAG_HUDS](/constants/FILTER_FLAG_HUDS/) — include HUDs with matching experiences
+- [llSetLinkSitFlags](/functions/llSetLinkSitFlags/) — sit flags
+  - [SIT_FLAG_ALLOW_UNSIT](/constants/SIT_FLAG_ALLOW_UNSIT/) — an avatar seated by a script may stand up manually
+  - [SIT_FLAG_SCRIPTED_ONLY](/constants/SIT_FLAG_SCRIPTED_ONLY/) — only scripts can seat avatars here
+  - [SIT_FLAG_NO_COLLIDE](/constants/SIT_FLAG_NO_COLLIDE/) — no collision volume while seated
+  - [SIT_FLAG_NO_DAMAGE](/constants/SIT_FLAG_NO_DAMAGE/) — damage is not passed to the seated avatar
+  - [SIT_FLAG_SIT_TARGET](/constants/SIT_FLAG_SIT_TARGET/) — read-only, the prim has an active sit target
+- [llSitOnLink](/functions/llSitOnLink/) — returns a sit result, such as [SIT_OK](/constants/SIT_OK/) or [SIT_NO_SIT_TARGET](/constants/SIT_NO_SIT_TARGET/)
+
+</Box>
+
+## Reference
+
+<ConstantGroups names={[
+  "AgentInfo", "AgentData", "AgentDataPaymentInfo", "AgentListScope", "ScriptPermission",
+  "GiveAgentInventoryParam", "AttachPoint", "AttachedListFilterParam", "AttachedListFilterFlag",
+  "SitFlag", "SitError"
+]} />
+
+## Related
+
+<SeeAlso items={[
+  "category:permissions", "wiki:Category:LSL Permissions", "category:avatar_inventory",
+  "category:attachments", "wiki:Category:LSL Attachment", "category:sit", "wiki:Category:LSL Sit",
+  "category:avatar_animation", "wiki:Category:LSL Animation", "category:teleport", "feature:land"
+]} />
+
+<FeatureFooter
+  related={["camera", "input", "animesh", "experience"]}
+  categories={["avatar", "avatar_animation", "attachments", "sit", "teleport", "permissions", "avatar_inventory"]}
+  archive={["Category:LSL Avatar"]}
+/>

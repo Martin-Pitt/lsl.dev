@@ -1,0 +1,100 @@
+---
+title: "Dialog"
+description: "Dialog menus and text boxes, and how scripts handle the answers."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+[llDialog](/functions/llDialog/) shows a blue menu with a message and up to 12 buttons. [llTextBox](/functions/llTextBox/) asks for a line of text. In both cases the viewer makes the avatar say the answer on a channel the script chose, so a dialog is really a [listener](/functions/llListen/) plus a prompt.
+
+A dialog is not a window the script controls: once shown, the script cannot close or update it, and the answer is just chat, heard like any other message. Simple menus are easy; multi-page menus, several users at once and timeouts take more design.
+
+For complex interfaces, a HUD built from prims can be a better fit: buttons are prims [touched](/events/touch_start/) by the wearer, read with [llDetectedLinkNumber](/functions/llDetectedLinkNumber/).
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Showing a menu
+  - Buttons are a list of short labels; [clicking a button chats its label](/functions/llDialog/) on the channel
+  - A [text box](/functions/llTextBox/) chats whatever the avatar typed instead
+  - Use a large negative [random](/functions/llFrand/) channel so other scripts and people are unlikely to collide with it
+- Handling the answer
+  - [Open a listener](/functions/llListen/) on the dialog channel, filtered to the avatar's key, before showing the dialog
+  - The reply arrives in the [listen](/events/listen/) event
+  - [Remove the listener](/functions/llListenRemove/) after the answer, or after a timeout set with a [timer](/functions/llSetTimerEvent/); a listener can also be [paused and resumed](/functions/llListenControl/)
+- Opening menus
+  - Menus are usually opened by [touch](/events/touch_start/), using [who touched](/functions/llDetectedKey/) as the dialog target
+  - The [touch text](/functions/llSetTouchText/) and [click action](/functions/llSetClickAction/) change what the viewer shows on hover and click
+- Other viewer prompts
+  - Scripts can also [open a web page](/functions/llLoadURL/), [a map location](/functions/llMapDestination/) or [a floater](/functions/llOpenFloater/), and [give items](/functions/llGiveInventory/) with an accept prompt
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={["llDialog", "llTextBox", "llListen", "listen", "llListenRemove", "llSetTimerEvent", "timer"]} />
+
+</Box>
+<Box title="Dialog Menus" href="https://wiki.secondlife.com/wiki/Dialog_Menus">
+
+Multi-page menus, menu state machines and prim HUDs are covered in the archived wiki articles.
+
+</Box>
+<Box title="Prim HUDs" href="https://wiki.secondlife.com/wiki/CatHUD">
+
+A HUD is an attachment on the screen; its buttons are prims that the wearer touches, so it is not limited to 12 buttons.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llDialog", "llTextBox", "llFrand", "llListen", "listen", "llListenRemove", "llListenControl",
+  "llSetTimerEvent", "timer", "touch_start", "llDetectedKey", "llSetTouchText", "llSetClickAction"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llListen](/functions/llListen/) — channels that are not for menus
+  - [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) — reserved for script debugging and error messages
+  - [COMBAT_CHANNEL](/constants/COMBAT_CHANNEL/) — reserved for the [combat](/features/combat/) log
+- [llSetClickAction](/functions/llSetClickAction/) — what a left-click does ([all click actions](/constants/groups/ClickAction/))
+  - [CLICK_ACTION_TOUCH](/constants/CLICK_ACTION_TOUCH/) — triggers touch events, the usual way to open a menu
+  - [CLICK_ACTION_SIT](/constants/CLICK_ACTION_SIT/) — sits the avatar on the prim
+  - [CLICK_ACTION_PAY](/constants/CLICK_ACTION_PAY/) — opens the pay dialog
+- [llMapBeacon](/functions/llMapBeacon/) — displays an in-world beacon for the avatar touching or wearing the object
+  - [BEACON_MAP](/constants/BEACON_MAP/) — also display and focus the world map
+- [llMapDestination](/functions/llMapDestination/) — opens the world map; only works for attached scripts or during touch events
+- [llLoadURL](/functions/llLoadURL/) — offers to open a URL in the avatar's web browser
+- [llOpenFloater](/functions/llOpenFloater/) — opens a viewer floater loaded with a URL
+- [llGiveInventory](/functions/llGiveInventory/) — gives an item, as permitted by the permissions system
+
+</Box>
+
+## Constant groups
+
+<ConstantGroups names={["ChannelNonPublic", "ClickAction", "MapBeaconParam"]} />
+
+## Related
+
+<SeeAlso items={["feature:input", "category:user_interface"]} />
+
+<SeeAlso items={[
+  "wiki:Dialog Menus", "wiki:Category:LSL Dialog", "wiki:DialogPlus",
+  "feature:communications", "feature:avatar",
+  "wiki:CatDialogs|Script library: dialogs",
+  "wiki:CatHUD|Script library: HUDs"
+]}>
+  <Planned>Recipe: multi-page dialog menu</Planned>
+  <Planned>Guide: building a prim HUD</Planned>
+</SeeAlso>
+
+<FeatureFooter
+  related={["communications", "input"]}
+  categories={["user_interface"]}
+/>

@@ -1,0 +1,116 @@
+---
+title: "Effects"
+description: "Visual effects: particle systems, hover text, texture animation, light and glow."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+Effects are visual features rendered by the viewer from a few parameters set by a script. Once set, most of them keep running with no further script activity: the script describes the effect, it does not animate it frame by frame.
+
+High quality effects often combine features: a technical mesh shape made in a modelling tool such as Blender, with an [animated texture](/functions/llSetTextureAnim/) and [glow](/constants/PRIM_GLOW/), can look like particles while costing far less.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- [Particle systems](/functions/llParticleSystem/)
+  - A prim can emit one particle system, described by a list of rules for the emitter pattern, particle lifetime, size, color, speed, texture and flags
+  - Combine flags with the bitwise OR operator (|)
+  - An empty list stops the system; [another prim in the linkset](/functions/llLinkParticleSystem/) can be set too
+- [Hover text](/functions/llSetText/)
+  - Floating text above a prim, with a color and alpha
+  - It is a [prim property](/constants/PRIM_TEXT/), so it stays when the script is removed
+- [Texture animation](/functions/llSetTextureAnim/)
+  - Plays frames from a grid on a texture, or scrolls, rotates or scales the texture, entirely in the viewer
+  - Works [on any prim in the linkset](/functions/llSetLinkTextureAnim/)
+- Light, glow and full bright
+  - Prims can be [point lights](/constants/PRIM_POINT_LIGHT/) or [projectors](/constants/PRIM_PROJECTOR/)
+  - Faces can [glow](/constants/PRIM_GLOW/) or [ignore lighting](/constants/PRIM_FULLBRIGHT/)
+  - PBR materials add [emissive color](/constants/PRIM_GLTF_EMISSIVE/)
+- Media and sound
+  - Web pages on faces ([textures](/features/textures/)) and [sound](/features/sound/) round out many effects
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={["llParticleSystem", "llLinkParticleSystem", "llSetText", "llSetTextureAnim", "llSetLinkTextureAnim", "llSetLinkPrimitiveParamsFast"]} />
+
+</Box>
+<Box title="Particles" href="https://wiki.secondlife.com/wiki/Category:LSL_Particles">
+
+Particle rules are PSYS_\* constants: emitter (PSYS_SRC_\*) and particle (PSYS_PART_\*) settings. See the [reference below](#particle-rules).
+
+</Box>
+<Box title="Technical mesh">
+
+A mesh shaped for the effect, with texture animation and glow, can replace many particles.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llParticleSystem", "llLinkParticleSystem", "llSetText", "llSetTextureAnim", "llSetLinkTextureAnim",
+  "llSetLinkPrimitiveParamsFast"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llParticleSystem](/functions/llParticleSystem/) — the rules list
+  - [PSYS_PART_FLAGS](/constants/PSYS_PART_FLAGS/) — bitfield of particle flags, combined with |
+  - [PSYS_PART_EMISSIVE_MASK](/constants/PSYS_PART_EMISSIVE_MASK/) — particles are full-bright and unaffected by global lighting
+  - [PSYS_PART_RIBBON_MASK](/constants/PSYS_PART_RIBBON_MASK/) — joins emitted particles into a continuous ribbon strip
+  - [PSYS_SRC_PATTERN](/constants/PSYS_SRC_PATTERN/) — the generation pattern, such as [PSYS_SRC_PATTERN_EXPLODE](/constants/PSYS_SRC_PATTERN_EXPLODE/) (outward in all directions)
+  - [PSYS_SRC_TEXTURE](/constants/PSYS_SRC_TEXTURE/) — inventory name or UUID of the particle texture
+- [llSetTextureAnim](/functions/llSetTextureAnim/) — the mode flags
+  - [ANIM_ON](/constants/ANIM_ON/) — must be set to start the animation and cleared to stop it
+  - [LOOP](/constants/LOOP/) — loop continuously
+  - [SMOOTH](/constants/SMOOTH/) — slide smoothly instead of instant frame changes
+  - [ROTATE](/constants/ROTATE/) and [SCALE](/constants/SCALE/) — animate rotation or scale; they cannot be combined
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) — light, glow and text as prim parameters
+  - [PRIM_POINT_LIGHT](/constants/PRIM_POINT_LIGHT/) — local lighting; color in linear space (use [llsRGB2Linear](/functions/llsRGB2Linear/))
+  - [PRIM_PROJECTOR](/constants/PRIM_PROJECTOR/) — texture, field of view, focus and ambiance of a light projection
+  - [PRIM_GLOW](/constants/PRIM_GLOW/) — glow intensity on a face
+  - [PRIM_FULLBRIGHT](/constants/PRIM_FULLBRIGHT/) — full-bright rendering on a face
+  - [PRIM_GLTF_EMISSIVE](/constants/PRIM_GLTF_EMISSIVE/) — the GLTF emission override of a face
+  - [PRIM_TEXT](/constants/PRIM_TEXT/) — hover text, equivalent to llSetText
+
+</Box>
+
+## Particle rules
+
+<ConstantGroups names={["ParticleParam", "ParticleFlag", "ParticleSourcePattern", "ParticleBlendFunc"]} />
+
+## Texture animation modes
+
+<ConstantGroups names={["TextureAnimMode"]} />
+
+## Related
+
+<SeeAlso items={[
+  "category:particles", "wiki:Category:LSL Particles",
+  "wiki:CatParticles|Script library: particles"
+]}>
+  <Planned>Recipe: particle effect presets</Planned>
+</SeeAlso>
+
+<SeeAlso items={["wiki:Category:LSL Floating Text"]} />
+
+<SeeAlso items={["feature:textures"]}>
+  <Planned>Guide: technical mesh with texture animation</Planned>
+</SeeAlso>
+
+<SeeAlso items={["wiki:Category:LSL Light", "feature:prims"]} />
+
+<SeeAlso items={["feature:sound", "category:effects"]} />
+
+<FeatureFooter
+  related={["textures", "sound", "prims"]}
+  categories={["particles", "effects"]}
+  archive={["Category:LSL Effects"]}
+/>

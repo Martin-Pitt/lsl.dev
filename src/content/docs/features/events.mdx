@@ -1,0 +1,130 @@
+---
+title: "Events"
+description: "The event model: states, event handlers, timers and detection."
+redirectFrom: ["script", "sensing"]
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+LSL scripts are event driven. The script does nothing until something happens: a touch, a message, a timer, a collision. Then the matching event handler in the current state runs to completion.
+
+Events wait in a queue while a handler runs. Keep handlers short; long work blocks every other event in the script.
+
+There is no runtime subscription to events: a state receives the events it has handlers for. Think of each [state](/controls/state/) as a set of subscriptions; changing state is how a script subscribes and unsubscribes.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- States
+  - Every script starts in the [default](/controls/default/) state, and each state has its own handlers
+  - Changing state fires [state_exit](/events/state_exit/) and then [state_entry](/events/state_entry/), and removes listeners and sensors from the old state
+  - To stop receiving an event, change to a state without that handler, or remove its source with [llListenRemove](/functions/llListenRemove/), [llSensorRemove](/functions/llSensorRemove/) or [llSetTimerEvent(0.0)](/functions/llSetTimerEvent/)
+  - A script can [reset itself](/functions/llResetScript/) or [another script](/functions/llResetOtherScript/), and [stop or start](/functions/llSetScriptState/) other scripts
+- Timers and time
+  - Each script has [one timer](/functions/llSetTimerEvent/), firing the [timer](/events/timer/) event
+  - Delays such as [llSleep](/functions/llSleep/) pause the whole script
+  - Time functions read [script time](/functions/llGetTime/), region time and [real-world time](/functions/llGetUnixTime/)
+- [Changes](/events/changed/) to the object: inventory, links, owner, region, teleports, shape and more
+  - Test the flags with the bitwise AND operator (&)
+- Detection
+  - Touch, collision, sensor and damage events can report several detections at once
+  - The event's number parameter says how many; llDetected\* functions such as [llDetectedKey](/functions/llDetectedKey/) read each one by index, and only inside that event
+- [Sensors](/functions/llSensor/) scan a cone around the object for avatars or objects, [once or repeatedly](/functions/llSensorRepeat/)
+  - The nearest results arrive in [sensor](/events/sensor/), or [no_sensor](/events/no_sensor/) when nothing is found
+- Script health
+  - [Memory](/functions/llGetUsedMemory/), [script time](/functions/llGetSimStats/) and [profiling](/functions/llScriptProfiler/) help find scripts that slow the region
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "state_entry", "state_exit", "on_rez", "changed", "timer", "llSetTimerEvent",
+  "llSensor", "sensor", "no_sensor", "llDetectedKey"
+]} />
+
+</Box>
+<Box title="Event Order" href="https://wiki.secondlife.com/wiki/Event_Order">
+
+Which events are called for different actions, such as attaching, rezzing, resetting or changing state, and in which order.
+
+</Box>
+<Box title="Events by feature" href="/events/">
+
+Most events belong to a feature. Start from the event index, or from the feature you are working on: [input](/features/input/), [communications](/features/communications/), [physics](/features/physics/).
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "state_entry", "state_exit", "on_rez", "llResetScript",
+  "llResetOtherScript", "llSetScriptState", "llGetScriptState",
+  "llGetScriptName", "changed", "llSensor", "llSensorRepeat", "llSensorRemove", "sensor", "no_sensor"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- Timers and time
+  - [llSetTimerEvent](/functions/llSetTimerEvent/) — 0.0 stops further [timer](/events/timer/) events
+  - [llSleep](/functions/llSleep/) — the script is inactive during this time
+  - [llMinEventDelay](/functions/llMinEventDelay/) — minimum delay between events being handled
+  - [llGetTime](/functions/llGetTime/), [llResetTime](/functions/llResetTime/), [llGetAndResetTime](/functions/llGetAndResetTime/) — elapsed script time
+  - [llGetUnixTime](/functions/llGetUnixTime/), [llGetTimestamp](/functions/llGetTimestamp/), [llGetDate](/functions/llGetDate/) — current UTC time and date
+  - [llGetWallclock](/functions/llGetWallclock/) — seconds since midnight Pacific Time (SLT); [llGetGMTclock](/functions/llGetGMTclock/) — seconds since midnight GMT
+- [changed](/events/changed/) — the changes bitfield ([all flags](/constants/groups/ChangeType/))
+  - [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/) — prim inventory changed by someone with modify rights
+  - [CHANGED_LINK](/constants/CHANGED_LINK/) — number of prims or seated avatars changed
+  - [CHANGED_OWNER](/constants/CHANGED_OWNER/) — the object changed owners
+  - [CHANGED_REGION](/constants/CHANGED_REGION/) — the object changed regions
+  - [CHANGED_TELEPORT](/constants/CHANGED_TELEPORT/) — the avatar this object is attached to teleported
+- Detected functions — [llDetectedKey](/functions/llDetectedKey/), [llDetectedName](/functions/llDetectedName/), [llDetectedOwner](/functions/llDetectedOwner/), [llDetectedGroup](/functions/llDetectedGroup/), [llDetectedPos](/functions/llDetectedPos/), [llDetectedRot](/functions/llDetectedRot/), [llDetectedVel](/functions/llDetectedVel/), [llDetectedLinkNumber](/functions/llDetectedLinkNumber/) (touches and collisions), [llDetectedGrab](/functions/llDetectedGrab/) (touches only)
+  - [llDetectedType](/functions/llDetectedType/) — bitfield of types ([DetectType](/constants/groups/DetectType/))
+  - [AGENT](/constants/AGENT/) — an avatar
+  - [ACTIVE](/constants/ACTIVE/) — physical objects and agents
+  - [PASSIVE](/constants/PASSIVE/) — non-physical objects
+  - [SCRIPTED](/constants/SCRIPTED/) — has at least one active script
+- Common event sources
+  - [touch_start](/events/touch_start/), [collision_start](/events/collision_start/), [control](/events/control/) — [input](/features/input/) and [physics](/features/physics/)
+  - [listen](/events/listen/), [link_message](/events/link_message/), [http_request](/events/http_request/) — [communications](/features/communications/)
+  - [dataserver](/events/dataserver/) — requested data returned to the script
+  - [run_time_permissions](/events/run_time_permissions/) — an agent granted or denied permissions
+- Script health
+  - [llGetFreeMemory](/functions/llGetFreeMemory/), [llGetUsedMemory](/functions/llGetUsedMemory/) — free and used script memory
+  - [llScriptProfiler](/functions/llScriptProfiler/) — [PROFILE_SCRIPT_MEMORY](/constants/PROFILE_SCRIPT_MEMORY/) tracks peak memory while active
+  - [llGetSimStats](/functions/llGetSimStats/) — region statistics such as [SIM_STAT_SCRIPT_MS](/constants/SIM_STAT_SCRIPT_MS/) (script time per frame) and [SIM_STAT_SCRIPT_EPS](/constants/SIM_STAT_SCRIPT_EPS/) (script events per second)
+  - [llGetRegionFPS](/functions/llGetRegionFPS/), [llGetRegionTimeDilation](/functions/llGetRegionTimeDilation/) — region performance
+  - [llGetEnergy](/functions/llGetEnergy/) — remaining physics energy of the object
+  - [llScriptDanger](/functions/llScriptDanger/) — whether a position is over public or sandbox land, or land that restricts building or outside scripts
+
+</Box>
+
+## Constant groups
+
+<ConstantGroups names={["ChangeType", "DetectType", "ScriptProfileMode", "SimulatorStat"]} />
+
+## Related
+
+<SeeAlso items={[
+  "/controls/default/|default", "/controls/state/|state",
+  "wiki:Category:LSL State"
+]}>
+  <Planned>Guide: switching event handlers with states</Planned>
+</SeeAlso>
+
+<SeeAlso items={["category:time", "category:detected", "category:sensor", "category:script"]} />
+
+<SeeAlso items={[
+  "/events/|All events", "feature:input", "feature:communications",
+  "feature:physics", "wiki:Category:LSL Events", "wiki:Event Order"
+]} />
+
+<FeatureFooter
+  related={["input", "communications", "physics"]}
+  categories={["script", "time", "detected", "sensor"]}
+/>

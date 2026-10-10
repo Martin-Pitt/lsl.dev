@@ -50,6 +50,10 @@ scripts/
   lib/wiki_fields.py       template field extraction helpers
   lib/test_import.py       unittest tests for importer + renderer
   check-built-links.py     offline audit of dist/ (local links, remote assets)
+  feature-index.mjs        reads feature pages for astro.config; writes the generated feature index
+  check-feature-migration.py  confirms the feature pages kept everything from the old JSON
+  lib/feature_mdx.py       Python reader for feature pages (tests)
+  lib/test_features.py     feature page tests (coverage, links, structure)
   requirements.txt         Python deps (PyYAML==6.0.3)
   legacy/                  archived JS generators (unsupported)
 src/data/catalog.json    DERIVED: full catalog consumed by the site
@@ -61,15 +65,19 @@ src/pages/               data-driven routes (see below)
 src/components/reference ApiDetail, CatalogList, WikiContent, WikiAttribution
 src/components/starlight Header, Hero, PageFrame (from slua.dev) and Footer overrides
 src/styles/slua-base.css slua.dev's theme CSS, copied verbatim; custom.css adds lsl.dev rules
-src/data/feature-clusters.json  feature dashboards (slua.dev slugs) and old-slug redirects: drives /features/, the sidebar and API feature links
-src/content/docs/        hand-written MDX: home, guides, types, controls
+src/content/docs/features/  hand-written feature pages (slua.dev slugs); drive /features/, the sidebar, redirects and API feature chips
+src/components/features  feature page components (Columns, Box, Signatures, ApiLinks, SeeAlso, Planned, ...)
+src/lib/features.ts      reads the feature pages: featurePages, featuresForApi (API feature chips)
+src/data/feature-clusters.json  GENERATED from the feature pages by scripts/feature-index.mjs (for older code)
+src/content/docs/        hand-written MDX: home, guides, types, controls, features
+docs/                    contributor guides (not published)
 src/legacy/              pre-modernization MDX/components (excluded from the build)
 ```
 
 Routes built from the catalog: `/reference/`, `/functions/` and `/functions/[name]/`,
 `/events/` and `/events/[name]/`, `/constants/` and `/constants/[name]/`,
 `/categories/` and `/categories/[id]/`, `/constants/groups/` and `/constants/groups/[group]/`,
-`/features/` and `/features/[id]/`, `/wiki/` and `/wiki/[slug]/`. The sidebar links only to
+`/features/` (feature pages themselves are MDX in `src/content/docs/features/`), `/wiki/` and `/wiki/[slug]/`. The sidebar links only to
 feature areas, categories and indexes, never to individual functions or constants. Search uses Starlight's built-in Pagefind index.
 
 ### Source data vs derived data
@@ -78,6 +86,7 @@ feature areas, categories and indexes, never to individual functions or constant
 |---|---|---|
 | Source | `data/sources/*` | Replaced deliberately when refreshing snapshots |
 | Curated | `src/data/topic-guides.json`, `src/content/docs/**` | Edited by hand |
+| Generated index | `src/data/feature-clusters.json` | `node scripts/feature-index.mjs` after editing feature pages |
 | Derived | `src/data/catalog.json`, `public/wiki-source/*.txt`, `data/reports/import-report.json` | Written by `npm run import:data`, never edited by hand |
 | Diagnostic | `data/reports/built-links.json`, `data/reports/npm-audit*.json`, `data/reports/dependency-audit.md` | Written by checks/audits |
 
@@ -90,6 +99,13 @@ return types, constant values, categories and metadata. Wiki prose, caveats, not
 examples are kept verbatim from the original revisions, with no rewriting or summarizing.
 The main API reference leaves out entries flagged `private` or `deprecated` for LSL.
 The wiki archive keeps every imported page, including historical ones.
+
+## Feature pages
+
+Feature pages are MDX in `src/content/docs/features/<slug>.mdx`: Markdown prose with links on
+meaningful phrases, plus components for signature tables, panels and link rows. See
+[docs/editing-feature-pages.md](docs/editing-feature-pages.md) for editing or adding one and
+[docs/style/feature-pages.md](docs/style/feature-pages.md) for the writing style.
 
 ## Setup
 
@@ -114,6 +130,7 @@ npm run dev                                  # http://localhost:4321
 | `npm run build` | Production build to `dist/` (includes Pagefind) |
 | `npm run preview` | Serve the built `dist/` |
 | `npm run check` | `astro check` type/diagnostic pass |
+| `npm run features:index` | Regenerate `src/data/feature-clusters.json` from the feature pages |
 | `npm run import:data` | `python scripts/import-datasets.py`: regenerate derived data from `data/sources` |
 | `npm run test:data` | `python -m unittest discover -s scripts/lib -p "test_*.py"` (38 tests) |
 | `npm run test:links` | `python scripts/check-built-links.py`: needs a prior build. Checks local `href`s in `dist/` and fails on remote assets. Writes `data/reports/built-links.json` |

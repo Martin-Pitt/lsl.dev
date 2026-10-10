@@ -1,0 +1,122 @@
+---
+title: "Prims"
+description: "Prim properties and primitive params: shape, size, appearance, light, text and inventory."
+redirectFrom: ["inventory", "objects"]
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+A prim is the basic building block of an object, whether a parametric shape, a sculpt or mesh. Each prim has properties: position, rotation and size; shape; faces with textures and colors; light, glow and text; physics settings; and its own inventory.
+
+Primitive params read and write almost all of these in one call, as a list of PRIM_\* rules followed by their values. Specific functions cover the common cases.
+
+How prims are linked into objects is covered under [Linksets](/features/linkset/); what is drawn on each face under [Textures & Materials](/features/textures/).
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- [Primitive params](/functions/llSetLinkPrimitiveParamsFast/) set rules on any prim; [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/) switches prims inside one list
+  - Read them back [for any prim](/functions/llGetLinkPrimitiveParams/) or [for this prim](/functions/llGetPrimitiveParams/)
+- Placement and scale: [position](/functions/llSetPos/), [rotation](/functions/llSetRot/), [size](/functions/llSetScale/) ([PRIM_SIZE](/constants/PRIM_SIZE/)), or [scale the whole object](/functions/llScaleByFactor/)
+- [Shape](/constants/PRIM_TYPE/): parametric shapes (box, cylinder, prism, sphere, torus, tube, ring) take cut, hollow, twist and other parameters
+  - Sculpts and mesh use the [sculpt type](/constants/PRIM_TYPE_SCULPT/)
+- Faces: textures, [colors](/constants/PRIM_COLOR/), alpha, materials and media are set per face
+  - [ALL_SIDES](/constants/ALL_SIDES/) applies to every face; count faces [here](/functions/llGetNumberOfSides/) or [on any prim](/functions/llGetLinkNumberOfSides/)
+- Beyond the faces: [point light](/constants/PRIM_POINT_LIGHT/), [glow](/constants/PRIM_GLOW/), [hover text](/functions/llSetText/) and [flexible paths](/constants/PRIM_FLEXIBLE/)
+- Prim [name](/functions/llSetObjectName/) and [description](/functions/llSetObjectDesc/), [touch](/functions/llSetTouchText/) and [sit](/functions/llSetSitText/) text, [click action](/functions/llSetClickAction/) and [pay price](/functions/llSetPayPrice/)
+- Each prim holds inventory: scripts, notecards, textures, sounds, animations and objects
+  - Scripts [list](/functions/llGetInventoryName/) and [inspect](/functions/llGetInventoryType/) it, [remove items](/functions/llRemoveInventory/), and react to [changes](/constants/CHANGED_INVENTORY/)
+- Objects and inventory items carry next-owner permissions (copy, modify, transfer)
+  - Scripts can [read them](/functions/llGetObjectPermMask/), and [transfer the object's ownership](/functions/llTransferOwnership/) in some cases
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llSetLinkPrimitiveParamsFast", "llGetLinkPrimitiveParams", "llSetPos", "llSetRot",
+  "llSetScale", "llSetText", "llGetInventoryName", "llGetObjectPermMask", "changed"
+]} />
+
+</Box>
+<Box title="Primitive params" href="https://wiki.secondlife.com/wiki/Category:LSL_PrimitiveParams">
+
+A rule list is PRIM_\* constants each followed by their values; one call can change many properties on many prims.
+
+</Box>
+<Box title="Prim inventory" href="https://wiki.secondlife.com/wiki/Category:LSL_Inventory">
+
+Each prim holds its own inventory; a linked prim's inventory is separate from its siblings. Scripts list and inspect it, [give](/functions/llGiveInventory/) or [remove](/functions/llRemoveInventory/) items, and react to changes.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llSetLinkPrimitiveParamsFast", "llGetLinkPrimitiveParams", "llGetPrimitiveParams",
+  "llSetPos", "llSetRot", "llSetScale", "llGetScale", "llScaleByFactor",
+  "llGetNumberOfSides", "llGetLinkNumberOfSides", "llSetText",
+  "llSetObjectName", "llGetObjectName", "llSetObjectDesc", "llGetObjectDesc",
+  "llSetTouchText", "llSetSitText", "llSetClickAction", "llSetPayPrice", "llGetKey",
+  "llGetInventoryNumber", "llGetInventoryName", "llGetInventoryType", "llGetInventoryKey",
+  "llGetInventoryCreator", "llGetInventoryDesc", "llGetInventoryAcquireTime",
+  "llRequestInventoryData", "llRemoveInventory", "llAllowInventoryDrop",
+  "llRemoteLoadScriptPin", "llSetRemoteScriptAccessPin",
+  "llGetObjectPermMask", "llSetObjectPermMask", "llGetInventoryPermMask",
+  "llSetInventoryPermMask", "llTransferOwnership", "llGetCreator", "llGetOwner"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) — common rules ([PrimParam](/constants/groups/PrimParam/), read with [PrimParamGet](/constants/groups/PrimParamGet/))
+  - [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/) — Switch to another prim within the same list
+  - [PRIM_SIZE](/constants/PRIM_SIZE/), [PRIM_POSITION](/constants/PRIM_POSITION/), [PRIM_POS_LOCAL](/constants/PRIM_POS_LOCAL/), [PRIM_ROTATION](/constants/PRIM_ROTATION/) — Size and placement
+  - [PRIM_TYPE](/constants/PRIM_TYPE/) — Shape type and its parameters ([PrimType](/constants/groups/PrimType/), [PrimTypeHole](/constants/groups/PrimTypeHole/)); [PRIM_TYPE_SCULPT](/constants/PRIM_TYPE_SCULPT/) with a [sculpt type](/constants/groups/PrimTypeSculptType/) such as [PRIM_SCULPT_TYPE_MESH](/constants/PRIM_SCULPT_TYPE_MESH/) and [flags](/constants/groups/PrimTypeSculptFlag/)
+  - [PRIM_TEXTURE](/constants/PRIM_TEXTURE/), [PRIM_COLOR](/constants/PRIM_COLOR/) — Per-face texture and color, with a face number or [ALL_SIDES](/constants/ALL_SIDES/) ([Faces](/constants/groups/Faces/))
+  - [PRIM_POINT_LIGHT](/constants/PRIM_POINT_LIGHT/) — Local light: color, intensity, radius and falloff
+  - [PRIM_GLOW](/constants/PRIM_GLOW/) — Glow intensity on a face
+  - [PRIM_TEXT](/constants/PRIM_TEXT/) — Hover text, like [llSetText](/functions/llSetText/)
+  - [PRIM_FLEXIBLE](/constants/PRIM_FLEXIBLE/) — Flexible path: softness, gravity, friction, wind, tension and force
+  - [PRIM_NAME](/constants/PRIM_NAME/), [PRIM_DESC](/constants/PRIM_DESC/), [PRIM_CLICK_ACTION](/constants/PRIM_CLICK_ACTION/) — Name, description and click action
+- [llGetInventoryNumber](/functions/llGetInventoryNumber/) and [llGetInventoryName](/functions/llGetInventoryName/) — filter by type ([InventoryType](/constants/groups/InventoryType/)), such as [INVENTORY_ALL](/constants/INVENTORY_ALL/) or [INVENTORY_SCRIPT](/constants/INVENTORY_SCRIPT/)
+- [changed](/events/changed/) — inventory changes
+  - [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/) — Changed by someone with modify rights
+  - [CHANGED_ALLOWED_DROP](/constants/CHANGED_ALLOWED_DROP/) — Someone else dropped an item, possible only with [llAllowInventoryDrop](/functions/llAllowInventoryDrop/)
+  - [CHANGED_SHAPE](/constants/CHANGED_SHAPE/), [CHANGED_SCALE](/constants/CHANGED_SCALE/), [CHANGED_OWNER](/constants/CHANGED_OWNER/) — Shape, scale or owner changed
+- [llRemoteLoadScriptPin](/functions/llRemoteLoadScriptPin/) — copies a script into a prim whose PIN was set with [llSetRemoteScriptAccessPin](/functions/llSetRemoteScriptAccessPin/)
+- [llGetObjectPermMask](/functions/llGetObjectPermMask/) and [llGetInventoryPermMask](/functions/llGetInventoryPermMask/) — permission flags ([AssetPermission](/constants/groups/AssetPermission/)) per category ([AssetPermissionCategory](/constants/groups/AssetPermissionCategory/), [flags](/constants/groups/AssetPermissionCategoryFlag/))
+  - [PERM_COPY](/constants/PERM_COPY/), [PERM_MODIFY](/constants/PERM_MODIFY/), [PERM_TRANSFER](/constants/PERM_TRANSFER/) — Copy, modify and transfer
+  - [MASK_OWNER](/constants/MASK_OWNER/), [MASK_NEXT](/constants/MASK_NEXT/) — Current owner and next owner
+- [llTransferOwnership](/functions/llTransferOwnership/) — transfers the object or a copy ([TransferOwnershipFlag](/constants/groups/TransferOwnershipFlag/))
+- [llGetObjectDetails](/functions/llGetObjectDetails/) — [OBJECT_TOTAL_INVENTORY_COUNT](/constants/OBJECT_TOTAL_INVENTORY_COUNT/) counts inventory items in another object with the same owner
+
+</Box>
+
+## Constant groups
+
+<ConstantGroups names={[
+  "PrimParam", "PrimParamGet", "PrimType", "PrimTypeHole", "PrimTypeSculptType",
+  "PrimTypeSculptFlag", "Faces", "InventoryType", "AssetPermission",
+  "AssetPermissionCategory", "AssetPermissionCategoryFlag", "TransferOwnershipFlag"
+]} />
+
+## Related
+
+<SeeAlso items={[
+  "wiki:Category:LSL PrimitiveParams", "wiki:CatPrims|Script library: prims",
+  "feature:movement", "feature:linkset", "feature:textures", "feature:effects",
+  "category:prim_properties", "category:prim_inventory", "wiki:Category:LSL Inventory",
+  "category:asset_permissions", "category:prim", "wiki:Category:LSL Prim"
+]}>
+  <Planned>Guide: primitive params rule lists</Planned>
+</SeeAlso>
+
+<FeatureFooter
+  related={["linkset", "textures", "physics", "effects"]}
+  categories={["prim", "prim_properties", "prim_inventory", "asset_permissions"]}
+/>

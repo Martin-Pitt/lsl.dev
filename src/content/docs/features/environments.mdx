@@ -1,0 +1,100 @@
+---
+title: "Environments"
+description: "Environment settings (EEP): sky, water, day cycles, sun and moon."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+Environments, from the Environmental Enhancement Project (EEP), define the sky, water and day cycle. Regions and parcels have an environment, and each avatar can see an override on top of it.
+
+Scripts can read the sun and moon positions, change a parcel's or region's environment where the owner allows it, and give a single avatar a temporary environment through an [experience](/features/experience/). Wind, water height and ground shape are separate region properties, not part of the environment.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Reading the environment
+  - Sun and moon [direction](/functions/llGetSunDirection/) and [rotation](/functions/llGetMoonRotation/) for the parcel, falling back to the region's; or [for the region](/functions/llGetRegionSunDirection/) itself
+  - [Day length](/functions/llGetDayLength/), [day offset](/functions/llGetDayOffset/) and [time of day](/functions/llGetTimeOfDay/), each also [region-wide](/functions/llGetRegionTimeOfDay/)
+  - [Individual environment settings at a position](/functions/llGetEnvironment/)
+- Parcel and region environment
+  - [Swap in a whole environment asset](/functions/llReplaceEnvironment/)
+  - [Change individual settings](/functions/llSetEnvironment/)
+  - Both need the land rights to change the environment
+- Per-avatar environment
+  - Inside an experience, a script can [override what one avatar sees](/functions/llReplaceAgentEnvironment/), or [set individual settings for them](/functions/llSetAgentEnvironment/), with a transition time
+  - The override is temporary
+- Weather and ground
+  - [Wind](/functions/llWind/), [water height](/functions/llWater/) and [the ground shape](/functions/llGround/) are region properties scripts can read
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llGetEnvironment", "llGetSunDirection", "llGetMoonDirection", "llGetTimeOfDay",
+  "llReplaceEnvironment", "llSetEnvironment", "llReplaceAgentEnvironment", "llSetAgentEnvironment"
+]} />
+
+</Box>
+<Box title="llSetEnvironment parameters" href="https://wiki.secondlife.com/wiki/LSL_Constants/llSetEnvironment">
+
+The SKY_\* and WATER_\* settings that scripts can read and set. See the [constant groups below](#environment-settings).
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llGetEnvironment", "llGetSunDirection", "llGetSunRotation",
+  "llGetMoonDirection", "llGetMoonRotation", "llGetRegionSunDirection",
+  "llGetRegionSunRotation", "llGetRegionMoonDirection",
+  "llGetRegionMoonRotation", "llGetDayLength", "llGetDayOffset",
+  "llGetRegionDayLength", "llGetRegionDayOffset", "llGetTimeOfDay",
+  "llGetRegionTimeOfDay", "llReplaceEnvironment", "llSetEnvironment",
+  "llReplaceAgentEnvironment", "llSetAgentEnvironment"
+]} descriptions />
+
+</Box>
+
+<Box title="Additional">
+
+- [llGetEnvironment](/functions/llGetEnvironment/) — read-only and settable parameters
+  - [ENVIRONMENT_DAYINFO](/constants/ENVIRONMENT_DAYINFO/) — day length, day offset and seconds since midnight
+  - [SKY_SUN](/constants/SKY_SUN/) — sun rotation, scale, color, direction and lighting
+  - [WATER_FOG](/constants/WATER_FOG/) — underwater fog color, density and modulation
+- [llSetEnvironment](/functions/llSetEnvironment/), [llReplaceEnvironment](/functions/llReplaceEnvironment/) and the per-avatar functions — return an error code
+  - [ENV_OK](/constants/ENV_OK/) — the change will be attempted
+  - [ENV_NO_PERMISSIONS](/constants/ENV_NO_PERMISSIONS/) — the script lacks permissions to modify the environment here
+  - [ENV_NOT_EXPERIENCE](/constants/ENV_NOT_EXPERIENCE/) — attempted to change environments outside an experience
+- Ground and weather
+  - [llGround](/functions/llGround/) — ground height below the prim
+  - [llGroundNormal](/functions/llGroundNormal/) — ground surface normal
+  - [llGroundSlope](/functions/llGroundSlope/) — ground slope
+  - [llGroundContour](/functions/llGroundContour/) — direction with no change in elevation
+  - [llWater](/functions/llWater/) — water height
+  - [llWind](/functions/llWind/) — wind velocity
+
+</Box>
+
+## Environment settings
+
+<ConstantGroups names={["EnvironmentParamReadOnly", "EnvironmentParam", "EnvironmentError"]} />
+
+## Related
+
+<SeeAlso items={[
+  "category:parcel_appearance",
+  "wiki:LSL Constants/llSetEnvironment|llSetEnvironment parameters"
+]}>
+  <Planned>Guide: changing and replacing an environment</Planned>
+</SeeAlso>
+
+<SeeAlso items={["feature:experience", "category:region_appearance", "feature:land"]} />
+
+<FeatureFooter
+  related={["land", "experience"]}
+  categories={["parcel_appearance", "region_appearance"]}
+/>

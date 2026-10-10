@@ -1,0 +1,23 @@
+---
+// <SeeAlso items={["feature:input", "category:combat", "wiki:Combat Log", "/types/list/|list type"]}>
+//   <Planned>Recipe: …</Planned>
+// </SeeAlso>
+// Items: feature:<slug>, category:<id>, wiki:<wiki page title> (links to the live Second Life Wiki) or a /site/path; "|Label" sets the
+// link text. Unknown targets fail the build. Children (usually <Planned>) follow the links.
+import { categoryMap, categoryHref, wikiByTitle } from '../../lib/catalog';
+import { featurePageMap, featureHref } from '../../lib/features';
+import { parseSeeAlsoItem } from '../../lib/feature-mdx.mjs';
+interface Props { items?: string[] }
+function need<T>(v: T | undefined, item: string): T { if (!v) throw new Error(`<SeeAlso>: "${item}" does not resolve`); return v; }
+const links = (Astro.props.items ?? []).map(item => {
+	const { kind, target, label } = parseSeeAlsoItem(item);
+	if (kind === 'feature') { const f = need(featurePageMap.get(target), item); return { kind: 'Feature', label: label ?? f.title, href: featureHref(f.id) }; }
+	if (kind === 'category') { const c = need(categoryMap.get(target), item); return { kind: 'Category', label: label ?? c.label, href: categoryHref(c.id) }; }
+	// The local wiki archive is not a reading destination (templates are only partly rendered), so
+	// wiki: items link to the live Second Life Wiki page as a plain external link (never fetched).
+	if (kind === 'wiki') { const w = need(wikiByTitle.get(target), item); return { kind: 'SL Wiki', label: label ?? w.title.replace(/^Category:/, ''), href: w.source.url, external: true }; }
+	return { kind: 'Page', label: label ?? target, href: target };
+});
+import './features.css';
+---
+<p class="feature-row not-content"><span class="label">See also</span> {links.map(l => <a href={l.href} rel={'external' in l ? 'external' : undefined}><small>{l.kind}</small> {l.label}</a>)}<slot /></p>

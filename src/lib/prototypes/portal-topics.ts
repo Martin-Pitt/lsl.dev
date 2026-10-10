@@ -46,7 +46,7 @@ const rawAZ: Topic[] = [
 	{ label: 'Camera', to: 'f:camera', also: ['g:CameraParam'] },
 	{ label: 'Collision', to: 'f:physics', also: ['c:detected'] },
 	{ label: 'Color', to: 'f:textures' },
-	{ label: 'Combat2', to: 'f:combat', also: ['g:DamageType'] },
+	{ label: 'Combat', to: 'f:combat', also: ['g:DamageType'] },
 	{ label: 'Communications', to: 'f:communications', also: ['c:chat'] },
 	{ label: 'Controls', to: 'f:input', also: ['g:ControlButton'] },
 	{ label: 'Dataserver', to: 'c:dataserver' },

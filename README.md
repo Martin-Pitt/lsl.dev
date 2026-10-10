@@ -1,75 +1,194 @@
-> [!IMPORTANT]
-> Currently focusing efforts primarily on SLua.dev
+# lsl.dev
 
+A reference for the Linden Scripting Language (LSL) used in Second Life, built with
+[Astro](https://astro.build) and [Starlight](https://starlight.astro.build). It combines
+the canonical `lsl-definitions` YAML (signatures, parameters, categories, constants) with
+an offline snapshot of the Second Life Wiki (prose, caveats, examples, history).
 
-# LSL.dev
+Production URL (from `astro.config.mjs`): https://lsl.dev
 
-LSL.dev is brand new home for LSL — focused on being a modernised version of the [LSL Portal of the SL Wiki](https://wiki.secondlife.com/wiki/LSL_Portal).
+## Offline policy: no wiki network access
 
-This project is unofficial, and currently being developed and maintained by myself Martin Pitt, whom you may be more familiar with as Nexii Malthus in-world.
+**Nothing in this repository may make a network request to the Second Life Wiki.** That
+covers crawling, scraping, API calls, fetching templates or images, and checking links.
+In the past, automated requests got 403 responses and probably contributed to a bot ban.
 
-As a work in progress, I'm working on setting up the project and giving it a steady starting place before slowly ramping up the involvement of contributors into the project to make a true community open-source project by LSL Scripters for LSL Scripters.
+- All wiki content comes from the checked-in export `data/sources/wiki-English.xml`.
+- `scripts/import-datasets.py` and `scripts/check-built-links.py` use only local files.
+- Rendered pages can *link* to `wiki.secondlife.com` (source, revision and history links
+  for attribution). The site never *embeds* remote wiki assets, and
+  `test:links` fails if any `<img>`, `<script>` or `<iframe>` has a remote `src`.
+- Do not validate external links by fetching them.
+- The generators in `scripts/legacy/` predate this policy. They are archival, unsupported,
+  and must not be run (see `scripts/legacy/README.md`).
 
-There is also a sister project at [Martin-Pitt/slua.dev](https://github.com/Martin-Pitt/slua.dev) which will cover the documentation of the new Second Life scripting language SLua that is currently available on the beta grid.
-
-The high-level roadmap is roughly as follows:
-
-1. Setup LSL.dev the project
-1. Figure out approach, styling, theme, what I can and should do, user experience, info architecture, content design
-1. Core content/templates
-1. Migrate content from the current wiki
-	* Starting with a few pages at first to test different types of content and their integration / necessary components to design and develop
-	* May take opportunity to rewrite pages as I migrate them! Of course this is an insane amount of work — but look, I've been in and out of the LSL wiki for two decades now
-1. Feature Category pages that are as useful as my [Combat2 article](https://wiki.secondlife.com/wiki/Category:LSL_Combat2)
-	* I want really high quality overview pages that summarise/bullet point the most important aspects of that feature and are chock full of internal links throughout
-	* This will be a LOT of work because a lot of the LSL feature pages are really bad, outdated, undocumented or just needing a bit of TLC
-1. Put LSL.dev into a useful state first
-	1. Where all the reference/lookup pages are covered first
-	1. … following by ways of navigating to them through simple Feature Categories
-	1. Fleshing out those Feature Category pages over time from a simple lookup index and into teaching material
-1. Further development and the future of SL technical documentation and knowledge
-	* Guides, Recipes, Tutorials, Discord community, …
-	* SLua.dev
-	* *Maybe* an updated [Content Creator docs site](https://wiki.secondlife.com/wiki/Creation_Portal) that covers avatars, building, textures, 3D modelling, videos, region design, landscaping, content creation within community nichés like SLMC, Sailing, Aircraft/Airports, Driving/Drivers of SL
-	* *Maybe* a general SL knowledge site? Cover avatars, exploration, activities, linden homes, communities like SLMC, Sailing, Aircraft/Airports, Driving/Drivers of SL, Bay City, …
-
-
-
-<!--
-Commented out useful bits below from starter readme, might integrate later
-
-## 🚀 Project Structure
-
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+## Architecture
 
 ```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   ├── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
+data/sources/            SOURCE: checked-in snapshots (edit only to refresh them)
+  wiki-English.xml         original English wiki revisions (2,266 pages)
+  lsl_definitions.yaml     canonical LSL definitions (MIT)
+  definitions-LICENSE      the definitions' license, verbatim
+  categories.en.json       readable category labels (from slua.dev)
+  README.md                provenance and rendering-policy details
+scripts/
+  import-datasets.py       offline importer: sources -> derived data
+  lib/wiki_render.py       safe partial wikitext -> HTML renderer
+  lib/wiki_fields.py       template field extraction helpers
+  lib/test_import.py       15 unittest tests for importer + renderer
+  check-built-links.py     offline audit of dist/ (local links, remote assets)
+  requirements.txt         Python deps (PyYAML==6.0.3)
+  legacy/                  archived JS generators (unsupported)
+src/data/catalog.json    DERIVED: full catalog consumed by the site
+src/data/topic-guides.json  hand-curated category summaries and task links
+public/wiki-source/*.txt DERIVED: raw wikitext per archived page (downloadable)
+data/reports/            DERIVED/diagnostic: import, link and dependency reports
+src/lib/catalog.ts       typed access to catalog.json
+src/pages/               data-driven routes (see below)
+src/components/reference ApiDetail, CatalogList, WikiContent, WikiAttribution
+src/components/site      Header, Hero, Home overrides for Starlight
+src/content/docs/        hand-written MDX: home, guides, types, controls
+src/legacy/              pre-modernization MDX/components (excluded from the build)
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+Routes built from the catalog: `/reference/`, `/functions/` and `/functions/[name]/`,
+`/events/` and `/events/[name]/`, `/constants/` and `/constants/[name]/`,
+`/categories/` and `/categories/[id]/`, `/wiki/` and `/wiki/[slug]/`, plus a `/features/`
+compatibility landing page. Search uses Starlight's built-in Pagefind index.
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+### Source data vs derived data
 
-Static assets, like favicons, can be placed in the `public/` directory.
+| Kind | Paths | How it changes |
+|---|---|---|
+| Source | `data/sources/*` | Replaced deliberately when refreshing snapshots |
+| Curated | `src/data/topic-guides.json`, `src/content/docs/**` | Edited by hand |
+| Derived | `src/data/catalog.json`, `public/wiki-source/*.txt`, `data/reports/import-report.json` | Written by `npm run import:data`, never edited by hand |
+| Diagnostic | `data/reports/built-links.json`, `data/reports/npm-audit*.json`, `data/reports/dependency-audit.md` | Written by checks/audits |
 
-## 🧞 Commands
+Derived files are committed so that `astro build` needs only Node, not Python or the
+sources. The importer is deterministic: running it twice on the same inputs gives
+byte-identical output. The CI workflow relies on this (see below).
 
-All commands are run from the root of the project, from a terminal:
+Precedence: the YAML is authoritative for signatures, parameter names and descriptions,
+return types, constant values, categories and metadata. Wiki prose, caveats, notes and
+examples are kept verbatim from the original revisions, with no rewriting or summarizing.
+The main API reference leaves out entries flagged `private` or `deprecated` for LSL.
+The wiki archive keeps every imported page, including historical ones.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     | -->
+## Setup
+
+Requirements:
+
+- **Node.js >= 22.12.0** (the `engines` requirement of `astro@7.3.8`; npm >= 9.6.5). CI
+  uses Node 22. Development was also checked on Node 26.7.0.
+- **Python >= 3.12** only for the importer and tests (CI uses 3.12; also checked locally
+  on 3.14.7), plus `PyYAML==6.0.3`. Building the site does not need Python.
+
+```sh
+npm ci                                       # or npm install
+python -m pip install -r scripts/requirements.txt
+npm run dev                                  # http://localhost:4321
+```
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Astro dev server |
+| `npm run build` | Production build to `dist/` (includes Pagefind) |
+| `npm run preview` | Serve the built `dist/` |
+| `npm run check` | `astro check` type/diagnostic pass |
+| `npm run import:data` | `python scripts/import-datasets.py`: regenerate derived data from `data/sources` |
+| `npm run test:data` | `python -m unittest discover -s scripts/lib -p "test_*.py"` (15 tests) |
+| `npm run test:links` | `python scripts/check-built-links.py`: needs a prior build. Checks local `href`s in `dist/` and fails on remote assets. Writes `data/reports/built-links.json` |
+
+Importer options: `python scripts/import-datasets.py --wiki PATH --definitions PATH`
+reads other local files instead of the default snapshots. No network is involved.
+
+## Regeneration and tests
+
+```sh
+npm run import:data     # rewrites catalog.json, public/wiki-source/, import-report.json
+npm run test:data       # importer/renderer unit tests
+npm run build
+npm run test:links
+git diff --stat         # derived output should change only where the sources changed
+```
+
+CI (`.github/workflows/lsl-sync.yml`, on pull requests touching `data/`, `scripts/`
+or `src/data/`, and on manual dispatch) installs `scripts/requirements.txt` and runs
+the unit tests. It then reruns the importer and fails if `src/data/catalog.json`,
+`public/wiki-source` or `data/reports` differ from what is committed. The workflow makes
+no network requests to the wiki and pushes nothing. Deployment
+(`.github/workflows/astro.yml`) runs only on pushes to `main` or manual dispatch.
+
+## Catalog schema (`src/data/catalog.json`, `meta.schemaVersion` 1)
+
+Top-level keys:
+
+- `meta`: `schemaVersion`, `sourcePolicy`, `sources` (`wiki`/`definitions` file names
+  and SHA-256), `counts`, `wikiLicense`, `wikiLicenseUrl`, `definitionsLicense`,
+  `latestWikiRevision`.
+- `functions`, `events`, `types`, `controls`: arrays of entries with `name`, `kind`,
+  `slug`, `description`, `signature`, `returnType`, `parameters[]` (`name`, `type`,
+  `description`), `categories[]`, `definition` (the full original YAML record:
+  energy, sleep, func-id, flags, etc.), and `wiki` (the matched archive page or null).
+- `constants`: the same fields plus `type`, `value` and `groups`.
+- `categories`: `id`, `label`, and lists of `functions`, `events`, `constants`.
+- `wiki`: archive pages with `id`, `slug`, `title`, `namespace`, `html` (rendered),
+  `sections`, `rawPath` (link to `public/wiki-source/<slug>.txt`), and `source`
+  (`title`, `url`, `revisionId`, `timestamp`, `contributor`, `revisionUrl`, `historyUrl`).
+- `enums`: enum groups from the definitions (for example `AgentInfo`, `AttachPoint`).
+
+Current counts: 501 functions, 42 events, 1,042 constants, 62 categories, 2,266 wiki
+pages, 7 types, 10 controls. `data/reports/import-report.json` records exclusions,
+API entries with no wiki page (for example `llFindNotecardTextCount`, which exists only in
+the YAML and is not claimed to be deployed), unexpanded templates, and referenced titles
+that have no local route.
+
+## Partial wiki renderer: limits
+
+`scripts/lib/wiki_render.py` is a deliberately limited, safe converter. **It is not
+MediaWiki.** It handles headings and sections, internal links (rewritten to local
+routes), code blocks (kept verbatim and inert), lists, basic tables, known inline
+parameter helpers, `LSL Function/Headless` shared pages, and the static set/get branches
+of the primitive-parameter tables.
+
+It does not handle parser functions, dynamic transclusion, conditional or variable
+template logic, nested table layouts, images, or arbitrary HTML. Unknown templates are
+shown as escaped invocations that link to their archived template page, so no content
+is invented. Injected helper templates appear under "Shared wiki helpers" with their
+original source and a note that their conditionals were not evaluated. Wiki HTML,
+scripts and iframes never run. When the rendering is incomplete, the full original
+wikitext is always available at the page's `rawPath`.
+
+## Updating the snapshots
+
+1. Get a new wiki export **by hand** (for example, a user-initiated Special:Export
+   download in a browser). Never script it. Do the same for a new `lsl-definitions`
+   checkout.
+2. Try it first without replacing anything:
+   `python scripts/import-datasets.py --wiki /path/new.xml --definitions /path/lsl_definitions.yaml`
+3. Review the diff of `src/data/catalog.json` and `data/reports/import-report.json`,
+   then run `npm run test:data`, `npm run build` and `npm run test:links`.
+4. To accept it, copy the files over `data/sources/wiki-English.xml` and
+   `data/sources/lsl_definitions.yaml`, update `data/sources/README.md` (date, page
+   count, provenance), and run `npm run import:data` with no arguments so the default
+   run reproduces the committed output. Keep translations out of the English export.
+
+## License and attribution
+
+- **Site code:** MIT, see `LICENSE`.
+- **LSL definitions** (`data/sources/lsl_definitions.yaml`): MIT, see
+  `data/sources/definitions-LICENSE`.
+- **Wiki content** (`data/sources/wiki-English.xml`, `public/wiki-source/`, and the
+  rendered wiki prose on API and archive pages): written by Second Life Wiki contributors
+  under **Creative Commons Attribution-ShareAlike 3.0**
+  (https://creativecommons.org/licenses/by-sa/3.0/). It is not covered by the MIT code
+  license. Each page shows its original title, revision ID, timestamp, latest-revision
+  contributor, and links to the source revision and full history. The contributor shown
+  is only the latest editor; the history link gives the full attribution chain.
+  Derivative reuse must keep this attribution and the CC BY-SA terms.
+
+Dependency audit status: see `data/reports/dependency-audit.md` (11 moderate advisories,
+all from one build-time transitive dependency with no compatible upstream fix yet).

@@ -42,3 +42,15 @@ Save the results under `design/logo-prototypes/<NN>-<name>/` in this repo (any f
 Claude to build the comparison page. That page shows each prototype on light and dark, at favicon
 sizes, in the site header and next to slua.dev's logo. The chosen design then replaces
 `src/assets/logo.{light,dark}.svg` and `public/favicon.svg`, and a PNG apple-touch-icon is added.
+
+## Decisions so far
+
+- **Wordmark:** the custom lettering from prototype 18 (Continuous Scroll): curled L feet, a flowing
+  S and a round dot (`design/logo-prototypes/18-continuous-scroll/wordmark-{light,dark}.svg`).
+  Pair it with whichever mark is chosen.
+- **Mark direction:** 18's idea of L-shaped terminals standing in for the S's serifs (reading
+  L-S-L), drawn the way 17 (Serpentine Page) draws its S: as a cutout through a dog-eared script
+  page. Round three (22–29) explores this; 22, 26 and 27 are the closest so far. 12 (Script Fold)
+  was the round-one favourite.
+- **Favicon:** expect a simplified version of the mark at 16 px, because the L serifs disappear at
+  that size.

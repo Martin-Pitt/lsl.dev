@@ -65,7 +65,7 @@ export function purpose(f: FeaturePage) { return purposes[f.id] ?? f.description
 
 /**
  * Starlight built-in icon per feature. Only a rough fit for LSL concepts; a custom LSL icon set
- * would improve them (see docs/prototypes/features-index.md).
+ * would improve them.
  */
 const icons: Record<string, string> = {
 	animesh: 'puzzle', avatar: 'star', camera: 'magnifier', combat: 'warning', communications: 'comment',

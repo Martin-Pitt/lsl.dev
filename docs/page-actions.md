@@ -18,7 +18,7 @@ and the menu adds **View as Markdown**, **Open in ChatGPT** and **Open in Claude
   `<Box>` becomes a `##` heading, `<SeeAlso>`/`<FeatureFooter>`/`<Attribution>`/`<WikiSource>`
   become links and the CC BY-SA credit. Code is copied verbatim. Unknown components keep their
   children. When you add a new component to MDX pages, add a case in `page-markdown.ts`.
-- Astro-route pages (catalog lists, categories, constant groups, prototypes, the wiki archive)
+- Astro-route pages (catalog lists, categories, constant groups, the wiki archive)
   have no Markdown source. PageTitle renders the menu only when the route's entry is a file in the
   docs collection, so those pages show no menu.
 - ChatGPT and Claude are plain links (`chatgpt.com/?q=…`, `claude.ai/new?q=…`) whose prompt

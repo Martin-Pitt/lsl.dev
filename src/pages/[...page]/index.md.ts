@@ -1,7 +1,7 @@
 /**
  * Markdown version of every docs page (MDX content collection), at /<page>/index.md and /index.md.
  * Linked from the page actions menu next to the title (src/components/starlight/PageActions.astro).
- * The Astro-route pages (catalog lists, categories, constant groups, prototypes) have no Markdown source and no menu.
+ * The Astro-route pages (catalog lists, categories, constant groups) have no Markdown source and no menu.
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';

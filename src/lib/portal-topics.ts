@@ -1,14 +1,14 @@
 /**
- * PROTOTYPE data for E (/prototypes/features/e/) and F (/prototypes/landing/): the LSL Portal's
- * "LSL Features by category" column (data/derived/wiki-source/lsl-portal-079327e8.txt) mapped onto
- * lsl.dev pages. Temporary; see docs/prototypes/features-index.md.
+ * Topics for the homepage's "Features by category" column (PortalColumns → PortalTopics): the LSL
+ * Portal's "LSL Features by category" column (data/derived/wiki-source/lsl-portal-079327e8.txt)
+ * mapped onto lsl.dev pages. Every feature page must be placed in a topic or the build fails.
  *
  * Refs: `f:<feature>`, `c:<category>`, `g:<constant group>`, or a `/path/`. A topic with no `to`
  * is a gap: lsl.dev has no page for it. Unknown features, categories or groups fail the build.
  */
-import { catalog, constantGroupHref, constantsInGroup } from '../catalog';
-import { categoryLink } from '../categories';
-import { featurePageMap, featurePages, featureHref } from '../features';
+import { catalog, constantGroupHref, constantsInGroup } from './catalog';
+import { categoryLink } from './categories';
+import { featurePageMap, featurePages, featureHref } from './features';
 
 export type Topic = { label: string; to?: string; also?: string[]; children?: Topic[] };
 export type Link = { href: string; label: string; kind: 'feature' | 'category' | 'group' | 'page' };

@@ -32,8 +32,6 @@ In the past, automated requests got 403 responses and probably contributed to a 
   for attribution). The site never *embeds* remote wiki assets, and
   `test:links` fails if any `<img>`, `<script>` or `<iframe>` has a remote `src`.
 - Do not validate external links by fetching them.
-- The generators in `scripts/legacy/` predate this policy. They are archival, unsupported,
-  and must not be run (see `scripts/legacy/README.md`).
 
 ## Architecture
 
@@ -58,7 +56,6 @@ scripts/
   lib/feature_mdx.py       Python reader for feature pages (tests)
   lib/test_features.py     feature page tests (coverage, links, structure)
   requirements.txt         Python deps (PyYAML==6.0.3)
-  legacy/                  archived JS generators (unsupported)
 src/data/catalog.json    DERIVED: catalog index (definitions, categories, enums, slim wiki references)
 src/data/wiki-html/      DERIVED: rendered archive pages, one file each, loaded lazily by /wiki/[slug]/
 data/derived/api-wiki.json  DERIVED: per-API wiki sections, input of the MDX generator only
@@ -83,7 +80,6 @@ src/lib/categories.ts    categoryLink(id): link and label for a category; a sing
 src/data/feature-clusters.json  GENERATED from the feature pages by scripts/feature-index.mjs (for older code)
 src/content/docs/        hand-written MDX: home, guides, types, controls, features
 docs/                    contributor guides (not published)
-src/legacy/              pre-modernization MDX/components (excluded from the build)
 ```
 
 API pages `/functions/<name>/`, `/events/<name>/` and `/constants/<name>/` are the MDX files in

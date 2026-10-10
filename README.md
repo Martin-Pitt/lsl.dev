@@ -61,7 +61,7 @@ src/pages/               data-driven routes (see below)
 src/components/reference ApiDetail, CatalogList, WikiContent, WikiAttribution
 src/components/starlight Header, Hero, PageFrame (from slua.dev) and Footer overrides
 src/styles/slua-base.css slua.dev's theme CSS, copied verbatim; custom.css adds lsl.dev rules
-src/data/feature-clusters.json  curated feature areas: drives /features/ and the sidebar
+src/data/feature-clusters.json  feature dashboards (slua.dev slugs) and old-slug redirects: drives /features/, the sidebar and API feature links
 src/content/docs/        hand-written MDX: home, guides, types, controls
 src/legacy/              pre-modernization MDX/components (excluded from the build)
 ```

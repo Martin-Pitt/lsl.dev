@@ -1,40 +1,85 @@
 ---
+// Feature dashboard: short concept paragraphs and dense links to the APIs, constant groups,
+// categories and archive articles for one feature. Detail lives on the linked pages.
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import ApiLinkList from '../../components/reference/ApiLinkList.astro';
-import { catalog, clusters, categoryMap, categoryHref, constantGroupHref, constantsInGroup, wikiByTitle, wikiHref, type Cluster } from '../../lib/catalog';
-export function getStaticPaths() { return clusters.map(cluster => ({ params: { id: cluster.id }, props: { cluster } })); }
-const { cluster } = Astro.props as { cluster: Cluster };
-const groups = cluster.constantGroups.map(g => ({ g, n: constantsInGroup(g).length })).filter(x => x.n > 0);
-const wiki = cluster.wiki.map(t => wikiByTitle.get(t)).filter(Boolean) as typeof catalog.wiki;
+import { apiMap, apiHref, features, featureMap, featureHref, categoryMap, categoryHref, constantGroupHref, constantsInGroup, wikiByTitle, wikiHref, type Feature, type FeatureLink } from '../../lib/catalog';
+export function getStaticPaths() { return features.map(feature => ({ params: { id: feature.id }, props: { feature } })); }
+const { feature } = Astro.props as { feature: Feature };
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function resolve(l: FeatureLink): { label: string; href: string; kind: string } | undefined {
+	if (l.feature) { const f = featureMap.get(l.feature); return f && { label: l.label ?? f.title, href: featureHref(f.id), kind: 'Feature' }; }
+	if (l.category) { const c = categoryMap.get(l.category); return c && { label: l.label ?? c.label, href: categoryHref(c.id), kind: 'Category' }; }
+	if (l.wiki) { const w = wikiByTitle.get(l.wiki); return w && { label: l.label ?? w.title.replace(/^Category:/, ''), href: wikiHref(w.slug), kind: w.title.startsWith('Category:') ? 'Wiki category' : 'Wiki' }; }
+	if (l.href) return { label: l.label ?? l.href, href: l.href, kind: 'Page' };
+}
+const sections = feature.sections.map(s => ({
+	...s,
+	entries: (s.items ?? []).map(n => apiMap.get(n)).filter(Boolean) as any[],
+	groupLinks: (s.groups ?? []).map(g => ({ g, n: constantsInGroup(g).length })).filter(x => x.n > 0),
+	seeAlso: (s.links ?? []).map(resolve).filter(Boolean) as { label: string; href: string; kind: string }[],
+}));
+const related = (feature.related ?? []).map(id => featureMap.get(id)).filter(Boolean) as Feature[];
+const homeCategories = feature.categories.map(id => categoryMap.get(id)!).filter(Boolean);
+const archive = (feature.wiki ?? []).map(t => wikiByTitle.get(t)).filter(Boolean) as any[];
 ---
-<StarlightPage frontmatter={{ title: cluster.title, description: cluster.summary, editUrl: false }}>
-	<p>{cluster.summary}</p>
-	{cluster.sections.map(s => (
-		<>
-			<h2 id={slug(s.title)}>{s.title}</h2>
-			<ApiLinkList names={s.items} />
-		</>
-	))}
-	{groups.length > 0 && (
-		<>
-			<h2 id="constant-groups">Constant groups</h2>
-			<ul class="inline-links">{groups.map(({ g, n }) => <li><a href={constantGroupHref(g)}>{g}</a> <small>({n})</small></li>)}</ul>
-		</>
-	)}
-	<h2 id="categories">All entries by category</h2>
-	<ul class="inline-links">
-		{cluster.categories.map(id => categoryMap.get(id)!).map(c => <li><a href={categoryHref(c.id)}>{c.label}</a> <small>({c.functions.length + c.events.length})</small></li>)}
-	</ul>
-	{wiki.length > 0 && (
-		<>
-			<h2 id="background">Background in the wiki archive</h2>
-			<ul class="inline-links">{wiki.map(w => <li><a href={wikiHref(w.slug)}>{w.title}</a></li>)}</ul>
-		</>
-	)}
+<StarlightPage frontmatter={{ title: feature.title, description: feature.description, editUrl: false }}>
+	<div class="feature-dashboard">
+		<div class="feature-intro">{feature.intro.map(p => <p>{p}</p>)}</div>
+		<nav class="feature-toc" aria-label="Sections">
+			<ul>{sections.map(s => <li><a href={`#${slug(s.title)}`}>{s.title}</a></li>)}</ul>
+		</nav>
+		<div class="feature-sections">
+			{sections.map(s => (
+				<section class="feature-section" aria-labelledby={slug(s.title)}>
+					<h2 id={slug(s.title)}>{s.title}</h2>
+					{(s.text ?? []).map(p => <p>{p}</p>)}
+					{s.entries.length > 0 && (
+						<ul class="api-grid">
+							{s.entries.map(e => <li><a href={apiHref(e.kind, e.name)} title={e.description}><code>{e.name}</code></a></li>)}
+						</ul>
+					)}
+					{s.groupLinks.length > 0 && (
+						<p class="feature-groups"><span class="label">Constant groups</span> {s.groupLinks.map(({ g, n }) => <a href={constantGroupHref(g)}>{g} <small>{n}</small></a>)}</p>
+					)}
+					{s.seeAlso.length > 0 && (
+						<p class="feature-see"><span class="label">See also</span> {s.seeAlso.map(l => <a href={l.href}><small>{l.kind}</small> {l.label}</a>)}</p>
+					)}
+				</section>
+			))}
+		</div>
+		<footer class="feature-footer">
+			{related.length > 0 && <div><h2 id="related-features">Related features</h2><ul class="inline-links">{related.map(f => <li><a href={featureHref(f.id)}>{f.title}</a></li>)}</ul></div>}
+			{homeCategories.length > 0 && <div><h2 id="categories">Categories</h2><ul class="inline-links">{homeCategories.map(c => <li><a href={categoryHref(c.id)}>{c.label}</a> <small>({c.functions.length + c.events.length})</small></li>)}</ul></div>}
+			{archive.length > 0 && <div><h2 id="background">Wiki archive</h2><ul class="inline-links">{archive.map(w => <li><a href={wikiHref(w.slug)}>{w.title.replace(/^Category:/, '')}</a></li>)}</ul></div>}
+		</footer>
+	</div>
 </StarlightPage>
+<style is:global>
+	/* Wide layout for feature dashboards only. */
+	:root:has(.feature-dashboard) { --sl-content-width: 84rem; }
+</style>
 <style>
-	.inline-links { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; }
-	.inline-links li { margin: 0; }
+	.feature-intro { font-size: var(--sl-text-lg); max-width: 52rem; }
+	.feature-intro p + p { margin-top: .75rem; }
+	.feature-toc ul { list-style: none; padding: 0; margin: 1.25rem 0 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+	.feature-toc li { margin: 0; }
+	.feature-toc a { display: inline-block; font-size: var(--sl-text-sm); text-decoration: none; border: 1px solid var(--sl-color-hairline); border-radius: 2rem; padding: .15rem .7rem; }
+	.feature-toc a:hover { border-color: var(--sl-color-accent); }
+	.feature-sections { margin-top: 1.5rem; column-gap: 2.5rem; }
+	@media (min-width: 72rem) { .feature-sections { column-count: 2; column-rule: 1px solid var(--sl-color-hairline); } }
+	.feature-section { break-inside: avoid; padding-bottom: 1.5rem; margin: 0; }
+	.feature-section h2 { margin-top: 0; padding-top: .5rem; font-size: var(--sl-text-h3); }
+	.feature-section > p { margin: .5rem 0 0; }
+	.api-grid { list-style: none; padding: 0; margin: .75rem 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 12.5rem), 1fr)); gap: .15rem 1rem; }
+	.api-grid li { margin: 0; min-width: 0; }
+	.api-grid a { text-decoration: none; overflow-wrap: anywhere; }
+	.api-grid code { font-size: var(--sl-text-xs); }
+	.feature-groups, .feature-see { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .9rem; font-size: var(--sl-text-sm); }
+	.feature-groups a, .feature-see a { overflow-wrap: anywhere; }
+	.label { font-size: var(--sl-text-2xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; color: var(--sl-color-text-accent); }
 	small { color: var(--sl-color-gray-3); }
+	.feature-footer { margin-top: 1rem; border-top: 1px solid var(--sl-color-hairline); display: grid; gap: 0 2.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+	.feature-footer h2 { font-size: var(--sl-text-h4); }
+	.inline-links { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; }
+	.inline-links li { margin: 0; }
 </style>

@@ -1,7 +1,7 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { catalog, clusterGroups, clusterMap, categoryMap, categoryHref, featureHref } from '../../lib/catalog';
+import { catalog, features, categoryMap, categoryHref, featureHref } from '../../lib/catalog';
 ---
 <StarlightPage frontmatter={{ title: 'Reference', description: 'LSL functions, events, constants, types and flow control.', editUrl: false }}>
 	<p>Signatures, parameters and metadata come from LSL Definitions; descriptions, caveats and examples come from the LSL Wiki. Deprecated and private entries are left out. A definition does not guarantee availability in every region.</p>
@@ -14,20 +14,15 @@ import { catalog, clusterGroups, clusterMap, categoryMap, categoryHref, featureH
 		<LinkCard title="Flow control" description="States, branches, loops and returns." href="/controls/" />
 	</CardGrid>
 	<h2 id="categories">Categories</h2>
-	<p>The {catalog.categories.length} categories from LSL Definitions, arranged by feature area.</p>
-	{clusterGroups.map(g => (
-		<>
-			<h3 id={g.id}>{g.label}</h3>
-			<dl class="category-map">
-				{g.clusters.map(id => clusterMap.get(id)!).map(c => (
-					<div>
-						<dt><a href={featureHref(c.id)}>{c.title}</a></dt>
-						<dd>{c.categories.map((id, i) => <>{i > 0 && ' · '}<a href={categoryHref(id)}>{categoryMap.get(id)!.label}</a></>)}</dd>
-					</div>
-				))}
-			</dl>
-		</>
-	))}
+	<p>The {catalog.categories.length} categories from LSL Definitions, arranged by feature.</p>
+	<dl class="category-map">
+		{features.filter(c => c.categories.length > 0).map(c => (
+			<div>
+				<dt><a href={featureHref(c.id)}>{c.title}</a></dt>
+				<dd>{c.categories.map((id, i) => <>{i > 0 && ' · '}<a href={categoryHref(id)}>{categoryMap.get(id)!.label}</a></>)}</dd>
+			</div>
+		))}
+	</dl>
 </StarlightPage>
 <style>
 	.category-map > div { display: grid; grid-template-columns: minmax(0, 16rem) minmax(0, 1fr); gap: .25rem 1rem; padding: .4rem 0; border-bottom: 1px solid var(--sl-color-hairline); }

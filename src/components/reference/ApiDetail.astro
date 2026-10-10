@@ -1,11 +1,11 @@
 ---
 import { Code } from '@astrojs/starlight/components';
 import WikiContent from './WikiContent.astro';
-import { catalog, categoryMap, categoryHref, apiHref, clusterByCategory, featureHref, constantGroupHref, searchAliases } from '../../lib/catalog';
+import { catalog, categoryMap, categoryHref, apiHref, featuresForApi, featureHref, constantGroupHref, searchAliases } from '../../lib/catalog';
 const { entry } = Astro.props;
 const d = entry.definition;
 const memberships: string[] = d['member-of'] || [];
-const featureAreas = [...new Map((entry.categories as string[]).map(id => clusterByCategory.get(id)).filter(Boolean).map(c => [c!.id, c!])).values()];
+const featureAreas = featuresForApi(entry);
 const aliases = searchAliases[entry.name] || [];
 const flags = [['experience','Requires an experience'],['linden-experience','Linden experience only'],['god-mode','Privileged function']].filter(([key])=>d[key]);
 ---

@@ -11,13 +11,26 @@ export const allApi = [...data.functions, ...data.events, ...data.constants];
 export const apiMap = new Map(allApi.map(a => [a.name, a]));
 export function wikiHref(slug: string) { return `/wiki/${slug}/`; }
 
-// Feature clusters: curated task groupings that drive /features/ and the Reference sidebar.
-import clusterData from '../data/feature-clusters.json';
-export type Cluster = typeof clusterData.clusters[number];
-export const clusterGroups = clusterData.groups;
-export const clusters = clusterData.clusters;
-export const clusterMap = new Map(clusters.map(c => [c.id, c]));
-export const clusterByCategory = new Map(clusters.flatMap(c => c.categories.map(cat => [cat, c] as const)));
+// Feature pages: curated dashboards that drive /features/ and the sidebar (slugs match slua.dev).
+import featureData from '../data/feature-clusters.json';
+export type FeatureLink = { feature?: string; category?: string; wiki?: string; href?: string; label?: string };
+export type FeatureSection = { title: string; text?: string[]; items?: string[]; groups?: string[]; links?: FeatureLink[] };
+export type Feature = { id: string; title: string; description: string; intro: string[]; sections: FeatureSection[]; categories: string[]; related?: string[]; wiki?: string[] };
+export const features = featureData.features as Feature[];
+export const featureRedirects = featureData.redirects as Record<string, string>;
+export const featureMap = new Map(features.map(f => [f.id, f]));
+/** Home feature of each definition category (every category has exactly one). */
+export const featureByCategory = new Map(features.flatMap(f => f.categories.map(cat => [cat, f] as const)));
+/** Features whose sections list an API by name, or list a constant group the API belongs to. */
+const featuresByName = new Map<string, Feature[]>();
+const featuresByGroup = new Map<string, Feature[]>();
+function addTo(map: Map<string, Feature[]>, key: string, f: Feature) { const list = map.get(key) ?? []; if (!list.includes(f)) list.push(f); map.set(key, list); }
+for (const f of features) for (const s of f.sections) { for (const n of s.items ?? []) addTo(featuresByName, n, f); for (const g of s.groups ?? []) addTo(featuresByGroup, g, f); }
+export function featuresForApi(entry: { name: string; groups?: string[] }): Feature[] {
+  const out = [...(featuresByName.get(entry.name) ?? [])];
+  for (const g of entry.groups ?? []) for (const f of featuresByGroup.get(g) ?? []) if (!out.includes(f)) out.push(f);
+  return features.filter(f => out.includes(f));
+}
 export function featureHref(id: string) { return `/features/${encodeURIComponent(id)}/`; }
 export function constantGroupHref(group: string) { return `/constants/groups/${encodeURIComponent(group)}/`; }
 export const wikiByTitle = new Map(data.wiki.map(w => [w.title, w]));

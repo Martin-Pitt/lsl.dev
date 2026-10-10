@@ -1,16 +1,11 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { clusterGroups, clusterMap, featureHref } from '../../lib/catalog';
+import { features, featureHref } from '../../lib/catalog';
 ---
-<StarlightPage frontmatter={{ title: 'Features', description: 'LSL feature areas: the functions, events and constants for each kind of task.', editUrl: false }}>
-	<p>Each feature page names the key functions, events and constants for an area, grouped by task. Follow a link for the signature, parameters, caveats and examples.</p>
-	{clusterGroups.map(g => (
-		<>
-			<h2 id={g.id}>{g.label}</h2>
-			<CardGrid>
-				{g.clusters.map(id => clusterMap.get(id)!).map(c => <LinkCard title={c.title} description={c.summary} href={featureHref(c.id)} />)}
-			</CardGrid>
-		</>
-	))}
+<StarlightPage frontmatter={{ title: 'Features Overview', description: 'Features of Second Life scripting: one dashboard per area, linking to the functions, events and constants.', editUrl: false }}>
+	<p>Each feature page explains an area of Second Life scripting at a high level and links to the functions, events, constant groups and articles for it. Follow a link for signatures, parameters, caveats and examples.</p>
+	<CardGrid>
+		{features.map(f => <LinkCard title={f.title} description={f.description} href={featureHref(f.id)} />)}
+	</CardGrid>
 </StarlightPage>

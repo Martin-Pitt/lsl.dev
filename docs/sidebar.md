@@ -7,14 +7,15 @@ diff its `components/SidebarSublist.astro` against ours.
 
 ## Group styles
 
-- **Top-level groups** (Fundamentals, Reference, Features) keep Starlight's large, bold heading style.
+- **Top-level groups** (Fundamentals, Reference, Features) keep Starlight's large, bold heading style,
+  including when they are split groups (below).
 - **Nested groups** (any group inside another group) look like ordinary links in the list: same size
   and weight, plus a chevron.
 
 ## Split groups
 
-A nested group whose children include a link with the `data-sidebar-group-link` attribute is a split
-group. That link is removed from the children; its `href` becomes the group's label link, and a separate
+A group, top-level or nested, whose children include a link with the `data-sidebar-group-link`
+attribute is a split group. That link is removed from the children; its `href` becomes the group's label link, and a separate
 chevron button beside it expands and collapses the group. The group's own `label` is shown, not the
 link's label.
 
@@ -46,12 +47,15 @@ and the group opens.
 
 Notes:
 
-- The attribute only applies to nested groups; on a top-level group the link stays an ordinary child.
+- At the top level, the split label keeps the large heading style (`li.split-group.top-split`), so
+  the sections still read as headings. Fundamentals (via `fundamentals/index.mdx` frontmatter),
+  Reference and Features are top-level split groups; their overview is no longer listed as a child.
+  Top-level entries without an overview page (Wiki archive, About) stay plain links.
 - Any `class` on the lifted link (such as `is-priority`) is dropped. Put `is-priority` on the next child
   if it should stand apart from the rest.
 - Groups without such a link stay single toggles (the whole row is the `<summary>`).
-- The current split groups are each feature with sub-pages (Combat, ...), and Reference's Categories,
-  Constants, Types and Flow control.
+- The current split groups are the top-level Fundamentals, Reference and Features; each feature with
+  sub-pages (Combat, ...); and Reference's Categories, Constants, Types and Flow control.
 
 ## Behaviour and accessibility
 

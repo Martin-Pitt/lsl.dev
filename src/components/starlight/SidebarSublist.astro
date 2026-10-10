@@ -3,10 +3,11 @@
  * Copy of Starlight 0.42's SidebarSublist with two changes (see docs/sidebar.md):
  * - Nested groups (depth >= 1) use the size and weight of ordinary links, not the bold heading style
  *   that top-level groups keep.
- * - A nested group whose items include a link with the `data-sidebar-group-link` attribute becomes a
- *   split control: that link becomes the group's label (and leaves the list of children), and a separate
+ * - A group (top-level or nested) whose items include a link with the `data-sidebar-group-link`
+ *   attribute becomes a split control: that link becomes the group's label (and leaves the list of children), and a separate
  *   <button> expands and collapses the group. The group still uses <details>, whose <summary> is
  *   hidden while scripting is on, so state persistence and current-page expansion keep working.
+ *   A top-level split label keeps the large heading style of the other top-level groups.
  */
 import type { StarlightRouteData } from '@astrojs/starlight/route-data';
 import { Badge, Icon } from '@astrojs/starlight/components';
@@ -26,7 +27,7 @@ const { sublist, nested } = Astro.props;
 /** Same as Starlight's sidebarGroupHasCurrent (not exported). */
 const hasCurrent = (group: Group): boolean => group.entries.some(e => e.type === 'link' ? e.isCurrent : hasCurrent(e));
 const GROUP_LINK = 'data-sidebar-group-link';
-const groupLink = (group: Group) => nested ? group.entries.find((e): e is Link => e.type === 'link' && GROUP_LINK in e.attrs) : undefined;
+const groupLink = (group: Group) => group.entries.find((e): e is Link => e.type === 'link' && GROUP_LINK in e.attrs);
 /** Running id for aria-controls, unique within the page. */
 const counter = Symbol.for('lsl-sidebar-split-index');
 const locals = Astro.locals as unknown as Record<symbol, number>;
@@ -70,10 +71,10 @@ const linkAttrs = ({ class: _class, ...attrs }: Link['attrs']) => attrs;
 			);
 			const id = nextId();
 			return (
-				<li class="split-group">
+				<li class:list={['split-group', { 'top-split': !nested }]}>
 					<div class="split-row">
 						<a href={link.href} aria-current={link.isCurrent ? 'page' : undefined} class="split-link" {...linkAttrs(link.attrs)}>
-							<span>{entry.label}</span>
+							<span class:list={{ large: !nested }}>{entry.label}</span>
 							{entry.badge && <Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />}
 						</a>
 						<button type="button" class="split-toggle" aria-controls={id} aria-expanded={open ? 'true' : 'false'} aria-label={`${open ? 'Collapse' : 'Expand'} ${entry.label}`} data-label={entry.label}>

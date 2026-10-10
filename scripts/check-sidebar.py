@@ -1,5 +1,5 @@
-"""Check the built sidebar: nested groups with an overview link render as split controls, top-level
-groups keep Starlight's markup (docs/sidebar.md). Run after `npm run build`."""
+"""Check the built sidebar: groups with an overview link render as split controls, at the top level
+(with the large heading label) and nested (docs/sidebar.md). Run after `npm run build`."""
 from pathlib import Path
 import re,sys
 root=Path(sys.argv[1]).resolve() if len(sys.argv)>1 else Path(__file__).resolve().parents[1]/'dist'
@@ -16,10 +16,17 @@ def split(html,label):
 def attr(tag,name):
  m=re.search(r'\s'+name+r'="([^"]*)"',tag);return m and m.group(1)
 s=sidebar('/features/combat/')
-# Top level: Starlight's large summary labels, no split rows.
-for label in ['Fundamentals','Reference','Features']:
- check(re.search(r'<summary[^>]*>\s*<span class="group-label[^"]*">\s*<span class="large[^"]*">'+label+'</span>',s),f'top-level group {label} lost its heading markup')
-check(not re.search(r'<li class="split-group[^"]*">\s*<div class="split-row[^"]*">\s*<a [^>]*class="large',s),'a top-level entry rendered as split')
+# Top level: sections with an overview page are split controls whose label keeps the large heading
+# style; the overview is not listed again as a child.
+TOP=[('Fundamentals','/fundamentals/'),('Reference','/reference/'),('Features','/features/')]
+for label,href in TOP:
+ m=re.search(r'<li class="split-group top-split[^"]*">\s*<div class="split-row[^"]*">\s*<a href="'+re.escape(href)+r'"[^>]*class="split-link[^"]*"[^>]*>\s*<span class="large[^"]*">'+label+'</span>',s)
+ check(m,f'top-level section {label} is not a split control with a large label linking {href}')
+ check(s.count(f'href="{href}"')==1,f'{href} is listed again besides the top-level split label')
+check('>Overview</span>' not in s and '>Features Overview</span>' not in s,'a redundant Overview child is still listed')
+for label,href in [('Wiki archive','/wiki/'),('About these docs','/about/')]:
+ check(re.search(r'<a href="'+re.escape(href)+r'"[^>]*class="large[^"]*"',s),f'{label} is no longer a plain top-level link')
+check(not re.search(r'<li class="split-group(?! top-split)[^"]*">[\s\S]{0,300}?<span class="large',s),'a nested split group has a large label')
 # Split groups.
 for label,href in [('Combat','/features/combat/'),('Categories','/categories/'),('Constants','/constants/'),('Types','/types/'),('Flow control','/controls/')]:
  g=split(s,label)
@@ -49,7 +56,9 @@ sub=sidebar('/features/combat/combat-log/')
 a,b,d=split(sub,'Combat')
 check(attr(b,'aria-expanded')=='true' and attr(a,'aria-current') is None,'Combat is not open (or wrongly current) on a sub-page')
 # Fundamentals has its own pages (src/content/docs/fundamentals/) plus Learn LSL, never Reference pages.
-def section(html,start,end):return html[html.index(f'>{start}</span>'):html.index(f'>{end}</span>')]
+def section(html,start,end):
+ at=lambda l:html.rindex('<li',0,html.index(f'>{l}</span>'))
+ return html[at(start):at(end)]
 fund=section(s,'Fundamentals','Reference')
 hrefs=re.findall(r'href="([^"]*)"',fund)
 check('/fundamentals/' in hrefs and '/guides/' in hrefs,'Fundamentals lacks its overview or Learn LSL')
@@ -60,11 +69,12 @@ def current(page):
  h=sidebar(page);m=re.search(r'<a [^>]*aria-current="page"[^>]*>',h)
  check(m,f'{page}: no current sidebar entry')
  if not m:return None
- i=m.start();return 'Fundamentals' if h.index('>Fundamentals</span>')<i<h.index('>Reference</span>') else 'Reference' if i<h.index('>Features</span>') else 'other'
+ i=m.start();at=lambda l:h.rindex('<li',0,h.index(f'>{l}</span>'))
+ return 'Fundamentals' if at('Fundamentals')<=i<at('Reference') else 'Reference' if i<at('Features') else 'other'
 for page in ['/types/','/types/integer/','/controls/','/controls/if/']:
  check(current(page)=='Reference',f'{page} does not mark a Reference entry as current')
 for page in ['/fundamentals/','/fundamentals/types/']:
  check(current(page)=='Fundamentals',f'{page} does not mark a Fundamentals entry as current')
 if errors:
  print('\n'.join(errors));sys.exit(1)
-print('Sidebar OK: top-level groups unchanged, nested overview groups are split controls.')
+print('Sidebar OK: top-level and nested groups with an overview page are split controls.')

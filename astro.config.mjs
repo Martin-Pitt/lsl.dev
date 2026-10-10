@@ -112,8 +112,9 @@ export default defineConfig({
 			PageTitle: './src/components/starlight/PageTitle.astro',
 			Sidebar: './src/components/starlight/Sidebar.astro',
 		},
-		// A nested group's link with the data-sidebar-group-link attribute becomes the group's own label
-		// (a link to its overview page beside a separate expand/collapse button); see docs/sidebar.md.
+		// A group's link with the data-sidebar-group-link attribute becomes the group's own label (a link
+		// to its overview page beside a separate expand/collapse button), at the top level too, where the
+		// label keeps the large heading style; see docs/sidebar.md.
 		sidebar: [
 			{
 				label: 'Fundamentals',
@@ -124,7 +125,7 @@ export default defineConfig({
 				label: 'Reference',
 				collapsed: true,
 				items: [
-					{ label: 'Overview', link: '/reference/', attrs: { class: 'is-priority' } },
+					{ label: 'Overview', link: '/reference/', attrs: { 'data-sidebar-group-link': '' } },
 					{ label: 'Limits', link: '/reference/limits/', attrs: { class: 'is-priority' } },
 					{ label: 'Categories', collapsed: true, items: [{ label: 'All categories', link: '/categories/', attrs: { 'data-sidebar-group-link': '' } }, ...referenceCategories] },
 					{ label: 'Functions', link: '/functions/' },
@@ -141,7 +142,7 @@ export default defineConfig({
 					{ label: 'Flow control', collapsed: true, items: [{ autogenerate: { directory: 'controls' } }] },
 				],
 			},
-			{ label: 'Features', collapsed: true, items: [{ label: 'Features Overview', link: '/features/', attrs: { class: 'is-priority' } }, ...featureItems] },
+			{ label: 'Features', collapsed: true, items: [{ label: 'Features Overview', link: '/features/', attrs: { 'data-sidebar-group-link': '' } }, ...featureItems] },
 			{ label: 'Wiki archive', link: '/wiki/' },
 			{ label: 'About these docs', link: '/about/' },
 		],

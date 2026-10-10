@@ -2,16 +2,18 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 import CatalogList from '../../components/reference/CatalogList.astro';
-import { catalog, apiMap, apiHref } from '../../lib/catalog';
+import { catalog, apiMap, apiHref, clusterByCategory, featureHref } from '../../lib/catalog';
 import guides from '../../data/topic-guides.json';
 export function getStaticPaths(){return catalog.categories.map(category=>({params:{id:category.id},props:{category}}));}
 const {category}=Astro.props;
 const guide=(guides as any)[category.id];
 const items=[...category.functions,...category.events,...category.constants].map(name=>apiMap.get(name)).filter(Boolean).map(e=>({title:e!.name,description:e!.description,href:apiHref(e!.kind,e!.name),kind:e!.kind}));
 const tasks=guide?.tasks || [];
+const cluster=clusterByCategory.get(category.id);
 ---
 <StarlightPage frontmatter={{title:category.label,description:guide?.summary || `LSL ${category.label.toLowerCase()} functions, events, and constants.`,editUrl:false}}>
 <p>{guide?.summary || `Explore the functions and events for ${category.label.toLowerCase()}. Follow an entry for its parameters, examples, and technical constraints.`}</p>
+{cluster && <p>Feature area: <a href={featureHref(cluster.id)}>{cluster.title}</a></p>}
 {tasks.length>0 && <><h2 id="start-here">What do you want to do?</h2><CardGrid>{tasks.map((task:any)=><LinkCard title={task.label} description={task.description} href={task.href || apiHref('function',task.function)}/>)}</CardGrid></>}
 <h2 id="reference">Reference</h2><CatalogList items={items} label="topic entries"/>
 </StarlightPage>

@@ -1,0 +1,40 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import ApiLinkList from '../../components/reference/ApiLinkList.astro';
+import { catalog, clusters, categoryMap, categoryHref, constantGroupHref, constantsInGroup, wikiByTitle, wikiHref, type Cluster } from '../../lib/catalog';
+export function getStaticPaths() { return clusters.map(cluster => ({ params: { id: cluster.id }, props: { cluster } })); }
+const { cluster } = Astro.props as { cluster: Cluster };
+const groups = cluster.constantGroups.map(g => ({ g, n: constantsInGroup(g).length })).filter(x => x.n > 0);
+const wiki = cluster.wiki.map(t => wikiByTitle.get(t)).filter(Boolean) as typeof catalog.wiki;
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+---
+<StarlightPage frontmatter={{ title: cluster.title, description: cluster.summary, editUrl: false }}>
+	<p>{cluster.summary}</p>
+	{cluster.sections.map(s => (
+		<>
+			<h2 id={slug(s.title)}>{s.title}</h2>
+			<ApiLinkList names={s.items} />
+		</>
+	))}
+	{groups.length > 0 && (
+		<>
+			<h2 id="constant-groups">Constant groups</h2>
+			<ul class="inline-links">{groups.map(({ g, n }) => <li><a href={constantGroupHref(g)}>{g}</a> <small>({n})</small></li>)}</ul>
+		</>
+	)}
+	<h2 id="categories">All entries by category</h2>
+	<ul class="inline-links">
+		{cluster.categories.map(id => categoryMap.get(id)!).map(c => <li><a href={categoryHref(c.id)}>{c.label}</a> <small>({c.functions.length + c.events.length})</small></li>)}
+	</ul>
+	{wiki.length > 0 && (
+		<>
+			<h2 id="background">Background in the wiki archive</h2>
+			<ul class="inline-links">{wiki.map(w => <li><a href={wikiHref(w.slug)}>{w.title}</a></li>)}</ul>
+		</>
+	)}
+</StarlightPage>
+<style>
+	.inline-links { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; }
+	.inline-links li { margin: 0; }
+	small { color: var(--sl-color-gray-3); }
+</style>

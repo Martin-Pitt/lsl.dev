@@ -1,0 +1,26 @@
+---
+// Compact, link-first list of API entries: name, kind and the definition's description.
+import { apiMap, apiHref } from '../../lib/catalog';
+interface Props { names: string[] }
+const entries = Astro.props.names.map(n => apiMap.get(n)).filter(Boolean) as any[];
+---
+<ul class="api-link-list">
+	{entries.map(e => (
+		<li>
+			<a href={apiHref(e.kind, e.name)}><code>{e.name}</code></a>
+			<span class="kind">{e.kind}</span>
+			<span class="desc">{e.description}</span>
+		</li>
+	))}
+</ul>
+<style>
+	.api-link-list { list-style: none; padding: 0; }
+	.api-link-list li { display: grid; grid-template-columns: minmax(0, 18rem) auto minmax(0, 1fr); gap: .25rem 1rem; align-items: baseline; padding: .4rem 0; border-bottom: 1px solid var(--sl-color-hairline); margin: 0; }
+	.api-link-list a { overflow-wrap: anywhere; }
+	.kind { font-size: var(--sl-text-2xs); color: var(--sl-color-gray-3); text-transform: uppercase; letter-spacing: .04em; }
+	.desc { font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); }
+	@media (max-width: 40rem) {
+		.api-link-list li { grid-template-columns: minmax(0, 1fr) auto; }
+		.desc { grid-column: 1 / -1; }
+	}
+</style>

@@ -1,15 +1,28 @@
 # lsl.dev
 
-A reference for the Linden Scripting Language (LSL) used in Second Life, built with
-[Astro](https://astro.build) and [Starlight](https://starlight.astro.build). It combines
-the canonical `lsl-definitions` YAML (signatures, parameters, categories, constants) with
-an offline snapshot of the Second Life Wiki (prose, caveats, examples, history).
+**Unofficial** documentation for the Linden Scripting Language (LSL) used in Second Life.
+lsl.dev is a community project. It is not affiliated with or endorsed by Linden Lab.
+
+The content merges two sources:
+
+- **[LSL Definitions](https://github.com/secondlife/lsl-definitions)** supplies signatures,
+  parameter names and descriptions, return types, constant values, categories and other
+  metadata. The `sync-lsl-definitions.yml` workflow refreshes the snapshot from GitHub.
+- **The official [LSL Wiki](https://wiki.secondlife.com/wiki/LSL_Portal)** supplies
+  descriptive prose, caveats and examples, from an offline English export (assembled
+  10 October 2026, newest revision 3 October 2026). Wiki content is used under
+  [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) with per-page attribution.
+
+The site is built with [Astro](https://astro.build) and [Starlight](https://starlight.astro.build),
+and shares its look, components and navigation structure with the sister site
+[slua.dev](https://slua.dev).
 
 Production URL (from `astro.config.mjs`): https://lsl.dev
 
 ## Offline policy: no wiki network access
 
-**Nothing in this repository may make a network request to the Second Life Wiki.** That
+**Nothing in this repository may make a network request to the Second Life Wiki.** (LSL Definitions
+is the one source fetched from the network, by its sync workflow on GitHub.) That
 covers crawling, scraping, API calls, fetching templates or images, and checking links.
 In the past, automated requests got 403 responses and probably contributed to a bot ban.
 
@@ -46,15 +59,18 @@ data/reports/            DERIVED/diagnostic: import, link and dependency reports
 src/lib/catalog.ts       typed access to catalog.json
 src/pages/               data-driven routes (see below)
 src/components/reference ApiDetail, CatalogList, WikiContent, WikiAttribution
-src/components/site      Header, Hero, Home overrides for Starlight
+src/components/starlight Header, Hero, PageFrame (from slua.dev) and Footer overrides
+src/styles/slua-base.css slua.dev's theme CSS, copied verbatim; custom.css adds lsl.dev rules
+src/data/feature-clusters.json  curated feature areas: drives /features/ and the sidebar
 src/content/docs/        hand-written MDX: home, guides, types, controls
 src/legacy/              pre-modernization MDX/components (excluded from the build)
 ```
 
 Routes built from the catalog: `/reference/`, `/functions/` and `/functions/[name]/`,
 `/events/` and `/events/[name]/`, `/constants/` and `/constants/[name]/`,
-`/categories/` and `/categories/[id]/`, `/wiki/` and `/wiki/[slug]/`, plus a `/features/`
-compatibility landing page. Search uses Starlight's built-in Pagefind index.
+`/categories/` and `/categories/[id]/`, `/constants/groups/` and `/constants/groups/[group]/`,
+`/features/` and `/features/[id]/`, `/wiki/` and `/wiki/[slug]/`. The sidebar links only to
+feature areas, categories and indexes, never to individual functions or constants. Search uses Starlight's built-in Pagefind index.
 
 ### Source data vs derived data
 

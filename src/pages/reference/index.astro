@@ -1,11 +1,36 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { catalog } from '../../lib/catalog';
+import { catalog, clusterGroups, clusterMap, categoryMap, categoryHref, featureHref } from '../../lib/catalog';
 ---
-<StarlightPage frontmatter={{title:'LSL reference',description:'The language and APIs for building in Second Life.',editUrl:false}}>
-<p>Look up a signature, check a parameter, or explore what you can build. The reference brings current LSL definitions together with the community’s detailed wiki documentation.</p>
-<CardGrid><LinkCard title="Functions" description={`${catalog.functions.length} functions, organized by purpose.`} href="/functions/"/><LinkCard title="Events" description={`${catalog.events.length} ways for a script to respond.`} href="/events/"/><LinkCard title="Constants" description={`${catalog.constants.length} named values and flags.`} href="/constants/"/><LinkCard title="Browse by topic" description="Start with what you want to do." href="/categories/"/><LinkCard title="Types" description="Values, conversions, and storage." href="/types/"/><LinkCard title="Flow control" description="States, branches, loops, and returns." href="/controls/"/></CardGrid>
-<h2 id="sources">About this reference</h2><p>API signatures, argument names, and topic classifications come from the LSL definitions. Technical explanations, examples, and caveats retain their wording from the Second Life Wiki, with source attribution on each article. The <a href="/wiki/">wiki library</a> also preserves supporting pages and their original text.</p>
-<p>Deprecated and private APIs are omitted from the main reference. Historical articles remain available in the library. A definition does not guarantee availability in every region.</p>
+<StarlightPage frontmatter={{ title: 'Reference', description: 'LSL functions, events, constants, types and flow control.', editUrl: false }}>
+	<p>Signatures, parameters and metadata come from LSL Definitions; descriptions, caveats and examples come from the LSL Wiki. Deprecated and private entries are left out. A definition does not guarantee availability in every region.</p>
+	<CardGrid>
+		<LinkCard title="Functions" description={`All ${catalog.functions.length} functions, filterable by name and category.`} href="/functions/" />
+		<LinkCard title="Events" description={`All ${catalog.events.length} events.`} href="/events/" />
+		<LinkCard title="Constants" description={`All ${catalog.constants.length.toLocaleString('en')} constants, filterable by group.`} href="/constants/" />
+		<LinkCard title="Constant groups" description="Constants by enum or flag set." href="/constants/groups/" />
+		<LinkCard title="Types" description={`The ${catalog.types.length} LSL value types.`} href="/types/" />
+		<LinkCard title="Flow control" description="States, branches, loops and returns." href="/controls/" />
+	</CardGrid>
+	<h2 id="categories">Categories</h2>
+	<p>The {catalog.categories.length} categories from LSL Definitions, arranged by feature area.</p>
+	{clusterGroups.map(g => (
+		<>
+			<h3 id={g.id}>{g.label}</h3>
+			<dl class="category-map">
+				{g.clusters.map(id => clusterMap.get(id)!).map(c => (
+					<div>
+						<dt><a href={featureHref(c.id)}>{c.title}</a></dt>
+						<dd>{c.categories.map((id, i) => <>{i > 0 && ' · '}<a href={categoryHref(id)}>{categoryMap.get(id)!.label}</a></>)}</dd>
+					</div>
+				))}
+			</dl>
+		</>
+	))}
 </StarlightPage>
+<style>
+	.category-map > div { display: grid; grid-template-columns: minmax(0, 16rem) minmax(0, 1fr); gap: .25rem 1rem; padding: .4rem 0; border-bottom: 1px solid var(--sl-color-hairline); }
+	.category-map dd { margin: 0; font-size: var(--sl-text-sm); }
+	@media (max-width: 40rem) { .category-map > div { grid-template-columns: 1fr; } }
+</style>

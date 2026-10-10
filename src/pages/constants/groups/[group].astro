@@ -1,0 +1,21 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import ApiLinkList from '../../../components/reference/ApiLinkList.astro';
+import { catalog, apiHref, constantsInGroup } from '../../../lib/catalog';
+export function getStaticPaths() {
+	return Object.keys(catalog.enums).filter(g => constantsInGroup(g).length > 0).map(group => ({ params: { group }, props: { group } }));
+}
+const { group } = Astro.props as { group: string };
+const info = (catalog.enums as Record<string, any>)[group];
+const members = constantsInGroup(group);
+const users = catalog.functions.filter(f => JSON.stringify((f as any).parameters).includes(`"${group}"`) || ((f as any).parameters as any[]).some(p => p['enum-semantics'] === group || p.enum === group));
+---
+<StarlightPage frontmatter={{ title: group, description: info.tooltip || `${group} constants.`, editUrl: false }}>
+	<p>{info.tooltip || `Constants in the ${group} ${info.type === 'flag' ? 'flag set' : 'enum'}.`} {info.type === 'flag' && 'These are flags and can be combined with bitwise OR.'}</p>
+	<p><a href="/constants/groups/">All constant groups</a></p>
+	<div class="table-scroll"><table>
+		<thead><tr><th>Constant</th><th>Type</th><th>Value</th><th>Description</th></tr></thead>
+		<tbody>{members.map(c => <tr><td><a href={apiHref('constant', c.name)}><code>{c.name}</code></a></td><td>{(c as any).type}</td><td><code>{String((c as any).value)}</code></td><td>{c.description}</td></tr>)}</tbody>
+	</table></div>
+	{users.length > 0 && (<><h2 id="used-by">Used by</h2><ApiLinkList names={users.map(f => f.name)} /></>)}
+</StarlightPage>

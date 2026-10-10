@@ -1,0 +1,16 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { clusterGroups, clusterMap, featureHref } from '../../lib/catalog';
+---
+<StarlightPage frontmatter={{ title: 'Features', description: 'LSL feature areas: the functions, events and constants for each kind of task.', editUrl: false }}>
+	<p>Each feature page names the key functions, events and constants for an area, grouped by task. Follow a link for the signature, parameters, caveats and examples.</p>
+	{clusterGroups.map(g => (
+		<>
+			<h2 id={g.id}>{g.label}</h2>
+			<CardGrid>
+				{g.clusters.map(id => clusterMap.get(id)!).map(c => <LinkCard title={c.title} description={c.summary} href={featureHref(c.id)} />)}
+			</CardGrid>
+		</>
+	))}
+</StarlightPage>

@@ -8,6 +8,7 @@ export default {
 			JSON.parse(await readFile('./src/content/data/lsl_grammar.json', 'utf-8'))
 		],
 	},
+	themes: ['github-dark', 'github-light'],
 	tabWidth: 0,
 	plugins: [
 		pluginCollapsibleSections(),

@@ -137,3 +137,39 @@ class DatasetTests(unittest.TestCase):
     def test_unique_archive_routes(self):
         self.assertEqual(len({x['slug'] for x in self.c['wiki']}),len(self.c['wiki']))
 if __name__=='__main__': unittest.main()
+
+
+class FeatureClusterTests(unittest.TestCase):
+    """src/data/feature-clusters.json drives /features/ and the Reference sidebar."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = json.loads((ROOT / 'src/data/catalog.json').read_text(encoding='utf-8'))
+        cls.features = json.loads((ROOT / 'src/data/feature-clusters.json').read_text(encoding='utf-8'))
+
+    def test_every_category_in_exactly_one_cluster(self):
+        assigned = [c for cl in self.features['clusters'] for c in cl['categories']]
+        self.assertEqual(sorted(assigned), sorted(c['id'] for c in self.catalog['categories']))
+
+    def test_every_cluster_in_exactly_one_group(self):
+        grouped = [c for g in self.features['groups'] for c in g['clusters']]
+        self.assertEqual(sorted(grouped), sorted(cl['id'] for cl in self.features['clusters']))
+
+    def test_items_are_public_api_names(self):
+        names = {e['name'] for k in ('functions', 'events', 'constants') for e in self.catalog[k]}
+        for cl in self.features['clusters']:
+            for section in cl['sections']:
+                for item in section['items']:
+                    self.assertIn(item, names, f"{cl['id']}: {item}")
+            for group in cl['constantGroups']:
+                self.assertIn(group, self.catalog['enums'])
+
+    def test_feature_pages_do_not_list_yaml_only_functions(self):
+        items = {i for cl in self.features['clusters'] for s in cl['sections'] for i in s['items']}
+        self.assertNotIn('llFindNotecardTextCount', items)
+
+    def test_wiki_links_exist_in_archive(self):
+        titles = {w['title'] for w in self.catalog['wiki']}
+        for cl in self.features['clusters']:
+            for title in cl['wiki']:
+                self.assertIn(title, titles)

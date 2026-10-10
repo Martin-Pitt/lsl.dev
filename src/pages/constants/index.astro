@@ -2,9 +2,10 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import CatalogList from '../../components/reference/CatalogList.astro';
 import { catalog, apiHref } from '../../lib/catalog';
-const items=catalog.constants.map(e=>({title:e.name,description:e.description,href:apiHref(e.kind,e.name),categories:e.categories}));
+const items=catalog.constants.map(e=>({title:e.name,description:e.description,href:apiHref(e.kind,e.name),categories:(e as any).groups||[]}));
+const groups=Object.keys(catalog.enums).filter(g=>catalog.constants.some(c=>((c as any).groups||[]).includes(g))).sort().map(id=>({id,label:id}));
 ---
 <StarlightPage frontmatter={{title:'Constants',description:'Browse the current LSL constants reference.',editUrl:false}}>
-<p>Find LSL constants by name, purpose, or topic. Signatures and descriptions follow the current definitions; deprecated and private entries are excluded.</p>
-<CatalogList items={items} label="constants" filterCategories={catalog.categories}/>
+<p>Find LSL constants by name or by <a href="/constants/groups/">constant group</a>. Signatures and descriptions follow the current definitions; deprecated and private entries are excluded.</p>
+<CatalogList items={items} label="constants" filterCategories={groups} filterLabel="Group" filterAll="All groups"/>
 </StarlightPage>

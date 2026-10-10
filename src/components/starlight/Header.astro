@@ -1,0 +1,107 @@
+---
+// Copied from slua.dev src/components/starlight/Header.astro; adds a compact title and
+// search for narrow screens, where slua.dev's sidebar header is hidden.
+import LanguageSelect from '@astrojs/starlight/components/LanguageSelect.astro';
+import Search from '@astrojs/starlight/components/Search.astro';
+import SiteTitle from '@astrojs/starlight/components/SiteTitle.astro';
+import SocialIcons from '@astrojs/starlight/components/SocialIcons.astro';
+import ThemeSelect from '@astrojs/starlight/components/ThemeSelect.astro';
+
+const { hasSidebar } = Astro.locals.starlightRoute;
+---
+<div class="header">
+    {hasSidebar && (
+        <div class="mobile-group md:sl-hidden print:hidden">
+            <SiteTitle />
+            <Search />
+        </div>
+    )}
+    {!hasSidebar && (
+        <div class="title-wrapper left-group">
+            <SiteTitle />
+        </div>
+        <div class="middle-group print:hidden">
+            <Search />
+        </div>
+    )}
+    <div class="sl-hidden md:sl-flex print:hidden right-group">
+        <div class="sl-flex social-icons">
+            <SocialIcons />
+        </div>
+        <ThemeSelect />
+        <LanguageSelect />
+    </div>
+</div>
+
+<style>
+	@layer starlight.core {
+		.header {
+			display: flex;
+			gap: var(--sl-nav-gap);
+			justify-content: space-between;
+			align-items: center;
+			height: 100%;
+		}
+
+		.title-wrapper {
+			/* Prevent long titles overflowing and covering the search and menu buttons on narrow viewports. */
+			overflow: clip;
+			/* Avoid clipping focus ring around link inside title wrapper. */
+			padding: 0.25rem;
+			margin: -0.25rem;
+			min-width: 0;
+		}
+
+		.mobile-group {
+			display: flex;
+			align-items: center;
+			gap: var(--sl-nav-gap);
+			min-width: 0;
+		}
+
+		.right-group,
+		.social-icons {
+			gap: 1rem;
+			align-items: center;
+		}
+		.social-icons {
+			height: 2rem;
+			padding-inline-end: 1rem;
+			border-inline-end: 1px solid var(--sl-color-gray-5);
+		}
+
+		@media (min-width: 50rem) {
+			:global(:root[data-has-sidebar]) {
+				--__sidebar-pad: calc(2 * var(--sl-nav-pad-x));
+			}
+			:global(:root:not([data-has-toc])) {
+				--__toc-width: 0rem;
+			}
+			.header {
+				display: grid;
+				grid-template-columns: auto;
+				align-content: center;
+				
+				&:has(.middle-group) {
+					--__sidebar-width: max(0rem, var(--sl-content-inline-start, 0rem) - var(--sl-nav-pad-x));
+					--__main-column-fr: calc(
+						(
+								100% + var(--__sidebar-pad, 0rem) - var(--__toc-width, var(--sl-sidebar-width)) -
+									(2 * var(--__toc-width, var(--sl-nav-pad-x))) - var(--sl-content-inline-start, 0rem) -
+									var(--sl-content-width)
+							) / 2
+					);
+					grid-template-columns:
+						minmax(
+							calc(var(--__sidebar-width) + max(0rem, var(--__main-column-fr) - var(--sl-nav-gap))),
+							auto
+						)
+						/* 2 (search box): all free space that is available. */
+						1fr
+						/* 3 (right items): use the space that these need. */
+						auto;
+				}
+			}
+		}
+	}
+</style>

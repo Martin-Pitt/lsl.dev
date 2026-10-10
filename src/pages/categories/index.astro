@@ -1,9 +1,16 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { catalog, categoryHref } from '../../lib/catalog';
+import { clusterGroups, clusterMap, categoryMap, categoryHref, featureHref } from '../../lib/catalog';
 ---
-<StarlightPage frontmatter={{title:'Explore by topic',description:'Find the LSL tools for what you want to build.',editUrl:false}}>
-<p>Start with a task or a part of the world. Each topic brings its functions, events, and related constants together, with the full technical details one link away.</p>
-<CardGrid>{catalog.categories.map(c=><LinkCard title={c.label} href={categoryHref(c.id)} description={`${c.functions.length} functions · ${c.events.length} events · ${c.constants.length} constants`}/>)}</CardGrid>
+<StarlightPage frontmatter={{ title: 'Categories', description: 'LSL Definitions categories, arranged by feature area.', editUrl: false }}>
+	<p>Each category page lists every function and event in that category from LSL Definitions. Categories are arranged under the <a href="/features/">feature area</a> they belong to.</p>
+	{clusterGroups.flatMap(g => g.clusters).map(id => clusterMap.get(id)!).map(c => (
+		<>
+			<h2 id={c.id}><a href={featureHref(c.id)}>{c.title}</a></h2>
+			<CardGrid>
+				{c.categories.map(id => categoryMap.get(id)!).map(cat => <LinkCard title={cat.label} href={categoryHref(cat.id)} description={`${cat.functions.length} functions · ${cat.events.length} events`} />)}
+			</CardGrid>
+		</>
+	))}
 </StarlightPage>

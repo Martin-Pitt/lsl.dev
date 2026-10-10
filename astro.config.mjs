@@ -1,29 +1,83 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { readFileSync } from 'node:fs';
+
+/**
+ * Navigation mirrors slua.dev: Fundamentals, Reference, Features, Guides, plus the wiki archive.
+ * The Reference sidebar goes down to feature clusters and their categories but never lists
+ * individual functions or constants; those are reached from category pages, the filtered
+ * catalogs and search.
+ */
+/** @type {any} */
+const features = JSON.parse(readFileSync('./src/data/feature-clusters.json', 'utf-8'));
+/** @type {any} */
+const catalog = JSON.parse(readFileSync('./src/data/catalog.json', 'utf-8'));
+const categoryLabel = new Map(catalog.categories.map((/** @type {any} */ c) => [c.id, c.label]));
+const clusterById = new Map(features.clusters.map((/** @type {any} */ c) => [c.id, c]));
+const orderedClusters = features.groups.flatMap((/** @type {any} */ g) => g.clusters.map((/** @type {string} */ id) => clusterById.get(id)));
+
+const referenceCategories = orderedClusters.map((/** @type {any} */ cluster) => ({
+	label: cluster.title,
+	collapsed: true,
+	items: cluster.categories.map((/** @type {string} */ id) => ({ label: categoryLabel.get(id) ?? id, link: `/categories/${id}/` })),
+}));
+const featureItems = features.groups.map((/** @type {any} */ group) => ({
+	label: group.label,
+	items: group.clusters.map((/** @type {string} */ id) => ({ label: clusterById.get(id).title, link: `/features/${id}/` })),
+}));
+
 export default defineConfig({
-  site: 'https://lsl.dev',
-  integrations: [starlight({
-    title: 'lsl.dev', favicon: '/favicon.svg',
-    description: 'A modern Linden Scripting Language reference for Second Life creators.',
-    defaultLocale: 'root', locales: { root: { label: 'English', lang: 'en' } },
-    social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Martin-Pitt/lsl.dev' }],
-    pagination: false, tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 3 },
-    customCss: ['./src/styles/custom.css'],
-    components: { Header: './src/components/site/Header.astro', Hero: './src/components/site/Hero.astro' },
-    sidebar: [
-      { label: 'Start here', items: [
-        { label: 'Overview', link: '/' }, { label: 'Learning guides', link: '/guides/' },
-        { label: 'Language types', link: '/types/' }, { label: 'Flow control', link: '/controls/' },
-      ] },
-      { label: 'Language reference', items: [
-        { label: 'Reference overview', link: '/reference/' }, { label: 'Functions', link: '/functions/' },
-        { label: 'Events', link: '/events/' }, { label: 'Constants', link: '/constants/' },
-        { label: 'Browse by category', link: '/categories/' },
-      ] },
-      { label: 'Knowledge library', items: [
-        { label: 'Wiki archive', link: '/wiki/' }, { label: 'SLua documentation ↗', link: 'https://slua.dev' },
-      ] },
-    ],
-  })],
+	site: 'https://lsl.dev',
+	integrations: [starlight({
+		title: 'LSL Dev',
+		favicon: '/favicon.svg',
+		description: 'Unofficial developer documentation for the Linden Scripting Language (LSL) of Second Life.',
+		defaultLocale: 'root',
+		locales: { root: { label: 'English', lang: 'en' } },
+		social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Martin-Pitt/lsl.dev' }],
+		tableOfContents: false,
+		pagination: false,
+		customCss: ['./src/styles/slua-base.css', './src/styles/custom.css'],
+		components: {
+			Header: './src/components/starlight/Header.astro',
+			PageFrame: './src/components/starlight/PageFrame.astro',
+			Hero: './src/components/starlight/Hero.astro',
+			Footer: './src/components/starlight/Footer.astro',
+		},
+		sidebar: [
+			{
+				label: 'Fundamentals',
+				collapsed: true,
+				items: [
+					{ label: 'Learn LSL', link: '/guides/' },
+					{ label: 'Language types', link: '/types/' },
+					{ label: 'Flow control', link: '/controls/' },
+				],
+			},
+			{
+				label: 'Reference',
+				collapsed: true,
+				items: [
+					{ label: 'Overview', link: '/reference/' },
+					{ label: 'Categories', collapsed: true, items: [{ label: 'All categories', link: '/categories/' }, ...referenceCategories] },
+					{ label: 'Functions', link: '/functions/' },
+					{ label: 'Events', link: '/events/' },
+					{
+						label: 'Constants',
+						collapsed: true,
+						items: [
+							{ label: 'All constants', link: '/constants/' },
+							{ label: 'Constant groups', link: '/constants/groups/' },
+						],
+					},
+					{ label: 'Types', collapsed: true, items: [{ autogenerate: { directory: 'types' } }] },
+					{ label: 'Flow control', collapsed: true, items: [{ autogenerate: { directory: 'controls' } }] },
+				],
+			},
+			{ label: 'Features', collapsed: true, items: [{ label: 'Overview', link: '/features/' }, ...featureItems] },
+			{ label: 'Wiki archive', collapsed: true, items: [{ label: 'Archive index', link: '/wiki/' }] },
+			{ label: 'About these docs', link: '/about/' },
+		],
+	})],
 });

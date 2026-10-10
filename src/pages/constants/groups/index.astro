@@ -1,0 +1,15 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { catalog, constantGroupHref, constantsInGroup } from '../../../lib/catalog';
+const groups = Object.entries(catalog.enums as Record<string, any>)
+	.map(([name, info]) => ({ name, info, count: constantsInGroup(name).length }))
+	.filter(g => g.count > 0)
+	.sort((a, b) => a.name.localeCompare(b.name));
+---
+<StarlightPage frontmatter={{ title: 'Constant groups', description: 'LSL constants grouped by the enum or flag set they belong to.', editUrl: false }}>
+	<p>Constants that belong to the same enum or flag set in LSL Definitions. Flag groups can be combined with bitwise OR.</p>
+	<div class="table-scroll"><table>
+		<thead><tr><th>Group</th><th>Kind</th><th>Prefix</th><th>Constants</th></tr></thead>
+		<tbody>{groups.map(g => <tr><td><a href={constantGroupHref(g.name)}>{g.name}</a></td><td>{g.info.type}</td><td>{g.info.prefix && <code>{g.info.prefix}</code>}</td><td>{g.count}</td></tr>)}</tbody>
+	</table></div>
+</StarlightPage>

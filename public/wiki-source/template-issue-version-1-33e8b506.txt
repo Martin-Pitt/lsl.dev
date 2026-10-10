@@ -1,0 +1,235 @@
+<includeonly>{{#if:
+
+{{#vardefine:s|{{{style|}}}{{#switch:{{#if:{{{resolution|}}}|{{{resolution|}}}|{{#switch:{{{status|}}}|vfix=fixed|wont=expect|veri=verified}}}}
+|fixed=    text-decoration:line-through;
+|misfiled= text-decoration:line-through; color:red;
+|expect=   text-decoration:line-through; color:HotPink;
+|more=     text-decoration:line-through; color:lightGray;
+|cr|wont=     color:gray;
+|request=  color:darkblue;
+|verified= color:darkred;
+|=}}}}
+
+{{#vardefine:count-last-issue|0}}
+{{#vardefine:count-forced}}
+
+{{#vardefine:issue-status|{{#if:{{{status|}}}|{{lc:{{{status|}}}}}|{{#ifeq:{{#if:{{{resolution|}}}|{{lc:{{{resolution|}}}}}|unres}}|unres|open|res}}}}}}
+
+{{#ifeq:{{{type|}}}|bug|{{#vardefine:count-last-issue|{{#switch:{{#var:issue-status}}|acc|accepted|await|awaiting|open|ip|reop|fixp|rft|tip|inqa|hold|eip|eded|test|veri|ack|vned=1|0}}}}}}
+
+{{#if:{{{fc|}}}|{{#ifeq:{{#var:count-last-issue}}|0|{{#vardefine:count-last-issue|1}}{{#vardefine:count-forced|$}}}}|
+{{#if:{{{dnc|}}}|{{#ifeq:{{#var:count-last-issue}}|1|{{#vardefine:count-last-issue|0}}{{#vardefine:count-forced|$}}}}}}
+}}
+
+{{#vardefine:BugCounter{{#var:direction}}|{{#expr:{{#var:BugCounter{{#var:direction}}|0}} + {{#var:count-last-issue|0}}}}}}
+{{#vardefine:IssueCounter{{#var:direction}}|{{#expr:{{#var:IssueCounter{{#var:direction}}|0}} + 1}}}}
+
+}}{{!}}-style="vertical-align:top;" id="{{{1}}}"
+{{!}} class="plainlinks" {{!}} {{#switch:{{#if:{{{type|}}}|{{lc:{{{type|}}}}}|meta}}
+|meta= <span title="{{#ifeq:{{#if:{{{type|}}}|{{lc:{{{type|}}}}}|meta}}|meta|Meta Issue - Describes a general category of problems rather than a specific problem|{{ucfirst:{{{type|}}}}}}}">[[Image:Issue Type-Meta.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#IssueTypes]]</span>
+|bug=  <span title="Bug - A problem which impairs or prevents the functions of the product.">[[Image:Issue Type-Bug.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#IssueTypes]]</span>
+|imp=  <span title="Improvement - An improvement or enhancement to an existing feature or task.">[[Image:Issue Type-Improvement.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#IssueTypes]]</span>
+|nf|fs=<span title="New Feature - A new feature of the product, which has yet to be developed.">[[Image:Issue Type-New Feature.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#IssueTypes]]</span>
+|task= <span title="Task - A task that needs to be done.">[[Image:Issue Type-Task.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#IssueTypes]]</span>
+|tran= <span title="Translation">[[Image:Issue Type-Documentation.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#IssueTypes]]</span>
+|sub = <span title="Sub-task - The sub-task of the issue">[[Image:Issue Type-Subtask.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#IssueTypes]]</span>
+}}
+{{!}} class="plainlinks" {{!}} {{#switch:{{#if:{{{status|}}}|{{lc:{{{status|}}}}}|
+{{#ifeq:{{#if:{{{resolution|}}}|{{lc:{{{resolution|}}}}}|unres}}|unres|open|res}}}}
+|awaiting|await=<span title="{{#ifeq:{{#if:{{{status|}}}|{{lc:{{{status|}}}}}|open}}|open|Awaiting Review - Initial state when an issue/ticket is created or when it is reopened from a resolved or closed state. All issues in this state will be reviewed and triaged.|{{ucfirst:{{{status|}}}}}}}">[[Image:Status-Open.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|open=<span title="{{#ifeq:{{#if:{{{status|}}}|{{lc:{{{status|}}}}}|open}}|open|Open - The issue is open and ready for the assignee to start work on it.|{{ucfirst:{{{status|}}}}}}}">[[Image:Status-Open.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|ip  =<span title="In Progress - This issue is being actively worked on at the moment by the assignee.">[[Image:Status-In Progress.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|reop=<span title="Reopened - This issue was once resolved, but the resolution was deemed incorrect. From here issues are either marked assigned or resolved.">[[Image:Status-Reopened.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|accepted|acc=<span title="Accepted">[[Image:Status-Open.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|res =<span title="Resolved - A resolution has been taken, and it is awaiting verification by reporter. From here issues are either reopened, or are closed.">[[Image:Status-Resolved.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|closed|clo =<span title="Closed - The issue is considered finished, the resolution is correct. Issues which are closed can be reopened.">[[Image:Status-Closed.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|fixp=<span title="Fix Pending - Issues that have been fixed in Linden Lab's internal codebase, but not yet deployed in a viewer">[[Image:Status-In Progress.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|rft =<span title="Ready for Translation">[[Image:Status-Open.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|tip =<span title="Translation In Progress">[[Image:Status-In Progress.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|tran=<span title="Translated">[[Image:Status-Up.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|inqa=<span title="In QA">[[Image:Status-Down.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|pass=<span title="Passed QA">[[Image:Status-Closed.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|tfin=<span title="Translation Final">[[Image:Status-Reopened.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|pub =<span title="Published">[[Image:Status-Resolved.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|hold=<span title="On Hold">[[Image:Status-Need Info.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|eip =<span title="Editing In Progress">[[Image:Status-Reopened.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|eded=<span title="Edited">[[Image:Status-Resolved.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|test=<span title="Testing">[[Image:Status-In Progress.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|veri=<span title="Verified">[[Image:Status-Resolved.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|vfix=<span title="Verified: Fixed">[[Image:Status-Resolved.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|vned=<span title="Verified: Fix Needed">[[Image:Status-Assigned.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|rpub=<span title="Republished">[[Image:Status-Resolved.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|ack=<span title="Acknowledged">[[Image:Status-Open.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+|await=<span title="Awaiting Review">[[Image:Status-Open.gif|link=https://jira.secondlife.com/secure/ShowConstantsHelp.jspa?decorator=popup#StatusTypes]]</span>
+}}
+<!--{{!}}{{!}} {{#switch:{{#if:{{{priority|}}}|{{lc:{{{priority|}}}}}|normal}}
+|normal=[[Image:Priority-Minor.gif|{{#ifeq:{{#if:{{{priority|}}}|{{lc:{{{priority|}}}}}|normal}}|normal|Normal - Minor loss or impairment of function, other problems which have workarounds, or issues that are extremely simple to fix.|{{ucfirst:{{{priority|}}}}}}}]]
+|showstopper=[[Image:Priority-Blocker.gif|Showstopper - ONLY the most severe, *confirmed* issues which demand immediate attention from Linden Lab. For example, inability for many Residents to login. IMPORTANT: Abusing this setting will cause revocation of Issue Tracker access. If in doubt, mark "Critical" instead.]]
+|critical=[[Image:Priority-Critical.gif|Critical - Generally, most crashes (particularly if they're easy to reproduce and affect many), content loss, significant memory leaks, greatly reduced performance, etc.]]
+|major=[[Image:Priority-Major.gif|Major - Major loss or impairment of function, including rarer crashes.]]
+|low=[[Image:Priority-Trivial.gif|Low - Non-critical issues with simple fixes]]
+|nice=[[Image:Priority-Trivial.gif|Nice to have - Issues not yet on the Linden Lab roadmap. See WEB-659 for more info.]]
+}}-->
+{{!}} style="{{#var:s}}" class="plainlinks" {{!}} [http://jira.secondlife.com/browse/{{{1}}} {{{1}}}]
+{{!}} style="{{#var:s}}" class="plainlinks" {{!}} <span style="font-size:smaller; color:gray;">{{#ifexist:Template:Issues/{{{1}}}{{#var:lang}}|<span title='About'>[[Template:Issues/{{{1}}}{{#var:lang}}|A]]</span>&nbsp;}}</span>
+{{!}} style="color:gray;text-decoration:line-through;" {{!}} {{#if:{{{2|}}}| &nbsp;&nbsp; |}}
+{{!}} style="{{#var:s}}" {{!}} {{#if:{{#var:count-forced}}|{{#switch:{{#if:{{{resolution|}}}|{{lc:{{{resolution|}}}}}|unres}}|wont=<code><nowiki>[Won't Fix]</nowiki></code>}}}} {{{2|}}}</includeonly><noinclude>
+
+This template is being phased out in favor of an easier to use template, enough of how Jira is used has changed to make most of the features unnecessary. This version will be retained but not maintained. Code that depends upon this functionality will be routed to this template so that no functionality is lost.
+
+{| {{Prettytable}}
+|- {{hl2}}
+!Fields
+!Values
+|-
+|type
+|See '''type''' table
+|-
+|status
+|See '''status''' table
+|-
+|resolution
+|See '''resolution''' table
+|-
+<!--|priority
+|See '''priority''' table-->
+|}
+
+{| {{Prettytable}}
+|+'''type''' parameter accepted values, defaults to Meta Issue
+|- {{hl2}}
+!type
+!value
+!description
+|- 
+|| [[Image:Issue Type-Bug.gif|Bug}}]]                 Bug         || bug  || A problem which impairs or prevents the functions of the product.
+|- 
+|| [[Image:Issue Type-Improvement.gif|Improvement]]   Improvement || imp  || An improvement or enhancement to an existing feature or task.
+|- 
+|| [[Image:Issue Type-Meta.gif|Meta Issue]]           Meta Issue  || meta || Describes a general category of problems rather than a specific problem
+|- 
+|| [[Image:Issue Type-New Feature.gif|New Feature]]   New Feature || nf '''OR''' fs || A new feature of the product, which has yet to be developed.
+|- 
+|| [[Image:Issue Type-Task.gif|Task]]                 Task        || task || A task that needs to be done.
+|- 
+|| [[Image:Issue Type-Documentation.gif|Translation]] Translation || tran || 
+|- 
+|| [[Image:Issue Type-Subtask.gif|Sub-task]]         Sub-Task    || sub  || The sub-task of the issue
+|}
+
+{| {{Prettytable}}
+|+'''status''' parameter accepted values, defaults to Open
+|- {{hl2}}
+!type
+!value
+!description
+|- 
+|| [[Image:Status-Open.gif|Open]]                           Open                    || open || The issue is open and ready for the assignee to start work on it.
+|- 
+|| [[Image:Status-In Progress.gif|In Progress]]             In Progress             || ip   || This issue is being actively worked on at the moment by the assignee.
+|- 
+|| [[Image:Status-Reopened.gif|Reopened]]                   Reopened                || reop || This issue was once resolved, but the resolution was deemed incorrect. From here issues are either marked assigned or resolved.
+|- 
+|| [[Image:Status-Resolved.gif|Resolved]]                   Resolved                || res  || A resolution has been taken, and it is awaiting verification by reporter. From here issues are either reopened, or are closed.
+|- 
+|| [[Image:Status-Closed.gif|Closed]]                       Closed                  || clo  || The issue is considered finished, the resolution is correct. Issues which are closed can be reopened.
+|- 
+|| [[Image:Status-In Progress.gif|Fix Pending]]             Fix Pending             || fixp || Issues that have been fixed in Linden Lab's internal codebase, but not yet deployed in a viewer
+|- 
+|| [[Image:Status-Open.gif|Ready for Translation]]          Ready for Translation   || rft  ||
+|- 
+|| [[Image:Status-In Progress.gif|Translation In Progress]] Translation In Progress || tip  ||
+|- 
+|| [[Image:Status-Up.gif|Translated]]                       Translated              || tran ||
+|- 
+|| [[Image:Status-Down.gif|In QA]]                          In QA                   || inqa ||
+|- 
+|| [[Image:Status-Closed.gif|Passed QA]]                    Passed QA               || pass ||
+|- 
+|| [[Image:Status-Reopened.gif|Translation Final]]          Translation Final       || tfin ||
+|- 
+|| [[Image:Status-Resolved.gif|Published]]                  Published               || pub  ||
+|- 
+|| [[Image:Status-Need Info.gif|On Hold]]                   On Hold                 || hold ||
+|- 
+|| [[Image:Status-Reopened.gif|Editing In Progress]]        Editing In Progress     || eip  ||
+|- 
+|| [[Image:Status-Resolved.gif|Edited]]                     Edited                  || eded ||
+|- 
+|| [[Image:Status-In Progress.gif|Testing]]                 Testing                 || test ||
+|- 
+|| [[Image:Status-Resolved.gif|Verified]]                   Verified                || veri ||
+|-
+|| [[Image:Status-Resolved.gif|Verified: Fixed]]            Verified: Fixed         || vfix ||
+|- 
+|| [[Image:Status-Assigned.gif|Verified: Fix Needed]]       Verified: Fix Needed    || vned ||
+|- 
+|| [[Image:Status-Resolved.gif|Republished]]                Republished             || rpub ||
+|- 
+|| [[Image:Status-Open.gif|Acknowledged]]                   Acknowledged            || ack  || After upgrade (on Sept 7): When an issue has been imported to an internal Linden Lab project, it will be marked as Acknowledged. We're installing a custom tool to enable syncing between internal and external projects (ie VWR, SVC, WEB). Prior to upgrade: Acknowledge is all issues that were In Progress.
+|- 
+|| [[Image:Status-Open.gif|Awaiting Review]]                Awaiting Review         || await || Initial state when an issue/ticket is created or when it is reopened from a resolved or closed state. All issues in this state will be reviewed and triaged.
+|- 
+|}
+
+
+{| {{Prettytable}}
+|+'''resolution''' parameter accepted values, defaults to Unresolved 
+|- {{hl2}}
+!resolution
+!value
+!description
+|- 
+|| Unresolved || unres || Issue has yet to be resolved
+|- 
+|| Fixed || fixed || A fix for this issue is available in a public release 
+|- 
+|| Cannot Reproduce || cr || All attempts at reproducing this issue failed, or not enough information was available to reproduce the issue. Reading the code produces no clues as to why this behavior would occur. If more information appears later, please reopen the issue. 
+|- 
+|| Contact Support || cs || Please contact Linden Lab support at http://secondlife.com/support rather than using this issue tracker 
+|- 
+|| Duplicate || dup || The problem is a duplicate of an existing issue. 
+|- 
+|| Expected Behavior || expect || Often the system is behaving exactly as designed, but it can look wrong if you're not aware of the reasons behind the behavior. This status is used for such cases. 
+|- 
+|| Misfiled || misfiled  || Issue should be somewhere besides this issue tracker 
+|- 
+|| Needs More Info || more || The problem is not completely described. 
+|- 
+|| Under Advisement || advice || The problem/idea is being evaluated. 
+|- 
+|| Won't Finish || wont || The problem described is an issue which likely will never be fixed. 
+|}
+
+<!--
+{| {{Prettytable}}
+|+'''priority''' parameter accepted values, defaults to Normal
+|- {{hl2}}
+!priority
+!value
+!description
+|- 
+|| [[Image:Priority-Minor.gif|Normal]] Normal || normal || Minor loss or impairment of function, other problems which have workarounds, or issues that are extremely simple to fix.
+|-
+|| [[Image:Priority-Blocker.gif|Showstopper]] Showstopper || showstopper || ONLY the most severe, *confirmed* issues which demand immediate attention from Linden Lab. For example, inability for many Residents to login. IMPORTANT: Abusing this setting will cause revocation of Issue Tracker access. If in doubt, mark "Critical" instead.
+|-
+|| [[Image:Priority-Critical.gif|Critical]] Critical || critical || - Generally, most crashes (particularly if they're easy to reproduce and affect many), content loss, significant memory leaks, greatly reduced performance, etc.
+|-
+||[[Image:Priority-Major.gif|Major]] Major || major || Major loss or impairment of function, including rarer crashes.
+|-
+||[[Image:Priority-Trivial.gif|Low]] Low || low || Non-critical issues with simple fixes
+|-
+||[[Image:Priority-Trivial.gif|Nice to have]] Nice to have || nice || Issues not yet on the Linden Lab roadmap. See {{Jira|WEB-659}} for more info.
+|}
+-->
+{|
+{{{{FULLPAGENAME}}|a|resolution{{=}}fixed, type{{=}}bug|resolution=fixed|type=bug}}
+{{{{FULLPAGENAME}}|a|resolution{{=}}misfiled|resolution=misfiled}}
+{{{{FULLPAGENAME}}|a|resolution{{=}}expect|resolution=expect}}
+{{{{FULLPAGENAME}}|a|resolution{{=}}wont|resolution=wont}}
+{{{{FULLPAGENAME}}|a|resolution{{=}}request|resolution=request}}
+{{{{FULLPAGENAME}}|a|blah, type{{=}}bug|type=bug}}
+{{{{FULLPAGENAME}}|a|resolution{{=}}wont, fc{{=}}*|resolution=wont|fc=*}}
+|}
+{{#var:BugCounter{{#var:direction}}}}/{{#var:IssueCounter{{#var:direction}}}}
+</noinclude>

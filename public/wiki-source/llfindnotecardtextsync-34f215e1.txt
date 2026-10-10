@@ -1,0 +1,47 @@
+{{LSL_Function
+|inject-2={{LSL_Function/notecard|name|uuid=true}}
+|func_id=|func_sleep=0.0|func_energy=10.0
+|sort=FindNotecardTextSync
+|func=llFindNotecardTextSync
+|return_type=list
+|p1_type=string|p1_name=name
+|p2_type=string|p2_name=pattern|p2_desc=The regex pattern to search for
+|p3_type=integer|p3_name=start|p3_desc=The number of match results to skip before returning matches. 0 will begin at the first match.
+|p4_type=integer|p4_name=count|p4_desc=The maximum number of search results to return
+|p5_type=list|p5_name=options|p5_desc=A list of options to pass into the search. (unused at this time, should be [])
+|func_desc=Returns a list of lines and columns where the search pattern is found in the notecard.
+|Return_text=containing a list of integers containing the locations of the found text.
+|func_footnote=Returns a list containing only [[NAK]] if the notecard is not cached.
+|spec=
+Searches the text of a cached notecard for lines containing the given pattern. If the notecard is not in the cache, returns a list containing a single [[NAK]], otherwise a list of matches of the pattern in the notecard. If no matches are found, or the notecard contains embedded items, an empty list is returned.
+
+Every match in the notecard is represented as a sequence of three integers:
+<syntaxhighlight lang="lsl2">[integer row, integer column, integer length]</syntaxhighlight>
+In other words the returned list has a stride of 3. A maximum of 64 matches are returned, resulting in a maximum list length of 192.
+
+If the notecard does not exist, returns a list containing a single [[NAK]] and the script will shout an error on [[DEBUG_CHANNEL]] (but the script continues to run).
+
+If there is an error in the regular expression, returns an empty list and the script will shout an error on [[DEBUG_CHANNEL]] (but the script continues to run).
+
+Notecards are cached into a fixed-size buffer, with the oldest (least-recently read) notecard getting removed first. It is not safe to assume a notecard has been previously cached. Data for a previously cached notecard may be dropped from the cache at any time, especially on a busy server.
+
+|caveats=
+* If notecard contains embedded inventory items (such as textures and landmarks), an empty list will be returned, regardless of the search string.
+* No more than 64 matches are returned.
+|constants
+|examples
+|also_functions={{LSL DefineRow||[[llGetNumberOfNotecardLines]]|}}
+{{LSL DefineRow||[[llGetNotecardLine]]|}}
+{{LSL DefineRow||[[llGetNotecardLineSync]]|}}
+|also_events
+|also_articles
+|also_tests
+|permission
+|notes=
+{{LSL Regular Expressions}}
+|cat1=Notecard
+|cat2=
+|cat3=
+|cat4=
+|history=
+}}

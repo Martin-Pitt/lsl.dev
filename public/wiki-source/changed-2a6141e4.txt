@@ -1,0 +1,128 @@
+{{LSL_Event|event_id=30
+|inject-2=
+{{Issues/SCR-411}}
+{{Issues/SVC-2549}}
+|event_delay
+|event=changed
+|p1_type=integer|p1_subtype=bit_field|p1_name=change|p1_desc=[[bit field]] of CHANGED_* flags
+|event_footnote=Multiple changes can be represented in a single event, so use [[LSL_Operators#_De_Morgan.27s_laws|bitwise arithmetic]].
+|event_desc=Various changes to the [[object]]/[[prim]] trigger this event.
+|constants={{LSL Constants Changed}}
+|spec
+|caveats=
+*This [[event]] will trigger in any [[script]] using it (in its current running [[state]]) whether the script be in a [[child prim|child]] or [[root prim]] of a [[link_set]], e. g., a changed event in a script in the wheel (child prim) of a car will trigger when any avatar sits on or stands from the seat (root prim) of that car.
+*<code>CHANGED_SCALE</code> will fire when the scale of at least one prim in the linked object has changed. Only the root prim will receive this event.
+|helpers
+|also_header
+|also_events
+|also_functions
+|also_articles
+|also_footer
+|mode
+|notes=
+*Always test the value of {{LSLP|change}} for the specific <code>CHANGED_*</code> flags you are interested in, unless you want your script to act upon any change that can cause a changed event to trigger.
+**New <code>CHANGED_*</code> flags, bugs and bug fixes could conceivably be added by LL at any time. Scripts should be written under the assumption that they will receive ''changed'' events not expected at the time or place of writing. For future proof scripts, use bitwise conditions as in the examples.
+*See [[llGetOwner]] for a full discussion on <syntaxhighlight lang="lsl2" inline>(change & CHANGED_OWNER)</syntaxhighlight>
+*[[CHANGED_INVENTORY]] will also trigger when inventory permissions are changed, a new feature request for a [[CHANGED_PERMISSIONS]] flag to trigger when the object permissions are changed can be voted for at {{Jira|SCR-411}}<ref>Remember, as of 2024, this may be an archived vote.</ref>
+*If leaving a [[state]] from within a [[changed]] event that registers a change just before the [[state]] change, on return to that state, the changed event will trigger. For example —
+<syntaxhighlight lang="lsl2">default
+{
+    changed(integer change)
+    {
+        if(change & CHANGED_LINK)
+        {
+            integer links = 0;
+            if(llGetObjectPrimCount(llGetKey()) < (links = llGetNumberOfPrims()))
+            {
+                llUnSit(llGetLinkKey(links));
+                state whatever;
+            }
+            else
+            llOwnerSay("Some kind of linking or unlinking has changed me but, I am not being sat on.");
+            // This will be chatted after returning to the default state.
+        }
+    }
+}
+state whatever
+{
+    state_entry()
+    {
+        llSetTimerEvent(10.0);
+    }
+    timer()
+    {
+        state default;
+    }
+}</syntaxhighlight>
+|examples=<syntaxhighlight lang="lsl2">default
+{
+    changed(integer change)
+    {
+        // note that it's & and not &&... it's bitwise!
+        if (change & CHANGED_INVENTORY)         
+        {
+            llOwnerSay("The inventory has changed.");
+        }
+        if (change & CHANGED_COLOR) 
+        {
+            llOwnerSay("The color or alpha changed.");
+        }
+        if (change & CHANGED_SHAPE) 
+        {
+            llOwnerSay("The prims shape has changed.");
+        }
+        if (change & CHANGED_SCALE) 
+        {
+            llOwnerSay("The prims size has changed.");
+        }
+        if (change & CHANGED_TEXTURE) 
+        {
+            llOwnerSay("The prims texture or texture attributes have changed.");
+        }
+        if (change & CHANGED_LINK) 
+        {
+            llOwnerSay("The number of links have changed.");
+        }
+        if (change & CHANGED_ALLOWED_DROP) 
+        {
+            llOwnerSay("The inventory has changed as a result of a user without mod permissions "+
+                       "dropping an item on the prim and it being allowed by the script.");
+        }
+        if (change & CHANGED_OWNER) 
+        {
+            llOwnerSay("The owner of the object has changed.");
+        }
+        if (change & CHANGED_REGION) 
+        {
+            llOwnerSay("The region the object is in has changed.");
+        }
+        if (change & CHANGED_TELEPORT) 
+        {
+            llOwnerSay("The object has been teleported while attached.");
+        }
+        if (change & CHANGED_REGION_START) 
+        {
+            llOwnerSay("The regions has just restarted.");
+        }
+    }
+}</syntaxhighlight>
+For the same action to be called for multiple changes we can use the following syntax:
+<syntaxhighlight lang="lsl2">default
+{
+    changed(integer change)
+    {
+        if(change & (CHANGED_OWNER | CHANGED_INVENTORY)) // Either of the changes will return true.
+            llResetScript();
+    }
+}</syntaxhighlight>
+|deprecated
+|cat1=Inventory
+|cat2=Script
+|cat3=Color
+|cat4=Alpha
+|cat5=Texture
+|cat6=Link
+|cat7=Sit
+|cat8=Link/Management
+|haiku={{Haiku|Object changes dance,|They trigger in scripts, a chance,|Bugs add to the trance.|author=ChatGPT}}
+}}{{LSLC|Region}}{{LSLC|Owner}}{{LSLC|Prim}}

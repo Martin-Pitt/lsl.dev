@@ -1,0 +1,83 @@
+{{LSL_Function
+|func=llReplaceAgentEnvironment
+|func_desc=The llReplaceAgentEnvironment function overrides the current region and parcel environment seen by an agent. The new environment persists until the agent crosses to a new region or this function is called with the NULL_KEY or empty string in the environment parameter for the particular agent, doing so will strip all environmental settings applied to this agent as part of the experience. This function must be executed as part of an experience. 
+|return_type=integer
+|p1_type=key|p1_name=agent_id|p1_desc=The key for an agent in the region. The agent must be in the region and must be participating in the experience.
+|p2_type=float|p2_name=transition|p2_desc=The number of seconds over which to transition to the new settings.
+|p3_type=string|p3_name=environment|p3_desc=The name of an environmental setting in the object's inventory or the asset ID for an environment.
+|constants=
+{{{!}} class="sortable" {{Prettytable|style=margin-top:0;}}
+{{!}}+ '''Return Values'''
+{{!}}-{{Hl2}}
+!Value
+!Constant
+!Description
+{{!}}-
+{{!}} ENV_OK {{!!}} 1 {{!!}} The agent has been instructed to change their environment.
+{{!}}-
+{{!}} ENV_NOT_EXPERIENCE {{!!}} -1 {{!!}}The script is not running as part of an experience with a valid experience key.
+{{!}}-
+{{!}} ENV_NO_EXPERIENCE_PERMISSION {{!!}} -2 {{!!}} The agent has not granted permission.
+{{!}}-
+{{!}} ENV_NO_ENVIRONMENT {{!!}} -3 {{!!}} The environment inventory object could not be found.
+{{!}}-
+{{!}} ENV_INVALID_AGENT {{!!}} -4 {{!!}} Unable to find specified agent.
+{{!}}-
+{{!}} ENV_NO_EXPERIENCE_LAND {{!!}} -7 {{!!}} The experience has not been enabled or can not run on the land.
+{{!}}-
+{{!}} ENV_THROTTLE {{!!}} -8 {{!!}} The scripts have exceeded the throttle.  Wait and retry the request.
+{{!}}}
+|caveats=
+* The agent's viewer may choose to ignore this command.
+* An environment set locally on the viewer will override any environment set from this function.
+* If a UUID is passed as the environment parameter and that UUID does not specify an environment setting, the viewer quietly ignores the instruction.
+* The ENV_OK constant is only present on Lua-enabled sims. On older sims, use it's value of 1 instead
+|examples=<source lang="lsl2">
+string gEnvironment = "A-12AM"; // Can be asset's name in object's inventory or the asset ID
+float gTransitionTime = 3.0;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        key person = llDetectedKey(0);
+        if (llGetAgentSize(person) != ZERO_VECTOR)
+        {
+            llRequestExperiencePermissions(person, "");
+        }
+        else
+        {
+            llInstantMessage(person, "You need to be in the same region to change environment");
+        }
+    }
+
+    experience_permissions(key agent_id)
+    {
+        integer envTest = llReplaceAgentEnvironment(agent_id, gTransitionTime, gEnvironment);
+        if (envTest == 1)
+        {
+            llRegionSayTo(agent_id, 0, "Applying environment for " + (string)agent_id);
+        }
+        else
+        {
+            llRegionSayTo(agent_id, 0, "Cannot apply environment for " + (string)agent_id + " due to reason id: " + (string)envTest);
+        }
+    }
+
+    experience_permissions_denied(key agent_id, integer reason)
+    {
+        llRegionSayTo(agent_id, 0, "Denied experience permissions for " + (string)agent_id + " due to reason id: " + (string)reason);
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetEnvironment]]|}}
+{{LSL DefineRow||[[llSetAgentEnvironment]]|}}
+{{LSL DefineRow||[[llSetEnvironment]]|}}
+{{LSL DefineRow||[[llReplaceEnvironment]]|}}
+|notes
+|cat1=Experience
+|cat2=Permissions/Experience
+}}
+[[Category:Experience Tools]]

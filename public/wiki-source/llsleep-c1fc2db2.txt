@@ -1,0 +1,63 @@
+{{LSL_Function
+|func_id=108|func_sleep=0.0|func_energy=0.0
+|func=llSleep|p1_type=float|p1_name=sec|p1_desc=seconds to sleep
+|func_footnote
+|func_desc=Puts the script to sleep for '''sec''' seconds. The script will not do anything during this time.
+
+The script will sleep at least until the next server-frame, which happen every (1/45 = ~0.02222) seconds under normal conditions.
+
+If '''sec''' is zero or less, the script will not sleep at all.
+
+|return_text
+|spec
+|caveats
+|constants
+|examples=<syntaxhighlight lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llSay(0, "I going to take a nap for 5 seconds.");
+        llSleep(5.0);
+        llSay(0, "I feel so refreshed!");
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llOwnerSay("Time between sleeps:");
+
+        integer loops = 10;
+        float last_time = 0.0;
+
+        llResetTime();
+        llSleep(0.02);
+
+        while (--loops)
+        {
+            float time = llGetTime();
+            llOwnerSay((string)(time - last_time));
+            last_time = time;
+            llSleep(0.0); // Try a value above zero
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llSetTimerEvent]]}}
+|also_events={{LSL DefineRow||[[timer]]}}
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|sort=Sleep
+|cat1=Script
+|haiku={{Haiku|Clouds drift, streams flow on.|Yet in here, time holds its breath.|The mind disconnects.}}
+|cat2
+|cat3
+|cat4
+}}

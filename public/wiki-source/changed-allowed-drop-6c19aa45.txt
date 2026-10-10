@@ -1,0 +1,34 @@
+{{LSL Constant
+|name=CHANGED_ALLOWED_DROP
+|type=integer
+|value={{LSL Hex|0x40}}
+|desc=A user other then the owner (or the owner if the object is no-mod) has added inventory to the prim. This is only possible if enabled with [[llAllowInventoryDrop]].
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llAllowInventoryDrop(TRUE); // With this set to FALSE the drop (on a no mod object) will not be allowed.
+    }                               // This means the allowance may be revoked by use of llAllowInventoryDrop(FALSE).
+    changed(integer change)
+    {
+        if (change & CHANGED_ALLOWED_DROP) // note that it's & and not &&... it's bitwise!
+        {
+            llOwnerSay("The inventory has changed as a result of a user without mod permissions "+
+                       "dropping an item on the prim and it being allowed by the script.");
+        }
+    }
+}
+</syntaxhighlight>
+|constants=
+{{LSL DefineRow||[[CHANGED_INVENTORY]]|}}
+|functions=
+{{LSL DefineRow||[[llAllowInventoryDrop]]|}}
+|events=
+{{LSL DefineRow||[[changed]]|}}
+|cat1=Inventory
+|cat2
+|cat3
+|cat4
+}}

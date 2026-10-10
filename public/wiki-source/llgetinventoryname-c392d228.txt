@@ -1,0 +1,56 @@
+{{LSL_Function
+|inject-3={{LSL Function/negative_index|false|number}}
+|func_id=147|func_sleep=0.0|func_energy=10.0
+|func=llGetInventoryName|return_type=string
+|p1_type=integer|p1_name=type|p1_desc=INVENTORY_* flag
+|p2_type=integer|p2_name=number|p2_desc=Beginning from 0
+|func_footnote=
+Inventory items are sorted in alphabetical order (not chronological order).
+|func_desc
+|return_text=that is the name of the inventory item {{LSLP|number}} of {{LSLP|type}}. Returns an empty string if no item of the specified type is found in the prim's inventory (or there are less than or equal to {{LSLP|number}} items of the type).
+|spec
+|caveats
+|constants={{LSL Constants Inventory}}
+|examples======Box Unpacker=====
+<syntaxhighlight lang="lsl2">
+// Give all prim contents to anyone touching this object,
+// But don't give this script itself.
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        list    InventoryList;
+        integer count = llGetInventoryNumber(INVENTORY_ALL);  // Count of all items in prim's contents
+        string  ItemName;
+        while (count--)
+        {
+            ItemName = llGetInventoryName(INVENTORY_ALL, count);
+            if (ItemName != llGetScriptName() )  
+                InventoryList += ItemName;   // add all contents except this script, to a list
+        }
+        // Give all the items to the toucher, in a folder named as per this prim's name
+        llGiveInventoryList(llDetectedKey(0), llGetObjectName(), InventoryList);
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetInventoryAcquireTime]]|Returns the time the item was added to the prim's inventory}}
+{{LSL DefineRow||[[llGetInventoryNumber]]|Returns the number of items of a specific type in inventory}}
+{{LSL DefineRow||[[llGetInventoryType]]|Tests to see if an inventory item exists and returns its type.}}
+{{LSL DefineRow||[[llGetInventoryCreator]]|Returns the inventory item's creator}}
+{{LSL DefineRow||[[llGetInventoryPermMask]]|Returns the inventory item's permissions}}
+{{LSL DefineRow||[[llGetInventoryKey]]|Returns the inventory item's [[UUID]] (if full perm)}}
+|also_events
+|also_tests=
+{{LSL DefineRow||[[llGiveInventory_All_Test]]|}}
+|also_articles
+|notes=The maximum number of characters for an object inventory item is currently 63 characters.
+|permission
+|sort=GetInventoryName
+|cat1=Inventory
+|cat2
+|cat3
+|cat4
+}}

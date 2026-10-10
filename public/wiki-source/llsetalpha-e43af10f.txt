@@ -1,0 +1,82 @@
+{{LSL_Function
+|inject-2={{LSL_Function/face|face}}{{LSL_Function/alpha|alpha}}
+|func_id=51|func_sleep=0.0|func_energy=10.0
+|func=llSetAlpha|sort=SetAlpha
+|p1_type=float|p1_name=alpha
+|p2_type=integer|p2_name=face
+|func_footnote
+|func_desc=Sets the [[PBR_Materials#Nomenclature_changes|Blinn-Phong]] {{LSLP|alpha}} on {{LSLP|face}}
+|return_text
+|spec
+|caveats=
+* llSetAlpha will have no visible effect on faces with a PBR material. To work on faces both with and without a PBR material, use one of these snippets:
+** invisible <source lang="lsl2">
+if (llIsLinkGLTFMaterial(LINK_THIS, ALL_SIDES)) {
+    llSetLinkGLTFOverrides(LINK_THIS, ALL_SIDES, [OVERRIDE_GLTF_BASE_ALPHA_MODE, PRIM_GLTF_ALPHA_MODE_BLEND, OVERRIDE_GLTF_BASE_ALPHA, 0.0]);
+} else {
+    llSetAlpha(0.0, ALL_SIDES);
+}
+</source>
+** visible <source lang="lsl2">
+if (llIsLinkGLTFMaterial(LINK_THIS, ALL_SIDES)) {
+    llSetLinkGLTFOverrides(LINK_THIS, ALL_SIDES, [OVERRIDE_GLTF_BASE_ALPHA_MODE, "", OVERRIDE_GLTF_BASE_ALPHA, ""]);
+} else {
+    llSetAlpha(1.0, ALL_SIDES);
+}
+</source>
+|constants
+|examples=<source lang="lsl2">
+float cloakSpeed = 0.1;
+
+default
+{
+    touch_end(integer total_number)
+    {
+        float alpha = 1.0;
+        while(alpha > 0.0)
+        {
+            alpha -= 0.1;
+            llSetAlpha(alpha, ALL_SIDES);
+            llSleep(cloakSpeed);
+        }
+        state cloaked;
+    }
+}
+
+state cloaked
+{
+    touch_end(integer total_number)
+    {
+        float alpha;
+        while (alpha < 1.0)
+        {
+            alpha += 0.1;
+            llSetAlpha(alpha, ALL_SIDES);
+            llSleep(cloakSpeed);
+        }
+        state default;
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetAlpha]]|Gets the prim's alpha}}
+{{LSL DefineRow||[[llGetColor]]|Gets the prim's color}}
+{{LSL DefineRow||[[llSetColor]]|Sets the prim's color}}
+{{LSL DefineRow||[[llSetLinkColor]]|Sets link's color}}
+{{LSL DefineRow||[[llSetLinkAlpha]]|Sets link's alpha}}
+{{LSL DefineRow||[[PRIM_COLOR]]|The equivilant parameter for [[llSetPrimitiveParams]]}}
+{{LSL DefineRow||[[PRIM_GLTF_BASE_COLOR]]|The equivilant PBR parameter for [[llSetPrimitiveParams]]}}
+|also_tests
+|also_events=
+{{LSL DefineRow||[[changed]]|[[CHANGED_COLOR]]}}
+|also_articles
+|notes=In practical terms, "alpha" means "transparency" or "visibility".
+
+To be clear, llSetAlpha will only affect the prim that the script it is in. It will not affect any linked prims. To set the alpha state for those, use [[llSetLinkAlpha]]
+|deprecated
+|cat1
+|cat2
+|cat3
+|cat4
+}}

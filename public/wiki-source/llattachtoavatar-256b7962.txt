@@ -1,0 +1,67 @@
+{{LSL_Function
+|inject-2=
+{{LSL_Function/permission|PERMISSION_ATTACH|grant=the owner}}
+{{Issues/VWR-12525}}{{Issues/SCR-137}}{{Issues/SVC-890}}{{Issues/SCR-277}}
+|func_id=113|func_sleep=0.0|func_energy=10.0
+|func=llAttachToAvatar
+|p1_type=integer|p1_subtype=attach_point|p1_name=attach_point|p1_desc=ATTACH_* constant or valid value (see the tables below)
+|func_desc=Attaches the object to the avatar who has granted permission to the script. The object is taken into the users inventory and attached to {{LSLP|attach_point}}.
+|func_footnote=If {{LSLP|attach_point}} is zero, then the object attaches to the attach point it was most recently attached to.
+|return_text
+|spec
+|caveats=*Attach points can be occupied by multiple attachments.{{Footnote|Multiple attachments per attach point were added as result of {{Jira|SCR-277}}|Multiple attachments per attach point were added as result of SCR-277}}
+**This was not always the case, previously if {{LSLP|attach_point}} was occupied, the existing object was detached and the new attachment took it's place. 
+*Objects attached to the head (and any attachment position within the head) will not be visible in First Person view (aka [[Mouselook]]) if "show attachments in mouselook" is disable.
+*If {{LSLP|attach_point}} is zero but the object was never previously attached, it defaults to the right hand ({{LSL Const|ATTACH_RHAND|integer|6|c=right hand}}).
+*If the object is already attached the function fails silently, regardless if the {{LSLP|attach_point}} is a different [[llGetAttached|attach point]]. -- [[Template:Issues/SCR-137|SCR-137]]
+|examples=
+<source lang="lsl2">//-- rez object on ground, drop in this script, it will request permissions to attach,
+//-- and then attach to the left hand if permission is granted. if permission is denied,
+//-- then the script complains.
+default
+{
+    state_entry()
+    {
+        llRequestPermissions( llGetOwner(), PERMISSION_ATTACH );
+    }
+
+    run_time_permissions( integer vBitPermissions )
+    {
+        if ( vBitPermissions & PERMISSION_ATTACH )     
+            llAttachToAvatar( ATTACH_LHAND );     
+        else     
+            llOwnerSay( "Permission to attach denied" );
+    }
+
+    on_rez(integer rez)
+    {
+        if (!llGetAttached() )        //reset the script if it's not attached.
+            llResetScript();      
+    }
+
+    attach(key id)
+    {
+        // The attach event is called on both attach and detach, but 'id' is only valid on attach
+        if (id)
+            llOwnerSay( "The object is attached to " + llKey2Name(id) );
+        else 
+            llOwnerSay( "The object is not attached");
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llAttachToAvatarTemp]]|Attach an object to any avatar but only temporarily}}
+{{LSL DefineRow||[[llDetachFromAvatar]]|Detaches the object from the avatar}}
+{{LSL DefineRow||[[llGetAttached]]|Gets the attach point number (that the object is attached to)}}
+|also_articles
+|also_events=
+{{LSL DefineRow||[[attach]]|}}
+|constants={{LSL_Constants_Attachment}}
+|notes
+|cat1=Attachment
+|cat2=Avatar
+|haiku={{Haiku|Embrace me. I'm yours|Forever. Even detached|To inventory.}}
+|cat3
+|cat4
+}}

@@ -1,0 +1,52 @@
+{{LSL Function
+|func_id=|func_sleep=0.0|func_energy=10.0
+|func=llJson2List|return_type=list|p1_type=string|p1_name=src
+|func_footnote=
+To convert a list into a json formatted string use [[llList2Json]].
+|func_desc=This function takes a string representing [http://json.org JSON], and returns a list of the top level.
+|return_text=made by parsing '''src''', a string representing json.
+|spec=See [[Json_usage_in_LSL]]
+* If the json represents a single item (number, string, true, false or null) then a list with 1 item will be returned.
+* If the json represents an object then a strided list of key, value pairs is returned. All values that are objects or arrays are returned as json strings.
+* If the json represents an array then a list of all items is returned. All values that are objects or arrays are returned as json strings.
+|constants
+|examples=
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        list items;
+
+        string value = "89556747-24cb-43ed-920b-47caed15465f";
+        items = llJson2List(value);
+        // ["89556747-24cb-43ed-920b-47caed15465f"]
+
+        string object = "{\"pi\": 3.14, \"set\": [1,2,3], \"status\": \"ok\"}";
+        items = llJson2List(object);
+        // ["pi", 3.140000, "set", "[1,2,3]", "status", "ok"]
+
+        string array = "[0, 3.14, [1,2,3], {}]";
+        items = llJson2List(array);
+        // [0, 3.140000, "[1,2,3]", "{}"]
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llList2Json]]|}}
+{{LSL DefineRow||[[llJsonGetValue]]|}}
+{{LSL DefineRow||[[llJsonSetValue]]|}}
+{{LSL DefineRow||[[llJsonValueType]]|}}
+|also_events
+|also_tests
+|also_articles={{LSL DefineRow||[[Typecast]]|}}
+|notes=
+|permission
+|negative_index
+|sort=Json2List
+|cat1=List
+|cat2=String
+|cat3=Data Conversion
+|cat4=JSON
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/13#13.05.20.276191 | 20/05/2013 ]]
+}}

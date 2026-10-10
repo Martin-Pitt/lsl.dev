@@ -1,0 +1,119 @@
+{{LSL_Function
+|inject-2={{LSL_Function/detected|index|touchST|simple=*}}
+|func_id=342|func_sleep=0.0|func_energy=10.0
+|func=llDetectedTouchST
+|return_type=vector|return_text=that is the surface coordinates for where the prim was touched. The {{LSLP|x}} & {{LSLP|y}} vector positions contain the horizontal ({{LSLP|s}}) & vertical ({{LSLP|t}}) face coordinates respectively (<code>{{NoWrap|{{LSL_VR|{{LSLPT|s}}|{{LSLPT|t}}|0.0}}}}</code>). Each component is usually in the interval {{Interval|gte=0.0|center=component|lte=1.0}} with the origin in the bottom left corner.{{Interval/Footnote}} With some mesh objects, values of less than 0.0 and higher than 1.0 have been observed.
+
+{{LSL Const|TOUCH_INVALID_TEXCOORD|vector|{{LSL_VR|-1.0|-1.0|0.0}}}} is returned when the surface coordinates cannot be determined. See [[#Caveats|Caveats]] for further details.
+|p1_type=integer|p1_name=index
+|func_footnote=For the {{LSLGC|Touch|touch}} category of events only. The prim that was touched may not be the prim receiving the event, use [[llDetectedLinkNumber]] to check for this; likewise, you can use [[llDetectedTouchFace]] to determine which face was touched.
+|func_desc
+|spec
+|caveats=
+*{{LSL Const|TOUCH_INVALID_TEXCOORD|vector|{{LSL_VR|-1.0|-1.0|0.0}}}} is returned when...
+** The avatar's viewer does not support face touch detection.
+*** To check if face touch detection is supported check the return of [[llDetectedTouchFace]].
+** The touch has moved off the surface of the prim.
+** The touch happened too close to the edge of the face to determine a location.
+** The event triggered is not a {{LSLGC|Touch|touch}} event.
+* The vertical coordinate is flipped on a glTF mesh.
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer total_number)
+    {
+        integer touchFace = llDetectedTouchFace(0);
+        vector  touchST   = llDetectedTouchST(0);
+
+//      ZERO_VECTOR (<0.0, 0.0, 0.0> ... the origin) is in the bottom left corner of the face
+//      touchST.x goes across the face from the left to the right
+//      touchST.y goes up the face from the bottom to the top
+
+        if (touchFace == -1)
+            llWhisper(PUBLIC_CHANNEL, "Sorry, your viewer doesn't support touched faces.");
+        else if (touchST == TOUCH_INVALID_TEXCOORD)
+            llWhisper(PUBLIC_CHANNEL, "Sorry, the touch position upon the face could not be determined.");
+        else
+            llSay(PUBLIC_CHANNEL, "llDetectedTouchST(0) = " + (string)touchST
+                    + "\ntouchST.x = " + (string)touchST.x
+                    + "\ntouchST.y = " + (string)touchST.y);
+    }
+}
+</syntaxhighlight>
+
+The following script will assume an (imaginary) 12x12 grid over the face, and identify which square was touched by the user.
+<syntaxhighlight lang="lsl2">
+integer numberOfRows    = 12;
+integer numberOfColumns = 12;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        vector  touchST     = llDetectedTouchST(0);
+
+//      ZERO_VECTOR (<0.0, 0.0, 0.0> ... the origin) is in the bottom left corner of the face
+//      touchST.x goes across the face from the left to the right
+//      touchST.y goes up the face from the bottom to the top
+
+        integer columnIndex = (integer) (touchST.x * numberOfColumns);
+        integer rowIndex    = (integer) (touchST.y * numberOfRows);
+        integer cellIndex   = (rowIndex * numberOfColumns) + columnIndex;
+
+        llSay(PUBLIC_CHANNEL, "ST grid (" + (string)columnIndex + ", " + (string)rowIndex
+                            + ") --> cell " + (string)cellIndex);
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+//  with friendly permission of Supremius Maximus
+//  who made the texture used in this script
+//
+//  click & hold the mouse while dragging across
+//  the face of the prim
+
+default
+{
+    touch(integer num_detected)
+    {
+        integer link    = llDetectedLinkNumber(0);
+        integer face    = llDetectedTouchFace(0);
+        vector  touchST = llDetectedTouchST(0);
+
+//      ZERO_VECTOR (<0.0, 0.0, 0.0> ... the origin) is in the bottom left corner of the face
+//      touchST.x goes across the face from the left to the right
+//      touchST.y goes across the face from the bottom to the top
+
+        string uuid = "23badbe7-6d8c-639b-0131-bb321f8e9db5";
+
+        llSetLinkPrimitiveParamsFast(link, [
+            PRIM_TEXTURE, face, uuid, <1.0, 1.0, 0.0>, touchST, 0,
+            PRIM_FULLBRIGHT, ALL_SIDES, TRUE]);
+    }
+}
+</syntaxhighlight>
+|helpers
+|related
+|also_functions=
+{{LSL DefineRow||[[llDetectedLinkNumber]]}}
+{{LSL DefineRow||[[llDetectedTouchFace]]}}
+{{LSL DefineRow||[[llDetectedTouchUV]]}}
+{{LSL DefineRow||[[llDetectedTouchPos]]}}
+{{LSL DefineRow||[[llDetectedTouchNormal]]}}
+{{LSL DefineRow||[[llDetectedTouchBinormal]]}}
+|also_events=
+{{LSL DefineRow||[[touch_start]]|}}
+{{LSL DefineRow||[[touch]]|}}
+{{LSL DefineRow||[[touch_end]]|}}
+|also_articles
+|notes
+|history=*Introduced in Viewer {{SVN|870|rev=92872|branch=Release|anchor=file14|date=Wednesday, 23 July 2008}}, Supported by Beta Server 1.24.0.93754 (Wenesday 6th August 2008), and viewer binary 1.20.15 (93532).
+*Date of Release Server [[ Release_Notes/Second_Life_Beta_Server/1.24#Release_Notes_for_Second_Life_Beta_Server_1.24.3_.28August_29th.2C_2008.29 | 29-08-2008 ]]
+*Date of Release Client  [[ Release_Notes/Second_Life_Release/1.21 | 16-10-2008 ]]
+|cat1=Touch
+|cat2
+|cat3
+|cat4
+|haiku={{Haiku|Gently touching face,|Odd emotion arises.|Laughter fills the space.}}
+}}

@@ -1,0 +1,61 @@
+{{Issues/SVC-2409}}{{LSL_Event
+|event_id=14
+|event_delay
+|event=no_sensor
+|event_desc=Result of a call to [[llSensor]] or [[llSensorRepeat]].
+|constants
+|spec
+|caveats=
+*sensor/no_sensor are not always the best solution:
+**To determine if something is in/out of range is overkill. For this situation use: [[llGetObjectDetails]] as you will see in the [[#Useful Snippets|Useful&nbsp;Snippets]] section.
+**To determine if an avatar is in the region, try [[llGetAgentSize]]
+|examples=
+<source lang="lsl2">//List all avatars in range.
+default 
+{
+     on_rez(integer i) 
+     {
+          llSensor("", "", AGENT_BY_LEGACY_NAME, 96.0, PI);   // Detect any avatars within a 96 metre radius sphere
+     }
+     sensor(integer number_detected) 
+     {
+          integer i = 0;
+          do 
+          {
+               llOwnerSay(llDetectedName(i) + " is " + (string) llVecDist(llGetPos(), llDetectedPos(i) ) + "m away.");
+          }
+          while(++i < number_detected);
+     }
+     no_sensor() 
+     {
+          llOwnerSay("No avatars in range.");
+     }
+}
+</source>
+
+|helpers=
+<source lang="lsl2">//An alternative solution for find out if a user is not in range
+//No sensor is used so the above caveat doesn't apply.
+
+integer InRange(key uuid, float distance)
+{
+    list data = llGetObjectDetails(uuid, [OBJECT_POS]);
+    if(data == [])
+        return 0;
+    return llVecDist(llList2Vector(data, 0), llGetPos()) <= distance;
+}</source>
+|also_header
+|also_events
+|also_functions={{LSL DefineRow||[[llSensor]]}}
+{{LSL DefineRow||[[llSensorRepeat]]}}
+|also_articles
+|also_footer
+|notes
+|mode
+|bugs={{LSL Bug|SVC-2409|llSensorRepeat not triggering no_sensor unless a sensor event handler is present}}
+|deprecated
+|cat1=Sensor
+|cat2
+|cat3
+|cat4
+}}

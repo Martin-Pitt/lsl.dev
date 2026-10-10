@@ -1,0 +1,133 @@
+{{LSL_Function
+|inject-2={{LSL_Function/uuid|id|object=*}}{{LSL Constants/Sensing|type}}
+|inject-3={{Issues/SVC-2409}}{{Issues/SVC-4301}}{{Issues/SVC-6662}}{{Issues/BUG-2366}}
+|func=llSensorRepeat|sort=SensorRepeat
+|func_id=29|func_sleep=0.0|func_energy=10.0
+|p1_type=string|p1_name=name|p1_hover=Object or avatar name
+|p1_desc=Object or avatar name[[#NameFormat|<span style="color:red;">!</span>]]
+|p2_type=key|p2_name=id
+|p3_type=integer|p3_name=type
+|p3_desc=mask ({{#var:AGENT_BY_LEGACY_NAME}}, {{#var:AGENT_BY_USERNAME}}, {{#var:ACTIVE}}, {{#var:PASSIVE}}, and/or {{#var:SCRIPTED}})
+|p3_hover=mask (AGENT_BY_LEGACY_NAME, AGENT_BY_USERNAME, ACTIVE, PASSIVE, and/or SCRIPTED)
+|p4_type=float|p4_name=radius
+|p4_desc=distance in meters from center, {{Interval|gte=0.0|center=radius|lte=96.0}}
+|p4_hover=distance in meters from center, {{Interval/Hover|gte=0.0|center=radius|lte=96.0}}
+|p5_type=float|p5_name=arc
+|p5_desc=the max angle between the object's local X-axis and detectable objects, {{Interval|gte=0.0|lteh=PI|lte={{#var:PI}}|center=arc}}
+|p5_hover=the max angle between the object's local X-axis and detectable objects, {{Interval/Hover|gte=0.0|lteh=PI|lte={{#var:PI}}|center=arc}}
+|p6_type=float|p6_name=rate
+|p6_desc=how often a scan is performed
+|func_footnote=If {{LSLP|name}}, {{LSLP|id}}, and/or {{LSLP|type}} are empty or 0, they are ignored.<br/>If {{LSLP|id}} is an invalid key or [[NULL_KEY]] it is treated as empty.<br id="NameFormat"/>Depending upon which AGENT* flag is used determines the format requirements for {{LSLP|name}}
+
+See: [http://www.lslwiki.net/lslwiki/wakka.php?wakka=llSensor llSensor] for an excellent explanation of {{LSLP|arc}}.
+|func_desc=Performs a scan for {{LSLP|name}} and {{LSLP|id}} with {{LSLP|type}} within {{LSLP|range}} meters and {{LSLP|arc}} radians of forward vector and repeats every {{LSLP|rate}} seconds. The first scan is not performed until {{LSLP|rate}} seconds have passed.
+
+Script execution continues immediately. Whenever a scan is completed, a [[sensor]] or [[no_sensor]] event is put in the event queue.
+|return_text
+|spec
+|caveats=*The repeat of the sensor event is adversely affected by [[llGetRegionTimeDilation|time dilation]] (lag).
+*Sensors placed in the root prim of attachments will use the direction the avatar is facing as their forward vector. In mouselook, this means that it will be wherever the avatar is looking, while out of mouselook, this means whichever way the avatar is pointing. This does not include where the avatar's head is pointing, or what animation the avatar is doing, just the direction the avatar would move in if you walked forward. This is the case, regardless of where the object is attached.
+*Sensors placed in prims other than the root prim of an attachment will have their forward direction offset relative to the root prim's forward direction, e.g. a sensor in a prim whose +X direction is the reverse of the root +X will look backward.
+* Only the most recent [[sensor]] event is queued. Previous sensor events are replaced.
+* A repeating sensor does not persist across a state change.
+* [[llSensorRepeat]] can occasionally detect outside of it's specified range every few cycles when used near sim borders. [[llSensor]] in a [[timer]] does not.
+* Only one or zero llSensorRepeats can be active per script. If llSensorRepeat is called a second time without calling [[llSensorRemove]], the first llSensorRepeat is deactivated and the second one replaces it
+|examples=
+<source lang="lsl2">// Written by Steamy Latte.
+// Scans every 30 seconds for visitors within 10 meters.
+// Reports new visitors to object owner when she is in range.
+
+string AllAgents;
+
+default
+{
+    state_entry()
+    {
+        // arc=PI is a sphere, you could look more narrowly in the direction object is facing with PI/2, PI/4 etc.
+        // don't repeat this too often to avoid lag.
+        llSensorRepeat("", "", AGENT_BY_LEGACY_NAME, 10.0, PI, 30.0);
+    }
+    sensor(integer num_detected)
+    {
+        string thisAgent;
+        integer agentNum;
+        for (agentNum=0; agentNum<num_detected; agentNum++)
+        {
+            thisAgent = llDetectedName(agentNum);
+            if (llDetectedKey(agentNum) == llGetOwner())
+            {
+                if (AllAgents != "")
+                {
+                    llOwnerSay("We've had the following visitors:" + AllAgents);
+                    AllAgents = "";
+                }
+            }
+            else if (llSubStringIndex(AllAgents+"\n", "\n"+thisAgent+"\n") < 0)
+            {
+                AllAgents = AllAgents + "\n" + thisAgent;
+            }
+        }
+    }
+}</source>
+
+<source lang="lsl2">
+// Written by Evans Love.
+// (Limited to most recent 200 names by Void Singer to prevent eventual Stack/Heap Collision + clean up)
+// Continuously scans for visitors within 10 meters and reports new visitors to object owner.
+//-------------------------------------------------------------------------------------
+
+integer RESPONSE_CHANNEL = -100;
+float   SCAN_RANGE       = 10.0;
+float   SCAN_INTERVAL    = 20.0;
+list    VISITOR_LIST;
+
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", NULL_KEY, AGENT_BY_LEGACY_NAME, SCAN_RANGE, PI, SCAN_INTERVAL);
+    }
+
+    sensor(integer number_detected)
+    {
+        integer agent_number;
+
+//      iterate through all detected agents
+        for (; agent_number < number_detected; agent_number++)
+        {
+            string  this_agent_name = llDetectedName(agent_number);
+            key     this_agent_key  = llDetectedKey(agent_number);
+
+//          if the agent is not found on the list
+            if (llListFindList(VISITOR_LIST, [this_agent_name]) == -1)
+            {
+//              add her/him and make the list hold the last 200 visitors
+                VISITOR_LIST = [this_agent_name] + llList2List(VISITOR_LIST, 0, 198);
+
+                llDialog(this_agent_key, "Welcome!", ["Ok"], RESPONSE_CHANNEL);
+
+                llOwnerSay(this_agent_name);
+            }
+//          else agent is already on the list
+        }
+
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llSensor]]| Runs a sensor once}}
+{{LSL DefineRow||[[llSensorRemove]]| Stops the llSensorRepeat timer}}
+{{LSL DefineRow||[[llOverMyLand]]| What happens over owners land}}
+|also_events=
+{{LSL DefineRow||[[sensor]]|Triggered when a sensor detects something}}
+{{LSL DefineRow||[[no_sensor]]|Triggered when a sensor detects nothing}}
+|also_articles
+|notes=
+{{LSL Tip|You might want to use [[llGetAgentList]] instead of using sensors to get a list of all avatars within the same parcel or region.}}
+|cat1=Sensor
+|cat2=Detected
+|cat3=Username/As A Parameter
+|cat4=Legacy Name/As A Parameter
+|haiku={{Haiku|Binoculars raised,|All eyes scan the horizon.|Ever vigilant.}}
+}}

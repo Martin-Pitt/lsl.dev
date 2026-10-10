@@ -1,0 +1,28 @@
+[[Category:Experience Tools]]
+{{LSL_Function
+|inject-2={{LSL Function/Experience|false}}
+|func=llGetExperienceDetails
+|return_text=of details about the experience. This list has 6 components: <code>[string experience_name, key owner_id, key experience_id, integer state, string state_message, key group_id]</code>
+|func_footnote=If {{LSLPT|experience_id}} is [[NULL_KEY]], then information about the script's experience is returned. In this situation, if the script isn't associated with an experience, an empty list is returned.
+|return_type=list
+|p1_type=key|p1_name=experience_id|p1_desc=The ID of the experience to query. 
+|also_functions=
+*[[llAgentInExperience]]
+|examples=<source lang="lsl2">default
+   {
+       touch_start(integer total_number)
+       {
+           key xp = "9170c22b-f445-ea5d-89fa-0f2f1e144f04";
+           llOwnerSay(llDumpList2String(llGetExperienceDetails(xp), "\n"));
+           // Prints:
+           // Linden Realms
+           // id
+           // status msg
+           
+           llOwnerSay(llDumpList2String(llGetExperienceDetails(NULL_KEY), "\n"));
+           // Print nothing if not associated with an XP or info about the associated experience
+       }
+   }</source>
+|cat1=Experience
+|history=* {{JIRA|BUG-7048}} - [[llGetExperienceDetails]] returns 4 for {{LSLPT|state}} and "operation not permitted" for {{LSLPT|state_message}} while over mainland parcels that have the experience allowed. 
+}}

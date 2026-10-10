@@ -1,0 +1,39 @@
+{{LSL Header|ml=*}}
+
+=====Show the current SL time (PST/PDT)=====
+<syntaxhighlight lang="lsl2">
+// Simple SLT 12-hour clock with AM/PM and PDT/PST indicators.   Uses llGetWallClock() and llGetGMTclock()
+// Omei Qunhua
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(1);
+    }
+    timer()
+    {
+        integer sltSecs = (integer) llGetWallclock();               // Get SL time in seconds (will be either PST or PDT)
+        integer diff    = (integer) llGetGMTclock() - sltSecs;      // Compute the difference between UTC and SLT
+        string  PST_PDT = " PST";                                   // Assume Pacific Standard Time
+
+        // If the difference between SLT and UTC is 7 hours or -17 hours, then SLT is currently PDT
+        if (diff == 25200 || diff == -61200)         
+            PST_PDT = " PDT";                         //  Pacific Daylight Time
+        integer Mins  = sltSecs / 60;
+        integer Hours = Mins / 60;
+        Mins = Mins % 60;
+        string AMPM = " AM";
+        if (Hours > 11)            // Convert to 12-hour format with PM indication
+        {
+            AMPM = " PM";
+            Hours -= 12;
+        }
+        if (Hours == 0)
+            Hours = 12;
+        llSetText( (string) Hours + ":" + llGetSubString("0" + (string) Mins,  -2, -1) + AMPM + PST_PDT, <1,1,1> ,1);
+    }
+}
+</syntaxhighlight>
+
+[[Category:LSL Examples]]

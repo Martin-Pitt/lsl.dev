@@ -1,0 +1,44 @@
+{{LSL_Function
+|func_id=17|func_sleep=0.0|sort=Axes2Rot|func_energy=10.0
+|func=llAxes2Rot|sort=Axes2Rot
+|func_footnote=All three vectors must be mutually orthogonal unit vectors.
+|return_type=rotation
+|p1_type=vector|p1_name=fwd
+|p2_type=vector|p2_name=left
+|p3_type=vector|p3_name=up
+|return_text=that is defined by the 3 coordinate axes
+|notes=Technically, only the first two vectors are needed to define this rotation, which can be done by calling any of these:
+<source lang="lsl2">llAxes2Rot(fwd, left, fwd % left);
+llAxes2Rot(left % up, left, up);
+llAxes2Rot(fwd, up % fwd, up);</source>
+|spec
+|caveats
+|examples=<source lang="lsl2">default
+{
+    state_entry()
+    {
+        vector i = < 1.0, 0.0, 0.0>;
+        vector j = < 0.0, 1.0, 0.0>;
+        vector k = < 0.0, 0.0, 1.0>;
+
+        rotation rot = llAxes2Rot( j, -i, k );
+
+        llSay(0, (string) (llRot2Euler(rot) * RAD_TO_DEG) );
+    }
+}</source>
+
+This script displays:
+   Object: <-0.00000, 0.00000, 90.00000>
+which shows that ('''j''', '''-i''', '''k''') is obtained by rotating ('''i''', '''j''', '''k''') 90 degrees around z direction.
+|helpers
+|also_functions
+|also_events
+|also_tests=
+{{LSL_DefineRow||[[User:Dora_Gustafson/llAxes2Rot_right_and_wrong|Visual illustration]]|Importance of mutually orthogonal unit vectors}}
+|also_articles
+|cat1=Math/3D
+|cat2=Rotation
+|cat3
+|cat4
+|haiku={{Haiku|quaternions rule|the whole world spins at your whim|or crashes and burns}}
+}}

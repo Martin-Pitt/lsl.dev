@@ -1,0 +1,111 @@
+{{LSL_Function
+|inject-2={{Issues/SCR-311}}{{Issues/SVC-5488}}{{Issues/MISC-243}}{{Issues/BUG-40680}}{{Issues/BUG-40681}}{{Issues/BUG-227045}}
+|func=llGetAgentList
+|sort=GetAgentList
+|func_id
+|func_sleep=0
+|func_energy=0
+|func_desc=Requests a [[list]] of [[agent]]s currently in the [[region]], limited by the {{LSLP|scope}} parameter.
+|func_footnote=
+|return_type=list
+|return_text=<code><nowiki>[</nowiki>[[key]]&nbsp;{{HoverText|id0|First agent key}}, [[key]]&nbsp;{{HoverText|id1|Second agent key}}, ..., [[key]]&nbsp;{{HoverText|idn|nᵗʰ agent key}}]</code> or <code><nowiki>[</nowiki>[[string]]&nbsp;{{HoverText|error_msg|An error message}}]</code> -  returns avatar [[key]]s for all agents in the region limited to the area(s) specified by scope
+|spec=
+|p1_type=integer|p1_name=scope|p1_hover=AGENT_LIST_* flag specifies the selection scope|p1_desc=<span></span>
+{{Collapsible_Table/Simple|title=AGENT_LIST_* flag specifies the selection scope
+|content={{!}}
+* [[AGENT_LIST_PARCEL]] - returns only agents on the same [[parcel]] where the script is running.
+* [[AGENT_LIST_PARCEL_OWNER]] - returns only agents on any parcel in the region where the parcel owner is the same as the owner of the parcel under the scripted object.
+* [[AGENT_LIST_REGION]] - returns any/all agents in the region.
+}}
+|p2_type=list|p2_subtype=instructions|p2_name=options|p2_desc=Unused.
+|constants=
+|caveats=
+* There is no guaranteed understandable order or randomness to the list returned.
+* Will only return up to 100 agents.
+* Ghosts, agents that leave behind a corrupted presence and agents in [[God Mode]] depending on the level will have NULL_KEY returned instead of their real key with [[llGetAgentList]](). There is also an issue with a certain type of ghosted agent still returning a key too. Perhaps check each key against [[llGetAgentSize]]() to verify if they're really in the sim or not; none of the above anomalies affect [[llGetAgentSize]]().
+
+|examples=
+{{LSL Tip|To check if an avatar is in the same sim, please check whether [[llGetAgentSize]] does NOT return [[ZERO_VECTOR]]. It's much faster and easier than calling [[llGetAgentList]] and running through the list to compare a given key with each list item.}}
+{{LSL Tip|As of now, this function does not have a delimiter for its option list. This means, the function MIGHT return up to a hundred avatar keys. You'll need a lot of free memory to be able to store those keys, be warned of possible [[STACK_HEAP_COLLISION_ERROR]]s.}}
+<syntaxhighlight lang="lsl2">
+//Displays up to 100 avatar key: name pairs detected in the entire region
+
+default
+{
+    touch_start(integer total_number)
+    {
+        list avatarsInRegion = llGetAgentList(AGENT_LIST_REGION, []);
+        integer numOfAvatars = llGetListLength(avatarsInRegion);
+
+        // if no avatars, abort avatar listing process and give a short notice
+        if (!numOfAvatars)
+        {
+            llOwnerSay("No avatars found within the region!");
+            return;
+        }
+
+        integer index;
+        while (index < numOfAvatars)
+        {
+            key id = llList2Key(avatarsInRegion, index);
+            string name = llKey2Name(id);
+
+            llOwnerSay(name + " [ " + (string)id + " ]");
+            ++index;
+        }
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+//  Orders new list based on distance
+//  and returns names and distances on touch
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        list keys = llGetAgentList(AGENT_LIST_REGION, []);
+        integer numberOfKeys = llGetListLength(keys);
+
+        vector currentPos = llGetPos();
+        list newkeys;
+        key thisAvKey;
+
+        integer i;
+        for (i = 0; i < numberOfKeys; ++i) {
+            thisAvKey = llList2Key(keys,i);
+            newkeys += [llRound(llVecDist(currentPos,
+                            llList2Vector(llGetObjectDetails(thisAvKey, [OBJECT_POS]), 0))),
+                        thisAvKey];
+        }
+  
+        newkeys = llListSort(newkeys, 2, FALSE);     //  sort strided list by descending distance
+
+        for (i = 0; i < (numberOfKeys * 2); i += 2) {
+            llOwnerSay(llGetDisplayName(llList2Key(newkeys, i+1))
+                +" ["+ (string) llList2Integer(newkeys, i) + "m]");
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_header
+|also_functions=*[[llGetRegionAgentCount]]
+|also_tests
+|also_events
+|also_articles
+|also_footer
+|notes
+|deprecated
+|location
+|history=
+* New function proposed by LL, reconciling the feature suggestions {{Jira|SVC-805}}, {{Jira|SVC-6427}}, {{Jira|MISC-243}} and {{Jira|SVC-5488}}.
+* Pre-Released [[Release_Notes/Second_Life_RC_Magnum/12]] - Original JIRA requested {{mono|llGetRegionAgents()}}, the name changed since the released function does more.
+* Date of Release  [[ Release_Notes/Second_Life_Server/12#12.04.30.255166 | 30/04/2012 ]]
+|cat1=Functions
+|cat2=Avatar
+|cat3=Owner
+|cat4=Parcel
+|cat5=Region
+|cat6
+}}

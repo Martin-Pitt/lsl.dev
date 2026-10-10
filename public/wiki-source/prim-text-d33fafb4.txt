@@ -1,0 +1,86 @@
+<onlyinclude>{{#if:
+
+{{LSL Function/limits}}
+{{LSL Function/color|color}}
+{{LSL Function/alpha|alpha}}
+
+{{#vardefine:p_text_set_hover|floating text to display}}
+{{#vardefine:p_text_get_hover|floating text displayed}}
+{{#vardefine:p_text_hover|{{#switch:{{{1|}}}|get={{#var:p_text_get_hover}}|set={{#var:p_text_set_hover}}|floating text}}}}
+
+{{#vardefine:p_text_set_desc|[[:Category:LSL Floating Text|floating text]] to display}}
+{{#vardefine:p_text_get_desc|[[:Category:LSL Floating Text|floating text]] displayed}}
+{{#vardefine:p_text_desc|{{#switch:{{{1|}}}|get={{#var:p_text_get_desc}}|set={{#var:p_text_set_desc}}|[[:Category:LSL Floating Text|floating text]]}}}}
+
+{{#vardefine:text_const|{{LSL Const|PRIM_TEXT|integer|26|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the object's floating text}}}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+* Do not rely on [[:Category:LSL Floating Text|Floating Text]] as a storage medium; it is neither secure nor finalized.
+** Floating text has been altered in past server updates, breaking existing content; future changes may occur.
+** Even "invisible"{{Footnote|1=Floating text with an {{LSLP|alpha}} set to 0.0 is rendered "invisible"|2=Floating text with an alpha set to 0.0 is rendered {{String|invisible}}}} floating text is transmitted to the client.
+*** It can be viewed by anyone with a client that is capable of rendering text that is supposed to be invisible.
+*** The network packets that contain the text can be sniffed and the text read.}}
+
+}}</onlyinclude>{{#if:
+
+}}{{LSL Constant
+|inject-2={{LSL PrimitiveParam Categorize|Prim}}
+|name=PRIM_TEXT
+|type=integer
+|value=26
+|desc=Used to get or set the object's [[:Category:LSL Floating Text|floating text]].
+|pa={{LSL Constant/List|i_front=[[llSetPrimitiveParams]]([ {{#var:text_const}},&#32;|i_end=&nbsp;]);|
+|text=Syntax for: [[llSetPrimitiveParams]], [[llSetLinkPrimitiveParams]] & [[llSetLinkPrimitiveParamsFast]]
+|i1_type=string|i1_name=text_set|i1_disp=text
+|i2_type=vector|i2_name=color
+|i3_type=float|i3_name=alpha
+|toc=llSetPrimitiveParams
+}}
+|pb={{LSL Constant/List|i_front=[[llGetPrimitiveParams]]([ {{#var:text_const}}|i_end=&nbsp;]);|
+|r_front=Returns the list [&nbsp;|r_end=&nbsp;]
+|text=Syntax for: [[llGetPrimitiveParams]], [[llGetLinkPrimitiveParams]]
+|r1_type=string|r1_name=text_get|r1_disp=text
+|r2_type=vector|r2_name=color
+|r3_type=float|r3_name=alpha
+|toc=llGetPrimitiveParams
+}}
+|examples=<source lang="lsl2">default
+{
+    state_entry()
+    {
+        // a string to display
+        string displayMessage = llGetDisplayName( llGetOwner() ) + ", test number "; 
+        
+        // just so could test changing the displayMessage
+        integer loopControl;
+        for( loopControl = 1; loopControl < 3; ++loopControl )
+        {
+            // on first iteration set the text 
+            if( loopControl == 1 )
+            {
+                llSetPrimitiveParams([PRIM_TEXT, displayMessage + (string)loopControl + ".", <1, 0, 0>, 1.0]);
+            }
+            
+            // on second iteration get the text and say it. 
+            else if( loopControl == 2 )
+            {
+                llSay(0, llDumpList2String(llGetPrimitiveParams([PRIM_TEXT]), " "));
+            }
+        }
+    }
+}</source>
+|constants=
+|functions=
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParamsFast]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetText]]|}}
+|events
+|location
+|cat1
+|cat2=Floating Text
+|cat3
+|cat4
+}}

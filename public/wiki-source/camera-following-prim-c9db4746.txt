@@ -1,0 +1,104 @@
+{{LSL Header}}
+
+= Introduction =
+
+A reasonably simple demo of a prim that follows your camera around (as long as you are wearing the special attachment that makes it work).  This was inspired by a request for a light that would follow the camera around, but can be used for all sorts of other things as well.  Presumably.
+
+= Usage =
+
+To use these scripts, stick the CameraMaster script into the root prim of an object, and wear that object.  (Anywhere on the body; wearing it as a HUD attachment hasn't been tested.)  Then stick the CameraFollowerPrim script into the prim that you want to follow your camera around (it should be a non-physical prim; phantom is probably also a good idea).  As you move your camera around (alt-click and so forth, you know), the prim will follow the camera-point around (which can, for obvious reasons, make it hard to see the prim!).
+
+= Limitations and Notes =
+
+The prim that moves will move rather jerkily, but very fast.  Smoother (but generally slower) motion could be gotten by making the moving prim physical, and using llMoveToTarget rather than llSetPos.  If you prefer smoother motion for some reason.  I haven't tried that variation, but it ought to be relatively simple.
+
+You can change the channel that the scripts use to communicate, and the frequency with which it updates the prim's position, by altering the obvious constants in the code.  You can also make the moving prim go to some offset from the camera position, rather than right on the camera position itself (a meter above it, say) by changing OFFSET in the follower script (to, say, <0,0,1>).
+
+To make the prim stop following your camera, detach the attachment.
+
+= The Code =
+
+You may do anything you like with this code, without limitation.  As far as I'm concerned.  As long as it's not anything mean.  You shouldn't be mean.
+
+The CameraMaster (for the attachment):
+
+<source lang="lsl2">
+// Put this in an attachment and it will continuously broadcast your camera position
+
+float DELAY = 0.5;
+integer CHANNEL = -85847;
+
+default
+{
+    attach(key id)
+    {
+        if (id != NULL_KEY)
+            llRequestPermissions(id, PERMISSION_TRACK_CAMERA);
+        else
+            llSetTimerEvent((float)FALSE);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_TRACK_CAMERA)
+            llSetTimerEvent(DELAY);
+    }
+
+    timer()
+    {
+        vector cameraPosition = llGetCameraPos();
+
+        llRegionSay(CHANNEL, (string)cameraPosition);
+    }
+}
+</source>
+
+The follower, for the moving prim:
+
+<source lang="lsl2">
+// Put this in a non-physical prim, and it will move to (an offset from) places that it hears about.
+
+integer CHANNEL = -85847;
+vector OFFSET;
+
+integer listenHandler;
+
+init()
+{
+    llListenRemove(listenHandler);
+    listenHandler = llListen(CHANNEL, "", NULL_KEY, "");
+}
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_OWNER)
+            llResetScript();
+    }
+
+    state_entry()
+    {
+        init();
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        key owner = llGetOwner();
+        key otherOwner = llGetOwnerKey(id);
+
+        if (otherOwner != owner)
+            return;
+
+        vector destination = OFFSET + (vector)message;
+        llSetRegionPos(destination);
+    }
+}
+</source>
+
+{{LSLC|Library}}{{LSLC|Examples}}

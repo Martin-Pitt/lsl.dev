@@ -1,0 +1,59 @@
+{{LSL_Function
+|inject-1={{Issues/SVC-4939}}{{Issues/VWR-17719}}{{LSL_Function/face|face|notall=*}}
+|func_id=350|func_sleep=1.0|func_energy=10.0|mode
+|func=llSetPrimMediaParams|return_type=integer|return_subtype=status
+|p1_type=integer|p1_name=face|p1_desc
+|p2_type=list|p2_subtype=instructions|p2_name=params|p2_desc=a set of name/value pairs (in no particular order)
+|func_footnote=
+|func_desc=Set the media {{LSLP|params}} for a particular {{LSLP|face}}. 
+|return_text=that is a STATUS_* flag which details the success/failure of the operation(s).
+|spec=
+|caveats=*If prim-media is not already on this object, add it.
+*Params not specified are unchanged, or if new media is added set to the default specified.
+* Both width and height must be specified together to work, and they narrow the texture space while inversely widening the aperture.
+** width and height scaled larger than 1024pixels will require the texture backdrop to be resized to fit(see [[#Useful_Snippets|Useful Snippets]])
+*** if resized to fit, the resulting view will cut off scrolled content outside the bounds making it impossible to be viewed
+* Face needs to be a single face. If you want the media on multiple faces (e. g. opposing sides of an object), you have to call the function multiple times with different face numbers. Bitwise AND for face numbers does not work.
+* PRIM_MEDIA_FIRST_CLICK_INTERACT can be overridden by the viewer setting Me > Preferences > Sound & Media > Media first-interact. By default, it works on Worn HUDs, Owned Objects, Friend Objects, Group Objects, and Landowner Objects
+|constants={{LSL Constants/ReturnStatus|table=*|sortable=*}}{{LSL Constants/PrimMedia|set}}
+|examples
+|helpers=<syntaxhighlight lang="lsl2">//-- expand media textures greater than 1024 pixel in a direction to fit the media face
+//-- does exactly what the "align" button does in the edit window (width/height are in pixels)
+//-- original by Edelman Linden (or Kate Linden), tweaked by Void Singer
+uExpandMediaTexture( integer vIntWidth, integer vIntHeight, integer vIntFace ){
+    integer vIntTemp;
+    vector  vSizScale;
+    
+    while (vIntWidth >> ++vIntTemp);
+    vSizScale.x = vIntWidth / (float)(1 << vIntTemp);
+    vIntTemp = 0;
+    while (vIntHeight >> ++vIntTemp);
+    vSizScale.y = vIntHeight / (float)(1 << vIntTemp);
+    llSetPrimitiveParams( [PRIM_TEXTURE, vIntFace] +
+                          llListReplaceList( llGetPrimitiveParams( [PRIM_TEXTURE, vIntFace] ),
+                                             [vSizScale, ((vSizScale - <1.0, 1.0, 0.0>) / 2.0)],
+                                             1,
+                                             2 ) );
+}</syntaxhighlight>
+ref: [[How_to_Align_a_Shared_Media_Texture_from_Linden_Script|original source]]
+|also_functions=
+{{LSL DefineRow||[[llSetLinkMedia]]}}
+{{LSL DefineRow||[[llGetPrimMediaParams]]}}
+{{LSL DefineRow||[[llClearPrimMedia]]}}
+|also_tests
+|also_events=
+|also_articles=
+{{LSL DefineRow||[[/Tricks]]}}
+|notes
+|deepnotes
+|history=
+*{{SVN|2816|rev=134947|trunk=*|anchor=|ver=|ser=}}
+*{{JIRA|SVC-4939}}
+* Functionality available in Client 2.0
+|haiku={{Haiku|Media in dance,|Parameters find their place,|Object's form embrace.}}
+|cat1=Prim Media
+|cat2=Media
+|cat3
+|cat4
+}}
+[[Category:Shared Media]]

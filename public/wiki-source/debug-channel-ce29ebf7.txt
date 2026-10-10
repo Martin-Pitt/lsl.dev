@@ -1,0 +1,41 @@
+<onlyinclude>{{#vardefine:DEBUG_CHANNEL|{{LSL Const|DEBUG_CHANNEL|integer|hex=0x7FFFFFFF|ihex=2147483647|c=Chat channel reserved for script debugging and error messages, broadcasts to all nearby users.}}}}</onlyinclude>{{LSL Constant
+|name={{#var:cname}}
+|type={{#var:type}}
+|hvalue=0x7FFFFFFF
+|value=2147483647
+|desc=Chat channel reserved for script debugging and error messages. The client will display chat on this channel in the script console if the avatar is within the appropriate distance for the communication type (see {{LSLGC|Chat}} for details).
+
+Server-generated errors are broadcast the same distance as [[llSay]].
+
+Regardless of the source, most viewers filter out messages received on '''DEBUG_CHANNEL''' from objects owned by others.
+|examples
+|comment={{#var:comment}}
+|constants=
+{{LSL ConstRow|PUBLIC_CHANNEL}}
+{{LSL ConstRow|COMBAT_CHANNEL}}
+|functions=
+{{LSL DefineRow||[[llWhisper]]|}}
+{{LSL DefineRow||[[llSay]]|}}
+{{LSL DefineRow||[[llShout]]|}}
+{{LSL DefineRow||[[llRegionSay]]|}}
+{{LSL DefineRow||[[llRegionSayTo]]|}}
+{{LSL DefineRow||[[llListen]]|}}
+|events=
+{{LSL DefineRow||[[listen]]|}}
+|helpers=
+<source lang="lsl2">key owner;
+
+default{//little link_message debugging script
+    link_message(integer a, integer b, string c, key d){
+        llSay(DEBUG_CHANNEL, llList2CSV([a,b,c,d]));
+        if(llGetOwner() != owner)
+            llSetScriptState(llGetScriptName(), FALSE);
+    }
+    state_entry(){
+        owner = llGetOwner();
+    }
+}</source>
+|location=
+'linden\indra\llcommon\indra_constants.h' as CHAT_CHANNEL_DEBUG (with a value of S32_MAX)
+|cat1=Chat
+}}

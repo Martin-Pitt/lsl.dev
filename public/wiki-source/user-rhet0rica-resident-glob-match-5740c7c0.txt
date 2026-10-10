@@ -1,0 +1,172 @@
+{{LSLC|User-Defined Functions}}
+{{LSL_Function
+|func=glob_match
+|func_desc=Ported by [[User:Rhet0rica Resident|rhet0rica]] from [https://github.com/torvalds/linux/blob/master/lib/glob.c the Linux kernel], this function takes a pattern string and a query string as input and returns [[TRUE]] or [[FALSE]] depending on whether the query satisfies the pattern. This is the same method used by POSIX systems to match wildcards in filenames. License: Dual MIT and GPL 2.0. <syntaxhighlight lang="lsl">
+
+/**
+ * glob_match - Shell-style pattern matching, like !fnmatch(pat, str, 0)
+ * @pat: Shell-style pattern to match, e.g. "*.[ch]".
+ * @str: String to match.  The pattern must match the entire string.
+ *
+ * Perform shell-style glob matching, returning true (1) if the match
+ * succeeds, or false (0) if it fails.  Equivalent to !fnmatch(@pat, @str, 0).
+ *
+ * Pattern metacharacters are ?, *, [ and \.
+ * (And, inside character classes, !, - and ].)
+ *
+ * This is small and simple implementation intended for device blacklists
+ * where a string is matched against a number of patterns.  Thus, it
+ * does not preprocess the patterns.  It is non-recursive, and run-time
+ * is at most quadratic: strlen(@str)*strlen(@pat).
+ *
+ * An example of the worst case is glob_match("*aaaaa", "aaaaaaaaaa");
+ * it takes 6 passes over the pattern before matching the string.
+ *
+ * Like !fnmatch(@pat, @str, 0) and unlike the shell, this does NOT
+ * treat / or leading . specially; it isn't actually used for pathnames.
+ *
+ * Note that according to glob(7) (and unlike bash), character classes
+ * are complemented by a leading !; this does not support the regex-style
+ * [^a-z] syntax.
+ *
+ * An opening bracket without a matching close is matched literally.
+ */
+
+integer glob_match(string pat, string str)
+{
+	/*
+	 * Backtrack to previous * on mismatch and retry starting one
+	 * character later in the string.  Because * matches all characters
+	 * (no exception for /), it can be easily proved that there's
+	 * never a need to backtrack multiple levels.
+	 */
+	
+	integer back_pat = NOWHERE;
+	integer back_str;
+	
+	/*
+	 * Loop over each token (character or class) in pat, matching
+	 * it against the remaining unmatched tail of str.  Return false
+	 * on mismatch, or true after matching the trailing nul bytes.
+	 */
+	
+	integer str_i;
+	integer pat_i;
+		
+	while (TRUE) {
+		integer c = llOrd(str, str_i++);
+		integer d = llOrd(pat, pat_i++);
+		
+		/* Wildcard: anything but nul */
+		if (d == 0x3f) { // '?'
+			if (c == 0x00) // EOL
+				return FALSE;
+			jump skip_default;
+		/* Any-length wildcard */
+		} else if (d == 0x2a) { // '*'
+			/* Optimize trailing * case */
+			if (llOrd(pat, pat_i) == 0x00)
+				return TRUE;
+			back_pat = pat_i;
+			/* Allow zero-length match */
+			back_str = --str_i;
+			jump skip_default;
+		/* Character class */
+		} else if (d == 0x5b) { // '['
+			integer match = FALSE;
+			integer inverted = (llOrd(pat, pat_i) == 0x21); // '!'
+			integer class_i = pat_i + inverted;
+			integer a = llOrd(pat, class_i++);
+
+			/*
+			 * Iterate over each span in the character class.
+			 * A span is either a single character a, or a
+			 * range a-b.  The first span may begin with ']'.
+			 */
+			do {
+				integer b = a;
+
+				/* Malformed */
+				if (a == 0x00)
+					jump literal; // FIXME
+
+				if (llOrd(pat, class_i + 0) == 0x2d && llOrd(pat, class_i + 1) != 0x5d) {
+					b = llOrd(pat, class_i + 1);
+
+					if(b == 0x00)
+						jump literal;
+
+					class_i += 2;
+					/* Any special action if a > b? */
+				}
+				match = match | (a <= c && c <= b);
+			} while ((a = llOrd(pat, class_i++)) != 0x5d);
+
+			if (match == inverted)
+				jump backtrack;
+			pat_i = class_i;
+			jump skip_default;
+		} else if (d == 0x5c) { // '\\'
+			d = llOrd(pat, pat_i++);
+		}
+		/* Literal character */
+		@literal;
+			if (c == d) {
+				if (d == 0x00)
+					return TRUE;
+				jump skip_default;
+			}
+		@backtrack;
+			if (c == 0x00 || !~back_pat)
+				/* No point continuing */
+				return FALSE;
+			/* Try again from last *, one character later in str. */
+			pat_i = back_pat;
+			str_i = ++back_str;
+			jump skip_default;
+		@skip_default;
+	}
+	return FALSE; // unreachable, but the LSL compiler complains
+}</syntaxhighlight>
+|func_footnote
+|return_type=integer
+|return_text=[[TRUE]] or [[FALSE]].
+|p1_type=string
+|p1_name=pat
+|p1_desc=The string to use as a template. <code>*</code> matches zero or more characters, <code>?</code> matches exactly one character, <code>[abc]</code> matches a, b, or c, and <code>[!abc]</code> matches any character but a, b, or c. Other characters are interpreted as literals.
+|p1_hover=Pattern string.
+|p2_type=string
+|p2_name=str
+|p2_desc=The query string to evaluate.
+|p2_hover=Query string.
+|constants
+|spec
+|caveats=* An unmatched <code>[</code> in {{LSLP|pat}} will be interpreted as a literal left square bracket.
+* This is not a full regular expression implementation. Hyphens in character classes (square brackets) are not supported.
+|examples=<syntaxhighlight lang="lsl">glob_match("a*c", "ac"); // TRUE - * can match zero characters
+glob_match("a*can*", "alpha centauri cantina"); // TRUE - glob_match() supports full backtracking
+glob_match("a?c", "ac"); // FALSE - ? always matches exactly 1 character
+glob_match("*a*c?", "space"); // TRUE - mixture of the above
+glob_match("gr[ae]y", "grey"); // TRUE - [ae] allows exactly one of "a" or "e"
+glob_match("gr[ae]y", "gray"); // TRUE - [ae] allows exactly one of "a" or "e"
+glob_match("gr[!ae]y", "grXy"); // TRUE - [!ae] expects exactly one character but forbids "a" or "e"
+glob_match("gr[!ae]y", "gry"); // FALSE - character classes must match exactly once</syntaxhighlight>
+|helpers
+|also_header
+|also_functions
+|also_tests
+|also_events
+|also_articles
+|also_footer
+|notes=* For case-insensitive match, use [[llToLower]] on {{LSLP|str}} first.
+|mode
+|deprecated
+|location
+|cat1
+|cat2
+|cat3
+|cat4
+|cat5
+|cat6
+|haiku={{Haiku|Characters align;|patterns match in hidden files;|[[LSL Portal Poetry Project|haiku makes me cringe]].}}
+}}

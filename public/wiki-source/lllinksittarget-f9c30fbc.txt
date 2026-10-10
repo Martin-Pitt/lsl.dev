@@ -1,0 +1,49 @@
+{{LSL_Function
+|inject-2={{LSL_Function/link|link|nogroup=*}}{{LSL Function/offset}}
+|func_id=?|func_sleep=0.0|func_energy=10.0
+|sort
+|func=llLinkSitTarget
+|p1_type=integer|p1_subtype=link|p1_name=link|
+|p2_type=vector|p2_name=offset|p2_desc=Additional position for the sit target in local prim coordinates.
+|p3_type=rotation|p3_name=rot|p3_desc=Additional rotation for the sit target relative to the prim rotation.
+|func_footnote=If {{LSLP|offset}} == [[ZERO_VECTOR|{{LSL VR|0.0|0.0|0.0}}]] then the sit target is removed.
+|func_desc=Set the sit location for the linked prim(s). The sit location is relative to the prim's position and rotation.
+|return_text
+|spec=llLinkSitTarget sets the position for the Agent Target (Develop -> Avatar -> Display Agent Target in the version 3.x viewer, Develop -> Character -> View Agent Target in older viewers). The position of the target is based on {{LSLP|rot}} and the {{LSLP|offset}}{{Footnote|It is widely considered that the '''rot''' should not affect the position, unfortunately the sit target code is a {{Wikipedia|Lava_flow_(programming)|lava-flow}}. ~ {{JIRA|SVC-2277}}|It is widely considered that the '''rot''' should not affect the position, unfortunately the sit target code is a lava-flow. - SVC-2277|handle=rot-offset}}.
+|caveats=* {{LSLP|link}} needs to be [[LINK_THIS]] for an unlinked prim. Specifying [[LINK_ROOT]] ([[integer]] value 1) will not work.
+*Once a sit target is removed [[llAvatarOnLinkSitTarget]] will only return {{LSL_Constant/NULL_KEY}}.
+*Removing or deactivating the script that sets the sit target will not remove the prim's sit target.
+**Sit target is a prim property and not dependent on a script for its continued existence. 
+*To remove sit target, use the following: 
+:<syntaxhighlight lang="lsl2">llLinkSitTarget(linkNum, ZERO_VECTOR, ZERO_ROTATION);</syntaxhighlight>
+*There is no way to remove the Sit option from the pie menu. It will appear to be removed if the [[llSetSitText]] is set to a space "&nbsp;" or similar transparent string.
+*Attachments cannot be sat upon (see {{jira|SVC-6100}} to vote for such a feature).
+*{{LSLP|rot}} affects the position of the sit-target in a buggy way. To correct for the ''rot'' bug, subtract {{LSL VR|0.0|0.0|0.4}} from the position when ''rot'' is zero. See example in [[llSitTarget]]. This offset is {{LSL VR|0.0|0.0|0.418}} on [[OpenSimulator]] 0.7.6 (it's 0.4 on version 0.8), but there is more to it than just this offset (opensim and SL remain incompatible). You can find the gory details and an example [[User:Timmy_Foxclaw/About_Coordinate_Systems_and_Rotations|here]].
+**[[llSetLinkPrimitiveParams]] is a more difficult workaround.
+**Animations are relative to the Agent Target, but the Agent Target isn't described by the animation.
+*[[llSitTarget]] does not update position of an already seated avatar. See [[llSitTarget#UpdateSitTarget|UpdateSitTarget]] for a way to do this.
+* {{LSLP|offset}} is limited to 300.0 meters on each axis. The {{LSLP|x}}, {{LSLP|y}} and {{LSLP|z}} components must be in the range {{Interval|lte=300.0|gte=-300}}{{Footnote|handle=interval}}.
+** If they are outside the acceptable range they are rounded to the closest limit.
+* If an object has multiple seats (each seat has a script that sets a sit target with [[llSitTarget]], or the [[link set]] has a script that assigns several ''llLinkSitTarget''s), the following method determines which sit target an avatar ends up at:
+**If the prim that is clicked on ''has'' a sit target and that sit target is not full, that sit target is used.
+**If the prim that is clicked on ''has no sit target'', and one or more other linked prims have sit targets that are not full, the sit target of the prim with the lowest link number will be used.
+|examples
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llSitTarget]]|}}
+{{LSL DefineRow||[[llSetSitText]]|}}
+{{LSL DefineRow||[[llAvatarOnSitTarget]]|}}
+{{LSL DefineRow||[[llAvatarOnLinkSitTarget]]|}}
+{{LSL DefineRow||[[llUnSit]]|}}
+|also_events={{LSL DefineRow||[[changed]]|}}
+|also_articles
+|notes
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/11#11.08.10.238207 | 10/08/2011 ]]
+|cat1=Sit
+|cat2=Vehicle
+|cat3=Prim
+|cat4=Effects
+|cat5=Sit/Teleport
+|cat6=Stop
+|cat7=Link/Set
+}}

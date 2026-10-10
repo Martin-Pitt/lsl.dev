@@ -1,0 +1,73 @@
+__NOTOC__
+{{Help
+|Object=*
+}}
+
+Beginning animators often don't understand what happens to frames before Loop In and after Loop Out.  They may not know how to make seamlessly looping animations.  The loop controls are also a common source of befuddlement.  They work with percentages, rather than frame numbers, unlike every other animation program.
+
+This article attempts to clear up the confusion.
+
+== Before Loop In ==
+Frames before Loop In, if any, will be played only when the animation starts.  You could think of this as the intro of the animation.
+
+== During the Loop ==
+Frames within the loop work like you would probably expect.  When playback reaches the Loop Out frame it jumps back to the Loop In frame and continues.  To make the loop seamless the Loop In and Loop Out frames need to be identical.  There is no interpolation or delay during this jump, which is necessary to avoid a noticeable pause.  When the animation is stopped playback will stop jumping to the Loop In frame when it reaches the Loop Out frame.
+
+If playback is stopped in the middle of the loop, playing will continue.  It just stops treating the Loop Out frame specially.
+
+== After Loop Out ==
+When the animation is stopped the frames after Loop Out, if any, will be played.  You could think of this as the outro of the animation.
+
+== Working with Percentages ==
+The percentages for Loop In and Loop Out indicate animation frame numbers, not BVH file frame numbers.
+
+For example, in a animation with 7 frames, if we wanted the loop to start on frame 3 of the animation, and end on frame 5 of the animation:
+
+'''Loop In Percentage:'''<br>
+frame 3/7 animation frames = 42.857%
+
+'''Loop Out Percentage:'''<br>
+frame 5/7 animation frames = 71.429%
+
+If this strikes anyone as unnecessarily complex and error-prone, that feeling is normal.
+
+== A Diagram of the Example ==
+{| {{prettytable}}
+! BVH File Frame
+! Animation Frame
+|-
+| 1
+| Removed (Reference Frame)
+|-
+| 2
+| 1 (Intro Frame 1)
+|-
+| 3
+| 2 (Intro Frame 2)
+|-
+| 4
+| 3 (Loop Frame 1; Loop In)
+|-
+| 5
+| 4 (Loop Frame 2)
+|-
+| 6
+| 5 (Loop Frame 3; Loop Out)
+|-
+| 7
+| 6 (Outro Frame 1)
+|-
+| 8
+| 7 (Outro Frame 2)
+|}
+
+== Known Issues ==
+There are some bugs in the BVH importer.  One of them causes the first frame of a animation to be triplicated (see {{JIRA|SH-2550}}).  This causes a noticeable pause in animations that are looped from start to finish.  Many recommended adjusting Loop In to account for the reference frame.  However, the internal format for animations does not contain the reference frame, and a Loop In of 0% actually starts at 0 seconds into the animation.  Adjusting Loop In this way did reduce the visibility of the pause, but did not eliminate it, because it only skipped 1 of the extra frames.
+
+A bug causes frames after Loop Out to not be played in the animation upload preview window.  However, they still play correctly in-world (see {{JIRA|VWR-8301}}).
+:You can avoid wasting [[Linden Dollar]]s due to this bug by testing all your animations on the [[Preview Grid]].
+
+== See Also ==
+*[[BVH Reference Frame]]
+
+[[Category:LSL_Animation]]

@@ -1,0 +1,45 @@
+{{LSL_Function
+|func_id=254|func_sleep=1.0|func_energy=10.0
+|func=llOpenRemoteDataChannel
+|func_footnote
+|func_desc=Creates a channel to listen for XML-RPC calls. Will trigger a {{LSLG|remote_data}} event with channel id once it is available.
+|return_text
+|spec
+|deprecated=LSL_http_server
+|caveats=* '''XML-RPC should not be used anymore.  Use http-in instead, see [[LSL_http_server]].'''
+* If an object moves from one region to another it must re-open the channel
+** The object will get the *same* channel as before, but without re-opening no requests will get through
+* Any channel that is not used for 14 days will be cleaned up.
+** May be advisable to somewhat regularly (before expected use or on a regular schedule) check that the channel is good and hasn't changed by calling llOpenRemoteDataChannel and comparing to the previous channel.
+* Note: XML-RPC requests often time-out due to the front-end server being overloaded.  LL has continued to upgrade the server hardware periodically, but it has remained unreliable.  LL developers have advised that the XML-RPC design isn't scalable (due to the single server bottle-neck) and that the service is "deprecated".  They suggest using [[HTTP Polling]] as an alternative.  If an XML-RPC request does time-out the script's remote_data event may or may not be triggered (and any script response is lost).
+|constants
+|examples=<syntaxhighlight lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llOpenRemoteDataChannel();
+    }
+    changed(integer c)
+    {
+        if(c & (CHANGED_REGION | CHANGED_TELEPORT))
+            llOpenRemoteDataChannel();
+    }
+    remote_data( integer event_type, key channel, key message_id, string sender, integer idata, string sdata )
+    {
+        if (event_type == REMOTE_DATA_CHANNEL) { // channel created
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=XML-RPC
+|cat2
+|cat3
+|cat4
+}}

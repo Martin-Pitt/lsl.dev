@@ -1,0 +1,106 @@
+{{LSL Function
+|func_id=196|func_sleep=0.0|func_energy=10.0
+|func=llCSV2List|return_type=list|p1_type=string|p1_name=src
+|func_footnote=
+To convert a list into a comma-separated string use [[llList2CSV]].<br/>
+Do not confuse this function with the {{Wikipedia|Comma-separated values|CSV}} format, it is ''not'' the CSV format.
+|func_desc=This function takes a string of values separated by commas, and turns it into a list.
+|return_text=made by parsing '''src''', a string of comma separated values.
+|spec=
+=== Vectors & Rotations ===
+Anything between "<" and ">" is considered a single value regardless of the existence of a comma between. 
+
+This ensures that [[vector]]s and [[rotation]]s get treated as a single value, with no additional cleanup needed afterward.
+
+Note, though, that for every "<" there needs to be a corresponding ">" or it will consume the rest of the string. For example,
+{{{!}}
+{{LSL DefineRow||&#32;<code>llCSV2List("<>,>,a")</code>|returns <code>["<>", ">", "a"]</code>|(Second ">" is isolated)}}
+{{LSL DefineRow||&#32;<code>llCSV2List("<<>,>,a")</code>|returns <code>["<<>,>", "a"]</code>|(Regularly paired)}}
+{{LSL DefineRow||&#32;<code>llCSV2List("<<<>,>,a")</code>|returns <code>["<<<>,>,a"]</code>|(Third "<" lost its opposite one)}}
+{{!}}}
+
+=== Types ===
+
+The function makes no assumptions about what the list entry types should be, all elements in the resulting list will be strings. It is important to know that the llList2* functions implicit typecasts do not work the same as explicit typecast. The following table gives code examples for each type that will yield the best results.
+
+{{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}- {{Hl2}}
+! Target
+! Code
+! Description
+{{!}}-
+{{!}}[[integer]]
+{{!}}<code>(integer)[[llList2String]](mlist, mint)</code>
+{{!}}[[llList2Integer]] does not support the hex format
+{{!}}-
+{{!}}[[float]]
+{{!}}<code>(float)[[llList2String]](mlist, mint)</code>
+{{!}}[[llList2Float]] does not support the scientific or hexadecimal notations
+{{!}}-
+{{!}}[[string]]
+{{!}}<code>[[llList2String]](mlist, mint)</code>
+{{!}}Always Safe
+{{!}}-
+{{!}}[[key]]
+{{!}}<code>[[llList2Key]](mlist, mint)</code>
+{{!}}Always Safe
+{{!}}-
+{{!}}[[vector]]
+{{!}}<code>(vector)[[llList2String]](mlist, mint)</code>
+{{!}}[[llList2Vector]] will return a zero vector
+{{!}}-
+{{!}}[[rotation]]
+{{!}}<code>(rotation)[[llList2String]](mlist, mint)</code>
+{{!}}[[llList2Rot]] will return a zero rotation
+{{!}}}
+
+=== Whitespace ===
+
+[[llCSV2List]] consumes the first leading space from all values :
+
+<syntaxhighlight lang="lsl2">
+list tmp = llCSV2List("first , second , third");
+//returns ["first ","second ","third"]
+//not ["first "," second "," third"]
+</syntaxhighlight>
+|caveats=
+* If a "<" does not have a matching ">", the remainder of the string will be a single value, even if the "<" is in the middle of the value, see [[#Vectors & Rotations|Vectors & Rotations]] for further details.
+* All items in the returned list are strings.
+* If an empty string is parsed, the result will a list containing an empty string: [""] (not an empty list).
+* When used with lists that are generated based off assets in inventory, [[llCSV2List]] should not be used, as inventory assets can contain commas as part of their names.
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    state_entry()
+    {
+        string csv = "first,second,third";
+        list my_list = llCSV2List(csv);
+        llOwnerSay("CSV: " + csv);
+        integer i;
+        integer num_list=llGetListLength(my_list);
+        for (i=0; i<num_list; ++i)
+        {
+            llOwnerSay("my_list[" + (string)i + "]: " + llList2String(my_list,i));
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llList2CSV]]|}}
+{{LSL DefineRow||[[llDumpList2String]]|}}
+{{LSL DefineRow||[[llParseString2List]]|}}
+{{LSL DefineRow||[[llParseStringKeepNulls]]|}}
+|also_events
+|also_tests
+|also_articles={{LSL DefineRow||[[Typecast]]|}}
+|notes=To use separators other than commas (especially if you can't predict when a user might have sneaked a comma into data they supply the script), use [[llParseString2List]] instead, which allows you to specify separators other than commas. [[llParseString2List]] unfortunately does not support the special parsing required for handling rotations and vectors, nor does it consume leading and trailing whitespace.
+|permission
+|negative_index
+|sort=CSV2List
+|cat1=List
+|cat2=String
+|cat3=Data Conversion
+|cat4=CSV
+}}

@@ -1,0 +1,197 @@
+=====Cycle through the color wheel=====
+
+Cycles through color wheel at 15 degree intervals every second.
+
+<source lang="lsl2">
+// Cycle color each second for every 15 degress around the color wheel
+// @author: JB Kraft
+// ------------------------------------------------------------------------
+// Jan 28, 2007 - v0.1 orig example code
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+// 24 color values, one for each 15 degrees around the color wheel
+list realcolors = [
+<1.000000, 0.000000, 0.000000>, <1.000000, 0.200000, 0.000000>, 
+<1.000000, 0.400000, 0.000000>, <1.000000, 0.501961, 0.000000>, 
+<1.000000, 0.600000, 0.000000>, <1.000000, 0.698039, 0.000000>, 
+<1.000000, 0.800000, 0.000000>, <1.000000, 0.898039, 0.000000>, 
+<1.000000, 1.000000, 0.000000>, <0.800000, 1.000000, 0.000000>, 
+<0.200000, 1.000000, 0.000000>, <0.000000, 0.800000, 0.000000>, 
+<0.000000, 0.698039, 0.400000>, <0.000000, 0.600000, 0.600000>, 
+<0.000000, 0.400000, 0.698039>, <0.000000, 0.200000, 0.800000>, 
+<0.098039, 0.098039, 0.698039>, <0.200000, 0.000000, 0.600000>, 
+<0.250980, 0.000000, 0.600000>, <0.400000, 0.000000, 0.600000>, 
+<0.600000, 0.000000, 0.600000>, <0.800000, 0.000000, 0.600000>, 
+<0.898039, 0.000000, 0.400000>];
+
+// keep time
+integer g_TIMER = 0;
+// the offset into the color array
+integer g_NDX = 0;
+
+// ------------------------------------------------------------------------
+// D E F A U L T
+// ------------------------------------------------------------------------
+default
+{
+    // --------------------------------------------------------------------
+    state_entry()
+    {
+    }
+
+    // --------------------------------------------------------------------
+    touch_start(integer total_number)
+    {
+        // turn the timer on/off        
+        g_TIMER = !g_TIMER;
+        // cheeky use of flag as timer value
+        llSetTimerEvent( g_TIMER );
+    }
+    
+    
+    // --------------------------------------------------------------------
+    timer( )
+    {
+        if( g_NDX > llGetListLength( realcolors ) - 1) {
+            g_NDX = 0;
+        }
+        llSetColor( llList2Vector( realcolors, g_NDX), ALL_SIDES );
+        ++g_NDX;
+    }
+}
+
+</source>
+
+Below Added by Nephilim jinx:
+
+You can also make use of this by adding the "if" statement to detect owner only and reset on rez for builds.
+
+<source lang="lsl2">
+// Cycle color each second for every 15 degress around the color wheel
+// @author: JB Kraft
+// @edit by: Nephilim Jinx
+// ------------------------------------------------------------------------
+// April, 29 2012 Edit
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ 
+// 24 color values, one for each 15 degrees around the color wheel
+list realcolors = [
+<1.000000, 0.000000, 0.000000>, <1.000000, 0.200000, 0.000000>, 
+<1.000000, 0.400000, 0.000000>, <1.000000, 0.501961, 0.000000>, 
+<1.000000, 0.600000, 0.000000>, <1.000000, 0.698039, 0.000000>, 
+<1.000000, 0.800000, 0.000000>, <1.000000, 0.898039, 0.000000>, 
+<1.000000, 1.000000, 0.000000>, <0.800000, 1.000000, 0.000000>, 
+<0.200000, 1.000000, 0.000000>, <0.000000, 0.800000, 0.000000>, 
+<0.000000, 0.698039, 0.400000>, <0.000000, 0.600000, 0.600000>, 
+<0.000000, 0.400000, 0.698039>, <0.000000, 0.200000, 0.800000>, 
+<0.098039, 0.098039, 0.698039>, <0.200000, 0.000000, 0.600000>, 
+<0.250980, 0.000000, 0.600000>, <0.400000, 0.000000, 0.600000>, 
+<0.600000, 0.000000, 0.600000>, <0.800000, 0.000000, 0.600000>, 
+<0.898039, 0.000000, 0.400000>];
+ 
+// keep time
+integer g_TIMER = 0;
+// the offset into the color array
+integer g_NDX = 0;
+ 
+// ------------------------------------------------------------------------
+// D E F A U L T
+// ------------------------------------------------------------------------
+default
+{
+    // --------------------------------------------------------------------
+    on_rez(integer start_param)
+    {
+    llResetScript();
+    }
+ 
+    // --------------------------------------------------------------------
+    touch_start(integer a)
+    {
+    if(llDetectedKey(0) == llGetOwner())
+{
+        // turn the timer on/off        
+        g_TIMER = !g_TIMER;
+        // cheeky use of flag as timer value
+        llSetTimerEvent( g_TIMER );
+}
+    }
+ 
+ 
+    // --------------------------------------------------------------------
+    timer( )
+    {
+        if( g_NDX > llGetListLength( realcolors ) - 1) {
+            g_NDX = 0;
+        }
+        llSetColor( llList2Vector( realcolors, g_NDX), ALL_SIDES);
+        ++g_NDX;
+    }
+}
+</source>
+
+and to expand even more. the tags could be simply set from ALL_SIDES to a specific side number!
+
+<source lang="lsl2">
+
+    // --------------------------------------------------------------------
+    timer( )
+    {
+        if( g_NDX > llGetListLength( realcolors ) - 1) {
+            g_NDX = 0;
+        }
+        llSetColor( llList2Vector( realcolors, g_NDX), 2);
+        ++g_NDX;
+    }
+}
+</source>
+
+but lets go one step further. you would want multiple sides of one prim but not all sides, simply replicate llSetColor like so.
+
+<source lang="lsl2">
+    // --------------------------------------------------------------------
+    timer( )
+    {
+        if( g_NDX > llGetListLength( realcolors ) - 1) {
+            g_NDX = 0;
+        }
+        llSetColor( llList2Vector( realcolors, g_NDX), 1);
+        llSetColor( llList2Vector( realcolors, g_NDX), 2);
+        llSetColor( llList2Vector( realcolors, g_NDX), 3);
+        ++g_NDX;
+    }
+}
+</source>
+
+and for those builders who like to make multiple objects sync the same color in cyclic order. the messaged link can be added to the touch event like the following.
+(THIS IS FOR THE MASTER/ROOT PRIM SCRIPT AND SHOULD NOT BE USED IN SLAVE/CHILD PRIM SCRIPT!)
+
+<source lang="lsl2">
+    // --------------------------------------------------------------------
+    touch_start(integer a)
+    {
+    if(llDetectedKey(0) == llGetOwner())
+{
+        // turn the timer on/off        
+        g_TIMER = !g_TIMER;
+        // cheeky use of flag as timer value
+        llMessageLinked(LINK_SET, 0, "Touched.", NULL_KEY);
+        llSetTimerEvent( g_TIMER );
+}
+    }
+</source>
+
+and for the child/slave prim script we would replace the touch event with a listen instead!
+(THIS IS FOR THE CHILD/SLAVE PRIM SCRIPT AND SHOULD NOT BE USED IN MASTER/ROOT PRIM!)
+
+<source lang="lsl2">
+    // --------------------------------------------------------------------
+link_message(integer sender_num, integer num, string str, key id)
+ {
+        // turn the timer on/off        
+        g_TIMER = !g_TIMER;
+        // cheeky use of flag as timer value
+        llSetTimerEvent( g_TIMER );
+    }
+ </source>
+[[Category:LSL Examples]]

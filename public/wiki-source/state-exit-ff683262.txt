@@ -1,0 +1,55 @@
+{{LSL_Event
+|event_id=1|event_delay|event=state_exit
+|event_desc=Triggered on a qualifying [[state]] transition.
+|constants
+|spec
+|caveats=
+* Events queued during [[state_exit]], are dumped before the next state is entered. use [[state_entry]] to avoid this, when possible. See [[state]] for further caveats.
+|examples=<source lang="lsl2">default
+{
+    state_entry()
+    {
+        llOwnerSay("Entering default state");
+    }
+    touch_end(integer detected)
+    {
+        // Note: NEVER do a state change from a touch_start event -
+        // - this can result in a missed touch_start on re-entering this state
+        // Here we do the state change safely from within touch_end
+        state other;
+    }
+    state_exit()
+    {
+        llOwnerSay("leaving default state");
+    }
+}
+
+state other
+{
+    state_entry()
+    {
+        llOwnerSay("Entering state \"other\"");
+    }
+    touch_end(integer detected)
+    {
+        state default;
+    }
+    state_exit()
+    {
+        llOwnerSay("leaving state \"other\"");
+    }
+}</source>
+|helpers
+|also_header
+|also_events
+|also_functions
+|also_articles
+|also_footer
+|notes=While the [[default]] [[state_entry]] is triggered on script reset, state_exit is not triggered prior to the reset.
+|mode
+|deprecated
+|cat1=Script
+|cat2=State
+|cat3
+|cat4
+}}

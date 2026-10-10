@@ -1,0 +1,83 @@
+<onlyinclude>{{#if:
+
+{{#vardefine:omega_const|{{LSL Const|PRIM_OMEGA|integer|18|c=Used to {{GetSet|{{{1|}}}|get the object's llTargetOmega settings|rotate the object at on the given axis at the given rate|/}} }}}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+*[[PRIM_OMEGA]] on nonphysical objects, and child prims of physical objects, is only a client side effect; the object or prim will collide as non-moving geometry.
+*[[PRIM_OMEGA]] cannot be used on avatars sitting on the object. It will emit the error message "PRIM_OMEGA disallowed on agent".
+*If [[PRIM_OMEGA]] does not appear to be working, make sure that that Develop > Network > Velocity Interpolate Objects is enabled on the viewer.
+*In the parameters returned by <code>llGetPrimitiveParams([PRIM_OMEGA])</code>, the vector is normalized, and the spinrate is multiplied by the magnitude of the original vector.}}
+
+{{#vardefine:p_axis_desc|arbitrary axis to rotate the object around}}
+{{#vardefine:p_spinrate_desc|rate of rotation in radians per second}}
+{{#vardefine:p_gain_desc|also modulates the final spinrate and disables the rotation behavior if zero}}
+
+}}</onlyinclude>{{#if:
+
+}}{{LSL Constant
+|inject-2={{LSL PrimitiveParam Categorize|Prim}}
+|name=PRIM_OMEGA
+|type=integer
+|value=32
+|desc=Used to make the object spin at the specified axis and rate, or retrieve spin settings. See [[llTargetOmega]] for specification.
+|examples=<source lang="lsl2">
+// Set this prim rotating
+llTargetOmega(<1.0,3.0,0.5>, TWO_PI, 1.0);
+
+// Read back this prim's current target omega
+list current_omega = llGetPrimitiveParams([PRIM_OMEGA]); // returns [axis, spinrate, gain]
+vector axis = llList2Vector(current_omega, 0); // Should be llVecNorm(<1.0,3.0,0.5>)
+float spinrate = llList2Float(current_omega, 1); // Should be TWO_PI*llVecMag(<1.0,3.0,0.5>)
+float gain = llList2Float(current_omega, 2); // Should be 1.0
+
+// Set all child prims rotating
+llSetLinkPrimitiveParamsFast(LINK_ALL_CHILDREN, [PRIM_OMEGA, <1.0,3.0,0.5>, TWO_PI, 1.0]);
+</source>
+Also, can use llSetPrimitiveParams for the root prim.
+<source lang="lsl2">// will need two prims linked together for this script.
+default
+{
+    state_entry()
+    {
+        // make some sort of rotation angle for the omega...
+        vector rotationAngle = <2.3, 5.5, 9.7> * llTan(85); 
+        
+        // rotate the main prim slowly using the same rotataion angle, rate, and gain...
+        llSetPrimitiveParams([ PRIM_OMEGA, rotationAngle * 0.3, 1.0, 1.0 ]);
+        
+        // rotate the link satellite prim separately around its own axis 
+        // it will rotate also around the main prim because the main prim is rotating.
+        llSetLinkPrimitiveParams(2, [ PRIM_OMEGA, rotationAngle, 1.0, 1.0 ]);
+    }
+}
+</source>
+|constants
+|pa={{LSL Constant/List|i_front=[&#32;{{#var:omega_const}},&#32;|i_end=&nbsp;]
+|text=When used with [[llSetPrimitiveParams]] & [[llSetLinkPrimitiveParams]]
+|i1_type=vector|i1_name=axis
+|i2_type=float|i2_name=spinrate
+|i3_type=float|i3_name=gain
+|toc=llSetPrimitiveParams
+}}
+|pb={{LSL Constant/List|i_front=[[llGetPrimitiveParams]]([&nbsp;{{#var:omega_const}}&nbsp;]);|
+|r_front=Returns the [[list]] [&nbsp;|r_end=&nbsp;]
+|text
+|toc=llGetPrimitiveParams
+|r1_type=vector|r1_name=axis
+|r2_type=float|r2_name=spinrate
+|r3_type=float|r3_name=gain
+}}
+|functions=
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llTargetOmega]]|}}
+|events
+|location
+|history=*Introduced in [[Release Notes/Second Life RC BlueSteel/11#11.06.20.233291|Second Life RC BlueSteel 11.06.20.233291]], June 22, 2011
+*Rolled to main server channel the week of 7/11/2011
+|cat1
+|cat2=Effects
+|cat3=Physics
+|cat4=Rotation
+}}

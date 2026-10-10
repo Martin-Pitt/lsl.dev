@@ -1,0 +1,125 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-868}}
+{{LSL_Function/give|target|inventory|sim=*|uuid=false|insert=list of items}}
+|func_id=231|func_sleep=3.0|func_energy=10.0
+|func=llGiveInventoryList
+|p1_type=key|p1_name=target|p1_desc
+|p2_type=string|p2_name=folder|p2_desc=folder name to use
+|p3_type=list|p3_name=inventory
+|func_footnote
+|return_text
+|func_desc=Gives '''inventory''' items to '''target''', creating a new '''folder''' to put them in.
+|spec=
+===target types===
+Depending upon the type of '''target''' this function works differently.
+* Avatar
+** Must be in or able to see into the same Region as the sending object, or recently have been so. [[#SVC-868|SVC-868]]
+** Places the inventory items in a newly created folder in the avatars inventory (even if there is a folder by the same name, a new one is created).
+* Prim / Object
+** The prim ''must'' be in the same region.
+** Does ''not'' create a folder.
+|caveats=
+|examples=
+<source lang="lsl2">
+default
+{
+    touch_start(integer n)
+    {
+        key toucher = llDetectedKey(0);
+        string folder = "Item Folder";
+        list inventory = ["item", "another item"];
+        llGiveInventoryList(toucher, folder, inventory);
+    }
+}
+</source>
+<source lang="lsl2">
+//  when the prim is touched, the script checks all other inventory items whether or not they're copiable
+//  copiable items are added to a list, if the list is not empty when all items have been checked
+//  the prim gives them to the touching avatar within a single folder
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        string thisScript = llGetScriptName();
+        list inventoryItems;
+        integer inventoryNumber = llGetInventoryNumber(INVENTORY_ALL);
+
+        integer index;
+        for ( ; index < inventoryNumber; ++index )
+        {
+            string itemName = llGetInventoryName(INVENTORY_ALL, index);
+
+            if (itemName != thisScript)
+            {
+                if (llGetInventoryPermMask(itemName, MASK_OWNER) & PERM_COPY)
+                {
+                    inventoryItems += itemName;
+                }
+                else
+                {
+                    llSay(0, "Unable to copy the item named '" + itemName + "'.");
+                }
+            }
+        }
+
+        if (inventoryItems == [] )
+        {
+            llSay(0, "No copiable items found, sorry.");
+        }
+        else
+        {
+            llGiveInventoryList(llDetectedKey(0), llGetObjectName(), inventoryItems);    // 3.0 seconds delay
+        }
+    }
+}
+</source>
+<source lang="lsl2">
+//  script gives items to owner only
+//  all copiable items are given within a single folder
+//  all no-copy items are transferred separately (only one time, right? right!)
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        key owner = llGetOwner();
+        if (llDetectedKey(0) != owner)
+            return;
+
+        list inventoryItems;
+        integer inventoryNumber = llGetInventoryNumber(INVENTORY_ALL);
+
+        integer index;
+        for ( ; index < inventoryNumber; ++index )
+        {
+            string itemName = llGetInventoryName(INVENTORY_ALL, index);
+            if (itemName != llGetScriptName() )
+            {
+                if (llGetInventoryPermMask(itemName, MASK_OWNER) & PERM_COPY)
+                {
+                    inventoryItems += itemName;
+                }
+                else
+                {
+                    llGiveInventory(owner, itemName);    // 2.0 seconds delay
+                }
+            }
+        }
+
+        if (inventoryItems != [] )
+            llGiveInventoryList(owner, llGetObjectName(), inventoryItems);    // 3.0 seconds delay
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llGiveInventory]]}}
+{{LSL DefineRow||[[llGiveAgentInventory]]}}
+|also_events={{LSL DefineRow||[[changed]]}}
+|also_tests
+|also_articles
+|notes|cat1=Inventory
+|cat2
+|cat3
+|cat4
+}}

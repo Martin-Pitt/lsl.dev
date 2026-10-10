@@ -1,0 +1,42 @@
+{{LSL_Function
+|func_id=280|func_sleep=0.0|func_energy=10.0
+|func=llIntegerToBase64|return_type=string|p1_type=integer|p1_name=number
+|func_footnote
+|func_desc
+|return_text=that is a {{LSLGC|Base64}} big endian encode of '''number'''
+|spec
+|caveats
+|constants
+|examples=<syntaxhighlight lang="lsl2">string ASCII7ToString(integer letter)
+{
+    if(letter >= 0x80 || letter < 0) return "";//Not valid ascii7 character
+    return llBase64ToString(llIntegerToBase64(letter << 24));
+}</syntaxhighlight>
+<syntaxhighlight lang="lsl2">// Packs a 24-bit unsigned integer value (0-16777215) to only 4 Base64 characters.
+string Int24ToBase64(integer value)
+{
+    return llGetSubString(llIntegerToBase64(value<<8), 0, 3);
+}
+// unpacks a 4-character Base64 value to a 24-bit unsigned integer
+integer Base64ToInt24(string value)
+{
+    return (llBase64ToInteger(value)>>8)&0xffffff; // Masking required to remove sign extension from bit-shifting
+}
+</syntaxhighlight>
+If you are looking for full Unicode translation, not just ASCII7 see: [[Combined_Library#Unicode_Integer_to_UTF8|Combined_Library]]
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llBase64ToInteger]]}}
+{{LSL DefineRow||[[llBase64ToString]]}}
+{{LSL DefineRow||[[llStringToBase64]]}}
+|also_events
+|also_tests
+|also_articles
+|notes=*Only the first 6 of the 8 characters returned are needed to decoded it back into an integer. The padding "==" can be safely removed for storage.
+*"Big-endian" refers to the fact that the most significant, i.e. highest byte of the integer is processed first: the first characters in the returned Base64 string correspond to this byte, and the last characters correspond to the least significant byte.
+**Combined with bit-shifting, removing characters from the Base64 string allows more efficient packing of small values. See [[llBase64ToInteger#Caveats|llBase64ToInteger caveats]] for specifics.
+|cat1=Base64
+|cat2=Encoding
+|cat3
+|cat4
+}}

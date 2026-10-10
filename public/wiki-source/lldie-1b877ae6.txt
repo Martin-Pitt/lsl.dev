@@ -1,0 +1,49 @@
+{{LSL Function
+|inject-2={{Warning|This permanently deletes your whole object (root prim and all linked prims). The deleted object WILL NOT appear in your lost-and-found folder. The deleted object WILL NOT appear in your trash folder. It will be gone, lost forever. There will be NO WAY WHATSOEVER to get it back. Use with caution!}}
+|inject-3=Huh {{Issues|SVC-7421}}
+|func=llDie
+|sort=Die
+|func_id=41
+|func_sleep=0.0
+|func_energy=0.0
+|func_footnote=If called in any prim in the {{LSLG|link set}} the result will be the deletion of the entire object.{{PBR}}To remove a single prim from an object, use [[llBreakLink]] first.
+|func_desc=Deletes the object. The object does '''not''' go to the owner's Inventory [[Trash|🗑 Trash]].
+|return_text
+|spec
+|caveats=
+*The script may not stop executing immediately after this function is called ({{Jira|SVC-7421}}).
+*After this function is called, there is no way to undo the deletion of the object.
+*Has no effect if called from within an {{LSLGC|Attachment|attachment}}; there is no way to delete an attachment.
+**To detach an object from the avatar, call [[llDetachFromAvatar]].
+**[[llDetachFromAvatar|Detaching]] a [[llAttachToAvatarTemp|temporary attachment]] will cause the attachment to be deleted.
+|constants
+|examples=
+
+|helpers=
+[[llRemoveInventory]] of [[llGetScriptName]] deletes just the calling script, rather than all of the objects that the calling script contains. For instance, you can write a script that chats a little when dragged onto an object from inventory and then politely disappears itself, such as:
+<syntaxhighlight lang="lsl2">
+// http://wiki.secondlife.com/wiki/llDie
+default
+{
+    state_entry()
+    {
+        llOwnerSay("llGetRegionTimeDilation()");
+        llOwnerSay((string) llGetRegionTimeDilation());
+        llRemoveInventory(llGetScriptName());
+    }
+}
+</syntaxhighlight>
+|also_functions={{LSL DefineRow||[[llDetachFromAvatar]]|}}
+{{LSL DefineRow||[[llBreakLink]]|}}
+|also_events
+|also_tests
+|also_articles={{LSL DefineRow||{{LSLGC|Attachment}}|}}
+|notes
+|permission
+|negative_index
+|haiku={{Haiku|Hey, where did it go?|Assignment. Equality.|Gee, thanks, K & R.}}
+|cat1=Object
+|cat2=Stop
+|cat3=Cleanup
+|cat4
+}}

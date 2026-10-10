@@ -1,0 +1,44 @@
+{{LSL_Function
+|func_id=245|func_sleep=0.0|func_energy=10.0
+|func=llDumpList2String|return_type=string|p1_type=list|p1_name=src|p2_type=string|p2_name=separator
+|func_footnote=Use [[llParseString2List]] or [[llParseStringKeepNulls]] to undo the process.
+
+Unlike [[llList2CSV]], which dumps a list to a comma-separated formatted string with no choice over the {{LSLPT|separator}}, llDumpList2String gives you more control. This can be useful if you don't trust commas as a {{LSLPT|separator}} because you might be working with data supplied to the script by a user who uses, say, commas as part of a street address.
+|func_desc
+|return_text=that is the list {{LSLPT|src}} converted to a string with {{LSLPT|separator}} between the entries.
+|spec
+|notes
+|caveats
+|constants
+|examples=
+<source lang="lsl2">list mylist = ["a", "b", "c", "d"];
+string tmp = llDumpList2String(mylist, "**");
+//tmp now equals: "a**b**c**d"</source>
+
+<source lang="lsl2">list mylist = [<10,5,7>, 100, "c", "d"];
+string tmp = llDumpList2String(mylist, "**");
+//tmp now equals: "<10,5,7>**100**c**d"</source>
+
+<source lang="lsl2">default{
+    state_entry(){
+        list my_list = [1, 2.0, "a string", llGetOwner()];
+        llOwnerSay("<" + llDumpList2String(my_list,"><") + ">"); 
+//says: "<1><2.000000><a string><a822ff2b-ff02-461d-b45d-dcd10a2de0c2>"        
+    }
+}</source>
+|helpers
+|also_functions=*{{LSLG|llParseString2List}}
+*{{LSLG|llParseStringKeepNulls}}
+*{{LSLG|llCSV2List}}
+*{{LSLG|llList2CSV}}
+|also_events
+|also_tests
+|also_articles=*{{LSLG|Typecast}}
+|notes=Instead of using <code>llDumpList2String(myList, "")</code> you may wish to consider using the more efficient <code>(string)myList</code> as it produces an identical result with less memory usage due to eliminating a function-call. Each element of the list is converted to string format in the result, so floats expand to six digits of precision, rotations and vectors are represented with "<" and ">" characters, etc.
+|permission
+|negative_index
+|cat1=List
+|cat2=String
+|cat3=Data Conversion
+|cat4
+}}

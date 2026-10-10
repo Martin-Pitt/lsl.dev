@@ -1,0 +1,120 @@
+{{LSL Function
+|inject-2={{LSL Function/uuid|uuid|sim=*|group=*}}{{LSL Function/group}}
+|func=llSameGroup
+|sort=SameGroup
+|func_id=219|func_sleep=0.0|func_energy=10.0
+|return_type=integer
+|return_subtype=boolean
+|p1_type=key|p1_name=uuid
+|func_desc
+|return_text=that is [[TRUE]] if {{LSLP|uuid}} and the [[prim]] the [[script]] is in are of the same [[group]], otherwise [[FALSE]].
+|func_footnote=This function compares the {{mono|group-uuid}} of the [[prim]] containing the script to that of the {{mono|group-uuid}} of what {{LSLP|uuid}} describes.
+It answers these two questions:
+*"Is the script's prim in the same [[group]] as {{LSLP|uuid}}?"
+*"Is the {{mono|group-uuid}} of the script's prim equal to {{LSLP|uuid}}?"
+|spec=
+The group of the prim the script is in is...
+* The group the prim is set-to
+* The group the prim is deeded-to 
+* The group the prim is otherwise [[Owner|owned by]]
+* If no group information is set, the {{mono|group-uuid}} used for this is [[NULL_KEY]].
+
+The group of the {{LSLP|uuid}} is...
+* If {{LSLP|uuid}} is a prim (known to the [[region]])...
+** and it is an [[attachment]], the active group of the owner*
+** The group the prim is set-to
+** The group the prim is deeded-to 
+** The group the prim is otherwise owned by
+** If no group information is set, the {{mono|group-uuid}} used for this is [[NULL_KEY]].
+* If {{LSLP|uuid}} is an [[avatar]] (known to the [[region]])...
+** The active group of the avatar.
+** If no group information is set, the {{mono|group-uuid}} used for this is [[NULL_KEY]].
+* Otherwise, treat {{LSLP|uuid}} AS the {{mono|group-uuid}}.
+** This means that instead of doing "Is the script's prim in the same group as {{LSLP|uuid}}?", it becomes "Is the {{mono|group-uuid}} of the script's prim equal to {{LSLP|uuid}}?"
+'''Note:''' No group, prim, or avatar share the same {{LSLP|uuid}}.
+
+In pseudocode:
+<syntaxhighlight lang="lsl2">integer llSameGroup(key uuid){
+    key group = getGroupKey(llGetKey());
+    if(uuid == group)
+        return TRUE;
+    if(getGroupKey(uuid) == group)
+        return TRUE;
+    return FALSE;
+}</syntaxhighlight>
+|caveats=
+*Not so obvious is that it returns [[TRUE]] if the [[object]] is not set to a group (i.e. "(none)") and either the [[avatar|AV]] with the given [[key]] has no group active or the function is called with a [[NULL_KEY]].
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+// Gives inventory object only to agents with the same active group
+
+default
+{
+    touch_start(integer total_number)
+    {
+        key id = llDetectedKey(0);
+
+        integer sameGroup = llSameGroup(id);
+//      same as llDetectedGroup(i) (with llDetectedGroup, detected does not need to be in the sim)
+
+        if (sameGroup)
+        {
+            integer numberOfObjectsInPrim = llGetInventoryNumber(INVENTORY_OBJECT);
+
+            if (numberOfObjectsInPrim)
+                llGiveInventory(id, llGetInventoryName(INVENTORY_OBJECT, 0));
+        }
+        else
+        {
+            llRegionSayTo(id, 0, "Wrong active group!");
+        }
+    }
+}
+</syntaxhighlight>
+|helpers=
+To determine if an avatar is an object's owner when deeded to group, you should use a function similar to that provided for [[LlGetOwner#Useful_Snippets|llGetOwner]]().
+
+The following uses llSameGroup() to determine if a [[parcel]] is [[Rez|rezzable]] based on the object's active group and parcel details. Useful for preventing unnecessary rez failure notices from various types of attached objects (e.g. guns, water/skywalk [[HUD]]s, etc).
+<syntaxhighlight lang="lsl2">
+/*
+  By Aryn Gellner
+  pos - position (in region coordinates) to check against.
+  * Additional Land Owner Test added by Ruthven Willenov, simplified by Strife
+*/
+ 
+integer is_rezzable(vector pos)
+{
+    integer parcel_flags = llGetParcelFlags(pos);
+    if (parcel_flags & PARCEL_FLAG_ALLOW_CREATE_OBJECTS)
+    {
+        return true; //Anyone can rez. No further checks are needed.
+    }
+
+    //Ok, not just anyone can rez. Maybe they share an owner or the land allows for group rezzing.
+    //So let's get the parcel owner_id and group_id
+
+    list details = llGetParcelDetails(pos, [PARCEL_DETAILS_OWNER, PARCEL_DETAILS_GROUP]);
+
+    if (llList2Key(details, 0) == llGetOwner())
+    {
+        return TRUE; //Owner can always rez.
+    }
+
+    //Since what we are going to return is a boolean just return the result of the boolean expression.
+    return (parcel_flags & PARCEL_FLAG_ALLOW_CREATE_GROUP_OBJECTS) && llSameGroup(llList2Key(details, 1));
+}
+</syntaxhighlight>
+|also_functions={{LSL DefineRow||[[llDetectedGroup]]|Used in conjunction with {{LSLGC|Detected|detection}} events}}
+{{LSL DefineRow||[[llGetAttachedList]]|Together with [[llGetObjectDetails]] and [[OBJECT_GROUP]], it can be used to determine the active group of an avatar that is wearing at least one non-HUD attachment.}}
+|also_tests=
+{{LSL DefineRow||[[llSameGroup Test]]}}
+|also_events
+|also_articles
+|notes
+|cat1=Avatar
+|cat2=Group
+|haiku={{Haiku|Do you belong or|Are you alien, unknown|To us, unwanted?}}
+|cat3
+|cat4
+}}

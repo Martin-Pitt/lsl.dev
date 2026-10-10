@@ -1,0 +1,58 @@
+{{LSL_Function
+|func_id=285|func_sleep=0.0|func_energy=10.0
+|func=llParseStringKeepNulls
+|return_type=list
+|p1_type=string|p1_name=src|p1_desc=source string
+|p2_type=list|p2_name=separators|p2_desc=separators to be discarded
+|p3_type=list|p3_name=spacers|p3_desc=spacers to be kept
+|func_footnote
+|func_desc
+|return_text=that is {{LSLP|src}} broken into a list, discarding {{LSLP|separators}}, keeping {{LSLP|spacers}}, keeping any null values generated.
+|spec=
+The behavior is identical to that for [[llParseString2List]], except blank strings found in the list are kept. This is useful when parsing a list that contains values that can be null or empty (and subsequently removing the nulls would upset the distribution of data and the element indexes).
+
+llParseStringKeepNulls("", ["~"], []) will return [""]
+|caveats=
+* Only the first 8 {{LSLP|separators}} and first 8 {{LSLP|spacers}} will be used any extras will be ignored.
+* All {{LSLP|separators}} and {{LSLP|spacers}} must be strings, all other types will be ignored.
+* {{LSLP|separators}} take precedent over {{LSLP|spacers}}. The string is parsed from start to finish, each position is compared against the {{LSLP|separators}} then {{LSLP|spacers}} before moving onto the next position. The first match is the one that is returned. Using the list ["A", "AB"] will always act with "A" and never "AB".
+* Duplicate or irrelevant {{LSLP|separators}} or {{LSLP|spacers}} count towards the limits and slow down parsing.
+* All entries in the return are typed as string. Use explicit typecasting on [[llList2String]] to convert the values into other types. Do not rely upon the implicit typecasting of the other llList2* functions (as they typically return a default value).
+* Remember to capture the result of the operation with a variable, unless you are planning to act directly on the results.
+|constants
+|examples=<source lang="lsl2">default
+{
+    state_entry()
+    {
+        // This will say:
+        // <A><crazy><fox><.><Saw><the><moon><.><.>
+        string my_string = "A crazy fox.  Saw the moon..";
+        list my_list = llParseString2List(my_string,[" "],["."]);
+        llOwnerSay("<" + llDumpList2String(my_list,"><") + ">");
+        
+        // This will say:
+        //  <A><crazy><fox><.><><><Saw><the><moon><.><><.><>
+        my_list = llParseStringKeepNulls(my_string,[" "],["."]);
+        llOwnerSay("<" + llDumpList2String(my_list,"><") + ">");
+    }
+}</source>
+|helpers=
+'''Replacement functions without or very large separator/spacer count limits'''
+{{{!}}
+{{LSL DefineRow||[[ParseString2List]]|Functions exactly the same as [[llParseString2List]] and [[llParseStringKeepNulls]].}}
+{{LSL DefineRow||[[Separate Words|separateWords]]|Functions the same as [[llParseString2List]] unless certain preconditions are not met.}}
+{{!}}}
+|also_functions={{LSL DefineRow||[[llParseString2List]]}}
+{{LSL DefineRow||[[llDumpList2String]]}}
+{{LSL DefineRow||[[llCSV2List]]}}
+{{LSL DefineRow||[[llList2CSV]]}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|sort=ParseStringKeepNulls
+|cat1=List
+|cat2=String
+|cat3=Data Conversion
+|cat4
+}}

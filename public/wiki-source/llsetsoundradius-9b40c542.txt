@@ -1,0 +1,50 @@
+{{Issues/SVC-3058}}{{LSL_Function/Headless
+|inject-2={{LSL Function/link-face|link}}
+
+|head={{LSL_Function/Head
+|func=llSetSoundRadius
+|func_id=209|func_sleep=0.0|func_energy=10.0
+|p1_type=float|p1_name=radius|p1_desc=in meters
+|func_footnote
+|func_desc
+|return_text
+}}{{LSL_Function/Head
+|func=llLinkSetSoundRadius
+|func_id=|func_sleep=0.0|func_energy=10.0
+|p1_type=integer|p1_subtype=link|p1_name=link
+|p2_type=float|p2_name=radius
+|func_footnote
+|func_desc
+|return_text
+}}
+
+|summary=Establishes a hard cut-off '''radius''' for audibility for [[llPlaySound]], [[llLoopSound]] and [[llLinkPlaySound]] in non-triggered mode. Sounds are not heard until an observer's camera enters the radius, and immediately stop when leaving the radius. Volume fading is still determined by the distance from camera, not the radius.
+|caveats=
+* This function is a prim property, thus will survive script resets.
+* Has no effect on [[llTriggerSound]] or llLinkPlaySound in triggered mode. Sounds will play regardless of camera position.
+** [[llTriggerSoundLimited]] can be used instead for a similar effect but the function depends on '''avatar''' position, not camera position.
+* When used with llPlaySound or llLinkPlaySound in non-looped mode, the sound will be played from the beginning only once, when the observer's camera enters the radius for the first time. This can happen significantly later than a one-off sound was actually played.
+* With llLoopSound or llLinkPlaySound in looped mode, the sound will be played from the beginning every time the observer's camera enters the radius.
+|constants
+|examples=
+Enable sound cutoff at 4 meters.
+<source lang="lsl2">
+llSetSoundRadius(4); //Enable sound cutoff at 4 meters.
+</source>
+Disable sound cutoff.
+<source lang="lsl2">
+llSetSoundRadius(0); //Disable sound cutoff.
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llTriggerSoundLimited]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes=
+Pass 0 to this function to disable it.
+|cat1=Sound
+|cat2
+|cat3
+|cat4
+|history={{LSL Added|0.4.0|remote=http://secondlife.wikia.com/wiki/Version_0.4.0}}
+}}

@@ -1,0 +1,89 @@
+{{LSL Header}}
+
+==Blacklist and Remote Kill==
+
+This script explains how to set up a blacklist and incorporate a remote kill script for something.
+
+===Blacklist===
+
+The Blacklist is a list of avatar names you can input which will be denied access to your object.  The script will check the blacklist on rez and if the owner is on it, the object will delete, clean scripts, or detach.
+
+===Remote Kill===
+
+Allows you to delete something owned by someone else by saying something like "kill:ownername" on a private admin channel to delete, clean scripts, or detach their object.
+
+==The Script==
+
+<source lang="lsl2">
+//© 2009 Chase Quinnell and TerraCo Designs
+//      http://www.terracodesigns.com
+//Please keep this open source and leave my name reference here
+
+list blacklist = ["name 1", "name2", "name3"];
+
+//  put your avatar's uuid here
+key creator = "YOUR AVATAR UUID KEY HERE";
+
+
+integer adminChannel = 901;
+
+
+default
+{
+    on_rez(integer start)
+    {
+        llResetScript();
+        llListen(adminChannel,"","","");
+    }
+
+    state_entry()
+    {
+        //  the next line is required to make detaching possible
+        //llRequestPermissions(llGetOwner(),PERMISSION_ATTACH);
+
+        key ownerKey = llGetOwner();
+        string ownerName = llKey2Name(ownerKey);
+        integer found = ~llListFindList(blacklist, [ownerName]);
+
+        if (found)
+        {
+            llOwnerSay("WARNING:"
+                + "\n\tYou are not allowed to use this item, you have been blacklisted by the creator."
+                + "\n\tItem will bee self-destructing. Have a nice day, " + ownerName + ".");
+            llSleep(0.5);
+
+        //  llDie();
+
+        //  the next line is required if you want to detach
+        //  llDetachFromAvatar;
+        }
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        key ownerKey = llGetOwner();
+        key ownername = llKey2Name(ownerKey);
+
+        if (message == llToLower("kill:" + (string)ownername) && channel == adminChannel && id == creator)
+        {
+            //if the message equals kill:currentownernamehere
+            //and the channel is the admin channel
+            //and the person is the creator
+    
+            //then tell the person their thing has been nerfed...
+            llOwnerSay("Self destruct initiated...");
+            llInstantMessage(creator, "/me owned by " + ownerName +" has self-destructed.");
+            llSleep(0.5);
+            llRemoveInventory("otherscripthere..");
+            llSleep(0.5);
+            llRemoveInventory(llGetScriptName());
+        }
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (!(perm & PERMISSION_ATTACH))
+            llResetScript();
+    }
+}
+</source>

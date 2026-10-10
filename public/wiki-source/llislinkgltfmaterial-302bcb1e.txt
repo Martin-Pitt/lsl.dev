@@ -1,0 +1,54 @@
+[[Category:glTF]]
+
+{{LSL_Function
+|func_id=|func_sleep=0.0|func_energy=10.0
+|func=llIsLinkGLTFMaterial
+|return_type=integer
+|return_subtype=boolean
+|p1_type=integer|p1_name=link|p1_desc=Link to inspect for PBR, may be [[LINK_THIS]] or [[LINK_ROOT]]
+|p2_type=integer|p2_name=face|p2_desc='''Face''' to examine for PBR, or [[ALL_SIDES]]
+|return_text=that is [[TRUE]] if the material is PBR and [[FALSE]] if it is [[PBR_Materials#Nomenclature_changes|Blinn-Phong]] diffuse texture on '''face'''
+|func_footnote
+|spec
+|caveats=
+* Returns [[FALSE]] if link does not exist or refers to a multi-link target (such as [[LINK_SET]]).
+* Returns [[FALSE]] if face does not exist.
+|constants
+|examples=<source lang="lsl2">
+//Tells (on chat) if the materials are PBR
+default
+{
+    state_entry()
+    {
+        integer link = LINK_THIS;
+        integer i;
+        for(; i < llGetLinkNumberOfSides(link); ++i)
+        {
+            string message = "Side " + (string)i + " material is ";
+            if (llIsLinkGLTFMaterial(link, i))
+                message += "glTF/PBR";
+            else
+                message += "Blinn-Phong";
+            llSay(0, message);
+        }
+
+        if (llIsLinkGLTFMaterial(link, ALL_SIDES))
+            llSay(0, "All sides are PBR.");
+        else
+            llSay(0, "Some sides are Blinn-Phong (not PBR).");
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetNumberOfSides]]|Gets the number of faces on the prim}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|history
+|cat1=PBR
+|cat2
+|cat3
+|cat4
+}}

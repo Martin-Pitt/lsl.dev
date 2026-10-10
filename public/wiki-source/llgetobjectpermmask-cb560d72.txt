@@ -1,0 +1,128 @@
+{{LSL_Function
+|func_id=287|func_sleep=0.0|func_energy=10.0
+|func=llGetObjectPermMask
+|return_type=integer|return_subtype=bit field
+|p1_type=integer|p1_name=category|p1_desc=MASK_* flag
+|func_footnote
+|func_desc
+|return_text=of the requested permission {{LSLP|category}} for the object containing this script.
+|spec
+|caveats
+|constants={{LSL Constants Perm Mask}}
+|examples=
+<source lang="lsl2">
+if ((permsYouHave & permsYouWant) == permsYouWant)
+    llSay(0, "You have the perms you want.");
+else
+    llSay(0, "You don't have the perms you want.");
+</source>
+<source lang="lsl2">
+integer ownerPerms = llGetObjectPermMask(MASK_OWNER);
+integer copyAndModPerms = PERM_COPY | PERM_MODIFY;
+
+if ((ownerPerms & copyAndModPerms) == copyAndModPerms)
+    llSay(0, "Owner has copy & modify perms.");
+else
+    llSay(0, "Owner does not have copy & modify perms.");
+</source>
+<source lang="lsl2">
+string getPermsAsReadableString(integer perm)
+{
+    integer allPerms = PERM_ALL;
+    integer fullPerms = PERM_COPY | PERM_MODIFY | PERM_TRANSFER;
+
+    integer copyModMovePerms = PERM_COPY | PERM_MODIFY | PERM_MOVE;
+    integer copyModPerms = PERM_COPY | PERM_MODIFY;
+
+    integer copyTransMovePerms = PERM_COPY | PERM_TRANSFER | PERM_MOVE;
+    integer copyTransPerms = PERM_COPY | PERM_TRANSFER;
+
+    integer modTransMovePerms = PERM_MODIFY | PERM_TRANSFER | PERM_MOVE;
+    integer modTransPerms = PERM_MODIFY | PERM_TRANSFER;
+
+    integer copyMovePerms = PERM_COPY | PERM_MOVE;
+
+    integer transMovePerms = PERM_TRANSFER | PERM_MOVE;
+
+    string output = " perms: ";
+
+    if ((perm & allPerms) == allPerms)
+        output += "full and move";
+    else if ((perm & fullPerms) == fullPerms)
+        output += "full";
+    else if ((perm & copyModMovePerms) == copyModMovePerms)
+        output += "copy & modify & move";
+    else if ((perm & copyModPerms) == copyModPerms)
+        output += "copy & modify";
+    else if ((perm & copyTransMovePerms) == copyTransMovePerms)
+        output += "copy & transfer & move";
+    else if ((perm & copyTransPerms) == copyTransPerms)
+        output += "copy & transfer";
+    else if ((perm & modTransMovePerms) == modTransMovePerms)
+        output += "modify & transfer & move";
+    else if ((perm & modTransPerms) == modTransPerms)
+        output += "modify & transfer";
+    else if ((perm & copyMovePerms) == copyMovePerms)
+        output += "copy & move";
+    else if ((perm & PERM_COPY) == PERM_COPY)
+        output += "copy";
+    else if ((perm & transMovePerms) == transMovePerms)
+        output += "transfer & move";
+    else if ((perm & PERM_TRANSFER) == PERM_TRANSFER)
+        output += "transfer";
+    else if ((perm & PERM_MOVE) == PERM_MOVE)
+        output += "move";
+    else
+        output += "none";
+
+    //  Remember, items in Second Life must have either
+    //  PERM_COPY or PERM_TRANSFER when "talking about"
+    //  owner perms or perms for next owner.
+
+    return
+        output;
+}
+default
+{
+    state_entry()
+    {
+        integer basePerms      = llGetObjectPermMask(MASK_BASE);
+        integer ownerPerms     = llGetObjectPermMask(MASK_OWNER);
+        integer nextOwnerPerms = llGetObjectPermMask(MASK_NEXT);
+        integer groupPerms     = llGetObjectPermMask(MASK_GROUP);
+        integer everyonePerms  = llGetObjectPermMask(MASK_EVERYONE);
+
+        llSay(0, "base"       + getPermsAsReadableString(basePerms));
+        llSay(0, "owner"      + getPermsAsReadableString(ownerPerms));
+        llSay(0, "next owner" + getPermsAsReadableString(nextOwnerPerms));
+        llSay(0, "group"      + getPermsAsReadableString(groupPerms));
+        llSay(0, "everyone"   + getPermsAsReadableString(everyonePerms));
+    }
+}
+</source>
+<source lang="lsl2">
+integer isLocked()
+{
+    return !(llGetObjectPermMask(MASK_OWNER) & PERM_MOVE);
+}
+</source>
+
+|helpers
+|also_functions={{LSL DefineRow||[[llGetInventoryPermMask]]|}}
+|also_events
+|also_tests=
+{{LSL DefineRow||[[llGetObjectPermMask_Test]]}}
+|also_articles=
+{{LSL DefineRow||[[hex]]}}
+|notes=
+The perms of a newly created object are often:
+  Base = PERM_ALL
+  Owner = PERM_ALL
+  Next = PERM_MOVE or PERM_TRANSFER
+  Group = 0 (none)
+  Everyone = 0 (none)
+|cat1=Permissions/Asset
+|cat2=Object
+|cat3
+|cat4
+}}

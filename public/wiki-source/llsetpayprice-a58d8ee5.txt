@@ -1,0 +1,114 @@
+{{LSL_Function
+|inject-2={{Issues/VWR-3048}}{{Issues/VWR-8744}}
+|func_id=302|func_sleep=0.0|func_energy=10.0
+|func=llSetPayPrice|sort=SetPayPrice
+|p1_type=integer|p1_name=price|p1_desc=PAY_* constant or positive value (including zero)
+|p2_type=list|p2_name=quick_pay_buttons|p2_desc=Four PAY_* constants and/or positive integer values (zero is not shown)
+|func_desc=Suggest default amounts for the pay text field and pay buttons of the appearing dialog when someone chooses to pay this object.
+|caveats=*This function should not be trusted to limit the values of money payable to the object; ''always'' verify the amount paid is the amount expected.
+* Use only one call to this function in all the scripts on an object to prevent confusion about which values are used.   You still need to check in the money event that the amount is as expected.
+* This function only works when called from the root prim of an object. Its effect applies to all the prims in the object. Calling it from a child prim has no effect.
+** There is currently a [https://feedback.secondlife.com/slua-alpha/p/child-prim-in-linkset-cannot-be-paid-if-previously-a-root-prim-with-llsetpaypric viewer bug] where calls from child prims will '''prevent''' payment to the object.
+* Payment to a prim can be blocked by the llSetPayPrice() setting in the prim, which persists even if the script with llSetPayPrice() is removed.
+* '''Caution:''' Calling this function will enable payment on the prim (or the whole object if it is the root prim) for the current state, even when this state has no money event.
+* Otherwise, the pay option will only be shown in prims having a running script with a [[money]] event (or in all the prims of the object if the root has a running script with a money event).
+* The effect seems to persist even if the script is recompiled with out the [[llSetPayPrice]] function, even if the script is replaced with another one which includes a [[money]] event, but not [[llSetPayPrice]].
+* Money cannot be paid to an attachment; "Pay" will go directly to the wearer instead.
+* If '''quick_pay_buttons''' contains a negative value or zero, the button will not be shown at all.
+** However, zero is allowed for '''price''', which is used to set the custom text field's value within the Pay window.
+* If ''price'' is [[PAY_HIDE]] and a payment is made that does not match any value in ''quick_pay_buttons'', then the simulator will block the payment and the payer will receive an error message.
+
+|examples=This will give the user a dialog box without the '''price''' field and only one button with a value of 150.
+<source lang="lsl2">llSetPayPrice(PAY_HIDE, [150,PAY_HIDE,PAY_HIDE,PAY_HIDE])</source>
+
+<source lang="lsl2">integer price = 10;
+
+default
+{
+    state_entry()
+    {
+        llSetPayPrice(PAY_HIDE, [PAY_HIDE ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+        llRequestPermissions(llGetOwner(), PERMISSION_DEBIT);
+    }
+    run_time_permissions(integer perm)
+    {
+        if(perm & PERMISSION_DEBIT)
+            state cash;
+    }
+}
+
+state cash
+{
+    state_entry()
+    {
+        llSetPayPrice(price, [price ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+    }
+    money(key id, integer amount)
+    {
+        if(amount != price)
+        {
+            llGiveMoney(id, amount);
+            llInstantMessage(id, "You paid "+(string)amount+", which is the wrong price, the price is: "+(string)price);
+        }
+        else
+        {
+            //insert your give code here.
+            llInstantMessage(id, "You paid the right price");
+        }
+    }
+}</source>
+|spec
+|constants=
+{{{!}}
+{{!}}
+{{{!}}{{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! colspan="2" {{!}} Constant
+! {{HoverText|Alt|Alternate}}
+! Description
+{{!}}-
+{{!}} [[PAY_HIDE]]
+{{!}} -1
+{{!}} <center>0</center>
+{{!}} Hides this quick pay button.
+{{!}}-
+{{!}} [[PAY_DEFAULT]]
+{{!}} -2
+{{!}} 
+{{!}} Use the default value for this quick pay button.
+{{!}}}
+{{!}}
+{{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! colspan="2" {{!}} Button Order
+{{!}}- 
+{{!}} <center>1</center>
+{{!}} <center>2</center>
+{{!}}-
+{{!}} <center>3</center>
+{{!}} <center>4</center>
+{{!}}}
+{{!}}
+{{{!}}{{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! colspan="2" {{!}} Defaults
+{{!}}-
+{{!}}$1
+{{!}}$5
+{{!}}-
+{{!}}$10
+{{!}}$20
+{{!}}}
+{{!}}}
+|helpers
+|also_functions={{LSL DefineRow||[[llGiveMoney]]|}}
+|also_tests={{LSL DefineRow||[[llSetPayPrice Test]]|}}
+|also_events={{LSL DefineRow||[[money]]|}}
+|also_articles
+|notes
+|cat1=Money
+|cat2=Prim
+|cat3=Dialog
+|cat4
+|issues
+}}

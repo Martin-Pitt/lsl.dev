@@ -1,0 +1,70 @@
+{{LSL_Function/permission|PERMISSION_CONTROL_CAMERA}}{{LSL_Function
+|func_id=314|func_sleep=0.0|func_energy=10.0
+|func=llClearCameraParams
+|func_desc=Resets all camera parameters to default values and turns off scripted camera control.
+|return_text
+|spec
+|caveats
+|constants
+|examples=<source lang="lsl2">integer gEnabled;
+
+askForPermissions()
+{
+    llRequestPermissions(llGetOwner(), PERMISSION_CONTROL_CAMERA);
+}
+
+default
+{
+
+    on_rez(integer sp)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        askForPermissions();
+    }
+
+    touch_start(integer total_number)
+    {
+
+        if (llDetectedKey(0) != llGetOwner())
+        {
+            return;
+        }
+        else if (!llGetPermissions() & PERMISSION_CONTROL_CAMERA)
+        {
+            llOwnerSay("I need permissions to control your camera.");
+            askForPermissions();
+            return;
+        }
+
+        gEnabled = !gEnabled;
+        if (gEnabled)
+        {
+            llOwnerSay("Enabled.");
+            llSetCameraParams([
+                CAMERA_ACTIVE, 1, 
+                CAMERA_DISTANCE, 50.0
+            ]);
+        }
+        else
+        {
+            llOwnerSay("Disabled.");
+            llClearCameraParams();
+        }
+
+    }
+
+}</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llSetCameraParams]]}}
+|also_events
+|also_articles
+|notes
+|cat1=Camera
+|cat2
+|cat3
+|cat4
+}}

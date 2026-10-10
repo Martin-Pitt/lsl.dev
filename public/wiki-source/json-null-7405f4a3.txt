@@ -1,0 +1,39 @@
+{{LSL Constant
+|inject-2={{Issues/BUG-3692}}
+|name=JSON_NULL
+|type=string
+|value="�"
+|dvalue={{HoverText|"�"|Special Unicode Character&#x000d;Unicode:&#x0009;U+FDD5&#x000d;HTML:&#x0009;&amp;#xFDD5;&#x000d;llUnescapeUrl({{String|%EF%B7%95}});}}
+|desc=Return value for [[llJsonValueType]] function indicating the Json data type of a given address specifier in a given string-serialized JSON text.
+
+Also the return string value for [[llJsonGetValue]] function when the bare word 'null' is at the given address specifier in a given string-serialized JSON text.
+
+Also used to encode the bare word 'null' within a Json text to signify an empty, valueless placeholder Value at that location (the empty LSL String, "", can be used as well for that).
+|constants={{LSL Constants/JSON}}
+|examples=<source lang="lsl2">// Showing usage of JSON_NULL
+// within a Json text string
+string jText;
+
+default
+{
+    state_entry(){
+        jText = llList2Json(JSON_OBJECT, ["A", 4, "B", 5]);
+        llOwnerSay(jText); // jText is '{"A":4,"B":5}'
+        llOwnerSay(llJsonGetValue(jText, ["B"])); // The string "5"
+        jText = llJsonSetValue(jText, ["B"], JSON_NULL);
+        llOwnerSay(jText); // jText is now '{"A":4,"B":null}'
+        llOwnerSay(llJsonGetValue(jText, ["B"])); // The Unicode value of JSON_NULL
+
+        }
+}</source>
+|caveats
+|functions=
+{{LSL DefineRow||[[llJsonValueType]]|}}
+{{LSL DefineRow||[[llJsonGetValue]]|}}
+|events
+|cat1=JSON
+|cat2
+|cat3
+|cat4
+|self
+}}

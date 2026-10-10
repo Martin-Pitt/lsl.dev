@@ -1,0 +1,112 @@
+{{LSL Header|ml=*}}{{LSLC|}}
+There are only a few ways to crash a script in LSL. The most popular is [[integer]] divide-by-zero but there are also functions which will cause the script to crash.
+
+{| {{Prettytable}}
+|+ Crashes not caused by function calls.
+|- {{Hl2}}
+! Message
+! Example / Cause
+! LSRF
+|-
+| ''[[:Category:LSL Error/Math|Math Error]]''
+| Integer divide by zero: <code>1 / 0</code>
+| LSRF_MATH
+|-
+| ''Hit Sandbox Limit''
+| Setting [[STATUS_SANDBOX]] and then the objects moves beyond 10m
+| LSRF_SANDBOX
+|-
+| ''Stack-Heap Collision''
+| Running out of memory
+| LSRF_STACK_HEAP_COLLISION
+|-
+| ''Lists may not contain lists''
+| For whatever reason the following will compile, but it will crash at runtime <code>[(list)1]</code>
+| LSRF_NESTING_LISTS
+|}
+
+{| {{Prettytable}}
+|+ Function calls that can crash the script
+|- {{Hl2}}
+! Function
+! Error Delivery
+! Message
+! Description
+! LSRF
+|-
+| [[llListen]]
+| [[PUBLIC_CHANNEL]]
+| ''Too Many Listens''
+| The script tried to open more than 65 concurrent listens.
+| LSRF_TOO_MANY_LISTENS
+|-
+| [[llPow]]
+| [[PUBLIC_CHANNEL]]
+| ''Math Error''
+| Triggered for imaginary results <code>(({{LSLPT|exponent}} != ([[integer]]){{LSLPT|exponent}}) && ({{LSLPT|base}} < 0.0))</code>
+| LSRF_MATH
+|-
+| [[llSqrt]]
+| [[PUBLIC_CHANNEL]]
+| ''Math Error''
+| Triggered for imaginary results <code>({{LSLPT|val}} < 0.0)</code>
+| LSRF_MATH
+|}
+
+{| class="sortable" {{prettytable}}
+|+ Full table of LSL VM generated errors (this is by no means all of the LSL errors
+|- {{hl2}}
+! Message
+! LSRF
+! Cause
+|-
+| "Invalid"
+| ''NA''
+| Internal VM error - report any occurrence on [https://jira.secondlife.com/ JIRA]
+|-
+| "Math Error"
+| LSRF_MATH
+| Math error, divide by zero, imaginary result, etc.
+|-
+| "Stack-Heap Collision"
+| LSRF_STACK_HEAP_COLLISION
+| The script ran out of memory. Use less memory or split your memory usage across multiple scripts.
+|-
+| "Bounds Check Error"
+| LSRF_BOUND_CHECK_ERROR
+| 
+|-
+| "Heap Error"
+| LSRF_HEAP_ERROR
+| 
+|-
+| "Version Mismatch"
+| LSRF_VERSION_MISMATCH
+| Internal VM error - report any occurrence on [https://jira.secondlife.com/ JIRA]
+|-
+| "Missing Inventory"
+| LSRF_MISSING_INVENTORY
+| The script itself has been lost despite still appearing to be in inventory. You could try contacting [https://support.secondlife.com/ support].
+|-
+| "Hit Sandbox Limit"
+| LSRF_SANDBOX
+| This is not an error per se, it's enable with [[STATUS_SANDBOX]] and used for debugging to keep objects from escaping.
+|-
+| "Chat Overrun"
+| LSRF_CHAT_OVERRUN
+| '''Deprecated''': {{LSLC|Chat}} functions use to throw this error instead of silent truncation.
+|-
+| "Too Many Listens"
+| LSRF_TOO_MANY_LISTENS
+| The script tried to have more than 65 listens open at the same time. Considering using [[llListenRemove]].
+|-
+| "Lists may not contain lists"
+| LSRF_NESTING_LISTS
+| For whatever reason the following will compile, but it will crash at runtime [(list)1]
+|-
+| "CLI Exception"
+| LSRF_CLI
+| Internal VM error - report any occurrence on [https://jira.secondlife.com/ JIRA]
+|}
+Source: 
+https://bitbucket.org/lindenlab/viewer-release/src/bc61d5ad9162bd461c17d77728090fe5d8ead59e/indra/lscript/lscript_execute/lscript_execute.cpp?at=default

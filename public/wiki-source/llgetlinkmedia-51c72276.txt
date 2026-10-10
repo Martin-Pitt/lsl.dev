@@ -1,0 +1,42 @@
+{{LSL_Function
+|inject-2={{LSL_Function/face|face|notall=*|return=an empty list}}{{LSL_Function/link|link|nogroup=*}}{{Issues/SVC-7422}}
+|func_id=?|func_sleep=0.0|func_energy=0.0|mode
+|func=llGetLinkMedia|return_type=list|return_subtype=parameters|return_subtype_disp=parameter list
+|p1_type=integer|p1_subtype=link|p1_name=link|p1_desc
+|p2_type=integer|p2_name=face|p2_desc
+|p3_type=list|p3_subtype=instructions|p3_name=params|p3_desc=a set of names (in no particular order)
+|func_footnote=Returns an empty list if no media exists on the face(s).
+|func_desc=Get the media params for a particular {{LSLP|face}} on a {{LSLP|link}}ed prim, given the desired list of named ''param''s.
+|return_text=of values in the order requested.
+|spec=
+|caveats=
+|constants={{LSL Constants/PrimMedia|get}}
+|examples
+|helpers=<syntaxhighlight lang="lsl2">list GetLinkMedia(integer link, integer face, list input)
+{//Returns a list that can be fed to llSetLinkMedia or llSetPrimMediaParams
+    list output;
+    integer c = ~llGetListLength(input);
+    while((c = - ~c))
+    {
+        list flag = llList2List(input, c, c);
+        output += flag + llGetLinkMedia(link, face, flag);
+    }
+    if(output == input)
+        return [];
+    return output;
+}</syntaxhighlight>
+|also_functions=
+{{LSL DefineRow||[[llGetPrimMediaParams]]}}
+{{LSL DefineRow||[[llSetLinkMedia]]}}
+{{LSL DefineRow||[[llClearLinkMedia]]}}
+|also_tests
+|also_events=
+|also_articles=
+|notes
+|deepnotes
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/11#11.08.10.238207 | 10/08/2011 ]]
+|cat1=Prim Media
+|cat2=Media
+|cat3=Link/Get
+|cat4
+}}

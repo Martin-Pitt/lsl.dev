@@ -1,0 +1,64 @@
+{{LSL_Function
+|inject-2=
+
+{{#vardefine:spec_between|If {{LSLP|start}} is past the end of {{LSLP|dest}}, then {{LSLP|src}} is appended to {{LSLP|dest}}, it will not add null entries.  To avoid this, create empty elements in the list first. A similar outcome occurs when using {{LSLGC|Negative Index|negative indexes}}.}}
+
+{{LSL_Function/negative index|true|start}}
+
+|func_id=200|func_sleep=0.0|func_energy=10.0
+|func=llListInsertList
+|return_type=list
+|p1_type=list|p1_name=dest
+|p2_type=list|p2_name=src
+|p3_type=integer|p3_name=start
+|func_footnote
+|func_desc
+|return_text=that contains all the elements from {{LSLP|dest}} but with the elements from {{LSLP|src}} inserted at position {{LSLP|start}}.
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">
+list numbers = [3, "three", 2, "two", 1, "one"];
+default
+{
+    state_entry()
+    {
+        llOwnerSay(llDumpList2String(numbers, ","));
+        // Object: 3,three,2,two,1,one
+        integer index = llListFindList(numbers, [2]);
+        if (index != -1)
+        {
+            numbers = llListInsertList(numbers, [2.5, "two and a half"], index);
+            llOwnerSay(llDumpList2String(numbers, ","));
+            // Object: 3,three,2.500000,two and a half,2,two,1,one
+        }
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow|[[llDeleteSubList]]}}
+{{LSL DefineRow|[[llList2List]]}}
+{{LSL DefineRow|[[llListReplaceList]]}}
+|also_events
+|also_tests
+|also_articles
+|notes=
+Bear in mind that the source list will remain unchanged. Instead, a new list will be produced. So, it's important that you capture this with a variable (unless you are acting directly on the results.)
+
+
+Tip! To insert something at the start of a list, you can just add the two lists (putting the list with the new item(s) first)
+
+<source lang="lsl2">
+list oldList = ["B", "C", "D"];
+list newItem = ["A"];
+list newlist = newItem + oldList;
+</source>
+
+|permission
+|sort=ListInsertList
+|cat1=List
+|cat2
+|cat3
+|cat4
+}}

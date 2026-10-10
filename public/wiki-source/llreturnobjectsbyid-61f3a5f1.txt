@@ -1,0 +1,101 @@
+{{LSL_Function
+|inject-2=
+{{Issues/SVC-6281}}
+{{LSL_Function/permission|PERMISSION_RETURN_OBJECTS}}
+|func_id=|func_sleep=0.0|func_energy=
+|func=llReturnObjectsByID|sort=ReturnObjectsByID
+|p1_type=list|p1_name=objects|p1_desc=list of object [[UUID|uuids]] (keys)|p1_hover=list of object uuids (keys)
+|return_type=integer
+|func_footnote=If the return value is negative, it represents an [[#{{anchorencode:Error Flags}}|error]] flag.
+|func_desc=If the script is owned by an agent, [[PERMISSION_RETURN_OBJECTS]] may be granted by the owner.  If the script is owned by a group, this permission may be granted by an agent belonging to the group's "Owners" role.
+|return_text=that is the number of objects successfully returned to their owners or an [[#{{anchorencode:Error Flags}}|ERR_*]] flag.
+|spec=
+==== Script Owner and Scope ====
+If the script is owned by an estate owner or manager, this function works for objects located on any parcel in the region.  Otherwise, the script can return objects located over land owned by the owner of the script.
+
+As a security measure, parcel owner, estate owner, and estate managers can not have their objects returned by this method, except when the object returns itself. 
+==== Throttle ====
+Throttled at max parcel land impact capacity region-wide per hour.
+|caveats=* Objects owned by other groups will be returned to their previous owner if the object is transferable, deleted otherwise.
+|constants={{LSL_Constants/ReturnError|table=*|sortable=*}}
+|examples=
+<syntaxhighlight lang="lsl2">
+key owner;
+
+// list of objects to return
+list objects_to_return = [
+    "929f26d8-b225-5f6a-a26a-eeda27c31416",
+    "f0abe779-1989-6be4-d73c-dcb48b4313cf",
+    "bad9903-139f-2217-81f3-e61884540df6"
+];
+
+default
+{
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(),PERMISSION_RETURN_OBJECTS);
+    }
+    
+    run_time_permissions(integer p)
+    {
+        if (p & PERMISSION_RETURN_OBJECTS)
+        {
+            llSetText("Touch me to return the list of objects defined in this script",<1,1,0>,1);
+        }
+    }
+
+    touch_start(integer total_number)
+    {
+        if ((llGetPermissions() & PERMISSION_RETURN_OBJECTS) == 0)
+        {
+            llOwnerSay("Requesting permission to return objects.");
+            llRequestPermissions(llGetOwner(),PERMISSION_RETURN_OBJECTS);
+        }
+        else
+        {
+            list found_objects = [];
+            integer n = llGetListLength(objects_to_return);
+            while(--n >= 0)
+            {
+                key object = llList2Key(objects_to_return, n);
+                string pos = llList2String(llGetObjectDetails(object, [OBJECT_POS]), 0);
+                if(pos == "" )
+                {
+                    llOwnerSay( "Object in return list " + (string)object + " not found - skipping.");
+                }
+                else
+                {
+                    llOwnerSay("Adding object " + (string)object + " at " + (string)pos + " to return list.");
+                    found_objects += [object];
+                }
+            }
+            llOwnerSay("Found " + (string)llGetListLength(found_objects) + " objects to return.");
+            integer result = llReturnObjectsByID(found_objects);
+            if(result >= 0)
+            {
+                llOwnerSay("Returned " + (string)result + " objects.");
+            }
+            else
+            {
+                llOwnerSay("llReturnObjectsByID returned error code " + (string)result
+                    + " - see https://wiki.secondlife.com/wiki/LlReturnObjectsByID for meaning");
+            }
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llReturnObjectsByOwner]]|}}
+{{LSL DefineRow||[[llGetParcelPrimOwners]]|}}
+{{LSL DefineRow||[[llDie]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Parcel
+|cat2=Region
+|cat3=Security<!--not really security but I think it's useful to have it in that category-->
+|cat4=Cleanup
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/13#13.06.18.277494 | 18/06/2013 ]]
+}}

@@ -1,0 +1,46 @@
+{{LSL_Function
+|inject-1={{LSL_Function/prim|prim|sim=*|}}
+|func_id=323|func_sleep=0.0|func_energy=10.0
+|func=llGetObjectPrimCount
+|return_type=integer
+|p1_type=key|p1_name=prim|p1_desc
+|func_footnote=Avatars sitting on the object are not counted{{Footnote|[[llGetNumberOfPrims]] on the other hand does count avatars sitting on the object.|llGetNumberOfPrims on the other hand does count avatars sitting on the object.}}. Zero is returned if {{LSLP|prim}}: {{HoverText|(A)|is not found}} is not found, {{HoverText|(B)|is part of an attachment}} is part of an attachment{{Footnote|Whether the attachment exception is a bug or a feature is unclear.|handle=attachment}}, or {{HoverText|(C)|is not a prim}} is not a prim.
+|func_desc
+|return_text=that is the total number of prims in the object that contains {{LSLP|prim}}.
+|spec
+|caveats=
+* This cannot be used to detect if an avatar is seated (by checking for a non-zero return), use [[llGetAgentInfo]] instead.
+* The prim count for attachments are not returned{{Footnote|handle=attachment}}. If possible use [[llGetNumberOfPrims]] instead.
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">default
+{
+    touch_start(integer num)
+    {
+        integer prims = llGetObjectPrimCount(llGetKey());
+        if (prims == 0)
+        {
+            // llGetObjectPrimCount returns zero for attachments.
+            prims = llGetNumberOfPrims();
+            // Avatars can't sit on attachments so this is ok.
+        }
+        llOwnerSay("This object has "
+                    + (string)prims
+                    + " prims and "
+                    + (string)(llGetNumberOfPrims() - prims)
+                    + " avatars.");
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetNumberOfPrims]]|Returns the number of prims in the current object.}}
+{{LSL DefineRow||[[llGetObjectLinkKey]]|Returns the key of the link in the linkset an object.}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Object
+|cat2
+|cat3
+|cat4
+}}

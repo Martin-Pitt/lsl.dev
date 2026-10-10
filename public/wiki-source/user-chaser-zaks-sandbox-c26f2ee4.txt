@@ -1,0 +1,55 @@
+{{DISPLAYTITLE:farts}}
+{{LSL_Function
+|inject-2={{LSL_Function/prim|id|sim=*}}
+|func_id=182|func_sleep=0.0|func_energy=10.0
+|func=llGetOwnerKey|sort=GetOwnerKey
+|return_type=key|p1_type=key|p1_name=id
+|func_footnote
+|func_desc
+|return_text=that is the owner of prim {{LSLP|id}}
+|spec
+|caveats=
+* Returns {{LSLP|id}} if {{LSLP|id}} is not found in the region or is not a prim.
+** Owner information becomes unavailable ''immediately'' on derez or detach. For example, if a prim chats at derez or detach time, {{LSLP|id}} can be returned even inside [[listen]] events of nearby objects. <sup>{{Jira|SVC-5095}}</sup>
+* Also returns {{LSLP|id}} for avatars, use [[llGetAgentSize]] instead to distinguish them from prims that do not exist.
+* Returns NULL_KEY if the id passed in is not a valid key
+|constants
+|examples=
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+    //  listen to anything talking on channel 1
+        llListen(1, "", NULL_KEY, "");
+    //  Type "/1 " + message (such as "/1 poke") to chat 'message' on channel 1.
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        key ownerOfThisObject = llGetOwner();
+        key ownerOfSpeaker = llGetOwnerKey(id);
+
+    //  if whoever is talking is the owner of this object
+    //  or if the owner of the object talking is the owner of this object
+        if (ownerOfSpeaker == ownerOfThisObject)
+        {
+            llOwnerSay("'" + name + "' has the same owner as me ^_^");
+        }
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llKey2Name]]|}}
+{{LSL DefineRow||[[llRequestAgentData]]|}}
+{{LSL DefineRow||[[llGetObjectDetails]]|[[OBJECT_OWNER]]}}
+{{LSL DefineRow||[[llGetOwner]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Owner
+|cat2=Key
+|cat3
+|cat4
+}}

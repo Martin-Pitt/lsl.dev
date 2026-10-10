@@ -1,0 +1,84 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-924}}{{LSL_Function/avatar|id|sim=*}}
+|func_id=220|func_sleep=0.0|func_energy=10.0
+|sort=UnSit|func=llUnSit
+|p1_type=key|p1_name=id
+|func_footnote
+|func_desc=The agent identified by {{LSLP|id}} is forced to stand up if any of the following apply:
+# The agent is sitting on the scripted object
+# The agent is over land owned by the scripted object's owner and/or a group the owner has land rights for.
+
+|return_text
+|spec
+|caveats
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">// UnSit on Sit, Using a sit target
+default
+{
+    state_entry()
+    {
+        llSitTarget(<0.0, 0.0, 0.1>, ZERO_ROTATION); // Needed for llAvatarOnSitTarget to work. The vectors components must not all be set to 0.0
+    }
+    changed(integer change) // Triggered when various changes are sensed.
+    {
+        if(change & CHANGED_LINK) // When an agent sits on an object they become a new link.
+        {
+            key user = llAvatarOnSitTarget(); // Store the UUID of any agent sitting on the sit target.
+            if(user) // An avatar is on the sit target.
+                llUnSit(user); // Un-Sit the avatar.
+        }
+    }
+}</syntaxhighlight>
+<syntaxhighlight lang="lsl2">// UnSit on Sit, NOT using a sit target
+
+default
+{
+    changed(integer change) // Triggered when various changes are sensed.
+    {
+        if(change & CHANGED_LINK) // When an agent sits on an object they become a new link.
+        {
+            integer links = 0; // Create an integer type variable.
+            if(llGetObjectPrimCount(llGetKey()) < (links = llGetNumberOfPrims())) // During the check store the number of links.
+            // If the number of prims is fewer than the number of links, the last must be an avatar.
+                llUnSit(llGetLinkKey(links)); // Use the key of the last link to be added (the avatar) to call llUnSit().
+            else
+                llOwnerSay("Some kind of linking or unlinking has changed me but, I am not being sat on.");
+            // llUnSit() triggers the changed event too (the number of links is reduced by 1).
+        }
+    }
+}</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+unsit_all_avatars()
+{
+    integer objectPrimCount = llGetObjectPrimCount(llGetKey());
+    integer currentLinkNumber = llGetNumberOfPrims();
+
+    for (; objectPrimCount < currentLinkNumber; --currentLinkNumber)
+        llUnSit(llGetLinkKey(currentLinkNumber));
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        unsit_all_avatars();
+    }
+}
+</syntaxhighlight>
+
+|helpers
+|also_functions={{LSL DefineRow||[[llAvatarOnSitTarget]]|}}
+{{LSL DefineRow||[[llSitTarget]]|}}
+|also_events={{LSL DefineRow||[[changed]]|}}
+|also_articles
+|also_tests
+|notes
+|permission
+|negative_index
+|cat1=Parcel
+|cat2=Sit
+|cat3
+|cat4
+|haiku={{Haiku|Beauty at the bar|Not an empty seat in sight.|Owner clears me one.}}
+}}

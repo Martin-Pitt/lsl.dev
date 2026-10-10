@@ -1,0 +1,38 @@
+{{Issues/SVC-3293}}{{LSL_Function
+|func_id=84
+|func_sleep=0.0
+|func_energy=10.0
+|func=llGetAndResetTime
+|sort=GetAndResetTime
+|return_type=float
+|return_text=that is script time in seconds and then resets the script time to zero.
+|func_footnote
+|spec=Script time is the amount of time the script has been running since it first started, was most recently reset, or one of the reset functions was called.  It is unaffected by time dilation.
+|caveats=
+*Script time is the amount of real-world time that the script has been in a running state. It is unaffected by time dilation, but it does not count time while the script is suspended, the user is offline (when in an attachment), the object is in inventory rather than rezzed, etc.
+*Script time resets when...
+**Script reset (user or [[llResetScript]] or [[llResetOtherScript]])
+**Call to either [[llResetTime]] or [[llGetAndResetTime]]
+* Due to (32 bit) floating point number limitations, the accuracy of this function is 1/32sec up to ~3 days, 1/16sec up to ~6 days, etc... doubling each time, e.g. it's only 1 second at ~194 days. Use [[llResetTime]] or [[llGetAndResetTime]] whenever practical to maintain the accuracy you require.
+|examples=<source lang="lsl2">
+default
+{
+    touch_start(integer num_touch)
+    {
+        // This is equivalent to calling llGetTime(), then llResetTime()
+        float time = llGetAndResetTime();
+
+        llSay(0, (string)time + " seconds have elapsed since the last touch or script start.");
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llResetTime]]|}}
+{{LSL DefineRow||[[llGetTime]]|}}
+{{LSL DefineRow||[[llGetRegionTimeDilation]]}}
+|also
+|cat1=Time
+|cat2=Script
+|cat3
+|cat4
+}}

@@ -1,0 +1,46 @@
+{{LSL_Function/permission|PERMISSION_CHANGE_LINKS|grant=the owner}}{{LSL_Function
+|sort=BreakAllLinks
+|func_id=143|func_sleep=0.0|func_energy=10.0
+|func=llBreakAllLinks
+|func_desc=Delinks all prims in the link set.
+|func_footnote
+|return_text
+|spec
+|caveats=
+*This function fails if the owner does not have edit permissions on the object containing the script, the system message "''Delink failed because you do not have edit permission''" is received by the owner.
+|constants
+|examples=
+<source lang="lsl2">
+//-- requests permission to change linkes, then breaks all links on touch.
+default{
+  state_entry(){
+    llRequestPermissions( llGetOwner(), PERMISSION_CHANGE_LINKS );
+  }
+
+  run_time_permissions( integer vBitPermissions ){
+    if (PERMISSION_CHANGE_LINKS & vBitPermissions){
+      state sMain;
+    }else{
+      llResetScript();
+    }
+  }
+}
+
+state sMain{
+  touch_start( integer vIntTouched ){
+    llBreakAllLinks();
+  }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llBreakLink]]|Break a link}}
+{{LSL DefineRow||[[llCreateLink]]|Link to another object}}
+|also_tests
+|also_events={{LSL DefineRow||[[changed]]|[[CHANGED_LINK]]}}
+|also_articles
+|notes
+|cat1=Link
+|cat2=Link/Management
+|cat3
+|cat4
+}}

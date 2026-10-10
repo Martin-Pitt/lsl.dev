@@ -1,0 +1,52 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-3860}}{{LSL_Function/permission|PERMISSION_TRIGGER_ANIMATION}}{{LSL_Function/inventory|anim|uuid=true|type=animation}}
+|func_id=130|func_sleep=0.0|func_energy=10.0
+|func=llStopAnimation|sort=StopAnimation
+|p1_type=string|p1_name=anim|p1_desc=&#32;or [[Internal_Animations|built in animation]] name
+|func_footnote
+|func_desc=Stop animation {{LSLP|anim}} for agent that granted [[PERMISSION_TRIGGER_ANIMATION]] if the permission has not been revoked.
+|return_text
+|spec
+|caveats=
+* If the animation to be stopped is the only playing animation (as found via [[llGetAnimationList]]), it will continue to play to its end (if looped it will continue indefinitely)
+** if you must stop a looped animation, playing a single frame non-looped one immediately after stopping it, at low priority, will clear the list.
+|constants
+|notes=
+<source lang="lsl2">
+llStopAnimation(llGetAnimationOverride("Sitting"))
+</source>
+|examples=
+<source lang="lsl2">
+default
+{
+    touch_start(integer detected)
+    {
+        llRequestPermissions(llDetectedKey(0), PERMISSION_TRIGGER_ANIMATION);
+    }
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_TRIGGER_ANIMATION)
+        {
+            llStartAnimation("sit");
+            llOwnerSay("animation will end in 5 seconds");
+            llSetTimerEvent(5.0);
+        }
+    }
+    timer()
+    {
+        llSetTimerEvent(0.0);
+        llStopAnimation("sit");
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llGetAnimationList]]|Gets a list of playing animations}}
+{{LSL DefineRow||[[llStartAnimation]]|Starts playing an animation}}
+|also_tests
+|also_events
+|also_articles
+|cat1=Animation
+|cat2=Stop
+|cat3
+|cat4
+}}

@@ -1,0 +1,62 @@
+{{LSL Function
+|inject-2={{Issues/SVC-1945}}{{LSL Function/position|pos|region=*|local=*}}
+|func_id=58|func_sleep=0.2|func_energy=10.0
+|func=llSetPos
+|p1_type=vector|p1_name=pos|p1_desc=&#32;(see ''[[#Specification]]'').|p1_hover=.
+|func_desc=Moves the object or primitive towards {{LSLPT|pos}} without using physics.
+|func_footnote=Movement is capped to 10m per call for unattached root prims.{{Footnote|Unless you exploit the undocumented [[warpPos]] bug.}}
+|spec=This function is available for nonphysical root prims and all child prims. It has no effect on the root prim if the object is physical.
+=====Coordinate Frame=====
+*Root prims (or single prim objects)
+**Attached
+***'''pos''' is a [[Viewer coordinate frames#Local|local coordinate]] relative to the attach point.
+**Not attached
+***'''pos''' is a [[Viewer coordinate frames#Region|region coordinate]].
+*Child prims (non root prims)
+**'''pos''' is a [[Viewer coordinate frames#Local|local coordinate]] relative to the root prim.
+|caveats=
+*Because of the intermixing of local and regional coordinates with this function, when a prims position is wanted it is best to use [[llGetLocalPos]].
+*This function does not work in the root prim of physical objects. Use a physical function like [[llMoveToTarget]] instead.
+*If you have explicitally set your object as "static obstacle" for pathfinding , the function will fail with the error in the debug channel:
+** "Unable to set prim position or scale: object contributes to the navmesh."
+* The function cannot move a world object below the region ground level, and the midpoint of the root will be snapped to the ground instead.
+|constants
+|examples=
+{{LSL Tip|This function has a movement cap of 10m and a time delay of 0.2 seconds per call. Please consider using [[llSetRegionPos]] and/or [[llSetLinkPrimitiveParamsFast]] instead.}}
+<syntaxhighlight lang="lsl2">
+//Move the object up 1m when someone touches it.
+default {
+     touch_start(integer i) {
+          llSetPos(llGetPos() + <0,0,1>);
+     }
+}
+// to bypass the small movement bug use this
+// - created by Madpeter Zond
+// notes: it does not check if the movement would go out of limit range for linked prims
+llSetLocalPos(vector offset)
+{
+    vector save = offset;
+    if(offset.x < 0.0) offset.x -= 1;
+    else offset.x += 1;
+    if(offset.y < 0.0) offset.y -= 1;
+    else offset.y += 1;
+    if(offset.z < 0.0) offset.z -= 1;
+    else offset.z += 1;
+    llSetPos(offset);
+    llSetPos(save);    
+}
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llSetRegionPos]]|Sets position of object to any position within the region.}}
+{{LSL DefineRow||[[llGetLocalPos]]|Returns the prim's local position if it is attached or non-root (otherwise it returns the global position)}}
+{{LSL DefineRow||[[llGetRootPosition]]|Gets the root prims position}}
+{{LSL DefineRow||[[llGetPos]]|Returns the prim's global position, even if it is attached or non-root}}
+|also_tests
+|also_events
+|also_articles
+|notes=Multiple movement commands can be chained together with [[llSetPrimitiveParams]] and [[PRIM_POSITION]]. The advantage of doing this is that the script only sleeps once per function call instead of once per movement.
+|cat1=Movement
+|cat2=Prim
+|cat3
+|cat4
+}}

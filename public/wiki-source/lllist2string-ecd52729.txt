@@ -1,0 +1,47 @@
+{{LSL_Function
+|inject-2={{LSL_Function/list/element|src|index|string|nf=*|return={{HoverText|null string|null string: ""}}}}
+|func_id=188|func_sleep=0.0|func_energy=10.0
+|func=llList2String|return_type=string|p1_type=list|p1_name=src|p2_type=integer|p2_name=index
+|func_footnote
+|func_desc
+|return_text=that is at {{LSLP|index}} in {{LSLP|src}}.
+|spec
+|caveats=*When using this function to typecast a list element to a string it will truncated float based types to 6 decimal places.
+|constants
+|examples=<source lang="lsl2">//This code demonstrates the differences in typecasting in LSL (and demonstrates how to use the llList2* functions).
+// Best viewed in Chat History (ctrl-h)
+default
+{
+    state_entry()
+    {
+        list my_list = ["a", "0xFF", "0xFF.FF", "1.0e3", 1, 2.0, <1,2,3>, <1,2,3,4>, llGetOwner()];
+        integer i = 0;
+        integer end = llGetListLength(my_list);
+        for (; i<end; ++i)
+        {
+            llOwnerSay("string=" + llList2String(my_list,i)
+                        + "\n   integer=" + (string)llList2Integer(my_list,i) + " OR " +(string)((integer)llList2String(my_list,i))
+                        + "\n   float=" + (string)llList2Float(my_list,i) + " OR " +(string)((float)llList2String(my_list,i))
+                        + "\n   vector=" + (string)llList2Vector(my_list,i) + " OR " +(string)((vector)llList2String(my_list,i))
+                        + "\n   rot=" + (string)llList2Rot(my_list,i) + " OR " +(string)((rotation)llList2String(my_list,i))
+                        + "\n   key=" + (string)llList2Key(my_list,i) + " OR " +(string)((key)llList2String(my_list,i)) );
+        }
+    }
+}</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llDumpList2String]]|}}
+{{LSL DefineRow||[[llGetListEntryType]]|}}
+{{LSL DefineRow||[[llList2Float]]|}}
+{{LSL DefineRow||[[llList2Integer]]|}}
+{{LSL DefineRow||[[llList2Key]]|}}
+|also_events
+|also_tests
+|also_articles
+|notes=*If you wish to extract a string from a list that you know will contain only a single item (for example if you extract a single entry from a list using [[llList2List|llList2List()]]), then instead of using <code>llList2String(myList, 0)</code> you may wish to considering using the more efficient <code>(string)myList</code> as it will produce the same result for single-entry lists with less memory usage due to eliminating a function-call.
+*To convert a string of hexadecimal notation to integer, call [[llList2Integer]] and it will automatically cast the value as decimal integer. To convert that integer back to a string of hexadecimal notation, use a user function like [[hex]].
+|permission
+|cat1=List
+|cat2
+|cat3
+|cat4
+}}

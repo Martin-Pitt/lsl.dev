@@ -1,0 +1,136 @@
+{{LSL_Function
+|func_id=117|func_sleep=0.0|func_energy=10.0
+|func=llGetOwner|sort=GetOwner
+|return_type=key
+|func_footnote
+|func_desc
+|return_text=that is the object owner's [[UUID]].
+|spec
+|caveats=*When the owner of an object changes, code that depends on this function's return value will not automatically update for the new owner or be automatically re-evaluated.
+**This requires the reregistration of [[llListen|listens]] and  [[llRequestPermissions|requesting of permissions]] from the new owner as needed.
+***This is not limited to listens and permissions but anything that caches the return value, it is up to the programmer to work around this limitation.
+**Detection of owner change can be achieved with the [[changed]] event in conjunction with the [[CHANGED_OWNER]] flag (see the second example) or by storing the old value and periodically (e.g. in [[on_rez]]) checking if it has changed. Both techniques are valid though the latter will not detect the sale of the object if it is sold with "sell original" in-world and not picked up.
+*When the object is deeded to a group, the UUID returned is that of the group.
+|constants
+|examples=
+<source lang="lsl2">
+llOwnerSay( (string)llGetOwner()); // speaks in chat the "key" (UUID code) of the avatar.
+llOwnerSay( llKey2Name(llGetOwner())); // speaks in chat the name of the owner if in the sim.
+</source>
+
+<source lang="lsl2">
+default
+{
+    changed(integer change)
+    {
+        if (change & CHANGED_OWNER)
+            llResetScript();
+    }
+
+    state_entry()
+    {
+        key owner = llGetOwner();
+        llInstantMessage(owner, "Only you can hear me. Isn't that eerie.");
+    }
+}
+</source>
+|helpers=To determine the owner of an object that might be group-deeded you can use the following code snippet. Setting the <code>groupAdmin</code> parameter to <code>TRUE</code> can be used to specify that group members should ''always'' count as owners, even if the object isn't deeded to that group.
+<source lang="lsl2">
+integer isOwner(key id, integer groupAdmin) {
+    integer result = FALSE;
+    {
+        key owner = llGetOwner();
+        if (id == owner) result = TRUE;
+        else { // If object is group owned, avatar need only belong to same group
+            integer sameGroup = llSameGroup(id);
+            if (groupAdmin) result = sameGroup;
+            else {
+                key group = (key)((string)llGetObjectDetails(llGetKey(), [OBJECT_GROUP]));
+                if (group == owner) result = sameGroup;
+            }
+        }
+    }
+    return result;
+}
+</source>
+|also_functions=
+{{LSL DefineRow||[[llGetCreator]]|}}
+{{LSL DefineRow||[[llGetOwnerKey]]|}}
+{{LSL DefineRow||[[llDetectedOwner]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes=
+To retrieve the owners name while the owner is in the region use [[llKey2Name]], [[llGetUsername]] or [[llGetDisplayName]]. Respectively [[llRequestAgentData]], [[llRequestUsername]] or [[llRequestDisplayName]] should be used when the owner is not in the region.
+
+The one problem many coders come up against is that previously-activated events referring to the owner don't automatically change when the owner changes.  The most often-seen result is a listen registered to owner will continue to listen to the PREVIOUS owner rather than the CURRENT owner.  It is often confused as a bug in [[llGetOwner]] or [[llListen]] it is not in fact a bug but part of the design.  There are several ways of working around this problem.  The easy solution is to reset the script when owner changes or it is rezzed. The easy solution is not always the right solution.
+
+There are two ways to detect if the owner has changed, the most reliable is to use the [[changed]] event.
+<source lang="lsl2">
+changed(integer change)
+{
+    if (change & CHANGED_OWNER)//if owner changes, reset the script.
+        llResetScript();
+}
+</source>
+
+In many applications resetting the script when the object is rezzed is an adequate and easy solution.
+<source lang="lsl2">
+on_rez(integer start_param)
+{ //when the object is rezzed, reset the script.
+    llResetScript();
+}
+</source>
+
+Resetting the script is not appropriate if the script needs to keep it's data when it's ownership is transfered or if script startup is slow, in these situations listens will need to be re-keyed to the new owner along with any other owner specific code, like who the script is supposed to be animating.
+
+The [[on_rez]] and [[changed]] events can be harnessed to reinitialize owner specific code every time the object is rezzed or changes owner.
+
+<source lang="lsl2">
+integer listen_handle;
+
+init()
+{
+    key owner = llGetOwner();
+    llListenRemove(listen_handle);
+    // PUBLIC_CHANNEL has the integer value 0
+    listen_handle = llListen(PUBLIC_CHANNEL, "", owner, "");
+    llRequestPermissions(owner, PERMISSION_TRIGGER_ANIMATION);
+}
+
+default
+{
+    state_entry()
+    {
+        init();
+        //insert additional startup code here that doesn't need to run each rez/owner change
+        //for example, reading settings from a notecard
+    }
+
+    on_rez(integer start)
+    {
+        init();
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_OWNER)
+            init();
+    }
+
+    run_time_permissions(integer perm)
+    {//always use the run_time_permissions event with llRequestPermissions, never assume
+        if(perm & PERMISSION_TRIGGER_ANIMATION)
+        {
+            //setup your animation code here, start your timers, etc.
+            llOwnerSay("I have animation permissions");
+        }
+    }
+}
+</source>
+|cat1=Owner
+|cat2=Object
+|cat3=Key
+|cat4
+|haiku={{Haiku|Pass me my coat please|it is not always easy|whose coat is it now?}}
+}}

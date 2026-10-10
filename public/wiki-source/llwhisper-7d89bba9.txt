@@ -1,0 +1,45 @@
+{{LSL_Function
+|inject-2={{LSL_Function/chat|channel|msg}}
+|func_id=22
+|func_sleep=0.0
+|func_energy=10.0
+|func=llWhisper
+|sort=Whisper
+|p1_type=integer|p1_name=channel
+|p2_type=string|p2_name=msg
+|func_desc=Whispers the text supplied in string {{LSLP|msg}} on channel supplied in integer {{LSLP|channel}}.
+|return_text
+|spec
+|constants
+|caveats=*Text can be a maximum of 1024 bytes. This can convey 1024 ASCII characters, or 512 UTF-8 characters such as á
+*Whispers can only be heard within 10 meters of the speaking prim (rather than the root). This is contrary to how [[listen]]s work, where a message can only be heard by any prim in the object if and only if the root prim is capable of hearing it.
+*A prim can '''not''' hear itself, this to prevent problems with recursion. It can however hear other prims within the same object. Use [[llMessageLinked]] instead for intra-prim messaging.
+|examples=
+If you prefer, you can make use of certain mnemonic constants such as [[PUBLIC_CHANNEL]] instead of channel 0 and [[DEBUG_CHANNEL]] instead of channel +2,147,483,647.
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llWhisper(0, "This is an incredibly useless program.");
+    }
+}
+</source>
+For communicating with the user or owner it is preferable to use [[llOwnerSay]] or [[llInstantMessage]] or [[llRegionSayTo]] as they won't spam other users.
+|helpers
+|also_events={{LSL DefineRow||[[listen]]|}}
+|also_functions=
+{{LSL DefineRow||[[llListen]]|}}
+{{LSL DefineRow||[[llOwnerSay]]|}}
+{{LSL DefineRow||[[llRegionSay]]|Sends chat region wide}}
+{{LSL DefineRow||[[llSay]]|Sends chat limited to 20 meters}}
+{{LSL DefineRow||[[llShout]]|Sends chat limited to 100 meters}}
+{{LSL DefineRow||[[llInstantMessage]]|}}
+|also
+|notes
+|haiku={{Haiku|The prims speak to me|hushed tones... a secret message?|Tell me your story.}}
+|cat1=Communications
+|cat2=Chat
+|cat3
+|cat4
+}}

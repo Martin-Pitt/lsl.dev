@@ -1,0 +1,77 @@
+{{Issues/SVC-3379}}{{LSL_Event
+|event_id=0|event_delay|event=state_entry
+|event_desc=Triggered on any state transition and startup
+|constants
+|spec=
+=== Triggered ===
+#Script save or adding to object
+#State change
+#*A [[state_exit]] is triggered in the old state and the [[state_entry]] is triggered in the new state. All other events in the queue are lost as a result of the state change.
+#On script reset, either by client or [[llResetScript]]/[[llResetOtherScript]]
+#When the object is rezzed ''without'' a saved script status
+#*If it was a copy taken from inworld
+#*If the event had not been triggered due to no-script land.
+
+=== Not Triggered ===
+#When the object is rezzed ''with'' saved script status, not even on change of owner
+#*Use [[on_rez]] event in this situation
+#When the task moves to another SIM, nor on SIM restart
+|caveats
+|examples=
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llSay(0,
+            "You either just saved the script after editing it"
+            + "\nand/or the script (re)entered the default state.");
+ 
+        llSetText("Click to change states", <1.0, 1.0, 1.0>, 1.0);
+    }
+ 
+    touch_end(integer num_detected)
+    {
+        // Note: NEVER do a state change from within a touch_start event -
+        // - that can lead to the next touch_start on return to this state to be missed.
+        // Here we do the state change safely, from within touch_end
+        state two;
+    }
+ 
+    state_exit()
+    {
+        llSay(0, "The script leaves the default state.");
+    }
+}
+ 
+state two
+{
+    state_entry()
+    {
+        llSay(0, "The script entered state 'two'");
+        state default;
+    }
+ 
+    state_exit()
+    {
+        llSay(0, "The script leaves state 'two'");
+    }
+}
+</source>
+|helpers
+|also_header
+|also_events={{LSL DefineRow||[[on_rez]]|Triggered when the object is rezzed}}
+{{LSL DefineRow||[[state_exit]]|Triggered when the state is exited at state change}}
+|also_functions={{LSL DefineRow||[[llResetScript]]|Resets the script}}
+{{LSL DefineRow||[[llResetOtherScript]]|Resets another script in the prim}}
+{{LSL DefineRow||[[llGetStartParameter]]|The [[on_rez]] parameter (or [[llRemoteLoadScriptPin]] parameter)}}
+|also_articles
+|also_footer
+|notes
+|mode
+|deprecated
+|cat1=Script
+|cat2=State
+|cat3
+|cat4
+}}

@@ -1,0 +1,173 @@
+{{LSL_Function
+|inject-2={{LSL Function/avatar|agent|region=*}}{{LSL Function/inventory|landmark|type=landmark|uuid=false|empty=(for teleporting within the same region)}}{{Issues/BUG-4062}}{{Issues/SVC-7987}}
+|inject-3={{LSL_Function/permission|PERMISSION_TELEPORT|grant={{LSLP|agent}}}}
+|func=llTeleportAgent
+|sort=TeleportAgent
+|p1_type=key|p1_name=agent|p1_desc=&#32;(the avatar to teleport, must be the [[llGetOwner|owner]])|p1_hover=&#32;(the avatar to teleport, must be the owner)
+|p2_type=string|p2_name=landmark|p2_desc
+|p3_type=vector|p3_name=position|p3_desc=The position within the local region to teleport the avatar to if no landmark was provided.
+|p4_type=vector|p4_name=look_at|p4_desc=The position within the region that the avatar should be turned to face upon arrival.
+|func_desc=Teleports an {{LSLP|agent}} to a {{LSLP|landmark}} stored in the object's inventory.
+
+If {{LSLP|landmark}} is an empty string, the avatar is teleported to the location {{LSLP|position}} in the current region.
+
+If the destination is in the current region, the avatar will land facing {{LSLP|look_at}} as a position within that region. Otherwise, {{LSLP|look_at}} is treated as a unit direction.
+|func_footnote
+|caveats=
+* '''This function can only teleport the owner of the object''' (unless part of an [[:Category:Experience Tools|Experience]]).
+* Throttled experiments (August 2026) show:
+** Only 4 initial teleports can be done immediately, or
+** You can keep teleporting every 1.4 seconds.
+* If you get throttled:
+** An error is shouted on DEBUG_CHANNEL, and
+** No further teleports will succeed until 10 seconds have passed from the first throttle message.
+* Does not work in scripts within attached temp objects　{{LSLG|llAttachToAvatarTemp}}.　Error Message is "Temporary attachments cannot request runtime permissions to teleport"
+* Sitting avatars cannot be teleported using this function. You must [[llUnSit]] them first.
+* This function does not override a parcel's teleport settings, i.e. if the parcel has a landing zone enabled the avatar will be teleported there.
+* If the script is part of an experience that the avatar has granted permission, then this function may teleport them without being the owner and it will override parcel teleport routing. See the example below.
+* When {{LSLPT|look_at}} is treated as a direction, a valid input should be <code><llCos(angle), llSin(angle), 0.0></code>.
+** In other words, it should be a '''unit vector''' corresponding to the avatar turning '''angle''' radians from north.
+|examples=
+Basic example with a landmark called '''Destination''' in the object's inventory:
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TELEPORT);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (PERMISSION_TELEPORT & perm)
+        {
+            llTeleportAgent(llGetPermissionsKey(), "Destination", ZERO_VECTOR, ZERO_VECTOR);
+        }
+    }
+}
+</syntaxhighlight>
+Basic example without a landmark in the object's inventory, while facing the avatar towards the center of the region:
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TELEPORT);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (PERMISSION_TELEPORT & perm)
+        {
+            vector region_pos = <100, 130, 40>;
+            vector look_at = <128,128,40>;
+            llTeleportAgent(llGetPermissionsKey(), "", region_pos, look_at);
+        }
+    }
+}
+</syntaxhighlight>
+'''How to use this function in an Experience'''
+<syntaxhighlight lang="lsl2">
+// A SIMPLE SCRIPT that implements an Experience based teleport.
+// Compile with the "Use Experience" box cnecked and an experience key you own selected.
+// The prim containing this script must contain a landmark named "Landmark" in its contents
+//
+// If the person touching this box has not previously accepted an invitation to your experience,
+// that person will be offered that opportunity when this prim is touched, and if the invitations
+// is accepted, will be immediately teleported to the target of the landmark.
+//
+// If the toucher has previously accepted an invitation, the person will be immediately teleported
+// with no interruption.
+//
+// The script has no safety features, e.g., will simply fail if the prim contains no landmark.
+//
+// Thanks to Rolig Loon for her help in figuring out how to do this
+// See https://community.secondlife.com/t5/English-Knowledge-Base/Experiences-in-Second-Life/ta-p/2744686
+// to read what the Lindens think is an adequate explanation of all this.
+
+default
+{
+    touch_start(integer n)
+    {
+        llRequestExperiencePermissions(llDetectedKey(0), "");
+    }
+
+    experience_permissions(key agent)
+    {
+        llTeleportAgent(agent, "Landmark", ZERO_VECTOR, ZERO_VECTOR);
+    }
+}
+</syntaxhighlight>
+
+Below is an example of properly handling the '''look_at''' value based on whether the destination is the current region or a different one. This ensures that the avatar will always be facing the same ''direction'' regardless of whether they're teleporting within the region or to another one.
+
+The script keeps track of the landmark's destination coordinate in the '''state_entry''' and '''changed''' events, which is later used to calculate the total distance of the teleport.
+<syntaxhighlight lang="lsl2">
+string landmark;
+vector destination;
+
+default
+{
+    state_entry()
+    {
+        // Get data about the first landmark in object inventory when script starts.
+        if (llGetInventoryNumber(INVENTORY_LANDMARK) > 0) {
+            landmark = llGetInventoryName(INVENTORY_LANDMARK, 0);
+            llRequestInventoryData(landmark);
+        }
+    }
+
+    changed(integer change)
+    {
+        if (!(change & (CHANGED_INVENTORY|CHANGED_REGION))) return;
+
+        // Get data about the first landmark in object inventory when inventory changes.
+        if (llGetInventoryNumber(INVENTORY_LANDMARK) > 0) {
+            landmark = llGetInventoryName(INVENTORY_LANDMARK, 0);
+            llRequestInventoryData(landmark);
+        }
+    }
+
+    dataserver(key query, string data)
+    {
+        // Save llRequestInventoryData response.
+        destination = (vector)data;
+    }
+
+    touch_start(integer num_detected)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TELEPORT);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (!(PERMISSION_TELEPORT & perm)) return;
+
+        float angle = 45 * DEG_TO_RAD;
+
+        // When teleporting to another region, we need a direction vector.
+        vector look_at = <llCos(angle), llSin(angle), 0>;
+
+        float sim_size = llVecMag(<1,1,1>);
+        float distance = llVecDist(<1,1,1>, destination / 256);
+
+        if (distance < sim_size) {
+            // When teleporting within the current region, we should use a position within the region instead.
+            look_at = destination + look_at;
+        }
+
+        llTeleportAgent(llGetPermissionsKey(), landmark, ZERO_VECTOR, look_at);
+    }
+}
+</syntaxhighlight>
+
+Another example, submitted by [[User:Jesse_Barnett|Jesse Barnett]], shows how to use a list of landmarks inside a HUD to allow teleporting, even inside a no-script area: [[Teleport HUD]].
+|also_functions=
+{{LSL DefineRow||[[llTeleportAgentGlobalCoords]]|Teleports an agent to a global position.}}
+|notes=
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/12#12.07.24.262437 | 24/07/2012 ]]
+|cat1=Teleport
+|cat2=Experience
+|cat3=Permissions/Experience
+}}
+[[Category:Experience Tools]]

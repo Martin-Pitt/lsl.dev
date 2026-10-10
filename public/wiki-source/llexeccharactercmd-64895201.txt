@@ -1,0 +1,76 @@
+{{LSL_Function
+|func=llExecCharacterCmd
+|func_desc=Send a command to the pathing system.
+|func_footnote=Currently only supports stopping the current pathfinding operation or causing the character to jump.
+|p1_type=integer
+|p1_name=command
+|p1_desc=Command to be sent.
+|p2_type=list
+|p2_subtype=instructions
+|p2_name=options
+|p2_desc=<code>CHARACTER_CMD_*</code>|p2_hover=CHARACTER_CMD_*
+|constants={{LSL_Constants/ExecCharacterCmd}}
+|caveats=* If another script in the same object issues [[CHARACTER_CMD_STOP]] then pathing in all scripts is cancelled.
+|examples=
+<source lang="lsl2">
+vector patrol;
+ 
+default
+{
+    state_entry()
+    {
+        patrol = llGetPos();
+        llCreateCharacter([CHARACTER_MAX_SPEED, 25, CHARACTER_DESIRED_SPEED, 15.0]);
+        state awake;
+    }
+}
+ 
+state awake
+{
+    state_entry()
+    {
+        llSay(0, "I am guarding now");
+        list points = [patrol + <5,0,0>, patrol - <5,0,0>];
+        llPatrolPoints(points, []);
+    }
+ 
+    touch_start(integer total_number)
+    {
+        state sleep;
+    }
+}
+ 
+state sleep
+{
+    state_entry()
+    {
+        llSay(0, "Going to sleep");
+        llExecCharacterCmd(CHARACTER_CMD_SMOOTH_STOP, []);
+    }
+ 
+    touch_start(integer total_number)
+    {
+        patrol = llGetPos();
+        //Jump to attention!
+        llExecCharacterCmd(CHARACTER_CMD_JUMP, [0.5]);
+        state awake;
+    }
+}
+</source> 
+|also_functions=
+* [[llCreateCharacter]]
+* [[llDeleteCharacter]]
+* [[llEvade]]
+* [[llExecCharacterCmd]]
+* [[llGetClosestNavPoint]]
+* [[llFleeFrom]]
+* [[llNavigateTo]]
+* [[llPatrolPoints]]
+* [[llPursue]]
+* [[llUpdateCharacter]]
+* [[llWanderWithin]]
+|also_events=
+* [[path_update]]
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/12#12.07.31.262785 | 31/07/2012 ]]
+|cat1=Pathfinding
+}}

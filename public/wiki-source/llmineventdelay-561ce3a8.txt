@@ -1,0 +1,115 @@
+{{LSL_Function
+|func_id=125|func_sleep=0.0|func_energy=10.0
+|sort=MinEventDelay
+|func=llMinEventDelay
+|p1_type=float|p1_name=delay|p1_desc=time in seconds
+|func_footnote
+|func_desc=Set the minimum time between events being handled.
+
+Defaults and minimums vary by the event type, see [[LSL Delay]].
+|return_text
+|spec
+|caveats=Minimum delay is maintained between state changes.  
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">default
+{
+    state_entry()
+    {
+        llMinEventDelay(5.0);
+    }
+    touch(integer detected)
+    {
+        llSay(0, "Touched.");//Without the event delay set touch would cause the screen to fill 
+                             //with the word "Touched" in a split second if you held the mouse button down.
+    }
+}</syntaxhighlight>
+
+Where as, if in one object you place this script (for the sake of fun call the object "Sandy Powell"). -
+
+<syntaxhighlight lang="lsl2">default
+{
+    touch(integer detected)
+    {
+        llSay(0, "Can you hear me mother?"); //Northern English accent. Catch phase of Sandy Powell (comedian).
+    }
+}</syntaxhighlight>
+
+and this in another object called "Mother" -
+
+<syntaxhighlight lang="lsl2">default
+{
+    state_entry()
+    {
+        llMinEventDelay(5.0);
+        llListen(0, "Sandy Powell", "", "");
+    }
+    listen(integer chan, string name, key id, string msg)
+    {
+        llSay(0, "Eh?");
+    }
+}</syntaxhighlight>
+
+the result in chat is as follows -
+
+{{Samp|1=
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Mother: Eh?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Sandy Powell: Can you hear me mother?
+[12:51]  Mother: Eh?
+[12:51]  Mother: Eh?
+[12:51]  Mother: Eh?
+[12:51]  Mother: Eh?
+[12:51]  Mother: Eh?
+[12:51]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+[12:52]  Mother: Eh?
+}}
+and no more events are triggered. This is an example of lost transferred info because of [[llMinEventDelay]] so be careful with it.
+|helpers
+|also_functions
+|also_events
+|also_articles=
+{{LSL DefineRow||[[LSL Delay]] |for default values}}
+|also_tests
+|notes
+|permission
+|negative_index
+|cat1=Script
+|cat2
+|cat3
+|cat4
+}}

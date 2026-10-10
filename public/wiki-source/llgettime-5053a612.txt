@@ -1,0 +1,110 @@
+{{Issues/SVC-3293}}{{LSL_Function
+|func_id=82|func_sleep=0.0|func_energy=10.0
+|func=llGetTime|sort=GetTime
+|return_type=float
+|return_text=that is script time in seconds with subsecond precision since the script started, was last reset, or call to either [[llResetTime]] or [[llGetAndResetTime]].
+|func_footnote
+|spec=Script time matches normal time, it is unaffected by time dilation.  For example, if you call llResetTime on two objects in separate simulators at the same time, and later call llGetTime on both at the same time, their values will be equal regardless of differences in dilation.
+|caveats=
+*Script time is the amount of real-world time that the script has been in a running state. It is unaffected by time dilation, but it does not count time while the script is suspended, the user is offline (when in an attachment), the object is in inventory rather than rezzed, etc.
+*Script time resets when...
+**Script reset (user or [[llResetScript]] or [[llResetOtherScript]])
+**Call to either [[llResetTime]] or [[llGetAndResetTime]]
+* Due to (32 bit) floating point number limitations, the accuracy of this function is 1</sup>/<sub>64</sub>sec up to ~3 days, 1</sup>/<sub>32</sub>sec up to ~6 days, etc... doubling each time, e.g. it's only 1 second at ~194 days. Use [[llResetTime]] or [[llGetAndResetTime]] whenever practical to maintain the accuracy you require:
+{{{!}} class="wikitable" style="text-align:right"
+{{!}}+ Floating Point Precision Thesholds
+{{!}}-
+! Precision !! Up to Seconds !! Hours !! Days
+{{!}}-
+{{!}} style="text-align:left" {{!}} 0.016=2<sup>-6</sup> {{!}}{{!}}   262144=2<sup>18</sup> {{!}}{{!}}   72.82 {{!}}{{!}}   3.03
+{{!}}-
+{{!}} style="text-align:left" {{!}} 0.022=<sup>1</sup>/<sub>45</sub> {{!}}{{!}} colspan="3" style="text-align:center" {{!}} 1 simulator frame
+{{!}}-
+{{!}} style="text-align:left" {{!}} 0.031=2<sup>-5</sup> {{!}}{{!}}   524288=2<sup>19</sup> {{!}}{{!}}  145.63 {{!}}{{!}}   6.06
+{{!}}-
+{{!}} style="text-align:left" {{!}} 0.063=2<sup>-4</sup> {{!}}{{!}}  1048576=2<sup>20</sup> {{!}}{{!}}  291.27 {{!}}{{!}}  12.13
+{{!}}-
+{{!}} style="text-align:left" {{!}} 0.125=2<sup>-3</sup> {{!}}{{!}}  2097152=2<sup>21</sup> {{!}}{{!}}  582.54 {{!}}{{!}}  24.27
+{{!}}-
+{{!}} style="text-align:left" {{!}} 0.250=2<sup>-2</sup> {{!}}{{!}}  4194304=2<sup>22</sup> {{!}}{{!}} 1165.08 {{!}}{{!}}  48.54
+{{!}}-
+{{!}} style="text-align:left" {{!}} 0.500=2<sup>-1</sup> {{!}}{{!}}  8388608=2<sup>23</sup> {{!}}{{!}} 2330.16 {{!}}{{!}}  97.09
+{{!}}-
+{{!}} style="text-align:left" {{!}} 1.000=2<sup>-0</sup> {{!}}{{!}} 16777216=2<sup>24</sup> {{!}}{{!}} 4660.33 {{!}}{{!}} 194.18
+{{!}}}
+* Note that this precision caveat does not apply to scripts written in SLua, only to LSL scripts. In SLua:
+** the timer precision is 64-bit, and will maintain 1</sup>/<sub>64</sub>sec precision for ~4.4million years.
+** [[llResetTime]] and [[llGetAndResetTime]] have been removed
+
+|examples=<syntaxhighlight lang="lsl2">
+default {
+    state_entry()
+    {
+        llResetTime();
+    }
+    touch_start(integer num_touch)
+    {
+        float time = llGetTime(); //Instead getting, and then resetting the time, we could use llGetAndResetTime() to accomplish the same thing.
+        llResetTime();
+        llSay(0,(string)time + " seconds have elapsed since the last touch." );
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+// Distinguish between a single click and a double click
+
+float gHoldTime;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        float now = llGetTime();
+        if (now - gHoldTime < 0.3)
+        {
+            llSay(PUBLIC_CHANNEL,"Double clicked");
+            // Trigger one sequence of actions
+        }
+        else
+        {
+            llSetTimerEvent(0.32);
+        }
+        gHoldTime = now;
+    }
+    
+    timer()
+    {
+        llSetTimerEvent(0.0);
+        if (llGetTime()-gHoldTime > 0.3)
+        {
+            llSay(PUBLIC_CHANNEL,"Single clicked.");
+            // Trigger a different sequence of actions
+        }
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+//  To do time-dependant loops of whatever:
+//  for example move 2 meters within 5.0 seconds
+
+float time = 5.0;
+float i;
+llResetTime();
+do
+{
+    i = llGetTime()/time;
+    // move2meters*i
+}
+while (llGetTime() < time);
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llResetTime]]}}
+{{LSL DefineRow||[[llGetAndResetTime]]}}
+{{LSL DefineRow||[[llGetRegionTimeDilation]]}}
+|also
+|issues
+|cat1=Time
+|cat2=Script
+|cat3
+|cat4
+}}

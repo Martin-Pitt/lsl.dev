@@ -1,0 +1,149 @@
+{{LSL_Function
+|inject-2={{LSL_Function/inventory|item|uuid=false}}
+|func_id=289|func_sleep=0.0|func_energy=10.0
+|func=llGetInventoryPermMask|return_type=integer|return_subtype=bit field
+|p1_type=string|p1_name=item
+|p2_type=integer|p2_name=category|p2_desc=MASK_* flag
+|func_footnote
+|func_desc
+|return_text=of the requested permission {{LSLP|category}} for the inventory {{LSLP|item}}
+|spec
+|caveats=
+* Note that including the [[MASK_COMBINED]] bit does not impact the output of this function, as the combined permissions are the only accessible permissions for inventory items.
+|constants={{LSL Constants Perm Mask}}
+|examples=
+<source lang="lsl2">
+if ((permsYouHave & permsYouWant) == permsYouWant)
+    llSay(PUBLIC_CHANNEL, "You have the perms you want.");
+else
+    llSay(PUBLIC_CHANNEL, "You don't have the perms you want.");
+</source>
+<source lang="lsl2">
+integer ownerPerms = llGetInventoryPermMask("inventory item name goes here", MASK_OWNER);
+integer copyAndModPerms = PERM_COPY | PERM_MODIFY;
+
+if ((ownerPerms & copyAndModPerms) == copyAndModPerms)
+    llSay(PUBLIC_CHANNEL, "Owner has copy & modify perms.");
+else
+    llSay(PUBLIC_CHANNEL, "Owner does not have copy & modify perms.");
+</source>
+<source lang="lsl2">
+string getPermsAsReadableString(integer perm)
+{
+    integer fullPerms = PERM_COPY | PERM_MODIFY | PERM_TRANSFER;
+    integer copyModPerms = PERM_COPY | PERM_MODIFY;
+    integer copyTransPerms = PERM_COPY | PERM_TRANSFER;
+    integer modTransPerms = PERM_MODIFY | PERM_TRANSFER;
+ 
+    string output = " perms: ";
+
+    if ((perm & fullPerms) == fullPerms)
+        output += "full";
+    else if ((perm & copyModPerms) == copyModPerms)
+        output += "copy & modify";
+    else if ((perm & copyTransPerms) == copyTransPerms)
+        output += "copy & transfer";
+    else if ((perm & modTransPerms) == modTransPerms)
+        output += "modify & transfer";
+    else if ((perm & PERM_COPY) == PERM_COPY)
+        output += "copy";
+    else if ((perm & PERM_TRANSFER) == PERM_TRANSFER)
+        output += "transfer";
+    else
+        output += "none";
+
+    //  Remember, items in Second Life must have either
+    //  PERM_COPY or PERM_TRANSFER when "talking about"
+    //  owner perms or perms for next owner.
+
+    return  output;
+}
+
+default
+{
+    state_entry()
+    {
+        string inventoryItemName = "inventory item name goes here";
+
+        integer basePerms      = llGetInventoryPermMask(inventoryItemName, MASK_BASE);
+        integer ownerPerms     = llGetInventoryPermMask(inventoryItemName, MASK_OWNER);
+        integer nextOwnerPerms = llGetInventoryPermMask(inventoryItemName, MASK_NEXT);
+        integer groupPerms     = llGetInventoryPermMask(inventoryItemName, MASK_GROUP);
+        integer everyonePerms  = llGetInventoryPermMask(inventoryItemName, MASK_EVERYONE);
+
+        llSay(0, "/me [" + inventoryItemName
+            + "]: base" + getPermsAsReadableString(basePerms));
+        llSay(0, "/me [" + inventoryItemName
+            + "]: owner" + getPermsAsReadableString(ownerPerms));
+        llSay(0, "/me [" + inventoryItemName
+            + "]: next owner" + getPermsAsReadableString(nextOwnerPerms));
+        llSay(0, "/me [" + inventoryItemName
+            + "]: group" + getPermsAsReadableString(groupPerms));
+        llSay(0, "/me [" + inventoryItemName
+            + "]: everyone" + getPermsAsReadableString(everyonePerms));
+    }
+}
+</source>
+To test for the opposite (e.g. to see if something is NOT copy):
+<source lang="lsl2">
+    if (!(PERM_COPY & llGetInventoryPermMask(myitem, MASK_OWNER)))
+        llSay(PUBLIC_CHANNEL, "/me [" + myitem + "]: owner doesn't have copy perms.");
+</source>
+
+To remind the next owner what permissions to set before selling on
+choose which need to be set;
+
+<source lang="lsl2">
+CheckPerms()
+{        
+    string item = llGetScriptName();
+    integer nextOwnerPerms = llGetInventoryPermMask(item, MASK_NEXT);
+
+    if(PERM_COPY & nextOwnerPerms)
+        llOwnerSay("Set no copy");
+
+    if(PERM_MODIFY & nextOwnerPerms)
+        llOwnerSay("Set no mod");
+
+    if(PERM_TRANSFER & nextOwnerPerms)
+        llOwnerSay("Set no transfer");
+}
+ 
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        if(llGetOwner() != llGetInventoryCreator(llGetScriptName()))
+            CheckPerms();
+    }
+}
+</source>
+
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetObjectPermMask]]|}}
+{{LSL DefineRow||[[llGetInventoryAcquireTime]]|Returns the time the item was added to the prim's inventory}}
+{{LSL DefineRow||[[llGetInventoryName]]|Returns the inventory item's name}}
+{{LSL DefineRow||[[llGetInventoryType]]|Tests to see if an inventory item exists and returns its type}}
+{{LSL DefineRow||[[llGetInventoryNumber]]|Returns the number of items of a specific type in inventory}}
+{{LSL DefineRow||[[llGetInventoryKey]]|Returns the inventory item's [[UUID]] (if full perm)}}
+{{LSL DefineRow||[[llGetInventoryCreator]]|Returns the inventory item's creator}}
+|also_events
+|also_tests=
+{{LSL DefineRow||[[llGetInventoryPermMask Test]]}}
+|also_articles=
+{{LSL DefineRow||[[hex]]}}
+|notes=
+* In effect, the perms for articles published on this Wiki are [[PERM_COPY]] and [[PERM_TRANSFER]] until you log in, then [[PERM_MODIFY]], [[PERM_MOVE]], [[PERM_COPY]] and [[PERM_TRANSFER]].
+* The default perms of a newly created script are: Base = [[PERM_ALL]], Owner = [[PERM_ALL]], Next = [[PERM_MOVE]] or [[PERM_TRANSFER]], Group = 0 (none), Everyone = 0 (none). These perms are the same, no matter if the script is created in user inventory or in an object.
+** However, an option in the ''[[Preferences window|Preferences]] > Advanced'' menu allows to set the '''Default Creation Permissions''' of all items that can be created or uploaded in-world.
+|cat1=Inventory
+|cat2=Permissions/Asset
+|cat3
+|cat4
+}}

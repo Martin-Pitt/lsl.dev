@@ -1,0 +1,37 @@
+{{LSL Constant
+|name=STATUS_PHANTOM
+|type=integer
+|value={{LSL Hex|0x10}}
+|desc=This property (set FALSE by default) when set TRUE turns the object un-solid (objects and avatars can pass through it).
+|examples=A simple "secret" door. The object will turn un-solid (phantom) when the owner collides with it. So, if this script is in a prim that is part of your wall, it will allow only you to pass through.
+<syntaxhighlight lang="lsl2">default
+{ // Triggered when objects (including avatars) collide with the object containing this script
+    collision_start(integer nd)
+    {
+        while(nd)
+        { // Cycle through the detected keys of those objects that collided this time checking if each is the owner.
+            if(llDetectedKey(--nd) == llGetOwner())
+                llSetStatus(STATUS_PHANTOM, TRUE); // Become un-solid
+        }
+    }
+    collision_end(integer nd)
+    {
+        if(llGetStatus(STATUS_PHANTOM)) // If the object is un-solid
+            llSetStatus(STATUS_PHANTOM, FALSE); // Set the object solid.
+    }
+}</syntaxhighlight>
+|constants=
+{{!}}
+{{{!}}
+{{LSL DefineRow||[[PRIM_PHANTOM]]|}}
+{{!}}}
+{{LSL Constants/Status|no_default=*}}
+|functions=
+{{LSL DefineRow||[[llSetStatus]]|}}
+{{LSL DefineRow||[[llGetStatus]]|}}
+|events=
+|cat1=Status
+|cat2=Phantom
+|cat3
+|cat4
+}}

@@ -1,0 +1,66 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-304}}{{LSL_Function/inventory|item|uuid=false|type}}
+|func_id=151|func_sleep=0.0|func_energy=10.0
+|func=llRemoveInventory|p1_type=string|p1_name=item
+|func_footnote
+|func_desc=Remove the named inventory {{LSLP|item}}
+|return_text
+|spec
+|caveats=*If the current script is removed it will continue to run for a short period of time after this call.
+*With multiple executions an llSleep(0.1) after llRemoveInventory will allow edit window contents to refresh correctly and avoid errors on phantom contents.
+*llRemoveInventory will not trigger a changed event.
+|constants
+|examples=
+<source lang="lsl2">
+// Remove the current script from the object
+
+default
+{
+    state_entry()
+    {
+        llRemoveInventory(llGetScriptName());
+    }
+}
+</source>
+<source lang="lsl2">
+// user-function to include in your script
+// deletes all other contents of any type except the script itself
+delete_all_other_contents()
+{
+    string thisScript = llGetScriptName();
+    string inventoryItemName;
+
+    integer index = llGetInventoryNumber(INVENTORY_ALL);
+    while (index)
+    {
+        --index;        // (faster than index--;)
+
+        inventoryItemName = llGetInventoryName(INVENTORY_ALL, index);
+
+        if (inventoryItemName != thisScript)   
+            llRemoveInventory(inventoryItemName);     
+    }
+}
+
+default
+{
+    state_entry()
+    {
+        delete_all_other_contents();
+    }
+}
+</source>
+|helpers
+|also_functions
+|also_events
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|sort=RemoveInventory
+|cat1=Inventory
+|cat2
+|cat3
+|cat4
+}}

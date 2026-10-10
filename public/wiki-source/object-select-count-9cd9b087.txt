@@ -1,0 +1,44 @@
+{{LSL Constant
+|name={{PAGENAMEE}}
+|type=integer
+|value=37
+|desc=This is a flag used with [[llGetObjectDetails]] to get the total number of agents selecting any links in the object.
+
+If '''id''' is an avatar, 0 is returned.
+
+|examples=
+<source lang="lsl2">
+//If someone selects the object it will glow
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(0.01);
+    }
+    
+    timer()
+    {
+        list details = llGetObjectDetails(llGetKey(), [OBJECT_SELECT_COUNT]);
+        integer objectSelectCount = llList2Integer(details, 0);
+        if(objectSelectCount > 0)
+        {
+            llSetLinkPrimitiveParamsFast(LINK_SET,  [ PRIM_GLOW, ALL_SIDES, 0.1] );
+        }else
+        {
+            
+            llSetLinkPrimitiveParamsFast(LINK_SET,  [ PRIM_GLOW, ALL_SIDES, 0.0] );
+        }
+    }
+}
+
+</source>
+
+|functions={{LSL DefineRow||[[llGetObjectDetails]]}}
+|constants={{!}}{{LSL_Constants/Object_Details}}
+|events
+|cat1=Object
+|cat2=
+|notes
+|cat3
+|cat4
+}}

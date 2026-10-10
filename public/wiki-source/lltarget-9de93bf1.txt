@@ -1,0 +1,64 @@
+{{LSL_Function
+|inject-2={{LSL Function/position|position|region=*}}
+|func_id=66|func_sleep=0.0|func_energy=10.0
+|func=llTarget|sort=Target
+|return_type=integer
+|return_subtype=handle
+|p1_type=vector|p1_name=position
+|p2_type=float|p2_name=range
+|func_footnote=A similar function exists for rotations: {{LSLG|llRotTarget}}<br/>This function does not move the object, to do that use {{LSLG|llSetPos}} or {{LSLG|llMoveToTarget}}.
+|func_desc=This function is to have the script know when it has reached a position.<br/>It registers a {{LSLP|position}} with a {{LSLP|range}} that triggers {{LSLG|at_target}} and {{LSLG|not_at_target}} events continuously until unregistered.
+|return_text=to unregister the target with {{LSLG|llTargetRemove}}.
+|spec
+|caveats=* The position always references the current region. If you set llTarget to <100, 100, 100> while in Region A and then move the object to region B, the target automatically becomes <100, 100, 100> in Region B.
+* The position can be set outside the region boundaries, but [[at_target]] can only happen if the range extends into the current region.  The part of the range outside the current region will not activate [[at_target]].
+* Only 8 targets can be active to a script. Additional llTarget will remove the oldest target set.
+|constants
+|examples=
+<source lang="lsl2">
+integer target_id;
+vector target_pos;
+
+default
+{
+    state_entry()
+    {
+        target_pos = llGetPos() + <1.0, 0.0, 0.0>;
+        target_id = llTarget(target_pos, 0.5);
+    }
+    at_target(integer tnum, vector targetpos, vector ourpos)
+    {
+        if (tnum == target_id)
+        {
+            llOwnerSay("object is within range of target");
+            llOwnerSay("target position: " + (string)targetpos + ", object is now at: " + (string)ourpos);
+            llOwnerSay("this is " + (string)llVecDist(targetpos, ourpos) + " meters from the target");
+            llTargetRemove(target_id);
+        }
+    }
+    not_at_target()
+    {
+        llOwnerSay(
+            "not there yet - object is at " + (string)llGetPos() + 
+            ", which is " + (string)llVecDist(target_pos, llGetPos()) + 
+            " meters from the target (" + (string)target_pos + ")"
+        );
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llTargetRemove]]|Cancel a target position}}
+{{LSL DefineRow||[[llRotTarget]]|Register a target rotation}}
+{{LSL DefineRow||[[llRotTargetRemove]]|Cancel a target rotation}}
+|also_tests
+|also_events=
+{{LSL DefineRow|[[at_target]]|[[not_at_target]]|positional target events}}
+{{LSL DefineRow|[[at_rot_target]]|[[not_at_rot_target]]|rotational target events}}
+|also_articles
+|notes
+|cat1=Target
+|cat2=Physics
+|cat3=At Target
+|cat4
+}}

@@ -1,0 +1,415 @@
+NewAge Avatar Radar Project
+Version 1.2
+No longer need to spend to in making a hud, just copy and past script into a prim and click yes to allow script permission to attach to your UI, Set on Center 2.
+
+<source lang="lsl2">
+/////////////////////////////////
+// NewAge Radar Project Script
+// By Asia Snowfall
+// Version 1.2
+/////////////////////////////////
+// v1.2;
+// ------
+// (Added) HUD Maker Feature, When you save script, click Yes
+// (Added) Power Feature, Turn Radar on and Off
+// (Added) HUD Menu, Allowing you to control Power Feature, Change from Avatar Radar to Land Information and back again
+// Easier to now Modify script varibles
+/////////////////////////////////
+// v1.1;
+// ------
+// (Added) - Agent Count in Region when no agents in sensor range
+// (Added) - Lag Status when no agents in sensor range
+/////////////////////////////////
+// v1.0
+// ------
+// (Initial Release)
+/////////////////////////////////
+
+// Configure;
+float scan_range = 100;
+float speed = 2;
+
+integer channel = 1;
+integer menu_channel = 666;
+integer show_total_agents_in_chat_range = TRUE;
+integer show_total_agents_in_region = TRUE;
+integer show_lag_status = TRUE;
+integer max_people = 7;
+integer parcel_description_max_characters = 50;
+
+string menu_text = "***\nAvatar Radar Project\n***\nby Asia Snowfall";
+string hud_texture = "ec122289-1239-74fd-708f-ab4b949b7cdb";
+
+vector hud_size = <0.1,0.1,0.1>;
+
+// Core Varibles;
+
+// Integer Varibles
+integer setting = FALSE;
+integer handler;
+integer radar_power = TRUE;
+integer positioning;
+integer positioning_handler;
+integer scan_type = TRUE;
+
+// String Varibles
+string people;
+string lag_status;
+
+// List Varibles
+list people_in_sensor_range;
+list people_in_sensor_vectors;
+list chat_range;
+list hud_position;
+list main_menu;
+
+// Float Varibles
+float position_by = 0.01;
+ 
+// Vector Varibles
+vector text_color;
+
+// Premade Functions
+
+asSetPosMenu() //Might wonder why i make the script empty the hud position and fill it again with same options, but it optimizes script memory! every little helps
+{
+    setting = TRUE;
+    hud_position = [];
+    llListenRemove(positioning_handler);
+    @retry;
+    positioning = llRound(llFrand(999999));
+    if(positioning <= 2000)
+    {
+        jump retry;
+    }
+    positioning_handler = llListen(positioning, "", "", "");
+    hud_position = ["-", "Down", "+", "Left", "===", "Right", "===", "Up", "Done"];
+    llSetText("Setup the hud using position control\nClick Done when your finished", <1.0, 1.0, 1.0>, 1.0);
+    llSetTimerEvent(30);
+}
+
+asSetMainMenu()
+{
+    main_menu = ["Avatars", "Land Info"];
+    if(radar_power == FALSE)
+    {
+        main_menu += "Power On";
+    }
+    else
+    {
+        main_menu += "Power Off";
+    }
+}
+
+llLagStatus()
+{
+    float time_dilation = llGetRegionTimeDilation();
+    if(time_dilation <= 0.3)
+    {
+        lag_status = "Laggy";
+        text_color = <1.0,0.0,0.0>;
+    }
+    else if(time_dilation > 0.3 && time_dilation <= 0.5)
+    {
+        lag_status = "Not Bad";
+        text_color = <1.0,1.0,0.0>;
+    }
+    else if(time_dilation > 0.5 && time_dilation <= 0.8)
+    {
+        lag_status = "Good";
+        text_color = <0.0,1.0,0.0>;
+    }
+    else if(time_dilation > 0.8 && time_dilation <= 1.0)
+    {
+        lag_status = "Excellent";
+        text_color = <0.0,1.0,1.0>;
+    }
+}
+
+all_status()
+{
+    if(show_total_agents_in_region == TRUE)
+    {
+        people += "Region Agent Count = "+(string)llGetRegionAgentCount()+"\n";
+    }
+    if(show_total_agents_in_chat_range == TRUE)
+    {
+        people += "Agents in Range = "+(string)llGetListLength(chat_range)+"\n";
+    }
+    if(show_lag_status == TRUE)
+    {
+        people += "Lag Status = "+lag_status;
+    }
+}
+
+finish()
+{
+    llOwnerSay("Starting radar system\nClick HUD for Menu");
+    setting = FALSE;
+    llSetTimerEvent(speed);
+    llListenRemove(positioning_handler);
+}
+            
+
+default
+{
+    state_entry()
+    {
+        llListen(menu_channel, "", "", "");
+        if(llGetAttached() != 0)
+        {
+            llSetScale(hud_size);
+            llSetTexture(hud_texture, ALL_SIDES);
+            handler = llListen(channel, "", "", "");
+            llOwnerSay("Find location of avatar within sensor range by typing either their full or partial name on channel "+(string)channel + ", example; /"+(string)channel+" Mark");
+            asSetPosMenu();
+            llDialog(llGetOwner(), menu_text, hud_position, positioning);
+        }
+        else if(llGetAttached() == 0)
+        {
+            llSensor("", "", AGENT, scan_range, PI);
+            setting = FALSE;
+            llListenRemove(handler);
+            llRequestPermissions(llGetOwner(), PERMISSION_ATTACH);
+        }
+    }
+    touch_start(integer x)
+    {
+        if(llDetectedKey(0) == llGetOwner())
+        {
+            if(setting == FALSE)
+            {
+                if(llGetAttached() != 0)
+                {
+                    asSetMainMenu();
+                    llDialog(llGetOwner(), menu_text, main_menu, menu_channel);
+                }
+                else
+                {
+                    llRequestPermissions(llGetOwner(), PERMISSION_ATTACH);
+                }
+            }
+            else
+            {
+                llDialog(llGetOwner(), menu_text, hud_position, positioning);
+            }
+        }
+    }
+    run_time_permissions(integer perm)
+    {
+        if(perm & PERMISSION_ATTACH)
+        {
+            llAttachToAvatar(ATTACH_HUD_CENTER_2);
+        }
+        else
+        {
+            llOwnerSay("Some features disabled when not attached");
+            llSetTimerEvent(speed);
+        }
+    }
+    attach(key id)
+    {
+        llResetScript();
+    }
+    listen(integer chan, string name, key id, string str)
+    {
+        if(id == llGetOwner())
+        {
+            str = llToLower(str);
+            if(chan == channel)
+            {
+                integer index = llListFindList(people_in_sensor_range, [str]);
+                if(index != -1)
+                {
+                    llOwnerSay(llList2String(people_in_sensor_range, index)+" is located at "+llList2String(people_in_sensor_vectors, index));
+                }
+                else if(index == -1)
+                {
+                    integer i = 0;
+                    integer length = llGetListLength(people_in_sensor_range);
+                    integer ind;
+                    do
+                    {
+                        if(llStringLength(llList2String(people_in_sensor_range, i)) > 0)
+                        {
+                            ind = llSubStringIndex(llList2String(people_in_sensor_range, i), str);
+                            if(ind != -1)
+                            {
+                                llOwnerSay(llList2String(people_in_sensor_range, i) + " is located at "+llList2String(people_in_sensor_vectors, i));
+                                return;
+                            }
+                        }
+                    }while(i++<length);
+                    llOwnerSay("No Avatars Found by the name or partial name of "+str);
+                }
+            }
+            else if(chan == menu_channel)
+            {
+                if(str == "avatars")
+                {
+                    scan_type = 1;
+                    llOwnerSay("Radar will scan all avatars within "+(string)scan_range+" meters");
+                }
+                else if(str == "land info")
+                {
+                    scan_type = 2;
+                    llOwnerSay("Radar will show land information");
+                }
+                else if(str == "power on")
+                {
+                    radar_power = TRUE;
+                    llSetTimerEvent(speed);
+                }
+                else if(str == "power off")
+                {
+                    radar_power = FALSE;
+                    llSetTimerEvent(0);
+                    llSetText("Power Off", <1.0,1.0,1.0>, 1.0);
+                }
+            }
+            else if(chan == positioning)
+            {
+                if(str == "+")
+                {
+                    if(position_by < 0.1)
+                    {
+                        position_by += 0.01;
+                    }
+                    llOwnerSay("Positioning will move by "+(string)position_by+" meters");
+                }
+                else if(str == "-")
+                {
+                    if(position_by > 0.01)
+                    {
+                        position_by -= 0.01;
+                    }
+                    llOwnerSay("Positioning will move by "+(string)position_by+" meters");
+                }
+                else if(str == "down")
+                {
+                    llSetPos(llGetLocalPos()+<0.0,0.0,-position_by>*llGetRot());
+                }
+                else if(str == "left")
+                {
+                    llSetPos(llGetLocalPos()+<0.0,position_by,0.0>*llGetRot());
+                }
+                else if(str == "right")
+                {
+                    llSetPos(llGetLocalPos()+<0.0,-position_by,0.0>*llGetRot());
+                }
+                else if(str == "up")
+                {
+                    llSetPos(llGetLocalPos()+<0.0,0.0,position_by>*llGetRot());
+                }
+                else if(str == "done")
+                {
+                    finish();
+                }
+                if(setting == TRUE)
+                {
+                    llSetTimerEvent(30);
+                    llDialog(llGetOwner(), menu_text, hud_position, positioning);
+                }
+            }
+        }
+    }
+    on_rez(integer g)
+    {
+        if(g & CHANGED_OWNER)
+        {
+            llResetScript();
+        }
+    }
+    changed(integer h)
+    {
+        if(h & CHANGED_OWNER)
+        {
+            llResetScript();
+        }
+    }
+    sensor(integer x)
+    {
+        people_in_sensor_range = [];
+        people_in_sensor_vectors = [];
+        integer i = 0;
+        integer index;
+        --x;
+        if(x > max_people)
+        {
+            x = max_people-1;
+        }
+        do
+        {
+            index = llListFindList(chat_range, [llDetectedName(i)]);
+            if(llStringLength(llDetectedName(i)) >! 0)
+            {
+                if(llVecDist(llDetectedPos(i), llGetPos()) <= 20)
+                {
+                    if(index == -1)
+                    {
+                        chat_range += llDetectedName(i);
+                        llOwnerSay(llDetectedName(i) + " has entered chat range");
+                    }
+                }
+                else
+                {
+                    if(index != -1)
+                    {
+                        llOwnerSay(llDetectedName(i) + " has left chat range");
+                        chat_range = llDeleteSubList(chat_range, index, index);
+                    }
+                }
+                people_in_sensor_range += llToLower(llDetectedName(i));
+                people_in_sensor_vectors += llDetectedPos(i);
+                people += llDetectedName(i) + " - " + llGetSubString((string)llVecDist(llDetectedPos(i), llGetPos()), 0, 4)+"m\n";
+            }
+        }while(i++<x);
+        llLagStatus();
+        all_status();
+        if(scan_type == 2)
+        {
+            list details = llGetParcelDetails(llGetPos(), [PARCEL_DETAILS_NAME, PARCEL_DETAILS_DESC, PARCEL_DETAILS_OWNER, PARCEL_DETAILS_AREA]);
+            people = "Region = "+llGetRegionName();
+            people += "\nParcel Name = "+llList2String(details, 0);
+            people += "\nParcel Description = "+llGetSubString(llList2String(details, 1), 0, parcel_description_max_characters);
+            if(llStringLength(llKey2Name((key)llList2String(details, 2))) > 0)
+            {
+                people += "\nParcel Owner = "+llKey2Name((key)llList2String(details, 2));
+            }
+            else
+            {
+                people += "\nParcel Owner = Group Owned";
+            }
+            people += "\nParcel Area = "+llList2String(details, 3);
+            people += "\nRegion FPS = "+(string)llGetRegionFPS();
+            people += "\nRegion Time Dilation = "+(string)llGetRegionTimeDilation();
+        }
+        llSetText(people, text_color, 1.0);
+        people = "";
+    }
+    no_sensor()
+    {
+        if(llGetListLength(chat_range) > 0)
+        {
+            chat_range = [];
+        }
+        people += "Region Agent Count = "+(string)llGetRegionAgentCount()+"\nAgents in Range = "+(string)llGetListLength(chat_range)+"\n";
+        people = "No People In Range\n";
+        llLagStatus();
+        all_status();
+        llSetText(people, text_color, 1.0);
+        people = "";
+    }
+    timer()
+    {
+        if(setting == FALSE)
+        {
+            llSensor("", "", AGENT, scan_range, PI);
+        }
+        else
+        {
+            finish();
+        }
+    }
+}
+</source>

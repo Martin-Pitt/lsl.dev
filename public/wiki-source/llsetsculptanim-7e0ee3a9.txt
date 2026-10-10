@@ -1,0 +1,88 @@
+{{LSL_Function
+|mode=request
+|func_id=pending
+|func_sleep=0.0
+|func_energy=20.0
+|sort=SetSculptAnim
+|func=llSetSculptAnim
+|func_desc='Animate' a sculpted prim by way of segments of a larger sculpt map.  (Rather than by using UUID-swapping via [[llSetPrimitiveParams]])
+|p1_type=integer|p1_name=mode|p1_desc=mask of Mode flags
+|p2_type=integer|p2_name=sizex|p2_desc=horizontal frames
+|p3_type=integer|p3_name=sizey|p3_desc=vertical frames
+|p4_type=integer|p4_name=start_frame|p4_desc=first frame in animation cycle
+|p5_type=integer|p5_name=end_frame|p5_desc=last frame in animation cycle
+|p6_type=float|p6_name=rate|p6_desc=frames per second (must be non-zero)
+|p7_type=boolean|p7_name=texture_sync|p7_desc=syncs texture animation with the sculpt's ([[TRUE]] or [[FALSE]])
+|func_footnote=Frames are numbered from left to right, top to bottom, starting at 0.<br/>If '''rate''' is negative, it has the same effect as using the [[REVERSE]] flag.{{Footnote|Though if '''rate''' is negative and the [[REVERSE]] flag is used, they cancel each other out.}}
+|return_text
+|spec= 
+===Frames===
+Frames are sub-rectangles within the texture. A set of frames with 2 horizontal ('''sizex''') and 3 vertical ('''sizey''') means the overall texture is divided into 3 rows of 2 columns of images, each of which is a frame. [[llSetSculptAnim]] will animate across these 6 starting with the top left image and going across and down, optionally repeating and/or retracing, using each frame in turn as a sculpt map.
+===Collisions===
+Unlike with UUID-swapping, the physics engine is required only once to calculate the collision area for the sculpt map being utilized.  The resultant collision area is defined by the maximum ranges defined anywhere within the source sculpt map.
+===Lag / Load===
+The nature of this function drastically reduces server-side lag/load by making the sculpted animation a client-side function similar to [[llSetTextureAnim]].
+===texture_sync===
+If this is set to [[TRUE]], the texture applied to the prim is divided (as with [[llSetTextureAnim]]) and cycled in synchronization with the sculpt map - ie; frame 5 of the texture is active at the same time as frame 5 of the sculpt map.  If this is set to [[FALSE]], the texture applied to the prim functions normally; reverting to normal parameters if previously set to [[TRUE]].
+===Other Characteristics===
+[[llSetSculptAnim]] affects only the sculpt map definition of the applicable prim.  It does not affect sizing, positioning, rotation, mirroring, inside-out, etc.
+|constants={{{!}} class="sortable collapsible" {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! Modes
+! title="Value" {{!}}
+! class="unsortable" {{!}} Description
+{{!}}-
+{{!}}[[ANIM_ON]]
+{{!}}{{LSL Hex||1|chars=2}}
+{{!}}Sculpted animation is on. This must be set to start the animation, cleared to stop it.
+{{!}}-
+{{!}}[[LOOP]]
+{{!}}{{LSL Hex||2|chars=2}}
+{{!}}Loop the sculpted animation.
+{{!}}-
+{{!}}[[REVERSE]]
+{{!}}{{LSL Hex||4|chars=2}}
+{{!}}Play animation in reverse direction.
+{{!}}-
+{{!}}[[PING_PONG]]
+{{!}}{{LSL Hex||8|chars=2}}
+{{!}}Play animation going forwards, then backwards.
+{{!}}}
+|caveats=*You can only have one sculpt animation on a prim.
+*While '''sizex''' & '''sizey''' both have a range of 0 to 255, the source sculpt map is limited to a maximum size of 512x512.{{Footnote|This reduction vs the normal image limit of 1024x1024 is to help compensate for the additional filesize resulting from lossless compression.  This effectively limits sculpted prims to a maximum of 64 'frames'.  Anything more complex than this requires meshes.}}
+*As sculpted prims are subject to 'vertex vomit', [[llSetSculptAnim]] lacks most of the options available with [[llSetTextureAnim]] - including [[SMOOTH]], [[ROTATE]], and [[SCALE]], as well as only having one 'face'.
+|examples=
+This would divide a texture into 6 "maps", 2 across and 3 down, and animate a sculpted prim through all six frames in one second, then loop to the beginning and continue.  This is useful for repeating animations.
+<source lang="lsl2">llSetSculptAnim(ANIM_ON | LOOP, 2, 3, 0, 5, 6.0, FALSE);</source>
+
+
+This would do as above but would similarly portion the prim's texture (as [[llSetTextureAnim]]), synchronizing the two functions.
+<source lang="lsl2">llSetSculptAnim(ANIM_ON | LOOP, 2, 3, 0, 5, 6.0, TRUE);</source>
+
+
+This would do as above but only use the last and first frames, cycling between them and ignoring the other four frames.
+<source lang="lsl2">llSetSculptAnim(ANIM_ON | LOOP, 2, 3, 5, 0, 2.0, TRUE);</source>
+
+
+This would stop the first animation above, using the fourth frame (first frame of the second row) as a 'normal' sculpt map.  Due to the nature of sculpted prims, '''sizex''', '''sizey''', and '''start_frame MUST''' be specified when stopping the animation.
+<source lang="lsl2">llSetSculptAnim(FALSE, 2, 3, 3, 5, 1.0, TRUE);</source>
+
+
+This would divide a texture into 24 "maps", 8 across and 3 down, and animate a sculpted prim only through the eight frames of the third row in one second, then loop to the beginning and continue.
+<source lang="lsl2">llSetSculptAnim(ANIM_ON | LOOP , 8, 3, 16, 23, 8.0, FALSE);</source>Two other prims could use frames 0-7 and 8-15, respectively.  This is useful for using a common texture to animate multiple sculpted prims.
+|helpers
+|also_functions
+|also_events
+|also_articles
+|notes=
+[[llSetLinkSculptAnim]]:
+This variant (with the addition of a [[link]] parameter) would permit the root prim of a linked object to control the same functions of individual child prims without necessitating additional scripts.
+
+With so much emphasis being placed upon the implementation of meshes and rigging this may be a moot proposal, but remains relevant nonetheless.  It should be much simpler to incorporate into the existing SL world, as well as providing a (hopefully) simpler alternative for builds/projects which do not require the more complex physics of meshes.
+|cat1=Prim
+|cat2=Sculpted
+|cat3=Effects
+|cat4=Functions
+|cat5
+|cat6
+}}

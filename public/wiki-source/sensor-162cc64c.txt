@@ -1,0 +1,57 @@
+{{LSL_Event
+|event_id=13|event_delay|event=sensor
+|p1_type=integer|p1_name=num_detected|p1_desc=number of objects/avatars found
+|event_desc=Results from a call to either [[llSensor]] or [[llSensorRepeat]].
+|event_footnote=The results are ordered from nearest to furthest.
+<br/>'''num_detected''' is always greater than zero, the [[no_sensor]] event is triggered if no objects/avatars were found.
+|constants
+|spec
+|caveats=*[[Linden]]s in [[God Mode|administrative mode]] cannot be sensed by sensors in the same region as the Linden.
+*Sensors placed in attachments will use the direction the avatar is facing as their forward vector. In mouselook, this means that it will be wherever the avatar is looking, while out of mouselook, this means whichever way the avatar is pointing. This does not include where the avatar's head is pointing, or what animation the avatar is doing, just the direction the avatar would move in if you walked forward. This is the case, regardless of where the object is attached. 
+*A sensor running in an attachment will not detect the avatar wearing it.
+*Only 32 objects will be scanned each time. (Increased from 16 with Release 2024-03-18.8333615376 on Tuesday, March 19, 2024)
+*This event is not executed when nothing is detected, means, you never get the result 0 returned. Use [[no_sensor]] for that.
+*on logout all avatars leave a Ghost for a few moments, this results in Failures in llDetected functions in sensor events.
+|examples=
+<source lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+    //  do a 10m spherical sweep
+        llSensor("", NULL_KEY, AGENT_BY_LEGACY_NAME, 10.0, PI);
+    }
+
+    sensor (integer num_detected)
+    {
+        string message = "Detected " + (string)num_detected + " avatar(s): " + llDetectedName(0);
+
+    //  we already added the first avatar above, so continue from index 1
+        integer index = 1;
+        while (index < num_detected)
+            message += ", " + llDetectedName(index++);
+
+        llWhisper(PUBLIC_CHANNEL, message);
+    }
+
+    no_sensor()
+    {
+        llWhisper(PUBLIC_CHANNEL, "Nobody is near me at present.");
+    }
+}
+</source>
+|helpers
+|also_header
+|also_events
+|also_functions={{LSL DefineRow||[[llSensor]]|}}
+{{LSL DefineRow||[[llSensorRepeat]]|}}
+|also_articles={{LSL DefineRow||{{LSLGC|Detected}}|}}
+|also_footer
+|notes={{LSL Tip|You might want to use [[llGetAgentList]] instead of using sensors to get a list of all avatars within the same parcel or region.}}
+|mode
+|deprecated
+|cat1=Sensor
+|cat2=Detected
+|cat3
+|cat4
+}}

@@ -1,0 +1,43 @@
+{{LSL Function
+|func=Float2String
+|mode=user
+|p1_type=float|p1_name=num|p1_desc=number to be formatted
+|p2_type=integer|p2_name=places|p2_desc=number of places to use during formatting
+|p3_type=integer|p3_name=rnd|p3_desc=boolean, enables/disables rounding
+|return_type=string
+|return_text=that contains the float '''num''' in a tidy text format, with optional rounding.
+|func_footnote=Negative floats are fine (i.e. negative signs will be preserved.)<br />
+If you say 1 place, you will get 7.0 instead of 7.0000000<br />
+If you say 3 places, you get 7.14 instead of 7.1400000<br />
+7.1373699 will come out as 7.13 or 7.14, depending on whether you specify rounding<br />
+rnd (rounding) should be set to [[TRUE]] for Rounding, [[FALSE]] for no rounded<br />
+
+'''Example:'''
+<source lang="lsl2">
+string myFormattedFloat = Float2String(-7.1373699, 3, TRUE);<br /> //rounded
+//returns "-7.14"
+
+string myFormattedFloat = Float2String(-7.1373699, 3, FALSE);<br /> //not rounded
+//returns "-7.13"
+</source>
+|spec=<source lang="lsl2">string Float2String ( float num, integer places, integer rnd) { 
+//allows string output of a float in a tidy text format
+//rnd (rounding) should be set to TRUE for rounding, FALSE for no rounding
+
+    if (rnd) {
+        float f = llPow( 10.0, places );
+        integer i = llRound(llFabs(num) * f);
+        string s = "00000" + (string)i; // number of 0s is (value of max places - 1 )
+        if(num < 0.0)
+            return "-" + (string)( (integer)(i / f) ) + "." + llGetSubString( s, -places, -1);
+        return (string)( (integer)(i / f) ) + "." + llGetSubString( s, -places, -1);
+    }
+    if (!places)
+        return (string)((integer)num );
+    if ( (places = (places - 7 - (places < 1) ) ) & 0x80000000)
+        return llGetSubString((string)num, 0, places);
+    return (string)num;
+}</source>
+|deepnotes=Inspired by (and evolved from) discussions between {{User|Cheree Bury}} & {{User|Domino Marama}} in the SL Scripting Forum July 2008 at http://forums-archive.secondlife.com/54/15/267884/1.html, with optional rounding added (that part being inspired by work by various authors here: [[Fixed_Precision]] )
+|cat1=Examples
+}}

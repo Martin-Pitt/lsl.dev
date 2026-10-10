@@ -1,0 +1,133 @@
+{{Help|Object=*}}
+A [[prim]] has one or more '''faces''' (or '''sides''') depending on its basic shape and shape parameters. Each face of a prim can have its own [[texture]] properties, [[color]], [[alpha]], and attributes ([[shiny]], [[full-bright]], and [[bump-map]]). The texture properties that each face can have are: texture, texture map (standard or planar), scale, offset, and [[rotation]]. The properties of a prim face can be changed individually by using its face number or all of the prim faces can be modified at once using the <tt>[[ALL_SIDES]]</tt> face number. 
+
+Prims are formed by moving a circle, triangle, or square through a path in 3D space. For boxes, prisms, and cylinders the path is a line. For tori, rings, and tubes the path is a circle. For a sphere the path is rotation of a half-circle around a point. A circle (or half-circle) defines one face along its path, a triangle defines three faces along its path, and a square defines four faces along its path. The interior face of a hollow prim is always one face, even if the hollow shape is a triangle or a square.
+
+===Using the face list table===
+The following table lists all of the possible faces for the eight different prim types and the rule for whether a particular face exists. A given prim will have some subset of this list depending on its shape parameters. The face number of a prim face is determined by its position in the face list after non-existent faces have been removed. The first face in the list that exists will be face zero, the next existing face will be face one, and so on. The positions of the faces listed in the table are in the local coordinate space of the prim, assuming no twist. If beginning twist or end twist is non-zero then some faces will rotate with respect to the prim's local coordinate space.
+
+{|  {{prettytable}}
+|| '''[[PRIM_TYPE_CYLINDER|Cylinder]]''' 
+* top (+z) ''always exists''
+* outside ''always exists''
+* hollow ''if hollow''
+* bottom (-z) ''always exists''
+* path cut begin ''if path cut''
+* path cut end ''if path cut''
+|| '''[[PRIM_TYPE_TORUS|Torus]]''' 
+* path cut end ''if path is cut or broken''
+* outside ''always exists''
+* hollow ''if hollow''
+* path cut begin ''if path is cut or broken''
+* profile cut begin ''if profile cut''
+* profile cut end ''if profile cut''
+|| '''[[PRIM_TYPE_SPHERE|Sphere]]''' 
+* path cut end ''if path cut or twisted''
+* outside ''always exists''
+* hollow ''if hollow''
+* path cut begin ''if path cut or twisted''
+* dimple begin ''if dimpled or hollow''
+* dimple end ''if dimpled or hollow''
+|-
+|| '''[[PRIM_TYPE_PRISM|Prism]]''' 
+* top (+z) ''always exists'' 
+* +y ''unless path cut away''
+* -x ''unless path cut away''
+* -y ''unless path cut away''
+* hollow ''if hollow''
+* bottom (-z) ''always exists''
+* path cut begin ''if path cut''
+* path cut end ''if path cut''
+|| '''[[PRIM_TYPE_RING|Ring]]''' 
+* path cut end ''if path is cut or broken''
+* inside face ''unless profile cut away''
+* +x ''unless profile cut away''
+* outside face ''unless profile cut away''
+* hollow ''if hollow''
+* path cut begin ''if path is cut or broken''
+* profile cut begin ''if profile cut''
+* profile cut end ''if profile cut''
+||
+|-
+|| '''[[PRIM_TYPE_BOX|Box]]''' 
+* top (+z) ''always exists''
+* -y ''unless path cut away''
+* +x ''unless path cut away''
+* +y ''unless path cut away''
+* -x ''unless path cut away''
+* hollow ''if hollow''
+* bottom (-z) ''always exists''
+* path cut begin ''if path cut''
+* path cut end ''if path cut''
+|| '''[[PRIM_TYPE_TUBE|Tube]]''' 
+* path cut end ''if path is cut or broken''
+* outside face ''unless profile cut away''
+* -x ''unless profile cut away''
+* inside face ''unless profile cut away''
+* +x ''unless profile cut away''
+* hollow ''if hollow''
+* path cut begin ''if path is cut or broken''
+* profile cut begin ''if profile cut''
+* profile cut end ''if profile cut''
+||
+|-
+|| '''[[PRIM_TYPE_SCULPT|Sculpted]]'''
+* outside ''always exists''
+||
+||
+|}
+
+Here are the face existence rules in greater detail:
+* The outside face always exists on circle derived prims (sphere, cylinder, and torus)
+* The top and bottom faces always exist on line path prims (cylinder, prism, and box)
+* Both path cut faces exist if path cut begin &gt; 0 or path cut end &lt; 1
+* Both path cut faces exist on circular path prims (torus, ring, and tube) if the circular path is broken: path cut, skewed, begin twist &ne; end twist, radius delta &ne; 0, revolutions &gt; 1, or taper parameters &ne; 0
+** ''even if begin twist &equiv; end twist ''mod'' 360''
+* Both path cut faces exist on sphere prims if begin twist &ne; end twist (even if &equiv; ''mod'' 360)
+* Both sphere dimple faces exist if either dimple begin &gt; 0 or dimple end &lt; 1 or hollow &gt; 0
+** ''even if you can't see the dimple face because dimple begin = 0 or dimple end = 1, it exists and can have its parameters set''
+* The hollow face only exists if hollow &gt; 0
+* Both profile cut faces exist if profile cut begin &gt; 0 or profile cut end &lt; 1
+* If the path cut of a prism or box completely eliminates a face then that face doesn't exist
+* If the profile cut of a ring or tube completely eliminates a face then that face doesn't exist
+* A face ''still exists'' even if it is shrunk all the way to a line or a point by the taper parameters
+
+==== An example ====
+If you have a box prim that has a path cut beginning of 0.30, a path cut ending of 1.00, and no hollow then your face list looks like this:
+{|
+{{LSL DefineRow|top (+z)|''always exists''}}
+{{LSL DefineRow|-y|''doesn't exist because the path cut beginning is &ge; 0.25''}}
+{{LSL DefineRow|+x|''exists''}}
+{{LSL DefineRow|+y|''exists''}}
+{{LSL DefineRow|-x|''exists''}}
+{{LSL DefineRow|hollow|''doesn't exist because the hollow parameter is 0''}}
+{{LSL DefineRow|bottom (-z)|''always exists''}}
+{{LSL DefineRow|path cut begin|''exists because path cut beginning &gt; 0''}}
+{{LSL DefineRow|path cut end|''exists because path cut beginning &gt; 0''}}
+|}
+So the face numbering for this prim is:
+{|  {{prettytable}}
+| 0 || top (+z) 
+|-
+| 1 || +x 
+|-
+| 2 || +y 
+|-
+| 3 || -x 
+|-
+| 4 || bottom (-z) 
+|-
+| 5 || path cut begin 
+|-
+| 6 || path cut end 
+|}
+
+===Finding the value of a face===
+If you are unsure about which face number to use, following these steps will give you the face number to use.
+
+* Enable the Develop menu by pressing {{K|Ctrl|Alt|Q}}. (On version 1.x viewers, instead enable the [[Advanced menu]] by pressing {{K|Ctrl|Alt|D}}.)
+* Select the Face Using the "Select Texture" Tool
+* Pick Develop > Rendering > Selected Texture Info from the menu, or press {{K|Ctrl|Alt|Shift|T}}
+
+The face number will be shown in your local chat window or as a notification.
+[[Category:LSL Face| ]]

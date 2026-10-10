@@ -1,0 +1,78 @@
+{{LSL Header|ml=3}}{{LSLC|Keywords}}{{LSLC|Flow Control}}{{LSLC|}}
+==User-Defined Functions==
+This category contains custom pre-defined function contributions from the LSL community to extend the abilities of LSL.
+To add a wiki page to this category, include a link to this page. You may use the [[:Template:LSL_Function/docs|Template:LSL_Function]] (with "mode" set to user) to create the page to be added here.
+
+Go to the {{LSLGC|Functions}} page to view the built-in functions.
+
+=== About User-Defined Functions ===
+LSL allows user-defined functions which will help keep scripts compact and readable, and allow code reuse.  The [[LSL Style Guide]] suggests that user-defined functions should be placed before the default state definition and after user-defined variables. 
+
+The definitions are as follows:
+
+<syntaxhighlight lang="lsl2">
+<return_type> function_name([<parameter1_type> parameter1[, <parameter2_type> parameter2[, ...]]])
+{
+  function_statements;
+
+  ...
+
+  return value_of_return_type;
+}
+</syntaxhighlight>
+* User-defined functions must be defined before any [[state]]s in the script or a syntax error will be generated on compilation.
+* <code>return_type</code> and <code>parameterN_type</code> may be any [[:Category:LSL Types|LSL variable type]].
+** The <code>return_type</code> may also be omitted for a void type function. Such a function is not required to use the <code>return</code> statement at all, and if one is used it will have no parameter.
+* There are no known limits on the maximum number and size of parameters, beyond normal script memory limits.
+** If the function requires no parameters, the entire parameter list can be omitted.
+* Parameters are passed by value, as with built-in functions. They behave like local variables and writing into them has no effect on what the function was called with.
+** Entering a user-defined function starts a new [[LSL Variables#Scope of variables|scope]]. Only global variables and the function parameters are visible; any local variables from where the function was called from are not directly available.
+* If multiple return values are desired, they can be packed into a [[list]], a [[vector]] or a [[rotation]], depending on what you need to return.
+
+=== Examples ===
+<syntaxhighlight lang="lsl2">
+// example with void return type:
+
+let_prim_say_something_and_include_owner_info(string message)
+{
+    key ownerKey = llGetOwner();
+    string ownerName = llKey2Name(ownerKey);
+
+    llSay(PUBLIC_CHANNEL, "/me (owned by " + ownerName + "): " + message);
+}
+
+default
+{
+    state_entry()
+    {
+        let_prim_say_something_and_include_owner_info("Hello world!");
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+// example with integer return type (actually it's a boolean)
+
+integer is_sun_up()
+{
+    vector sunDirection = llGetSunDirection();
+
+    if (sunDirection.z < 0.0)
+        return FALSE;
+
+    // else
+        return TRUE;
+}
+
+default
+{
+    state_entry()
+    {
+        if (is_sun_up())
+            llSay(PUBLIC_CHANNEL, "Good day!");
+        else
+            llSay(PUBLIC_CHANNEL, "Good night!");
+    }
+}
+</syntaxhighlight>
+
+Below is a list of functions on this wiki that have been included in this category:

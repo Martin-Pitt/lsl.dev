@@ -1,0 +1,68 @@
+{{LSL_Function|func_id=?|func_sleep=0.0|func_energy=10.0
+|inject-2={{LSL Function/link|link|nogroup=*|nounlinked=*}}
+|func=llAvatarOnLinkSitTarget
+|p1_type=integer|p1_subtype=link|p1_name=link|
+|return_type=key
+|return_text=that is the [[UUID]] of the user seated on the prim.
+|func_footnote=If the prim lacks a [[llLinkSitTarget|sit target]] or there is no avatar sitting on the prim, then {{LSL Const|NULL_KEY|key|&quot;00000000-0000-0000-0000-000000000000&quot;|c=Evaluates to false in conditionals just like invalid keys.}} is returned.
+|caveats=*A prim does not have a sit target unless [[llSitTarget]]/[[llLinkSitTarget]] has been called with a '''nonzero''' vector as the first argument.
+*The root link number changes from zero to one when someone sits on an unlinked prim.
+**So <code>(llAvatarOnLinkSitTarget( 0) == NULL_KEY)</code> is always true. Nobody ever sits on link number 0
+|spec
+|examples=
+<syntaxhighlight lang="lsl2">
+// Unseat a second avatar on this object
+
+string one_sitter_message = "Hey!  I don't take passengers.";
+
+default
+{
+    state_entry()
+    {
+        // Sit target 1 is your sit target on the root prim
+        llLinkSitTarget(1,<0.0,0.0,0.5>,ZERO_ROTATION);
+        // Sit target 2 is the target on child prim 2, a small transparent prim inside the object
+        llLinkSitTarget(2, <0.0,0.0,0.1>,ZERO_ROTATION);
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        {
+            // An avatar on child prim 2, whether seated by choice or by redirection after sit target 1 is occupied, will be unseated.
+            if (llAvatarOnLinkSitTarget(2))
+            {
+                llRegionSayTo(llAvatarOnLinkSitTarget(2),PUBLIC_CHANNEL, one_sitter_message);
+                llUnSit(llAvatarOnLinkSitTarget(2));
+            }
+            // Now pay attention to the avatar on the root prim.                                
+            key agent = llAvatarOnLinkSitTarget(1);
+            if (agent)
+            {
+                llRegionSayTo(agent,PUBLIC_CHANNEL,"Hello!");
+            }
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|related
+|also_tests
+|also_events={{LSL DefineRow||[[changed]]|}}
+|also_functions=
+{{LSL DefineRow||[[llAvatarOnSitTarget]]|}}
+{{LSL DefineRow||[[llLinkSitTarget]]|}}
+{{LSL DefineRow||[[llGetLinkKey]]}}
+|also_articles={{LSL DefineRow||[[CHANGED_LINK]]|}}
+|notes=The position of an avatar on a sit target can be determined with the use of [[llGetObjectDetails]] (see [[llSitTarget#Useful_Snippets|llSitTarget]] for an example).
+
+If an object has multiple seats (each seat has a script that sets a sit target with [[llSitTarget]], or the linkset has a script that assigns several ''llLinkSitTarget''s), the following method determines which sit target an avatar ends up at:
+*If the prim that is clicked on ''has'' a sit target and that sit target is not full, that sit target is used.
+*If the prim that is clicked on ''has no sit target'', and one or more other linked prims have sit targets that are not full, the sit target of the prim with the lowest link number will be used.
+|haiku={{Haiku|Lazy afternoon|A patient avatar sits|enjoying the prim}}
+|cat1=Avatar
+|cat2=Prim
+|cat3=Sit
+|cat4=Link/Get
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/11#11.08.10.238207 | 10/08/2011 ]]
+}}

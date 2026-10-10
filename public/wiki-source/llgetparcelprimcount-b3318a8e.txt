@@ -1,0 +1,145 @@
+{{LSL_Function
+|inject-2=
+{{LSL_Function/position|pos|region=noZ}}
+{{LSL_Function/boolean|sim_wide|non-zero=*|td=searches parcels in the region with the same owner as the targeted parcel|fd=searches only the targeted parcel|bool=*}}
+|func_id=325|func_sleep=0.0|func_energy=10.0
+|func=llGetParcelPrimCount|return_type=integer
+|p1_type=vector|p1_name=pos|p1_desc
+|p2_type=integer|p2_name=category|p2_desc=a PARCEL_COUNT_* flag
+|p3_type=integer|p3_subtype=boolean|p3_name=sim_wide|p3_desc
+|func_footnote
+|func_desc
+|return_text=that is the total [http://community.secondlife.com/t5/English-Knowledge-Base/Calculating-land-impact/ta-p/974163 land impact] of objects on the parcel at {{LSLP|pos}} of the given {{LSLP|category}}
+|spec=If {{LSLP|sim_wide}} is...
+*{{#var:TRUE}} then the return is the combined object land impact used on all parcels in the sim owned by the specified parcel's owner of the category requested.{{Footnote|handle=non-zero}}
+*{{#var:FALSE}} then the return is the object land impact used of the category requested on the parcel specified.
+|caveats=
+* Temp mesh is not included in totals for PARCEL_COUNT_TEMP 
+|constants={{LSL Constants/Parcel Prim Count}}
+|examples=
+<syntaxhighlight lang="lsl2">
+//  gives prim usage information when touched
+
+string primCountThisParcel(integer flag)
+{
+    vector currentPosition = llGetPos();
+
+    return
+        (string)llGetParcelPrimCount(currentPosition, flag, FALSE);
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        llSay(PUBLIC_CHANNEL,
+            "The total land impact of objects on this parcel is " + primCountThisParcel(PARCEL_COUNT_TOTAL) + ".");
+
+        llSay(PUBLIC_CHANNEL,
+            primCountThisParcel(PARCEL_COUNT_OWNER) + " LI for objects owned by the parcel owner.");
+
+        llSay(PUBLIC_CHANNEL,
+            primCountThisParcel(PARCEL_COUNT_GROUP) + " LI for objects set to or owned by the parcel's group.");
+
+        llSay(PUBLIC_CHANNEL,
+            primCountThisParcel(PARCEL_COUNT_OTHER) + " LI for objects not set to the parcel group or owned by the parcel owner.");
+
+        llSay(PUBLIC_CHANNEL,
+            primCountThisParcel(PARCEL_COUNT_SELECTED) + " LI for selected objects.");
+
+        llSay(PUBLIC_CHANNEL,
+            primCountThisParcel(PARCEL_COUNT_TEMP) + " LI for temp-on-rez objects.");
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+//Sim-wide scanner to count prim use in each parcel
+list gPrclID;
+integer gTotPrims;
+float gX;
+float gY;
+string gObjName;
+integer gNUM;
+
+default
+{
+    state_entry()
+    {
+        gObjName = llGetObjectName();
+        gPrclID = [];
+        gTotPrims = 0;
+        // Begin scanning at the SW <0.0,0.0,0.0> corner of the sim
+        gX = 4.0;
+        gY = 4.0;
+    }
+    
+    on_rez(integer start)
+    {
+        llSetPos(llGetPos() + <0.0,0.0,0.5>);
+        llSetText("Touch to start scan",<1.0,1.0,0.0>,1.0);
+    }
+
+    touch_start(integer total_number)
+    {
+        llSetText("Scanning ....",<1.0,1.0,0.0>,1.0);
+        gNUM = 0;
+        llRegionSayTo(llGetOwner(),0,"Scan started on " + llGetRegionName());
+        llSetTimerEvent(0.1);
+    }
+        
+    timer()
+    {
+        //Grab the parcel's ID and name at position <gX, gY, 100.0>
+        list parcel = llGetParcelDetails(<gX,gY,100.0>,[PARCEL_DETAILS_ID,PARCEL_DETAILS_NAME]);
+        key temp = llList2Key(parcel,0);
+        string parcel_name = llList2String(parcel,1);
+        if (parcel_name == "")
+        {
+            parcel_name = "(no name)";
+        }
+        if (!~llListFindList(gPrclID,[temp]))   //Scan at this location if this parcel was not scanned earlier
+        {
+            ++gNUM;
+            llSetObjectName((string)gNUM);
+            integer Count = llGetParcelPrimCount(<gX,gY,100>,PARCEL_COUNT_TOTAL,FALSE); //Do not include other parcels owned by llGetOwner()
+            gTotPrims += Count;
+            llRegionSayTo(llGetOwner(),0, "/me "+ parcel_name + " @ <"+(string)gX+","+(string)gY+",Z>  = " + (string)Count);
+            gPrclID += [temp];  //Add this parcel to the "previously scanned" list
+        }
+        // Increment X and Y in successive scans to look at the entire sim in 8m square blocks
+        if (gX < 256.0)
+        {
+            gX +=8.0;
+        }
+        if (gX > 256.0)
+        {
+            gY += 8.0;
+            gX = 4.0;
+        }
+        if (gY > 256.0) // Reached NE corner
+        {
+            llSetObjectName(gObjName);
+            llRegionSayTo(llGetOwner(),0,"Scan finished.  Total land impact = " + (string)gTotPrims + " in " + (string)llGetListLength(gPrclID) + " parcels (not counting temp rez prims).");
+            llSetText("Touch to start scan",<1.0,1.0,0.0>,1.0);
+            llResetScript();
+        }
+    }
+}
+</syntaxhighlight>
+
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetParcelMaxPrims]]}}
+|also_events
+|also_tests
+|also_articles=For a detailed explanation on how the land impact is calculated, see also [https://community.secondlife.com/forums/topic/83294-prims-prim-equivalent-land-impact-a-too-long-guide/ Jenni Darkwatch's post] from late 2011.
+|notes
+|permission
+|negative_index
+|haiku={{Haiku|It's a dreadful night|When an extra prim impacts|more than land can hold}}
+|sort=GetParcelPrimCount
+|cat1=Parcel
+|cat2=Parcel/Prim Count
+|cat3
+|cat4
+}}

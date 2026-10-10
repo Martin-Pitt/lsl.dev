@@ -1,0 +1,76 @@
+{{LSL Function
+|func_sleep=0.0|func_energy=10.0
+|func=llHash|sort=Hash
+|func_desc=Returns a 32bit hash for the provided string.  Returns 0 if the input string is empty.
+|return_type=integer
+|p1_type=string|p1_name=val|p1_desc=String to hash.
+|p1_hover=String to hash.
+|return_text=
+|func_footnote=
+|spec=
+The SDBM algorithm provides a good general purpose hash function with a fairly even distribution across the 32 bit space in the general case. 
+The characters fed into the hash function are 32bit wide. 
+
+<source lang="cpp">
+U32 SDBMHash(const std::wstring &val)
+{
+    U32 hash(0);
+
+    for(const wchar_t &c: val)
+    {
+        hash = c + (hash << 6) + (hash << 16) - hash;
+    }
+    return hash;
+}
+</source>
+
+In LSL:
+<source lang="lsl2">
+integer llSDBMHash(string value)
+{
+    integer hash = 0;
+    integer index = 0;
+    for (index = 0; index < llStringLength(value); ++index)
+    {
+        hash = llOrd(value, index) + (hash << 6) + (hash << 16) - hash;
+    }
+    
+    return hash;
+}
+
+</source>
+
+|caveats=
+This hash value is not cryptographically secure and should not be used as part of any security protocol. 
+SDBM provides a good distribution of hash values across its range, however with only 
+32 bits the chance of a collision is unacceptably high.(with 1000 entries, the odds for a collision are about 1 in 10000.)
+|examples=
+Given the combination of the object name and the owner's key generate a unique number.  This number could be used for things
+like selecting a chat channel that has a low probability of colliding with another object. 
+<source lang="lsl2">
+integer pickIDForObject()
+{
+    /* Generate an arbitrary integer ID for the combination of the
+     * object name and the ower's key.  This value could be used 
+     * for selecting a chat/listen channel. 
+     */
+    string obj_name = llGetObjectName();
+    key obj_owner = llGetOwner();
+    
+    integer hash = llHash(obj_name + (string)obj_owner);
+    
+    return hash;
+}
+</source>
+|helpers|related
+|also_functions=
+{{LSL DefineRow|[[llOrd]]|Convert a character into an ordinal}}
+{{LSL DefineRow|[[llChar]]|Convert an ordinal into a character}}
+|also_articles={{LSL DefineRow||{{wikipedia|List of hash functions}}|}}
+{{LSL DefineRow||[https://preshing.com/20110504/hash-collision-probabilities/ Hash Collision Probabilities]|}}
+|notes
+|cat1
+|cat2
+|cat3
+|cat4
+}}

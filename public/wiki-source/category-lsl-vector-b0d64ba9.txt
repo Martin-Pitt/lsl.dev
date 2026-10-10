@@ -1,0 +1,89 @@
+{{LSL Header|ml=*}}{{LSLC|}}{{LSLC|Types}}
+==Vector==
+
+A vector is a data {{LSLGC|Types|type}} that contains a set of three {{LSLGC|Float|float}} values.
+
+===Components===
+Each element can be accessed individually by appending .x, .y, or .z to the variable name.  
+
+<syntaxhighlight lang="lsl2">
+vector vec = <1, 2, 3>;
+float x = vec.x; // 1.0
+float y = vec.y; // 2.0
+float z = vec.z; // 3.0
+</syntaxhighlight>
+
+Note that components can be only accessed with vector variables. Attempting to access the components of a vector literal or a return value from a function is illegal.
+<syntaxhighlight lang="lsl2">
+// These are not valid component accesses
+float f1 = <0, 1, 2>.z;
+float f2 = llGetScale().x;
+</syntaxhighlight>
+
+===Uses===
+Vectors are often used for...
+* {{LSLGC|Movement|Position}}: x, y, and z are in metres.
+* {{LSLGC|Movement|Velocity}}: x, y, and z are in meters per second.
+* {{LSLGC|Color|Colour}}: x is Red, y is Green, and z is Blue.
+
+===Operators===
+Vectors support the following operations:
+==== Addition, Operator "+" ====
+<syntaxhighlight lang="lsl2">
+vector v = <1, 2, 3> + <0.5, 0.0, 3>; // <1.5, 2.0, 6.0>
+</syntaxhighlight>
+
+==== Subtraction, Operator "-" ====
+<syntaxhighlight lang="lsl2">
+vector v = <1, 1, 1> - <0.5, 0.0, 3>; // <0.5, 1.0, -2.0>
+</syntaxhighlight>
+
+==== Dot Product, Operator "*" ====
+<syntaxhighlight lang="lsl2">
+float f = <9, 2, 7> * <4, 8, 10>; // 122.0
+</syntaxhighlight>
+
+==== Cross Product, Operator "%" ====
+<syntaxhighlight lang="lsl2">
+vector v = <2, 3, 4> % <5, 6, 7>; // <-3, 6, -3>
+</syntaxhighlight>
+
+==== Scalar ====
+A vector can be multiplied or divided by a [[Float]] or [[Integer]] to scale it.
+
+Each component of the vector will be multiplied or divided by the same value.
+<syntaxhighlight lang="lsl2">
+vector v = <1, 2, 3> * 1.5; // <1.5, 3.0, 4.5>
+vector v = <1, 2, 3> / 1.5; // <0.666667, 1.333333, 2.000000>
+</syntaxhighlight>
+
+==== Rotation ====
+A vector can be multiplied or divided by a [[Quaternion]] to rotate it.
+<syntaxhighlight lang="lsl2">
+// 45-degree rotation around the Z (up) axis
+rotation r = llEuler2Rot(<0, 0, 45> * DEG_TO_RAD);
+
+// Vector whose direction is 1 meter to the east
+vector v = <1, 0, 0>;
+
+// Vector whose direction is north-east
+vector rotated = v * r; // <0.707107, 0.707107, 0.000000>
+
+// Vector whose direction is south-east
+// (division performs a rotation in the opposite direction)
+vector rotated = v / r; // <0.707107, -0.707107, 0.000000>
+</syntaxhighlight>
+
+===Useful Snippets===
+Check whether a string value is a valid vector:
+<syntaxhighlight lang="lsl2">integer IsVector(string s)
+{
+    list split = llParseString2List(s, [" "], ["<", ">", ","]);
+    if(llGetListLength(split) != 7)//we must check the list length, or the next test won't work properly.
+        return FALSE;
+    return !((string)((vector)s) == (string)((vector)((string)llListInsertList(split, ["-"], 5))));
+    //it works by trying to flip the sign on the Z element of the vector,
+    //if it works or breaks the vector then the values won't match.
+    //if the vector was already broken then the sign flip will have no affect and the values will match
+    //we cast back to string so we can catch negative zero which allows for support of ZERO_VECTOR
+}//Strife Onizuka</syntaxhighlight>

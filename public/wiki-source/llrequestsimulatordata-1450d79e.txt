@@ -1,0 +1,83 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-2596}}{{Issues/SVC-4921}}{{Issues/BUG-5031}}
+|func_id=293|func_sleep=1.0|func_energy=10.0
+|func=llRequestSimulatorData
+|return_type=key
+|return_subtype=handle
+|p1_type=string|p1_name=region|p1_desc=Case sensitive region name.
+|p2_type=integer|p2_name=data|p2_desc=DATA_* flag
+|func_footnote
+|func_desc=Requests {{LSLP|data}} about {{LSLP|region}}. When {{LSLP|data}} is available the {{LSLG|dataserver}} event will be raised.
+|return_text=for a {{LSLG|dataserver}} event response.
+|spec
+|caveats=
+*There is no DATA_SIM_MAXPRIMS flag (but <code>[[llGetEnv]]("region_product_name")</code> returns the region type). [[#SVC-4921|SVC-4921]]
+|constants={{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}- {{Hl2}}
+! colspan="2" {{!}} {{LSL Param|data}} Constant
+! Type
+! colspan="4" {{!}} Description
+{{!}}-
+{{LSL_Constants/llRequestedSimulatorData}}
+{{!}}}
+|examples=Hide objects in PG or unknown regions
+<source lang="lsl2">
+key         gRateingQuery       =   NULL_KEY        ;
+
+show()
+{
+    llSetLinkAlpha( LINK_SET, 1.0, ALL_SIDES );
+}//show
+
+hide()
+{
+     llSetLinkAlpha( LINK_SET, 0.0, ALL_SIDES );
+}//hide
+
+default
+{
+    on_rez(integer Setting)
+    {
+        llResetScript();
+    }//on_rez
+    
+    state_entry()
+    {
+        gRateingQuery = llRequestSimulatorData( llGetRegionName(), DATA_SIM_RATING );
+    }//state_entry
+   
+    changed(integer ItChanged)
+    {
+        if (ItChanged & CHANGED_OWNER)      llResetScript();
+        if (ItChanged & CHANGED_REGION)     llResetScript();
+    }//changed
+    
+    dataserver(key query_id, string data)
+    {
+        if (query_id == gRateingQuery)
+        {
+            if (data == "MATURE" || data == "ADULT")        show();
+            else if (data == "UNKNOWN" || data == "PG")     hide();
+        }//gRateingQuery
+    }//dataserver
+    
+}//default
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetEnv]]|}}
+{{LSL DefineRow||[[llGetParcelDetails]]|}}
+{{LSL DefineRow||[[llGetParcelFlags]]|}}
+{{LSL DefineRow||[[llGetParcelMaxPrims]]|}}
+{{LSL DefineRow||[[llGetParcelPrimCount]]|}}
+|also_tests=
+{{LSL DefineRow||[[llRequestSimulatorData Test]]}}
+|also_events
+|also_articles
+|notes=Global Position in meters
+|issues
+|cat1=Dataserver
+|cat2=Region
+|cat3
+|cat4
+}}

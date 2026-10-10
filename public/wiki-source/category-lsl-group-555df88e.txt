@@ -1,0 +1,61 @@
+{{LSL Header|ml=*}}
+{{LSLC|}}{{RightToc}}
+
+For in-depth answers about common questions about groups, go here: [[:Category:Groups]]
+
+===Group General===
+
+In Second Life, a group is an association of people. As of July 2008, there is still a fee of L$100 to create a new group. Once created, a group's name cannot be changed. Nor, it appears, can it be re-used.
+
+===Group Numbers===
+
+A group must have in it 2 or more people. If a group's membership gets down to 1 person only, or 0, the system will purge it eventually. The present writer is unaware of a maximum number of people in a group.
+
+===Group Membership===
+
+A user with a Basic account my join a limit of 42 groups (updated January 2011), and a user with a Premium account could join up to 60 groups from May 2015 until in 2022 when this number was increased to 70 groups. A Premium Plus account was introduced in 2022 which allows the account to join up to 140 groups.
+
+The original limit was 10; this was raised to 15 in SL 1.4.0, and again in SL 1.12.0 to 25. Calls for the maximum to be increased even further began almost immediately after it was raised to 25.
+
+If users lower their subscription level and are members of more groups than the new account type supports, no memberships are lost, but they are not able to join any new groups until they get below the group limit for their account.
+
+===Joining a Group===
+
+The creator of a group can set joining conditions to:
+<ol type="a">
+<li>invitation only;
+<li>open to join, but there is a fee to join;
+<li>open to join for free.
+</ol>
+
+===Group Privileges===
+
+Group members are able to accord each other some access privileges, and can do sharing of financial items such as land tier, etc, if they choose. Some vending systems allow you to tell your vendors to accord certain discounts to group members{{Footnote|This though, owing to the limited group functionality in SL (identified above in [[#sag_1|Scripting and Groups: Point 1]]), only works if they have their group tag active at time of purchase.}}.
+
+Land and objects can be set to a group, shared with a group or be deeded to a group.
+
+Note that a non-transferable item cannot be deeded to a group, because that would be a transfer of ownership.
+
+Some objects, such as media objects like radios, TV's and security systems, will not function on group-owned land unless they are deeded to a group. Owing to this, note that non-transferable radios, for instance, can never work on group land.
+
+==="Active Group"===
+
+When a person has a group active, that group's name appears in the bubble above his or her head. This is referred to as the "group tag." "Having your group tag active" means having a certain group currently set to be your active group.
+
+Upon joining a group, it immediately sets itself to become your active group at that time (some people find this annoying.)
+
+===Scripting and Groups===
+
+#<span id="sag_1"></span>Identifying someone's group(s) through scripting
+#:There is as of yet (July 2008) no way of telling what groups someone belongs to, or of knowing what is the name of the group that they currently have active. The best you can do is compare the group they have active with the group that an object is set to, and get an answer as to whether they match or not. You do this using either [[llDetectedGroup]]() or [[llSameGroup]](). (To be clear: all you get back is an answer as to whether there is a match between the object's group, and the person's active group, or not. You get no other information.)
+#::This is no longer entirely correct. Using [[llGetObjectDetails]]([[llGetKey]](), [OBJECT_GROUP]) on an attachment will return the key of the avatar's currently active group. However, there is still no obvious way to retrieve a list of groups an avatar belongs to.
+#You cannot use [[llGiveMoney]] to give money to a group;
+#If your scripts draw on functions that can only work if same entity (person or group) owns both the scripted object and the land it is rezzed on, then you need to either release the object with transfer privileges so that it can be deeded to group and therefore work on group-owned land, or warn the customer in advance of purchase that the item won't work on group-owned land;
+#Communications such as [[LlInstantMessage|instant messages]] cannot be sent to a group per se. Instead, what you have to do is create a list of the UUIDs of the people in that group, and loop through the list sending an instant message to each person separately;
+#Note to teams working on shared scripting projects: membership in a common group is one of the pre-requisites to [[Editing someone else's scripts and notecards|shared editing access to scripts]].
+#You can use the [[World API]] in order to obtain group information by UUID key.
+#There is no LSL function that returns a group's name as a string.  However, if you know a group key (as a result of calling [[llGetObjectDetails]] with [[OBJECT_GROUP]], or calling [[llGetParcelDetails]] with [[PARCEL_DETAILS_GROUP]]), you can display the group's name in the viewer and chat history using the [[Viewer URI Name Space]]:
+<source lang="lsl2">llOwnerSay("secondlife:///app/group/" + (string)group_key + "/about");</source>
+
+===Footnotes===
+{{Footnotes}}

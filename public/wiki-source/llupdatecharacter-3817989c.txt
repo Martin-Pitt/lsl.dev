@@ -1,0 +1,54 @@
+{{LSL_Function
+|func=llUpdateCharacter
+|func_desc=Updates settings for a character
+|p1_type=list
+|p1_subtype=instructions
+|p1_name=options
+|p1_desc=Character configuration options.
+|constants={{LSL_Constants/llCreateCharacter}}
+|caveats=(subject to change)
+* [[CHARACTER_DESIRED_SPEED]] ranges from 0.2 to 40.0.
+* [[CHARACTER_RADIUS]] ranges from 0.1 to 5.0.
+* [[CHARACTER_LENGTH]] ranges from 0.0 to 10.0.
+* [[TRAVERSAL_TYPE_SLOW]] {{!}} [[TRAVERSAL_TYPE_FAST]] {{!}} [[TRAVERSAL_TYPE_NONE]] - only use one of these parameters or omit. Defaults to [[TRAVERSAL_TYPE_NONE]] to if omitted. This affects whether a character moving on terrain that is less than 100% walkable will move faster (e.g., a cat crossing a street) or slower (e.g., a car driving in a swamp).
+* [[CHARACTER_TYPE_A]] {{!}} [[CHARACTER_TYPE_B]] {{!}} [[CHARACTER_TYPE_C]] {{!}} [[CHARACTER_TYPE_D]] {{!}} [[CHARACTER_TYPE_NONE]] - only use one of these parameters or omit. Defaults to [[CHARACTER_TYPE_NONE]] if omitted. This determines which of the 4 walkability coefficients the character pays attention to.
+* The character's shape is a capsule (cylinder with spherical ends) with a length (from tip to tip) and a circular cross section of some radius. These two size parameters are what is controlled by the [[CHARACTER_LENGTH]] and [[CHARACTER_RADIUS]] params respectively.
+* Note that the characters true "length" cannot be smaller than twice the radius however you're welcome to specify a value lower than that (but more than zero) -- the script shouldn't complain. 
+* The capsule is usually oriented vertically. It is possible to make the capsule lie horizontal by using an object that is long in its local X-axis, however these characters might not be able to navigate through gaps that cannot fit them lengthwise.
+** Use a vertical capsule whenever possible; horizontal capsules may become stuck more easily than vertical capsules.
+* Removing the script from a prim will not stop pathing behavior, in the same way that particles and hover text remain. To stop a pathing command use <code>[[llExecCharacterCmd]]([[CHARACTER_CMD_STOP]], [])</code>.
+|examples=
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llCreateCharacter([CHARACTER_DESIRED_SPEED, 10.0]);
+        
+        list points = [llGetPos() + <5,0,0>, llGetPos() - <5,0,0>];
+        llPatrolPoints(points, []);
+    }
+    
+    touch_start(integer total_number)
+    {
+        llUpdateCharacter([CHARACTER_DESIRED_SPEED, 50.0]);
+    }
+}	
+</source> 
+|also_functions=
+* [[llCreateCharacter]]
+* [[llDeleteCharacter]]
+* [[llEvade]]
+* [[llExecCharacterCmd]]
+* [[llGetClosestNavPoint]]
+* [[llFleeFrom]]
+* [[llNavigateTo]]
+* [[llPatrolPoints]]
+* [[llPursue]]
+* [[llUpdateCharacter]]
+* [[llWanderWithin]]
+|also_events=
+* [[path_update]]
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/12#12.07.31.262785 | 31/07/2012 ]]
+|cat1=Pathfinding
+}}

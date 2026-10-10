@@ -1,0 +1,73 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-5146}}{{Issues/BUG-10924}}
+|func=llListFindList
+|func_id=201|func_sleep=0.0|func_energy=10.0
+|return_type=integer
+|Return_text=index of the first instance of {{LSLP|test}} in {{LSLP|src}}.
+|p1_type=list|p1_name=src|p1_desc=what to search in (haystack)
+|p2_type=list|p2_name=test|p2_desc=what to search for (needle)
+|func_footnote=If {{LSLP|test}} is not found in {{LSLP|src}}, -1 (in LSL) or nil (in SLua) is returned.<br/>
+The index of the first entry in the list is {{HoverText|0|zero}}<br>
+If {{LSLP|test}} is found at the last index in {{LSLP|src}} the positive index is returned (5th entry of 5 returns 4).
+|func_desc
+|spec
+|caveats=
+* Strict type matching and case sensitivity is enforced.
+** "1" != 1
+** "1.0" != 1.0
+** 1 != 1.0
+** "a822ff2b-ff02-461d-b45d-dcd10a2de0c2" != (key)"a822ff2b-ff02-461d-b45d-dcd10a2de0c2"
+** "Justice" != "justice"
+* If {{LSLP|test}} is an {{HoverText|empty list|[]}} the value returned is {{HoverText|0|zero}} rather than -1.
+|constants
+|examples=<source lang="lsl2">list numbers = [1, 2, 3, 4, 5];
+default
+{
+    state_entry()
+    {
+        integer index = llListFindList(numbers, [3]);
+        if (index != -1)
+        {
+            list three_four = llList2List(numbers, index, index + 1);
+            llOwnerSay(llDumpList2String(three_four, ","));
+            // Object: 3,4
+        }
+    }
+}</source>
+<source lang="lsl2">//You can also search for two items at once to find a pattern in a list
+list avatarsWhoFoundMagicLeaves = ["Fire Centaur","Red Leaf"];
+default
+{
+    state_entry()
+    {
+        integer index = llListFindList(avatarsWhoFoundMagicLeaves, ["Fire Centaur","Red Leaf"]);
+        if (index != -1)
+        {
+            list output = llList2List(avatarsWhoFoundMagicLeaves, index, index + 1);
+            llOwnerSay(llDumpList2String(output, ","));
+            // Object: Fire Centaur, Red Leaf
+        }
+    }
+}</source>
+|helpers=
+An easy way to see if an item exists in a list...
+<source lang="lsl2">if(~llListFindList(myList, (list)item))
+{//it exists
+    // This works because ~(-1) produces 0, but ~ of any other value produces non-zero and causes the 'if' to succeed
+    // So any return value (including 0) that corresponds to a found item, will make the condition succeed
+    // It saves bytecode and is faster then doing != -1
+    // This is a bitwise NOT (~) not a negation (-)
+}</source>
+|also_functions=
+{{LSL DefineRow||[[llSubStringIndex]]|Find a string in another string}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|sort=ListFindList
+|cat1=List
+|haiku={{Haiku|Where are my car keys?|Has anyone seen my keys?|Oh! In my pocket.}}
+|cat2
+|cat3
+|cat4
+}}

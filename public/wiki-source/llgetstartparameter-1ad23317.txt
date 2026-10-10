@@ -1,0 +1,55 @@
+{{LSL_Function
+|func_id=134|func_sleep=0.0|func_energy=10.0
+|sort=GetStartParameter
+|func=llGetStartParameter|return_type=integer
+|func_footnote=
+*If the script was loaded with [[llRemoteLoadScriptPin]] then that start parameter is returned.
+*If the containing object was rezzed by [[llRezObjectWithParams]] or [[llRezObject]] or [[llRezAtRoot]] then the return is the [[on_rez]] parameter.
+*If the containing object was manually rezzed, by dragging from inventory, the start parameter is 0.
+|func_desc
+|return_text=that is the script start/rez parameter.
+|spec
+|caveats=
+* The start parameter does not survive region restarts ({{Jira|SVC-2251}}) or region change ({{Jira|SVC-3258}}, crossing or teleport).
+* If the script is reset (using [[llResetScript]] or other means), the start parameter is set to 0.
+|constants
+|examples=
+<source lang="lsl2">
+default
+{
+    on_rez(integer param)
+    {
+        llOwnerSay("rezzed with the number " + (string)param);
+    }
+    state_entry()
+    {
+        integer i = llGetStartParameter();
+        if (i)
+        {
+            llOwnerSay("I was given the number " + (string)i + " when I was rezzed");
+        }
+        else
+        {
+            llOwnerSay("rezzed from inventory (or rezzed/loaded with 0)");
+        }
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetStartString]]|Modern alternative that allows passing even more data.}}
+{{LSL DefineRow||[[llRemoteLoadScriptPin]]|Used to load a script into a remote prim}}
+{{LSL DefineRow||[[llRezObject]]|Used to rez an object at the center of mass}}
+{{LSL DefineRow||[[llRezAtRoot]]|Used to rez an object at the root}}
+|also_events=
+{{LSL DefineRow||[[on_rez]]|}}
+|also_articles
+|notes
+|issues=
+{{Issue/V1|SVC-2251|llGetStartParameter returns zero after sim restart|type=bug}}
+{{Issue/V1|SVC-3258|llGetStartParameter returns zero after change of region|type=bug}}
+|cat1=Script
+|cat2
+|cat3
+|cat4
+}}

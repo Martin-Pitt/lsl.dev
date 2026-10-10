@@ -1,0 +1,183 @@
+{{LSL Function/Headless
+|default={{{default|}}}
+|inject-2=
+|summary=The '''llLinksetDataDelete''' and '''llLinksetDataDeleteProtected''' functions erases a '''name:value''' pair from the linkset's datastore.  
+
+When this function successfully removes a '''name:value''' pair a [[linkset_data]] event is triggered in all scripts running in the linkset with an action of [[Template:LSL_Constants_Linkset_Data|LINKSETDATA_DELETE]] and the '''name''' parameter set to the {{LSLP|name}} that was removed. The '''value''' parameter in the event is set to an empty string. 
+
+|func=llLinksetDataDelete|sort={{{sort|LinksetDataDelete}}}
+|head={{LSL Function/Head
+|func_id=|func_sleep=0|func_energy=10.0
+|func=llLinksetDataDelete
+|return_type=integer
+|return_text=success or failure code.
+|p1_type=string|p1_name=name|p1_desc=The key of the linkset '''name:value''' pair to be deleted.
+|func_desc=Removes an unprotected '''name:value''' pair from the linkset's datastore. If the pair was created 
+}}{{LSL_Function/Head
+|func_sleep=0.0|func_energy=10.0
+|func=llLinksetDataDeleteProtected
+|func_footnote
+|func_desc=The '''llLinksetDataDeleteProtected''' function erases a protected '''name:value''' pair from the linkset's datastore. 
+
+|func_footnote
+|return_type=integer
+|return_text=success or failure code.
+|p1_type=string|p1_name=name|p1_desc=The key of the linkset '''name:value''' pair to be deleted.
+|p2_type=string|p2_name=pass|p2_desc=A pass phrase previously used to protect the '''name:value''' pair.
+|spec
+}}
+|caveats=
+* If the {{LSLP|name}} does not exist or the {{LSLP|pass}} does not match, no event is triggered.
+|constants={{LSL Constants Linkset_Data Returns}}
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llLinksetDataAvailable]]|}}
+{{LSL DefineRow||[[llLinksetDataCountFound]]|}}
+{{LSL DefineRow||[[llLinksetDataCountKeys]]|}}
+{{LSL DefineRow||[[llLinksetDataFindKeys]]|}}
+{{LSL DefineRow||[[llLinksetDataListKeys]]|}}
+{{LSL DefineRow||[[llLinksetDataDeleteFound]]|}}
+{{LSL DefineRow||[[llLinksetDataRead]]|}}
+{{LSL DefineRow||[[llLinksetDataReset]]|}}
+{{LSL DefineRow||[[llLinksetDataWrite]]|}}
+|also_events=
+{{LSL DefineRow||[[linkset_data]]}}
+|also_tests
+|also_articles
+|notes
+|examples=<source lang="lsl2">// Simple blacklist management.
+
+integer gDialogChannel;
+integer gDialogHandle;
+integer gManagingBlocks;
+
+startDialog(key person)
+{
+    gManagingBlocks = 0;
+    gDialogHandle = llListen(gDialogChannel, "", person, "");
+    llDialog(person, "\nSelect action", ["List blocks", "Add block", "Remove block"], gDialogChannel);
+    llSetTimerEvent(60);
+}
+
+stopDialog()
+{
+    llSetTimerEvent(0);
+    llListenRemove(gDialogHandle);
+}
+
+default
+{
+
+    on_rez(integer sp)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        gDialogChannel = (integer)(llFrand(-10000000)-10000000);
+        llListen(PUBLIC_CHANNEL, "", NULL_KEY, "");;
+    }
+
+    timer()
+    {
+        stopDialog();
+    }
+
+    touch_start(integer nd)
+    {
+        key toucherKey = llDetectedKey(0);
+        if (toucherKey == llGetOwner())
+        {
+            startDialog(toucherKey);
+        }
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+
+        if (llGetAgentSize(id) == ZERO_VECTOR)
+        {
+            return;
+        }
+
+        if (channel == gDialogChannel)
+        {
+            stopDialog();
+            if (gManagingBlocks)
+            {
+                message = llStringTrim(message, STRING_TRIM);
+                if ((key)message)
+                {
+                    if (gManagingBlocks == 1)
+                    {
+                        llOwnerSay("Addition request has been sent to the blacklist storage");
+                        llLinksetDataWrite("blocklist:" + message, "1");
+                    }
+                    else
+                    {
+                        llOwnerSay("Removal request has been sent to the blacklist storage.");
+                        llLinksetDataDelete("blocklist:" + message);
+                    }
+                }
+                else
+                {
+                    llOwnerSay("The UUID '" + message + "' appears to be invalid.");
+                }
+                startDialog(id);
+            }
+            else if (message == "List blocks")
+            {
+                list blocks = llLinksetDataFindKeys("^blocklist:", 0, 0);
+                integer listLength = llGetListLength(blocks);
+                llOwnerSay("Blacklist items: " + (string)listLength);
+                integer i;
+                while (i < listLength)
+                {
+                    string record = llGetSubString(llList2String(blocks, i), 10, -1);
+                    llOwnerSay("- secondlife:///app/agent/" + record + "/about" + " - " + record);
+                    ++i;
+                }
+                blocks = [];
+                startDialog(id);
+            }
+            else if (message == "Add block" || message == "Remove block")
+            {
+                string label = "add to";
+                gManagingBlocks = 1;
+                if (message == "Remove block")
+                {
+                    gManagingBlocks = 2;
+                    label = "remove from";
+                }
+                gDialogHandle = llListen(gDialogChannel, "", id, "");
+                llTextBox(id, "\nPlease specify one single avatar UUID you'd like to " + label + " the blacklist storage.", gDialogChannel);
+                llSetTimerEvent(60);
+            }
+            return;
+        }
+
+        if (llGetListLength(llLinksetDataFindKeys("blocklist:" + (string)id, 0, 1)) > 0)
+        {
+            llRegionSayTo(id, 0, "You're blacklisted.");
+            return;
+        }
+
+        llRegionSayTo(id, 0, "Hello there, secondlife:///app/agent/" + (string)id + "/about - your message: " + message);
+
+    }
+
+    linkset_data(integer action, string name, string value)
+    {
+        if (action == LINKSETDATA_RESET || action == LINKSETDATA_DELETE || action == LINKSETDATA_UPDATE)
+        {
+            llOwnerSay("Blacklist storage modified.");
+        }
+    }
+
+}</source>
+|cat1=Script
+|cat2=LinksetData
+|cat3
+|cat4
+}}

@@ -1,0 +1,48 @@
+{{Issues/SVC-3306}}{{LSL_Event|event_id=6|event_delay|event=collision
+|p1_type=integer|p1_name=num_detected|p1_desc
+|event_desc=Triggered while task is [[colliding]] with another task.
+|constants
+|spec
+|caveats=
+* Max number detected is 8.
+* Smallest repeat rate is approximatively 0.13 seconds.
+* Will not detect collisions with [[ground]]; use [[land_collision]] instead.
+* Will not detect collisions between an avatar sitting on the task and the task itself (avatars are linked to objects they sit on so there is no collision, use the [[changed]] event to detect sits).
+* Phantom objects can never receive trigger collision events.
+* <code>[[llVolumeDetect]]([[TRUE]])</code> objects get trigger [[collision_start]] and [[collision_end]] but not [[collision]]() events.
+* A collision with a hovering avatar does not trigger collisions, unless the avatar turns or moves.
+* A collision with a physical object or avatar resting on object does not continuously trigger collisions but for a few times, unless there is movement.
+* Only a physical object will get collision events from colliding with a non-physical object.
+|examples=<syntaxhighlight lang="lsl2">//Will turn phantom when someone bumps into it if on the list
+
+list access_list = ["Governor Linden"];
+
+default
+{
+    collision(integer num_detected)
+    {
+        if(~llListFindList(access_list, (list)llDetectedName(0)))
+        {
+            llSetStatus(STATUS_PHANTOM, TRUE);
+        }
+    }
+}</syntaxhighlight>
+|helpers
+|also_header
+|also_events=
+{{LSL DefineRow||[[collision_start]]|}}
+{{LSL DefineRow||[[collision_end]]|}}
+|also_functions={{LSL DefineRow||[[llPassCollisions]]|}}
+{{LSL DefineRow||[[llCollisionFilter]]|}}
+{{LSL DefineRow||[[llCollisionSound]]|}}
+{{LSL DefineRow||[[llCollisionSprite]]|}}
+{{LSL DefineRow||[[llVolumeDetect]]|}}
+|also_articles
+|also_footer
+|notes
+|issues
+|cat1=Collision
+|cat2=Detected
+|cat3=Collision Events
+|cat4=Passable
+}}

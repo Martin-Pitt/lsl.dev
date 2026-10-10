@@ -1,0 +1,117 @@
+[[Category:glTF]]
+
+<onlyinclude>{{#if:
+
+{{#vardefine:render_material_return|an empty list.}}
+
+{{#vardefine:render_material_const|{{LSL Const|PRIM_RENDER_MATERIAL|integer|49|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the material settings of a prim's face}}}}
+
+{{LSL_Function/inventory|render_material|uuid=true|type=material|no_caveat={{#ifeq:{{{1|}}}|get|true|<noinclude>*</noinclude>}}|full={{{remote|}}}|remote={{#ifeq:{{{1|set}}}|get|*}}|target=PRIM_RENDER_MATERIAL#Target}}
+
+{{#ifeq:{{{1|}}}|none||
+
+{{#vardefine:facetable|{{#var:facetable}}
+{{!}}-
+{{!}} [ {{#var:render_material_const}} ]
+{{!}} {{#var:render_material_return}} }}
+
+{{#vardefine:caveats_set|
+* If {{LSLP|render_material}} is provided as [[NULL_KEY]], the [[PBR_Materials|glTF Material]] is removed from {{LSLP|face}}, reverting back to any underlying [[PBR_Materials#Nomenclature_changes|Blinn-Phong]] materials.
+}}
+
+{{#vardefine:caveats_get|
+* With {{LSLP|render_material}} as with [[llGetRenderMaterial]], {{LSL Constant/NULL KEY}} is returned when the {{LSLGC|Owner|owner}} does not have {{LSLGC|Permissions/Asset|full permissions}} to the object and the [[PRIM_RENDER_MATERIAL|material]] is not in the prim's inventory.}}
+
+{{#ifeq:{{{1|}}}|get|
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#var:caveats_get}}
+}}
+
+|
+
+{{Issues/SVC-914}}
+{{#vardefine:caveats|{{#var:caveats}}
+{{#var:caveats_set}}
+}}
+
+}}
+
+<noinclude>
+{{:PRIM TEXGEN|{{{1|}}}}}
+</noinclude>
+
+}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#var:shared_caveat}}}}
+
+}}</onlyinclude>{{#if:
+
+{{#vardefine:caveats_set|{{#var:caveats}}{{#vardefine:caveats|}}}}
+{{#vardefine:issues_set|{{#var:issues}}{{#vardefine:issues|}}}}
+
+{{LSL_Function/face|face|{{#var:render_material_const}}|!footer=*|return={{#var:render_material_return}}}}
+
+{{#vardefine:caveats_get|{{#var:caveats}}{{#vardefine:caveats|}}
+{{#var:caveats_get}}
+{{#var:shared_caveat}}}}
+{{#vardefine:issues_get|{{#var:issues}}{{#vardefine:issues|}}}}
+
+}}{{LSL Constant
+|inject-2={{LSL PrimitiveParam Categorize|Face}}
+|name=PRIM_RENDER_MATERIAL
+|type=integer
+|value=49
+|desc=Used to get or set the material settings of a prim's {{LSLP|face}}.
+|examples=
+|pa={{LSL Constant/List|i_front=[&#32;{{#var:render_material_const}},&#32;|i_end=&nbsp;]|
+|inject-1={{#vardefine:p_render_material_desc|}}
+{{#vardefine:p_render_material_hover|}}
+{{#vardefine:direction|_set}}
+{{LSL_Function/inventory|render_material|uuid=true|type=material}}
+|text=Used with [[llSetPrimitiveParams]] & [[llSetLinkPrimitiveParams]].
+
+{{LSL Generic/Caveats|caveats={{#var:caveats_set}}{{#vardefine:caveats_set}}|issues={{#var:issues_set}}|title=*|h=4}}
+
+====Examples====
+<syntaxhighlight lang="lsl2">llSetPrimitiveParams([ PRIM_RENDER_MATERIAL, ALL_SIDES, my_render_material ]);
+llSetPrimitiveParams([ PRIM_RENDER_MATERIAL, ALL_SIDES, llGetInventoryName(INVENTORY_MATERIAL, 0) ]);
+llSetPrimitiveParams([ PRIM_RENDER_MATERIAL, 0, my_render_material ]);</syntaxhighlight>
+
+|toc=llSetPrimitiveParams
+|i1_type=integer|i1_name=face
+|i2_type=string|i2_name=render_material
+}}
+|pb={{LSL Constant/List|i_front=[[llGetPrimitiveParams]]([&nbsp;{{#var:render_material_const}},&#32;|i_end=&nbsp;]);|
+|inject-1={{#vardefine:p_render_material_desc|}}
+{{#vardefine:p_render_material_hover|}}
+{{#vardefine:direction|_get}}
+{{LSL_Function/inventory|render_material|uuid=true|type=material|no_caveat=true|full={{{remote|}}}|remote=*|target=#Target}}
+{{LSL Function/link|link|nogroup=*|nocaveats=*}}
+|r_front=Returns the list [&nbsp;|r_end=&nbsp;]
+|text=
+{{LSL Generic/Caveats|caveats={{#var:caveats_get}}{{#vardefine:caveats_get}}|issues={{#var:issues_get}}|title=*|h=4}}
+====Target====
+In the case of llGetPrimitiveParams is either the prim the script resides in, or the prim specified by the immediately prior [[PRIM_LINK_TARGET]] call. However in the case of llGetLinkPrimitiveParams, it is either the value of the {{LSLP|link}} parameter, or the prim specified by the immediately prior [[PRIM_LINK_TARGET]] call.
+|toc=llGetPrimitiveParams
+|i1_type=integer|i1_name=face
+|r1_type=string|r1_name=render_material
+}}
+|constants=
+{{LSL DefineRow||[[CHANGED_RENDER_MATERIAL]]|}}
+|functions=
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetRenderMaterial]]|}}
+{{LSL DefineRow||[[llSetLinkRenderMaterial]]|}}
+|events=
+{{LSL DefineRow||[[changed]]|}}
+|location
+|notes
+|cat1=Render Material
+|cat2=PBR
+|cat3
+|cat4
+}}

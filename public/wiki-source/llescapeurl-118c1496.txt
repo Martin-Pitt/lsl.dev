@@ -1,0 +1,66 @@
+{{LSL_Function
+|func_id=307|func_sleep=0.0|func_energy=10.0
+|func=llEscapeURL|return_type=string|p1_type=string|p1_name=url|p1_desc=A (preferably valid and unescaped URL) string.
+|func_footnote=To clarify, numbers and ASCII7 alphabetical characters are NOT escaped. If a character requires more then one byte in {{Wikipedia|UTF-8|UTF-8}} {{Wikipedia|Byte|byte}} form then it returns multiple <code>"%xx"</code> sequences chained together.
+|func_desc
+|return_text=that is the escaped/encoded version of {{LSLPT|url}}, replacing spaces with <code>"%20"</code> etc. The function will escape any character not in {{HoverText|<nowiki>[a-zA-Z0-9]</nowiki>|a-z, A-Z, 0-9}} to <code>"%xx"</code> where <code>"xx"</code> is the {{Wikipedia|Hexadecimal|hexadecimal}} value of the character in {{Wikipedia|UTF-8|UTF-8}} {{Wikipedia|Byte|byte}} form.
+|spec
+|other_languages={{LSL OL|PHP|[http://php.net/manual/en/function.rawurlencode.php rawurlencode]}}{{LSL OL|{{HoverText|ECMAScript|JavaScript, ActionScript, etc}}|[https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent encodeURIComponent]}}
+|caveats=The function is not appropriate for escaping a {{LSLP|url}} all at once, because the <code>":"</code> after the protocol, and all of the <code>"/"</code> characters delimiting the various parts, will be escaped. Instead, build the {{LSLP|url}} in parts; escaping parts of the path and query string arguments as needed.
+
+Sample URL: [https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322/foo/bar?arg=gra {{HoverTextStyle|style=color:green;|<nowiki>https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322</nowiki>|2={{String|x-script-url}} = {{String|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322}}}}{{HoverTextStyle|style=color:blue;|/foo/bar|2={{String|x-path-info}} = {{String|/foo/bar}}}}?{{HoverTextStyle|style=color:red;|1=arg=gra|2={{String|x-query-string}} = {{String|1=arg=gra}}}}]
+
+{{{!}} class="lltable" style="font-size: 85%; text-align: center; width: auto; border=1px;"
+! URL part
+! example
+{{!}}-
+{{!}} base URL
+{{!}} <font color="green"><nowiki>https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322</nowiki></font>
+{{!}}-
+{{!}} trailing path
+{{!}} <font color="blue">/foo/bar</font>
+{{!}}-
+{{!}} query string past the first "?" in the URL
+{{!}} <font color="red">arg=gra</font>
+{{!}}}
+|constants
+|examples=<syntaxhighlight lang="lsl2">
+string str = "http://wiki.secondlife.com/wiki/LSL Portal";
+ 
+default
+{
+    state_entry()
+    {
+        llOwnerSay("Plain string:\n\t" + str);
+        // output: "http://wiki.secondlife.com/wiki/LSL Portal"
+ 
+        llOwnerSay("Escaped string:\n\t" + llEscapeURL(str));
+        // output: "http%3A%2F%2Fwiki%2Esecondlife%2Ecom%2Fwiki%2FLSL%20Portal"
+ 
+        llOwnerSay("Escaped string unescaped again:\n\t" + llUnescapeURL( llEscapeURL(str) ));
+        // output: "http://wiki.secondlife.com/wiki/LSL Portal"
+ 
+        // because escaping and unescaping are exact opposite
+        // and unescaping an escaped string returns the original
+ 
+ 
+        //  For readability's sake it would make more sense to do:
+        llOwnerSay("For readability's sake:\n\t" + "http://wiki.secondlife.com/wiki/" + llEscapeURL("LSL Portal"));
+        // output: "http://wiki.secondlife.com/wiki/LSL%20Portal"
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow|[[llUnescapeURL]]}}
+|also_events
+|also_tests
+|also_articles={{LSL DefineRow|[[UTF-8]]}}
+{{LSL DefineRow|{{LSLGC|Base64}}}}
+|notes=*The SL viewer pretty prints URLs when converting them to clickable links in chat and dialogs. To confirm that a URL was escaped as intended, right-click the URL and copy, then paste to inspect it in the chat bar; or wrap it between "<nowiki><nolink>...</nolink></nowiki>"; or examine your chat log in an external editor; or display the string with an alternative function like [[llSetText]].
+|permission
+|history=*Prior to SL versions 1.19.1.81992, this function was limited to returning a maximum of 254 characters. {{Jira|SVC-470}}
+|cat1=Encoding
+|cat2=String
+|cat3=Encoding/URL
+|cat4
+}}

@@ -1,0 +1,87 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-3145}}{{Issues/SVC-6578}}{{Issues/SVC-6686}}{{Issues/SCR-485}}
+{{LSL_Function/inventory|inventory|uuid=false|type=object}}
+{{LSL_Function/position|pos|region=*}}
+|func_id=104|func_sleep=0.1|func_energy=200.0
+|func=llRezObject|sort=RezObject
+|p1_type=string|p1_name=inventory
+|p2_type=vector|p2_name=pos
+|p3_type=vector|p3_name=vel|p3_desc=velocity (max [[llVecMag|magnitude]] is approximately 200m/s)
+|p4_type=rotation|p4_name=rot|p4_desc=rotation
+|p5_type=integer|p5_name=param|p5_desc=[[on_rez]] event parameter and value returned by [[llGetStartParameter]] in the rezzed object (or by each of the items in a coalesced object).|p5_hover=on_rez event parameter and value returned by llGetStartParameter in the rezzed object.
+|func_footnote=The root of {{LSLP|inventory}} is not at {{LSLP|pos}} but the [[llGetGeometricCenter|center]] of {{LSLP|inventory}} is.<br/>To have the root prim at {{LSLP|pos}} use [[llRezAtRoot]] instead.
+|func_desc=Instantiate {{LSLP|inventory}} object at {{LSLP|pos}} with velocity {{LSLP|vel}} and rotation {{LSLP|rot}} with start parameter {{LSLP|param}}
+|return_text
+|spec
+|caveats=
+*Silently fails to rez {{LSLP|inventory}} (to have it's geometric center at {{LSLP|pos}}) if {{LSLP|pos}} is too far from the geometric center of the object trying to rez {{LSLP|inventory}}.
+**If your script is mysteriously failing to rez things, make sure you haven't (say) written "<code><0.0,0.0,1.0></code>" for the {{LSLP|pos}} parameter rather than (say) <code>[[llGetPos]]() + <0.0,0.0,1.0></code>".
+* When scripting attachments meant to rez objects, remember that when used in the root of an ([[attach|attached]]) [[attachment]] <code>[[llGetPos]]</code> doesn't return the position of the attachment but instead returns the position of the avatar's bounding box geometric center. Read [[llGetPos]] and [[llParticleSystem#Caveats | llParticleSystem Caveats]] for more information.
+* If the object is unattached and the owner of the object does not have copy permission  on {{LSLP|inventory}}, the object will no longer be present in inventory after it is rezzed (so another attempt to rez (the same object) will fail); if the owner does have copy permission, then a copy is rezzed, and the original {{LSLP|inventory}} remains in inventory.
+* If the object is attached and the owner of the object does not have copy permission  on {{LSLP|inventory}}, an error is shouted on [[DEBUG_CHANNEL]]: "Cannot rez no copy objects from an attached object."
+*Silently fails if you don't have offline building rights on the land. To have the right, your objects needs to ''either'': 
+** Be on land you own yourself.
+** Be on land where anyone is allowed to build, e.g. a sandbox. 
+** Be deeded to the group that owns the land.
+** Be set to the same group that owns the land and the land have the parcel flag 'allow group to build' set.
+** The group role "Always allow 'Create Objects'" will only work to override this when you are online, in the region, or have a child agent in the region. See [[#SVC-3145|SVC-3145]] in the Issues subsection of Deep Notes for more information.
+* See [[object_rez]] for examples on how to establish communications between the rezzing object and the new prim.
+|constants
+|examples=<syntaxhighlight lang="lsl2">default
+{
+     touch_start(integer param)
+     {
+          llRezObject("Object", llGetPos() + <0.0,0.0,1.0>, <0.0,0.0,0.0>, <0.0,0.0,0.0,1.0>, 0);
+     }
+}</syntaxhighlight>
+<syntaxhighlight lang="lsl2">// Rez an object on touch, with relative position, rotation, and velocity all described in the rezzing prim's coordinate system.
+string object = "Object"; // Name of object in inventory
+vector relativePosOffset = <2.0, 0.0, 1.0>; // "Forward" and a little "above" this prim
+vector relativeVel = <1.0, 0.0, 0.0>; // Traveling in this prim's "forward" direction at 1m/s
+rotation relativeRot = <0.707107, 0.0, 0.0, 0.707107>; // Rotated 90 degrees on the x-axis compared to this prim
+integer startParam = 10;
+
+default
+{
+    touch_start(integer a)
+    {
+        vector myPos = llGetPos();
+        rotation myRot = llGetRot();
+
+        vector rezPos = myPos+relativePosOffset*myRot;
+        vector rezVel = relativeVel*myRot;
+        rotation rezRot = relativeRot*myRot;
+
+        llRezObject(object, rezPos, rezVel, rezRot, startParam);
+    }
+}</syntaxhighlight>
+|helpers
+|also_constants=
+{{LSL DefineRow||[[PRIM_TEMP_ON_REZ]]|}}
+|also_functions=
+{{LSL DefineRow||[[llRezObjectWithParams]]|Modern alternative with more parameters.}}
+{{LSL DefineRow||[[llRezAtRoot]]|Rezzes the object at the requested position}}
+{{LSL DefineRow||[[llGetStartParameter]]|}}
+{{LSL DefineRow||[[llGodLikeRezObject]]|}}
+{{LSL DefineRow||[[LlGetParcelFlags#Examples]]|Test if the parcel allows this script to rez}}
+|also_tests
+|also_events=
+{{LSL DefineRow||[[object_rez]]|triggered when this object rezzes an object from inventory}}
+|also_articles
+|notes='''Maximum rez distance'''
+*The {{LSLP|distance}} scales with the size of the object the script is in.
+**The formula is <code>10 + llVecMag(llGetScale()) * 0.5</code>
+*The {{LSLP|distance}} measured is between the [[llGetPos|center]] of the rezzing {{LSLP|prim}} and the [[llGetPos|center]] of the {{LSLP|prim}} that is rezzed.
+**The tests did not include rezzing from or the rezzing of link_set objects.
+**A <code>0.01</code> meter cube could rez just beyond <code>10.0</code> meters away.
+**A <code>10.0</code> meter cube could rez just beyond <code>18.66</code> meters away.
+**A <code>32.0</code> meter cube could rez just beyond <code>37.71</code> meters away.
+**A <code>64.0</code> meter cube could rez just beyond <code>65.42</code> meters away.
+|permission
+|inventory
+|negative_index
+|cat1=Rez
+|cat2=Object
+|cat3=Inventory
+|cat4
+}}

@@ -1,0 +1,124 @@
+{{LSL_Function
+|inject-2={{LSL_Function/notecard|name|uuid=true}}
+|func_id=276|func_sleep=0.1|func_energy=10.0
+|func=llGetNumberOfNotecardLines
+|return_type=key
+|return_subtype=handle
+|p1_type=string|p1_name=name
+|func_footnote
+|func_desc=Requests the number of lines in notecard {{LSLP|name}} via the [[dataserver]] event (cast dataserver value to integer)
+|Return_text=for a [[dataserver]] event response.
+|spec
+|caveats=* If notecard contains embedded inventory items (such as textures and landmarks), invalid data will be returned.
+|constants
+|examples=
+<source lang="lsl2">
+// Ascertain the number of lines in a notecard in the prim's contents
+
+string  gNotecard = "Config";       // Name of notecard to be examined
+key     gLineRequestID;             // Identity of expected dataserver event
+integer gLineCounter;               // The number of lines in the NC, as determined by this script
+
+default
+{
+    state_entry()
+    {
+        // Ask how many lines are in the notecard.
+        // The answer will arrive via a dataserver event
+        gLineRequestID = llGetNumberOfNotecardLines(gNotecard);
+    }
+    
+    dataserver(key requested, string data)
+    {
+        if (requested == gLineRequestID)
+        {
+            llOwnerSay( "The notecard '" + gNotecard + "' contains " + data + " lines" );
+            // cast the data string to an integer if you need to access the counter later
+            gLineCounter = (integer) data;
+        }        
+    }
+}
+</source>
+<source lang="lsl2">
+// Check for a valid existant notecard, and read it into a list
+// On touch, say the total number of lines, number of lines containing data, and say each line
+// Omei Qunhua  7-Jan-2013
+
+string  gNotecard = "Config";       // Name of notecard to be examined
+key     gLineRequestID;             // Identity of expected line count dataserver event
+key     gReadRequestID;             // Identity of expected data read dataserver event
+integer gLineTotal;                 // The number of lines in the NC, as determined by this script
+integer gLineIndex;                 // Index for data read requests
+list    gDataLines;                 // List containing all data lines from notecard, excluding blank and comment lines
+string  gStatus;                    // Will contain EOF when notecard reading has finished
+
+default
+{
+    state_entry()
+    {
+        if (llGetInventoryKey(gNotecard) )         // Test if notecard exists and has been saved (returned key will be NULL_KEY otherwise)
+            gLineRequestID = llGetNumberOfNotecardLines(gNotecard);       // Kick off a request for the total number of lines that the notecard contains
+        else
+            llOwnerSay("Notecard '" + gNotecard + "' does not exist or has no saved data");
+    }
+    changed(integer change)
+    {
+        if (change & CHANGED_INVENTORY)
+            llResetScript();
+    }
+    dataserver(key requested, string data)
+    {
+        if (requested == gLineRequestID)
+        {
+            gLineTotal = (integer) data;           // Cast the data string to an integer to get the number of lines
+            gReadRequestID = llGetNotecardLine(gNotecard, gLineIndex);      // Request a read of the first notecard line
+            return;
+        }
+        if (requested != gReadRequestID)
+            return;
+        if ( (gStatus = data) == EOF)              // Save and test the current data (so that other code can tell when we've finished too)
+            return;
+
+        // A notecard line has been read. Kick off the process of fetching the next line, while we process this line
+        gReadRequestID = llGetNotecardLine(gNotecard, ++gLineIndex);
+
+        data = llStringTrim(data, STRING_TRIM);    // chop off any leading or trailing blanks
+        if (data == "" || llGetSubString(data, 0, 0) == "#")     
+            return;                                // ignore blank or comment lines
+        
+        // Do any further processing of the data here
+        gDataLines += data;                        // Add this data line to our global list
+    }
+    touch_start(integer total_number)
+    {
+        if (gStatus != EOF)
+        {
+            llOwnerSay("Please wait");             // Still reading the notecard
+            return;
+        }
+        integer count = (gDataLines != [] );       // Get list length (efficient shortcut)
+        llOwnerSay(gNotecard + " had a total of  " + (string) gLineTotal + " lines, of which " + (string) count + " contained data." );
+
+        integer x;
+        for ( ; x < count; ++x)                    // Loop through the data list
+        {
+            llOwnerSay( llList2String(gDataLines, x) );
+        }
+        llOwnerSay("---- end of data ----");
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llGetNotecardLine]]|}}
+|also_events={{LSL DefineRow||[[dataserver]]|}}
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|sort=GetNumberOfNotecardLines
+|cat1=Notecard
+|cat2=Dataserver
+|cat3=
+|cat4
+}}

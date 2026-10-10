@@ -1,0 +1,51 @@
+{{LSL Function
+|func_id=284|func_sleep=0.2|func_energy=10.0
+|func=llSetLocalRot
+|p1_type=rotation|p1_name=rot|p1_desc
+|func_desc=Sets the rotation of a child prim relative to the root prim
+|return_text
+|spec
+|caveats
+|constants
+|examples=Drop this script into a ''child'' prim to rotate it in 1 degree increments on each [[touch]].
+<source lang="lsl2">rotation rot_xyzs;
+ 
+default
+{
+    state_entry()
+    {
+        vector xyz_angles = <0,1.0,0>; // This defines a 1 degree change on the Y axis
+        vector angles_in_radians = xyz_angles*DEG_TO_RAD; // Change to radians
+        rot_xyzs = llEuler2Rot(angles_in_radians); // Convert to a rotation
+    }
+ 
+    touch_start(integer s)
+    {
+        llSetLocalRot(llGetLocalRot()*rot_xyzs); // Apply the increment rotation to the prim's current rotation ...
+ 
+    }
+}</source>
+|helpers=
+<source lang="lsl2">//-- this is an equivalent call from any prim in the same link set
+llSetLinkPrimitiveParamsFast( target_prim, [PRIM_ROT_LOCAL, rot] );
+//-- where "target_prim" is the link number of the prim you want to set the local rotation of</source>
+|also_functions=
+{{LSL DefineRow||[[llGetRot]]|}}
+{{LSL DefineRow||[[llGetLocalRot]]|}}
+{{LSL DefineRow||[[llGetRootRotation]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetRot]]|}}
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParamsFast]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Movement
+|cat2=Rotation
+|haiku={{Haiku|Carousel horses|Race, ever facing forward.|Turn without turning.}}
+|cat3
+|cat4
+}}

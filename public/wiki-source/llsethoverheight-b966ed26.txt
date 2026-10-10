@@ -1,0 +1,64 @@
+{{LSL_Function
+|inject-2=
+{{LSL_Function/physical}}
+{{LSL_Function/damping|tau}}
+|inject-3=
+{{LSL_Function/boolean|water|bool=*|if=*|td=then hover above water too (or below if {{LSLP|height}} is negative)|th=then hover above water too (or below if height is negative)|fd=ignore water like it isn't there}}
+|func_id=123|func_sleep=0.0|func_energy=10.0
+|func=llSetHoverHeight
+|p1_type=float|p1_name=height|p1_desc=Distance to hover above the ground (if negative, hovers below ground)
+|p2_type=integer|p2_subtype=boolean|p2_name=water
+|p3_type=float|p3_name=tau
+|func_footnote=Do not use with vehicles.<br/>Use [[llStopHover]] to stop hovering.
+|func_desc=Critically damps to a {{LSLP|height}} above the ground (or water) in {{LSLP|tau}} seconds.
+|return_text
+|spec
+|caveats=*Do not rely on built-in limits. In the past, the difference between the object's initial position and the hover height was limited to 64 meters. Under SL Server 1.26.2 the limit is 4096 meters above the ground level.
+* This is not a prim property; stopping or resetting the script stops llSetHoverHeight; same with the similar [[llGroundRepel]]
+* If the object tries to go above the height (like, walking up a prim ramp), llSetHoverHeight will pull it back down, unlike the similar [[llGroundRepel]]
+|constants
+|examples=
+<source lang="lsl2">
+// Put in an attached prim and touch to start floating in air without flying.
+// Touch again to drop to the ground.
+
+integer gHovering = FALSE; // are we supposd to be hovering now?
+
+default {
+    touch_start(integer total_number) {
+        if (!llGetAttached()) {
+            llWhisper(0, "Wear me to play.");
+            return;
+        }
+
+        if (gHovering) {
+            llOwnerSay("Releasing you.");
+            llStopHover();
+        }
+        else {
+            llOwnerSay("Making you float...");
+
+            // Start hovering 5 meters over our current location.
+            vector myPosition = llGetPos();
+            llSetHoverHeight(myPosition.z - llGround(ZERO_VECTOR) + 5.0, FALSE, 1.0);
+        }
+
+        gHovering = !gHovering; // flip the switch
+    }
+}
+</source>
+|notes=* It is possible to assign '''height''' a negative value. If '''water''' is [[TRUE]], this will make the object hover below the water level.
+* Unless [[llVolumeDetect|volume detect]] is enabled, negative '''height''' values when '''water''' is [[FALSE]] will not move the object below the ground level and may cause it to be dragged down the local incline to the nearest low point. Enabling [[llVolumeDetect|volume detect]] will cause negative '''height''' settings to move the object below the ground level.
+* Assigning '''height''' a value of zero will have the same effect as [[llStopHover]].
+|helpers
+|also_functions={{LSL DefineRow||[[llGroundRepel]]| Same as llSetHoverHeight but does not hover all the time}}
+{{LSL DefineRow||[[llStopHover]]|To stop hovering}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Hover
+|cat2=Movement
+|cat3=Physics
+|cat4
+}}

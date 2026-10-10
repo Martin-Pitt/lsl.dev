@@ -1,0 +1,428 @@
+{{LSL Header}}
+
+(http://www.gnu.org/copyleft/fdl.html) in the spirit of which this script is GPL'd. Copyright (C) 2008 Xaviar Czervik
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+This compiles an assembly-like programming language, and runs it. Unlike most assembly code, which is fast, this is very, very, slow. You can't do anything you couldn't do in a tenth the number of lines of LSL, so there are no advantages to using it (besides having fun).
+
+Most of the things I did are really bizarre, and I did it for the sole reason of trying to do something amusing.
+
+I'll try to explain quickly...
+
+There are three registers, 0, 1, and 2. You can save values to 0 and 1. After functions are ran, they put the result into registry 2.
+
+Below are a list of functions. 
+<pre>
+st0 - Stores the value to registry 0.
+st1 - Stores the value to registry 1.
+ty0 - Sets the type of registry 0, "str", "int" or "flo".
+ty1 - Sets the type of registry 1, "str", "int" or "flo".
+sv0 - Saves registry 0 to the memory address specified.
+sv1 - Saves registry 0 to the memory address specified.
+sv2 - Saves registry 0 to the memory address specified.
+ld0 - Load the data from the memory address into registry 0.
+ld1 - Load the data from the memory address into registry 1.
+jmp - Jump to a line number.
+jil - Jump to a line number if registry 0 is less than registry 1.
+jle - Jump to a line number if registry 0 is less than or equal to registry 1.
+jie - Jump to a line number if registry 0 is equal to registry 1.
+add - Adds registry 0 and 1, and stores the value into registry 2.
+sub - Subtracts registry 0 and 1, and stores the value into registry 2.
+say - Says registry 1 out loud.
+inp - Waits for user input (chat).
+rnd - Generates a random number between registry 0 and 1 (inclusive).
+rem - Comment.
+</pre>
+
+One thing I didn't realize until after I wrote the compiler-type-thing, is that if you use negative numbers as the memory address to save the registries to, you can overwrite the program. This means you can make a self-modifying program fairly easily. You can also read lines of the program by loading a negative number. This works because I load the program into a list, and the variables go after the list, so -1 is the last line of the program, -2 is the second-to-last, etc.
+
+Create a box, and drop this script in it. Then create a note called "prog" and write the program in it. Some example programs follow this script.
+<source lang="lsl2">
+list memory;
+integer lastProgLine;
+
+string reg0;
+string type0;
+string reg1;
+string type1;
+string reg2;
+string type2;
+
+integer lstn;
+
+integer i;
+
+err(integer li, string s) {
+    llOwnerSay("Error on line " + (string)li + ": " + s);
+    llResetScript();
+}
+
+save(string val, integer loc) {
+    integer add = lastProgLine + (integer)loc;
+    if (add < llGetListLength(memory)) {
+        memory = llListReplaceList(memory, [val], add, add);
+    } else {
+        integer i = 0;
+        while (i < add-llGetListLength(memory)) {
+            memory += "";
+            i++;
+        }
+        memory += val;
+    }
+}
+
+default {
+    touch_start(integer a) {
+        llGetNotecardLine("Prog", lastProgLine);
+    }
+    changed(integer a) {
+        if (a & CHANGED_INVENTORY) {
+            llResetScript();
+        }
+    }
+    dataserver(key qid, string data) {
+        if (data == EOF) {
+            state run;
+        }
+        memory += data;
+        llGetNotecardLine("Prog", (lastProgLine += 1));
+    }
+}
+
+state run {
+    changed(integer a) {
+        if (a & CHANGED_INVENTORY) {
+            llResetScript();
+        }
+    }
+    state_entry() {
+        i = 0;
+        llSetTimerEvent(.001);
+    }
+    timer() {
+        if (i >= lastProgLine) {
+            llResetScript();
+        }
+        
+        string l = llList2String(memory, i);
+        string command;
+        string action;
+        if (llSubStringIndex(l, " ") != -1) {
+            list line = [llGetSubString(l, 0, llSubStringIndex(l, " ")-1), llGetSubString(l, llSubStringIndex(l, " ")+1, -1)];
+            command = llList2String(line, 0);
+            action = llList2String(line, 1);
+        } else {
+            command = l;
+        }
+        if (command == "ty0") {
+            if (!(action == "str" || action == "int" || action == "flo")) {
+                err(i,  "Invalid registry type.");
+            }
+            type0 = action;
+        } else if (command == "ty1") {
+            if (!(action == "str" || action == "int")) {
+                err(i,  "Invalid registry type.");
+            }
+            type1 = action;
+        } else if (command == "ty2") {
+            err(i,  "Registry two can not be set.");
+        } else if (command == "st0") {
+            if (type0 == "") {
+                err(i, "Registry type has not been defined.");
+            }
+            reg0 = action;
+        } else if (command == "st1") {
+            if (type1 == "") {
+                err(i, "Registry type has not been defined.");
+            }
+            reg1 = action;
+        } else if (command == "st2") {
+            err(i,  "Registry two can not be set.");
+        } else if (command == "jmp") {
+            i = (integer)action - 1;
+        } else if (command == "jil") {
+            if (type0 == "str" || type1 == "str") {
+                err(i,  "Registries may not be of type str to compare.");
+            }
+            if ((float)reg0 < (float)reg1)
+                i = (integer)action - 1;
+        } else if (command == "jle") {
+            if (type0 == "str" || type1 == "str") {
+                err(i,  "Registries may not be of type str to compare.");
+            }
+            if ((float)reg0 <= (float)reg1)
+                i = (integer)action - 1;
+        } else if (command == "jie") {
+            if (type0 == type1) {
+                if (reg0 == reg1)
+                    i = (integer)action - 1;
+            }
+        } else if (command == "add") {
+            if (type0 == "str" || type1 == "str") {
+                type2 = "str";
+                reg2 = reg0 + reg1;
+            } else if (type0 == "int" && type1 == "int") {
+                type2 = "int";
+                reg2 = (string)((integer)reg0 + (integer)reg1);
+            } else if (type0 == "flo" && type1 == "flo") {
+                type2 = "int";
+                reg2 = (string)((float)reg0 + (float)reg1);
+            } else if (type0 == "flo" && type1 == "int") {
+                type2 = "int";
+                reg2 = (string)((float)reg0 + (integer)reg1);
+            } else if (type0 == "int" && type1 == "flo") {
+                type2 = "int";
+                reg2 = (string)((integer)reg0 + (float)reg1);
+            } else {
+                err(i, "Registry type mismatch or invalid.");
+            }
+        } else if (command == "sub") {
+            if (type0 == "int" && type1 == "int") {
+                type2 = "int";
+                reg2 = (string)((integer)reg0 - (integer)reg1);
+            } else {
+                err(i, "Registry type mismatch or invalid.");
+            }
+        } else if (command == "ld0") {
+            if (type0 == "") {
+                err(i, "Registry type has not been defined.");
+            }
+            reg0 = llList2String(memory, lastProgLine + (integer)action);
+        } else if (command == "ld1") {
+            if (type1 == "") {
+                err(i, "Registry type has not been defined.");
+            }
+            reg1 = llList2String(memory, lastProgLine + (integer)action);
+        } else if (command == "ld2") {
+            err(i, "Cannot load data into registry two.");
+        } else if (command == "sv0") {
+            save(reg0, (integer)action);
+        } else if (command == "sv1") {
+            save(reg1, (integer)action);
+        } else if (command == "sv2") {
+            save(reg2, (integer)action);
+        } else if (command == "say") {
+            llSay(0, reg0);
+        } else if (command == "inp") {
+            llSetTimerEvent(0);
+            lstn = llListen(0, "", "", "");
+        } else if (command == "rnd") {
+            if (type0 == "float" || type1 == "float") {
+                type2 = "flo";
+                reg2 = (string)(llFrand((float)reg1-(float)reg0)+(float)reg0);
+            } else if (type1 == "int" && type0 == "int") {
+                type2 = "int";
+                reg2 = (string)((integer)llFrand((float)reg1-(float)reg0+1)+(integer)reg0);
+            }
+        } else if (command == "rem") {
+        } else {
+            err(i, "Invalid command '" + command + "'.");
+        }
+        i++;
+    }
+    listen(integer i, string n, key id, string m) {
+        llListenRemove(lstn);
+        type2 = "str";
+        reg2 = m;
+        llSetTimerEvent(.0001);
+    }
+}
+</source>
+
+
+Some example programs...
+
+Guess the number
+<pre>
+ty0 str
+ty1 str
+st0 This is a demo of the assembly-like programming language by Xaviar Czervik.
+say
+st0 This is an examle guess-the-number game.
+say
+ty0 int
+ty1 int
+st0 0
+st1 100
+sv0 0
+sv1 1
+ty0 str
+ty1 str
+st0 I am thinking of a number between 
+ld1 0
+add
+sv2 2
+ld0 2
+st1  and 
+add
+sv2 2
+ld0 2
+ld1 1
+add
+sv2 2
+ld0 2
+st1 . Guess what it is.
+add
+sv2 2
+ld0 2
+say
+ty0 int
+ty1 int
+ld0 0
+ld1 1
+rnd
+sv2 3
+st0 1
+sv0 4
+ty0 str
+st0 
+sv0 5
+inp
+ty0 int
+ty1 int
+sv2 5
+ld0 3
+ld1 5
+jie 97
+jle 74
+ty0 str
+ty1 str
+ld0 5
+st1  is too low. Guess again. You are on guess #
+add
+sv2 6
+ty0 int
+ty1 int
+ld0 4
+st1 1
+add
+sv2 4
+ty0 str
+ty1 str
+ld0 6
+ld1 4
+add
+sv2 6
+ld0 6
+st1 .
+add
+say
+jmp 40
+ty0 str
+ty1 str
+ld0 5
+st1  is too high. Guess again. You are on guess #
+add
+sv2 6
+ty0 int
+ty1 int
+ld0 4
+st1 1
+add
+sv2 4
+ty0 str
+ty1 str
+ld0 6
+ld1 4
+add
+sv2 6
+ld0 6
+st1 .
+add
+say
+jmp 40
+ty0 str
+ty1 str
+ld0 5
+st1  is correct! It took you 
+add
+sv2 6
+ty0 int
+ty1 int
+ld0 4
+st1 1
+add
+sv2 4
+ty0 str
+ty1 str
+ld0 6
+ld1 4
+add
+sv2 6
+ld0 6
+st1  guesses to get my number.
+add
+sv2 7
+ld0 7
+say
+</pre>
+
+Hello world (of sorts)
+<pre>ty0 int
+st0 0
+ty1 int
+st1 5
+jle 6
+jmp 100
+sv0 0
+ty0 str
+st0 Hello World. On line: 
+ld1 0
+add
+sv2 1
+ld0 1
+say
+ty0 int
+ld0 0
+ty1 int
+st0 1
+add
+sv2 2
+ld0 2
+jmp 2
+</pre>
+
+Get user input
+<pre>ty0 int
+st0 0
+ty1 int
+st1 3
+jle 6
+jmp 100
+sv0 0
+ty0 str
+st0 Please say something.
+say
+inp
+sv2 1
+ty1 str
+ld1 1
+st0 You said: "
+add
+sv2 2
+ld0 2
+st1 " on input number 
+add
+sv2 2
+ld0 2
+ld1 0
+add
+sv2 2
+ld0 2
+st1 .
+add
+sv2 2
+ld0 2
+say
+ty0 int
+ld0 0
+ty1 int
+st1 1
+add
+sv2 3
+ld0 3
+jmp 2
+</pre>
+
+[[Category:LSL Library]]

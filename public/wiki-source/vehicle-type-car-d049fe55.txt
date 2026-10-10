@@ -1,0 +1,62 @@
+{{LSL Constant
+|name={{PAGENAMEE}}
+|type=integer
+|value=2
+|examples
+|desc=Another vehicle that bounces along the ground but needs the motors to be driven from external controls or
+[[timer]] events.
+
+===Effects===
+Setting the vehicle type to car enables the vehicle system and additionally has the same effect of executing the following:
+<source lang="lsl2">
+// most friction for left-right, least for up-down
+llSetVehicleVectorParam( VEHICLE_LINEAR_FRICTION_TIMESCALE, <100, 2, 1000> );
+// no angular friction
+llSetVehicleVectorParam( VEHICLE_ANGULAR_FRICTION_TIMESCALE, <1000, 1000, 1000> );
+// linear motor wins after about a second, decays after about a minute
+llSetVehicleVectorParam( VEHICLE_LINEAR_MOTOR_DIRECTION, <0, 0, 0> );
+llSetVehicleFloatParam( VEHICLE_LINEAR_MOTOR_TIMESCALE, 1 );
+llSetVehicleFloatParam( VEHICLE_LINEAR_MOTOR_DECAY_TIMESCALE, 60 );
+// agular motor wins after a second, decays in less time than that
+llSetVehicleVectorParam( VEHICLE_ANGULAR_MOTOR_DIRECTION, <0, 0, 0> );
+llSetVehicleFloatParam( VEHICLE_ANGULAR_MOTOR_TIMESCALE, 1 );
+llSetVehicleFloatParam( VEHICLE_ANGULAR_MOTOR_DECAY_TIMESCALE, 0.8 );
+// no hover
+llSetVehicleFloatParam( VEHICLE_HOVER_HEIGHT, 0 );
+llSetVehicleFloatParam( VEHICLE_HOVER_EFFICIENCY, 0 );
+llSetVehicleFloatParam( VEHICLE_HOVER_TIMESCALE, 1000 );
+llSetVehicleFloatParam( VEHICLE_BUOYANCY, 0 );
+// maximum linear deflection with timescale of 2 seconds
+llSetVehicleFloatParam( VEHICLE_LINEAR_DEFLECTION_EFFICIENCY, 1 );
+llSetVehicleFloatParam( VEHICLE_LINEAR_DEFLECTION_TIMESCALE, 2 );
+// no angular deflection
+llSetVehicleFloatParam( VEHICLE_ANGULAR_DEFLECTION_EFFICIENCY, 0 );
+llSetVehicleFloatParam( VEHICLE_ANGULAR_DEFLECTION_TIMESCALE, 10 );
+// critically damped vertical attractor
+llSetVehicleFloatParam( VEHICLE_VERTICAL_ATTRACTION_EFFICIENCY, 1 );
+llSetVehicleFloatParam( VEHICLE_VERTICAL_ATTRACTION_TIMESCALE, 10 );
+// weak negative critically damped banking
+llSetVehicleFloatParam( VEHICLE_BANKING_EFFICIENCY, -0.2 );
+llSetVehicleFloatParam( VEHICLE_BANKING_MIX, 1 );
+llSetVehicleFloatParam( VEHICLE_BANKING_TIMESCALE, 1 );
+// default rotation of local frame
+llSetVehicleRotationParam( VEHICLE_REFERENCE_FRAME, <0, 0, 0, 1> );
+// remove these flags
+llRemoveVehicleFlags( VEHICLE_FLAG_HOVER_WATER_ONLY
+    | VEHICLE_FLAG_HOVER_TERRAIN_ONLY
+    | VEHICLE_FLAG_HOVER_GLOBAL_HEIGHT);
+// set these flags
+llSetVehicleFlags( VEHICLE_FLAG_NO_DEFLECTION_UP
+    | VEHICLE_FLAG_LIMIT_ROLL_ONLY
+    | VEHICLE_FLAG_HOVER_UP_ONLY
+    | VEHICLE_FLAG_LIMIT_MOTOR_UP );
+</source>
+|constants={{!}} {{LSL Constants/Vehicle Types}}
+|functions={{LSL DefineRow||[[llSetVehicleType]]}}
+|events
+|articles
+|cat1=Vehicle/Types
+|cat2
+|cat3
+|cat4
+}}

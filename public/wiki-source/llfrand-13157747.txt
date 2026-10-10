@@ -1,0 +1,263 @@
+{{LSL_Function
+|sort=Frand
+|func=llFrand|func_id=8|func_sleep=0.0|func_energy=10.0
+|p1_type=float|p1_name=mag|p1_desc=Any valid float value
+|return_type=float
+|return_text=that is pseudo random in the range {{Interval|gte=0.0|lt='''mag'''|lth=mag|center=return}} or {{Interval|lte=0.0|gt='''mag'''|gth=mag|center=return}}.{{Interval/Footnote}}<br/> This means that the returned value can be any value in the range 0.0 to '''mag''' including 0.0, but not including the value of '''mag''' itself. The sign of {{LSLP|mag}} matches the return. 
+|func_footer=When converting the float to an integer, be sure to use an integer typecast <code>([[integer]])</code> and ''not'' one of the rounding functions ([[llRound]], [[llFloor]], [[llCeil]]). The integer typecast is the only method guaranteed not to skew the distribution of integer values.
+|caveats=*The random number generator is not a source of entropy.
+**The sequence of random numbers are shared across the entire simulator process, and not independently seeded. Therefore, the pseudo random number generation is not suitable for any application which requires completely predictable or completely unpredictable results.
+* It should be remembered that when passing llFrand an [[integer]] as the {{LSLP|mag}}, it will be implicitly [[typecast]] to a [[float]].
+* Many integers outside the range {{Interval|lte=+2<sup>24</sup>|gte=-2<sup>24</sup>|gteh=-2^24|lteh=+2^24|center=integer}} can not be represented in a float (this is an inherent limitation of the float type); for example, outside that range no odd integers will appear. For that reason, when converting the resulting float to integer, it is impossible to generate more than 2<sup>24</sup>+1 uniformly distributed values, and it's also impossible to generate more than 9*2<sup>23</sup>+1 or about 75 million different integers in total. Two llFrand calls may be needed to obtain the desired integer range; see examples below.
+|examples=
+{{{!}} class="sortable" width="100%" {{Prettytable}}
+{{!}}- {{Hl2}}
+! '''Method one: returns float within (5.0, 10.0]'''
+! '''Method two: returns float within (5.0, 10.0]'''
+{{!}}-
+{{!!}}<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        float randomFloat = 10.0 + llFrand(-5.0);
+
+        llSay(0, (string) randomFloat);
+    }
+}
+</source>
+{{!!}}
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        float randomFloat = 10.0 - llFrand(5.0);
+
+        llSay(0, (string) randomFloat);
+    }
+}
+</source>
+{{!}}}
+<source lang="lsl2">
+//  *near* 50:50 chance of "Heads" vs. "Tails"
+integer coin_toss()
+{
+    if (llFrand(1.0) < 0.5) return TRUE;
+    return FALSE;
+}
+
+//  Sometimes it is useful to get a random integer over a given range.  This is
+//  a surprisingly tricky and emotive subject and has caused endless discussion
+//  on the scripting groups. The primary cause of probability errors when
+//  employing llFrand is to have a varying bin size on the edges of the range.
+//
+//  As the bracket notation indicates, [0.0, mag), the function is inclusive of
+//  the 0.0 and exclusive of the entered value. Because an LSL floating point
+//  number is only a subset of real numbers and does not have infinite
+//  granularity, this schema will work for any float greater than float
+//  t = 1.175494351e-38; at which value the function will return only zero. At a
+//  float beyond this, a math error occurs.
+
+//  Random integer generator:
+//      Contributed by Mephistopheles Thalheimer,
+//      original function posted by Hg Beeks
+
+//  Returns a pseudo-random integer in the range of min to max inclusive.
+
+//  Rationale:
+//      Expands the range by 1.0 to ensure equal bin spacing on ends relative to
+//      the middle of the range and then uses an integer cast to round towards
+//      zero.
+
+//  Caveats:
+//      This function is not range checked and will fail if max < min
+
+integer random_integer(integer min, integer max)
+{
+    return min + (integer)(llFrand(max - min + 1));
+}
+
+say(string message)
+{
+    llSay(0, message);
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+//      *near* 50:50 chance of "Heads" vs. "Tails"
+        if (coin_toss()) say("Heads");
+        else             say("Tails");
+
+        integer n1 = random_integer(2, 8); // Return a random number between 2 and 8
+        say("I chose a " + (string)n1);
+
+    }
+}</source>
+
+<source lang="lsl2">
+// Example for generating an uniformly distributed integer with more than
+// 16 million possible values; in particular, this code will generate
+// 500,000,000 possible values, ranging from 0 to 499,999,999 inclusive.
+//
+// The method consists of not using llFrand() on a number larger than 16,777,216
+// (2^24) but to divide the range into two numbers that are both less than that,
+// using a scheme of the form (integer)llFrand(a)*b + (integer)llFrand(b), where
+// a*b gives the desired range.
+//
+// For prime ranges, or ranges with a prime factor greater than 2^24, a rejection
+// scheme should be used (use this method to generate a number slightly above the
+// target range, and reject it and generate a new one if it exceeds the maximum).
+
+default
+{
+    state_entry()
+    {
+        integer rand = (integer)llFrand(500)*1000000 + (integer)llFrand(1000000);
+        llOwnerSay("Here's a random number between 0 and 499,999,999 inclusive: " + (string)rand);
+    }
+}
+</source>
+
+The following code produces the most possibilities for random negative integers (suitable for use as channel numbers for example)
+<source lang="lsl2">
+        integer rand = 0x80000000 | (integer)llFrand(65536) | ((integer)llFrand(65536) << 16);
+</source>
+
+<source lang="lsl2">
+// Simple integer random number tester
+// Contributed by Mephistopheles Thalheimer
+
+// This is a random number tester designed to give a quick visual explanation
+//  and proof of why some random integer functions just do not work. In general,
+//  with any random number generator, if you can see a pattern emerging, then
+//  chances are, the function is not random.
+
+//  The test case given "silly_random_integer( .. )" shows the type of pitfalls
+//  that can happen. Superficially, it would seem like a good candidate.  I
+//  thought so, and in fact mooted it in a discussion, however, a bit of thought
+//  reveals that the first and last bin are only collecting rounded results from
+//  half the float space as the rest of the integers. They are therefore
+//  under-represented in output, and the generator is flawed.
+
+
+integer random_integer(integer min, integer max)
+{
+    return min + (integer)llFrand(max - min + 1);
+}
+
+integer silly_random_integer(integer min, integer max)
+{
+    return min + (integer)(llRound(llFrand(max - min))); // Looks good, but does not work
+}
+
+say(string message)
+{
+    llSay(0, message);
+}
+
+//  Simple integer random number tester
+//  Contributed by Mephistopheles Thalheimer
+
+list bins;
+
+integer MIN             = 2;                             // The minimum integer you want
+integer MAX             = 5;                             // The maximum integer you want
+
+integer NUMBER_OF_TRIES = 10000;                         // The bigger the better.. but slower
+
+default
+{
+    state_entry()
+    {
+        say("Bin tester ready.");
+        bins = [];
+    }
+
+    touch_start(integer total_number)
+    {
+
+        say("Started, be patient");
+
+        integer i;
+        integer r;
+
+        integer range = MAX - MIN;
+
+        for (i = 0; i <= range; ++i)
+        {
+            bins += [ 0 ];
+        }
+
+        integer v;
+        integer out_of_range;
+
+        for (i = 0; i < NUMBER_OF_TRIES; ++i)
+        {
+//          Replace the next line with the function you are testing
+            r = silly_random_integer(MIN, MAX);
+
+//          Note the output on the next line has about 0.5 expected hits on the first and last bin
+//          r = random_integer(MIN, MAX);
+
+            if (r > MAX || r < MIN)
+            {
+               out_of_range++;
+            }
+            else
+            {
+               v = llList2Integer(bins, r - MIN);
+               bins = llListReplaceList(bins, [++v], r - MIN, r - MIN);
+            }
+        }
+
+        for (i = 0; i <= range; ++i)
+        {
+            say("Bin #" + (string)(i + MIN) + " = " + (string)llList2Integer(bins, i));
+        }
+
+        say("Number out of range = " + (string)out_of_range);
+    }
+}
+</source>
+<source lang="lsl2">
+//Exponential distribution
+//
+// Contributed by Pat Perth on October 5th 2013
+// No rights reserved
+//
+// Return an exponentially distributed random number with expected value 'mean_value'
+//
+// Reference: Wikipedia article "Exponential distribution", in particular the section
+// entitled "Generating exponential variates" at
+//
+// http://en.wikipedia.org/wiki/Exponential_distribution (visited on October 5th 2013)
+//
+// The exponential distribution is often an appropriate way to simulate waiting times
+// of the sort "It takes about x seconds for <something> to happen." For
+// example, if you want to trigger a rain shower "about every seven days", use
+//
+//  time_between_rain = random_exponential(7.0 * 24.0 * 60.0 * 60.0) ;
+//
+// in an llSleep(...) or llSetTimerEvent(...) call.
+//
+// Please notice the negative sign in the return value.
+
+float random_exponential(float mean_value)
+{
+    return -mean_value * llLog(llFrand(1.0));
+}
+</source>
+|helpers=[[Pseudo-random_Number_Generator]] - Suitable for apps which require repeatable results that feel random.
+|also_header
+|also_functions={{LSL DefineRow||[[llListRandomize]]|}}
+|also_tests
+|also_articles
+|also_footer
+|notes
+|cat1=Math
+|cat2=Float
+|cat3
+}}

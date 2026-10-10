@@ -1,0 +1,40 @@
+=====EscapeXML=====
+
+<source lang="lsl2">// Escape standard reserved XML chars with entities
+// Copyright 2008, JB Kraft & Strife Onizuka
+// Released under BSD license
+// http://www.opensource.org/licenses/bsd-license.php
+
+
+// ------------------------------------------------------------------------
+// escape standard reserved XML chars with entities
+// ------------------------------------------------------------------------
+string escapeXML( string str )
+{
+    integer i = llStringLength( str );
+    if(i)
+    {
+        string unescapedChars = "&\"'<>"; 
+        list escapedChars = ["&amp;", "&quot;", "&#39;", "&lt;", "&gt;"];
+        integer ndx;
+
+        do
+            if( ~(ndx = llSubStringIndex( unescapedChars, llGetSubString(str, --i, i))) )
+                str = llInsertString( llDeleteSubString( str, i, i), i, llList2String( escapedChars, ndx));
+        while(i);
+    }
+    return str;
+}
+
+// ------------------------------------------------------------------------
+// D E F A U L T
+// ------------------------------------------------------------------------
+default
+{
+    state_entry()
+    {
+        llSay(0, escapeXML("<Black> & \"White\" & 'Red' & <Green>"));
+    }
+}</source>
+
+[[Category:LSL Examples]]

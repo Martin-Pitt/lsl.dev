@@ -1,0 +1,45 @@
+{{LSL_Function
+|inject-2={{LSL_Function/avatar|id|sim=known}}
+|func_id=358|func_sleep=0.0|func_energy=10.0
+|sort=GetUsername|func=llGetUsername
+|return_type=string|p1_type=key|p1_name=id
+|func_footnote='''id''' must specify a valid avatar key, present in or otherwise known to the sim in which the script is running, otherwise an empty string is returned. This function will still return a valid username if the avatar is a child agent of the sim (i.e., in an adjacent sim, but presently able to see into the one the script is in), or for a short period after the avatar leaves the sim (specifically, when the client completely disconnects from the sim, either as a main or child agent).
+
+'''Note:''' If the avatar's lastname is "Resident", only the firstname will be returned. "joe" not "joe.resident".
+|func_desc
+|return_text=that is the unique [[Usernames|username]] of the avatar specified by '''id'''.
+|spec
+|caveats=
+* To get around the "avatar must be present" limitation, you can use the [[llRequestUsername]] function and the [[dataserver]] event to obtain the avatar's username from a key.
+* There is no opposite function ([[llUsername2Key]]) available. For Name2Key services see [[llKey2Name]].
+* "" can be returned if the region is unable to resolve the username. This can happen even if the avatar is present and display names are enabled on the region. Do not rely on this function to verify avatar presence.
+*If you merely wish to show the agent username in the viewer window, it may be more straightforward to use [[Viewer URI Name Space]], e.g.:<source lang="lsl2">llSay(0, "secondlife:///app/agent/" + (string)id + "/username");</source>|constants
+|examples=<source lang="lsl2">// Best viewed in Chat History (ctrl-h)
+default
+{
+    collision_start(integer a)//Announce who collided
+    {
+        llSay(0, "llGetDisplayName: " + llGetDisplayName(llDetectedKey(0)) +
+               "\nllGetUsername: " + llGetUsername(llDetectedKey(0)));
+    }
+    touch_start(integer a)
+    {
+        llSay(0,"llGetDisplayName: " + llGetDisplayName(llDetectedKey(0)) +
+               "\nllGetUsername: " + llGetUsername(llDetectedKey(0)));
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetDisplayName]]}}
+{{LSL DefineRow||[[llRequestUsername]]|Uses the [[dataserver]] to request avatar information}}
+|also_events
+|also_articles=
+|also_tests
+|notes=
+|cat1=Avatar
+|cat2=Username
+|cat3=Key
+|cat4=Avatar/Name
+|haiku={{Haiku|My name is Jerome.|No, really. It is. Don't ask.|I wasn't thinking.}}
+{{Haiku|Jerome Resident|Except sometimes it's different|Then it's just Jerome}}
+}}

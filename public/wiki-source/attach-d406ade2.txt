@@ -1,0 +1,71 @@
+{{LSL_Event
+|event_id=23
+|event_delay
+|event=attach
+|inject-2={{Issues/SVC-6687}}
+|p1_type=key|p1_name=id
+|p1_desc=the avatar if attached, if not attached {{LSL_Constant/NULL_KEY}}.
+|p1_hover=the avatar if attached, if not attached NULL_KEY.
+|event_desc=Triggered in an object when the object [[attachment|attaches]] or detaches from agent.
+|constants
+|spec=
+===Triggered===
+# When the object is attached to an avatar
+#* From the ground
+#* From inventory
+#* When the avatar wearing the object logs in
+# When object is detached ('''id''' == {{LSL_Constant/NULL_KEY}})
+#* Dropped to the ground
+#* Derezzed to inventory
+#* <s>When the avatar wearing the object logs out</s> ''(does not occur with current versions, but scripters should anticipate the possibility)''
+
+===Not Triggered===
+# When the avatar wearing the object teleports
+#* Use [[CHANGED_TELEPORT]] to detect when the avatar teleports
+# When the avatar wearing the object moves from one region to another
+#* Use [[CHANGED_REGION]] to detect when the avatar changes region
+# When the attachment is detached after being attached with [[llAttachToAvatarTemp]].
+#* There is no way to detect this at this moment.
+|caveats=*When detached to inventory, an object is only given limited time to execute its attach events. If these events are active when the script derezzes but have not completed, execution will finish when the object is next rezzed. <sup>[http://forums-archive.secondlife.com/54/8b/65518/1.html#post689314]</sup> If the script is busy handling a ''different'' event at detach time, an attach event with id=NULL_KEY can happen on the next rez, followed by one with the wearer's key. To verify a real detach, check that id == NULL_KEY ''AND'' llGetAttached() == 0.
+* If the script is busy with a complex event handler before it is taken to inventory, the [[:Category:LSL_Events|event queue]] can overflow, leaving no room to capture new events. The queue is preserved, so attach and on_rez may not be triggered the next time the object is rezzed. To guard against this possibility, [[llGetAttached]] can be checked in other events.
+* When detaching an object, [[llGetAttached]]() returns 0, but the same happens when dropping an object from an attachment point to the ground. No other indicative event is triggered in the latter case; in particular, the [[on_rez]] event is not triggered for attachment drops. If you need to distinguish a drop from a detach, a possible hack is to check [[llGetObjectPrimCount]]([[llGetKey]]()). If it's zero, it can be assumed that the object is being detached; otherwise, that it is being dropped.
+* There is a bug when an attach event is in a script in a child prim.  When the object is attached, a detached event is first triggered, and then an attached event is triggered.  When the object is detached, no event is triggered.
+|examples=
+The following is a simplified example of the attach event. The variable id will be the key of the avatar the scripted object is attached to otherwise it will take on the value of {{LSL_Constant/NULL_KEY}}. The conditional [[if]] statement is used to determine the value of the variable id.
+<syntaxhighlight lang="lsl2">
+default
+{
+    attach(key id)
+    {
+        if (id)     // is a valid key and not NULL_KEY
+        {
+            llSay(0, "I have been attached!");
+        }
+        else
+        {
+            llSay(0, "I have been detached!");
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_header
+|also_events=
+{{LSL DefineRow|[[on_rez]]}}
+|also_functions=
+{{LSL DefineRow|[[llAttachToAvatar]]}}
+{{LSL DefineRow|[[llDetachFromAvatar]]}}
+{{LSL DefineRow|[[llGetAttached]]}}
+|also_articles=
+{{LSL DefineRow|{{LSLGC|Attachment}}}}
+|also_footer
+|notes=
+===[[on_rez]] & [[attach]]===
+[[on_rez]] will be triggered prior to [[attach]] when attaching from inventory or during login.
+|haiku={{Haiku|A nightmare I had:|The box on my head I wear|Can't escape that dream.}}
+|mode
+|deprecated
+|cat1=Attachment
+|cat2
+|cat3
+|cat4}}

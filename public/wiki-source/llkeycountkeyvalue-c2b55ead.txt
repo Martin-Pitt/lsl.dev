@@ -1,0 +1,51 @@
+[[Category:Experience Tools]]
+{{LSL_Function
+|inject-2=
+{{LSL Function/KeyValue|d2_type=integer|d2_name=pairs|d2_desc=number of keys-value pairs in the key-value store}}
+{{LSL Function/Experience|true}}
+|func=llKeyCountKeyValue
+|func_desc=Start an asynchronous transaction to request the number of keys with the script's {{LSLGC|Experience}}.
+|func_footnote
+|return_type=key|return_subtype=handle
+|return_text=that can be used to identify the corresponding [[dataserver]] event to determine if this command succeeded or failed and the results.
+|also_functions=
+*[[llGetExperienceErrorMessage]]
+*[[llCreateKeyValue]]
+*[[llReadKeyValue]]
+*[[llUpdateKeyValue]]
+*[[llDeleteKeyValue]]
+*[[llDataSizeKeyValue]]
+*[[llKeyCountKeyValue]]
+*[[llKeysKeyValue]]
+|examples=<source lang="lsl2">key trans;
+default
+{
+    state_entry()
+    {
+        trans = llKeyCountKeyValue();
+    }
+
+
+    dataserver(key t, string value)
+    {
+        if (t == trans)
+        {
+            // our llKeyCountKeyValue transaction is done
+            list result = llCSV2List(value);
+            if (llList2Integer(result, 0) == 1)
+            {
+                // data size retrieved
+                llSay(0, "Keys in use: "+llList2String(result, 1));
+            }
+            else
+            {
+                // key count failed
+                llSay(0, "Key-value failed to count keys: " + llList2String(result, 1) );
+            }
+        }
+    } 
+}</source>
+|cat1=Experience
+|cat2=Dataserver
+|cat3=Experience/Data
+}}

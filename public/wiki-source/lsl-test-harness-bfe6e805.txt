@@ -1,0 +1,74 @@
+{{Multi-lang}}{{LSL Header}}{{LSLC|}}
+The LSL Test Harness is a platform for testing LSL scripts developed for Linden Lab by {{strike|1=[http://www.i3dnow.com i3D Inc.]}}(Domain expired). Second Life developers may want to use this to confirm that their  scripts function consistently from update to update. The test harness is freely available (under Creative Commons license: [http://creativecommons.org/licenses/by-sa/2.5/ Attribution-ShareAlike 2.5]) to download and use. 
+
+The LSL Test Harness consists of three or more inworld objects. You can create any object, even use the default plywood cube prim, just ensure that you place the appropriate scripts and notecards in the proper objects. 
+
+= The Controller =
+The controller provides the interface for you to issue instructions to the test harness. It will listen to your commands on a chat channel and execute them. Alternatively you can make a touch-based controller. 
+
+* Rez or create an object, name it Controller.
+* Add the script Controller_Controller (available to copy/paste [[Controller_Controller.lsl | here]]).
+
+= The Coordinator =
+The coordinator handles the communication between the controller and the actual test units themselves. 
+
+* Rez or create an object, name it Coordinator
+* Add the following scripts: (available to copy/paste at the linked locations)
+** [[Coordinator_Coordinator.lsl | Coordinator.Coordinator]]
+** [[Coordinator_TestUnits.lsl | Coordinator_TestUnits]]
+** [[Coordinator_TestUnitsReports.lsl | Coordinator_TestUnitsReports]]
+* Now add the notecard [[Coordinator_nc | Coordinator_nc]] and open it
+** If you wish to have the harness send you reports via email, add your email address to the email field
+** If you want the harness to http post the reports, add your url to the Http: field
+
+= The Test Unit(s) =
+The Test Units actually conduct the LSL tests. Therefore they consist of a generic script for running tests, plus the specific script (which you write) which holds the testing code. You may create as many test units as you need. To facilitate development of test scripts, several examples are included in the code repository (here) and these may be used as templates. 
+
+* Rez or create an object and call it something descriptive (e.g. Test Unit - Rotations).
+* Add the script [[TestUnit_TestHarness.lsl | TestUnit_TestHarness]]
+** Here's how: [[TestUnit_Integration | TestUnit_Integration]]
+* Add the notecard [[TestUnit_nc | TestUnit_nc]]
+** Open the notecard and edit the UnitName and GroupName fields
+*** UnitName is the name you want for this particular test
+*** GroupName specifies a family of tests, in case you want to do something like run all your math testing test units (you'd define a groupName "Math").
+* Add your test script which should be called [GroupName]_[UnitName]
+** You can use [[TestUnit_TestScript.lsl | TestUnit_TestScript.lsl]] as a template
+** Just add your test lsl to the indicated section and report the result
+* Alternatively, there are some sample test scripts at [[Test_Harness_Test_Units | Test Harness Sample Tests]]
+
+= Commands =
+Once you have the Controller, Coordinator, and all your Test Units rezzed, ensure that they are within chat distance of each other, and then you can issue the following commands in the control channel (default is 1234)
+
+* '''ActivateRegistration''' will make the coordinator round up all test units in chat range
+* '''ActivateTest''' will start all selected test units
+* '''ActivateReport''' will generate your specified report (chat, email, http)
+* '''Reset''' will reset all test units
+* '''SetTestSelected''' will specify which test units should execute
+** SetTestSelected::All all test units in range
+** SetTestSelected::[GroupName] all units in that group
+** SetTestSelected::[UnitName] a specific unit
+* '''SetReportMethod''' you can choose from three report methods
+** SetReportMethod::CHAT::channel::0 for open chat
+** SetReportMethod::EMAIL::address::you@yourdomain.com
+** SetReportMethod::HTTP::url::www.yoururl.com
+* '''SetReportType''' - specify report type as NORMAL, QUITE, VERBOSE, STATS
+** SetReportType::NORMAL
+* '''SetControlChannel''' used to change the internal comm channel 
+* '''SetBroadcastChannel''' chat channel for report output (typically 0)
+
+=Repository for the LSL test harness=
+This is the repository for the LSL test harness - update this wiki as you update the harness! 
+
+[[Test Harness Control Buttons]]
+
+[[Test Harness Controller]]
+
+[[Test Harness Test Units]]
+
+[[Test Harness PHP]]
+
+= Tests =
+All known tests should be in [[:Category:Conformance Test]].
+
+[[Category:Automated Testing]]
+[[Category:QA]]

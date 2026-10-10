@@ -1,0 +1,55 @@
+{{LSL_Function
+|inject-2={{LSL_Function/face|face|return={{LSL VR|1.0|1.0|0.0}}}}
+|func_id=179|func_sleep=0.0|func_energy=10.0
+|func=llGetTextureScale
+|return_type=vector|p1_type=integer|p1_name=face
+|func_footnote
+|func_desc
+|return_text=that is the texture scale on {{LSLP|face}} (only the x and y components are used).
+|spec= In the default texture mapping mode the scale units are in texture repeats per face. In the planar texture mapping mode the scale units are in texture repeats per half meter. This is in contrast to the in-world editing tool, in which the planar texture scaling units are repeats per meter.
+|caveats=* ALL_SIDES seems to return the scale of the *first* face, not an average or other function of all the faces.  It acts much like if it were called with <code>face=0</code>.  
+|constants
+|examples=<source lang="lsl2">//Script by Basil Wijaya, 2009 August 08
+//Sets texture scale on face 0. 
+//Corresponds to the object edit window, Texture tab, Repeats per Face: Horiontal U and Vertical V
+
+float U_repeats = 1.0;
+float V_repeats = 1.0;
+integer face = 0;
+
+default
+{
+    state_entry()
+    {
+        llScaleTexture( U_repeats, V_repeats, ALL_SIDES);  
+    }
+    
+    touch_start(integer num)
+    {
+        U_repeats = U_repeats + .2;
+        V_repeats = V_repeats + .5;
+        
+        //set texture scale on a face
+        llScaleTexture( U_repeats , V_repeats, face);
+        llOwnerSay("Scale has been set to " + (string)U_repeats +  " and " +  (string)V_repeats);
+
+        //get texture scale of a face
+        vector scale_vector = llGetTextureScale(face); 
+        llOwnerSay("llGetTextureScale(0) gives a vector :  " +  (string)scale_vector); 
+        //You can see that the first 2 values of the vector contain the U_repeats and V_repeats values we have setted.
+
+        //The object edit window, in the Texture tab, shows the changes of the U and V values, but only for face 0. 
+        //Other faces changes are done but do not show in the edit window.  
+    }
+}</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llScaleTexture]]}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Texture
+|cat2
+|cat3
+|cat4
+}}

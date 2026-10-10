@@ -1,0 +1,69 @@
+{{LSL_Function
+|inject-2={{LSL_Function/position|point|region=*}}
+|func=llGetClosestNavPoint
+|func_desc=Used to get a point on the navmesh that is the closest point to {{LSLP|point}}.
+|func_sleep_frame=1
+|return_type=list
+|return_text=containing a single vector which is the closest point on the navmesh to the point provided or an empty list.
+|func_footer=If an option is not explicitly set, the default value for that option is used.
+|p1_type=vector|p1_name=point
+|p2_type=list|p2_subtype=instructions|p2_name=options
+|p2_desc=GCNP_* and other flags with their parameters. See [[#Options|options]] table
+|constants={{LSL Constants/llGetClosestNavPoint}}
+|caveats=
+* There is no guarantee that a path exists from your current location to the returned point.
+|examples=
+<source lang="lsl2">
+create_character()
+{
+//  Clear any previous character behaviors
+    llDeleteCharacter();
+
+//  default speed is 20
+    llCreateCharacter([CHARACTER_DESIRED_SPEED, 10.0]);
+    llWanderWithin(llGetPos(), <64.0, 64.0, 2.0>, []);
+}
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        create_character();
+    }
+ 
+    touch_start(integer num_detected)
+    {
+        vector currentPos = llGetPos();
+        list points = llGetClosestNavPoint(currentPos, [GCNP_RADIUS, 10.0] );
+
+        if (!llGetListLength(points))
+            return;
+
+        llSay(0, "current position " + (string)currentPos
+            + " and closest nav point " + (string)llList2Vector(points, 0) );
+    }
+}
+</source>
+|notes=Using the method incurs a one frame script sleep and the call can be extremely expensive. It is intended to be used in response to a path_update message indicating an inability to reach a requested destination (e.g., because the character or the destination is off the mesh).
+|also_functions=
+* [[llCreateCharacter]]
+* [[llDeleteCharacter]]
+* [[llEvade]]
+* [[llExecCharacterCmd]]
+* [[llGetClosestNavPoint]]
+* [[llFleeFrom]]
+* [[llNavigateTo]]
+* [[llPatrolPoints]]
+* [[llPursue]]
+* [[llUpdateCharacter]]
+* [[llWanderWithin]]
+|also_events=
+* [[path_update]]
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/12#12.07.31.262785 | 31/07/2012 ]]
+|cat1=Pathfinding
+}}

@@ -1,0 +1,68 @@
+{{LSL_Event
+|inject-2={{Issues/SCR-97}}{{Issues/SVC-3187}}{{LSL Function/avatar|id|}}
+|event_id=15|event_delay=0.05|event=control
+|p1_type=key|p1_name=id|p1_desc
+|p2_type=integer|p2_subtype=bit_field|p2_name=level|p2_desc=bitfield of CONTROL_* flags, non-zero while one or more keys is being held down.
+|p3_type=integer|p3_subtype=bit_field|p3_name=edge|p3_desc=bitfield of CONTROL_* flags, non-zero when one or more keys have been just pressed or released.
+|event_desc=Result of [[llTakeControls]] library function call and user input.
+|constants={{LSL Constants/Controls}}
+|spec
+|caveats=*[[CONTROL_ROT_LEFT]] and [[CONTROL_ROT_RIGHT]] can be triggered when an object is selected or edited. If the user is running Viewer 2.0 and later, [[llGetAgentInfo]] will have [[AGENT_AUTOPILOT]] set in this case.  
+**Sitting upon an object that takes control may also trigger [[CONTROL_FWD]], [[CONTROL_BACK]], [[CONTROL_DOWN]] and [[CONTROL_UP]], depending on avatar position relative to the seat.
+**Autopilot control events can continue for a short time after AGENT_AUTOPILOT drops.
+*The 'levels' and 'edges' of the control() event both receive ([[CONTROL_FWD]] + [[CONTROL_BACK]]) (value 3) after teleport, effecting scripts that use this combination for faster movement. Calling llTakeControls() again after a llSleep(3) will filter this out.
+
+|examples=<source lang="lsl2">default
+{
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+    }
+    run_time_permissions(integer perm)
+    {
+        if(PERMISSION_TAKE_CONTROLS & perm)
+        {
+            llTakeControls(
+                            CONTROL_FWD |
+                            CONTROL_BACK |
+                            CONTROL_LEFT |
+                            CONTROL_RIGHT |
+                            CONTROL_ROT_LEFT |
+                            CONTROL_ROT_RIGHT |
+                            CONTROL_UP |
+                            CONTROL_DOWN |
+                            CONTROL_LBUTTON |
+                            CONTROL_ML_LBUTTON |
+                            0, TRUE, FALSE);
+                            // | 0 is for edit convenience,
+                            // it does not change the mask.
+        }
+    }
+    control(key id, integer level, integer edge)
+    {
+        integer start = level & edge;
+        integer end = ~level & edge;
+        integer held = level & ~edge;
+        integer untouched = ~(level | edge);
+        llOwnerSay(llList2CSV([level, edge, start, end, held, untouched]));
+    }
+}</source>
+|helpers
+|also_header
+|also_events={{LSL DefineRow||[[run_time_permissions]]}}
+|also_functions={{LSL DefineRow||[[llTakeControls]]}}
+{{LSL DefineRow||[[llReleaseControls]]}}
+{{LSL DefineRow||[[llRequestPermissions]]}}
+|also_tests
+|also_articles
+|also_footer
+|notes=[[llGetRot]] in [[mouselook]] for an attachment returns the angle the avatar is looking in.
+
+There are some bugs when you put two scripts in the same prim and call LlTakeControls(), the '''id''' may not be the intended one. See [http://jira.secondlife.com/browse/SVC-3187 SVC-3187].
+|mode
+|issues
+|cat1=Controls
+|cat2
+|cat3
+|cat4
+}}

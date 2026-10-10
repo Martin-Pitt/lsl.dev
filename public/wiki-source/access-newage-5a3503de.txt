@@ -1,0 +1,48 @@
+== Access Script ==
+
+How to use?
+
+Change the Access variable to one of the three;
+'Public'
+'Group'
+'Owner'
+
+Returns TRUE  if user UUID is allowed to continue using.
+Returns FALSE if user UUID is not permitted to use.
+
+<source lang="lsl2">
+// NewAge Access Script
+// By Asia Snowfall
+// Version 2
+//
+//  Access Mode:
+//      public = anybody
+//      group  = agents with the same active group
+//      owner  = owner only
+
+string accessMode = "public";
+
+integer asAccessCheck(key id)
+{
+    string accessModeToLower = llToLower(accessMode);
+
+    if (accessModeToLower == "public" || id == llGetOwner() )
+        return TRUE;
+
+    if (accessModeToLower == "group")
+        return llSameGroup(id);
+
+    return FALSE;
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        if (asAccessCheck( llDetectedKey(0) ))
+            llWhisper(0, "Access Granted");
+        else
+            llWhisper(0, "Access Denied");
+    }
+}
+</source>

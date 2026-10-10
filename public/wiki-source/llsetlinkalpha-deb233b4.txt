@@ -1,0 +1,144 @@
+{{LSL_Function
+|inject-2={{LSL Function/face|face|}}{{LSL Function/link|link|}}{{LSL_Function/alpha|alpha}}
+|func_id=274|func_sleep=0.0|func_energy=10.0
+|func=llSetLinkAlpha
+|p1_type=integer|p1_subtype=link|p1_name=link
+|p2_type=float|p2_name=alpha
+|p3_type=integer|p3_name=face
+|func_footnote
+|func_desc=If a prim exists in the link set at {{LSLP|link}}, set the [[PBR_Materials#Nomenclature_changes|Blinn-Phong]] {{LSLP|alpha}} on {{LSLP|face}} of that prim.
+|return_text
+|spec
+|caveats=
+* llSetLinkAlpha will have no visible effect on faces with a PBR material. To work on faces both with and without a PBR material, use one of these snippets:
+** invisible <source lang="lsl2">
+if (llIsLinkGLTFMaterial(LINK_THIS, ALL_SIDES)) {
+    llSetLinkGLTFOverrides(LINK_THIS, ALL_SIDES, [OVERRIDE_GLTF_BASE_ALPHA_MODE, PRIM_GLTF_ALPHA_MODE_BLEND, OVERRIDE_GLTF_BASE_ALPHA, 0.0)]);
+} else {
+    llSetLinkAlpha(LINK_THIS, 0.0, ALL_SIDES);
+}
+</source>
+** visible <source lang="lsl2">
+if (llIsLinkGLTFMaterial(LINK_THIS, ALL_SIDES)) {
+    llSetLinkGLTFOverrides(LINK_THIS, ALL_SIDES, [OVERRIDE_GLTF_BASE_ALPHA_MODE, "", OVERRIDE_GLTF_BASE_ALPHA, "")]);
+} else {
+    llSetLinkAlpha(LINK_THIS, 1.0, ALL_SIDES);
+}
+</source>
+|constants
+|examples=
+<source lang="lsl2">
+// Make the entire object disappear for 5 seconds
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        // transparent
+        llSetLinkAlpha(LINK_SET, 0.0, ALL_SIDES);
+        llSetTimerEvent(5.0);
+    }
+
+    timer()
+    {
+        // opaque
+        llSetLinkAlpha(LINK_SET, 1.0, ALL_SIDES);
+        llSetTimerEvent(0.0);
+    }
+}
+</source>
+<source lang="lsl2">
+// when the object is touched,
+// fade it out and back in again
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        // fade out
+        float alpha = 1.0;
+        while (alpha >= 0.0)
+        {
+            llSetLinkAlpha(LINK_SET, alpha, ALL_SIDES);
+            alpha -= 0.001;
+        }
+
+        // fade in
+        while (alpha < 1.0)
+        {
+            alpha += 0.001;
+            llSetLinkAlpha(LINK_SET, alpha, ALL_SIDES);
+        }
+    }
+}
+</source>
+<source lang="lsl2">
+// Makes selected prims in a linkset become transparent or visible on chat command. Give each prim a unique name.
+
+list PrimList = ["ALL"];
+// Start our prim list with a dummy entry, so that the index into this list will correspond directly to the link number
+// By making the dummy entry 'ALL' we provide a match for that option too
+
+default
+{
+    changed (integer change)
+    {
+	if (change & CHANGED_LINK)
+	    llResetScript();
+    }
+
+    state_entry()
+    {
+	integer PrimCount = llGetNumberOfPrims();
+	llListen(37, "", NULL_KEY, "");  		    //  listen to chat commands from anyone on channel 37
+	integer i;
+	for (i = 1; i <= PrimCount; ++i)
+	    PrimList += llToUpper(llGetLinkName(i) );  	    // Build a list of upper-case link names, where list position equals link number
+    }
+
+    listen(integer channel, string name, key id, string msg)
+    {
+	list    TempList = llCSV2List( llToUpper(msg) );    // make a list from upper-case version of user command line
+	integer ListLen  = llGetListLength (TempList);
+	integer alpha    = (llList2String(TempList, 0) == "SHOW");
+	// 'SHOW' sets selected prims visible, otherwise set them transparent
+	// e.g.  HIDE,PLATE,SPOON,NAPKIN	            <---- makes named prims invisible
+	// e.g.  SHOW,ALL                                   <---- makes all prims visible
+
+	integer i;
+	for (i = 1; i < ListLen; ++i)
+	{
+	    string  ThisPrim   = llStringTrim(llList2String(TempList, i), STRING_TRIM);
+	    integer LinkNumber = llListFindList(PrimList, [ThisPrim]);
+	    if (~LinkNumber)    // i.e. if LinkNumber != -1
+	    {
+		if (!LinkNumber)
+		    LinkNumber = LINK_SET;   	// list position 0 is 'ALL'
+
+		llSetLinkAlpha(LinkNumber, alpha, ALL_SIDES);
+	    }
+	}
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetAlpha]]|Gets the prim's alpha}}
+{{LSL DefineRow||[[llSetAlpha]]|Sets the prim's alpha}}
+{{LSL DefineRow||[[llGetColor]]|Gets the prim's color}}
+{{LSL DefineRow||[[llSetColor]]|Sets the prim's color}}
+{{LSL DefineRow||[[llSetLinkColor]]|}}
+{{LSL DefineRow||[[llSetLinkTexture]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[PRIM_COLOR]]|The equivilant parameter for [[llSetPrimitiveParams]]}}
+{{LSL DefineRow||[[PRIM_GLTF_BASE_COLOR]]|The equivilant PBR parameter for [[llSetPrimitiveParams]]}}
+|also_tests
+|also_events={{LSL DefineRow||[[changed]]|[[CHANGED_COLOR]]}}
+|also_articles
+|notes
+|deprecated
+|cat1=Link/Set
+|cat2
+|cat3
+|cat4
+}}

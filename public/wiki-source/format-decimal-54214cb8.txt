@@ -1,0 +1,111 @@
+{{LSL Header}}__NOTOC__
+<div id="box">{{#vardefine:p_number_desc|any valid float, positive or negative
+}}{{#vardefine:p_precision_desc|precision of result. Positive values truncate rounded fraction, negative values truncate rounded '''number''' to integer
+}}
+== Function: [[string]] FormatDecimal([[float]] {{LSL Param|number}}, [[integer]] {{LSL Param|precision}}); ==
+<div style="padding: 0.5em;">
+''Formats a float value to a fixed precision ie. for display purposes''
+
+Returns a [[String|string]] that comprises the '''{{LSL Param|number}}''' truncated and rounded to the given '''{{LSL Param|precision}}'''.
+{|
+{{LSL DefineRow|[[float]]|number|{{#var:p_number_desc}}}}
+{{LSL DefineRow|[[integer]]|precision|{{#var:p_precision_desc}}}}
+|}
+<br/>
+{| {{Prettytable}}
+|-{{Hl2}}
+!{{LSL Param|precision}}
+!Value
+|-
+|positive
+|Truncates '''{{LSL Param|number}}''' rounded to this fraction positions
+|-
+|zero
+|Truncates '''{{LSL Param|number}}''' rounded to it's integer value
+|-
+|negative
+|Rounds '''{{LSL Param|number}}''' at this pre-decimal position
+|}
+</div></div>
+<div id="box">
+== Specification ==
+<div style="padding: 0.5em;">
+<source lang="lsl2">
+string FormatDecimal(float number, integer precision)
+{    
+    float roundingValue = llPow(10, -precision)*0.5;
+    float rounded;
+    if (number < 0) rounded = number - roundingValue;
+    else            rounded = number + roundingValue;
+    
+    if (precision < 1) // Rounding integer value
+    {
+        integer intRounding = (integer)llPow(10, -precision);
+        rounded = (integer)rounded/intRounding*intRounding;
+        precision = -1; // Don't truncate integer value
+    }
+    
+    string strNumber = (string)rounded;
+    return llGetSubString(strNumber, 0, llSubStringIndex(strNumber, ".") + precision);
+}
+</source>
+'''Examples:'''
+{| border="2" cellspacing="0" cellpadding="3" rules="all" style="margin:1em 1em 1em 0; border:solid 1px #AAAAAA; border-collapse:collapse; background-color:#F9F9F9; font-size:90%; empty-cells:show;"
+|-{{Hl2}}
+!{{LSL Param|number}}
+!{{LSL Param|precision}}
+!Result
+!Code
+|-
+|style="text-align: right;" |123.456
+|style="text-align: center;" |2
+|style="text-align: right;" |123.46
+|<code>FormatDecimal(123.456, 2)</code>
+|-
+|style="text-align: right;" | -123.456
+|style="text-align: center;" |2
+|style="text-align: right;" | -123.46
+|<code>FormatDecimal(-123.456, 2)</code>
+|-
+|style="text-align: right;" |123.456
+|style="text-align: center;" |0
+|style="text-align: right;" |123
+|<code>FormatDecimal(123.456, 0)</code>
+|-
+|style="text-align: right;" |123.456
+|style="text-align: center;" | -2
+|style="text-align: right;" |100
+|<code>FormatDecimal(123.456, -2)</code>
+|}
+</div></div><div id="box">
+
+== Caveats ==
+<div style="padding: 0.5em;">
+Maximum value is restricted to [[integer]] range, that is -2,147,483,648 to +2,147,483,647
+</div></div>
+<div id="box">
+== Example ==
+<div style="padding: 0.5em;">
+Trivial example to listen to any chat from the object owner for '''{{LSL Param|number}}, {{LSL Param|precision}}''' values and respond formatted value.
+<source lang="lsl2">
+// Insert code of FormatDecimal user function here
+
+default
+{
+    state_entry()
+    {
+        llOwnerSay("Enter: [number,precision]");
+        llListen(0, "", llGetOwner(), "");
+    }
+
+    listen(integer _chan, string _str, key _id, string _msg)
+    {
+        list values=llCSV2List(_msg);
+        float number = llList2Float(values,0);
+        integer decimals = llList2Integer(values,1);
+        llOwnerSay("Number " + (string)number + " is formatted " + FormatDecimal(number, decimals));
+    }
+}
+</source>
+</div></div>
+{{LSLC|Examples|Format Decimal}}

@@ -1,0 +1,55 @@
+{{LSL Header|ml=*}}{{LSLC{{#var:lang}}|}}
+Negative indexes count backwards from the end.
+
+For ''string s = "Hello World"''
+* Index 0 is 'H' (''llGetSubString(s,0,0)'')
+* Index -1 is 'd' (''llGetSubString(s,-1,-1)'')
+* Index -5 is 'W' (''llGetSubString(s,-5,-5)'')
+
+
+Negative indexes are very straight forward, LSL treats negative indexes as if they were their positive counterpart.<br/>
+Say ''n_ind'' is a negative index for ''str'' then the positive form of ''n_ind'' would be <code>n_ind + llStringLength(str);</code><br/>
+Say ''p_ind'' is a positive index for ''str'' then the negative form of ''p_ind'' would be <code>p_ind - llStringLength(str);</code>
+
+
+Care must be taken when using the results of [[llListFindList]] and [[llSubStringIndex]] in combination with the functions in this category.  Those functions will return an index of -1 to indicate 'not found', which if used in these functions is a valid index - but probably not the one you want.
+
+<source lang="lsl2">
+string s = "Hello World";
+
+integer index = llSubStringIndex(s, "t");//index == -1
+if(~index)//same as doing (index != -1) but a bit faster, '~' inverts the bits (-1 == all on) so (~-1 == all off)
+{
+    s = llDeleteSubString(s, index, index);
+}
+</source>
+
+==Range Functions==
+{|{{Prettytable}}
+|-valign="top"
+|width="40%"|
+'''List'''
+* [[llList2List]]
+* [[llDeleteSubList]]
+* [[llListInsertList]]
+* [[llListReplaceList]]
+|width="40%"|
+'''String'''
+* [[llGetSubString]]
+* [[llDeleteSubString]]
+|}
+To complicate things range functions take two indexes and operator on a range of indexes. They have ''start'' and ''end'' index parameters. Negative indexes are treated as if they are their positive counterparts. 
+
+*If ''start'' <= ''end'' then the range of indexes the function works with are [''start'', ''end''].
+*If ''start'' > ''end'' then the range of indexes the function works with is [0, ''end''] + [''start'', <span title="infinity">∞</span>]
+
+Things can get tricky when using mixed indexes with variable length strings and lists. The mode of ranges operated upon can switch back and forth dependent upon the length. It is important to keep this in mind when mixing indexes that count from the beginning and those that count from the end.
+
+<source lang="lsl2">string bad(string in)
+{
+    return llGetSubString(in, 5, -5);
+}
+
+bad("Hello World!");//returns " Wo" resulting range [5, 8]
+bad("Hello Cat!");//returns " " resulting range [5, 5]
+bad("Hello !");//returns "Hel !" resulting range [0, 2] + [5 , 6]</source>

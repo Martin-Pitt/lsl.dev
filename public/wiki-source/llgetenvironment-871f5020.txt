@@ -1,0 +1,43 @@
+{{LSL_Function
+|func=llGetEnvironment
+|return_type=list
+|return_text=containing the current environment values for the parcel or region as a list of attributes. Takes a list of attributes to retrieve in params and returns them in the order requested.
+|p1_type=vector|p1_name=pos|p1_desc=A position in region coordinates. X and Y are in region coordinates and determine the parcel. If X and Y are both -1, the environment for the region is inspected. Z is the altitude in the region and determines which sky track is accessed.
+|p2_type=list|p2_name=params|p2_desc=A list of parameters to retrieve from the current environment.
+|func_footnote=If an unknown rule is encountered in the parameter list an error is sent to the debug channel.
+|caveats=*If the script can not run in the requested parcel, this function returns an empty list and issues a warning in the debug channel.
+* [[SKY_LIGHT]]'s param ''fade_color'' does not return a clamped value, meaning an unusually bright scene will cause it to return an out-of-bounds color. (This can be fixed by clamping the value manually, but this should really return a clamped value).
+|examples=<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer total_number)
+    {
+        list environment = llGetEnvironment(llGetPos(), [SKY_TRACKS, SKY_AMBIENT, SKY_CLOUDS]);
+        llOwnerSay(llDumpList2String(environment, ", "));
+    }
+}
+</syntaxhighlight>
+|constants={{:LSL Constants/llGetEnvironment}}
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llSetAgentEnvironment]]|}}
+{{LSL DefineRow||[[llSetEnvironment]]|}}
+{{LSL DefineRow||[[llReplaceAgentEnvironment]]|}}
+{{LSL DefineRow||[[llReplaceEnvironment]]|}}
+{{LSL DefineRow||[[llGetSunDirection]]|}}
+{{LSL DefineRow||[[llGetRegionSunDirection]]|}}
+{{LSL DefineRow||[[llGetMoonDirection]]|}}
+{{LSL DefineRow||[[llGetRegionMoonDirection]]|}}
+{{LSL DefineRow||[[llGetSunRotation]]|}}
+{{LSL DefineRow||[[llGetRegionSunRotation]]|}}
+{{LSL DefineRow||[[llGetMoonRotation]]|}}
+{{LSL DefineRow||[[llGetRegionMoonRotation]]|}}
+{{LSL DefineRow||[[llGetDayLength]]|}}
+{{LSL DefineRow||[[llGetRegionDayLength]]|}}
+{{LSL DefineRow||[[llGetDayOffset]]|}}
+{{LSL DefineRow||[[llGetRegionDayOffset]]|}}
+{{LSL DefineRow||[[llGetTimeOfDay]]|}}
+{{LSL DefineRow||[[llGetRegionTimeOfDay]]|}}
+|notes
+|inject-2={{Issues|BUG-232461|llGetEnvironment - SKY_LIGHT fade_color param returns an unclamped value|type=bug}}
+}}

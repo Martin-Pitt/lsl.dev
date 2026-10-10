@@ -1,0 +1,343 @@
+{{LSL Header|ml=*}} __NOTOC__
+
+The Combat Log has been added as part of the [[:Category:LSL_Combat2|Combat2]] update which allows for auditing and useful usecases.
+
+* Combat Log messages are sent region-wide on the channel: [[COMBAT_CHANNEL]]
+* Records all damage events, damage adjustments and kills
+* System generated messages by a specific ID that scripts may filter to: [[COMBAT_LOG_ID]]
+* Scripts may write to this channel if not restricted by the region, check via: [[llGetEnv|{{code|llGetEnv("restrict_combat_log")}}]]
+
+System generated messages can be delayed up to 1 second as the sim collects messages to send them in bulk at a time.
+
+Unless you want to intentionally listen to object generated messages it is recommended to set your listener to filter by [[COMBAT_LOG_ID]], e.g. {{code|llListen(COMBAT_CHANNEL, "", COMBAT_LOG_ID, "");}} This is because your script may end up unnecessarily receiving and processing custom messages that it was not designed to handle and ends up ignoring.
+
+
+== Message Format ==
+
+Combat events are JSON-formatted, and multiple events may be combined into a single chat message (organized in an array).
+
+Each event always has an "event" property to describe the type of the message object, such as <code>DEATH</code> or <code>DAMAGE</code>.
+
+The schema of the different objects are as follows:
+
+{| {{Prettytable}}
+|+ JSON structure of a DAMAGE event
+|- {{Hl2}}
+! '''Key'''
+! '''Value'''
+! '''Description'''
+|-
+| "event"
+| "DAMAGE"
+| 
+|-
+| "damage"
+| [[JSON_NUMBER]]
+| Float of final damage applied
+|-
+| "initial"
+| [[JSON_NUMBER]]
+| Float of initial damage before adjustment
+|-
+| "type"
+| [[JSON_NUMBER]]
+| [[:Template:LSL_Constants/Damage_Types|DAMAGE_TYPE_*]] or any number defined by the scripter of the damage source
+|-
+| "source"
+| [[JSON_STRING]]
+| UUID key of damage source
+|-
+| "target"
+| [[JSON_STRING]]
+| UUID key of damage target
+|-
+| "owner"
+| [[JSON_STRING]]
+| UUID key of damage source owner
+|-
+| "rezzer"
+| [[JSON_STRING]]
+| UUID key of damage source rezzer
+|-
+| "modifications"
+| [[JSON_ARRAY]]
+| Array of damage adjustments
+
+{| {{Prettytable}}
+|+ JSON structure of a damage adjustment in the modifications array
+|- {{Hl2}}
+! '''Key'''
+! '''Value'''
+! '''Description'''
+|-
+| "events"
+| [[JSON_ARRAY]]
+| A json array of json objects. Each object has a "new_damage" number representing the adjusted damage and a "script" string
+|-
+| "task_id"
+| [[JSON_STRING]]
+| UUID key of the prim that adjusted the damage
+|}
+
+|-
+|}
+
+
+{| {{Prettytable}}
+|+ JSON structure of a DEATH event
+|- {{Hl2}}
+! '''Key'''
+! '''Value'''
+! '''Description'''
+|-
+| "event"
+| "DEATH"
+| 
+|-
+| "type"
+| [[JSON_NUMBER]]
+| [[:Template:LSL_Constants/Damage_Types|DAMAGE_TYPE_*]] or any number defined by the scripter of the damage source
+|-
+| "source"
+| [[JSON_STRING]]
+| UUID key of damage source
+|-
+| "source_pos"
+| [[JSON_ARRAY]]
+| Array representing the position of the damage source
+|-
+| "target"
+| [[JSON_STRING]]
+| UUID key of damage target
+|-
+| "target_pos"
+| [[JSON_ARRAY]]
+| Array representing the position of the damage target
+|-
+| "owner"
+| [[JSON_STRING]]
+| UUID key of damage source owner
+|-
+| "rezzer"
+| [[JSON_STRING]]
+| UUID key of damage source rezzer
+|-
+|}
+
+
+==Example Messages==
+
+Below is an example of a system generated combat log message, featuring a <code>DAMAGE</code> event followed by a <code>DEATH</code> event:
+
+<syntaxhighlight lang="json">
+[
+	{
+		"damage": 100,
+		"event": "DAMAGE",
+		"initial": 100,
+		"owner": "75078730-ebc8-4a80-adb9-1cfd2d95b5ca",
+		"rezzer": "7061ebe8-6919-49fd-8d9e-06983ada3108",
+		"source": "4daf361b-5912-e8f6-455c-ea9cdf0f0422",
+		"target": "75078730-ebc8-4a80-adb9-1cfd2d95b5ca",
+		"type": 102
+	},
+	{
+		"event": "DEATH",
+		"owner": "75078730-ebc8-4a80-adb9-1cfd2d95b5ca",
+		"rezzer": "7061ebe8-6919-49fd-8d9e-06983ada3108",
+		"source": "4daf361b-5912-e8f6-455c-ea9cdf0f0422",
+		"source_pos": [
+			52.5,
+			210.2584991455078,
+			1001.904296875
+		],
+		"target": "75078730-ebc8-4a80-adb9-1cfd2d95b5ca",
+		"target_pos": [
+			52.88808059692383,
+			210.6649627685547,
+			1001.1831665039062
+		],
+		"type": 102
+	}
+]
+</syntaxhighlight>
+
+A <code>DAMAGE</code> event which features a damage adjustment:
+
+<syntaxhighlight lang="json">
+{
+	"damage": 15.000000953674316,
+	"event": "DAMAGE",
+	"initial": 25,
+	"modifications": [
+		{
+			"events": [
+				{
+					"new_damage": 15.000000953674316,
+					"script": "Damage Adjustment Testing"
+				}
+			],
+			"task_id": "9d980b7e-9c74-a790-001c-bb852f95c16e"
+		}
+	],
+	"owner": "75078730-ebc8-4a80-adb9-1cfd2d95b5ca",
+	"rezzer": "75078730-ebc8-4a80-adb9-1cfd2d95b5ca",
+	"source": "daf3a6cb-8a56-afa9-5ebf-2156272dde16",
+	"target": "75078730-ebc8-4a80-adb9-1cfd2d95b5ca",
+	"type": 102
+}
+</syntaxhighlight>
+
+==Parsing Messages==
+
+You can use [[:Category:LSL JSON|JSON]] functions to help parse the messages:
+
+// Script example with a listener and showing how to filter for death events
+<syntaxhighlight lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llListen(COMBAT_CHANNEL, "", COMBAT_LOG_ID, "");
+    }
+    
+    listen(integer channel, string name, key identifier, string message)
+    {
+        list payloads = llJson2List(message);
+        integer index = 0;
+        integer count = llGetListLength(payloads);
+        for(; index < count; ++index)
+        {
+            string payload = llList2String(payloads, index);
+            string eventName = llJsonGetValue(payload, ["event"]);
+            if(eventName == "DEATH") // Set here which type of event we want to filter for
+            {
+                // We can now parse the event message
+                // For example if we want to extract the damage type and source:
+                integer type = (integer)llJsonGetValue(payload, ["type"]);
+                key source = llJsonGetValue(payload, ["source"]);
+            }
+        }
+    }
+}
+</syntaxhighlight>
+
+
+===Lookahead optimisations===
+
+Parsing JSON is fast but not as quick as simply trying to find a substring, so instead it's possible to do a performance optimisation by looking ahead using substring matching before actually committing to fully parsing out the message via the JSON functions.
+
+This depends on what you are specifically looking to accomplish. If you wish to only parse messages containing <code>DEATH</code> events, we can simply try to find that exact string is present. Here is how we add a lookahead check at the beginning of the listener event:
+
+<syntaxhighlight lang="lsl2">
+    listen(integer channel, string name, key identifier, string message)
+    {
+        if(llSubStringIndex(message, "\"DEATH\"") == -1) return; // Stop processing if there is no "DEATH" string in the message
+        
+        list payloads = llJson2List(message);
+        integer index = 0;
+        integer count = llGetListLength(payloads);
+</syntaxhighlight>
+
+
+However if you are actually looking to filter by death events of a specific agent such as the owner for example, you can instead filter by the UUID in the message. There are likely to be less combat log messages related to a single agent than filtering by all death events, and you can also combine it with the above check to further refine it like so:
+
+<syntaxhighlight lang="lsl2">
+    listen(integer channel, string name, key identifier, string message)
+    {
+        if(llSubStringIndex(message, "\"" + (string)llGetOwner() + "\"") == -1) return; // Stop if the owner's UUID key is not present anywhere
+        if(llSubStringIndex(message, "\"DEATH\"") == -1) return; // Stop if there is no "DEATH" event
+        
+        list payloads = llJson2List(message);
+        integer index = 0;
+        integer count = llGetListLength(payloads);
+</syntaxhighlight>
+
+For example we could now efficiently try to check for any <code>DEATH</code> events that the owner was responsible for within the for loop.
+
+
+==Writing to Combat Log==
+
+If a region allows writing to combat logs it's recommended to pass messages in the same format as a JSON array of objects.
+<syntaxhighlight lang="lsl2">
+string exampleEventObject = llList2Json(JSON_OBJECT, [
+    "event", "MY_CUSTOM_EVENT"
+]);
+list payloads = [exampleEventObject];
+string message = llList2Json(JSON_ARRAY, payloads);
+llRegionSay(COMBAT_CHANNEL, message);
+</syntaxhighlight>
+
+
+If your messages are more auxiliary/extra it might be better to send them on <code>COMBAT_CHANNEL - 1</code> as there is no easy way to filter types of messages without parsing each (or otherwise only listening to system-generated messages) if you wish to make sure all scripts that listen on the combat log are responsive and not parsing unnecessary messages.
+
+
+A useful message to send into the combat log could be an <code>OBJECT_DEATH</code> message. [[DAMAGEABLE]] objects don't generate system messages when their health is reduced to 0 as the health is entirely managed and responsibility of the script with the damage processing events.
+
+The <code>OBJECT_DEATH</code>message should look the same as a <code>DEATH</code>message:
+
+{| {{Prettytable}}
+|+ JSON structure of a OBJECT_DEATH event
+|- {{Hl2}}
+! '''Key'''
+! '''Value'''
+! '''Description'''
+|-
+| "event"
+| "OBJECT_DEATH"
+| Object-generated message written into the [[COMBAT_CHANNEL]] declaring that the object had died
+|-
+| "type"
+| [[JSON_NUMBER]]
+| [[:Template:LSL_Constants/Damage_Types|DAMAGE_TYPE_*]] or any number defined by the scripter of the damage source
+|-
+| "source"
+| [[JSON_STRING]]
+| UUID key of damage source
+|-
+| "source_pos"
+| [[JSON_ARRAY]]
+| Array representing the position of the damage source
+|-
+| "target"
+| [[JSON_STRING]]
+| UUID key of damage target
+|-
+| "target_pos"
+| [[JSON_ARRAY]]
+| Array representing the position of the damage target
+|-
+| "owner"
+| [[JSON_STRING]]
+| UUID key of damage source owner
+|-
+| "rezzer"
+| [[JSON_STRING]]
+| UUID key of damage source rezzer
+|-
+|}
+
+Generating and sending the message taken from an [[User:Nexii_Malthus/Object-based_health|example object-based health script]]:
+<syntaxhighlight lang="lsl2">
+// deadlyDamage is the number of the damage that caused the object to die in final_damage when health <= 0
+// Generate synthetic object death event as per https://wiki.secondlife.com/wiki/Talk:Combat_Log#Damageable_Object_Deaths
+vector sourcePos = llDetectedPos(deadlyDamage);
+vector targetPos = llGetPos();
+llRegionSay(COMBAT_CHANNEL, llList2Json(JSON_ARRAY, [
+    llList2Json(JSON_OBJECT, [
+        "event", "OBJECT_DEATH",
+        "owner", llDetectedOwner(deadlyDamage),
+        "rezzer", llDetectedRezzer(deadlyDamage),
+        "source", llDetectedKey(deadlyDamage),
+        "source_pos", llList2Json(JSON_ARRAY, [sourcePos.x, sourcePos.y, sourcePos.z]),
+        "target", llGetKey(),
+        "target_pos", llList2Json(JSON_ARRAY, [targetPos.x, targetPos.y, targetPos.z]),
+        "type", llList2Integer(llDetectedDamage(deadlyDamage), 1)
+    ])
+]));
+</syntaxhighlight>
+
+
+
+
+[[Category:LSL_Combat2]]

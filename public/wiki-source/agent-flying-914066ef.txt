@@ -1,0 +1,38 @@
+{{LSL Constant
+|name=AGENT_FLYING
+|type=integer
+|value={{LSL Hex|0x0001}}
+|desc=Used with [[llGetAgentInfo]] to determine if the queried avatar is flying.
+|pa=
+|text=
+|pb=
+|examples=Count how many people are currently flying within this parcel
+<syntaxhighlight lang="lsl2">
+// On touch, say how many avatars are currently flying within this parcel
+default
+{
+    touch_start(integer total_number)
+    {
+        list AgentList = llGetAgentList(AGENT_LIST_PARCEL, [] );
+        integer CountAll = (AgentList != [] );
+        integer CountFlying;
+        key AgentKey;
+        while (CountAll)
+        {
+            AgentKey = llList2Key(AgentList, --CountAll);
+            if (llGetAgentInfo(AgentKey) & AGENT_FLYING)       ++CountFlying;
+        }
+        llSay(0, (string) CountFlying + " avatars are currently flying within this parcel" );
+    }
+}
+</syntaxhighlight>
+|constants={{LSL Constants/llGetAgentInfo|no-wrapper=*}}
+|functions=
+{{LSL DefineRow||[[llGetAgentInfo]]|}}
+|events
+|location
+|cat1=Flying
+|cat2
+|cat3
+|cat4
+}}

@@ -1,0 +1,55 @@
+{{LSL_Function
+|func_id=|func_sleep=0.0|func_energy=10.0
+|sort=ComputeHash
+|func=llComputeHash
+|return_type=string
+|p1_type=string|p1_name=message
+|p2_type=string|p2_name=algorithm
+|func_footnote=Supported values of '''algorithm''' are '''md5''', '''md5_sha1''', '''sha1''', '''sha224''', '''sha256''', '''sha384''', '''sha512'''.
+|func_desc
+|return_text=hex-encoded hash digest of '''message''' using cryptographic '''algorithm'''
+|spec
+|caveats
+|constants
+|examples=<syntaxhighlight lang="lsl2">default
+{
+    state_entry()
+    {
+        llOwnerSay("Ready");
+    }
+
+    touch_start(integer touch_count)
+    {
+        string message = "your-test-message-here";
+
+        list algorithms = ["md5", "md5_sha1", "sha1", "sha224", "sha256", "sha384", "sha512" ];
+        
+        integer num_algorithms = llGetListLength(algorithms);
+        llOwnerSay("message='" + message + "'");
+        
+        integer i = 0;
+        for (i = 0; i < num_algorithms; ++i)
+        {
+            string algorithm = llList2String(algorithms, i);
+            string hash = llComputeHash(message, algorithm);
+            llOwnerSay(algorithm + " : " + hash);
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llSignRSA]]}}
+{{LSL DefineRow||[[llVerifyRSA]]}}
+{{LSL DefineRow||[[llHMAC]]}}
+{{LSL DefineRow||[[llSHA1String]]}}
+{{LSL DefineRow||[[llSHA256String]]}}
+{{LSL DefineRow||[[llMD5String]]}}
+|also_events
+|also_articles=
+|notes=
+|cat1=Hash
+|cat2=Encoding
+|cat3=Encryption
+|cat4
+}}

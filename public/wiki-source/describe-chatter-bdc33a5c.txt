@@ -1,0 +1,164 @@
+{{LSL Header}}
+
+= Introduction =
+
+Another avatar or object can ask what your avatar's name is, what your avatar's date-of-birth is, whether payment info is on file for your avatar, etc. The Linden servers will return this information without asking you for permission and without notifying you.
+
+If you can see an avatar's profile, then Profile > 2nd Life will tell you things like Currently Online, Born mm/dd/yyyy, No Payment Info On File. If you can't, then this script can tell you those kinds of things.
+
+= Sample Results =
+
+<pre>
+---
+Avatar info:
+    Name: John Doe
+    Birthday: 2007-09-23
+    Payinfo: Has unused payment info on file.
+    Online status: Offline
+---
+</pre>
+
+= Code =
+
+<source lang="lsl2">
+//  Touch prim to get avatar info as shown in the profile
+//
+//  http://wiki.secondlife.com/wiki/Describe_Chatter
+
+key nameRequestId;
+key birthdayRequestId;
+key payinfoRequestId;
+key onlineStatusRequestId;
+
+string avatarLegacyName;
+string avatarBirthday;
+string avatarPayinfo;
+string avatarOnlineStatus;
+
+integer    gEventsReceived;               // Bit pattern of received dataserver events
+integer    gMaskName = 1;
+integer    gMaskBirthday = 2;
+integer    gMaskPayinfo = 4;
+integer    gMaskOnline  = 8;
+
+key        gToucher;
+
+clear_cache()
+{
+    gEventsReceived = 0;
+    avatarLegacyName = "";
+    avatarBirthday = "";
+    avatarPayinfo = "";
+    avatarOnlineStatus = "";
+}
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(0);
+        //  yellow and opaque
+        llSetText("<~!~ touch to get avatar info ~!~>", <1, 1, 0>, 1);
+    }
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    changed(integer change)
+    {
+        if (change & (CHANGED_OWNER | CHANGED_INVENTORY))
+            llResetScript();
+    }
+
+    touch_end(integer num_detected)
+    {
+        gToucher = llDetectedKey(0);
+        state working;
+    }
+}
+
+state working
+{
+    state_entry()
+    {
+        llSetText("=== please wait ===", <1, 0, 0>, 1);
+        clear_cache();
+        nameRequestId = llRequestAgentData(gToucher, DATA_NAME);
+        birthdayRequestId = llRequestAgentData(gToucher, DATA_BORN);
+        payinfoRequestId = llRequestAgentData(gToucher, DATA_PAYINFO);
+        onlineStatusRequestId = llRequestAgentData(gToucher, DATA_ONLINE);
+        llSetTimerEvent(10);
+    }
+
+    dataserver(key query_id, string data)
+    {
+        if (query_id == NULL_KEY)
+            return;
+
+        if (query_id == nameRequestId)
+        {
+            gEventsReceived = gEventsReceived | gMaskName;
+            avatarLegacyName = data;
+        }
+        else if (query_id == birthdayRequestId)
+        {
+            gEventsReceived = gEventsReceived | gMaskBirthday;
+            avatarBirthday = data;
+        }
+        else if (query_id == payinfoRequestId)
+        {
+            gEventsReceived = gEventsReceived | gMaskPayinfo;
+            integer payInfo = (integer)data;
+            if (payInfo  & ~(PAYMENT_INFO_ON_FILE | PAYMENT_INFO_USED))
+                avatarPayinfo = "- payinfo request failed -";
+
+            else
+            {
+                integer hasPayinfo = (payInfo & PAYMENT_INFO_ON_FILE);
+                integer usedPayinfo = (payInfo & PAYMENT_INFO_USED);
+                avatarPayinfo = "Has no payment info on file.";
+                if (hasPayinfo)
+                {
+                    avatarPayinfo = "Has unused payment info on file.";
+                    if (usedPayinfo)
+                        avatarPayinfo =  "Has used payment info on file.";
+                }
+            }
+        }
+        else if (query_id == onlineStatusRequestId)
+        {
+            gEventsReceived = gEventsReceived | gMaskOnline;
+            avatarOnlineStatus = "Offline";
+            if ( (integer) data )
+                avatarOnlineStatus = "Online";
+        }
+
+        if (gEventsReceived == (gMaskName | gMaskBirthday | gMaskPayinfo | gMaskOnline ) )
+        {
+            llSay(0, "Avatar info:"
+                + "\n\tName: " + avatarLegacyName
+                + "\n\tBirthday: " + avatarBirthday
+                + "\n\tPayinfo: " + avatarPayinfo
+                + "\n\tOnline status: " + avatarOnlineStatus);
+            state default;
+        }
+    }
+
+    timer()
+    {
+        llSay(0, "Sorry, did not get a response for all requested info. Please try again!");
+        state default;
+    }
+}
+</source>
+
+= See Also =
+
+'''Functions'''
+
+[[llRequestAgentData]] - ask to receive information about of an agent, such as birth date
+
+[[llSetText]] - float text over a prim
+
+{{LSLC|Library}}{{LSLC|Examples}}

@@ -1,0 +1,63 @@
+{{LSL Header|ml=*}}{{LSLC|Keywords}}{{LSLC|}}
+===Introduction===
+
+A [[data]] type is a definition of the type or format of data.
+
+An integer for example, defines that the variable which will hold this kind (or 'type') of data shall contain only integers, which for 32-bit are whole number values in the range of  {{LSL Hex|0x00000000}} to {{LSL Hex|0xFFFFFFFF}}.
+
+{| {{Prettytable}}
+|-{{Hl2}}
+! type
+! example
+|-
+| integer
+| 42
+|-
+| float
+| 3.14159
+|-
+| string
+| "Hello, world!"
+|-
+| key
+| "1fc26194-b2c1-e5e3-20e5-45cb3ae7f73e"
+|-
+| vector
+| <1.0, 2.0, 3.0>
+|-
+| rotation
+| <0.0, 0.0, 0.0, 1.0>
+|-
+| list
+| [42, 3.14159, "value"]
+|}
+
+===Example===
+<source lang="lsl2">integer myVar = 123;</source>
+
+== Pass‑by‑value ==
+[[LSL]] as a language uses pass‑by‑value for all types{{Footnote|The VMs that run compiled scripts however do use reference types and pass‑by‑reference. In practice this means passing a large list or string as a parameter is not quite as memory ineffecient as it might seem: the passed variable becomes a full-sized copy only if it needs to be modified.}}. When a value (it can be the value in a variable) is passed as a parameter to a function, that function is provided with it's own unique copy of the value. So if in the course of executing the function, the function modifies the parameter, that modification only changes the functions copy of the value, it does not effect or change the original (or other copies).
+
+*[[:Category:LSL Functions|Built in functions]] will never modify the variables used as parameters.
+*User functions that change the values of parameters inside the function scope will not have those changes applied to the variables that supplied those parameters.
+
+===Example===
+<source lang="lsl2">//This demonstrates that LSL (as a language) is pass‑by‑value, if it were pass‑by‑reference, the lines said would be different.
+swap(string a, string b){
+    string t = a;
+    a = b;
+    b = t;
+}
+
+default {
+    state_entry(){
+        string a = "1";
+        string b = "2";
+        llOwnerSay(llList2CSV([a, b]));
+        swap(a, b);//fails to mutate a or b.
+        llOwnerSay(llList2CSV([a, b]));
+    }
+}</source>
+
+===Footnotes===
+{{Footnotes}}

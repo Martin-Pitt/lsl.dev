@@ -1,0 +1,88 @@
+{{LSL_Function/Headless
+|default={{{default|}}}
+|inject-2={{LSL_Function/volume|volume}}{{LSL Function/link-face|link}}
+|summary=Adjusts {{LSLP|volume}} of attached sound.
+
+|head={{LSL Function/Head
+|func=llAdjustSoundVolume
+|sort=AdjustSoundVolume
+|func_id=207|func_sleep=0.1|func_energy=10.0
+|p1_type=float|p1_name=volume}}
+
+{{LSL Function/Head
+|func=llLinkAdjustSoundVolume
+|sort=LinkAdjustSoundVolume
+|func_id=|func_sleep=0.1|func_energy=10.0
+|p1_type=integer|p1_subtype=link|p1_name=link
+|p2_type=float|p2_name=volume}}
+
+|func_footnote
+|func_desc
+|return_text
+|spec
+|caveats=Not work [[llTriggerSound]] and [[llCollisionSound]]
+|constants=
+|examples=
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llListen(42, "", llGetOwner(), "");
+    }
+
+    listen(integer chan, string name, key id, string msg)
+    {
+        float value = (float)msg;
+        llAdjustSoundVolume(value);
+        llOwnerSay("Volume set to: " + (string)value + " of 1.0");
+    }
+}
+</source>
+
+<source lang="lsl2">
+default
+{
+    collision_start(integer p)
+    {
+        llPlaySound("5df2e97f-d3ab-9a80-7063-69007470a182", 1.0);
+        llAdjustSoundVolume(1.0);
+        llSetTimerEvent(0.2); //In 0.2 seconds, will reduce the volume of the currently playing audio.
+    }
+    timer(){
+        llAdjustSoundVolume(0.1);
+        llSetTimerEvent(0.0);
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llLinkPlaySound]]|}}
+{{LSL DefineRow||[[llLinkSetSoundQueueing]]|}}
+{{LSL DefineRow||[[llLinkSetSoundRadius]]|}}
+{{LSL DefineRow||[[llLinkStopSound]]|}}
+{{LSL DefineRow||[[llLoopSound]]|}}
+{{LSL DefineRow||[[llLoopSoundMaster]]|}}
+{{LSL DefineRow||[[llLoopSoundSlave]]|}}
+{{LSL DefineRow||[[llPlaySound]]|}}
+{{LSL DefineRow||[[llPlaySoundSlave]]|}}
+{{LSL DefineRow||[[llPreloadSound]]|}}
+{{LSL DefineRow||[[llSetSoundQueueing]]|}}
+{{LSL DefineRow||[[llSetSoundRadius]]|}}
+{{LSL DefineRow||[[llSound]]|}}
+{{LSL DefineRow||[[llSoundPreload]]|}}
+{{LSL DefineRow||[[llStopSound]]|}}
+{{LSL DefineRow||[[llTriggerSound]]|}}
+{{LSL DefineRow||[[llTriggerSoundLimited]]|}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|cat1=Sound
+|cat2=Script
+|cat3
+|cat4
+|history={{LSL Added|0.2.0|remote=http://secondlife.wikia.com/wiki/Version_0.2.0}}
+}}

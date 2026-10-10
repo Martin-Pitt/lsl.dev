@@ -1,0 +1,61 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-2424}}
+|func_id=174|func_sleep=0.0|func_energy=10.0
+|func=llAngleBetween|sort=AngleBetween
+|return_type=float
+|p1_type=rotation|p1_name=a|p1_desc=start rotation
+|p2_type=rotation|p2_name=b|p2_desc=end rotation
+|func_footnote
+|return_text=that is the angle in radians between rotation {{LSLP|a}} and rotation {{LSLP|b}}.
+|spec
+|caveats
+|examples=
+<source lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        rotation currentRootRotation = llGetRootRotation();
+        float angle = llAngleBetween(ZERO_ROTATION, currentRootRotation);
+
+        // PUBLIC_CHANNEL has the integer value 0
+        llSay(PUBLIC_CHANNEL,
+            "llAngleBetween(ZERO_ROTATION, " + (string)currentRootRotation + ") = " + (string)angle);
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llRotBetween]]}}
+{{LSL DefineRow||[[llRot2Angle]]|Similar functionality used for the Axis-Angle format}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|deepnotes= ===Reference===
+<source lang="lsl2">float AngleBetween(rotation a, rotation b)//simple but turns out to not be very accurate.
+{
+    return 2.0 * llAcos( llFabs(a.x * b.x + a.y * b.y + a.z * b.z + a.s * b.s)
+                      / llSqrt((a.x * a.x + a.y * a.y + a.z * a.z + a.s * a.s)
+                             * (b.x * b.x + b.y * b.y + b.z * b.z + b.s * b.s)));
+}</source>
+
+<source lang="lsl2">float AngleBetween(rotation a, rotation b)//more complex implementation but more accurate, and reasonably fast.
+{
+    rotation r = b / a; // calculate the rotation between the two arguments as quaternion
+    float s2 = r.s * r.s; // square of the s-element
+    float v2 = r.x * r.x + r.y * r.y + r.z * r.z; // sum of the squares of the v-elements
+
+    if (s2 < v2) // compare the s-component to the v-component
+        return 2.0 * llAcos(llSqrt(s2 / (s2 + v2))); // use arccos if the v-component is dominant
+    if (v2) // make sure the v-component is non-zero
+        return 2.0 * llAsin(llSqrt(v2 / (s2 + v2))); // use arcsin if the s-component is dominant
+
+    return 0.0; // one or both arguments are scaled too small to be meaningful, or the values are the same, so return zero
+}//Written by Moon Metty & Miranda Umino. Minor optimizations by Strife Onizuka</source>
+
+Watch for developments on this function with {{Jira|SVC-2424}}
+|cat1=Math/3D
+|cat2
+|cat3
+|cat4
+}}

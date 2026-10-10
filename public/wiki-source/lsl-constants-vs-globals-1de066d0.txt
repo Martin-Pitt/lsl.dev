@@ -1,0 +1,53 @@
+There are some advantages in using global variables over the string and key constants when programming in [[LSO]]; it's faster and uses less bytecode when it is longer than 3 characters and is used more than twice, but it uses more bytecode when it is shorter than 3 characters or is used once. This is easily demonstrated by running the scripts in Figure 1.
+
+However, this is only true for [[LSO]] compiled programs. If [[Mono]] is used, then the opposite is true and it uses less memory to use constants. Mono uses only one copy of a constant in memory. In the scripts in Figure 1, using constants saves the memory used to initialize the variable null_key. This is true if LL constants (like NULL_KEY) are used or if user supplied strings (such as "this is a string") are used.
+
+===Pros when using LSO===
+* Faster
+* Uses less bytecode when it is longer than 3 characters and it used more than twice.
+
+===Cons===
+* User can accidentally change the value.
+* Uses more bytecode when it is shorter than 3 characters or it used once.
+
+
+{| {{Prettytable|style=margin-top:0;}}
+|+ Figure 1: Bytecode Cost
+|- {{Hl2}}
+! Constant
+! Global
+|- valign="top"
+|
+<lsl>
+
+dead(){
+    key a = NULL_KEY;
+    key b = NULL_KEY;
+    key c = NULL_KEY;
+    key d = NULL_KEY;
+}
+
+default {
+    state_entry() {
+        llOwnerSay((string) llGetFreeMemory());
+    }
+}</lsl>
+|
+<lsl>key null_key = NULL_KEY;
+
+dead(){
+    key a = null_key;
+    key b = null_key;
+    key c = null_key;
+    key d = null_key;
+}
+
+default {
+    state_entry() {
+        llOwnerSay((string) llGetFreeMemory());
+    }
+}</lsl>
+|}
+
+{{Resource Conservation Portal Nav|cat=memory}}
+[[Category:LSL]]

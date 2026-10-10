@@ -1,0 +1,253 @@
+{{#if:{{{no_wrapper|}}}||{{{!}} }}
+{{!}}- valign="top"
+{{!}} <div style="display:inline-block;">
+{{{!}} {{Prettytable|style=margin-bottom:0;{{{tstyle|}}}}}
+{{!}}-{{Hl2}}
+! colspan="2" {{!}} '''{{{1|}}} Flag Mask''' 
+! '''Description ([[llDetectedType]]())'''
+! '''Description ([[llSensor]]() and [[llSensorRepeat]]() mask)'''
+{{!}}-{{#if:
+{{!}} {{#vardefine:AGENT_BY_LEGACY_NAME|{{LSL Const|AGENT_BY_LEGACY_NAME|integer|1|hex=0x1|c=Agents}}}}{{#var:AGENT_BY_LEGACY_NAME}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} This is used to find agents by {{LSLGC|Avatar/Name|legacy name}}.
+{{!}}-
+{{!}} {{#vardefine:AGENT|{{LSL Const|AGENT|integer|1|hex=0x1|c=Agents}}}}{{#var:AGENT}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} This is also used to find agents by {{LSLGC|Avatar/Name|legacy name}}, and is functionally identical to [[AGENT_BY_LEGACY_NAME]]
+{{!}}-
+{{!}} {{#vardefine:AGENT_BY_USERNAME|{{LSL Const|AGENT_BY_USERNAME|integer|16|hex=0x10|c=Agents}}}}{{#var:AGENT_BY_USERNAME}}
+{{!}} {{#var:value}}
+{{!}} ''{{HoverText|Reserved|This value is currently not used by llDetectedType}}''
+{{!}} This is used to find agents by {{LSLGC|Avatar/Name|username}}.
+{{!}}-
+{{!}} {{#vardefine:ACTIVE|{{LSL Const|ACTIVE|integer|2|hex=0x2|c=Physical tasks. (Physical objects & agents) }}}}{{#var:ACTIVE}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} Physical objects that are moving or objects containing an active script. Thus, it is using SL server resources now.
+{{!}}-
+{{!}} {{#vardefine:PASSIVE|{{LSL Const|PASSIVE|integer|4|hex=0x4|c=Non-physical objects.}}}}{{#var:PASSIVE}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} Non-scripted or script is inactive and non-physical or, if physical, not moving. Thus, it is not using SL server resources now.
+{{!}}-
+{{!}} {{#vardefine:SCRIPTED|{{LSL Const|SCRIPTED|integer|8|hex=0x8|c=Objects containing any active script.}}}}{{#var:SCRIPTED}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} Objects that has any script, which is doing anything in simulator just now.
+{{!}}-
+{{!}} {{#vardefine:DAMAGEABLE|{{LSL Const|DAMAGEABLE|integer|32|hex=0x20|c=Objects & agents that are able to process damage.}}}}{{#var:DAMAGEABLE}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}} Filter for objects in world that have a script with [[on_damage]] or a [[final_damage]] event (able to process damage)
+{{!}}}
+</div><div style="display:inline-block;">
+{{{!}} {{Prettytable}}
+{{!}}-{{Hl2}}
+![[llDetectedType]]()
+!Scripted
+!Not Scripted
+!Agent Standing
+!title="Agent sitting on object"|Agent Sitting
+{{!}}-
+! Physical Movement
+{{!}} 10 ({{#var:ACTIVE}}|{{#var:SCRIPTED}})
+{{!}} 2 ({{#var:ACTIVE}})
+{{!}} 3 ({{#var:ACTIVE}}|{{#var:AGENT}})
+{{!}} 3 ({{#var:ACTIVE}}|{{#var:AGENT}})
+{{!}}-
+! title="Not moving" | Non-Physical
+{{!}} 12 ({{#var:PASSIVE}}|{{#var:SCRIPTED}})
+{{!}} 4 ({{#var:PASSIVE}})
+{{!}} 1 ({{#var:AGENT}})
+{{!}} 5 ({{#var:PASSIVE}}|{{#var:AGENT}})
+{{!}}}</div>
+{{#if:{{{no_wrapper|}}}||{{!}}} }}{{#if:
+
+{{#if:{{{examples|}}}<noinclude>*</noinclude>|
+{{#vardefine:examples|{{#var:examples}}
+'''Using [[llDetectedType]] in [[collision]] event:'''
+<source lang="lsl2">
+integer type;
+
+default
+{
+    state_entry()
+    {
+        llVolumeDetect(TRUE);
+    }
+    collision_start(integer detected)
+    {
+        type = llDetectedType(0);
+        if (type == AGENT)// = 1
+        {
+            llSay(0, "This is impossible. Since there is no avatar who doesn't require the physical calculation.");
+        }
+        else if (type == ACTIVE)// = 2
+        {
+            llSay(0, "I have been struck by a physical object not containing any script.");
+        }
+        else if (type == PASSIVE)// = 4
+        {
+            llSay(0, "This is impossible. Non-physical objects cannot trigger this event.");
+        }
+        else if (type == SCRIPTED)// = 8
+        {
+            llSay(0, "This is impossible. Since there is no object which isn't physical nor non-physical.");
+        }
+        else if (type == (AGENT | ACTIVE) ) // 1 + 2
+        {
+            llSay(0, "I have been struck by an avatar.");
+        }
+        else if (type == (SCRIPTED | ACTIVE) ) // = 8 + 2
+        {
+            llSay(0, "I have been struck by a physical object containing any script.");
+        }
+        else if (type == (SCRIPTED | PASSIVE) ) // = 8 + 4
+        {
+            llSay(0, "This is impossible. Non-physical objects cannot trigger this event.");
+        }
+    }
+}
+</source>
+'''Using [[llDetectedType]] in [[sensor]] event:'''
+<source lang="lsl2">
+default
+{
+    touch_start(integer numberDetected)
+    {
+         llSensor("", "", ACTIVE | PASSIVE | AGENT, 20.0, PI); // activates the sensor.
+    }
+
+    sensor (integer numberDetected)
+    {
+        integer i;
+        while(i < numberDetected)
+        {
+            integer type = llDetectedType(i);
+            string message;
+            message += (string)i + ", " + llDetectedName(i) + ", ";
+            list typeList;
+            if (type & AGENT)
+            {
+                typeList += "AGENT";
+            }
+            if (type & ACTIVE)
+            {
+                typeList += "ACTIVE";
+            }
+            if (type & PASSIVE)
+            {
+                typeList += "PASSIVE";
+            }
+            if (type & SCRIPTED)
+            {
+                typeList += "SCRIPTED";
+            }
+            message += llDumpList2String(typeList, "|");
+            llWhisper(0, message);
+            ++i;
+        }
+    }
+ 
+    no_sensor()
+    {
+        // This is impossible if range = 20.0 and you are standing within 10m!
+        llWhisper(0, "Nothing is near me at present."); 
+    }
+}
+</source>
+'''Using filter in {{LSLGC|Sensor|llSensor*}} functions:'''
+<source lang="lsl2">
+// Report nearby sensed objects and avatars under sundry categories
+
+list     SenseTypes;
+integer  gIndex;
+
+SenseNextType()
+{
+    string  text = llList2String( SenseTypes, gIndex);
+    integer tipe = llList2Integer(SenseTypes, gIndex + 1);
+    if (tipe)
+    {
+        llWhisper(0, text);
+        llSensor("", NULL_KEY, tipe, 20.0, PI);
+        gIndex += 2;   // increment by stride
+    }
+    else
+        llWhisper(0, "--- Finished ---");
+}
+
+default
+{
+    touch_start(integer detected)
+    {
+        // Make a Strided list of text and sensor type combinations
+        // (Can't use '|' in Global, unfortunately)
+        SenseTypes = [
+            "AGENT_BY_LEGACY_NAME", AGENT_BY_LEGACY_NAME,
+            "ACTIVE", ACTIVE,
+            "AGENT_BY_LEGACY_NAME|ACTIVE", AGENT_BY_LEGACY_NAME|ACTIVE,
+            "PASSIVE", PASSIVE,
+            "AGENT_BY_LEGACY_NAME|PASSIVE", AGENT_BY_LEGACY_NAME|PASSIVE,
+            "ACTIVE|PASSIVE", ACTIVE|PASSIVE,
+            "AGENT_BY_LEGACY_NAME|ACTIVE|PASSIVE", AGENT_BY_LEGACY_NAME|ACTIVE|PASSIVE,
+            "SCRIPTED", SCRIPTED,
+            "AGENT|SCRIPTED", AGENT|SCRIPTED,
+            "ACTIVE|SCRIPTED", ACTIVE|SCRIPTED,
+            "AGENT_BY_LEGACY_NAME|ACTIVE|SCRIPTED", AGENT_BY_LEGACY_NAME|ACTIVE|SCRIPTED,
+            "PASSIVE|SCRIPTED", PASSIVE|SCRIPTED,
+            "", 0 ];
+        gIndex = 0;
+        SenseNextType();        // Kick off the sensing sequence
+    }
+    sensor(integer detected)
+    {
+        integer x;
+        while (x < detected)
+        {
+            llWhisper(0, (string) (x+1) + ": " + llDetectedName(x) );
+            ++x;
+        }
+        SenseNextType();
+    }
+    no_sensor()
+    {
+        llWhisper(0, "none");
+        SenseNextType();
+    }
+}
+</source>
+'''Detecting [[DAMAGEABLE|damageable]] things with sensors:'''
+<source lang="lsl">
+default
+{
+    state_entry()
+    {
+        llSensor("", "", SCRIPTED|AGENT|DAMAGEABLE, 20, PI);
+    }
+
+    no_sensor()
+    {
+        llOwnerSay("Nothing detected");
+    }
+
+    sensor(integer num_detected)
+    {
+        llOwnerSay("Detected " + (string)num_detected + " damageable thing(s)");
+        integer i;
+        for (i = 0; i < num_detected; ++i)
+        {
+            string name = llDetectedName(i);
+            integer isAgent = llDetectedType(i) & AGENT;
+            list types = ["Object", "Agent"];
+
+            llOwnerSay(llList2String(types, isAgent) + ": " + name);
+        }
+    }
+}
+</source>
+}}}}
+
+}}<noinclude>{{#var:examples}}</noinclude>

@@ -1,0 +1,97 @@
+<noinclude>{{LSLC|Pathfinding}}</noinclude>
+{| class="sortable" {{Prettytable}}
+|-{{Hl2}}
+! Option
+! title="Value" style="min-width:2em;" |
+! class="unsortable" | Default
+! class="unsortable" | Range / Values
+! class="unsortable" | Description
+|-
+|{{LSL Const|CHARACTER_DESIRED_SPEED|integer|1}}
+|{{#var:value}}
+|6
+|{{Interval|gte=0.2|lte=40.0|center=speed}}
+|Speed of pursuit in meters per second.
+|-
+|{{LSL Const|CHARACTER_RADIUS|integer|2}}
+|{{#var:value}}
+|
+|{{Interval|gte=0.125|lte=5.0|center=radius}}
+|Set collision capsule radius.
+|-
+|{{LSL Const|CHARACTER_LENGTH|integer|3}}
+|{{#var:value}}
+|
+|{{Interval|gt=0.0|lte=10.0|center=length}}
+|Set collision capsule length
+
+If the value is less than twice the '''radius''' plus 0.1m, it will be set to twice the radius plus 0.1m.
+|-
+|{{LSL Const|CHARACTER_ORIENTATION|integer|4}}
+|{{#var:value}}
+|[[VERTICAL]]
+|[[VERTICAL]], [[HORIZONTAL]]
+|Set the character orientation.
+|-
+|{{LSL Const|TRAVERSAL_TYPE|integer|7}}
+|{{#var:value}}
+|[[TRAVERSAL_TYPE_SLOW]]
+|[[TRAVERSAL_TYPE_FAST]], [[TRAVERSAL_TYPE_SLOW]], [[TRAVERSAL_TYPE_NONE]]
+|Controls the speed at which characters moves on terrain that is less than 100% walkable will move faster (e.g., a cat crossing a street) or slower (e.g., a car driving in a swamp).
+
+To use [[TRAVERSAL_TYPE_FAST|_FAST]] or [[TRAVERSAL_TYPE_SLOW|_SLOW]], you must specify a [[CHARACTER_TYPE]].
+|-
+|{{LSL Const|CHARACTER_TYPE|integer|6}}
+|{{#var:value}}
+| [[CHARACTER_TYPE_NONE]]
+| [[CHARACTER_TYPE_A]], [[CHARACTER_TYPE_B]], [[CHARACTER_TYPE_C]], [[CHARACTER_TYPE_D]], [[CHARACTER_TYPE_NONE]]
+|Specifies which walkability coefficient will be used by this character.
+|-
+|{{LSL Const|CHARACTER_AVOIDANCE_MODE|integer|5}}
+|{{#var:value}}
+|[[AVOID_CHARACTERS]] <nowiki>|</nowiki> [[AVOID_DYNAMIC_OBSTACLES]]
+| Combinable Flags:{{PBR}} [[AVOID_CHARACTERS]], [[AVOID_DYNAMIC_OBSTACLES]], [[AVOID_NONE]]
+|Allows you to specify that a character should not try to avoid other characters, should not try to avoid dynamic obstacles (relatively fast moving objects and avatars), or both. This is framed in the positive sense (<code><nowiki>[</nowiki>[[CHARACTER_AVOIDANCE_MODE]], [[AVOID_CHARACTERS]]]</code> would create a character that avoided other characters but not agents or moving vehicles).  Setting this parameter to [[AVOID_NONE]] causes the character to not avoid either category.
+|-
+|{{LSL Const|CHARACTER_MAX_ACCEL|integer|8}}
+|{{#var:value}}
+|20
+|{{Interval|gte=0.5|lte=40.0|center=acceleration}}
+|The character's maximum acceleration rate.
+|-
+|{{LSL Const|CHARACTER_MAX_DECEL|integer|9}}
+|{{#var:value}}
+|30
+|{{Interval|gte=0.5|lte=60.0|center=deceleration}}
+|The character's maximum deceleration rate.
+|-
+|{{LSL Const|CHARACTER_DESIRED_TURN_SPEED|integer|12}}
+|{{#var:value}}
+|6
+|{{Interval|gte=0.02|lte=40.0|center=speed}}
+|The character's maximum speed while turning--note that this is only loosely enforced (i.e., a character may turn at higher speeds under certain conditions)
+|-
+|{{LSL Const|CHARACTER_MAX_TURN_RADIUS|integer|10}}
+|{{#var:value}}
+|1.25
+|{{Interval|gte=0.1|lte=10.0|center=radius}}
+|The character's turn radius when traveling at [[CHARACTER_DESIRED_TURN_SPEED]]
+|-
+|{{LSL Const|CHARACTER_MAX_SPEED|integer|13}}
+|{{#var:value}}
+|20
+|{{Interval|gte=1|lte=40.0|center=max_speed}}
+|The character's maximum speed.  Affects speed when avoiding dynamic obstacles and when traversing low-walkability objects in [[TRAVERSAL_TYPE_FAST]] mode.
+|-
+|{{LSL Const|CHARACTER_ACCOUNT_FOR_SKIPPED_FRAMES|integer|14}}
+|{{#var:value}}
+|[[TRUE]]
+|[[TRUE]] or [[FALSE]]
+|[[TRUE]] matches pre-existing behavior. If set to [[FALSE]], character will not attempt to catch up on lost time when pathfinding performance is low, potentially providing more reliable movement (albeit while potentially appearing to be more stuttery). 
+|-
+|{{LSL Const|CHARACTER_STAY_WITHIN_PARCEL|integer|15}}
+|{{#var:value}}
+| Depends[[llCreateCharacter#ct-caveat|*]]
+|[[TRUE]] or [[FALSE]]
+|[[FALSE]] matches traditional behavior. If set to [[TRUE]], treat the parcel boundaries as one-way obstacles (will re-enter but can't leave on it's own).
+|}

@@ -1,0 +1,208 @@
+{{LSL Header|lm=*}}{{LSLC|}}{{LSLC|JSON|*Json usage in LSL}}
+==Overview==
+[http://www.json.org/ JSON] (JavaScript Object Notation) is a language and architecture independent, lightweight text format used for [http://en.wikipedia.org/wiki/Serialization serializing data structures], much as [http://en.wikipedia.org/wiki/XML XML] does for documents but in a much more compact form. At its most basic level JSON text is merely a string, but one that follows a [http://tools.ietf.org/html/rfc4627 set of rules] in it's construction. These rules allow the encoding, manipulation, storing, transmission and decoding of complex data structures in a terse, readable form. JSON text can be used for interacting with other applications that are JSON-aware and is commonly used for web client-server communications.
+
+JSON text can also be used to implement [http://en.wikipedia.org/wiki/Object_(computer_science) primitive objects], [http://en.wikipedia.org/wiki/Database databases], complex data structures such as [http://en.wikipedia.org/wiki/Array_data_type multi-dimensional arrays] and [http://en.wikipedia.org/wiki/Associative_array associative arrays], as well as abstract data types such as [http://en.wikipedia.org/wiki/LIFO_(computing) stacks], [http://en.wikipedia.org/wiki/FIFO_(computing) queues] and [http://en.wikipedia.org/wiki/Linked_list linked lists]. Of course, lacking native support in LSL for any of that, such implementations would be somewhat primitive and require coding of the necessary functionality (such as getAllKeys(), getArrayLength(), deleteItem(), as well as iterator operators etc). But these limitations should not stop anyone from considering adding JSON text to their "coding toolbelt", since there are possible benefits such as data encapsulation, lessened memory footprint of lengthy lists, as well as nesting of compound data structures, to name a few.  It might be helpful to use a [https://json-csv.com JSON to CSV] converter if you wish to view or parse the data in a spreadsheet.
+
+An LSL based test script of these functions can be found at [[Json_usage_in_LSL/TestScript]]. The full list of JSON functions can be found at [[:Category:LSL_JSON]].
+
+==Type Conversions==
+
+JSON has native data types that differ from [[LSL Types]]. JSON Value types can be determined with [[llJsonValueType]]. However, all Values retrieved from JSON text will be a [[String]] and may require explicit conversion before being used further (ie ''(float)"3.109000"'' and ''(vector)"<1.00000, 1.00000, 1.00000>"'').
+* '''Number''' - [[JSON_NUMBER]] includes both LSL [[Integer]] and [[Float]] types (but '''not''' ''Inf'' and ''NaN'', which must be explicitly converted to [[String]] before encoding). '''''NOTE:''''' [[Float]] values will be converted as per the LSL [[Typecast|string conversion rules]]- to 6 decimal place precision, with padded zeros or rounding used, except within vectors and rotations, where 5 decimal place precision results (ie  6.1 => '''6.100000''' and <1,1,1> =>  '''"<1.00000, 1.00000, 1.00000>"''').
+* '''String''' - [[JSON_STRING]] equivalent to LSL [[String]]. '''''NOTE:''''' The LSL types [[Key]], [[Rotation]], and [[Vector]] will be converted to their String representation when encoded within a JSON text, either implicitly using [[llList2Json]] or explicitly before using [[llJsonSetValue]], and are always returned as a [[String]] when retrieved by [[llJsonGetValue]].  LSL strings which both begin and end with "'''\"'''" are interpreted literally as JSON strings, while those without are parsed when converted into JSON.
+* '''Array''' - [[JSON_ARRAY]] similar to the LSL [[List]]. This is a bracket-enclosed group of Values which are separated with commas ("''[Value, Value, ... ]''"). The Values are retrieved by use of a zero-based Index ('''''NOTE:''''' Negative indices are '''not''' supported!). A Value may be an Array or an Object, allowing "nesting", and an empty Array ("''[]''") is allowed.
+* '''Object''' - [[JSON_OBJECT]] similar to a [[List#Strided_lists|Strided List]] with a stride of 2, this is a curly brace-enclosed group of comma-separated "Key":Value pairs ("''{"Key":Value, "Key":Value, ... }''". The Values are retrieved by use of the "Key", which '''must''' be a String. A Value may be an Array or an Object, allowing "nesting", and an empty Object ("''{}''") is allowed. 
+* the Boolean constants '''true''' and '''false''' - [[JSON_TRUE]] and [[JSON_FALSE]]. '''''NOTE:''''' These are not to be confused with the LSL [[TRUE]] and [[FALSE]] (which are overloaded integers) and they cannot be directly used in comparative testing (so, instead of <code>if(jsonReturn)</code>, you must use <code>if(jsonReturn == JSON_TRUE)</code>.
+* the constant '''null''' - [[JSON_NULL]] which represents an empty, valueless placeholder and has no equivalent in LSL.
+* [[JSON_INVALID]] - not a Value as such, but a possible return flag representing a failed operation within a JSON text (such as trying to retrieve a Value from a non-existent address within the text or attempting to set a Value in an Array with an out of bounds index). This flag should be checked for whenever dealing with unknown JSON text and when debugging your own manipulations to avoid erroneous code operation.
+
+==LSL Methods==
+===Specifying JSON Elements===
+
+[[llJsonGetValue]], [[llJsonValueType]] and [[llJsonSetValue]] each take the same first two arguments:
+1. a JSON value in the form of a [[String|string]], and   
+2. a set of specifiers in the form of a [[List|list]].
+[[llJsonSetValue]] additionally takes a third an argument: 
+3. a JSON value in the form of a [[String|string]]. 
+
+To understand specifiers, one must generally understand that JSON data is structured in a [http://en.wikipedia.org/wiki/Nested_set_model nested set model]. LSL's built-in JSON parser uses the supplied "specifiers" list to perform [http://en.wikipedia.org/wiki/Tree_traversal tree traversal] on the nodes of the supplied JSON [http://en.wikipedia.org/wiki/Tree_(data_structure) tree data structure]. A JSON tree may be visualized as a set of hierarchical levels of parents and children. Each level is contained within '''curly braces {for objects, which are lists of members, that are defined as key-value pairs}''' or '''square braces [for arrays of elements, which are defined as single values]'''. 
+
+When JSON is presented in human-readable form, it is traditionally formatted such that the first parent level of organization is indented farthest to the left, and each more deeply-nested child level of organization is indented farther and farther to the right. The left-most level of nodes have no parents, only children. They begin with the very first member that appears after the initial "{" character of the JSON string (if it starts as an object), or the first element that appears after the initial "[" character (if it starts as an array). A node is considered as being a parent only if it has a non-null JSON object or array as its value.
+
+With that parent-child tree data structure in mind, the specifiers list that you supply in the above functions tell LSL's JSON parser how to [http://en.wikipedia.org/wiki/Tree_(data_structure)#Traversal_methods walk the tree] of the JSON data that you have supplied with the first argument of the function. The first specifier in the list tells the LSL JSON parser which node to walk to first. The next specifier tells it which of that node's children to walk to. Once the LSL parser has "walked" to the last destination node specified by your list of specifiers, it will then perform the function on the JSON value that it finds there. 
+
+If, anywhere along the line, any of the specified nodes do not exist, [[llJsonGetValue]] and [[llJsonValueType]] will almost always return [[JSON_INVALID]]. However there is a rare exception: if any specifier in the list leads to a node that has no characters in its JSON string value, [[JSON_NULL]] will be returned instead of [[JSON_INVALID]] — no matter what might come after it in the specifiers list. For example in:
+
+<syntaxhighlight lang="lsl2">
+string example = "{\"parent\":,}"; 
+string test1 = llJsonGetValue(example, ["parent"]);
+string test2 = llJsonGetValue(example, ["parent that doesn't exist", "etc."]);
+</syntaxhighlight> 
+'''test1''' and '''test2''' will both be [[JSON_NULL]]. 
+
+The same is true for arrays: a specifier pointing to any element of a valid array will return [[JSON_NULL]] anywhere there is no JSON value specified at given position in the array:
+
+<syntaxhighlight lang="lsl2">
+string example = "{\"parent\":[ , ,  , , ]}";
+string test1 = llJsonGetValue(example, ["parent", 2]);
+string test2 = llJsonGetValue(example, ["parent", 1, "child that does not exist", "etc."]);
+</syntaxhighlight>
+'''test1''' and '''test2''' will also both be [[JSON_NULL]]. 
+
+These types of scenarios may be useful in determining valid JSON paths for the setter: in all the scenarios where [[JSON_NULL]] is returned, the same set of specifiers is able to be successfully used for [[llJsonSetValue]]. However if [[JSON_INVALID]] is returned, there is no guarantee the setter won't return an error.
+
+For [[llJsonGetValue]], if a JSON value is present at the specified node, it will be returned by the function. The value may an object that contains no valid JSON data, so be careful. Such an object will be deemed a [[JSON_OBJECT]] by [[llJsonValueType]], even if its contents are not valid JSON. Therefore, it's always best to check the [[llJsonValueType]] of any specified value to make sure it's valid before using the information in your script. 
+
+
+{{LSL Tip|Counter-intuitiveness warning! If there exist multiple members with the same name in the same object at the same child-level, a specifier that points to that name will be interpreted by LSL as pointing to the member closest to the end of the string! This behavior is opposite from the behavior of [[llListFindList]] and [[llSubStringIndex]], which always find the match that is closest to the beginning of the list or string, respectively!}}
+
+
+The specifiers list may only consist of strings/keys (for object member keys), and integers (for array element positions), which define a path to the desired value in a JSON compound object.
+
+* An empty list specifies the entire Json value.
+* If the list is not empty, each element of the list is used to select the element at the same level of nesting in the JSON value:
+** if the specifier list element is a string, then the corresponding element in the JSON value must be an object and the list element selects the value whose JSON name exactly matches the string.
+** if the specifier list element is an integer, then the corresponding element in the JSON value must be an array and the list element is used as a zero-based index into the Json array.
+* Additionally llJsonSetValue accepts [[JSON_APPEND]] as a specifier to indicate appending the value to the end of the array at that level. Be careful because if the value at that level is not an array, it will be overwritten and replaced with the array you're setting! 
+
+For example, given the JSON value:
+<syntaxhighlight lang="javascript">
+{
+    "alpha": 1,
+    "beta": [
+       "x",
+       "y",
+       "z"
+    ],
+    "gamma": {
+       "a": 3.2,
+       "b": true
+    }
+}
+</syntaxhighlight>
+the contents of the string returned would be:
+<syntaxhighlight lang="lsl2">
+llJsonGetValue(value, ["alpha"])        ⇒    1
+llJsonGetValue(value, ["beta"])         ⇒    ["x", "y", "z"]
+llJsonGetValue(value, ["beta", 2])      ⇒    z
+llJsonGetValue(value, ["gamma", "a"])   ⇒    3.2
+</syntaxhighlight>
+
+<code>[[llJsonSetValue]](string json, list specifiers, string value_to_set)</code> will force the resulting JSON to conform with the specifiers supplied, as long as the specified path is traversable.
+
+==JSON Interrogation and Validation==
+
+To determine the type of a JSON value:
+
+<syntaxhighlight lang="lsl2">string type = llJsonValueType( string json, list specifiers );</syntaxhighlight>
+
+:returns one of several following special [[constants]] (see table below). Each constant has a name, <code>JSON_XXXX</code>, which unlike most LSL constants is not an integer — instead, it's a single-character string. The single character is not printable but has a specific character code (from [[llOrd]]) in the range of 64,976-64,984 or escape value (from [[llEscapeURL]]) in the range of %EF%B7%90–97. The below table shows each constant's invocation and escape code:
+
+{{LSL Constants/JSON}}
+
+==JSON to LSL Conversion==
+
+To directly extract a JSON value to an LSL string:
+
+<syntaxhighlight lang="lsl2">
+string value = llJsonGetValue( string json, list specifiers );
+</syntaxhighlight>
+* ''json'' is a string containing a valid JSON array or object value
+* ''specifiers'' is a list of specifiers (see [[#Specifying Json Elements]])
+* returns a JSON string
+* if the specifiers do not indicate a value that exists in the input, [[JSON_INVALID]] is returned
+
+To convert a JSON compound value (either an array or an object) to an LSL List:
+
+<syntaxhighlight lang="lsl2">
+list values = llJson2List( string json );
+</syntaxhighlight>
+* ''json'' is a string containing a valid JSON array or object value
+* If the string in ''json'' is not a valid JSON object or array, a list with a single item matching the conversion above is returned.
+
+==Recursive Parsing==
+
+Since any value in a JSON array or object may be any arbitrary type, including an array or object, the parsing methods must handle nested values.  Nested arrays or objects are not converted, but remain LSL String values.  If an LSL script needs to use the components in such a nested value, it must explicitly pass that string to the appropriate method.  For example, the following JSON value is passed to [[llJson2List]]:
+<syntaxhighlight lang="javascript">
+{
+    "alpha": 1,
+    "beta": [
+       "x",
+       "y",
+       "z"
+    ],
+    "gamma": {
+       "a": 3.2,
+       "b": true
+    }
+}
+</syntaxhighlight>
+The result would be an LSL list with a stride of 2: the first elements of the 3 strides would be "alpha", "beta", and "gamma".  The second element of the first stride would be the integer 1, but the second elements of the other two strides would be LSL strings containing the JSON representation of the array '[ "x", "y", "z" ]' and object '{ a: 3.2, b: true }' respectively.
+
+==LSL to JSON==
+
+To convert a list to json:
+<syntaxhighlight lang="lsl2">
+string json = llList2Json( string type, list values );
+</syntaxhighlight>
+* ''type'' must be either [[JSON_ARRAY]] or [[JSON_OBJECT]]
+* ''values'' is the list to be converted to JSON.
+
+:Produces an LSL String containing a JSON compound value, either an array or an object depending on type, containing the values in the input list.  
+
+:If type is [[JSON_ARRAY]], the list may contain values of any LSL type; they are converted as described in Type Conversions above.  
+
+:If type is [[JSON_OBJECT]], the list must have a stride of 2.  The first value of each stride must be a string.  The second value of each stride may be any LSL type, and are converted as described in Type Conversions above. [[JSON_INVALID]] is returned if the stride is not 2.
+
+:[[JSON_INVALID]] is returned if any other string or JSON type is specified as the type.
+
+To directly set a JSON value within a string:
+<syntaxhighlight lang="lsl2">
+string jsonresult = llJsonSetValue( string json, list specifiers, string value );
+</syntaxhighlight>
+* ''json'' is a string containing a valid JSON array or object value
+* ''specifiers'' is a list of specifiers (see [[#Specifying Json Elements]])
+* ''value'' the value to be inserted into the specified place in JSON
+* Returns the newly modified JSON string
+
+:The only failure mode for [[llJsonSetValue]] is if an array index is specified in specifiers that is negative (but not [[JSON_APPEND]]) or greater than the list size. In all other cases the JSON is modified so that the set can succeed. For example, if an integer is specified for a level that is an object, the object will be removed completely and replaced with an array. If the object key does not exist it will be added, and [[JSON_APPEND]] or an index one larger than the last item in an array can be used to append to an array. These features are to allow building a Json string with [[llJsonSetValue]].
+
+==Recursive Construction of Compound JSON Values==
+
+Since LSL does not support nested lists, the construction method may only be used to convert a single level; to create a JSON array or object whose values are nested arrays or objects, the LSL script must first construct the nested values and then pass those values as strings to another construction method call.  For example, to construct the JSON value:
+<syntaxhighlight lang="javascript">
+{
+    "alpha": 1,
+    "beta": [
+       "x",
+       "y",
+       "z"
+    ],
+    "gamma": {
+       "a": 3.2,
+       "b": true
+    }
+}
+</syntaxhighlight>
+The following sequence could be used:
+<syntaxhighlight lang="lsl2">
+string gamma_value = llList2Json( JSON_OBJECT, [ "a", 3.2, "b", JSON_TRUE ] );
+string beta_value  = llList2Json( JSON_ARRAY, [ "\"x\"", "\"y\"", "\"z\"" ] );
+string value       = llList2Json( JSON_OBJECT,[ "alpha", 1, "beta", beta_value, "gamma", gamma_value ] );
+</syntaxhighlight>
+or the equivalent without the intermediate variables:
+<syntaxhighlight lang="lsl2">
+string value =
+    llList2Json( JSON_OBJECT,
+        ["alpha", 1,
+         "beta", llList2Json( JSON_ARRAY, [ "\"x\"", "\"y\"", "\"z\"" ] ),
+         "gamma", llList2Json( JSON_OBJECT, [ "a", 3.2, "b", JSON_TRUE ] )]
+    );
+</syntaxhighlight>
+
+'''''NOTE''''' the use of the '''JSON_TRUE''' constant in the above to obtain the bare word 'true' for the value of ["gamma", "b"]. If one had used the LSL constant [[TRUE]], they would've incorrectly obtained an integer '1'. The same applies for 'false'. Do not use the LSL [[TRUE]] or [[FALSE]] constants, use the correct JSON_* type constants or the LSL strings "true" or "false". For the JSON value 'null', either use the LSL constant '''JSON_NULL''' or the LSL string "null".
+
+
+==Limitations==
+* JSON support in LSL does not support all the escape codes specified in [http://www.ietf.org/rfc/rfc4627.txt RFC 4627].  Instead, behavior for escape codes is consistent with general LSL [[string]] behavior: [[String#Escape_Codes]].

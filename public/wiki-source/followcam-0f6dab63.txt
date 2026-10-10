@@ -1,0 +1,466 @@
+== FollowCam ==
+
+[[FollowCam]] functionality allows [[script|scripts]] to [[control]] the {{LSLGC|Camera|camera}}.
+
+* Scripts on {{LSLGC|Attachment|attachments}} and {{LSLGC|Vehicle|vehicles}} can now control camera behavior through a call to [[llSetCameraParams]](), once they have acquired the [[PERMISSION_CONTROL_CAMERA]] {{LSLGC|Permissions/Script|permission}}
+* The script will control the [[user|user's]] camera as long as the resident doesn't override it (use Alt-zoom or enter [[mouselook]], for example) and the [[object]] remains attached or the {{LSLGC|Avatar|avatar}} continues to {{LSLGC|Sit|sit}} on it:
+** When multiple scripts attempt to control the camera, the last script to set the [[CAMERA_ACTIVE]] [[bitflags|flag]] will have control
+** Older scripts will regain control as soon as the newer one is deactivated
+* The new [[FollowCam]] scripts enable a huge variety of vehicle-following behaviors:
+* For instance, a loose camera setting allows sudden changes in vehicle acceleration to happen without causing dizzying jolts in the camera
+** By turning off the "behindness" feature, the camera will be simply dragged along, but it will not try to stay exactly behind the vehicle
+** Other parameters, like pitch (the angle at which it "looks down" at the vehicle), distance, and others, allow you to customize the cinematics of vehicular fun
+
+===[[FollowCam]] family of camera functions===
+
+* [[llRequestPermissions]](agent_key, [[PERMISSION_CONTROL_CAMERA]])
+** Requests permissions
+*** Note, [[PERMISSION_CONTROL_CAMERA]] permissions are only supported for attachments and vehicles at this time
+*** Accepting permissions via a dialog is not currently implemented.
+
+* [[llClearCameraParams]](): Resets all camera values to their default.
+
+* [[llSetCameraParams]]([]): sets up the camera movement rules based on the parameter list
+** [[CAMERA_ACTIVE]] ([[TRUE]] or [[FALSE]]) Default = [[FALSE]]
+*** Turns on or off scripting control of Scripted Camera
+** [[CAMERA_DISTANCE]] (0.5 to ? meters) Default = 3.0
+*** Sets how far away the Scripted Camera wants to be from its subject
+** [[CAMERA_PITCH]] (-45.0 to 80.0 degrees) Default = 0.0
+*** Adjusts the angular amount that the Scripted Camera aims straight ahead vs. straight down, maintaining the same distance. Analogous to 'incidence'
+** [[CAMERA_FOCUS_OFFSET]] (<-10,-10,-10> to <10,10,10> meters) Default = <0.0, 0.0, 0.0>
+*** Adjusts the position of the Scripted Camera focus position relative to the subject
+** [[CAMERA_POSITION_LAG]] (0.0 to 3.0 seconds) Default = 0.1
+*** How much the Scripted Camera lags as it tries to move towards its 'ideal' position
+** [[CAMERA_FOCUS_LAG]] (0.0 to 3.0 seconds) Default = 0.1
+*** How much the Scripted Camera lags as it tries to aim towards the subject
+** [[CAMERA_BEHINDNESS_ANGLE]] (0.0 to 180.0 degrees) Default = 10.0
+*** Sets the angle in degrees within which the Scripted Camera is not constrained by changes in subject rotation. 180 effectively turns behindness off.
+** [[CAMERA_BEHINDNESS_LAG]] (0.0 to 3.0 seconds) Default = 0.0
+*** How much the Scripted Camera lags as it tries to stay behind the target if outside of behindness angle
+** [[CAMERA_POSITION_THRESHOLD]] (0.0 to 4.0 meters) Default = 1.0
+*** Sets the radius of a sphere around the Scripted Camera's ideal position within which it is not affected by subject motion
+** [[CAMERA_FOCUS_THRESHOLD]] (0.0 to 4.0 meters) Default = 1.0
+*** Sets the radius of a sphere around the Scripted Camera's subject position within which its focus is not affected by subject motion
+** [[CAMERA_POSITION]] (vector position within the region)
+*** Sets the position of the Scripted Camera
+** [[CAMERA_FOCUS]] (vector position within the region)
+*** Sets the focus position of the Scripted Camera
+** [[CAMERA_POSITION_LOCKED]] ([[TRUE]] or [[FALSE]]) Default = [[FALSE]]
+*** Locks the camera position so it will not move
+** [[CAMERA_FOCUS_LOCKED]] ([[TRUE]] or [[FALSE]]) Default = [[FALSE]]
+*** Locks the camera focus so it will not move
+
+===Known issues===
+
+* The camera appears to jitter back and forth. This is a problem with our avatar motion model that will be worse at lower framerate. We are continuing to investigate potential solutions.
+* Free standing objects cannot control the user camera. This will continue to be the case until we can implement a robust mechanism for letting residents cancel scripted camera behaviors.
+
+<syntaxhighlight lang="lsl2">//Linden Lab
+//Dan Linden
+integer CHANNEL; // dialog channel
+list MENU_MAIN = ["Default", "Overhead Cam", "Spin Cam", "Trap Toggle", "Spaz Cam", "Drop Cam", 
+"Worm Cam", "Side Cam", "Driving Cam", "More...", "Cam ON", "Cam OFF"]; // the main menu
+list MENU_2 = ["More...", "...Back"]; // menu 2
+
+integer on = FALSE;
+integer flying;
+integer falling;
+integer spaz = 0;
+integer trap = 0;
+
+take_camera_control(key agent)
+{
+    llOwnerSay("take_camera_control"); // say function name for debugging
+    llOwnerSay( (string)agent);
+    llRequestPermissions(agent, PERMISSION_CONTROL_CAMERA);
+    llSetCameraParams([CAMERA_ACTIVE, 1]); // 1 is active, 0 is inactive
+    on = TRUE;
+}
+
+release_camera_control(key agent)
+{
+    llOwnerSay("release_camera_control"); // say function name for debugging
+    llSetCameraParams([CAMERA_ACTIVE, 0]); // 1 is active, 0 is inactive
+    llReleaseCamera(agent);
+    on = FALSE;
+}
+
+focus_on_me()
+{
+    llOwnerSay("focus_on_me"); // say function name for debugging
+    //    llClearCameraParams(); // reset camera to default
+    vector here = llGetPos();
+    llSetCameraParams([
+        CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+        CAMERA_BEHINDNESS_ANGLE, 0.0, // (0 to 180) degrees
+        CAMERA_BEHINDNESS_LAG, 0.0, // (0 to 3) seconds
+        CAMERA_DISTANCE, 0.0, // ( 0.5 to 10) meters
+        CAMERA_FOCUS, here, // region relative position
+        CAMERA_FOCUS_LAG, 0.0 , // (0 to 3) seconds
+        CAMERA_FOCUS_LOCKED, TRUE, // (TRUE or FALSE)
+        CAMERA_FOCUS_THRESHOLD, 0.0, // (0 to 4) meters
+//        CAMERA_PITCH, 80.0, // (-45 to 80) degrees
+        CAMERA_POSITION, here + <4.0,4.0,4.0>, // region relative position
+        CAMERA_POSITION_LAG, 0.0, // (0 to 3) seconds
+        CAMERA_POSITION_LOCKED, TRUE, // (TRUE or FALSE)
+        CAMERA_POSITION_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_FOCUS_OFFSET, ZERO_VECTOR // <-10,-10,-10> to <10,10,10> meters
+    ]);
+}
+
+default_cam()
+{
+//    llOwnerSay("default_cam"); // say function name for debugging
+    llClearCameraParams(); // reset camera to default
+    llSetCameraParams([CAMERA_ACTIVE, 1]);
+}
+
+
+driving_cam()
+{
+    llOwnerSay("driving_cam"); // say function name for debugging
+    default_cam();
+    llSetCameraParams([
+        CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+        CAMERA_BEHINDNESS_ANGLE, 45.0, // (0 to 180) degrees
+        CAMERA_BEHINDNESS_LAG, 0.5, // (0 to 3) seconds
+        CAMERA_DISTANCE, 8.0, // ( 0.5 to 10) meters
+        //CAMERA_FOCUS, <0.0,0.0,5.0>, // region relative position
+        CAMERA_FOCUS_LAG, 0.05 , // (0 to 3) seconds
+        CAMERA_FOCUS_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_FOCUS_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_PITCH, 20.0, // (-45 to 80) degrees
+        //CAMERA_POSITION, <0.0,0.0,0.0>, // region relative position
+        CAMERA_POSITION_LAG, 0.1, // (0 to 3) seconds
+        CAMERA_POSITION_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_POSITION_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_FOCUS_OFFSET, <3.0,0.0,2.0> // <-10,-10,-10> to <10,10,10> meters
+    ]);
+}
+
+
+side_cam()
+{
+    llOwnerSay("side_cam"); // say function name for debugging
+    llClearCameraParams(); // reset camera to default
+    llSetCameraParams([
+        CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+        CAMERA_BEHINDNESS_ANGLE, 0.0, // (0 to 180) degrees
+        CAMERA_BEHINDNESS_LAG, 0.0, // (0 to 3) seconds
+        CAMERA_DISTANCE, 0.0, // ( 0.5 to 10) meters
+        //CAMERA_FOCUS, <0.0,0.0,5.0>, // region relative position
+        CAMERA_FOCUS_LAG, 0.0 , // (0 to 3) seconds
+//        CAMERA_FOCUS_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_FOCUS_THRESHOLD, 0.0, // (0 to 4) meters
+//        CAMERA_PITCH, 80.0, // (-45 to 80) degrees
+        //CAMERA_POSITION, <0.0,0.0,0.0>, // region relative position
+        CAMERA_POSITION_LAG, 0.0, // (0 to 3) seconds
+//        CAMERA_POSITION_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_POSITION_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_FOCUS_OFFSET, <0.0,3.0,0.0> // <-10,-10,-10> to <10,10,10> meters
+    ]);
+}
+
+rearview_cam()
+{
+    llOwnerSay("rearview_cam"); // say function name for debugging
+    llSetCameraParams([
+        CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+        CAMERA_BEHINDNESS_ANGLE, 180.0, // (0 to 180) degrees
+        CAMERA_BEHINDNESS_LAG, 0.0, // (0 to 3) seconds
+//        CAMERA_DISTANCE, 10.0, // ( 0.5 to 10) meters
+        //CAMERA_FOCUS, <0.0,0.0,5.0>, // region relative position
+        CAMERA_FOCUS_LAG, 3.0 , // (0 to 3) seconds
+//        CAMERA_FOCUS_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_FOCUS_THRESHOLD, 0.0, // (0 to 4) meters
+//        CAMERA_PITCH, 80.0, // (-45 to 80) degrees
+        //CAMERA_POSITION, <0.0,0.0,0.0>, // region relative position
+//        CAMERA_POSITION_LAG, 0.0, // (0 to 3) seconds
+//        CAMERA_POSITION_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_POSITION_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_FOCUS_OFFSET, <5.0,2.0,-2.0> // <-10,-10,-10> to <10,10,10> meters
+    ]);
+}
+
+overhead_cam()
+{
+    llOwnerSay("overhead_cam"); // say function name for debugging
+    default_cam();
+    llSetCameraParams([
+        CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+        CAMERA_BEHINDNESS_ANGLE, 180.0, // (0 to 180) degrees
+        CAMERA_BEHINDNESS_LAG, 0.5, // (0 to 3) seconds
+        CAMERA_DISTANCE, 10.0, // ( 0.5 to 10) meters
+        //CAMERA_FOCUS, <0.0,0.0,5.0>, // region relative position
+        CAMERA_FOCUS_LAG, 0.05 , // (0 to 3) seconds
+        CAMERA_FOCUS_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_FOCUS_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_PITCH, 80.0, // (-45 to 80) degrees
+        //CAMERA_POSITION, <0.0,0.0,0.0>, // region relative position
+        CAMERA_POSITION_LAG, 0.0, // (0 to 3) seconds
+        CAMERA_POSITION_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_POSITION_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_FOCUS_OFFSET, <0.0,0.0,0.0> // <-10,-10,-10> to <10,10,10> meters
+    ]);
+}
+
+drop_camera_5_seconds()
+{
+    llOwnerSay("drop_camera_5_seconds"); // say function name for debugging
+    llSetCameraParams([
+        CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+        CAMERA_BEHINDNESS_ANGLE, 0.0, // (0 to 180) degrees
+        CAMERA_BEHINDNESS_LAG, 0.5, // (0 to 3) seconds
+        CAMERA_DISTANCE, 3.0, // ( 0.5 to 10) meters
+        //CAMERA_FOCUS, <0.0,0.0,5.0>, // region relative position
+        CAMERA_FOCUS_LAG, 2.0, // (0 to 3) seconds
+        CAMERA_FOCUS_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_FOCUS_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_PITCH, 0.0, // (-45 to 80) degrees
+        //CAMERA_POSITION, <0.0,0.0,0.0>, // region relative position
+        CAMERA_POSITION_LAG, 0.05, // (0 to 3) seconds
+        CAMERA_POSITION_LOCKED, TRUE, // (TRUE or FALSE)
+        CAMERA_POSITION_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_FOCUS_OFFSET, <0.0,0.0,0.0> // <-10,-10,-10> to <10,10,10> meters
+    ]);
+    llSleep(5);
+    default_cam();
+}
+
+
+
+worm_cam()
+{
+    llOwnerSay("worm_cam"); // say function name for debugging
+    llSetCameraParams([
+        CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+        CAMERA_BEHINDNESS_ANGLE, 180.0, // (0 to 180) degrees
+        CAMERA_BEHINDNESS_LAG, 0.0, // (0 to 3) seconds
+        CAMERA_DISTANCE, 8.0, // ( 0.5 to 10) meters
+        //CAMERA_FOCUS, <0.0,0.0,5.0>, // region relative position
+        CAMERA_FOCUS_LAG, 0.0 , // (0 to 3) seconds
+        CAMERA_FOCUS_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_FOCUS_THRESHOLD, 4.0, // (0 to 4) meters
+        CAMERA_PITCH, -45.0, // (-45 to 80) degrees
+        //CAMERA_POSITION, <0.0,0.0,0.0>, // region relative position
+        CAMERA_POSITION_LAG, 1.0, // (0 to 3) seconds
+        CAMERA_POSITION_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_POSITION_THRESHOLD, 1.0, // (0 to 4) meters
+        CAMERA_FOCUS_OFFSET, <0.0,0.0,0.0> // <-10,-10,-10> to <10,10,10> meters
+    ]);
+}
+
+spaz_cam()
+{
+    llOwnerSay("spaz_cam for 5 seconds"); // say function name for debugging
+    float i;
+    for (i=0; i< 50; i+=1)
+    {
+        vector xyz = llGetPos() + <llFrand(80.0) - 40, llFrand(80.0) - 40, llFrand(10.0)>;
+        //        llOwnerSay((string)xyz);
+        vector xyz2 = llGetPos() + <llFrand(80.0) - 40, llFrand(80.0) - 40, llFrand(10.0)>;
+        llSetCameraParams([
+            CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+            CAMERA_BEHINDNESS_ANGLE, 180.0, // (0 to 180) degrees
+            CAMERA_BEHINDNESS_LAG, llFrand(3.0), // (0 to 3) seconds
+            CAMERA_DISTANCE, llFrand(10.0), // ( 0.5 to 10) meters
+            //CAMERA_FOCUS, xyz, // region relative position
+            CAMERA_FOCUS_LAG, llFrand(3.0), // (0 to 3) seconds
+            CAMERA_FOCUS_LOCKED, TRUE, // (TRUE or FALSE)
+            CAMERA_FOCUS_THRESHOLD, llFrand(4.0), // (0 to 4) meters
+            CAMERA_PITCH, llFrand(125.0) - 45, // (-45 to 80) degrees
+            CAMERA_POSITION, xyz2, // region relative position
+            CAMERA_POSITION_LAG, llFrand(3.0), // (0 to 3) seconds
+            CAMERA_POSITION_LOCKED, TRUE, // (TRUE or FALSE)
+            CAMERA_POSITION_THRESHOLD, llFrand(4.0), // (0 to 4) meters
+            CAMERA_FOCUS_OFFSET, <llFrand(20.0) - 10, llFrand(20.0) - 10, llFrand(20) - 10> // <-10,-10,-10> to <10,10,10> meters
+        ]);
+        llSleep(0.1);
+    }
+    default_cam();
+}
+
+spin_cam()
+{
+    llSetCameraParams([
+        CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+        CAMERA_BEHINDNESS_ANGLE, 180.0, // (0 to 180) degrees
+        CAMERA_BEHINDNESS_LAG, 0.5, // (0 to 3) seconds
+        //CAMERA_DISTANCE, 10.0, // ( 0.5 to 10) meters
+        //CAMERA_FOCUS, <0.0,0.0,5.0>, // region relative position
+        CAMERA_FOCUS_LAG, 0.05 , // (0 to 3) seconds
+        CAMERA_FOCUS_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_FOCUS_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_PITCH, 30.0, // (-45 to 80) degrees
+        //CAMERA_POSITION, <0.0,0.0,0.0>, // region relative position
+        CAMERA_POSITION_LAG, 0.0, // (0 to 3) seconds
+        CAMERA_POSITION_LOCKED, FALSE, // (TRUE or FALSE)
+        CAMERA_POSITION_THRESHOLD, 0.0, // (0 to 4) meters
+        CAMERA_FOCUS_OFFSET, <0.0,0.0,0.0> // <-10,-10,-10> to <10,10,10> meters
+    ]);
+
+    float i;
+    vector camera_position;
+    for (i=0; i< 2*TWO_PI; i+=.05)
+    {
+        camera_position = llGetPos() + <0.0, 4.0, 0.0> * llEuler2Rot(<0.0, 0.0, i>);
+        llSetCameraParams([CAMERA_POSITION, camera_position]);
+    }
+    default_cam();
+}
+
+setup_listen()
+{
+    llListenRemove(1);
+    CHANNEL = llRound(llFrand(1) * 100000);
+    integer x = llListen(CHANNEL, "", "", ""); // listen for dialog answers
+}
+
+default
+{
+    state_entry()
+    {
+        llSitTarget(<0.0, 0.0, 0.1>, ZERO_ROTATION);
+        setup_listen();
+        llSetTimerEvent(2.0);
+    }
+
+    touch_start(integer total_number)
+    {
+        integer perm = llGetPermissions();
+        if (perm & PERMISSION_DEBIT)
+        { llOwnerSay(llGetScriptName() + " has PERMISSION_DEBIT perms for "+(string)llGetPermissionsKey()); }
+        if (perm & PERMISSION_TAKE_CONTROLS)
+        { llOwnerSay(llGetScriptName() + " has PERMISSION_TAKE_CONTROLS perms for "+(string)llGetPermissionsKey()); }
+        if (perm & PERMISSION_TRIGGER_ANIMATION)
+        { llOwnerSay(llGetScriptName() + " has PERMISSION_TRIGGER_ANIMATION perms for "+(string)llGetPermissionsKey()); }
+        if (perm & PERMISSION_ATTACH)
+        { llOwnerSay(llGetScriptName() + " has PERMISSION_ATTACH perms for "+(string)llGetPermissionsKey()); }
+        if (perm & PERMISSION_CHANGE_LINKS)
+        { llOwnerSay(llGetScriptName() + " has PERMISSION_CHANGE_LINKS perms for "+(string)llGetPermissionsKey()); }
+        if (perm & PERMISSION_TRACK_CAMERA)
+        { llOwnerSay(llGetScriptName() + " has PERMISSION_TRACK_CAMERA perms for "+(string)llGetPermissionsKey()); }
+        if (perm & PERMISSION_CONTROL_CAMERA)
+        { llOwnerSay(llGetScriptName() + " has PERMISSION_CONTROL_CAMERA perms for "+(string)llGetPermissionsKey()); }
+        if (perm == 0)
+        { llOwnerSay(llGetScriptName() + " has NO perms for "+(string)llGetPermissionsKey()); }
+
+        llDialog(llDetectedKey(0), "What do you want to do?", MENU_MAIN, CHANNEL); // present dialog on click
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        if (~llListFindList(MENU_MAIN + MENU_2, [message]))  // verify dialog choice
+//        if (~llListFindList(MENU_MAIN, [message]))  // verify dialog choice
+        {
+//            llOwnerSay(name + " picked the option '" + message + "'."); // output the answer
+            if (message == "More...")
+                llDialog(id, "Pick an option!", MENU_2, CHANNEL); // present submenu on request
+            else if (message == "...Back")
+                llDialog(id, "What do you want to do?", MENU_MAIN, CHANNEL); // present main menu on request to go back
+
+
+            else if (message == "Cam ON")
+            {
+                take_camera_control(id);
+            }
+
+            else if (message == "Cam OFF")
+            {
+                release_camera_control(id);
+            }
+
+            else if (message == "Default")
+            {
+                default_cam();
+            }
+
+            else if (message == "Driving Cam")
+            {
+                driving_cam();
+            }
+
+            else if (message == "Worm Cam")
+            {
+                worm_cam();
+            }
+
+            else if (message == "Overhead Cam")
+            {
+                overhead_cam();
+            }
+
+            else if (message == "Spaz Cam")
+            {
+                spaz_cam();
+            }
+
+            else if (message == "Side Cam")
+            {
+                side_cam();
+            }
+
+            else if (message == "Drop Cam")
+            {
+                drop_camera_5_seconds();
+            }
+
+            else if (message == "Trap Toggle")
+            {
+                trap = !trap;
+                if (trap == 1) {
+                    llOwnerSay("trap is on");
+                }
+                else {
+                    llOwnerSay("trap is off");
+                }
+            }
+
+            else if (message == "Spin Cam")
+            {
+                spin_cam();
+            }
+
+        } else
+        llOwnerSay(name + " picked invalid option '" + llToLower(message) + "'."); // not a valid dialog choice
+    }
+
+    run_time_permissions(integer perm) {
+        if (perm & PERMISSION_CONTROL_CAMERA) {
+            llSetCameraParams([CAMERA_ACTIVE, 1]); // 1 is active, 0 is inactive
+            llOwnerSay("Camera permissions have been taken");
+        }
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        {
+            key agent = llAvatarOnSitTarget();
+            if (agent)
+            {
+                setup_listen();
+                llRequestPermissions(agent, PERMISSION_CONTROL_CAMERA);
+            }
+        }
+    }
+
+    attach(key agent)
+    {
+        if (agent)
+        {
+            setup_listen();
+            llRequestPermissions(agent, PERMISSION_CONTROL_CAMERA);
+        }
+    }
+
+    timer()
+    {
+        if (trap == 1)
+        {
+            focus_on_me();
+        }
+    }
+}</syntaxhighlight>
+
+[[Category:LSL Examples]]

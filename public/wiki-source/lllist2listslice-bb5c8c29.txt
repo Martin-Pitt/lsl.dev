@@ -1,0 +1,75 @@
+{{LSL_Function
+|inject-2={{LSL_Function/negative index|true|start|end|noExclude=}}{{LSL_Function/stride|stride|slice}}
+|func_id=198|func_sleep=0.0|func_energy=10.0
+|func=llList2ListSlice
+|return_type=list
+|p1_type=list|p1_name=src
+|p2_type=integer|p2_name=start
+|p3_type=integer|p3_name=end
+|p4_type=integer|p4_name=stride
+|p5_type=integer|p5_name=slice_index
+|func_footnote=The index of the first entry in the list is {{HoverText|0|zero}}<br>
+The index of the first entry in a slice is {{HoverText|0|zero}}<br>
+If {{LSLP|start}}, {{LSLP|end}}, or {{LSLP|slice_index}} are negative they are indexed from end of list.  -1 is last element in the list.  -list_length is the 1st element of the list.<br>
+If {{LSLP|slice_index}} is negative it is counted from the end of its stride regardless of whether or not the stride exceeds the end of the list.  e.g:  -1 is the last element in a stride.<br>
+If {{LSLP|start}} > {{LSLP|end}} the range from start to end is treated as an exclusion range.<br>
+|func_desc
+|return_text=of the slice_index'th element of every stride in [[List#Strided_lists|strided list]] whose index is a multiple of {{LSLP|stride}} in the range {{LSLP|start}} to {{LSLP|end}}.
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">list mylist = [0,1,2,3,4,5,6];
+list result_a = llList2ListSlice(mylist,0,-1,3,0); //start at first item in list, go to the end, return 1st slice of every stride of 3
+//result_a == [0,3,6]
+
+list result_b = llList2ListSlice(mylist,0,-1,3,1); //start at first item in list, go to the end, return 2nd slice of every stride of 3
+//result_b == [1,4]
+
+list result_c = llList2ListSlice(mylist,1,-1,3,1); //start at second item in list, go to the end, return 2nd slice of every stride of 3
+//result_c == [2,5]
+
+list result_d = llList2ListSlice(mylist,2,-1,3,-1); //start at third item in list, go to the end, return last slice of every stride of 3
+//result_d == [4]
+
+list result_e = llList2ListSlice(mylist,4,2,1,0); //4>2 so this is an exclusion. slice indices count from 0 and first element after exclusion. Return every element not in range with a stride of 1
+//result_e == [0,1,2,4,5,6]</source>
+
+<source lang="lsl2">list menu = ["1", "one", "2", "two", "3", "three"];
+default
+{
+    state_entry()
+    {
+        llListen(10, "", llGetOwner(), "");
+    }
+    touch_start(integer detected)
+    {
+        list buttons = llList2ListSlice(menu, 0, -1, 2, 0);
+        llDialog(llDetectedKey(0), "choose a number", buttons, 10); //display the digits
+    }
+    listen(integer channel, string obj, key id, string message)
+    {
+        integer index = llListFindList(menu, [message]);
+        if (index != -1)
+        {
+            list names = llList2ListSlice(menu, 0, -1, 2, 1);
+            llOwnerSay("you chose " + llList2String(names, index/2) + " (" + message + ")");
+        }
+    }
+}</source>
+
+|helpers=*[[User:Fred_Gandt/Scripts/Functions#StrideOfList|StrideOfList]] - Starting from '''start''' and stopping before '''end''' exceeded it skips every '''stride'''-1 items. returns the slice_index element of the stride if its position is less than list length.
+|also_functions=
+|also_events
+|also_tests
+|also_articles
+|notes= If the list is not modulo the stride, elements up to the length of the list will be returned in the final slice matching conditions.  e.g.  a list of 5 elements with a stride of 2 will return 3 elements for a 0,5 range on slice index 0 but only 2 if the slice_index is 1.
+|permission
+|negative_index
+|haiku={{Haiku|Fetch me the last names|In a database of lists|Oh look columns. Neat!}}
+|sort=List2ListSlice
+|cat1=List
+|cat2
+|cat3
+|cat4
+}}

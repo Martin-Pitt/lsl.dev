@@ -1,0 +1,57 @@
+{{LSL_Function
+|func_id=|func_sleep=0.0|func_energy=10.0
+|sort=HMAC
+|func=llHMAC
+|return_type=string
+|p1_type=string|p1_name=secret
+|p2_type=string|p2_name=msg
+|p3_type=string|p3_name=algorithm
+|func_footnote=This function supports md5, sha1, sha224, sha256, sha384, sha512 for '''algorithm'''.
+
+'''secret''' can be any string.
+|func_desc
+|return_text=that is the {{Wikipedia|Base64|Base64-encoded}} {{Wikipedia|HMAC|HMAC}} hash of '''msg''' when using hash algorithm '''algorithm''' and secret string '''secret'''.
+|spec
+|caveats=
+* '''secret''' is passed in as UTF-8 (though stored in memory as UTF-16 in Mono).
+** If your secret is encoded in Base64 (as is common for HMAC applications), consider [[llBase64ToString]], but be aware of its caveats.
+** If you are generating an HMAC hash on a different platform, you will need to ensure its implementation reads the secret as UTF-8 (or you will need to manually encode it into the correct format beforehand), or else the HMAC hashes will not match.
+** Since '''secret''' is not Base64, and LSL does not support "NUL" (U+0000) in strings, this function cannot calculate hashes with secrets that encode into UTF-8/16 as U+0000.
+|constants
+|examples=<syntaxhighlight lang="lsl2">default
+{
+    state_entry()
+    {
+        string secret = "secret key";
+        
+        // Supported algorithims for llHMAC() include:
+        // md5, sha1, sha224, sha256, sha384, sha512
+        
+        string algorithm = "sha1";
+        string msg = "Hello, Avatar!";
+        
+        string digest = llHMAC(secret, msg, algorithm);
+        
+        // For the given secret/msg/algorithm, expect the HMAC
+        // digest to be 'ffCDntkagRO5mIEtd2tYzM2Bg8I='
+        llSay(0, "HMAC digest of message '" + msg + "' using algorithm "
+            +  algorithm + " is " + digest);
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llSignRSA]]}}
+{{LSL DefineRow||[[llVerifyRSA]]}}
+{{LSL DefineRow||[[llSHA1String]]}}
+{{LSL DefineRow||[[llSHA256String]]}}
+{{LSL DefineRow||[[llMD5String]]}}
+|also_events
+|also_articles=
+|notes=
+* This function performs no checks on '''secret'''; it can contain any value, or no value at all. Be sure to check that you are hashing using the correct '''secret'''.
+* Since this function uses UTF-8 secrets, you should at a minimum follow "password rules": more entropy is usually better. If you need a guideline, 32+ random characters is likely enough.
+|cat1=Hash
+|cat2=Encoding
+|cat3=Encryption
+|cat4
+}}

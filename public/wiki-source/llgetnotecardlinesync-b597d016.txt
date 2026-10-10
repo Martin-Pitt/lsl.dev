@@ -1,0 +1,185 @@
+{{LSL_Function
+|inject-2={{LSL_Function/negative_index|false|line}}{{LSL_Function/notecard|name|uuid=true}}
+|func_id=|func_sleep=0.0|func_energy=10.0
+|sort=GetNotecardLineSync
+|func=llGetNotecardLineSync
+|return_type=string
+|p1_type=string|p1_name=name
+|p2_type=integer|p2_name=line|p2_desc=Line number in a notecard (the index starts at zero).
+|func_desc=Gets the {{LSLP|line}} of the notecard {{LSLP|name}} from the region's notecard cache immediately without raising a dataserver event.
+|Return_text=containing the text of the requested line from the notecard.
+|func_footnote=Returns [[EOF]] if {{LSLP|line}} is past the end of the notecard.
+|spec=
+This function returns a string containing the requested line from a notecard in prim inventory, without the need for an asynchronous dataserver event, if the notecard is cached/known in its entirety by the simulator. This speeds up acessing notecard lines tremendously, and allows for near instantaneous random access.
+
+If the notecard does not exist it returns the constant [[NAK]] and will shout a message to the debug channel.  If the notecard has not been previously cached on the simulator it will return the [[NAK]] constant.
+
+Notecards are cached into a fixed-size buffer, with the oldest (least-recently read) notecard getting removed first. It is not safe to assume a notecard has been previously cached. Data for a previously cached notecard may be dropped from the cache at any time, especially on a busy server.
+
+|caveats=* If notecard contains embedded inventory items (such as textures and landmarks), [[EOF]] will be returned, regardless of the line requested.
+* If the requested line is longer than 1024 bytes (''not'' characters), [[llGetNotecardLineSync]] will only return the first 1024 ''bytes'' of the line.
+** To check that the returned line has not been truncated, use the example snippet on [[llStringToBase64]] to check the number of bytes returned by [[llGetNotecardLineSync]]. If the string is exactly 1024 bytes, it ''may'' have been truncated.
+*** Do not use [[llStringLength]] for this, because strings in LSL support multi-byte characters (UTF-8 for LSL-2, UTF-16 for Mono).
+* A [[dataserver]] event does '''not''' get raised. Therefore, other scripts in the linkset are unaware of the processed notecard lines.
+* Since this function does not idle the script while waiting for a [[dataserver]] event, garbage collection will not run while loading an entire notecard by calling llGetNotecardLineSync in a loop. For large notecards, you can quickly run out of free memory, even if you overwrite each line as you read it.
+** This does not occur with [[llGetNotecardLine]], which runs garbage collection while waiting for the [[dataserver]] event.
+** This can be mitigated using [[timer]]s (any length will do), but not [[llSleep]], which also blocks garbage collection.
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+string NOTECARD_NAME = "notecard";
+key READ_KEY = NULL_KEY;
+
+default
+{
+
+    touch_start(integer total_number)
+    {
+        READ_KEY = llGetNumberOfNotecardLines(NOTECARD_NAME);
+    }
+    
+    dataserver(key request, string data)
+    {
+        if (request == READ_KEY)
+        {
+            integer count = (integer)data;
+            integer index;
+            
+            for (index = 0; index < (count+1); ++index)
+            {
+                string line = llGetNotecardLineSync(NOTECARD_NAME, index);
+                if (line == NAK)
+                {
+                    llOwnerSay("---NAK---");
+                }
+                else if (line == EOF)
+                {
+                    llOwnerSay("---EOF---");
+                }
+                else
+                {
+                    llOwnerSay(line);
+                }
+            }
+        }
+    }
+}
+</syntaxhighlight>
+Following example to call a normal [[dataserver]] notecard read using [[llGetNotecardLine]] if llGetNotecardlineSync fails with a NAK.  Keep in mind to clear any lists you are reading data into when using the following example to keep from corrupting the integrity of the list data.
+<syntaxhighlight lang="lsl2">
+
+// llGetNotecardLineSync example with fall back to the old dataserver read
+// if llGetNotecardLineSync fails with a NAK.
+
+string  NOTECARD_NAME = "notecard";
+key     READ_KEY = NULL_KEY;
+
+key     noteCard_qry;
+integer noteCard_line;
+
+default
+{
+
+    state_entry()
+    {
+        // read the notecards number of lines to the
+        // simulators cache memory
+        READ_KEY = llGetNumberOfNotecardLines(NOTECARD_NAME);
+    }
+    
+    dataserver(key request, string data)
+    {
+        // read notecards using the new llGetNotecardLineSync function
+        // from simulator cache.
+        if (request == READ_KEY)
+        {
+            integer count = (integer)data;
+            integer index;
+            
+            for (index = 0; index < (count+1); ++index)
+            {
+                string line = llGetNotecardLineSync(NOTECARD_NAME, index);
+                if (line == NAK)
+                {
+                    // Got a notecard NAK meaning llGetNotecardLineSync had and error.
+                    // falling back to the old dataserver event to read notecards.
+                    llOwnerSay("---NAK---");
+                    noteCard_qry = llGetNotecardLine(NOTECARD_NAME, noteCard_line);
+                    return;  // return is needed to break the for/next loop once the NAK is encountered.
+                }
+                else if (line == EOF)
+                {
+                    // End of notecard.
+                    llOwnerSay("---EOF---");
+                }
+                else
+                {
+                    // do work here.
+                    llOwnerSay(line);
+                }
+            }
+        }
+
+        // old system takes over if a NAK is encountered.
+        if(request == noteCard_qry)
+        {
+            if(data == EOF)
+            {
+                // End of notecard encountered.
+                llOwnerSay("EOF encountered");
+            }
+            else 
+            {
+                // process normal notecard line, then read the next line
+                // of the notecard.
+                llOwnerSay(data);
+                noteCard_qry = llGetNotecardLine(NOTECARD_NAME, ++noteCard_line);
+            }
+        }
+    }
+}
+</syntaxhighlight>
+
+Here is a more compact implementation that returns to using llGetNotecardLineSync whenever possible:
+<syntaxhighlight lang="lsl2">
+string file_name;
+integer file_line_number;
+key file_request;
+
+default {
+    state_entry() {
+        file_name = llGetInventoryName(INVENTORY_NOTECARD, 0); // get the name of the first notecard in the object's inventory
+    }
+    
+    touch_start(integer n) {
+        // start reading text when the object is touched (you'll probably want to move these lines to another place depending on your needs):
+        file_line_number = 0;
+        file_request = llGetNotecardLine(file_name, file_line_number);
+    }
+    
+    dataserver(key id, string message) {
+        if (id == file_request) {
+            while (message != EOF && message != NAK) {
+                llOwnerSay(message); // do useful things with the text here
+                message = llGetNotecardLineSync(file_name, ++file_line_number);
+            }
+            if (message == NAK)
+                file_request = llGetNotecardLine(file_name, file_line_number);
+            if (message == EOF)
+                llOwnerSay("End of file.");
+        }
+    }
+}
+</syntaxhighlight>
+|also_functions={{LSL DefineRow||[[llGetNumberOfNotecardLines]]|}}
+{{LSL DefineRow||[[llGetNotecardLine]]|}}
+|also_events
+|also_articles
+|also_tests
+|permission
+|cat1=Notecard
+|cat2=
+|cat3=
+|cat4=
+|history=
+}}

@@ -1,0 +1,66 @@
+{{LSL_Function
+|inject-2={{LSL_Function/negative index|true|start|end}}{{Issues/SCR-6}}
+|func_id=95|func_sleep=0.0|func_energy=10.0
+|sort=DeleteSubString
+|func=llDeleteSubString
+|return_type=string
+|p1_type=string|p1_name=src
+|p2_type=integer|p2_name=start
+|p3_type=integer|p3_name=end
+|func_footnote=Characters at positions '''start''' and '''end''' are removed.
+|func_desc
+|return_text=that is the result of removing characters from '''src''' from '''start''' to '''end'''.
+|spec
+|caveats
+|constants
+|examples=<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        string ex = "abcdefghi";
+        llDeleteSubString(ex, 4, 7); //Incorrect!
+    }
+}</source>
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        string ex = "abcdefghi";
+        ex = llDeleteSubString(ex, 4, 7); //Correct
+        llSay(0, ex); //Would say "abcdi"
+    }
+}
+</source>
+<source lang="lsl2">
+//-- special case
+default
+{
+    state_entry()
+    {
+        string ex = "abcdefghi";
+        llSay( 0, llDeleteSubString(ex, 4, 7) ); //Would say "abcdi"
+        //-- acceptable if you do NOT want to change the contents of 'ex', only the output
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetSubString]]|}}
+{{LSL DefineRow||[[llReplaceSubString]]|}}
+{{LSL DefineRow||[[llInsertString]]|}}
+{{LSL DefineRow||[[llDeleteSubList]]|}}
+|also_events
+|also_articles={{LSL DefineRow||[[Library_Combined_Library#str_replace|CombinedLibrary: str_replace]]}}
+|notes=
+Indexes start at zero, the index of the first character is zero. Using 0,0 as start and end positions would delete the first character only. Negative indexes count from the far end of the string towards the beginning, so -1 is short form for the last character in a string. Positive and negative indexes can be mixed so using 0, -1 as start and end positions would delete the entire string.
+
+To ascertain how long a string is, use [[llStringLength]].
+
+Granted, wondering how to use this can be bewildering at times: with random text strings being handled by your script, you may wonder how you can know what positions you should be starting and ending the deletion at. [[llSubStringIndex]] is the preferred method of finding a string in a string but it can be a rather involved process. If the user just wants to remove all occurrences of a string from a string they may wish to consider simply using {{User|Strife Onizuka}}'s [[Library_Combined_Library#str_replace|str_replace]] function instead, to looks for a value without having to know where it starts and ends, and replacing it with "".
+|cat1=String
+|cat2
+|cat3
+|cat4
+}}

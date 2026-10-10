@@ -1,0 +1,51 @@
+[[Category:Experience Tools]]
+{{LSL_Function
+|inject-2={{Issues/BUG-8895}}
+{{LSL Function/KeyValue|k|value=value|d2_type=string|d2_name=value}}
+{{LSL Function/Experience|true}}
+|func=llReadKeyValue
+|func_desc=Start an asynchronous transaction to read the value associated with the specified key ({{LSLPT|k}}) and the script's {{LSLGC|Experience}}.
+|func_footnote=If the key does not exist the [[dataserver]] will return a failure along with the error [[XP_ERROR_KEY_NOT_FOUND]].
+|return_type=key|return_subtype=handle
+|return_text=that can be used to identify the corresponding [[dataserver]] event to determine if this command succeeded or failed and the results.
+|p1_type=string|p1_name=k
+|also_functions=
+*[[llGetExperienceErrorMessage]]
+*[[llCreateKeyValue]]
+*[[llReadKeyValue]]
+*[[llUpdateKeyValue]]
+*[[llDeleteKeyValue]]
+*[[llDataSizeKeyValue]]
+*[[llKeyCountKeyValue]]
+*[[llKeysKeyValue]]
+|examples=<syntaxhighlight lang="lsl2">key trans;
+default
+{
+    state_entry()
+    {
+        trans = llReadKeyValue("FOO");
+    }
+    dataserver(key t, string value)
+    {
+        if (t == trans)
+        {
+            // our llReadKeyValue transaction is done
+            if (llGetSubString(value, 0, 0) == "1")
+            {
+                // the key-value pair was successfully read
+                llSay(0, "New key-value pair value: " + llGetSubString(value, 2, -1));
+            }
+            else
+            {
+                // the key-value pair failed to read
+                integer error =  (integer)llGetSubString(value, 2, -1);
+                llSay(0, "Key-value failed to read: " + llGetExperienceErrorMessage(error));
+            }
+        } 
+    }
+}</syntaxhighlight>
+|haiku={{Haiku|Async read starts now,|Key sought in Experience,|Hope it's not missing!|author=ChatGPT}}
+|cat1=Experience
+|cat2=Experience/Data
+|cat3=Dataserver
+}}

@@ -1,0 +1,92 @@
+{{LSL_Function
+|inject-2={{LSL_Function/permission|PERMISSION_DEBIT|grant=the owner}}{{LSL Function/avatar|destination}}
+{{Issues/VWR-28201}}{{Issues/SVC-7623}}
+|func_id=?|func_sleep=0.0|func_energy
+|func=llTransferLindenDollars
+|return_type=key|return_text=used in a matching [[transaction_result]] event for the success or failure of the transfer. If the transaction is successful, this key will show in the [https://secondlife.com/my/account/transactions.php transaction history].
+|p1_type=key|p1_name=destination
+|p2_type=integer|p2_name=amount|p2_desc=number of L$, must be greater than zero, ({{LSLP|amount}} &gt; 0)|p2_hover=number of L$, must be greater than zero, ('amount' &gt; 0)
+|func_desc=Transfer {{LSLP|amount}} of L$ money from script owner to {{LSLP|destination}} avatar.
+|func_footnote=If you aren't going to use the return value or the resulting [[transaction_result]] event consider using [[llGiveMoney]] instead of this function.
+|spec
+|caveats=*An object cannot pay another object.
+*Objects deeded to groups cannot give money (the permission cannot be granted).
+*Use is limited to 30 payments in a 30 second interval for all scripts owned by that resident on a region. Sustained overage will produce a script error and halt payments while the rate remains excessive. Historically, faster payments have failed intermittently.
+*Once a script has the [[PERMISSION_DEBIT]] permission it can empty an account of L$.
+**Fraud & theft are both {{LL|TOS}} violations and crimes. Misuse this function and you risk being banned and legal action. In addition LL may freeze the accounts of anyone the money is transferred to and restore it to it's rightful owners. This may involve retrieving it from third party exchanges and accounts on those exchanges being frozen. The system is not designed to be friendly towards fraud.
+|examples=<source lang="lsl2">
+// Pay 100 L$ to Fred Bloggs when he touches this prim
+// Die if the transfer of funds was successful, else keep running
+
+string  Recipient = "Fred Bloggs";      // Authorised recipient
+integer Amount = 100;                   // Amount to pay Fred when he touches the prim
+
+integer DebitPerms;
+key     TransactionID=NULL_KEY;
+
+default
+{
+    state_entry()
+    {
+        // Ask the owner for permission to debit their account
+        llRequestPermissions(llGetOwner(), PERMISSION_DEBIT);
+    }
+
+    run_time_permissions (integer perm)
+    {
+        if  (perm & PERMISSION_DEBIT)
+            DebitPerms = TRUE;
+    }
+
+    touch_start(integer num_detected)
+    {
+        if (!DebitPerms)
+            return;  // Cannot proceed - debit permissions not granted
+        if (llDetectedName(0) != Recipient)
+            return;  // unauthorised person is touching - ignore
+        if (TransactionID != NULL_KEY)
+            return;  // waiting on previous transaction to complete/fail
+
+        key id = llDetectedKey(0);
+        TransactionID = llTransferLindenDollars(id, Amount);
+    }
+
+    transaction_result(key id, integer success, string data)
+    {
+        if (id != TransactionID)
+            return;          // Ignore if not the expected transaction
+        
+        if (success)
+        {
+            llOwnerSay( "Transfer of L$ to " + Recipient + " was successful");
+            llSleep(1.0);
+            llDie();          // Die so Fred can't keep taking money
+        }
+        else
+        {
+            llOwnerSay( "Transfer of L$ failed");
+            TransactionID = NULL_KEY;
+            // Keep the script running so Fred can try again, clear TransactionID to allow a new attempt
+        }
+    }
+}
+</source>
+|complex_examples=
+{{LSL DefineRow||[[Simple Piggy Bank]]|}}
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGiveMoney]]}}
+{{LSL DefineRow||[[llSetPayPrice]]}}
+|also_events=
+{{LSL DefineRow||[[transaction_result]]|}}
+{{LSL DefineRow||[[money]]|}}
+|also_tests
+|also_articles
+|notes=*released on main server channel on 3-Dec-2011
+|cat1=Avatar
+|cat2=Money
+|cat3=Transfer
+|cat4
+|cat5
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/11#11.12.03.246118 | 03/12/2011 ]]
+}}

@@ -1,0 +1,109 @@
+{{LSL_Function
+|inject-2={{LSL_Function/inventory|sound|uuid=true|type=sound|volume=volume}}
+|func_id=88|func_sleep=0.0|func_energy=10.0
+|func=llLoopSoundMaster
+|p1_type=string|p1_name=sound
+|p2_type=float|p2_name=volume
+|func_footnote
+|func_desc=Plays attached {{LSLP|sound}} looping at {{LSLP|volume}}, declares it a sync master.
+|return_text
+|spec
+|caveats=
+* This function is affected by the [[llSetSoundQueueing|Sound Queueing]] property of the parent prim - this means it's possible to queue a slave sound prior to starting a master, without having to use more than one prim as an emitter. (See below).
+|constants
+|examples=
+<source lang="lsl2">
+// for an uploaded .wav file called "MasterLoop" in inventory
+llLoopSoundMaster("MasterLoop", 1.0);
+</source>
+The script below is an example of how using [[llSetSoundQueueing]] affects the interaction between master and slave sounds. In the example, it is used to run a car engine.
+<source lang="lsl2">
+integer playState; //see LUT below.
+
+list lut = ["Engine start, idle.","Accelerate, speed loop.","Decelerate, idle.", "Idle, stop"];
+
+default
+{
+    state_entry()
+    {
+        llSetSoundQueueing(TRUE); //Set this so the we don't skip the 1st 'slave' sound.
+    }
+
+    touch_start(integer total_number)
+    {
+        llWhisper(0, "Sound: " + llList2String(lut,playState));
+        if(!playState) //start engine.
+        {
+            llPlaySoundSlave("engine start",1); //This sound is skipped if Sound Queueing is not set.
+            llLoopSoundMaster("idle",1);
+        }
+        else if(playState == 1) //accelerate, then play driving loop
+        {
+            llPlaySoundSlave("accelerate",1);
+            llLoopSoundMaster("speed",1);
+        }
+        else if(playState == 2) //decelerate to idle.
+        {
+            llPlaySoundSlave("decelerate",1);
+            llLoopSoundMaster("idle",1);
+        }
+        else //stop the engine.
+        {
+            llPlaySoundSlave("engine stop",1);
+            llSleep(2); //Wait until the above sound completes.
+            llStopSound(); //Call this to prevent the master loop from restarting randomly (e.g. upon script reset or region change).
+            playState = -1; //This actually resets to 0, as it's incremented below.
+        }
+        ++playState; //increment playState.
+    }
+}
+</source>
+The script below can be added to an object, to toggle a SoundMaster on and off. Note that the script requires a sound in inventory called MasterLoop, or you need to change the argument in the function for it to work.
+<source lang="lsl2">
+//This integer (actually a boolean) will be used to manage the toggle effect.
+integer soundState = FALSE;
+//Change MasterLoop to the sound clip you want to use.
+string soundClip = "MasterLoop";
+default {
+    state_entry()
+    {
+        //Displays red "OFF" as floating text above the prim
+        llSetText("OFF", <1,0,0>, 1.0);
+    }
+    touch_start(integer num_detected)
+    {
+        //When touched, soundState inverts its current boolean value. 1 becomes 0, 0 becomes 1. 
+        soundState = !soundState;
+        if(soundState)
+        {
+            //Run this code when entering soundState 'on'
+            //Displays green "ON" as floating text above the prim
+            llSetText("ON", <0,1,0>, 1.0);
+            llLoopSoundMaster(soundClip, 1.0);
+        }else
+        {   //Run this code when entering soundState 'off'
+            //When touched, stop sound & display red "OFF" as floating text.
+            llSetText("OFF", <1,0,0>, 1.0);
+            llStopSound();
+        }
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llLoopSound]]|3=Plays a sound {{HoverText|attached|The sound moves with the prim}} indefinitely.}}
+{{LSL DefineRow||[[llLoopSoundSlave]]|3=Plays a sound {{HoverText|attached|The sound moves with the prim}} indefinitely, and declares it as a sync slave.}}
+{{LSL DefineRow||[[llPlaySoundSlave]]|3=Plays a sound {{HoverText|attached|The sound moves with the prim}} once.}}
+{{LSL DefineRow||[[llSetSoundQueueing]]|3=Enables the ability to queue sounds.}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|sort=LoopSoundMaster
+|cat1=Sound
+|cat2
+|cat3
+|cat4
+}}

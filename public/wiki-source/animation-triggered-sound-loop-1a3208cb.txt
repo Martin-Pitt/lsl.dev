@@ -1,0 +1,162 @@
+{{LSL Header}}
+====Animation triggered sound loop====
+--[[User:BETLOG Hax|BETLOG Hax]] UTC+10: 20091011 1615 [SLT: 20091010 2315]
+
+You want a specific animation (thats already handled by your AO) to play a special sound.
+<br>
+
+This script does the sound bit. (LOOPS the sound FOR AS LONG AS you play the animation)
+<br>
+<syntaxhighlight lang="lsl2">
+//==============================================================
+// BETLOG Hax
+// UTC+10: 20091011 1601 [SLT: 20091010 2301]
+// For Eln Alter
+//----------------------------------
+//        **** LICENCE START ****
+// http://creativecommons.org/licenses/by-sa/3.0/
+//             Attribution licence:
+// You must:
+//    -Include this unaltered licence information.
+//    -Supply my original script with your modified version.
+//    -Retain the original scripts' SL permissions. [+c/+m/+t]
+//        -Exception for Eln ALter to protect the commercial viability of his animations' UUID
+// Or:
+//    -Link to the wiki URL from which you copied this script.
+//        https://wiki.secondlife.com/wiki/Animation_triggered_sound_loop
+//    -Document: "Uses parts of <scriptname> by BETLOG Hax"
+//        **** LICENCE END ****
+//==============================================================
+string      gAnimUUID       = "";//***THIS HAS TO BE INSERTED BY YOU***
+string      gSound          = "";//having a sound in contents will override
+//----------------------------------
+integer     gAnimState;
+//----------------------------------
+f_toggle(integer on)
+{   if(on)
+    {   string n = llGetInventoryName(INVENTORY_SOUND,0);
+        if(n!="")
+            gSound=n;
+        if(gSound!="")
+            llLoopSound(gSound,1.0);
+        else
+            llOwnerSay("ERROR: No sound defined in script and none in object contents.
+                Without one or the other I cant work.");
+    }
+    else
+        llStopSound();
+}
+//----------------------------------
+f_perms() //make it still operate when entering no script areas
+{   if(llGetAttached())
+        llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+}
+//==============================================================
+default
+{   state_entry()
+    {   if(llGetAttached())//DEV
+            f_perms();
+        else
+            llOwnerSay("You must be wearing me for this to operate.");
+    }
+    attach(key id) 
+    {   f_perms();
+    }
+    run_time_permissions(integer perm) 
+    {   if(perm & PERMISSION_TAKE_CONTROLS)
+        {   f_toggle(gAnimState=FALSE);
+            llSetTimerEvent(0.444444);
+        }
+    }
+    control(key id, integer pressed, integer change) 
+    {   //make it still operate when entering no script areas
+    }
+    timer() 
+    {   if(-1<llListFindList(llGetAnimationList(llGetOwner()), [(key)gAnimUUID]))
+        {   if(!gAnimState)
+                f_toggle(gAnimState=TRUE);
+        }
+        else if(gAnimState)
+            f_toggle(gAnimState=FALSE);
+    }
+}
+//==============================================================
+</syntaxhighlight>
+
+====Animation triggered sound NOloop====
+--[[User:BETLOG Hax|BETLOG Hax]] UTC+10: 20091011 1615 [SLT: 20091010 2315]
+
+You want a specific animation (thats already handled by your AO) to play a special sound.
+<br>
+This script does the sound bit. (Plays the sound ONCE each time you start the animation)
+<br>
+<syntaxhighlight lang="lsl2">
+//==============================================================
+// BETLOG Hax
+// UTC+10: 20091011 1601 [SLT: 20091010 2301]
+// For Eln Alter
+//----------------------------------
+//        **** LICENCE START ****
+// http://creativecommons.org/licenses/by-sa/3.0/
+//             Attribution licence:
+// You must:
+//    -Include this unaltered licence information.
+//    -Supply my original script with your modified version.
+//    -Retain the original scripts' SL permissions. [+c/+m/+t]
+//        -Exception for Eln ALter to protect the commercial viability of his animations' UUID
+// Or:
+//    -Link to the wiki URL from which you copied this script.
+//          https://wiki.secondlife.com/wiki/Animation_triggered_sound_loop
+//    -Document: "Uses parts of <scriptname> by BETLOG Hax"
+//        **** LICENCE END ****
+//==============================================================
+string      gAnimUUID       = "";//***THIS HAS TO BE INSERTED BY YOU***
+string      gSound          = "";//having a sound in contents will override
+//----------------------------------
+integer     gAnimState;
+//----------------------------------
+f_perms() //make it still operate when entering no script areas
+{   if(llGetAttached())
+        llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+}
+//==============================================================
+default
+{   state_entry()
+    {   if(llGetAttached())//DEV
+            f_perms();
+        else
+            llOwnerSay("You must be wearing me for this to operate.");
+    }
+    attach(key id) 
+    {   f_perms();
+    }
+    run_time_permissions(integer perm) 
+    {   if(perm & PERMISSION_TAKE_CONTROLS)
+            llSetTimerEvent(0.444444);
+    }
+    control(key id, integer pressed, integer change) 
+    {   //make it still operate when entering no script areas
+    }
+    timer() 
+    {   if(-1<llListFindList(llGetAnimationList(llGetOwner()), [(key)gAnimUUID]))
+        {   if(!gAnimState)
+            {   string n = llGetInventoryName(INVENTORY_SOUND,0);//not ideal-meh
+                if(n!="")
+                    gSound=n;
+                if(gSound!="")
+                {   gAnimState=TRUE;
+                    llPlaySound(gSound,1.0);
+                }
+                else
+                    llOwnerSay("ERROR: No sound defined in script and none in object contents.
+                        Without one or the other I cant work.");
+            }
+        }
+        else if(gAnimState)
+            gAnimState=FALSE;
+    }
+}
+//==============================================================
+</syntaxhighlight>
+
+[[Category:LSL Examples]]

@@ -1,0 +1,44 @@
+{{LSL_Function
+|func_id=|func_sleep=3.0|func_energy=10.0|return_type=integer
+|func=llGiveAgentInventory
+|p1_type=key|p1_name=agent|p1_desc=agent to receive inventory offer.
+|p2_type=string|p2_name=folder|p2_desc=destination folder name to use.
+|p3_type=list|p3_name=inventory|p3_desc=list of inventory items to give to the agent
+|p4_type=list|p4_name=options|p4_desc=list of options for inventory transfer.
+|func_footnote
+|return_text
+|func_desc=Gives '''inventory''' items to '''agent''', creating a new '''folder''' to put them in.
+|spec=
+* The target must be an avatar in the same region as the sending object, or must have recently been in the region.
+* Places the inventory items in a newly created folder in the avatar's inventory (even if there is a folder by the same name, a new one is created).
+* If a path of root folders has been specified, the function will ensure that those folders exist but will not recreate them if they already exist.
+|constants={{LSL Constants/Transfer Inventory}}
+
+{{LSL Constants/Transfer Errors}}
+
+|caveats=* Any no-copy items in '''inventory''' will be excluded from transfer.
+* Any no-transfer items in '''inventory''' will be excluded from transfer if '''agent''' is not the script owner.
+|examples=
+In this example, the object inventory needs to contain two objects named ''Item 1'' and ''Item 2''. The destination folder will be named ''Destination Folder'' and will be created under the main folder ''Objects'', in the sub-folder ''Subfolder''. If ''Subfolder'' does not exist, it will be created.
+
+If the object gets touched for a second time, the sub-folder ''Subfolder'' will '''not''' be duplicated, however the destination folder ''Destination Folder'' '''will''' be duplicated.
+
+If ''Item 1'' and/or ''Item 2'' do not exist, the transfer will silently fail partially or completely.
+<syntaxhighlight lang="lsl2">default
+{
+    touch_start(integer total_number)
+    {
+        llGiveAgentInventory(llDetectedKey(0), "Destination Folder", ["Item 1","Item 2"], [TRANSFER_DEST, "Objects|Subfolder"] );
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llGiveInventory]]}}
+{{LSL DefineRow||[[llGiveInventoryList]]}}
+|also_events={{LSL DefineRow||[[changed]]}}
+|also_tests
+|also_articles
+|notes|cat1=Inventory
+|cat2
+|cat3
+|cat4
+}}

@@ -1,0 +1,563 @@
+<noinclude>{{multi-lang}}</noinclude>{{#if:
+
+{{Footnote|When LL deprecated this flag they stripped it of it's name, however they did not remove the functionality. To aid in documenting the functionality, the value was given a new name in the documentation only. That is why PRIM_TYPE_LEGACY is not recognized by the compiler.|handle=ptl}}
+
+{{:PRIM_NAME|{{{1|}}}}}
+{{:PRIM_DESC|{{{1|}}}}}
+{{:PRIM_SLICE|{{{1|}}}}}
+{{:PRIM_COLOR|{{{1|}}}}}
+{{:PRIM_GLOW|{{{1|}}}}}
+{{:PRIM_TEXGEN|{{{1|}}}}}
+{{:PRIM_TEXTURE|{{{1|}}}}}
+{{:PRIM_RENDER_MATERIAL|{{{1|}}}}}
+{{:PRIM_TEXT|{{{1|}}}}}
+{{:PRIM_FULLBRIGHT|{{{1|}}}}}
+{{:PRIM_BUMP_SHINY|{{{1|}}}}}
+{{:PRIM_MATERIAL|{{{1|}}}}}
+{{:PRIM_TYPE|{{{1|}}}}}
+{{:PRIM_TYPE_BOX|{{{1|}}}}}
+{{:PRIM_TYPE_SCULPT|{{{1|}}}}}
+{{:PRIM_PHANTOM|{{{1|}}}}}
+{{:PRIM_TEMP_ON_REZ|{{{1|}}}}}
+{{:PRIM_PHYSICS|{{{1|}}}}}
+{{:PRIM_SIZE|{{{1|}}}}}
+{{:PRIM_POSITION|{{{1|}}}}}
+{{:PRIM_POS_LOCAL|{{{1|}}}}}
+{{:PRIM_ROTATION|{{{1|}}}}}
+{{:PRIM_ROT_LOCAL|{{{1|}}}}}
+{{:PRIM_FLEXIBLE|{{{1|}}}}}
+{{:PRIM_POINT_LIGHT|{{{1|}}}}}
+{{:PRIM_REFLECTION_PROBE|{{{1|}}}}}
+{{:PRIM_OMEGA|{{{1|}}}}}
+{{:PRIM_PHYSICS_SHAPE_TYPE|{{{1|}}}}}
+{{:PRIM_NORMAL|{{{1|}}}}}
+{{:PRIM_SPECULAR|{{{1|}}}}}
+{{:PRIM_ALPHA_MODE|{{{1|}}}}}
+<!--{{:PRIM_PHYSICS_MATERIAL|{{{1|}}}}}-->
+{{:PRIM_LINK_TARGET|{{{1|}}}|{{{2|}}}}}<--Must be last-->
+
+{{LSL_Function/color|color}}
+{{LSL_Function/linear_color|linear_color}}
+{{LSL_Function/alpha|alpha}}
+{{LSL_Function/boolean|boolean}}
+{{LSL_Function/face|face|flag|!footer=*|returns={{#ifeq:{{{1|<noinclude>get</noinclude>}}}|get|nothing.}}}}
+
+{{#vardefine:p_gltf_alpha_mode_desc|PRIM_GLTF_ALPHA_MODE_* flag}}
+{{#vardefine:p_gltf_alpha_mode_rows|
+!{{!}} {{LSLPT|gltf_alpha_mode}} Flags
+! title="value" {{!}} V
+! colspan="3" {{!}} Description
+{{!}}-
+{{!}} {{LSL Const|PRIM_GLTF_ALPHA_MODE_OPAQUE|integer|0|c=Ignore the alpha value and render the material as opaque.}}
+{{!}} {{#var:value}}
+{{!}} colspan="3" {{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|PRIM_GLTF_ALPHA_MODE_BLEND|integer|1|c=Render the material with transparency determined by the alpha value. Blending is done in linear color space. As is the case for Blinn-Phong as well, this mode suffers from depth sorting and performance issues. Use alpha mask instead when possible.}}
+{{!}} {{#var:value}}
+{{!}} colspan="3" {{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|PRIM_GLTF_ALPHA_MODE_MASK|integer|2|c=Render the material as  fully opaque where the alpha value is greater than the alpha cutoff, and otherwise render the material as fully transparent.}}
+{{!}} {{#var:value}}
+{{!}} colspan="3" {{!}} {{#var:comment}}
+}}
+
+}}{{#ifeq:{{{1|<noinclude>set</noinclude>}}}|set|
+{{{!}} class="sortable" {{Prettytable|style=margin: 0px 0px 10px 1pt;}}
+{{!}}- {{Hl2}}
+! class="sortable" {{!}}Flag
+! class="sortable" title="Value" style="cursor: help;" {{!}}<span style="border-bottom: 1px dotted;">V</span>
+! class="sortable" {{!}}Description
+! class="unsortable" {{!}}Usage
+{{!}}-
+{{!}} [[#PRIM_NAME|PRIM_NAME]]
+{{!}} 27
+{{!}} Sets the prim's name.
+{{!}} [&nbsp;{{#var:name_const}}, [[string]]&nbsp;{{LSL Param|name}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_DESC|PRIM_DESC]]
+{{!}} 28
+{{!}} Sets the prim's description.
+{{!}} [&nbsp;{{#var:desc_const}}, [[string]]&nbsp;{{LSL Param|description}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_TYPE|PRIM_TYPE]]
+{{!}} 9
+{{!}} Sets the prim's shape.
+{{!}} [&nbsp;{{#var:type_const}}, [[integer]]&nbsp;{{HoverText|flag|PRIM_TYPE_* flag}}&nbsp;]&nbsp;+ {{HoverLink|#PRIM_TYPE_flag_parameters|Additional parameters required by the flag|flag_parameters}}
+{{!}}-
+{{!}} [[#PRIM_SLICE|PRIM_SLICE]]
+{{!}} 35
+{{!}} Sets the prim's slice (a shape attribute).
+{{!}} [&nbsp;{{#var:slice_const}}, [[vector]]&nbsp;{{LSL Param|cut|slice}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_PHYSICS_SHAPE_TYPE|PRIM_PHYSICS_SHAPE_TYPE]]
+{{!}} 30
+{{!}} Sets the prim's physics shape type.
+{{!}} [&nbsp;{{#var:physics_shape_type_const}}, [[integer]]&nbsp;{{LSL Param|pstype|type}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_MATERIAL|PRIM_MATERIAL]]
+{{!}} 2
+{{!}} Sets the prim's material.
+{{!}} [&nbsp;{{#var:material_const}}, [[integer]]&nbsp;{{HoverText|flag|PRIM_MATERIAL_* flag}}&nbsp;]
+{{!}}-
+<!--{{!}} [[#PRIM_PHYSICS_MATERIAL|PRIM_PHYSICS_MATERIAL]]
+{{!}} 31
+{{!}} Sets the prim's physics material properties.
+{{!}} [&nbsp;{{#var:physics_material_const}}, [[integer]]&nbsp;{{LSL Param|material_bits}}, [[float]]&nbsp;{{LSL Param|gravity_multiplier}}, [[float]]&nbsp;{{LSL Param|restitution}}, [[float]]&nbsp;{{LSL Param|friction}}, [[float]]&nbsp;{{LSL Param|density}}&nbsp;]-->
+{{!}}-
+{{!}} [[#PRIM_PHYSICS|PRIM_PHYSICS]]
+{{!}} 3
+{{!}} Sets the object's physics status.
+{{!}} [&nbsp;{{#var:physics_const}}, [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_TEMP_ON_REZ|PRIM_TEMP_ON_REZ]]
+{{!}} 4
+{{!}} Sets the object's {{LSLGC|Temporary|temporary}} attribute.
+{{!}} [&nbsp;{{#var:temponrez_const}}, [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_PHANTOM|PRIM_PHANTOM]]
+{{!}} 5
+{{!}} Sets the object's phantom status.
+{{!}} [&nbsp;{{#var:phantom_const}}, [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_POSITION|PRIM_POSITION]]
+{{!}} 6
+{{!}} Sets the prim's position.
+{{!}} [&nbsp;{{#var:position_const}}, [[vector]]&nbsp;{{LSL Param|position{{{1|}}}|position}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_POS_LOCAL|PRIM_POS_LOCAL]]
+{{!}} 33
+{{!}} Sets the prim's local position. 
+{{!}} [&nbsp;{{#var:pos_local_const}}, [[vector]]&nbsp;{{LSL Param|pos|position}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_ROTATION|PRIM_ROTATION]]
+{{!}} 8
+{{!}} Sets the prim's global rotation.
+{{!}} [&nbsp;{{#var:rotation_const}}, [[rotation]]&nbsp;{{LSL Param|rot}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_ROT_LOCAL|PRIM_ROT_LOCAL]]
+{{!}} 29
+{{!}} Sets the prim's local rotation.
+{{!}} [&nbsp;{{#var:rot_local_const}}, [[rotation]]&nbsp;{{LSL Param|rot_local|rot}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_SIZE|PRIM_SIZE]]
+{{!}} 7
+{{!}} Sets the prim's size.
+{{!}} [&nbsp;{{#var:size_const}}, [[vector]]&nbsp;{{LSL Param|size}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_TEXTURE|PRIM_TEXTURE]]
+{{!}} 17
+{{!}} Sets the prim's texture attributes.
+{{!}} [&nbsp;{{#var:texture_const}}, [[integer]]&nbsp;{{LSL Param|face}}, [[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_RENDER_MATERIAL|PRIM_RENDER_MATERIAL]]
+{{!}} 49
+{{!}} Sets the prim's {{LSL Param|render_material}}. Setting this param will also clear most [[LlSetPrimitiveParams#PRIM_GLTF_BASE_COLOR|PRIM_GLTF_*]] properties on the face, with the exceptions of repeats, offsets, and rotation_in_radians
+{{!}} [&nbsp;{{#var:render_material_const}}, [[integer]]&nbsp;{{LSL Param|face}}, [[string]]&nbsp;{{LSL Param|render_material}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_TEXT|PRIM_TEXT]]
+{{!}} 26
+{{!}} Sets the prim's floating text.
+{{!}} [&nbsp;{{#var:text_const}}, [[string]]&nbsp;{{LSL Param|text}}, [[vector]]&nbsp;{{LSL Param|color}}, [[float]]&nbsp;{{LSL Param|alpha}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_COLOR|PRIM_COLOR]]
+{{!}} 18
+{{!}} Sets the face's color.
+{{!}} [&nbsp;{{#var:color_const}}, [[integer]]&nbsp;{{LSL Param|face}}, [[vector]]&nbsp;{{LSL Param|color}}, [[float]]&nbsp;{{LSL Param|alpha}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_BUMP_SHINY|PRIM_BUMP_SHINY]]
+{{!}} 19
+{{!}} Sets the face's shiny & bump.
+{{!}} [&nbsp;{{#var:bumpshiny_const}}, [[integer]]&nbsp;{{LSL Param|face}}, [[integer]]&nbsp;{{LSL Param|shiny}}, [[integer]]&nbsp;{{LSL Param|bump}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_POINT_LIGHT|PRIM_POINT_LIGHT]]
+{{!}} 23
+{{!}} Sets the prim as a point light.
+{{!}} [&nbsp;{{#var:light_const}}, [[integer]]&nbsp;{{LSL Param|boolean}}, [[vector]]&nbsp;{{LSL Param|linear_color}}, [[float]]&nbsp;{{LSL Param|intensity}}, [[float]]&nbsp;{{LSL Param|radius}}, [[float]]&nbsp;{{LSL Param|falloff}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_REFLECTION_PROBE|PRIM_REFLECTION_PROBE]]
+{{!}} 44
+{{!}} Sets the prim as a reflection probe.
+{{!}} [&nbsp;{{#var:reflection_probe_const}}, [[integer]]&nbsp;{{LSL Param|boolean}}, [[float]]&nbsp;{{LSL Param|ambiance}}, [[float]]&nbsp;{{LSL Param|clip_distance}}, [[integer]]&nbsp;{{HoverText|flags|PRIM_REFLECTION_PROBE_* flags}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_FULLBRIGHT|PRIM_FULLBRIGHT]]
+{{!}} 20
+{{!}} Sets the face's full bright flag.
+{{!}} [&nbsp;{{#var:fullbright_const}}, [[integer]]&nbsp;{{LSL Param|face}}, [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_FLEXIBLE|PRIM_FLEXIBLE]]
+{{!}} 21
+{{!}} Sets the prim as flexible.
+{{!}} [&nbsp;{{#var:flexible_const}}, [[integer]]&nbsp;{{LSL Param|boolean}}, [[integer]]&nbsp;{{LSL Param|softness}}, [[float]]&nbsp;{{LSL Param|flex_float|gravity}}, [[float]]&nbsp;{{LSL Param|flex_float|friction}}, [[float]]&nbsp;{{LSL Param|flex_float|wind}}, [[float]]&nbsp;{{LSL Param|flex_float|tension}}, [[vector]]&nbsp;{{LSL Param|force}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_TEXGEN|PRIM_TEXGEN]]
+{{!}} 22
+{{!}} Sets the face's texture mode.
+{{!}} [&nbsp;{{#var:texgen_const}}, [[integer]]&nbsp;{{LSL Param|face}}, [[integer]]&nbsp;{{HoverText|type|PRIM_TEXGEN_* flag}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_GLOW|PRIM_GLOW]]
+{{!}} 25
+{{!}} Sets the face's glow attribute.
+{{!}} [&nbsp;{{#var:glow_const}}, [[integer]]&nbsp;{{LSL Param|face}}, [[float]]&nbsp;{{LSL Param|intensity}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_OMEGA|PRIM_OMEGA]]
+{{!}} 32
+{{!}} Sets the prim's spin to the specified axis and rate.
+{{!}} [&nbsp;{{#var:omega_const}}, [[vector]]&nbsp;{{LSL Param|axis}}, [[float]]&nbsp;{{LSL Param|spinrate}}, [[float]]&nbsp;{{LSL Param|gain}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_NORMAL|PRIM_NORMAL]]
+{{!}} 37
+{{!}} Sets the prim's normal map attributes.
+{{!}} [&nbsp;{{#var:normal_const}}, [[integer]]&nbsp;{{LSL Param|face}}, [[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_SPECULAR|PRIM_SPECULAR]]
+{{!}} 36
+{{!}} Sets the prim's specular map attributes.
+{{!}} [&nbsp;{{#var:specular_const}}, [[integer]]&nbsp;{{LSL Param|face}}, [[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}, [[vector]]&nbsp;{{LSL Param|color}}, [[integer]]&nbsp;{{LSL Param|glossiness}}, [[integer]]&nbsp;{{LSL Param|environment}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_ALPHA_MODE|PRIM_ALPHA_MODE]]
+{{!}} 38
+{{!}} Sets the prim's diffuse texture alpha rendering mode attributes.
+{{!}} [&nbsp;{{#var:alpha_mode_const}}, [[integer]]&nbsp;{{LSL Param|face}}, [[integer]]&nbsp;{{LSL Param|alpha_mode}}, [[integer]]&nbsp;{{LSL Param|mask_cutoff}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_LINK_TARGET|PRIM_LINK_TARGET]]
+{{!}} 34
+{{!}} Sets the next linknumber to use in the linkset.
+{{!}} [&nbsp;{{#var:link_target_const}}, [[integer]]&nbsp;{{LSL Param|link_target}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_CAST_SHADOWS|PRIM_CAST_SHADOWS]]
+{{!}} 24
+{{!}} Sets the prim's cast shadow attribute. ('''DEPRECATED''')
+{{!}} [&nbsp;{{LSL Const|PRIM_CAST_SHADOWS|integer|24}}, [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}}-
+{{!}} [[#PRIM_TYPE_LEGACY|PRIM_TYPE_LEGACY]]{{Footnote|handle=ptl}}
+{{!}} 1
+{{!}} Sets the prim's shape  (legacy mode, '''DEPRECATED''').
+{{!}} [&nbsp;1, [[integer]]&nbsp;{{HoverText|flag|PRIM_TYPE_* flag}}&nbsp;]&nbsp;+ {{HoverLink|#PRIM_TYPE_LEGACY_flag_parameters|Additional parameters required by the flag|flag_parameters}}	
+{{!}}-
+{{!}} [[PRIM_ALLOW_UNSIT]]
+{{!}} 39
+{{!}} Avatars are allowed to manually stand up when seated on this prim.  Only valid for prims in a valid experience.
+{{!}} [ PRIM_ALLOW_UNSIT, [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}}-
+{{!}} [[PRIM_SCRIPTED_SIT_ONLY]]
+{{!}} 40
+{{!}} Avatars are not permitted to manually sit on this prim.
+{{!}} [ PRIM_SCRIPTED_SIT_ONLY, [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}}-
+{{!}} [[PRIM_SIT_TARGET]]
+{{!}} 41
+{{!}} The sit target, if any defined for this prim.
+{{!}} [ PRIM_SIT_TARGET, [[integer]]&nbsp;{{LSL Param|boolean}}, [[vector]]&nbsp;{{LSL Param|pos|offset}}, [[rotation]]&nbsp;{{LSL Param|rot}}&nbsp;]
+{{!}}-
+{{!}} [[PRIM_PROJECTOR]]
+{{!}} 42
+{{!}} Light projector settings for this prim.
+{{!}} [ PRIM_PROJECTOR, [[string]]&nbsp;{{LSL Param|texture}}, [[float]]&nbsp;{{LSL Param|fov}}, [[float]]&nbsp;{{LSL Param|focus}}, [[float]]&nbsp;{{LSL Param|ambiance}}&nbsp;]
+{{!}}-
+{{!}} [[PRIM_CLICK_ACTION]]
+{{!}} 43
+{{!}} Click action for this prim
+{{!}} [ PRIM_CLICK_ACTION, [[integer]]&nbsp;{{LSL Param|action}}&nbsp;]
+{{LSL Constants/ClickAction}}
+{{!}}-
+{{!}} [[PRIM_GLTF_BASE_COLOR]]
+{{!}} 48
+{{!}} Sets the prim's GLTF Material Base Color map attributes.
+{{LSL_Constants/PrimitiveParams/gltf_caveats}}
+{{{!}} {{Prettytable|style=margin: 0px 0px 10px 1pt;}}
+{{!}}- {{Hl2}}
+{{#var:p_gltf_alpha_mode_rows}}
+{{!}}}
+{{!}} [ PRIM_GLTF_BASE_COLOR, [[integer]]&nbsp;{{LSL Param|face}}, [[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}, [[vector]]&nbsp;{{LSL Param|linear_color}}, [[float]]&nbsp;{{LSL Param|alpha}}, [[integer]]&nbsp;{{LSL Param|gltf_alpha_mode}}, [[float]]&nbsp;{{LSL Param|alpha_mask_cutoff}}, [[integer]]&nbsp;{{LSL Param|double_sided}}&nbsp;]
+{{!}}-
+{{!}} [[PRIM_GLTF_NORMAL]]
+{{!}} 45
+{{!}} Sets the prim's GLTF Material Normal map attributes.
+{{LSL_Constants/PrimitiveParams/gltf_caveats}}
+{{!}} [ PRIM_GLTF_NORMAL, [[integer]]&nbsp;{{LSL Param|face}}, [[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}&nbsp;]
+{{!}}-
+{{!}} [[PRIM_GLTF_METALLIC_ROUGHNESS]]
+{{!}} 47
+{{!}} Sets the prim's GLTF ORM map attributes (Occlusion, Roughness, Metallic).
+{{LSL_Constants/PrimitiveParams/gltf_caveats}}
+{{!}} [ PRIM_GLTF_METALLIC_ROUGHNESS, [[integer]]&nbsp;{{LSL Param|face}}, [[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}, [[float]]&nbsp;{{LSL Param|metallic_factor}}, [[float]]&nbsp;{{LSL Param|roughness_factor}}&nbsp;]
+{{!}}-
+{{!}} [[PRIM_GLTF_EMISSIVE]]
+{{!}} 46
+{{!}} Sets the prim's GLTF Material Emissive map attributes.
+{{LSL_Constants/PrimitiveParams/gltf_caveats}}
+{{!}} [ PRIM_GLTF_EMISSIVE, [[integer]]&nbsp;{{LSL Param|face}}, [[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}, [[vector]]&nbsp;{{LSL Param|linear_emissive_tint}}&nbsp;]
+{{!}}-
+{{!}} [[PRIM_SIT_FLAGS]]
+{{!}} 50
+{{!}} Sets the flags on the prim's sit target
+{{LSL_Constants/SitFlags}}
+{{!}} [ PRIM_SIT_FLAGS, [[integer]]&nbsp;{{LSL Param|flags}}&nbsp;]
+{{!}}-
+{{!}} [[PRIM_DAMAGE]]
+{{!}} 51
+{{!}} Sets the damage and damage type delivered by a prim on collision.
+{{!}} [ PRIM_DAMAGE, [[float]]&nbsp;{{LSL Param|damage}},&nbsp;[[integer]]&nbsp;{{LSL Param|damage_type}}&nbsp;]
+{{!}}-
+{{!}} [[PRIM_HEALTH]]
+{{!}} 52
+{{!}} Sets the health value for this prim.
+{{!}} [ PRIM_HEALTH, [[float]]&nbsp;{{LSL Param|health}}&nbsp;]
+{{!}}} }}
+{{{!}} {{Prettytable|style=margin: 0px 0px 10px 1pt;}} {{#switch:{{NAMESPACE}}|Template=|User=|{{LSLC|Light}}}}
+{{!}}- {{Hl2}}
+! colspan="2" {{!}} Parameter
+! colspan="2" {{!}} {{GetSet|{{{1|}}}|Return&nbsp;Values|Additional&nbsp;Parameters}}
+! colspan="6" {{!}} Description
+{{!}}-
+{{LSL ConstTB|PRIM_NAME|integer|27|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_NAME"}}
+{{!}} colspan="5" {{!}} [ [[string]]&nbsp;{{LSL Param|name}}&nbsp;]
+{{!}} colspan="3" {{!}} Name: {{GetSet|{{{1|}}}|[[llGetObjectName]]|[[llSetObjectName]]}}
+{{!}}-
+{{LSL ConstTB|PRIM_DESC|integer|28|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_DESC"}}
+{{!}} colspan="5" {{!}} [ [[string]]&nbsp;{{LSL Param|description}}&nbsp;]
+{{!}} colspan="3" {{!}} Description: {{GetSet|{{{1|}}}|[[llGetObjectDesc]]|[[llSetObjectDesc]]}}
+{{!}}-
+{{LSL ConstTB|PRIM_TYPE|integer|9|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_TYPE"}}
+{{!}} colspan="2" {{!}} [ [[integer]]&nbsp;{{HoverText|flag|PRIM_TYPE_* flag}}&nbsp;]&nbsp;+ flag_parameters
+{{!}} colspan="6" {{!}} {{GetSet|{{{1|}}}|Gets|Sets}} the prim shape. {{CustomToggle|PRIM_TYPE|show=Would&nbsp;you&nbsp;like&nbsp;to&nbsp;know&nbsp;more?|link=PRIM_TYPE}}
+{{!}}- {{CustomToggle/Collapsible|PRIM_TYPE}}
+{{!}} colspan="2" {{!}}
+{{!}} colspan="8" {{!}}
+{{LSL Constants/PrimitiveParams/type|{{{1|}}}|table=*|sortable=*}}
+{{!}}-
+{{LSL ConstTB|PRIM_SLICE|integer|35|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_SLICE"}}
+{{!}} colspan="2" {{!}} [ [[vector]]&nbsp;{{LSL Param|cut|slice}}&nbsp;]
+{{!}} colspan="6" {{!}} {{GetSet|{{{1|}}}|Gets|Sets}} the prim's slice (a shape attribute).
+{{!}}-
+{{LSL ConstTB|PRIM_PHYSICS_SHAPE_TYPE|integer|30|b=[&nbsp;|e=&nbsp;]|s=rowspan="5"|s1=id="PRIM_PHYSICS_SHAPE_TYPE"}}
+{{!}} colspan="2" {{!}} [ [[integer]]&nbsp;{{LSL Param|pstype|type}}&nbsp;]
+{{!}} colspan="6" {{!}} {{GetSet|{{{1|}}}|Gets|Sets}} the prim's physics shape type.
+{{!}}-
+{{#var:physics_shape_type_rows}}
+{{!}}-
+{{LSL ConstTB|PRIM_MATERIAL|integer|2|b=[&nbsp;|e=&nbsp;]|s=rowspan="10"|s1=id="PRIM_MATERIAL"}}
+{{!}} colspan="2" {{!}} [ [[integer]]&nbsp;{{LSL Param|material}}&nbsp;]
+{{!}} colspan="6" {{!}} {{GetSet|{{{1|}}}|Gets|Sets}} the prim's material. The material determines the default [[llCollisionSound|collision sound]], [[llCollisionSprite|sprite]], [[llSetPhysicsMaterial|{{LSLP|friction}} coefficient and {{LSLP|restitution}} coefficient]].
+{{!}}-
+{{LSL Constants/PrimitiveParams/materials}}
+{{!}}-
+<!--{{LSL ConstTB|PRIM_PHYSICS_MATERIAL|integer|31|b=[&nbsp;|e=&nbsp;]|s=rowspan="6"|s1=id="PRIM_PHYSICS_SHAPE_TYPE"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|material_bits}}, [[float]]&nbsp;{{LSL Param|gravity_multiplier}}, [[float]]&nbsp;{{LSL Param|restitution}}, [[float]]&nbsp;{{LSL Param|friction}}, [[float]]&nbsp;{{LSL Param|density}}&nbsp;]
+{{!}} colspan="3" {{!}} Physics material properties {{GetSet|{{{1|}}}|[[llGetPhysicsMaterial]]|[[llSetPhysicsMaterial]]}}
+{{!}}-
+{{#var:physics_material_rows}}-->
+{{!}}-
+{{LSL ConstTB|PRIM_PHYSICS|integer|3|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_PHYSICS"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}} colspan="3" {{!}} Physics status {{GetSet|{{{1|}}}|[[llGetStatus]]|[[llSetStatus]]}}
+{{!}}-
+{{LSL ConstTB|PRIM_TEMP_ON_REZ|integer|4|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_TEMP_ON_REZ"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}} colspan="3" {{!}} {{LSLGC|Temporary}} attribute
+{{!}}-
+{{LSL ConstTB|PRIM_PHANTOM|integer|5|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_PHANTOM"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}} colspan="3" {{!}} Phantom status {{GetSet|{{{1|}}}|[[llGetStatus]]|[[llSetStatus]]}}
+{{!}}-
+{{LSL ConstTB|PRIM_POSITION|integer|6|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_POSITION"}}
+{{!}} colspan="5" {{!}} [ [[vector]]&nbsp;{{LSL Param|position{{{1|}}}|position}}&nbsp;]
+{{!}} colspan="3" {{!}} Position, {{GetSet|{{{1|}}}|[[llGetPos]]|[[llSetPos]]}}
+{{!}}-
+{{LSL ConstTB|PRIM_POS_LOCAL|integer|33|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_POS_LOCAL"}}
+{{!}} colspan="5" {{!}} [ [[vector]]&nbsp;{{LSL Param|pos|position}}&nbsp;]
+{{!}} colspan="3" {{!}} Local position, {{GetSet|{{{1|}}}|[[llGetLocalPos]]|[[llSetPos]]}}
+{{!}}-
+{{LSL ConstTB|PRIM_ROTATION|integer|8|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_ROTATION"}}
+{{!}} colspan="5" {{!}} [ [[rotation]]&nbsp;{{LSL Param|rot}}&nbsp;]
+{{!}} colspan="3" {{!}} Global rotation, {{GetSet|{{{1|}}}|[[llGetRot]]|[[llSetRot]] (broken for child prims)}}
+{{!}}-
+{{LSL ConstTB|PRIM_ROT_LOCAL|integer|29|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_ROT_LOCAL"}}
+{{!}} colspan="5" {{!}} [ [[rotation]]&nbsp;{{LSL Param|rot_local|rot}}&nbsp;]
+{{!}} colspan="3" {{!}} Local rotation, {{GetSet|{{{1|}}}|[[llGetLocalRot]]|[[llSetLocalRot]]}}
+{{!}}-
+{{LSL ConstTB|PRIM_SIZE|integer|7|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_SIZE"}}
+{{!}} colspan="5" {{!}} [ [[vector]]&nbsp;{{LSL Param|size}}&nbsp;]
+{{!}} colspan="3" {{!}} Size, {{GetSet|{{{1|}}}|[[llGetScale]]|[[llSetScale]]}}
+{{!}}-
+{{LSL ConstTB|PRIM_TEXTURE|integer|17|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_TEXTURE"}}
+{{!}} colspan="5" {{!}} [ [[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}&nbsp;]
+{{!}} colspan="3" {{!}}
+{{{!}} style="background-color:#F9F9F9;"
+{{!}}{{!}}{{LSLGC|Texture}}: {{!}}{{!}} {{#ifeq:{{{1|get}}}|get|[[llGetTexture]]}} {{!}}{{!}} {{#ifeq:{{{1|set}}}|set|[[llSetTexture]]}}
+{{!}}-
+{{!!}}Repeats: {{!}}{{!}} {{#ifeq:{{{1|get}}}|get|[[llGetTextureScale]]}} {{!}}{{!}} {{#ifeq:{{{1|set}}}|set|[[llScaleTexture]]}}
+{{!}}-
+{{!!}}Offset: {{!}}{{!}} {{#ifeq:{{{1|get}}}|get|[[llGetTextureOffset]]}} {{!}}{{!}} {{#ifeq:{{{1|set}}}|set|[[llOffsetTexture]]}}
+{{!}}-
+{{!!}}Rotation: {{!}}{{!}} {{#ifeq:{{{1|get}}}|get|[[llGetTextureRot]]}} {{!}}{{!}} {{#ifeq:{{{1|set}}}|set|[[llRotateTexture]]}}
+{{!}}}
+{{!}}-
+{{LSL ConstTB|PRIM_RENDER_MATERIAL|integer|49|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_RENDER_MATERIAL"}}
+{{!}} colspan="5" {{!}} [ [[string]]&nbsp;{{LSL Param|render_material}}&nbsp;]
+{{!}} colspan="3" {{!}}
+{{{!}} style="background-color:#F9F9F9;"
+{{!}}{{!}}{{LSLGC|Material}}: {{!}}{{!}} {{#ifeq:{{{1|get}}}|get|[[llGetRenderMaterial]]}} {{!}}{{!}} {{#ifeq:{{{1|set}}}|set|[[llSetRenderMaterial]]}}
+{{!}}}
+{{!}}-
+{{LSL ConstTB|PRIM_TEXT|integer|26|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_TEXT"}}
+{{!}} colspan="5" {{!}} [ [[string]]&nbsp;{{LSL Param|text}}, [[vector]]&nbsp;{{LSL Param|color}}, [[float]]&nbsp;{{LSL Param|alpha}}&nbsp;]
+{{!}} colspan="3" {{!}} Floating Text: {{GetSet|{{{1|}}}|NA|[[llSetText]]}}
+{{!}}-
+{{LSL ConstTB|PRIM_COLOR|integer|18|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_COLOR"}}
+{{!}} colspan="5" {{!}} [ [[vector]]&nbsp;{{LSL Param|color}}, [[float]]&nbsp;{{LSL Param|alpha}}&nbsp;]
+{{!}} colspan="3" {{!}} 
+{{{!}} style="background-color:#F9F9F9;"
+{{!!}}{{LSLGC|Alpha}}: {{!}}{{!}} {{#ifeq:{{{1|get}}}|get|[[llGetAlpha]]}} {{!}}{{!}} {{#ifeq:{{{1|set}}}|set|[[llSetAlpha]]}}
+{{!}}-
+{{!!}}{{LSLGC|Color}}: {{!}}{{!}} {{#ifeq:{{{1|get}}}|get|[[llGetColor]]}} {{!}}{{!}} {{#ifeq:{{{1|set}}}|set|[[llSetColor]]}}
+{{!}}}
+{{!}}-
+{{LSL ConstTB|PRIM_BUMP_SHINY|integer|19|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s=rowspan="25"|s1=id="PRIM_BUMP_SHINY"}}
+{{!}} colspan="5" {{!}} [&nbsp;[[integer]]&nbsp;{{LSL Param|shiny}}, [[integer]]&nbsp;{{LSL Param|bump}}&nbsp;]
+{{!}} colspan="3" {{!}}
+{{!}}-
+{{LSL_Constants/PrimitiveParams/bumpshiny}}
+{{!}}-
+{{LSL ConstTB|PRIM_FULLBRIGHT|integer|20|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_FULLBRIGHT"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}} colspan="3" {{!}} 
+{{!}}-
+{{LSL ConstTB|PRIM_FLEXIBLE|integer|21|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_FLEXIBLE"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}, [[integer]]&nbsp;{{LSL Param|softness}}, [[float]]&nbsp;{{LSL Param|flex_float|gravity}}, [[float]]&nbsp;{{LSL Param|flex_float|friction}}, [[float]]&nbsp;{{LSL Param|flex_float|wind}}, [[float]]&nbsp;{{LSL Param|flex_float|tension}}, [[vector]]&nbsp;{{LSL Param|force}}&nbsp;]
+{{!}} colspan="3" {{!}} 
+{{!}}-
+{{LSL ConstTB|PRIM_TEXGEN|integer|22|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s=rowspan="4"|s1=id="PRIM_TEXGEN"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|tg_type|mode}}&nbsp;]
+{{!}} colspan="3" {{!}} 
+{{!}}-
+{{LSL Constants/PrimitiveParams/texgen}}
+{{!}}-
+{{LSL ConstTB|PRIM_POINT_LIGHT|integer|23|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_POINT_LIGHT"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}, [[vector]]&nbsp;{{LSL Param|linear_color}}, [[float]]&nbsp;{{LSL Param|intensity}}, [[float]]&nbsp;{{LSL Param|radius}}, [[float]]&nbsp;{{LSL Param|falloff}}&nbsp;]
+{{!}} colspan="3" {{!}} {{LSL Param|linear_color}} param accepts color in Linear space - use [[llsRGB2Linear]] to convert regular LSL {{LSL Param|color}} into Linear space.
+{{!}}-
+{{LSL ConstTB|PRIM_REFLECTION_PROBE|integer|44|b=[&nbsp;|e=&nbsp;]|s=rowspan="5"|s1=id="PRIM_REFLECTION_PROBE"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}, [[float]]&nbsp;{{LSL Param|ambiance}}, [[float]]&nbsp;{{LSL Param|clip_distance}}, [[integer]]&nbsp;{{HoverText|flags|PRIM_REFLECTION_PROBE_* flags}}&nbsp;]
+{{!}} colspan="3" {{!}} {{GetSet|{{{1|}}}|Gets|Sets}} the prim's reflection probe parameters.
+{{!}}-
+{{#var:reflection_probe_flags_rows}}
+{{!}}-
+{{LSL ConstTB|PRIM_GLOW|integer|25|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_GLOW"}}
+{{!}} colspan="5" {{!}} [ [[float]]&nbsp;{{LSL Param|intensity}}&nbsp;]
+{{!}} colspan="3" {{!}} 
+{{!}}-
+{{LSL ConstTB|PRIM_OMEGA|integer|32|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_OMEGA"}}
+{{!}} colspan="5" {{!}} [&nbsp;[[vector]]&nbsp;{{LSL Param|axis}}, [[float]]&nbsp;{{LSL Param|spinrate}}, [[float]]&nbsp;{{LSL Param|gain}}&nbsp;]
+{{!}} colspan="4" {{!}} [[llTargetOmega]]
+{{!}}-
+{{LSL ConstTB|PRIM_NORMAL|integer|37|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_NORMAL"}}
+{{!}} colspan="5" {{!}} [&nbsp;[[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}&nbsp;]
+{{!}} colspan="3" {{!}}
+{{!}}-
+{{LSL ConstTB|PRIM_SPECULAR|integer|36|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_SPECULAR"}}
+{{!}} colspan="5" {{!}} [&nbsp;[[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}, [[vector]]&nbsp;{{LSL Param|color}}, [[integer]]&nbsp;{{LSL Param|glossiness}} [[integer]]&nbsp;{{LSL Param|environment}}&nbsp;]
+{{!}}-
+{{LSL ConstTB|PRIM_ALPHA_MODE|integer|38|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_ALPHA_MODE"}}
+{{!}} colspan="5" {{!}} [&nbsp;[[integer]]&nbsp;{{LSL Param|alpha_mode}}, [[integer]]&nbsp;{{LSL Param|mask_cutoff}}&nbsp;]
+{{!}} colspan="3" {{!}}
+{{!}}-
+{{LSL ConstTB|PRIM_LINK_TARGET|integer|34|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|link_target}}&nbsp;]|s1=id="PRIM_LINK_TARGET"}}
+{{!}} colspan="5" {{!}} []
+{{!}} colspan="4" {{!}} Multiple {{GetSet|{{{1|}}}|[[llGetLinkPrimitiveParams]]|[[llSetLinkPrimitiveParams]]}} calls.
+{{!}}-
+{{LSL ConstTB|PRIM_CAST_SHADOWS|integer|24|b=[&nbsp;<s>|e=</s>&nbsp;]|s1=id="PRIM_CAST_SHADOWS"}}
+{{!}} colspan="2" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}} colspan="6" {{!}} '''DEPRECATED''': Shadow casting for the primitive
+{{!}}-
+{{#ifeq:{{{1|set}}}|set|
+{{!}} rowspan="8" id="PRIM_TYPE_LEGACY"{{!}} [ 1 ]<br/><s>{{LSL Const|PRIM_TYPE_LEGACY|integer|1|nolink=*|c=The value is real, the name is not, merely a placeholder.}}</s>{{Footnote|handle=ptl}}
+{{!}} rowspan="8" {{!}} {{#var:value}}
+{{!}} colspan="8" {{!}} [ [[integer]]&nbsp;{{HoverText|flag|PRIM_TYPE_* flag}}]&nbsp;+ flag_parameters
+{{!}}-
+! colspan="2" {{!}} {{HoverText|flag|PRIM_TYPE_* flag}} Constants
+! colspan="6" id="PRIM_TYPE_LEGACY_flag_parameters"{{!}} Flag Parameters
+{{!}}-
+{{LSL ConstTB|PRIM_TYPE_BOX|integer|0}}
+{{!}} colspan="6" {{!}} [ [[vector]]&nbsp;{{LSL Param|cut}}, [[float]]&nbsp;{{LSL Param|hollow}}, [[float]]&nbsp;{{LSL Param|twist_end}}, [[vector]]&nbsp;{{LSL Param|top_size}}, [[vector]]&nbsp;{{LSL Param|top_shear}}&nbsp;]
+{{!}}-
+{{LSL ConstTB|PRIM_TYPE_CYLINDER|integer|1}}
+{{!}} colspan="6" {{!}} [ [[vector]]&nbsp;{{LSL Param|cut}}, [[float]]&nbsp;{{LSL Param|hollow}}, [[float]]&nbsp;{{LSL Param|twist_end}}, [[vector]]&nbsp;{{LSL Param|top_size}}, [[vector]]&nbsp;{{LSL Param|top_shear}}&nbsp;]
+{{!}}-
+{{LSL ConstTB|PRIM_TYPE_PRISM|integer|2}}
+{{!}} colspan="6" {{!}} [ [[vector]]&nbsp;{{LSL Param|cut}}, [[float]]&nbsp;{{LSL Param|hollow}}, [[float]]&nbsp;{{LSL Param|twist_end}}, [[vector]]&nbsp;{{LSL Param|top_size}}, [[vector]]&nbsp;{{LSL Param|top_shear}}&nbsp;]
+{{!}}-
+{{LSL ConstTB|PRIM_TYPE_SPHERE|integer|3}}
+{{!}} colspan="6" {{!}} [ [[vector]]&nbsp;{{LSL Param|cut}}, [[float]]&nbsp;{{LSL Param|hollow}}, [[vector]]&nbsp;{{LSL Param|cut|dimple}}&nbsp;]
+{{!}}-
+{{LSL ConstTB|PRIM_TYPE_TORUS|integer|4}}
+{{!}} colspan="6" {{!}} [ [[vector]]&nbsp;{{LSL Param|cut}}, [[float]]&nbsp;{{LSL Param|hollow}}, [[float]]&nbsp;{{LSL Param|twist_end}}, [[float]]&nbsp;{{LSL Param|hole_size_y}}, [[vector]]&nbsp;{{LSL Param|top_shear}}, [[vector]]&nbsp;{{LSL Param|cut|advanced_cut}}&nbsp;]
+{{!}}-
+{{LSL ConstTB|PRIM_TYPE_TUBE|integer|5}}
+{{!}} colspan="6" {{!}} [ [[vector]]&nbsp;{{LSL Param|cut}}, [[float]]&nbsp;{{LSL Param|hollow}}, [[float]]&nbsp;{{LSL Param|twist_end}}, [[float]]&nbsp;{{LSL Param|topshear_x}}&nbsp;]
+}}
+{{!}}-
+{{LSL ConstTB|PRIM_ALLOW_UNSIT|integer|39|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_ALLOW_UNSIT"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}} colspan="3" {{!}}
+{{!}}-
+{{LSL ConstTB|PRIM_SCRIPTED_SIT_ONLY|integer|40|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_SCRIPTED_SIT_ONLY"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;]
+{{!}} colspan="3" {{!}}
+{{!}}-
+{{LSL ConstTB|PRIM_SIT_TARGET|integer|41|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_SIT_TARGET"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|boolean}}&nbsp;, [[vector]]&nbsp;{{LSL Param|pos|offset}}, [[rotation]]&nbsp;{{LSL Param|rot}}&nbsp;]
+{{!}} colspan="3" {{!}} Sit target, [[llSitTarget]]. The position can be [[ZERO_VECTOR]].
+{{!}}-
+{{LSL ConstTB|PRIM_PROJECTOR|integer|42|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_PROJECTOR"}}
+{{!}} colspan="5" {{!}} [ [[string]]&nbsp;{{LSL Param|texture}}, [[float]]&nbsp;{{LSL Param|fov}}, [[float]]&nbsp;{{LSL Param|focus}}, [[float]]&nbsp;{{LSL Param|ambiance}}&nbsp;]
+{{!}} colspan="3" {{!}} Light projector settings, the texture may be [[NULL_KEY]]. ''(Write only, for now. [https://community.secondlife.com/forums/topic/486118-only-set-ambiance-on-prim_projector/#comment-2446570 See here])''
+{{!}}-
+{{LSL ConstTB|PRIM_CLICK_ACTION|integer|43|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_CLICK_ACTION"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|action}}&nbsp;]
+{{!}} colspan="3" {{!}} sets the default action to take when a user clicks on this prim.
+{{LSL Constants/ClickAction}}
+{{!}}-
+{{LSL ConstTB|PRIM_GLTF_BASE_COLOR|integer|48|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_GLTF_BASE_COLOR"}}
+{{!}} colspan="5" {{!}} [&nbsp;[[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}, [[vector]]&nbsp;{{LSL Param|color}}, [[float]]&nbsp;{{LSL Param|alpha}}, [[integer]]&nbsp;{{LSL Param|gltf_alpha_mode}}, [[float]]&nbsp;{{LSL Param|alpha_mask_cutoff}}, [[integer]]&nbsp;{{LSL Param|double_sided}}&nbsp;]
+{{!}} colspan="3" {{!}} {{LSL Param|linear_color}} param accepts color in Linear space - use [[llsRGB2Linear]] to convert regular LSL {{LSL Param|color}} into Linear space.
+{{Template:LSL_Constants/PrimitiveParams/gltf_caveats}}
+{{{!}} {{Prettytable|style=margin: 0px 0px 10px 1pt;}}
+{{!}}- {{Hl2}}
+{{#var:p_gltf_alpha_mode_rows}}
+{{!}}}
+{{!}}-
+{{LSL ConstTB|PRIM_GLTF_NORMAL|integer|45|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_GLTF_NORMAL"}}
+{{!}} colspan="5" {{!}} [&nbsp;[[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}&nbsp;]
+{{!}} colspan="3" {{!}} {{Template:LSL_Constants/PrimitiveParams/gltf_caveats}}
+{{!}}-
+{{LSL ConstTB|PRIM_GLTF_METALLIC_ROUGHNESS|integer|47|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_GLTF_METALLIC_ROUGHNESS"}}
+{{!}} colspan="5" {{!}} [&nbsp;[[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}, [[float]]&nbsp;{{LSL Param|metallic_factor}}, [[float]]&nbsp;{{LSL Param|roughness_factor}}&nbsp;]
+{{!}} colspan="3" {{!}} {{Template:LSL_Constants/PrimitiveParams/gltf_caveats}}
+{{!}}-
+{{LSL ConstTB|PRIM_GLTF_EMISSIVE|integer|46|b=[&nbsp;|e=, [[integer]]&nbsp;{{LSL Param|face}}&nbsp;]|s1=id="PRIM_GLTF_EMISSIVE"}}
+{{!}} colspan="5" {{!}} [&nbsp;[[string]]&nbsp;{{LSL Param|texture}}, [[vector]]&nbsp;{{LSL Param|repeats}}, [[vector]]&nbsp;{{LSL Param|offsets}}, [[float]]&nbsp;{{LSL Param|rotation_in_radians}}, [[vector]]&nbsp;{{LSL Param|emissive_tint}}&nbsp;]
+{{!}} colspan="3" {{!}} {{LSL Param|emissive_tint}} param accepts color in Linear space - use [[llsRGB2Linear]] to convert regular LSL {{LSL Param|color}} into Linear space.
+{{Template:LSL_Constants/PrimitiveParams/gltf_caveats}}
+{{!}}-
+{{LSL ConstTB|PRIM_SIT_FLAGS|integer|50|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_SIT_FLAGS"}}
+{{!}} colspan="5" {{!}} [ [[integer]]&nbsp;{{LSL Param|flags}}&nbsp;]
+{{!}} colspan="3" {{!}} Gets the sit flags currently set on this prim.
+{{LSL Constants/SitFlags}}
+{{!}}-
+{{LSL ConstTB|PRIM_DAMAGE|integer|51|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_DAMAGE"}}
+{{!}} colspan="5" {{!}} [ [[float]]&nbsp;{{LSL Param|damage}},&nbsp;[[integer]]&nbsp;{{LSL Param|damage_type}}&nbsp;]
+{{!}} colspan="3" {{!}} Gets the damage and damage type delivered by a prim on collision.
+{{!}}-
+{{LSL ConstTB|PRIM_HEALTH|integer|52|b=[&nbsp;|e=&nbsp;]|s1=id="PRIM_HEALTH"}}
+{{!}} colspan="5" {{!}} [ [[float]]&nbsp;{{LSL Param|health}}&nbsp;]
+{{!}} colspan="3" {{!}} Gets the health of a prim
+{{!}}-
+{{!}}}
+<noinclude>
+<div id="box">
+== Caveats ==
+<div style="padding: 0.5em;">
+{{#var:caveats}}
+</div></div>
+</noinclude>

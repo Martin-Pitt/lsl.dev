@@ -1,0 +1,36 @@
+{{LSL Header}}
+A way of creating SLURL's by using a pre-made function;
+ BuildSlurl(string region_name, vector pos);
+
+''Pre-made Function''
+
+<source lang="lsl2">
+string BuildSlurl(string region_name, vector pos){
+    return "secondlife://" + llEscapeURL(region_name) 
+            + "/"+ (string)((integer)pos.x) 
+            + "/"+ (string)((integer)pos.y) 
+            + "/"+ (string)(llCeil(pos.z));
+}</source>
+
+----
+
+''Example Script''
+
+<source lang="lsl2">
+string BuildSlurl(string region_name, vector pos){
+    return "secondlife://" + llEscapeURL(region_name) 
+            + "/"+ (string)((integer)pos.x) 
+            + "/"+ (string)((integer)pos.y) 
+            + "/"+ (string)(llCeil(pos.z));
+}
+
+default
+{
+    touch_start(integer x)
+    {
+        llWhisper(0, BuildSlurl(llGetRegionName(), llGetPos()));
+        //Returns slurl like this;
+        //       secondlife://Phoenix%20Rising/214/160/24
+    }
+}
+</source>

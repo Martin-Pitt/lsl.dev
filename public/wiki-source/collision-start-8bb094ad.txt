@@ -1,0 +1,62 @@
+{{Issues/SVC-3306}}{{LSL_Event|event_id=5|event_delay|event=collision_start
+|p1_type=integer|p1_name=num_detected|p1_desc
+|event_desc=Triggered when task starts colliding with another task
+|constants
+|spec
+|caveats=
+* Will not detect collisions with ground.  Use [[land_collision_start]] instead.
+* Phantom objects can never receive trigger collision events.
+* <code>[[llVolumeDetect]]([[TRUE]])</code> objects get trigger [[collision_start]] and [[collision_end]] but not [[collision]]() events.
+* A collision with a hovering avatar does not trigger collisions, unless the avatar turns or moves.
+* Only a physical object will get collision events from colliding with a non-physical object.
+|examples=<syntaxhighlight lang="lsl2">default
+{
+    collision_start(integer num)
+    {
+        llSay(0,"No pushing.");
+    }
+}</syntaxhighlight>
+
+<syntaxhighlight lang="lsl2">
+list DetectedAvatars = [];
+default
+{
+    state_entry()
+    {
+        llVolumeDetect(TRUE); // Enable detection of people colliding with object....
+    }
+    collision_start(integer detected)
+    {
+        integer index = llListFindList(DetectedAvatars, [llDetectedKey(0)]);
+        if (index == -1)
+        {
+            llInstantMessage(llDetectedKey(0), " Welcome to the Community");
+            DetectedAvatars = llListInsertList(DetectedAvatars, [llDetectedKey(0)], -1);
+
+            if (llGetListLength(DetectedAvatars) == 2)
+            {
+                DetectedAvatars = llDeleteSubList(DetectedAvatars, 1, 2);
+            }
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_header
+|also_events={{LSL DefineRow||[[collision]]|}}
+{{LSL DefineRow||[[collision_end]]|}}
+|also_functions={{LSL DefineRow||[[llPassCollisions]]|}}
+{{LSL DefineRow||[[llCollisionFilter]]|}}
+{{LSL DefineRow||[[llCollisionSound]]|}}
+{{LSL DefineRow||[[llCollisionSprite]]|}}
+{{LSL DefineRow||[[llVolumeDetect]]|}}
+|also_articles
+|also_footer
+|notes
+|mode
+|issues
+|cat1=Collision
+|cat2=Detected
+|cat3=Collision Events
+|cat4=Passable
+}}

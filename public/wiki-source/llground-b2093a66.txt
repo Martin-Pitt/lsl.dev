@@ -1,0 +1,46 @@
+{{LSL_Function
+|inject-2={{LSL Function/offset|offset|noZ=*|sim=*}}
+|func_id=42|func_sleep=0.0|func_energy=10.0
+|sort=Ground
+|func=llGround|sort=Ground
+|return_type=float|p1_type=vector|p1_name=offset
+|func_desc
+|return_text=that is the ground height directly below the [[llGetPos|prim position]] + {{LSLP|offset}}
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">// Makes the object land on ground or on water
+ 
+FindGroundOrWater()
+{
+    vector vTarget = llGetPos();
+    vTarget.z = llGround( ZERO_VECTOR );
+    float fWaterLevel = llWater( ZERO_VECTOR );
+    if( vTarget.z < fWaterLevel )
+        vTarget.z = fWaterLevel;
+    llSetRegionPos(vTarget);
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        FindGroundOrWater();
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGroundContour]]|Gets the ground contour}}
+{{LSL DefineRow||[[llGroundNormal]]|Gets the ground normal}}
+{{LSL DefineRow||[[llGroundSlope]]|Gets the ground slope}}
+{{LSL DefineRow||[[llEdgeOfWorld]]|Returns existence of neighboring sims}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Ground
+|cat2=Region
+|cat3
+|cat4
+}}

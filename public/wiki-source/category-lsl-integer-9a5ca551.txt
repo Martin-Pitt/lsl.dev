@@ -1,0 +1,125 @@
+{{LSL Header|ml=*}}
+{{LSLC|}}{{LSLC|Types}}
+
+=Integers=
+The integer data type is a signed 32 bit value between −2,147,483,648 and +2,147,483,647 (that is 0x80000000 to 0x7FFFFFFF in hex). Integers are whole numbers. The fractional datatype is the [[float]].
+
+[[DEBUG_CHANNEL]] can be used as a constant for the maximum integer (for that is the value it is defined as).
+
+==Examples==
+All of the following are integers:
+<source lang="lsl2">integer firstInt = 5512623;
+integer secondInt = ACTIVE;
+integer thirdInt = 0x61EC1A;
+integer fourthInt = -160693;</source>
+
+The following are NOT integers, use {{LSLG|float}} for them:
+<source lang="lsl2">
+integer decimalValue = 125.2; // ERROR : Type mismatch -- Integer literals can't have a decimal.
+integer bigValue = 3147483647; // An undocumented way to say -1,147,483,649 // Integer literals can't be larger than 2,147,483,647.
+integer biggerValue = 10123456789; // An undocumented way to say -1 // Integer literals can't be larger than 2,147,483,647.
+</source>
+
+The following function can be used to determine whether a string of characters consists only of integers. This can be important if you need to know that a user has entered a valid integer in chat or a textbox, for example.
+<source lang="lsl2">
+integer IsInteger(string var)
+{
+    integer i;
+    for (i=0;i<llStringLength(var);++i)
+    {
+        if(!~llListFindList(["1","2","3","4","5","6","7","8","9","0"],[llGetSubString(var,i,i)]))
+        {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}</source>
+
+Here's a simpler solution for strings containing positive or negative decimal integers (values from −2147483648 and 2147483647 written without + sign, leading zeros, or thousands separators ',' ). Omei Qunhua.
+
+<source lang="lsl2">
+    if ( (string) ( (integer) data) == data)
+        llOwnerSay("'" + data + "' contains a valid integer");
+</source>
+
+The following examples will validate that a string contains only the characters 0 though 9. Omei Qunhua.
+
+a) Example for a string of length 5
+<source lang="lsl2">
+    StringOf5Dec(string test)
+    {
+        return ( (integer) ("1" + test) >= 100000);
+    }
+</source>
+
+b) Example for a string of length 1 through 9
+<source lang="lsl2">
+    VarStringIsDecimal(string test)
+    {
+        integer limit = (integer) llPow(10.0, llStringLength(test) );
+        return ( (integer) ("1" + test) >= limit);
+    }
+</source>
+
+This function should validate any decimal integer, with or without signs or leading zeroes, and with leading/trailing space but does not accept thousands separators. (Phil Metalhead)
+
+<source lang="lsl2">
+    integer uIsInteger(string input)
+    {
+        input = llStringTrim(input,STRING_TRIM); // remove leading/trailing whitespace
+        // "+123" is a valid integer string but would otherwise fail, so strip leading "+" if it's there
+        if (llGetSubString(input,0,0) == "+") input = llGetSubString(input,1,-1);
+        return ((string)((integer)input) == input);
+    }
+</source>
+
+Test cases for the above function (click "Expand" link on the right side of the page):
+<source lang="lsl2" class="mw-collapsible mw-collapsed">
+///////////////
+// Returns 1 // (leading and trailing whitespace)
+   2352316
+
+///////////////
+// Returns 1 // (leading "+")
++151613662
+///////////////
+// Returns 1 // (negative number)
+-263163626
+///////////////
+// Returns 1 // (largest positive integer)
+2147483647
+///////////////
+// Returns 1 // (largest negative integer) 
+-2147483648
+///////////////
+// Returns 1 // (largest positive integer with leading and trailing whitespace, and leading "+")
+   +2147483647
+
+///////////////
+// Returns 0 // (contains letters)
+161362stuff
+///////////////
+// Returns 0 // (number is a float, not an integer -- contains "." in string)
+123.4
+///////////////
+// Returns 0 // (whitespace in middle of string)
+2347
+9089
+///////////////
+// Returns 0 // (contains thousands separator ",")
+844,241
+// Returns 0 // ("+" in middle of string)
+2378+87668
+///////////////
+// Returns 0 // ("-" in middle of string)
+3462098-12
+// Returns 0 // (number > 2147483647)
+2147483648
+///////////////
+// Returns 0 // (number < -2147483648)
+-2147483649
+///////////////
+</source>
+
+==Further Reading==
+For a more extensive coverage of integers, including the different ways they are used in LSL, see [[LSL_101/LSL_in_Focus:_Integers|LSL in Focus: Integers]].

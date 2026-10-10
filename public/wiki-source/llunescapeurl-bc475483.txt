@@ -1,0 +1,56 @@
+{{LSL_Function
+|func_id=308|func_sleep=0.0|func_energy=10.0
+|func=llUnescapeURL|return_type=string|p1_type=string|p1_name=url|p1_desc=A (preferably valid and escaped URL) string.
+|func_footnote=
+|func_desc
+|return_text=that is an unescaped/unencoded version of {{LSLP|url}}, replacing <code>"%20"</code> with spaces etc.
+|spec
+|other_languages={{LSL OL|PHP|[http://php.net/manual/en/function.urldecode.php urldecode]}}{{LSL OL|{{HoverText|ECMAScript|JavaScript, ActionScript, etc}}|[https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent decodeURIComponent]}}
+|caveats=*The {{Wikipedia|Hexadecimal|hexadecimal}} encoded representation of {{Wikipedia|UTF-8|UTF-8}} {{Wikipedia|Byte|byte}} encoding is the only supported means of access to non ASCII7 characters (Unicode characters).
+**Decoding of Unicode as <code>"%u####"</code> is not supported.
+*The <code>"+"</code> character is not decoded as a space.
+|constants
+|examples=
+<source lang="lsl2">
+string str = "http://wiki.secondlife.com/wiki/LSL Portal";
+
+default
+{
+    state_entry()
+    {
+        llOwnerSay("Plain string:\n\t" + str);
+        // output: "http://wiki.secondlife.com/wiki/LSL Portal"
+
+        llOwnerSay("Escaped string:\n\t" + llEscapeURL(str));
+        // output: "http%3A%2F%2Fwiki%2Esecondlife%2Ecom%2Fwiki%2FLSL%20Portal"
+
+        llOwnerSay("Escaped string unescaped again:\n\t" + llUnescapeURL( llEscapeURL(str) ));
+        // output: "http://wiki.secondlife.com/wiki/LSL Portal"
+
+        // because escaping and unescaping are exact opposite
+        // and unescaping an escaped string returns the original
+
+
+        //  For readability's sake it would make more sense to do:
+        llOwnerSay("For readability's sake:\n\t" + "http://wiki.secondlife.com/wiki/" + llEscapeURL("LSL Portal"));
+        // output: "http://wiki.secondlife.com/wiki/LSL%20Portal"
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llEscapeURL]]| Opposite of llUnescapeURL}}
+|also_events
+|also_tests
+|also_articles=
+{{LSL DefineRow||[[UTF-8]]|}}
+{{LSL DefineRow||{{LSLGC|Base64}}|}}
+{{LSL_DefineRow||[[Combined_Library#Unicode_Integer_to_UTF8|Combined Library: UnicodeIntegerToUTF8]]|Easily convert unicode character codes to string form.}}
+|notes
+|permission
+|negative_index
+|sort=UnescapeURL
+|cat1=Encoding
+|cat2=String
+|cat3=Encoding/URL
+|cat4
+}}

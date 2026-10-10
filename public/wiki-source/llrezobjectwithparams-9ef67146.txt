@@ -1,0 +1,135 @@
+{{LSL_Function
+|inject-2=
+{{LSL_Function/inventory|inventory|uuid=false|type=object}}
+{{LSL_Function/position|pos|region=*}}
+|func_id=|func_sleep=0.1|func_energy=200.0
+|func=llRezObjectWithParams|sort=RezObjectWithParams
+|return_type=key
+|p1_type=string|p1_name=inventory
+|p2_type=list|p2_name=params
+|func_desc=Instantiate {{LSLP|inventory}} object at {{LSLP|pos}} with an initial set of parameters specified in {{LSLP|params}}.
+
+{{LSLP|pos}} will default to the position of the object containing the script, unless REZ_POS is specified. (see below)
+|return_text=which will be the key of the object when it is successfully rezzed in the world. On failure, returns <code>(key)""</code> (in LSL), or <code>NULL_KEY</code> (in Lua).
+|spec= 
+{{:LSL Constants/llRezObjectWithParams}}
+|caveats=
+*Silently fails to rez {{LSLP|inventory}} if REZ_POS is too far from the geometric center of the object trying to rez {{LSLP|inventory}} (generally 10 meters; see [[llRezObject]]).
+* When scripting attachments meant to rez objects, remember that when used in the root of an ([[attach|attached]]) [[attachment]] <code>[[llGetPos]]</code> doesn't return the position of the attachment but instead returns the position of the avatar's bounding box geometric center. Read [[llGetPos]] and [[llParticleSystem#Caveats | llParticleSystem Caveats]] for more information.
+* If the object is unattached and the owner of the object does not have copy permission  on {{LSLP|inventory}}, the object will no longer be present in inventory after it is rezzed (so another attempt to rez (the same object) will fail); if the owner does have copy permission, then a copy is rezzed, and the original {{LSLP|inventory}} remains in inventory.
+* If the object is attached and the owner of the object does not have copy permission  on {{LSLP|inventory}}, an error is shouted on [[DEBUG_CHANNEL]]: "Cannot rez no copy objects from an attached object."
+*Silently fails if you don't have offline building rights on the land. To have the right, your objects needs to ''either'': 
+** Be on land you own yourself.
+** Be on land where anyone is allowed to build, e.g. a sandbox. 
+** Be deeded to the group that owns the land.
+** Be set to the same group that owns the land and the land have the parcel flag 'allow group to build' set.
+** The group role "Always allow 'Create Objects'" will only work to override this when you are online, in the region, or have a child agent in the region. See [[#SVC-3145|SVC-3145]] in the Issues subsection of Deep Notes for more information.
+* See [[object_rez]] for examples on how to establish communications between the rezzing object and the new prim.
+|constants
+|examples=
+The list of parameters is entirely optional. If you want to rez an object exactly where the rezzer is, you may call the function with an empty list.
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer total_number)
+    {
+        llRezObjectWithParams("Object", []);
+    }
+}
+</syntaxhighlight>
+
+The below example rezzes an object slightly above the rezzer, slowly spinning and with automatic cleanup. See [[:Category:LSL Temporary|Temporary]]
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer total_number)
+    {
+        llRezObjectWithParams("Object", [
+            REZ_FLAGS, REZ_FLAG_TEMP | REZ_FLAG_PHANTOM,
+            REZ_POS, <0,0,1>, TRUE, TRUE,
+            REZ_OMEGA, <0,0,1>, TRUE, 0.5, PI
+        ]);
+    }
+}
+</syntaxhighlight>
+
+The below is a basic example of firing a typical bullet from a worn attachment. The bullet is fired with a left-click during [[mouselook]].
+<syntaxhighlight lang="lsl2">
+default
+{
+    control(key id, integer level, integer edge)
+    {
+        integer click = level & edge;
+
+        if (click & CONTROL_ML_LBUTTON) {
+            llRezObjectWithParams("Bullet", [
+                REZ_POS, <2,0,0>, TRUE, TRUE, // Relative offset 2 meters forward
+                REZ_ROT, ZERO_ROTATION, TRUE, // Relative rotation
+                REZ_VEL, <100,0,0>, TRUE, FALSE, // Relative velocity 100m/s forward
+                REZ_DAMAGE, 40,
+                REZ_LOCK_AXES, <1,1,1>, // Disable all rotation
+                REZ_FLAGS, 0
+                | REZ_FLAG_PHYSICAL
+                | REZ_FLAG_TEMP
+                | REZ_FLAG_DIE_ON_COLLIDE
+                | REZ_FLAG_DIE_ON_NOENTRY
+                | REZ_FLAG_NO_COLLIDE_OWNER
+                | REZ_FLAG_NO_COLLIDE_FAMILY
+                | REZ_FLAG_BLOCK_GRAB_OBJECT
+            ]);
+        }
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm) {
+            llTakeControls(CONTROL_ML_LBUTTON, TRUE, FALSE);
+        }
+    }
+
+    attach(key id)
+    {
+        if (id) {
+            llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+        }
+    }
+
+    state_entry()
+    {
+        if (llGetAttached()) {
+            llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_constants=
+{{LSL DefineRow||[[PRIM_TEMP_ON_REZ]]|}}
+|also_functions=
+{{LSL DefineRow||[[llRezAtRoot]]|Rezzes the object at the requested position}}
+{{LSL DefineRow||[[llRezObject]]|Rezzes the object at the requested position}}
+{{LSL DefineRow||[[llGetStartString]]|}}
+{{LSL DefineRow||[[llGetStartParameter]]|}}
+{{LSL DefineRow||[[llGodLikeRezObject]]|}}
+{{LSL DefineRow||[[LlGetParcelFlags#Examples]]|Test if the parcel allows this script to rez}}
+|also_tests
+|also_events=
+{{LSL DefineRow||[[object_rez]]|triggered when this object rezzes an object from inventory}}
+|also_articles
+|notes='''Maximum rez distance'''
+*The {{LSLP|distance}} scales with the size of the object the script is in.
+**The formula is <code>10 + llVecMag(llGetScale()) * 0.5</code>
+*The {{LSLP|distance}} measured is between the [[llGetPos|center]] of the rezzing {{LSLP|prim}} and the [[llGetPos|center]] of the {{LSLP|prim}} that is rezzed.
+**The tests did not include rezzing from or the rezzing of link_set objects.
+**A <code>0.01</code> meter cube could rez just beyond <code>10.0</code> meters away.
+**A <code>10.0</code> meter cube could rez just beyond <code>18.66</code> meters away.
+**A <code>32.0</code> meter cube could rez just beyond <code>37.71</code> meters away.
+**A <code>64.0</code> meter cube could rez just beyond <code>65.42</code> meters away.
+|permission
+|inventory
+|negative_index
+|cat1=Rez
+|cat2=Object
+|cat3=Inventory
+|cat4
+}}

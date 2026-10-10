@@ -1,0 +1,187 @@
+{{LSL_Event
+|inject-2={{Issues/SVC-6831}}{{Issues/SVC-2596}}
+|event_id=24|event_delay|event=dataserver
+|p1_type=key|p1_subtype=handle|p1_name=queryid|p1_desc=matches the return of the requesting function
+|p2_type=string|p2_name=data|p2_desc=the requested data (cast as a string as necessary).
+|event_desc=Triggered when task receives asynchronous data
+|constants
+|spec
+|constants={{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}- {{Hl2}}
+! Function
+! colspan="2" {{!}}Input
+! Decode
+! colspan="4" {{!}} Description
+{{!}}-
+{{!}} colspan="3" {{!}} [[llGetNotecardLine]]
+{{!}} {{LSLG|string}}
+{{!}} colspan="4" {{!}} The line in the requested notecard, limited to 255 bytes.<br/>If [[EOF]] the line requested is past the end of the notecard.
+{{!}}-
+{{!}} colspan="3" {{!}} [[llGetNumberOfNotecardLines]]
+{{!}} ([[integer]])
+{{!}} colspan="4" {{!}} The number of lines in the notecard requested.
+{{!}}-
+{{!}} rowspan="7" {{!}} [[llRequestAgentData]]
+{{LSL Constants/llRequestAgentData}}
+{{!}}-
+{{!}} colspan="3" {{!}} [[llRequestDisplayName]]
+{{!}} [[string]]
+{{!}} colspan="4" {{!}} The agent's display name
+{{!}}-
+{{!}} colspan="3" {{!}} [[llRequestUsername]]
+{{!}} [[string]]
+{{!}} colspan="4" {{!}} The agent's username (legacy format: "first.last")
+{{!}}-
+{{!}} {{!}} [[llRequestUserKey]]
+{{!}} string name
+{{!}}
+{{!}}[[key]]
+{{!}} colspan="4" {{!}} The agent's unique ID.
+{{!}}-
+{{!}} rowspan="1" {{!}} [[llRequestInventoryData]]
+{{LSL Constants/llRequestInventoryData}}
+{{!}}-
+{{!}} rowspan="13" {{!}} [[llRequestSimulatorData]]
+{{LSL Constants/llRequestedSimulatorData}}
+{{!}}-
+{{!}} colspan="3" {{!}} [[llCreateKeyValue]]
+{{!}} [[llCSV2List]]()
+{{!}} colspan="4" {{!}} {{LSL Function/KeyValue|k|v|dataserver|value=value|d2_type=string|d2_name=value|dataserver=*}}
+{{!}}-
+{{!}} colspan="3" {{!}} [[llDataSizeKeyValue]]
+{{!}} [[llCSV2List]]()
+{{!}} colspan="4" {{!}} {{LSL Function/KeyValue|d2_type=integer|d2_name=used|d2_desc=Number of bytes used|d3_type=integer|d3_name=quota|d3_desc=Number of bytes the key-store can utilize|dataserver=*}}
+{{!}}-
+{{!}} colspan="3" {{!}} [[llDeleteKeyValue]]
+{{!}} [[llCSV2List]]()
+{{!}} colspan="4" {{!}} {{LSL Function/KeyValue|k|value=value|d2_type=string|d2_name=value|dataserver=*}}
+{{!}}-
+{{!}} colspan="3" {{!}} [[llKeyCountKeyValue]]
+{{!}} [[llCSV2List]]()
+{{!}} colspan="4" {{!}} {{LSL Function/KeyValue|d2_type=integer|d2_name=pairs|d2_desc=number of keys-value pairs in the key-value store|dataserver=*}}
+{{!}}-
+{{!}} colspan="3" {{!}} [[llKeysKeyValue]]
+{{!}} [[llCSV2List]]()
+{{!}} colspan="4" {{!}} {{LSL Function/KeyValue|dl_name=keys
+|dl_desc=A list of keys ([[String|strings]]) used in the key-value store
+|dl_hover=A list of keys (strings) used in the key-value store|dataserver=*}}
+{{!}}-
+{{!}} colspan="3" {{!}} [[llReadKeyValue]]
+{{!}} [[llCSV2List]]()
+{{!}} colspan="4" {{!}} {{LSL Function/KeyValue|k|value=value|d2_type=string|d2_name=value|dataserver=*}}
+{{!}}-
+{{!}} colspan="3" {{!}} [[llUpdateKeyValue]]
+{{!}} [[llCSV2List]]()
+{{!}} colspan="4" {{!}} {{LSL Function/KeyValue|k|v|value=value|d2_type=string|d2_name=value|dataserver=*}}
+{{!}}-
+{{!}}}
+|caveats=
+*Dataserver requests will trigger '''dataserver''' events in all scripts within the same prim where the request was made.
+**If there are multiple scripts with '''dataserver''' events in the same prim, always use the <code>queryid</code> key to determine which answer is being received.
+**'''dataserver''' events will not be triggered in scripts contained in other prims in the same linked object.
+*When dealing with multiple dataserver queries it is possible to receive the responses in any order, if you receive a response at all. It is good practise to maintain variables (or a list) with keys of all data server events you are waiting for, then use <code>queryid</code>
+**When using <code>if (dKey == queryid)</code>, or similar, in your dataserver events it is important to remember that changes to <code>dKey</code> will cause your script to ignore any requests that were made earlier that have not yet arrived; consider using more than one variable (or a list) if such cases may cause desired events to be ignored.
+**When using a list to track events, it is important to periodically check the list for requests that have taken too long and either resend them, or remove them (see examples), as it is possible for any dataserver request to fail, usually due to high traffic or the script receiving too many other events.
+|notes=*Requesting data from within the '''dataserver''' event is quite valid. However, be aware that further '''dataserver''' events cannot be received until the event that sent the request has been completed.
+|examples=
+<syntaxhighlight lang="lsl2">
+// Example script handling sequential data server events (notecard reading)
+
+string notecardNameOrKey = "name or key of the notecard goes here";
+key notecardQueryId;
+integer notecardLine;//  first notecard line is 0, so we don't have to set notecardLine = 1 here
+
+default
+{
+    state_entry()
+    {
+        llSay(0, "Reading notecard...");
+        notecardQueryId = llGetNotecardLine(notecardNameOrKey, notecardLine);
+    }
+
+    dataserver(key query_id, string data)
+    {
+        if (query_id == notecardQueryId)
+        {
+            if (data == EOF)//  we have reached the EOF (end of file)
+            {
+                llSay(0, "No more lines in notecard, read " + (string) notecardLine + " lines.");
+            }
+            else
+            {
+            //  increment line index first, both for line number reporting, and for reading the next line
+                ++notecardLine;
+                llSay(0, "Line " + (string) notecardLine + ": " + data);
+                notecardQueryId = llGetNotecardLine(notecardNameOrKey, notecardLine);
+            }
+        }
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+// Example script handling multiple data server events
+
+list events;
+integer stride = 3;
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        events += [llRequestDisplayName(id), id, llGetUnixTime()];
+        llSetTimerEvent(35.0);
+    }
+
+    dataserver(key request_id, string data)
+    {
+        integer index = llListFindList(events, [ request_id] );
+        // The chance of getting a match on an avatar UUID instead of the dataserver event key, is less than 1 in 2^100
+
+        if (~index )
+        { 
+            key id = llList2Key(events, index + 1);
+            llRegionSayTo(id, 0, "Hello " + data + "!");
+
+            events = llDeleteSubList(events, index, index + stride - 1);
+
+            if (events == [])
+                llSetTimerEvent(0);
+        }
+    }
+
+    timer()
+    {
+        integer length = (events != []);
+
+        // Loop until we find a valid entry (as all entries after will be valid too)
+        while (length && llList2Integer(events, 2) < (llGetUnixTime() - 30))
+        {
+            events = llDeleteSubList(events, 0, stride - 1);
+            length -= stride;
+        }
+
+        if (events == [])
+            llSetTimerEvent(0);
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_header
+|also_events
+|also_functions
+|also_articles
+|also_footer
+|notes
+|mode
+|deprecated
+|haiku={{Haiku|Asked questions pile up.|Take a number, get in line,|all answers charge time.}}
+|cat1=Dataserver
+|cat2=Notecard
+|cat3=Inventory
+|cat4=Region
+|cat5=Script
+|cat6=Prim
+|cat7=Avatar
+|cat8=Avatar/Name
+}}

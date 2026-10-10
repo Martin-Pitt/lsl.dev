@@ -1,0 +1,60 @@
+{{LSL_Function
+|inject-2={{LSL_Function/chat|channel|msg|np=*}}
+|func_id=331
+|func_sleep=0.0
+|func_energy=10.0
+|func=llRegionSay
+|p1_type=integer|p1_name=channel|p1_desc
+|p2_type=string|p2_name=msg|p2_desc
+|func_desc=Says the string {{LSLP|msg}} on channel number {{LSLP|channel}} that can be heard anywhere in the [[region]] by a script [[listen|listening]] on {{LSLP|channel}}.
+|func_footnote=Regardless of where the prim is, the message will not travel over region borders.
+|return_text
+|spec
+|constants
+|caveats=*This function cannot transmit on {{#var:PUBLIC_CHANNEL}} channel 0, this is a design feature and not a bug.
+*If {{LSLP|msg}} is longer than 1024 characters it is truncated to 1024 characters. (Note that in Mono, each character occupies 2 memory bytes).
+*A prim can '''not''' hear itself, this to prevent problems with recursion. It can however hear other prims within the same object. Use [[llMessageLinked]] instead for intra-prim messaging.
+|examples=<source lang="lsl2">default
+{
+    state_entry()
+    {
+        llRegionSay(25,"This is an incredibly useless program." );
+    }
+}</source>
+To avoid making your object spam its neighborhood, use [[llOwnerSay]] or [[llInstantMessage]].
+|helpers
+|also_events=
+{{LSL DefineRow||[[listen]]|}}
+|also_functions=
+{{LSL DefineRow||[[llListen]]|}}
+{{LSL DefineRow||[[llRegionSayTo]]|Sends chat directly to specified target within region}}
+{{LSL DefineRow||[[llOwnerSay]]|Sends chat to the owner only}}
+{{LSL DefineRow||[[llWhisper]]|Sends chat limited to 10 meters}}
+{{LSL DefineRow||[[llSay]]|Sends chat limited to 20 meters}}
+{{LSL DefineRow||[[llShout]]|Sends chat limited to 100 meters}}
+{{LSL DefineRow||[[llInstantMessage]]|}}
+{{LSL DefineRow||[[llDialog]]|}}
+{{LSL DefineRow||[[llTextBox]]|}}
+|also_tests
+|also_articles
+|notes=If one object 'says' something to another object (e.g., a button that, when touched,
+turns on a lamp), consider a very negative channel, e.g.,
+<source lang="lsl2">    llRegionSay(-5243212,"turn on");</source>
+Using negative channels for script communications remains a common practice because, prior to September 2016, the standard SL client was unable to chat on negative channels. The only way to do so prior to [[llTextBox]] was to use [[llDialog]] which was limited to 24 bytes. However, since 2016, viewers have been able to chat on negative channels, with messages capped to 254 bytes.
+
+If DEBUG_CHANNEL is used as {{LSLP|channel}}, the script will say {{LSLP|msg}} to the Script Warning/Error window. 
+
+If you wish two objects owned by the same person to communicate within a SIM, one idea is to make both scripts compute the channel based on the owner UUID. e.g. :-
+<source lang="lsl2">
+    gChannel = 0x80000000 | (integer) ( "0x" + (string) llGetOwner() );
+</source>
+
+* As of 1.18.3, using llRegionSay on the {{#var:DEBUG_CHANNEL}} will wrap around and display on channel 0, with a range of 100m.
+|history=
+*Introduced with SL 1.16.0
+* Date of Release [[ Release_Notes/Second_Life_Release/1.16 | 23-05-2007 ]]
+|cat1=Communications
+|cat2=Chat
+|cat3
+|cat4
+}}

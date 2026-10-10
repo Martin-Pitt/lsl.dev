@@ -1,0 +1,64 @@
+{{LSL_Function
+|inject-2={{LSL Function/position|pos|region=noZ}}
+|func_id=317|func_sleep=0.0|func_energy=10.0
+|func=llGetParcelFlags
+|p1_type=vector|p1_name=pos
+|func_footnote=Both {{LSLP|x}} and {{LSLP|y}} components of {{LSLP|pos}} are clamped to the range {{Interval|gte=0.0|lte=256.0|center=component}}, the {{LSLP|z}} component is ignored.
+|func_desc
+|return_type=integer
+|return_subtype=bit field
+|return_text=of parcel flags (PARCEL_FLAG_*) for the parcel that includes the point {{LSLP|pos}}.
+|spec
+|caveats
+|constants={{LSL_Constants/Parcel}}
+|examples=
+<source lang="lsl2">
+if (!(llGetParcelFlags(llGetPos()) & PARCEL_FLAG_ALLOW_FLY))
+    llSay(0,"You are not allowed to fly here!, Sorry!.");
+
+// Answers TRUE if rezzing is permitted, FALSE if not.
+// Rezzing can fail even if this returns TRUE due to parcel full or server errors.
+// Rezzing will always fail if this returns FALSE
+integer canRezAt(vector pos) {
+    integer parcelFlags = llGetParcelFlags(pos);
+    list parcelDetails = llGetParcelDetails(pos, [PARCEL_DETAILS_OWNER, PARCEL_DETAILS_GROUP]);
+    key parcelOwner = llList2Key(parcelDetails, 0);
+    key parcelGroup = llList2Key(parcelDetails, 1);
+ 
+    if (parcelFlags & PARCEL_FLAG_ALLOW_CREATE_OBJECTS) return TRUE;
+    if (parcelOwner == llGetOwner()) return TRUE;
+    if (!llSameGroup(parcelGroup)) return FALSE;
+    if (parcelFlags & PARCEL_FLAG_ALLOW_CREATE_GROUP_OBJECTS) return TRUE;
+    return FALSE;
+}
+ 
+// Answers TRUE if running scripts is permitted, FALSE if not
+integer canRunScriptsAt(vector pos) {
+    integer parcelFlags = llGetParcelFlags(pos);
+    list parcelDetails = llGetParcelDetails(pos, [PARCEL_DETAILS_OWNER, PARCEL_DETAILS_GROUP]);
+    key parcelOwner = llList2Key(parcelDetails, 0);
+    key parcelGroup = llList2Key(parcelDetails, 1);
+ 
+    if (parcelFlags & PARCEL_FLAG_ALLOW_SCRIPTS) return TRUE;
+    if (parcelOwner == llGetOwner()) return TRUE;
+    if (!llSameGroup(parcelGroup)) return FALSE;
+    if (parcelFlags & PARCEL_FLAG_ALLOW_GROUP_SCRIPTS) return TRUE;
+    return FALSE;
+}
+</source>
+|helpers
+|also_tests=
+{{LSL DefineRow||[[llGetParcelFlags Test]]}}
+|also_functions=
+{{LSL DefineRow||[[llGetParcelDetails]]}}
+{{LSL DefineRow||[[llGetRegionFlags]]}}
+|also_events
+|also_tests
+|also_articles
+|location={{SourceLink/github|viewer|indra/llinventory/llparcelflags.h}}
+|notes
+|cat1=Parcel
+|cat2
+|cat3
+|cat4
+}}

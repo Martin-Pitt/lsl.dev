@@ -1,0 +1,374 @@
+{{#if:
+
+{{LSL Signature/Add|
+{{LSL Const/Signature|PSYS_PART_FLAGS|integer|0}}
+{{LSL Const/Signature|PSYS_PART_BOUNCE_MASK|integer|hex=0x004|4}}
+{{LSL Const/Signature|PSYS_PART_EMISSIVE_MASK|integer|hex=0x100|256}}
+{{LSL Const/Signature|PSYS_PART_FOLLOW_SRC_MASK|integer|hex=0x010|16}}
+{{LSL Const/Signature|PSYS_PART_FOLLOW_VELOCITY_MASK|integer|hex=0x020|32}}
+{{LSL Const/Signature|PSYS_PART_INTERP_COLOR_MASK|integer|hex=0x001|1}}
+{{LSL Const/Signature|PSYS_PART_INTERP_SCALE_MASK|integer|hex=0x002|2}}
+{{LSL Const/Signature|PSYS_PART_RIBBON_MASK|integer|hex=0x400|1024}}
+{{LSL Const/Signature|PSYS_PART_TARGET_LINEAR_MASK|integer|hex=0x080|128}}
+{{LSL Const/Signature|PSYS_PART_TARGET_POS_MASK|integer|hex=0x040|64}}
+{{LSL Const/Signature|PSYS_PART_WIND_MASK|integer|hex=0x008|8}}
+{{LSL Const/Signature|PSYS_SRC_PATTERN|integer|9}}
+{{LSL Const/Signature|PSYS_SRC_PATTERN_EXPLODE|integer|hex=0x02|2}}
+{{LSL Const/Signature|PSYS_SRC_PATTERN_ANGLE_CONE|integer|hex=0x08|8}}  
+{{LSL Const/Signature|PSYS_SRC_PATTERN_ANGLE|integer|hex=0x04|4}}
+{{LSL Const/Signature|PSYS_SRC_PATTERN_DROP|integer|hex=0x01|1}}
+{{LSL Const/Signature|PSYS_SRC_PATTERN_ANGLE_CONE_EMPTY|integer|hex=0x10|16}}
+{{LSL Const/Signature|PSYS_SRC_BURST_RADIUS|integer|16}}
+{{LSL Const/Signature|PSYS_SRC_ANGLE_BEGIN|integer|22}}
+{{LSL Const/Signature|PSYS_SRC_ANGLE_END|integer|23}}
+{{LSL Const/Signature|PSYS_SRC_INNERANGLE|integer|10|c=deprecated}}
+{{LSL Const/Signature|PSYS_SRC_OUTERANGLE|integer|11|c=deprecated}}
+{{LSL Const/Signature|PSYS_SRC_TARGET_KEY|integer|20}}
+{{LSL Const/Signature|PSYS_PART_START_COLOR|integer|1}}
+{{LSL Const/Signature|PSYS_PART_END_COLOR|integer|3}}
+{{LSL Const/Signature|PSYS_PART_START_ALPHA|integer|2}}
+{{LSL Const/Signature|PSYS_PART_END_ALPHA|integer|4}}
+{{LSL Const/Signature|PSYS_PART_START_SCALE|integer|5}}
+{{LSL Const/Signature|PSYS_PART_END_SCALE|integer|6}}
+{{LSL Const/Signature|PSYS_SRC_TEXTURE|integer|12}}
+{{LSL Const/Signature|PSYS_PART_START_GLOW|integer|26}}
+{{LSL Const/Signature|PSYS_PART_END_GLOW|integer|27}}
+{{LSL Const/Signature|PSYS_SRC_MAX_AGE|integer|19}}
+{{LSL Const/Signature|PSYS_PART_MAX_AGE|integer|7}}
+{{LSL Const/Signature|PSYS_SRC_BURST_RATE|integer|13}}
+{{LSL Const/Signature|PSYS_SRC_BURST_PART_COUNT|integer|15}}
+{{LSL Const/Signature|PSYS_SRC_ACCEL|integer|8}}
+{{LSL Const/Signature|PSYS_SRC_OMEGA|integer|21}}
+{{LSL Const/Signature|PSYS_SRC_BURST_SPEED_MIN|integer|17}}
+{{LSL Const/Signature|PSYS_SRC_BURST_SPEED_MAX|integer|18}}
+}}
+
+<noinclude>
+{{#vardefine:self|*}}
+{{#vardefine:moded|stp}}
+</noinclude>
+
+<includeonly>
+{{#vardefine:header|{{#var:header}}{{LSLC|Effects}}{{LSLC|Light}}{{LSLC|Particles}}{{LSLC|Prim}}{{LSLC|Stop}}}}
+</includeonly>
+
+{{LSL Function/color}}
+{{LSL Function/alpha}}
+
+}}<noinclude>
+===constants_nb===
+</noinclude>{{#if:
+{{#vardefine:constants_nb|{{#var:constants_nb}}
+{{{!}} {{prettytable|style=margin-top:0; margin-right:0;}}
+{{!}}-{{Hl2}}
+{{!!}} 
+{{!!}} Rule / Value Constant
+{{!!}} Rule Parameter
+{{!!}} Description
+{{!!}} Value
+{{!}}- style="background-color:#ccffcc;" id="{{anchorencode:System Behavior}}"
+{{!}} colspan="5" align="left"{{!}}'''System Behavior'''
+{{!}}- id="PSYS_PART_FLAGS"
+{{!}}colspan="2"{{!}}PSYS_PART_FLAGS
+{{!!}}[[integer]] {{LSL Param|flags}}
+{{!!}}Various flags controlling the behavior of the particle system. The value may be specified as an integer in decimal or [[hexadecimal|hex]] format, or by ORing together (using the <nowiki>|</nowiki> operator) one or more of the following flag constants:
+{{!}}align="center"{{!}}0
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_BOUNCE_MASK"
+{{!}}rowspan="13" style="background-color:#c0c0c0;" align="center" valign="center"{{!}}'''V<br />a<br />l<br />u<br />e<br />s'''
+{{!}}colspan="2"{{!}}PSYS_PART_BOUNCE_MASK
+{{!!}}When set, specifies particles will bounce off a plane at the [[Viewer coordinate frames#Region|region]] Z height of the emitter. On "bounce", each particle reverses its Z-velocity. Particles spawned below the plane will reflect to an equivalent distance above the plane.
+{{!}}align="center"{{!}}{{LSL_Hex|0x004|4}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_EMISSIVE_MASK"
+{{!}} colspan="2"{{!}}PSYS_PART_EMISSIVE_MASK
+{{!!}}When set, particles are full-bright and are unaffected by global lighting (sunlight). Otherwise, particles will be lit depending on the current global lighting conditions. Note that point lights '''do''' illuminate non-emissive particles.
+{{!}}align="center"{{!}}{{LSL_Hex|0x100|256}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_FOLLOW_SRC_MASK"
+{{!}} colspan="2"{{!}}PSYS_PART_FOLLOW_SRC_MASK
+{{!!}}When set, particles move relative to the position of the emitter. Otherwise, particle position and movement are unaffected by the position/movement of the emitter. This flag disables the PSYS_SRC_BURST_RADIUS rule.
+{{!}}align="center"{{!}}{{LSL_Hex|0x010|16}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_FOLLOW_VELOCITY_MASK"
+{{!}} colspan="2"{{!}}PSYS_PART_FOLLOW_VELOCITY_MASK
+{{!!}}When set, particles rotate to orient their "top" towards the direction of movement or emission. Otherwise, particles are oriented vertically as their textures would appear (top of texture at top, left at left).
+{{!}}align="center"{{!}}{{LSL_Hex|0x020|32}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_INTERP_COLOR_MASK"
+{{!}} colspan="2"{{!}}PSYS_PART_INTERP_COLOR_MASK
+{{!!}}When set, particle color and alpha transition from their START settings to their END settings during the particle's lifetime. The transition is a smooth interpolation.
+{{!}}align="center"{{!}}{{LSL_Hex|0x001|1}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_INTERP_SCALE_MASK"
+{{!}} colspan="2"{{!}}PSYS_PART_INTERP_SCALE_MASK
+{{!!}}When set, particle size/scale transitions from its START setting to its END setting during the particle's lifetime.
+{{!}}align="center"{{!}}{{LSL_Hex|0x002|2}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_RIBBON_MASK"
+{{!}} colspan="2"{{!}}PSYS_PART_RIBBON_MASK
+{{!!}}Joins a stream of particles together into a continuous strip.  Particle textures are stretched (or squeezed) to join their right edges to their predecessor's left.  Ribbon 'width' is controlled by the 'x' values of start and end scale.  The 'y' values are used only for computing the maximum visibility distance of the particles, and the distance between particles controls the 'length' of each ribbon segment instead.  Unlike other particle effects, ribbon segments are not rendered facing the viewer's camera.  The Z axis of each new particle mimics the Z axis of the emitter prim.   Ribbon segments will not render if they have no 'length' - this happens when particles move only 'up' or 'down' the local Z-axis of their emitter prim.  PSYS_PART_FOLLOW_VELOCITY_MASK has no effect on ribbons.  For a simple ribbon effect, try using the DROP pattern, TEXTURE_BLANK, ACCEL and/or WIND.
+{{!}}align="center"{{!}}{{LSL_Hex|0x400|1024}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_TARGET_LINEAR_MASK"
+{{!}} colspan="2"{{!}}PSYS_PART_TARGET_LINEAR_MASK
+{{!!}} When set, emitted particles move in a straight evenly-spaced line towards the target specified by the PSYS_SRC_TARGET_KEY rule.  This option ignores all Non-DROP patterns and their dependent attributes (radius, burst speeds, angles, and omega).   PSYS_SRC_ACCEL and PSYS_PART_WIND_MASK are ignored as well.  Using PSYS_PART_BOUNCE_MASK while the target is 'below' the emitter will cause the linear particle stream to deflect upwards, terminating above the target.
+{{!}}align="center"{{!}}{{LSL_Hex|0x080|128}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_TARGET_POS_MASK"
+{{!}} colspan="2"{{!}}PSYS_PART_TARGET_POS_MASK
+{{!!}}When set, emitted particles change course during their lifetime, attempting to move towards the target specified by the PSYS_SRC_TARGET_KEY rule by the time they expire. Note that if no target is specified, the target moves out of range, or an invalid target is specified, the particles target the prim itself.
+{{!}}align="center"{{!}}{{LSL_Hex|0x040|64}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_WIND_MASK"
+{{!}} colspan="2"{{!}}PSYS_PART_WIND_MASK
+{{!!}}When set, particle movement is affected by the [[llWind|wind]]. It is applied as a secondary force on the particles.
+{{!}}align="center"{{!}}{{LSL_Hex|0x008|8}}
+{{!}}-
+
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_BEAM_MASK"
+{{!}} colspan="2"{{!}}<s>PSYS_PART_BEAM_MASK</s>
+{{!!}}(''unimplemented'') mask but in the enum 
+{{!}}align="center"{{!}}{{LSL_Hex|0x200|}}
+{{!}}-
+
+{{!}}- style="background-color:#e0e0e0;" id="LL_PART_HUD"
+{{!}} colspan="2"{{!}}<s>LL_PART_HUD</s>
+{{!!}}Used by the viewer to keep HUD and World particle sources separate.
+{{!}}align="center"{{!}}{{LSL_Hex|0x40000000|}}
+{{!}}-
+
+{{!}}- style="background-color:#e0e0e0;" id="LL_PART_DEAD_MASK"
+{{!}} colspan="2"{{!}}<s>LL_PART_DEAD_MASK</s>
+{{!!}}Removes particles, not compatible with any other PSYS_PART_*_MASK
+{{!}}align="center"{{!}}{{LSL_Hex|0x80000000|}}
+{{!}}-
+
+<!-- No point in displaying these.
+{{!}}- style="background-color:#e0e0e0;" id="LL_PART_RANDOM_ACCEL_MASK"
+{{!}} colspan="2"{{!}}<s style="color:darkred;">LL_PART_RANDOM_ACCEL_MASK</s>
+{{!!}}(''unimplemented & commented out'') Presumed to be used to apply random acceleration to the particles.
+{{!}}align="center"{{!}} -
+{{!}}-
+
+{{!}}- style="background-color:#e0e0e0;" id="LL_PART_RANDOM_VEL_MASK"
+{{!}} colspan="2"{{!}}<s style="color:darkred;">LL_PART_RANDOM_VEL_MASK</s>
+{{!!}}(''unimplemented & commented out'') Presumed to be used to specify random velocity for the particles upon emission.
+{{!}}align="center"{{!}} -
+{{!}}-
+
+{{!}}- style="background-color:#e0e0e0;" id="LL_PART_TRAIL_MASK"
+{{!}} colspan="2"{{!}}<s style="color:darkred;">LL_PART_TRAIL_MASK</s>
+{{!!}}(''unimplemented & commented out'') Presumed to be used for implementing "trails" via emitting more particles at shorter bursts.
+{{!}}align="center"{{!}} -
+{{!}}-
+-->
+
+{{!}}- style="background-color:#ccffcc;" id="{{anchorencode:System Presentation}}"
+{{!}} colspan="5" align="left"{{!}}'''System Presentation'''
+{{!}}- id="PSYS_SRC_PATTERN"
+{{!}} colspan="2"{{!}}PSYS_SRC_PATTERN
+{{!!}}[[integer]] {{LSL Param|pattern}}
+{{!!}}Specifies the general emission pattern.
+{{!}}align="center"{{!}}9
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_SRC_PATTERN_EXPLODE"
+{{!}}rowspan="5" style="background-color:#c0c0c0;" align="center" valign="center"{{!}}'''V<br />a<br />l<br />u<br />e<br />s'''
+{{!}}colspan="2"{{!}}PSYS_SRC_PATTERN_EXPLODE
+{{!!}}Sprays particles outwards in a spherical area. The Initial velocity of each particle is determined by PSYS_SRC_BURST_SPEED_MIN and PSYS_SRC_BURST_SPEED_MAX.  The EXPLODE pattern ignores the ANGLE parameters.
+{{!}}align="center"{{!}}{{LSL_Hex|0x02|2}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_SRC_PATTERN_ANGLE_CONE"
+{{!}}colspan="2"{{!}}PSYS_SRC_PATTERN_ANGLE_CONE
+{{!!}}Sprays particles outwards in a spherical, sub-spherical, conical or ring shaped area, as defined by the ANGLE parameters PSYS_SRC_ANGLE_BEGIN and PSYS_SRC_ANGLE_END.   The ANGLE_CONE pattern can be used to imitate the EXPLODE pattern by explicitly setting PSYS_SRC_ANGLE_BEGIN to 0.00000 and PSYS_SRC_ANGLE_END to 3.14159 (or PI) (or vice versa).
+{{!}}align="center"{{!}}{{LSL_Hex|0x08|8}}  
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_SRC_PATTERN_ANGLE"
+{{!}} colspan="2"{{!}}PSYS_SRC_PATTERN_ANGLE
+{{!!}}Sprays particles outward in a flat circular, semi-circular, arc or ray shaped areas, as defined by PSYS_SRC_ANGLE_BEGIN and PSYS_SRC_ANGLE_END.  The circular pattern radiates outwards around the prim's local X axis line.  
+{{!}}align="center"{{!}}{{LSL_Hex|0x04|4}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_SRC_PATTERN_DROP"
+{{!}}colspan="2"{{!}}PSYS_SRC_PATTERN_DROP
+{{!!}}Creates particles with no initial velocity.  The DROP pattern will override any values given for PSYS_SRC_BURST_RADIUS, PSYS_SRC_BURST_SPEED_MIN, and PSYS_SRC_BURST_SPEED_MAX, setting each to 0.00000.  (All patterns will behave like the DROP pattern, if RADIUS, SPEED_MIN and SPEED_MAX are explicitly set to 0.0000.)
+{{!}}align="center"{{!}}{{LSL_Hex|0x01|1}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_SRC_PATTERN_ANGLE_CONE_EMPTY"
+{{!}}colspan="2"{{!}}PSYS_SRC_PATTERN_ANGLE_CONE_EMPTY
+{{!!}}(''incomplete implementation'') acts the same as the PSYS_SRC_PATTERN_DROP pattern, it is believed that the original intention for this pattern was to invert the effect of the ANGLE parameters, making them delineate an area where particles were NOT to be sprayed. (effectively the inverse or opposite of the behavior of the ANGLE_CONE pattern).
+{{!}}align="center"{{!}}{{LSL_Hex|0x10|16}}
+{{!}}- id="PSYS_SRC_BURST_RADIUS"
+{{!}}colspan="2"{{!}}PSYS_SRC_BURST_RADIUS
+{{!!}}[[float]] {{LSL Param|radius}}
+{{!!}}Specifies the distance from the emitter where particles will be created. This rule is ignored when the PSYS_PART_FOLLOW_SRC_MASK flag is set. A test in http://forums-archive.secondlife.com/327/f5/226722/1.html indicates that the maximum value is 50.00
+{{!}}align="center"{{!}}16
+{{!}}- id="PSYS_SRC_ANGLE_BEGIN"
+{{!}}colspan="2"{{!}}PSYS_SRC_ANGLE_BEGIN
+{{!!}}[[float]] {{LSL Param|angle_begin}}
+{{!!}}Specifies a half angle, in radians, of a circular or spherical "dimple" or conic section (starting from the emitter facing) within which particles will NOT be emitted. Valid values are the same as for PSYS_SRC_ANGLE_END, though the effects are reversed accordingly. If the pattern is PSYS_SRC_PATTERN_ANGLE, the presentation is a 2D flat circular section. If PSYS_SRC_PATTERN_ANGLE_CONE or PSYS_SRC_PATTERN_ANGLE_CONE_EMPTY is used, the presentation is a 3D spherical section. Note that the value of this parameter and PSYS_SRC_ANGLE_END are internally re-ordered such that this parameter gets the smaller of the two values.
+{{!}}align="center"{{!}}22
+{{!}}- id="PSYS_SRC_ANGLE_END"
+{{!}}colspan="2"{{!}}PSYS_SRC_ANGLE_END
+{{!!}}[[float]] {{LSL Param|angle_end}}
+{{!!}}Specifies a half angle, in radians, of a circular or spherical "dimple" or conic section (starting from the emitter facing) within which particles WILL be emitted. Valid values are 0.0, which will result in particles being emitted in a straight line in the direction of the emitter facing, to [[PI]], which will result in particles being emitted in a full circular or spherical arc around the emitter, not including the "dimple" or conic section defined by PSYS_SRC_ANGLE_BEGIN. If the pattern is PSYS_SRC_PATTERN_ANGLE, the presentation is a 2D flat circular section. If PSYS_SRC_PATTERN_ANGLE_CONE or PSYS_SRC_PATTERN_ANGLE_CONE_EMPTY is used, the presentation is a 3D spherical section. Note that the value of this parameter and PSYS_SRC_ANGLE_BEGIN are internally re-ordered such that this parameter gets the larger of the two values.
+{{!}}align="center"{{!}}23
+{{!}}- id="PSYS_SRC_INNERANGLE"
+{{!}}colspan="2"{{!}}<del>PSYS_SRC_INNERANGLE</del>
+{{!!}}[[float]] {{LSL Param|angle_inner}}
+{{!!}}'''DEPRECATED: Use PSYS_SRC_ANGLE_BEGIN instead.''' Works similar to its replacement rule, except the edge of the section is aligned with the emitter facing, rather than its center.
+{{!}}align="center"{{!}}10
+{{!}}- id="PSYS_SRC_OUTERANGLE"
+{{!}}colspan="2"{{!}}<del>PSYS_SRC_OUTERANGLE</del>
+{{!!}}[[float]] {{LSL Param|angle_outer}}
+{{!!}}'''DEPRECATED: Use PSYS_SRC_ANGLE_END instead.''' Works similar to its replacement rule, except the edge of the section is aligned with the emitter facing, rather than the section's center.
+{{!}}align="center"{{!}}11
+{{!}}- id="PSYS_SRC_TARGET_KEY"
+{{!}}colspan="2"{{!}}PSYS_SRC_TARGET_KEY
+{{!!}}[[key]] {{LSL Param|target}}
+{{!!}}Specifies the key of a target object, prim, or agent towards which the particles will change course and move (if PSYS_PART_TARGET_POS_MASK is specified) or will move in a straight line (if PSYS_PART_TARGET_LINEAR_MASK is specified). They will attempt to end up at the geometric center of the target at the end of their lifetime. Requires the PSYS_PART_TARGET_POS_MASK or PSYS_PART_TARGET_LINEAR_MASK flag be set. [[#Caveats|caveat 4]]
+{{!}}align="center"{{!}}20
+{{!}}- style="background-color:#ccffcc;" id="{{anchorencode:Particle Appearance}}"
+{{!}}colspan="5" align="left"{{!}}'''Particle Appearance'''
+{{!}}- id="PSYS_PART_START_COLOR"
+{{!}}colspan="2"{{!}}PSYS_PART_START_COLOR
+{{!!}}[[vector]] {{LSL Param|color_start}}
+{{!!}}A vector specifying the [[color]] of the particles upon emission.
+{{!}}align="center"{{!}}1
+{{!}}- id="PSYS_PART_END_COLOR"
+{{!}}colspan="2"{{!}}PSYS_PART_END_COLOR
+{{!!}}[[vector]] {{LSL Param|color_end}}
+{{!!}}A vector specifying the [[color]] the particles transition to during their lifetime. Only used if the PSYS_PART_INTERP_COLOR_MASK flag is set.
+{{!}}align="center"{{!}}3
+{{!}}- id="PSYS_PART_START_ALPHA"
+{{!}}colspan="2"{{!}}PSYS_PART_START_ALPHA
+{{!!}}[[float]] {{LSL Param|alpha_start}}
+{{!!}}Specifies the [[alpha]] of the particles upon emission. Valid values are in the range 0.0 to 1.0. Lower values are more transparent; higher ones are more opaque.
+{{!}}align="center"{{!}}2
+{{!}}- id="PSYS_PART_END_ALPHA"
+{{!}}colspan="2"{{!}}PSYS_PART_END_ALPHA
+{{!!}}[[float]] {{LSL Param|alpha_end}}
+{{!!}}Specifies the [[alpha]] the particles transition to during their lifetime. Only used if the PSYS_PART_INTERP_COLOR_MASK flag is set. Valid values are the same as PSYS_PART_START_ALPHA.
+{{!}}align="center"{{!}}4
+{{!}}- id="PSYS_PART_START_SCALE"
+{{!}}colspan="2"{{!}}PSYS_PART_START_SCALE
+{{!!}}[[vector]] {{LSL Param|scale_start}}
+{{!!}}Specifies the [[scale]] or size of the particles upon emission. Valid values for each direction are 0.03125 to 4.0, in meters. The actual particle size is always a multiple of 0.03125. Smaller changes don't have any effect. Since particles are essentially 2D sprites, the Z component of the vector is ignored and can be set to 0.0.
+{{!}}align="center"{{!}}5
+{{!}}- id="PSYS_PART_END_SCALE"
+{{!}}colspan="2"{{!}}PSYS_PART_END_SCALE
+{{!!}}[[vector]] {{LSL Param|scale_end}}
+{{!!}}Specifies the [[scale]] or size the particles transition to during their lifetime. Only used if the PSYS_PART_INTERP_SCALE_MASK flag is set. Valid values are the same as PSYS_PART_START_SCALE.
+{{!}}align="center"{{!}}6
+{{!}}- id="PSYS_SRC_TEXTURE"
+{{!}}colspan="2"{{!}}PSYS_SRC_TEXTURE
+{{!!}}[[string]] {{LSL Param|texture}}
+{{!!}}Specifies the name of a texture in the emitter prim's inventory to use for each particle. Alternatively, you may specify an asset key [[UUID]] for a texture. If using [[llLinkParticleSystem]] and texture is not a UUID, texture must be in the emitter prim (not necessarily with the script).
+{{!}}align="center"{{!}}12
+{{!}}- id="PSYS_PART_START_GLOW"
+{{!}}colspan="2"{{!}}PSYS_PART_START_GLOW
+{{!!}}[[float]] {{LSL Param|glow_start}}
+{{!!}}Specifies the glow of the particles upon emission. Valid values are in the range of 0.0 (no glow) to 1.0 (full glow).
+{{!}}align="center"{{!}}26
+{{!}}- id="PSYS_PART_END_GLOW"
+{{!}}colspan="2"{{!}}PSYS_PART_END_GLOW
+{{!!}}[[float]] {{LSL Param|glow_end}}
+{{!!}}Specifies the glow that the particles transition to during their lifetime. Valid values are the same as PSYS_PART_START_GLOW.
+{{!}}align="center"{{!}}27
+{{!}}- style="background-color:#ccffcc;" id="{{anchorencode:Particle Blending}}"
+{{!}} colspan="5" align="left"{{!}}'''Particle Blending'''
+{{!}}- style="background-color:#ffcccc;"
+{{!}} colspan="5" align="left"{{!}}'''Note:''' The particle system blend parameters wrap directly to OpenGL's glBlendFunc.  Detailed documentation for glBlendFunc, including formulas, can be found in the [http://www.opengl.org/sdk/docs/man/html/glBlendFunc.xhtml official glBlendFunc documentation]
+{{!}}- id="PSYS_PART_BLEND_FUNC_SOURCE"
+{{!}} colspan="2"{{!}}PSYS_PART_BLEND_FUNC_SOURCE
+{{!!}}[[integer]] {{LSL Param|bf_source}}
+{{!!}}Specifies how blending function uses the incoming particle's color and alpha information to produce the rendered result. Defaults to PSYS_PART_BF_SOURCE_ALPHA.
+{{!}}align="center"{{!}}24
+{{!}}- id="PSYS_PART_BLEND_FUNC_DEST"
+{{!}} colspan="2"{{!}}PSYS_PART_BLEND_FUNC_DEST
+{{!!}}[[integer]] {{LSL Param|bf_dest}}
+{{!!}}Specifies how blending function uses the current framebuffer's color and alpha information to produce the rendered result. Defaults to PSYS_PART_BF_ONE_MINUS_SOURCE_ALPHA.   To make particles blend with the background in a less opaque and more luminescent way use PSYS_PART_BF_ONE for dest and the default for source.  Most other blending combinations will render the invisible/alpha portion of your particle texture, unless the invisible area of your texture is all black (or, in some cases, unless it is all white).
+{{!}}align="center"{{!}}25
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_BF_ONE"
+{{!}}rowspan="8" style="background-color:#c0c0c0;" align="center" valign="center"{{!}}'''V<br />a<br />l<br />u<br />e<br />s'''
+{{!}}colspan="2"{{!}}PSYS_PART_BF_ONE
+{{!!}}Do not scale the source or destination RGBA values.
+{{!}}align="center"{{!}}{{LSL_Hex|0x0|0}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_BF_ZERO"
+{{!}}colspan="2"{{!}}PSYS_PART_BF_ZERO
+{{!!}}Zero out the source or destination RGBA values.
+{{!}}align="center"{{!}}{{LSL_Hex|0x1|1}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_BF_DEST_COLOR"
+{{!}}colspan="2"{{!}}PSYS_PART_BF_DEST_COLOR
+{{!!}}Scale the RGBA values by the RGBA values of the destination.
+{{!}}align="center"{{!}}{{LSL_Hex|0x2|2}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_BF_SOURCE_COLOR"
+{{!}}colspan="2"{{!}}PSYS_PART_BF_SOURCE_COLOR
+{{!!}}Scale the RGBA values by the RGBA values of the particle source.
+{{!}}align="center"{{!}}{{LSL_Hex|0x3|3}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_BF_ONE_MINUS_DEST_COLOR"
+{{!}}colspan="2"{{!}}PSYS_PART_BF_ONE_MINUS_DEST_COLOR
+{{!!}}Scale the RGBA values by the inverted RGBA values of the destination.
+{{!}}align="center"{{!}}{{LSL_Hex|0x4|4}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_BF_ONE_MINUS_SOURCE_COLOR"
+{{!}}colspan="2"{{!}}PSYS_PART_BF_ONE_MINUS_SOURCE_COLOR
+{{!!}}Scale the RGBA values by the inverted RGBA values of the particle source.
+{{!}}align="center"{{!}}{{LSL_Hex|0x5|5}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_BF_SOURCE_ALPHA"
+{{!}}colspan="2"{{!}}PSYS_PART_BF_SOURCE_ALPHA
+{{!!}}Scale the RGBA values by the alpha values of the particle source.
+{{!}}align="center"{{!}}{{LSL_Hex|0x7|7}}
+{{!}}- style="background-color:#e0e0e0;" id="PSYS_PART_BF_ONE_MINUS_SOURCE_ALPHA"
+{{!}}colspan="2"{{!}}PSYS_PART_BF_ONE_MINUS_SOURCE_ALPHA
+{{!!}}Scale the RGBA values by the inverted alpha values of the particle source.
+{{!}}align="center"{{!}}{{LSL_Hex|0x9|9}}
+{{!}}- style="background-color:#ccffcc;" id="{{anchorencode:Particle Flow}}"
+{{!}}colspan="5" align="left"{{!}}'''Particle Flow'''
+{{!}}- id="PSYS_SRC_MAX_AGE"
+{{!}}colspan="2"{{!}}PSYS_SRC_MAX_AGE
+{{!!}}[[float]] {{LSL Param|duration_system}}
+{{!!}}Specifies the length of time, in seconds, that the emitter will operate upon coming into view range (if the particle system is already set) or upon execution of this function (if already in view range). Upon expiration, no more particles will be emitted, except as specified above. Zero will give the particle system an infinite duration. ([[#Caveats|caveat 1]])
+{{!}}align="center"{{!}}19
+{{!}}- id="PSYS_PART_MAX_AGE"
+{{!}}colspan="2"{{!}}PSYS_PART_MAX_AGE
+{{!!}}[[float]] {{LSL Param|duration_particle}}
+{{!!}}Specifies the lifetime of each particle emitted, in seconds. Maximum is 30.0 seconds. During this time, the particle will appear, change appearance and move according to the parameters specified in the other sections, and then disappear.
+{{!}}align="center"{{!}}7
+{{!}}- id="PSYS_SRC_BURST_RATE"
+{{!}}colspan="2"{{!}}PSYS_SRC_BURST_RATE
+{{!!}}[[float]] {{LSL Param|burst_sleep}}
+{{!!}}Specifies the time interval, in seconds, between "bursts" of particles being emitted. Specifying a value of 0.0 will cause the emission of particles as fast as the viewer can do so.
+{{!}}align="center"{{!}}13
+{{!}}- id="PSYS_SRC_BURST_PART_COUNT"
+{{!}}colspan="2"{{!}}PSYS_SRC_BURST_PART_COUNT
+{{!!}}[[integer]] {{LSL Param|burst_particle_count}}
+{{!!}}Specifies the number of particles emitted in each "burst".
+{{!}}align="center"{{!}}15
+{{!}}- style="background-color:#ccffcc;" id="{{anchorencode:Particle Motion}}"
+{{!}}colspan="5" align="left"{{!}}'''Particle Motion'''
+{{!}}- id="PSYS_SRC_ACCEL"
+{{!}}colspan="2"{{!}}PSYS_SRC_ACCEL
+{{!!}}[[vector]] {{LSL Param|acceleration}}
+{{!!}}Specifies a directional acceleration vector applied to each particle as it is emitted, in meters per second squared. Valid values are 0.0 to 100.0 for each direction both positive and negative, as [[Viewer coordinate frames#Region|region]] coordinates.
+{{!}}align="center"{{!}}8
+{{!}}- id="PSYS_SRC_OMEGA"
+{{!}}colspan="2"{{!}}PSYS_SRC_OMEGA
+{{!!}}[[vector]] {{LSL Param|omega}}
+{{!!}}Sets how far to rotate the "pattern" after each particle burst.  (Burst frequency is set with PSYS_SRC_BURST_RATE.)   Omega values are approximately 'radians per burst' around the prim's global (not local) X,Y,Z axes.  For precise and predictable pattern rotation, rotate the prim instead of using PSYS_SRC_OMEGA.  Omega has no visible effect on drop, explode and certain specific angle and angle cone patterns, depending on prim orientation.  Pattern rotation can be used with prim orientation and llTargetOmega() but won't produce consistent results. ([[#Caveats|caveat 2]] and [[#Caveats|caveat 3]])
+{{!}}align="center"{{!}}21
+{{!}}- id="PSYS_SRC_BURST_SPEED_MIN"
+{{!}}colspan="2"{{!}}PSYS_SRC_BURST_SPEED_MIN
+{{!!}}[[float]] {{LSL Param|speed_min}}
+{{!!}}Specifies the minimum value of a random range of values which is selected for each particle in a burst as its initial speed upon emission, in meters per second. Note that the value of this parameter and PSYS_SRC_BURST_SPEED_MAX are internally re-ordered such that this parameter gets the smaller of the two values.
+{{!}}align="center"{{!}}17
+{{!}}- id="PSYS_SRC_BURST_SPEED_MAX"
+{{!}}colspan="2"{{!}}PSYS_SRC_BURST_SPEED_MAX
+{{!!}}[[float]] {{LSL Param|speed_max}}
+{{!!}}Specifies the maximum value of a random range of values which is selected for each particle in a burst as its initial speed upon emission, in meters per second. Note that the value of this parameter and PSYS_SRC_BURST_SPEED_MIN are internally re-ordered such that this parameter gets the larger of the two values.
+{{!}}align="center"{{!}}18
+{{!}}-
+
+<!--
+{{!}}- id="{{anchorencode:Constant Footnotes}}"
+{{!}} style="font-size:80%" colspan="5" {{!}} LL_PART_* constants are only found in {{SourceLink|indra/llmessage/llpartdata.h|rev=1681|line=99}}, those flags in <span style="color:darkred;">red</span> have been commented out.
+{{!}}-
+-->
+
+{{!}}-
+{{!}}} }}
+}}<noinclude>
+{{#var:constants_nb}}
+</noinclude>{{#if:
+
+}}<noinclude>
+
+====Signature====
+{{#tag:pre|{{#var:signature}}}}
+
+</noinclude>{{#if:
+
+}}

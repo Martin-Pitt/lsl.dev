@@ -1,0 +1,79 @@
+{{LSL_Function
+|func=llListFindListNext
+|func_id=201|func_sleep=0.0|func_energy=10.0
+|return_type=integer
+|Return_text=index of the nth instance of {{LSLP|test}} in {{LSLP|src}}.
+|p1_type=list|p1_name=src|p1_desc=what to search in (haystack)
+|p2_type=list|p2_name=test|p2_desc=what to search for (needles)
+|p3_type=integer|p3_name=instance|p3_desc=which instance (needle) to return
+|func_footnote=If {{LSLP|test}} is not found in {{LSLP|src}}, -1 (in LSL) or nil (in SLua) is returned.<br/>
+The index of the first entry in the list is {{HoverText|0|zero}}<br>
+An expansion of llListFindList which adds an instance parameter to select the nth match to test parameter.<br>
+llListFindListNext(src, test, 0); is functionally equivalent to llListFindList(src, test);<br>
+Given a list like [ 'Resident', 'Alexia', 'Resident', 'Bob', 'Resident', 'Steve', 'Resident', 'Evil' ]
+using a test of [ 'Resident' ] and an instance of 0, 1, 2, 3 would return indices of 0, 2, 4, and 6 respectively.
+Selecting the 4th or greater instance will not be found and will return -1.<br>
+Reverse indexing is also supported. Using an instance of -1, -2, -3, -4 would respectively return 6, 4, 2, 0
+And -5 and lower would again return -1<br>
+If {{LSLP|test}} is found at the last index in {{LSLP|src}} the positive index is returned (5th entry of 5 returns 4).
+|func_desc
+|spec
+|caveats=
+* Strict type matching and case sensitivity is enforced.
+** "1" != 1
+** "1.0" != 1.0
+** 1 != 1.0
+** "a822ff2b-ff02-461d-b45d-dcd10a2de0c2" != (key)"a822ff2b-ff02-461d-b45d-dcd10a2de0c2"
+** "Justice" != "justice"
+* If {{LSLP|test}} is an {{HoverText|empty list|[]}} the value returned is {{HoverText|0|zero}} rather than -1.
+|constants
+|examples=<source lang="lsl2">default
+{
+    touch_end(integer i)
+    {
+        list myList = [];
+        list toFind = [];
+        llSay(0, "both lists empty  (expect '0', early abort): " + (string)llListFindListNext(myList, toFind, 0));
+        
+        myList = [1,2];
+        //Consistent with behavior of llListFindList
+        llSay(0, "toFind empty (expect immediate match at 0): " + (string)llListFindListNext(myList, toFind, 0));
+        llSay(0, "toFind empty (expect immediate match at 1): " + (string)llListFindListNext(myList, toFind, 1));        myList = [];
+        toFind = [1,2];
+        llSay(0, "myList empty, toFind populated (expect -1): " + (string)llListFindListNext(myList, toFind, 0));
+        
+        //indices: 0   1   2   3   4   5   6   7   8   9   10   11  12   13
+        myList = ["A", 0, "B", 1, "C", 2, "A", 0, "A", 1, "A", "A", 0, <1,2,3>, "c"];
+        toFind = ["A", 0];
+        llSay(0, "llListFindListNext(myList, toFind, 0) (expect '0'): " + (string)llListFindListNext(myList, toFind, 0));
+        llSay(0, "llListFindListNext(myList, toFind, 1) (expect '6'): " + (string)llListFindListNext(myList, toFind, 1));
+        llSay(0, "llListFindListNext(myList, toFind, 2) (expect '11'): " + (string)llListFindListNext(myList, toFind, 2));
+        llSay(0, "llListFindListNext(myList, toFind, 3) (expect '-1'): " + (string)llListFindListNext(myList, toFind, 3));
+        llSay(0, "llListFindListNext(myList, toFind, -1) (expect '11'): " + (string)llListFindListNext(myList, toFind, -1));
+        llSay(0, "llListFindListNext(myList, toFind, -2) (expect '6'): " + (string)llListFindListNext(myList, toFind, -2));
+        llSay(0, "llListFindListNext(myList, toFind, -3) (expect '0'): " + (string)llListFindListNext(myList, toFind, -3));
+        llSay(0, "llListFindListNext(myList, toFind, -4) (expect '-1'): " + (string)llListFindListNext(myList, toFind, -4));        toFind = [3];
+        llSay(0, "3 not matched with vector<1,2,3> content (expect '-1'): " + (string)llListFindListNext(myList, toFind, 0));
+        toFind = [<1,2,3>];
+        llSay(0, "Find a vector:  (expect '13'): " + (string)llListFindListNext(myList, toFind, -1));
+        toFind =[<1,2,3>, "c"];
+        llSay(0, "Find a vector:  (expect '13'): " + (string)llListFindListNext(myList, toFind, -1));
+        toFind =[ "c"];
+        llSay(0, "Find last element in reverse  (expect '14'): " + (string)llListFindListNext(myList, toFind, -1));
+        llSay(0, "Find last element fwd  (expect '14'): " + (string)llListFindListNext(myList, toFind, 0));
+        llSay(0, "Find last element with llListFindList (expect '14'): " + (string)llListFindList(myList, toFind));    }
+}</source>
+|helpers=
+|also_functions=
+{{LSL DefineRow||[[llSubStringIndex]]|Find a string in another string}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|sort=ListFindList
+|cat1=List
+|haiku={{Haiku|List so full of things.|How do I get the right one?|Make the machine count.}}
+|cat2
+|cat3
+|cat4
+}}

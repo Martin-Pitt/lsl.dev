@@ -1,0 +1,36 @@
+{{LSL_Function
+|func_id=|func_sleep=0.0|func_energy=10.0
+|func=llSHA256String|return_type=string|p1_type=string|p1_name=src
+|func_footnote
+|func_desc
+|return_text=of 64 hex characters that is the {{Wikipedia|SHA-2|SHA-256}} security hash of {{LSLP|src}}.
+|spec=LSL strings are stored in the UTF-8 format.
+|caveats=There's no way to input a zero-byte value into this function, nor any byte value from 128-255, therefore it's currently broken for many purposes (like HMAC-SHA1). The reason is because LSL strings cannot have a unicode null character (U+0000) in them, and LSL has no escape code for the null character (many programming languages use \0 but LSL does not have this feature). llEscapeURL("%00") yields an empty string. As well, inside this function, each character with a Unicode integer value over U+0127 / 007F are dealt with in UTF-8 fashion: in the hex values, 0xC2 is prepended to the byte value (hence 0x0080-0x00FF become 0xC280-0xC2FF inside the llSHA256String() routine).
+|constants
+|examples=
+<source lang="lsl2">
+llSay(0, llSHA256String("Hello, Avatar!")); // returns 3a9f9d2e4360319a62139d19bd425c16fb8439b832d74d5221ca75b54c35b4f2
+</source>
+
+====Linux Example====
+<pre>
+$ echo -n 'Hello, Avatar!' | openssl sha256
+3a9f9d2e4360319a62139d19bd425c16fb8439b832d74d5221ca75b54c35b4f2
+</pre>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llMD5String]]}}
+{{LSL DefineRow||[[llSHA1String]]}}
+|also_tests
+|also_events
+|also_articles=
+{{LSL DefineRow||[[SHA-2]]}}
+|notes
+|deepnotes=
+Prior to this, the only way to get the SHA-256 hash was to use the LSL SHA-256 port: [[SHA-2]]
+|history=
+|cat1=Hash
+|cat2=Encoding
+|cat3
+|cat4
+}}{{LSLC{{#var:lang}}|Encryption|llSHA1String}}

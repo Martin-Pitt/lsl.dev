@@ -1,0 +1,59 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-3455}}{{Issues/SVC-1038}}{{Issues/SVC-1795}}{{Issues/VWR-2060}}{{Issues/VWR-7331}}
+{{LSL Function/position|pos|region=*}}
+{{LSL Function/position|look_at|local=*}}
+|func_id=309|func_sleep=1.0|func_energy=10.0
+|func=llMapBeacon|sort=MapBeacon
+|p1_type=string|p1_name=region_name|p1_desc=Region name
+|p2_type=vector|p2_name=pos
+|p3_type=list|p3_name=options
+|func_desc=Asks the viewer to create a beacon for the user and optionally opens the world map centered on the location.
+|return_text
+|spec=Requests that a user's viewer set a beacon in the world and optionally opens the world map centered on the specified location.
+|caveats=
+* Since this function requests the client to perform a task, there is no way for script to know if it has failed.
+|constants=
+{{{!}} {{Prettytable|style=margin: 0px 0px 10px 1pt;}}
+{{!}}- {{Hl2}}
+! colspan="2" {{!}} Parameter
+! colspan="2" {{!}} {{GetSet|{{{1|}}}|Return&nbsp;Values|Additional&nbsp;Parameters}}
+! colspan="6" {{!}} Description
+{{!}}-
+{{LSL ConstTB|BEACON_MAP|integer|1|b=[&nbsp;|e=&nbsp;]|s=rowspan="1"|s1=id="BEACON_MAP"}}
+{{!}} colspan="2" {{!}} [ BEACON_MAP, [[integer]]&nbsp;{{LSL Param|open_map}}, [[integer]]&nbsp;{{LSL Param|focus_map}} ]
+{{!}} colspan="6" {{!}} Requests viewer world map behavior. If the first parameter is [[TRUE]] the viewer should open the world map. If the second parameter is [[TRUE]] this function also requests that the map should receive focus.<br>
+Note that setting both values to true mimics the behavior of [[llMapDestination]].
+Also, the focus_map parameter is only meaningful if open_map is [[TRUE]]
+{{!}}}
+
+|examples=
+The following example  mimics the behavior of [[llMapDestination]].
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer total_number)
+    {
+        llMapBeacon("WindSong", <185,140,29>, [BEACON_MAP, TRUE, TRUE]);
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llMapDestination]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes=
+* {{LSLP|pos}} will work with [[Viewer_coordinate_frames#Region|Region]] coordinates not inside {{LSLP|simname}}. (like those returned by [[llRequestInventoryData]])
+* if called from non {{LSLGC|Touch|touch}} events, it only works for the {{LSLGC|Owner|owner}}.
+* if called from touch, it may only work for the first or last touch in the event queue (example: {{Mono|num_touched > 1}})
+* if called inside an [[attachment]], it only works for the owner.
+|permission
+|inventory
+|negative_index
+|cat1=Dialog
+|cat2=Attachment
+|cat3=Avatar
+|cat4=Touch
+|issues
+}}

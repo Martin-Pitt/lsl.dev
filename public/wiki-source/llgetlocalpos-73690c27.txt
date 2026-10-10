@@ -1,0 +1,54 @@
+{{LSL_Function
+|func_id=60|func_sleep=0.0|func_energy=10.0
+|func=llGetLocalPos|sort=GetLocalPos
+|return_type=vector
+|func_footnote=If called from the root prim it returns the [[Viewer coordinate frames#Region|position in the region]] unless it is [[llGetAttached|attached]] to which it returns the position relative to the [[Viewer coordinate frames#Attachments|attach point]].
+|func_desc
+|return_text=that is the position relative ([[Viewer coordinate frames#Local|local]]) to the root.
+|spec
+|caveats
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer vIntTouched)
+    {
+        string vStrMessage = "The touched prim is ";
+        if (llDetectedLinkNumber(0) > 1)
+        {
+            vStrMessage += (string)llVecMag(llGetLocalPos()) + "m from ";
+        }
+        llSay(0, vStrMessage + "the root prim");
+    }
+}
+</syntaxhighlight>
+|helpers=
+There is no function to set the position of a prim local to itself.
+To set the position of a prim local to itself you would have to do something like:
+<syntaxhighlight lang="lsl2">
+SetPositionLocalToCurrentPosition(vector local_position)
+{
+    llSetPos(llGetLocalPos() + (local_position * llGetLocalRot()));
+}
+</syntaxhighlight>
+Or:
+<syntaxhighlight lang="lsl2">
+SetPositionLocalToCurrentPosition(vector local_position)
+{
+    llSetPos(llGetPos() + (local_position * llGetRot()));
+}
+</syntaxhighlight>
+|also_functions={{LSL DefineRow||[[llGetRootPosition]]|Gets the root prims global position}}
+{{LSL DefineRow||[[llGetPos]]|Gets the prims global position}}
+{{LSL DefineRow||[[llSetPos]]|Sets the prims global position}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|haiku={{Haiku|Root's vector winks,|Lost in local's labyrinth,|Attach point's secret.|author=ChatGPT}}
+|cat1=Movement
+|cat2=Prim
+|cat3
+|cat4
+}}

@@ -1,0 +1,47 @@
+{{LSL_Function
+|inject-2={{LSL Function/offset|offset|noZ=*|sim=*}}
+|func=llWater
+|func_id=153|func_sleep=0.0|func_energy=10.0
+|func_footnote=
+Water height is constant across each entire sim and is typically 20 meters but not always.
+|func_desc
+|p1_type=vector|p1_name=offset
+|return_type=float
+|return_text=that is the water height below the prim's [[llGetPos|position]] + {{LSLP|offset}}
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">// Makes the object land on ground or on water
+
+FindGroundOrWater()
+{
+    vector vTarget = llGetPos();
+    vTarget.z = llGround( ZERO_VECTOR );
+    float fWaterLevel = llWater( ZERO_VECTOR );
+    if( vTarget.z < fWaterLevel )
+        vTarget.z = fWaterLevel;
+    llSetRegionPos(vTarget);
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        FindGroundOrWater();
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llGround]]|Gets the ground height}}
+{{LSL DefineRow||[[llWind]]|Gets the wind velocity}}
+{{LSL DefineRow||[[llCloud]]|Gets the cloud density}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Region
+|cat2=Ground
+|cat3
+|cat4
+}}

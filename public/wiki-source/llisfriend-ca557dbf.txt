@@ -1,0 +1,61 @@
+{{LSL Function
+|inject-2={{LSL Function/uuid|uuid|sim=*}}
+|func=llIsFriend
+|sort=IsFriend
+|func_id=0|func_sleep=0.0|func_energy=10.0
+|return_type=integer
+|return_subtype=boolean
+|p1_type=key|p1_name=agent_id
+|func_desc=
+|return_text=that is [[TRUE]] if {{LSLP|agent_id}} and the owner of the [[prim]] the [[script]] is in are friends, otherwise [[FALSE]].
+|func_footnote
+|spec=
+
+* If the prim is owned by a group this function behaves identically to [[llSameGroup]]
+* This function will return [[FALSE]] under the following edge cases:
+** If neither the owner, nor the target agent are in the region.
+** If the agent_id does not specify an agent.
+
+|caveats=
+* You are not your own friend.
+
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", NULL_KEY, AGENT, 95, PI, 10);
+    }
+
+    sensor(integer count)
+    {
+        integer index;
+        for (index = 0; index < count; ++index)
+        {
+            string is_is_not = " is NOT ";
+            if (llIsFriend(llDetectedKey(index)))
+            {
+                is_is_not = " is ";
+            }
+            llSay(0, llDetectedName(index) + is_is_not + "a friend.");
+        }
+    }
+}
+
+</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llDetectedGroup]]}}
+{{LSL DefineRow||[[llSameGroup]]}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Avatar
+|cat2=Group
+|haiku
+|cat3
+|cat4
+}}

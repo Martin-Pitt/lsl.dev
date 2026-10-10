@@ -1,0 +1,159 @@
+<onlyinclude>{{#if:
+
+{{#vardefine:material_const|{{LSL Const|PRIM_MATERIAL|integer|2|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the prim's material}}}}
+
+{{#vardefine:p_material_desc|PRIM_MATERIAL_* flag}}
+
+}}</onlyinclude>{{#if:
+
+}}{{LSL Constant
+|inject-2={{LSL PrimitiveParam Categorize|Prim}}
+|name=PRIM_MATERIAL
+|type=integer
+|value=2
+|float=
+<center style="font-size:125%;">[http://youtube.com/watch?v=6OXYO61kQCA Video tutorial about material]</center>
+<videoflash>6OXYO61kQCA</videoflash>
+|desc=Sets the prim material. Material does not affect mass, but does affect friction, bounce (elasticity), and collision sound. On a wood incline of 33 degrees, the example script below gave the following results:
+
+{{{!}} class="sortable" {{Prettytable}}
+{{!}}+ <font style="font-size:80%;">Table detailing maximum velocity and distance traveled down the incline.</font>
+{{!}}- {{Hl2}}
+!Type
+!Velocity <font style="font-size:80%;">({{HoverText|m/s|meters per second}})</font>
+!Distance <font style="font-size:80%;">({{HoverText|m|meters}})</font>
+{{!}}-
+{{!}}[[PRIM_MATERIAL_STONE|Stone]]
+{{!}}0.453181
+{{!}}0.361655
+{{!}}-
+{{!}}[[PRIM_MATERIAL_METAL|Metal]]
+{{!}}5.475444
+{{!}}10.211180
+{{!}}-
+{{!}}[[PRIM_MATERIAL_GLASS|Glass]]
+{{!}}6.483150
+{{!}}11.678304
+{{!}}-
+{{!}}[[PRIM_MATERIAL_WOOD|Wood]]
+{{!}}2.154549
+{{!}}9.433724
+{{!}}-
+{{!}}[[PRIM_MATERIAL_FLESH|Flesh]]
+{{!}}0.351543
+{{!}}0.188043
+{{!}}-
+{{!}}[[PRIM_MATERIAL_PLASTIC|Plastic]]
+{{!}}4.502428
+{{!}}9.590952
+{{!}}-
+{{!}}[[PRIM_MATERIAL_RUBBER|Rubber]]
+{{!}}0.374964
+{{!}}0.187106
+{{!}}-
+{{!}}}
+|pa={{LSL Constant/List|i_front=[&#32;{{#var:material_const}},&#32;|i_end=&nbsp;]
+|text=When used with [[llSetPrimitiveParams]] & [[llSetLinkPrimitiveParams]]
+|i1_type=integer|i1_name=material
+|toc=llSetPrimitiveParams
+}}
+|pb={{LSL Constant/List|i_front=[[llGetPrimitiveParams]]([&nbsp;{{#var:material_const}}|i_end=&nbsp;]);|
+|r_front=Returns the list [&nbsp;|r_end=&nbsp;]
+|text
+|r1_type=integer|r1_name=material
+|toc=llGetPrimitiveParams
+}}
+|examples=
+<source lang="lsl2">// © 2008 by Karzita Zabaleta
+// Author of Scripting Your World, Wiley, October 2008.
+
+list gMaterialTypes = [
+  "STONE",
+  "METAL",
+  "GLASS",
+  "WOOD",
+  "FLESH",
+  "PLASTIC",
+  "RUBBER"
+];
+
+vector   gHomePosition;
+rotation gHomeRotation;
+integer  gWaitCount = 0; 
+float    gMaxVelMag;
+integer  gPrimMaterial;
+
+moveTo(vector origin, vector destination) {
+    float dist = llVecDist(origin, destination);
+    integer passes = llCeil( llLog(dist/10.0) / llLog(2.0) );
+    integer i;
+    list params = [PRIM_POSITION, destination];
+    for (i=0; i<passes; i++) {
+        params = (params=[]) + params + params;
+    }
+    // actually move the prim, now
+    llSetPrimitiveParams(params);
+}
+
+returnHome()
+{
+    llSetStatus(STATUS_PHYSICS, FALSE);
+    moveTo(llGetPos(),gHomePosition);
+    llSetTimerEvent(0);
+    llSetRot(gHomeRotation);
+}
+
+calculate_velocity()
+{
+    float velMag = llVecMag(llGetVel());
+    if (velMag > gMaxVelMag) {
+        gMaxVelMag = velMag;
+    }
+}
+
+default
+{
+    state_entry() {
+        gHomePosition = llGetPos();
+        gHomeRotation = llGetRot();
+    }
+    on_rez(integer _n) {
+        llResetScript();
+    }
+    touch_start(integer n) {
+        gMaxVelMag = 0;
+        llSetPrimitiveParams([PRIM_MATERIAL, gPrimMaterial]);
+        llSetStatus(STATUS_PHYSICS,TRUE);
+        llSetTimerEvent(0.1);
+        llResetTime();
+        gWaitCount=0;
+        gPrimMaterial++;
+        if (gPrimMaterial == 7 ) gPrimMaterial = 0;
+    }
+    timer() {
+        calculate_velocity();
+        gWaitCount++;
+        if (gWaitCount > 100) { // 10 seconds
+            string type = llList2String( gMaterialTypes, gPrimMaterial-1 );
+            llOwnerSay(type+" reached maximum velocity of "+(string)gMaxVelMag+
+                       " and traveled "+(string)llVecDist(llGetPos(), gHomePosition)+" meters.");
+            returnHome();
+        }
+    }
+}</source>
+|constants=
+{{!}}
+{{LSL Constants/PrimitiveParams/materials|table=*|sortable=*}}
+|functions=
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+|events=
+{{LSL DefineRow||[[changed]]|}}
+|location
+|haiku={{Haiku|The prims we conjure|can have many qualities.|There's more than plywood?}}
+|cat1=Collision
+|cat2=Prim/Materials
+|cat3=Material
+|cat4
+|}}

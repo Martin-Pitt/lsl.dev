@@ -1,0 +1,59 @@
+{{LSL_Function
+|inject-2={{LSL Function/offset|offset|noZ=*|sim=*}}
+|func=llWind
+|sort=Wind
+|func_id=44
+|func_sleep=0.0
+|func_energy=10.0
+|return_type=vector
+|p1_type=vector
+|p1_name=offset
+|func_footnote
+|return_text=that is the wind velocity at the prim's [[llGetPos|position]] + {{LSLPT|offset}}
+|spec
+|caveats
+|notes=
+* Each region simulates its own wind with a random seed value, and chaos is scaled by the region's sun position.
+** While the simulation is performed on a 16x16 grid, the wind has perfect resolution anywhere between those cells. (interpolated)
+** This low resolution tends to result in smooth gradients of wind, however sudden and strong changes in wind speed and direction are possible.
+** Vortexes and are also possible, sometimes multiple in the same region.
+* Neighboring regions influence each other at the connecting border, which may lead to cascading changes for either region.
+* Regions without neighbors exhibit very uniform wind across the whole region.
+** Wind will occasionally change direction over time, but eventually stabilizes toward the new direction.
+* Maximum wind speed can reach at least 20m/s.
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer num)
+    {
+        llSay(0, "Wind velocity: " + (string)llWind(ZERO_VECTOR));
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+// wind interpretation as angle and speed
+default
+{
+    state_entry()
+    {
+        vector windVector = llWind( ZERO_VECTOR);
+        float windSpeed = llVecMag( windVector);
+        float windDirection = llAtan2( windVector.y, windVector.x);
+        integer compassWind = ( 450 - (integer)( RAD_TO_DEG*windDirection))%360;
+        llOwnerSay( "\nWind direction: "+(string)compassWind+"°\nWind speed: "+(string)windSpeed+" m/S");
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llCloud]]}}
+|also_articles={{LSL DefineRow||{{LSLGC|Weather}}|SL Weather information}}
+{{LSL DefineRow||[[User:Dora_Gustafson/moderated_world_wind|Moderated in-world wind]]}}
+|notes
+|issues={{Issue/V1|SVC-3131|llWind() and viewer wind effects do not match}}
+|haiku={{Haiku|Softly blowing breeze|Calmly rustling through the tree|A gentle whisper}}
+|cat1=Region
+|cat2=Weather
+|cat3
+|cat4
+}}

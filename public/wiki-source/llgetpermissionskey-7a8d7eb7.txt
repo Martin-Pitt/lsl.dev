@@ -1,0 +1,71 @@
+{{Issues/SVC-4862}}{{LSL_Function
+|func_id=137|func_sleep=0.0|func_energy=10.0
+|func=llGetPermissionsKey|sort=GetPermissionsKey
+|return_type=key|return_subtype=avatar
+|func_footnote=Returns {{LSL Const|NULL_KEY|key|&quot;00000000-0000-0000-0000-000000000000&quot;|c=Evaluates to false in conditionals just like invalid keys.}} if permissions were neither granted nor declined (e.g., the permissions dialog was cancelled or otherwise ignored).
+|func_desc
+|Return_text=of the avatar that last granted or declined permissions to the script.
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">
+// 1. rez a cube
+// 2. create a new script and paste this
+// 3. save script
+// 4. right-click the prim and choose attach
+// 5. touch the prim
+
+announce_permissions_key()
+{
+    key permissionsKey = llGetPermissionsKey();
+
+    llSay(0, "key llGetPermissionsKey() = '" + (string)permissionsKey + "'");
+}
+
+default
+{
+    state_entry()
+    {
+        announce_permissions_key();
+
+        key owner = llGetOwner();
+        llRequestPermissions(owner, PERMISSION_ATTACH);
+    }
+
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        key owner = llGetOwner();
+        key permissionsKey = llGetPermissionsKey();
+
+        if (id == owner)
+        {
+            if (permissionsKey == owner)
+                llDetachFromAvatar();
+            else
+                llSay(0, "Can't detach from you, you have not granted ATTACH perms.");
+        }
+        else
+            llSay(0, "Sorry, you're not the owner!");
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_ATTACH)
+            announce_permissions_key();
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llGetPermissions]]|}}
+{{LSL DefineRow||[[llRequestPermissions]]|}}
+|also_tests
+|also_events={{LSL DefineRow||[[run_time_permissions]]|}}
+|also_articles
+|notes
+|cat1=Permissions/Script
+|cat2
+|cat3
+|cat4
+}}

@@ -1,0 +1,38 @@
+[[Category:LSL_Functions]]
+{{LSL_Function
+|func=llName2Key|func_sleep=0.0|func_energy=0.0
+|sort=NameToKey
+|return_type=key
+|p1_type=string|p1_name=name|p1_desc=Name of the avatar to retrieve the UUID of.
+|return_text=the Agent ID for the named agent in the region. If there is no agent with the specified name currently signed onto the region, this function returns the value NULL_KEY. Names are always provided in the form <nowiki>"First[ Last]" or "first[.last]"</nowiki> (first name with an optional last name.) If the last name is omitted a last name of "Resident" is assumed. Case is not considered when resolving agent names.
+|spec
+|caveats=* This function does not operate on historical names. For historical name lookup use [[llRequestUserKey]].
+|examples=<syntaxhighlight lang="lsl2">tellName2Key(string avatarName)
+{
+    key keyFromName = llName2Key(avatarName);
+    if (keyFromName == NULL_KEY)
+    {
+        llSay(0, "There is no agent with the name '" + avatarName + "' currently signed onto the region.");
+        return;
+    }
+    llSay(0, "Avatar key for name '" + avatarName + "': " + (string)keyFromName);
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        tellName2Key("rider.linden");
+        tellName2Key("Rider Linden");
+        tellName2Key(llDetectedName(0));
+    }
+}
+// If Rider Linden touches the object, the three lines should contain the answer c5a07167-9bbe-4944-a7b0-a9677afa134d
+</syntaxhighlight>
+|helpers
+|haiku={{Haiku|Glorious high noon|A last, tiny name converts|in spite of the key}}
+|related
+|also
+|also_functions=
+{{LSL DefineRow||[[llRequestUserKey]]}} to fetch avatar UUID by current or historical username.
+}}

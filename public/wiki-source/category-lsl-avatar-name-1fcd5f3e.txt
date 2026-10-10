@@ -1,0 +1,138 @@
+{{LSL Header|ml=*}}{{LSLC|}}{{LSLC|Avatar}}[[Category:Display Names]]
+{{RightToc}}
+===Names===
+From an LSL standpoint avatars can have 3 different names.
+
+{| {{Prettytable}}
+! Naming 
+! {{Hl2}} | Description
+! {{Hl2}} | Unique
+! {{Hl2}} | Get (in region)
+! {{Hl2}} | Request ([[dataserver]])
+! {{Hl2}} | [[llSensor]]([[llSensorRepeat|Repeat]]) flags
+! {{Hl2}} | {{LSLGC|Detected|detected}} events
+|-
+! {{Hl2}} | {{LSLGC|Display Name}}
+| The name that is displayed on the screen.
+| No
+| [[llGetDisplayName]]
+| [[llRequestDisplayName]]
+| [[Display Names/LSL#What about an AGENT_BY_DISPLAY_NAME flag for llSensor?|N/A]]
+| {{HoverText|N/A|Use llGetDisplayName in conjunction with llDetectedKey.}}
+|-
+! {{Hl2}} | {{LSLGC|Username}}
+| The name the users logs in with.
+| Yes
+| [[llGetUsername]]
+| [[llRequestUsername]]
+| [[AGENT_BY_USERNAME]]
+| {{HoverText|N/A|Use llGetUsername in conjunction with llDetectedKey.}}
+|-
+! {{Hl2}} | {{LSLGC|Legacy Name}}
+| An interface predating [[Display Names]].
+| Yes
+| [[llKey2Name]]
+| [[llRequestAgentData]]
+| [[AGENT_BY_LEGACY_NAME]]
+| [[llDetectedName]]
+|}
+{| {{Prettytable|style=float: right; margin-top: 0;}}
+|+ Name Formats by Account Type
+! Naming
+! {{Hl2}} | Modern
+! {{Hl2}} | Legacy
+|-
+! {{Hl2}} | Default {{LSLGC|Display Name}}
+| "FirstName"
+| "FirstName LastName"
+|-
+! {{Hl2}} | {{LSLGC|Username}}
+| "firstname"
+| "firstname.lastname"
+|-
+! {{Hl2}} | {{LSLGC|Legacy Name}}
+| "FirstName Resident"
+| "FirstName LastName"
+|}
+
+=== Modern and Legacy Accounts ===
+* Modern accounts are created by choosing a user name, which consists of one name (no spaces).
+* Legacy accounts were created by choosing two names: first and last names. These two names are used together to form the username.
+
+To maintain compatibility with legacy scripts (that expect two names), modern accounts are given the legacy last name "Resident".
+
+==== Default Display Name ====
+
+The default value of the Display Name depends upon the type of the account. For modern accounts, it is the first part of the Legacy Name (without the space and last name "Resident"; this is the same as the Username with capitalization used at registration time preserved). For legacy accounts, it is the full Legacy Name.
+<source lang="lsl2">
+string agentDefaultName(string agentUsername, string agentLegacyName) {
+    integer i = llStringLength(agentUsername);
+    if (i < llStringLength(agentLegacyName)) {
+        // modern account
+        return llDeleteSubString(agentLegacyName, i, -1);
+    } else {
+        // legacy account
+        return agentLegacyName;
+    }
+}
+</source>
+
+==== Legacy Name to Username ====
+
+The relationship between the Username and Legacy Name is simple. The Username for a specific Legacy Name is the Legacy Name in lowercase with the space replaced with a period. If the last name of the Legacy Name is "Resident", then the username is just the Legacy Name first name in lowercase (without the last name or the period).
+
+<source lang="lsl2">
+string agentUsername(string agentLegacyName) {
+    return llDumpList2String(llParseString2List(llToLower(agentLegacyName)+" ", [" resident ", " "],[]), ".");
+}</source>
+
+''If a Username is passed into this function instead of a Legacy Name, the Username will still be returned.''
+
+=== Changed names ===
+
+If your script has stored an avatar name and someone claims to be that avatar but they have changed their name, it is possible to combine two functions to find out if that is true.
+
+{{KBtip|custom=Avoid this problem|<br/>Don't store avatars by name because names can change; to remember an avatar, store the key}}
+
+Get the key for the name they claim to have used in the past using [[llRequestUserKey]]. You can compare that to any key for them you already have, or you can convert that key to its current name using [[llRequestUsername]]. An example script that does this is [[NameTest]].
+
+*''Please'' don't use LSL to provide these translations from outside Second Life using http requests; we have an [[Name to agent ID API|externally accessible API]] that provides the same capability and does not contribute to simulator lag.
+
+=== Other names ===
+
+====Complete Name====
+[[Viewer URI Name Space]] apparently also defines something called a Complete Name, which seems to be just the Display Name made unique by appending the Username in parenthesis when the Display Name is not set to its default value (and just the Display Name when it is set to its default value).
+<source lang="lsl2">
+string agentCompleteName(string agentDisplayName, string agentUsername, string agentLegacyName) {
+    if (agentDisplayName == agentDefaultName(agentUsername, agentLegacyName)) {
+        return agentDisplayName;
+    } else {
+        return agentDisplayName + " (" + agentUsername + ")";
+    }
+}
+</source>
+
+====Web Name====
+Some Second Life web pages (e.g., friends online: https://secondlife.com/my/account/friends.php or search results from: http://search.secondlife.com/) seem to return another form of naming similar to the Complete Name. This name is also just the Display Name made unique by appending a unique name in parenthesis when the Display Name is not set to its default value. The difference seems to be that the appended unique value is the default Display Name, instead of the Username, so this name always contains the default Display Name (with the current Display Name prepended).
+<source lang="lsl2">
+string agentWebName(string agentDisplayName, string agentUsername, string agentLegacyName) {
+    string agentDefaultName = agentDefaultName(agentUsername, agentLegacyName);
+    if (agentDisplayName == agentDefaultName) {
+        return agentDisplayName;
+    } else {
+        return agentDisplayName + " (" + agentDefaultName + ")";
+    }
+}
+</source>
+
+=== Legacy-Name Only Functions ===
+
+These functions only take Legacy Names and there are no alternative functions available.
+
+* [[llCollisionFilter]]
+* [[llListen]] - likewise the [[listen]] {{LSLGC|Events|event}} only has a Legacy Name parameter.
+
+===FAQs===
+There are a couple of FAQs that go into much more detail about this:
+* LSL FAQ: [[Display Names/LSL]]
+* General FAQ: [[Display Names]]

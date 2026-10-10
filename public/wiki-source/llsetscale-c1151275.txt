@@ -1,0 +1,53 @@
+{{LSL Function
+|func_id=47|func_sleep=0.0|func_energy=10.0
+|func=llSetScale
+|p1_type=vector|p1_name=size|p1_desc
+|func_desc=Sets the size of the prim according to {{LSLP|size}}
+|func_footnote=The components of {{LSLP|size}} ({{LSLP|x}}, {{LSLP|y}} & {{LSLP|z}}) each need to be in the range {{Interval|center=component|gte=0.01|lte=64.0}}{{Footnote|handle=interval}}, if they are out of the range they are rounded to the nearest endpoint.
+|spec
+|caveats=
+*This function only changes the size of the ''prim'' that the script is in. '''Not''' the entire object.
+*If the prim is part of a link set, rescaling will fail if the new size is too large or small to satisfy the [[Linkability Rules|linkability rules]].
+*Does not work on [[STATUS_PHYSICS|physical]] prims.
+|constants
+|examples=
+<source lang="lsl2">
+//A basic door that opens and closes when an avatar collides with it.
+//Not very effective, as it would be better to use llSetStatus(STATUS_PHANTOM, 1)...
+//But, it works.
+vector startingSize;
+default {
+     state_entry() {
+          startingSize = llGetScale();
+     }
+     collision_start(integer i) {
+          llSetScale(<0.1, 0.1, 0.1>); //Shrink
+          llSetPos(llGetPos() + <0.0,0.0,10.0>); //Hide us
+          llSetTimerEvent(3.0);
+     }
+     timer() {
+          llSetTimerEvent(0.0);
+          llSetScale(startingSize); //Go back to normal size
+          llSetPos(llGetPos() - <0.0,0.0,10.0>); //And where we started
+     }
+} //Code by Xaviar Czervik.
+</source>
+
+'''Curtain/Door script'''
+
+For a flexible curtain or door script using llSetScale(), see [[http://wiki.secondlife.com/wiki/Curtain_script]]
+
+|helpers
+|also_functions={{LSL DefineRow||[[llGetScale]]|Gets the prims size}}
+{{LSL DefineRow||[[llScaleByFactor]]|Uniformly rescale a linkset}}
+{{LSL DefineRow||[[llSetPrimitiveParams]]|Sets prims attributes}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|Gets prims attributes}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Prim
+|cat2
+|cat3
+|cat4
+|}}

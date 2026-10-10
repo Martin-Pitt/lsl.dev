@@ -1,0 +1,62 @@
+{{LSL_Function
+|inject-2={{LSL_Function/limits}}
+|func_id=202|func_sleep=0.0|func_energy=10.0
+|func=llGetObjectName
+|return_type=string
+|func_footnote={{LSL Tip|This function '''does not''' get the name of the object's rootprim, but the name of the prim containing the script. Please use [[llGetLinkName]]([[LINK_ROOT]]); instead.}}
+|func_desc
+|return_text=that is the name of the ''prim'' the script is attached to.
+|spec
+|caveats=*The prim name is limited to 63 bytes, any string longer than that will be truncated. This truncation does not always happen when the attribute is set or read.
+*This function may return "(Waiting)" sometimes. See: [[#Notes]]
+|constants
+|examples=
+{{{!}} class="sortable" width="100%" {{Prettytable}}
+{{!}}- {{Hl2}}
+! '''Get this prim's name'''
+! '''Get the root prim's name'''
+{{!}}-
+{{!!}}<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+    //  PUBLIC_CHANNEL has the integer value 0
+        llSay(PUBLIC_CHANNEL, "This prim's name: " + llGetObjectName() );
+    }
+}
+</source>
+{{!!}}
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+    //  PUBLIC_CHANNEL has the integer value 0
+        llSay(PUBLIC_CHANNEL, "Root prim's name: "
+            + llGetLinkName(LINK_ROOT));
+    }
+}
+</source>
+{{!}}}
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llSetObjectName]]|Set the prims name}}
+{{LSL DefineRow||[[llGetLinkName]]|Get a linked prims name}}
+{{LSL DefineRow||[[llGetObjectDesc]]|Get the prims description}}
+{{LSL DefineRow||[[llSetObjectDesc]]|Sets the prims description}}
+{{LSL DefineRow||[[llGetObjectDetails]]}}
+|also_tests
+|also_events
+|also_articles=
+{{LSL DefineRow||[[Prim Attribute Overloading]]}}
+|notes=
+==== Erroneous "(Waiting)" ====
+Presumably the function queries the asset server for a predetermined time and returns "(Waiting)" if that elapses.
+It then silently proceeds to the next instruction.
+A work around therefore, might be to test object name is not "(Waiting)" after calling llGetObjectName.
+|cat1=Prim
+|cat2
+|cat3
+|cat4
+}}

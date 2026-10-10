@@ -1,0 +1,54 @@
+{{LSL_Function
+|inject-2={{LSL Function/offset|offset}}
+|func_id=243|func_sleep=0.0|func_energy=10.0
+|func=llSetCameraEyeOffset|p1_type=vector|p1_name=offset
+|func_desc=Sets the camera eye {{LSLP|offset}} for avatars that sit on the object.
+|func_footnote=This is the position of the camera's eye, not the [[llSetCameraAtOffset|point it looks at]].
+|return_text
+|spec
+|caveats=
+* Setting this will not update the cameras of seated avatars, it will only effect avatars that subsequently sit down.  The camera settings have to be prepared in advance.
+* The {{LSLP|offset}} is [[Viewer_coordinate_frames#Local|locally relative]] to the object, if you want it relative to the seated [[Viewer_coordinate_frames#Agent|avatar]] (which likely has a custom sit rotation and offset) or the [[Viewer_coordinate_frames#Region|region]], you must do the computation yourself.
+* [[ZERO_VECTOR]] {{LSLP|offset}} will cancel any eye offset.
+* Camera position set by this function is a '''Prim Property'''. '''It will survive the script''' and it will survive prim taking and prim rezzing
+|constants
+|examples=<source lang="lsl2">// Sit the avatar looking at an arbitrary direction
+// Look over the avatar's shoulders from behind once it sits down
+
+back_view(float degrees)
+{
+     rotation sitRot = llAxisAngle2Rot(<0, 0, 1>, degrees * DEG_TO_RAD);
+    
+     llSitTarget(<0, 0, 0.1>, sitRot);
+        
+     llSetCameraEyeOffset(<-2, 0, 1> * sitRot);
+     llSetCameraAtOffset(<2, 0, 1> * sitRot);
+}
+
+default
+{
+    state_entry()
+    {
+        back_view( 208 );
+        llSay(0, "Please sit down");
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llSetLinkCamera]]|}}
+{{LSL DefineRow||[[llSetCameraAtOffset]]|}}
+{{LSL DefineRow||[[llForceMouselook]]|}}
+{{LSL DefineRow||[[llSetCameraParams]]|}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|cat1=Camera
+|cat2=Sit
+|cat3=Vehicle
+|cat4=Prim
+|cat5
+|cat6
+|cat7
+|cat8
+}}

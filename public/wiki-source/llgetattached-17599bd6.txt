@@ -1,0 +1,54 @@
+{{LSL_Function
+|func_id=224|func_sleep=0.0|func_energy=10.0
+|func=llGetAttached|return_type=integer|return_subtype=attach_point
+|func_footnote
+|func_desc
+|Return_text=the object is attached to or {{HoverText|zero|0}} if it is either not attached or is pending detachment.
+|spec
+|caveats
+|constants={{LSL_Constants_Attachment}}
+|examples=
+<syntaxhighlight lang="lsl2">default
+{
+    attach(key id)
+    {
+        if(id)//it's attached
+        {
+            if(llGetAttached() != ATTACH_LHAND)
+            {
+                llOwnerSay("Please attach me only to the left hand");
+                llRequestPermissions(id, PERMISSION_ATTACH);
+            }
+        }
+    }
+    run_time_permissions(integer a)
+    {
+        if(a & PERMISSION_ATTACH)
+            llDetachFromAvatar();
+    }
+}</syntaxhighlight>
+This snippet will make a prim invisible when attached, but visible when rezzed unattached
+<syntaxhighlight lang="lsl2">
+    on_rez(integer p)
+    {
+        // !llGetAttached() has the value 0 when attached, and 1 when unattached
+        llSetAlpha( !llGetAttached(), ALL_SIDES);
+    }
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llAttachToAvatar]]}}
+{{LSL DefineRow||[[llDetachFromAvatar]]}}
+{{LSL DefineRow||[[llGetAttachedList]]}}
+{{LSL DefineRow||[[llGetAttachedListFiltered]]}}
+{{LSL DefineRow||[[llGetObjectDetails]]|[[OBJECT_ATTACHED_POINT]]}}
+|also_events={{LSL DefineRow||[[attach]]}}
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|cat1=Attachment
+|cat2
+|cat3
+|cat4
+}}

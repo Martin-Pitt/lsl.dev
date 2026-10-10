@@ -1,0 +1,70 @@
+{{#if:
+
+{{:PRIM_TYPE}}
+
+}}<onlyinclude>{{#if:
+
+{{#vardefine:p_hole_shape_desc|PRIM_HOLE_* flag}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+* {{Anchor|z_taper}}{{LSLP|z_taper|top_size}} and client values are different, the ranges do not line up, conversion is required. This simple equation can be used: <tt>answer = 1.0 - value</tt>. See [[#top_size_Explained|top_size Explained]] for more information.
+}}
+
+{{#vardefine:deepnotes|{{#var:deepnotes}}
+<div style="text-align:justify;">
+<div style="float: right; margin-top:1em; margin-left:1em;">{{LSL_Constants/PrimitiveParams/taper}}</div>
+===={{LSL Param|z_taper|top_size}} Explained====
+When the original [[#PRIM_TYPE|PRIM_TYPE]] interface was retired ([[#PRIM_TYPE_LEGACY|PRIM_TYPE_LEGACY]], [http://secondlife.wikia.com/wiki/Version_1.5 SL 1.5]), the new [[#PRIM_TYPE|PRIM_TYPE]] interface did not yet support tapering of the bottom of the prim, this feature wasn't added until [http://secondlife.wikia.com/wiki/Version_1.11 SL 1.11] (two years later). Instead of retiring the new [[#PRIM_TYPE|PRIM_TYPE]] when it was added, the range of {{LSLP|top_size}} was enlarged; meanwhile in the client they redefined the parameter and it's values. This redefinition and range enlargement resulted in two interfaces that did the same thing but achieved it through different values. Meanwhile [[#PRIM_TYPE_LEGACY|PRIM_TYPE_LEGACY]]'s interface was not updated to support tapering of the bottom of the prim. Consequently all three interfaces have different ranges, making for a rather nasty caveat.
+</div>
+}}
+}}</onlyinclude>{{#if:
+
+}}{{LSL Constant
+|name=PRIM_TYPE_BOX
+|type=integer
+|value=0
+|desc=PRIM_TYPE_BOX is a parameter of [[PRIM_TYPE]] used to make prim into a box and to change specific properties that define the shape of that box.
+|pa={{LSL Constant/List|i_front=[ {{LSL_Const|PRIM_TYPE|integer|9}}, [[PRIM_TYPE_BOX]],&#32;|i_end=&nbsp;]
+|text={{LSL_Constants/PrimitiveParams/hole_shape}}
+|i1_type=integer|i1_name=hole_shape
+|i2_type=vector|i2_name=cut
+|i3_type=float|i3_name=hollow
+|i4_type=vector|i4_name=twist_box|i4_disp=twist
+|i5_type=vector|i5_name=z_taper|i5_disp=top_size
+|i6_type=vector|i6_name=top_shear
+|toc=PRIM_TYPE
+}}
+|pb={{LSL Constant/List|i_front=[ 1, [[PRIM_TYPE_BOX]],&#32;|i_end=&nbsp;]
+|text=This is the old PRIM_TYPE format for boxes (PRIM_TYPE used to be 1 instead of 9). Use the new format unless you are maintaining old code.
+|i1_type=vector|i1_name=cut
+|i2_type=float|i2_name=hollow
+|i3_type=float|i3_name=twist_end|i3_disp=twist
+|i4_type=vector|i4_name=top_size
+|i5_type=vector|i5_name=top_shear
+|toc=PRIM_TYPE_LEGACY
+}}
+|examples=
+<source lang="lsl2">llSetPrimitiveParams([PRIM_TYPE, 
+                        PRIM_TYPE_BOX, 
+                            PRIM_HOLE_DEFAULT,  // hole_shape
+                            <0.00, 1.0, 0.0>,   // cut
+                            0.0,                // hollow
+                            <0.0, 0.0, 0.0>,    // twist
+                            <1.0, 1.0, 0.0>,    // top_size
+                            <0.0, 0.0, 0.0>     // top_Shear
+                      ]);</source>
+|constants=
+{{LSL ConstRow|PRIM_TYPE}}
+{{LSL ConstRow|CHANGED_SHAPE}}
+|functions=
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+|events=
+{{LSL DefineRow||[[changed]]|}}
+|location
+|cat1=Prim
+|cat2
+|cat3
+|cat4
+}}

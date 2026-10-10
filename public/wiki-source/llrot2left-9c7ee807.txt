@@ -1,0 +1,40 @@
+{{LSL Function
+|func_id=19|func_sleep=0.0|func_energy=10.0
+|func=llRot2Left|sort=Rot2Left
+|return_type=vector|p1_type=rotation|p1_name=q
+|func_desc=Computes the orientation of the {{HoverText|local y-axis|left-direction of prim}} relative to the parent (i.e. relative to the root prim or the world).
+|return_text=that is the left vector defined by {{LSLP|q}}, i.e. a unit vector pointing in the local positive Y direction
+|spec=Mathematically equivalent to:
+<source lang="lsl2">ret = llVecNorm(<0., 1., 0.> * q);</source>
+If {{LSLP|q}} is known to be a unit quaternion then it can be simplified as:
+<source lang="lsl2">ret = <0., 1., 0.> * q;</source>
+Keep in mind that object and agent rotations will always be unit quaternions. For example, <0.0, 1.0, 0.0>*llGetRot() is about 25-30% faster than llRot2Left(llGetRot()) depending on the VM used. If done often and at extremely fast rates, it can be advantageous to even save <0.0, 1.0, 0.0> to a local/global variable and reuse it.
+|caveats
+|constants
+|examples=
+<source lang="lsl2">
+// Move an object 5 metres forwards along its own y axis, when touched, no matter how the object is oriented in world.
+// Works for a root or child prim
+default
+{
+    touch_start(integer total_number)
+    {
+        vector v = llRot2Left( llGetLocalRot() );
+        llSetPos( llGetLocalPos() + v * 5 );
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llRot2Up]]|}}
+{{LSL DefineRow||[[llRot2Fwd]]|}}
+{{LSL DefineRow||[[llRot2Axis]]|}}
+{{LSL DefineRow||[[llRot2Angle]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes=Can be useful to identify the orientation of the local {{Wikipedia|sagittal plane|sagittal-plane}} of the prim, since it's y-axis is always perpendicular to this local sagittal-plane.
+|cat1=Rotation
+|cat2
+|cat3
+|cat4
+}}

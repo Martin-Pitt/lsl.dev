@@ -1,0 +1,58 @@
+{{LSL_Function
+|func=llGetRot
+|sort=GetRot
+|func_id=62|func_sleep=0.0|func_energy=10.0
+|func_desc
+|func_footnote
+|return_type=rotation
+|return_text=that is the prim's rotation relative to the [[Viewer coordinate frames#Region|region]]'s axes.
+|constants
+|spec
+|caveats=
+* [[llGetRot]] incorrectly reports the avatars rotation when called from the root of an attached object, use [[llGetLocalRot]] for root prims, instead
+** [[llGetRot]] will return an accurate facing for Avatars seated or in mouselook, but only a rough direction otherwise when called from an attached prim.
+**When called in an attachment's child prim, the reported rotation will only be visually correct if the object's root is attached to [[ATTACH_AVATAR_CENTER]], at [[ZERO_ROTATION]]. Moving the attachment's root or changing the attachment point will not affect the reported rotation. Avatar animation is invisible to the simulator, so it also does not affect the reported rotation. Also see [[Rotation#Single_or_Root_Prims_vs_Linked_Prims_vs_Attachments|Single or Root Prims vs Linked Prims vs Attachments]].
+|examples=
+<source lang="lsl2"> //-- rotates an object to face the nearest cardinal direction (N,E,S,W)
+ //-- assumes build is aligned to root object facing
+
+default{
+  state_entry()
+  {
+    llSay( 0, "Rotate me in edit, then touch to make me face the nearest compass point" );
+  }
+
+  touch_start( integer vIntTouches )
+  {
+     //-- convert our rotation to x/y/z radians
+    vector vRadBase = llRot2Euler( llGetRot() );
+     //-- round the z-axis to the nearest 90deg (PI_BY_TWO = 90deg in radians)
+    llSetRot( llEuler2Rot( <0.0, 0.0, llRound( vRadBase.z / PI_BY_TWO ) * PI_BY_TWO > ) );
+  }
+}</source>
+|helpers
+|also_header
+|also_functions=
+{{LSL DefineRow||[[llGetLocalRot]]|}}
+{{LSL DefineRow||[[llGetRootRotation]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetRot]]|}}
+{{LSL DefineRow||[[llSetLocalRot]]|}}
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParamsFast]]|}}
+|also_tests
+|also_events
+|also_articles
+|also_footer
+|notes
+|mode
+|deprecated
+|location
+|cat1=Movement
+|cat2=Rotation
+|cat3=Prim
+|cat4
+|cat5
+|cat6
+}}

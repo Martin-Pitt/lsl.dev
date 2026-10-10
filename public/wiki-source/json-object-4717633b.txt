@@ -1,0 +1,70 @@
+{{LSL Constant
+|name=JSON_OBJECT
+|type=string
+|value="﷑"
+|dvalue={{HoverText|"﷑"|Special Unicode Character&#x000d;Unicode:&#x0009;U+FDD1&#x000d;HTML:&#x0009;&amp;#xFDD1;&#x000d;llUnescapeUrl({{String|%EF%B7%91}});}}
+|desc=Used with the [[llList2Json]] function to indicate that the list provided is a strided list of "Key", Value pairs (which may be empty), and that a string representing a Json object will be returned.
+
+Also a possible return value for the [[llJsonValueType]] function that indicates the Json data type of at the specifier location within a given Json text is, in fact, a JSON_OBJECT.
+|constants={{LSL Constants/JSON}}
+|examples=Showing use to form a Json object:
+<source lang="lsl2">string jsonText;
+
+default
+{
+	state_entry()
+	{
+		// NOTE: All even numbered elements in the supplied list MUST be strings or JSON_INVALID will be returned!
+		jsonText = llList2Json(JSON_OBJECT, ["A", 3, "B", <1.0,1.0,1.0>, "C", "A phrase", "D", PI]);
+	}
+	touch_start(integer total_number)
+	{
+		// In the resulting Json object, "Keys" are separarted from Values by a colon (:)
+		// and "Key":Value pairs by a comma (,).
+		llOwnerSay(jsonText); //  {"A":3,"B":"<1.000000, 1.000000, 1.000000>","C":"A phrase","D":3.141593}
+	}
+}</source>
+
+Showing usage to determine if a Value within a Json text is an object:
+<source lang="lsl2">string jsonText;
+
+default
+{
+	state_entry()
+	{
+		// Set jsonText to [3,{"A":77,"B":66},"A phrase"]
+		// A Json array whose second element is a Json object
+		jsonText = "[3,{\"A\":77,\"B\":66},\"A phrase\"]";
+		llOwnerSay(jsonText);
+	}
+	touch_start(integer total_number)
+	{
+		// Test the entirety of the Json text to see if it's an object
+		// Note use of the empty list for this
+		if (llJsonValueType(jsonText, []) == JSON_OBJECT)
+		{
+			llOwnerSay("The supplied string is a Json object.");
+		} else {
+			llOwnerSay("The supplied string is not a Json object."); // TRUE
+		}
+
+		// Test second element of the array
+		if (llJsonValueType(jsonText, [1]) == JSON_OBJECT)
+		{
+			llOwnerSay("The second element of the array is a Json object."); // TRUE
+		} else {
+			llOwnerSay("The second element of the array is not a Json object.");
+		}
+	}
+}</source>
+
+|functions=
+{{LSL DefineRow||[[llList2Json]]|}}
+{{LSL DefineRow||[[llJsonValueType]]|}}
+|events
+|cat1=JSON
+|cat2
+|cat3
+|cat4
+|self
+}}

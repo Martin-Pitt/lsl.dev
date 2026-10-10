@@ -1,0 +1,70 @@
+{{LSL_Function
+|inject-2={{LSL_Function/face|face}}
+|func=llScaleTexture
+|sort=ScaleTexture
+|func_id=54|func_sleep=0.2|func_energy=10.0
+|p1_type=float|p1_name=u|p1_desc=horizontal (x) scale in the interval {{Interval|lte=100.0|gte=-100.0|center=u}}|p1_hover=horizontal (x) scale in the interval {{Interval/Text|lte=100.0|gte=-100.0|center=u}}
+|p2_type=float|p2_name=v|p2_desc=vertical (y) scale in the interval {{Interval|lte=100.0|gte=-100.0|center=v}}|p2_hover=vertical (y) scale in the interval {{Interval/Text|lte=100.0|gte=-100.0|center=v}}
+|p3_type=integer|p3_name=face
+|func_footnote
+|func_desc=Sets the texture {{LSLP|u}} & {{LSLP|v}} scales for the chosen {{LSLP|face}}.
+|return_text
+|spec=In the default texture mapping mode the scale units are in texture repeats per face. In the planar texture mapping mode the scale units are in texture repeats per half meter. This is in contrast to the in-world editing tool, in which the planar texture scaling units are repeats per meter.
+|caveats
+|constants
+|examples=
+<source lang="lsl2">
+// WARNING:
+//      llScaleTexture has a delay of 200 miliseconds
+//      that means every time the function is called within a script it'll take 0.2 seconds
+//      for example the script below would take about 1.2 seconds....that's REALLY SLOW !!!
+//
+//      To work around that delay use the following instead:
+//
+//
+//      llSetLinkPrimitiveParamsFast(integer link,
+//          [PRIM_TEXTURE, integer face, string texture, vector repeats, vector offsets, float rotation_in_radians]);
+
+
+// *******************************************************************************************************************
+
+
+
+//Scales the textures on 6 sides
+float scale;
+
+default
+{
+    state_entry()
+    {
+        integer index;
+        while (index < 7)
+        {
+            scale += 0.1;
+            llScaleTexture((float)scale, (float)scale, index);
+
+            ++index;
+        }
+    }
+}
+
+// output:
+//      face 0 >> 0.1
+//      face 1 >> 0.2
+//      face 2 >> 0.3
+//      face 3 >> 0.4
+//      face 4 >> 0.5
+//      face 5 >> 0.6
+//      face 6 >> 0.7
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llGetTextureScale]]}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Texture
+|cat2
+|cat3
+|cat4
+}}

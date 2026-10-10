@@ -1,0 +1,75 @@
+{{LSL_Function
+|inject-2={{LSL_Function/avatar|avatar|sim=*}}{{Issues/VWR-12222}}{{Issues/SVC-5503}}
+|func_id=336|func_sleep=0.0|func_energy=10.0
+|func=llGetAgentLanguage
+|p1_type=key|p1_name=avatar|p1_desc
+|return_type=string
+|return_text=that is the language code of the preferred interface language of the user {{LSLP|avatar}}. 
+|func_desc
+|func_footnote
+|caveats=*If the user has "{{HoverText|Share language with objects|LanguageIsPublic}}" disabled then this function returns an empty string.
+*During a 1-5 seconds period after which an agent is logging in, this function will return an empty string as well, until the viewer sends the data to the simulator.
+*Users may prefer to see the client interface in a language that is not their native language, and some may prefer to use objects in the native language of the creator, or dislike low-quality translations. Consider providing a manual language override when it is appropriate.
+*New language/variant values may be added later. Scripts may need to be prepared for unexpected values.
+*If the viewer is set to "System Default" the possible return may be outside the list given above. see [http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes List of ISO 639-1 codes] for reference.
+*Viewers can specify other arbitrary language strings with the 'InstallLanguage' debug setting.  For example, launching the viewer with "--set InstallLanguage american" results this function returning 'american' for the avatar. {{Jira|VWR-12222}}
+**If the viewer supplies a multiline value, the simulator will only accept the first line and ignore all others. {{Jira|SVC-5503}}
+*Older viewers may return "en-us" instead of "en".
+|examples=<source lang="lsl2">
+default{
+    touch_start( integer num_detected ){
+        //-- loop through all detected touches
+        for (num_detected -= 1; num_detected > -1; num_detected -= 1 ){
+            key agent = llDetectedKey( num_detected );
+            string name = llGetDisplayName( agent );
+            string language = llGetAgentLanguage( agent );
+
+            if (("" == name) || ("???" == name))
+                name = llDetectedName( num_detected );
+
+            //-- PUBLIC_CHANNEL is 0
+            if (language == "es"){
+                llSay( PUBLIC_CHANNEL, "¡Hola, " + name + "!" );
+            }else if (language == "fr"){
+                llSay( PUBLIC_CHANNEL, "Salut, " + name + " !" );
+            }else if (language == "ja"){
+                llSay( PUBLIC_CHANNEL, "やあ、　" + name + "！" );
+            }else if (language == "de"){
+                llSay( PUBLIC_CHANNEL, "Hallo, " + name + "!" );
+            }else if (language == "en"){ //-- returned by some TPVs
+                llSay( PUBLIC_CHANNEL, "Hello, " + name + "!" );
+            }else if (language == "pt"){
+                llSay( PUBLIC_CHANNEL, "Olá!, " + name + "!" );
+            }else if (language == "ko"){
+                llSay( PUBLIC_CHANNEL, "안녕하세요, " + name + "!" );
+            }else if (language == "zh"){
+                llSay( PUBLIC_CHANNEL, "你好啊， " + name + "！" );
+            }else{ //-- Default to 'en-us' if language is unrecognized / not provided.
+                llSay( PUBLIC_CHANNEL, "Hi there, " + name + "!" );
+            }
+        }
+    }
+}</source>
+|spec
+|constants=
+{{{!}} cellspacing="0" cellpadding="0"
+{{!}}- valign='top'
+{{!}}
+{{LSL Constants/Language}}
+{{!}}If the viewer is set to "System Default" the possible return may not be in this list. See [http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes List of ISO 639-1 codes] for reference.
+
+The value can also be modified by directly editing the settings.xml file or with debug settings. So the value returned by llGetAgentLanguage may not be an ISO 639-1 value at all.
+{{!}}}
+|helpers
+|also_functions
+|also_tests
+|also_events
+|notes
+|history=*Introduced in {{SVN|568|rev=88085|branch=Release|anchor=file33|date=Wednesday, 21 May 2008}}
+*Modified to only return the first line with {{Jira|SVC-5503}}
+*Date of Release [[ Release_Notes/Second_Life_Release/1.21 | 16-10-2008 ]]
+|cat1=Avatar
+|cat2
+|cat3
+|cat4
+}}

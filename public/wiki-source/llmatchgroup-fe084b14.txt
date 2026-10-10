@@ -1,0 +1,105 @@
+{{LSL_Function
+|inject-2={{Issues/SCR-79}}{{LSL_Function/avatar|avatar|sim=*}}{{LSL_Function/group|group}}
+|func=llMatchGroup
+|sort=MatchGroup
+|func_id=0
+|func_sleep0.0
+|func_energy=0
+|func_desc=(Also suggested to be called as ''llIsGroupActive'' or ''llCheckGroupActive'').
+
+This function is a request from several scripters to reach what [[llDetectedGroup]] and [[llSameGroup]] is not able to provide. It would not cause any security and/or privacy issues due the fact it will return an integer as {{HoverText|boolean|TRUE or FALSE}} instead of any information about the group.
+
+Furthermore, this function will ''only'' check against an agent's current active group, something which can be readily discovered by most residents using the standard viewer even if the group is marked as hidden.
+|func_footnote=
+|return_type=integer
+|return_text={{HoverText|boolean|TRUE or FALSE}}; [[TRUE]] if the agent has '''group''' as active group, otherwise [[FALSE]].
+|p1_type=key|p1_name=avatar|p1_desc|p1_hover
+|p2_type=list|p2_name=group_keys|p2_desc=list of group UUIDs to check against '''{{LSL Param|avatar}}'''<nowiki>'</nowiki>s current active group|p2_hover=list of group UUIDs to check against avatar's current active group
+|p3_type|p3_name|p3_desc|p3_hover
+|p4_type|p4_name|p4_desc|p4_hover
+|spec=* Still unknow.
+|constants
+|caveats=* Can still check the agent's active group even if it is hidden.
+|examples=<source lang="lsl2">list group_keys = ["cd505f45-a33c-dcd5-eb7e-cad27847a4af", "a7729bfc-674b-10c7-edc0-461a3ee55ef4"]; //group keys
+key toucher;     // Key of person who touches the object
+
+default
+{
+    touch_start( integer total_number )
+    {
+        toucher = llGetDetected( 0 );
+
+        // It checks if the agent (avatar) has one of the groups in "group_keys" as active group
+        if( llMatchGroup( toucher, group_keys ) == TRUE )
+        {
+            llSay( 0, "You belong to the group" );
+        }
+        else
+        {
+            llSay( 0, "You don't belong to the group" );
+        }
+    }
+}</source>
+
+Only one group:
+<source lang="lsl2">list group_key = ["cd505f45-a33c-dcd5-eb7e-cad27847a4af"];
+key toucher;    // Key of person who touches the object
+
+default
+{
+    touch_start( integer total_number )
+    {
+        toucher = llGetDetected( 0 );
+
+        // It checks if the agent (avatar) has one of the groups in "group_keys" as active group
+        if( llMatchGroup( toucher, group_key ) == TRUE )
+        {
+            llSay( 0, "You belong to the group secondlife:///app/group/" +
+                       (string)llList2String( group_key, 0 ) + "/about" );
+        }
+        else
+        {
+            llSay( 0, "You don't belong to the group secondlife:///app/group/" +
+                       (string)llList2String( group_key, 0 ) + "/about" );
+        }
+    }
+}</source>
+|helpers
+|also_header
+|also_functions={{LSL DefineRow||[[llDetectedGroup]]|Used in conjunction with {{LSLGC|Detected|detection}} events}}
+{{LSL DefineRow||[[llSameGroup]]}}
+|also_tests
+|also_events
+|also_articles
+|also_footer
+|notes=
+----
+Please go vote if this feature is important to you. [https://jira.secondlife.com/browse/SCR-79 Jira (SCR-79)]
+|comments="A function, tentatively titled llMatchGroup(), which takes two parameters: an agent/object key and a group key, and returns a boolean result. (e.g. integer llMatchGroup(key target, key group); ) The function simply checks "target"'s active group against the key "group", returns a 1 if the two match and returns a 0 if they do not. For the purposes this is intended to cover it would only need to work for targets located within the same sim. (Though it would be nice if it could check targets 96m within adjacent sims, a la llGetObjectDetails().)
+
+I believe this function would satisfy both needs for the most part; it would allow scripters to set up multi-group authorization systems, but would not allow them to potentially breach resident privacy by in essence "fishing" for group information as implementing [https://jira.secondlife.com/browse/SVC-1612 SVC-1612] would allow. Any scripts using it would have to know the key of the group in advance to get any meaningful information out of this.
+
+It should also be noted that this functionality is strongly desired, to the point where designers use rather complex methods to accomplish this despite the heavy overhead required. I've seen a few security/etc. setups where the system relied on multiple objects set to different groups, each using llSameGroup() within intercommunicating scripts in order to allow multiple-group access checking. Implementing this would allow developers to use self-contained scripts to accomplish the same thing."
+
+
+----
+"'''IF''' this idea is implemented, I'd much rather see the function called llIsGroupActive or llCheckGroupActive as llMatchGroup is too vague."
+
+
+----
+"The best will be llMatchGroup(key avat, list group_keys), allowing to check more than one group at once. Function will return TRUE if avat active group is one of the list.
+For instance in RP sims, doors have to check access for the main group but also for ally groups, sub-groups, etc. So it will make one call instead of many.
+
+I hope LL sees that as long such function is missing we have to implement heavy workarounds (making one scripted object per group to check, another script to communicate with each object, and dealing with auto-return). This would save server script time and memory."
+
+* Texts extracted from [https://jira.secondlife.com/browse/SCR-79 Jira (SCR-79)]
+|mode=request
+|deprecated
+|location
+|cat1=Functions
+|cat2
+|cat3
+|cat4
+|cat5
+|cat6
+}}

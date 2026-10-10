@@ -1,0 +1,193 @@
+{{LSL_Function
+|inject-2={{Issues/SCR-325}}{{Issues/SCR-326}}{{Issues/SCR-327}}{{LSL_Function/permission|PERMISSION_CONTROL_CAMERA}}
+|func_id=313|func_sleep=0.0|func_energy=10.0
+|func=llSetCameraParams
+|p1_type=list|p1_subtype=instructions|p1_name=rules|p1_desc=Format is [ rule1, data1, rule2, data2 . . . rulen, datan ]
+|func_footnote
+|func_desc=Sets multiple camera parameters at once.
+|return_text
+|spec
+|caveats=*Camera control currently (server 1.38) only supported for attachments and objects on which you are sitting. An attempt otherwise will result in an error being shouted on [[DEBUG_CHANNEL]].
+*Scripted camera parameters are overriden for agents who are in [[Flycam|Free Camera mode]] ''(Alt + Click)''. '''No error is returned if this is the case'''; however when the agent returns to regular camera mode, their camera will go to the scripted camera position.
+*When [[CAMERA_FOCUS]] is not defined, it is advised that [[CAMERA_FOCUS_THRESHOLD]] is set to 0.0 - this is because when left at it's default value, it may prevent the camera from focusing on the correct point, instead focusing just to the side of the intended point.
+*A [[CAMERA_FOCUS_OFFSET]] of [[ZERO_VECTOR]] will always look at the same position as returned by llGetPos() for the avatar
+**When seated, this is also the position of "Avatar Center" when hover height is 0
+**When standing, this has a shape-dependent z-offset from "Avatar Center". (currently investigating [[User:Tapple Gao|Tapple Gao]] ([[User talk:Tapple Gao|talk]]))
+*Cannot be used to control the camera in Mouselook.
+|examples=
+
+You can either set the camera in region relative coordinates or you can make the camera follow your avatar.
+
+'''Region relative coordinates, an example:'''
+
+<syntaxhighlight lang="lsl2">lookAtMe( integer perms )
+{
+    if ( perms & PERMISSION_CONTROL_CAMERA )
+    {
+        vector camPos = llGetPos() + (relCamP * llGetRot() * turnOnChair) ;
+        vector camFocus = llGetPos() ;
+        llClearCameraParams(); // reset camera to default
+        llSetCameraParams([
+            CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+            CAMERA_FOCUS, camFocus, // region relative position
+            CAMERA_FOCUS_LOCKED, TRUE, // (TRUE or FALSE)
+            CAMERA_POSITION, camPos, // region relative position
+            CAMERA_POSITION_LOCKED, TRUE // (TRUE or FALSE)
+        ]);
+    }
+}</syntaxhighlight>
+Note that Focus and Position are both locked. This first example makes the camera look at ''camFocus'' from ''camPos''. 
+
+'''Camera follow avatar, an example:'''
+
+<syntaxhighlight lang="lsl2">lookAtMe( integer perms )
+{
+    if ( perms & PERMISSION_CONTROL_CAMERA )
+    {
+        llClearCameraParams(); // reset camera to default
+        llSetCameraParams([
+            CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+            CAMERA_BEHINDNESS_ANGLE, 30.0, // (0 to 180) degrees
+            CAMERA_BEHINDNESS_LAG, 0.0, // (0 to 3) seconds
+            CAMERA_DISTANCE, 10.0, // ( 0.5 to 10) meters
+          //CAMERA_FOCUS, <0,0,5>, // region relative position
+            CAMERA_FOCUS_LAG, 0.05 , // (0 to 3) seconds
+            CAMERA_FOCUS_LOCKED, FALSE, // (TRUE or FALSE)
+            CAMERA_FOCUS_THRESHOLD, 0.0, // (0 to 4) meters
+            CAMERA_PITCH, 10.0, // (-45 to 80) degrees
+          //CAMERA_POSITION, <0,0,0>, // region relative position
+            CAMERA_POSITION_LAG, 0.0, // (0 to 3) seconds
+            CAMERA_POSITION_LOCKED, FALSE, // (TRUE or FALSE)
+            CAMERA_POSITION_THRESHOLD, 0.0, // (0 to 4) meters
+            CAMERA_FOCUS_OFFSET, <2.0, 0.0, 0.0> // <-10,-10,-10> to <10,10,10> meters
+        ]);
+    }
+}
+</syntaxhighlight>
+Note that in this second example Focus and Position are NOT locked and not even set. This is appropriate for making the camera follow a pilot on a vehicle.
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llClearCameraParams]]}}
+{{LSL DefineRow||[[llGetCameraPos]]}}
+{{LSL DefineRow||[[llGetCameraRot]]}}
+{{LSL DefineRow||[[llSetLinkCamera]]}}
+{{LSL DefineRow||[[llSetCameraEyeOffset]]}}
+{{LSL DefineRow||[[llSetCameraAtOffset]]}}
+|also_events
+|also_tests=
+{{LSL DefineRow||[[llSetCameraParams Test]]}}
+|also_articles=
+{{LSL DefineRow||[[FollowCam]]}}
+|notes
+|cat1=Camera
+|cat2
+|cat3
+|cat4
+|constants={{{!}} class="sortable" {{Prettytable|style=margin-top:0;}}
+{{!}}- {{Hl2}}
+! Rule
+!
+! Parameter
+!class="unsortable"{{!}} Default
+!class="unsortable"{{!}} Value Range
+!class="unsortable"{{!}} Description
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_ACTIVE|integer|12}}
+{{!}} {{#var:cvalue}}&nbsp;&nbsp;
+{{!}} [[integer]]&nbsp;isActive
+{{!}} {{LSL Const|FALSE|integer|0}}
+{{!}} {{LSL Const|TRUE|integer|1}} or {{LSL Const|FALSE|integer|0}}
+{{!}} Turns on or off [[script|scripted]] control of the camera.
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_BEHINDNESS_ANGLE|integer|8}}
+{{!}} {{#var:cvalue}}
+{{!}} [[float]]&nbsp;degrees
+{{!}} 10.0
+{{!}} 0 to 180
+{{!}} Sets the angle in degrees within which the camera is not constrained by changes in target rotation.
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_BEHINDNESS_LAG|integer|9}}
+{{!}} {{#var:cvalue}}
+{{!}} [[float]]&nbsp;seconds
+{{!}} 0.0
+{{!}} 0 to 3
+{{!}} Sets how strongly the camera is forced to stay behind the target if outside of behindness angle.
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_DISTANCE|integer|7}}
+{{!}} {{#var:cvalue}}
+{{!}} [[float]]&nbsp;meters
+{{!}} 3.0
+{{!}} 0.5 to 50
+{{!}} Sets how far away the camera wants to be from its target.
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_FOCUS|integer|17}}
+{{!}} {{#var:cvalue}}
+{{!}} [[vector]]&nbsp;position
+{{!}} n/a
+{{!}} n/a
+{{!}} Sets camera focus (target position) in [[Viewer coordinate frames#Region|region coordinates]].
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_FOCUS_LAG|integer|6}}
+{{!}} {{#var:cvalue}}
+{{!}} [[float]]&nbsp;seconds
+{{!}} 0.1
+{{!}} 0 to 3
+{{!}} How much the camera lags as it tries to aim towards the target.
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_FOCUS_LOCKED|integer|22}}
+{{!}} {{#var:cvalue}}
+{{!}} [[integer]]&nbsp;isLocked
+{{!}} {{LSL Const|FALSE|integer|0}}
+{{!}} {{LSL Const|TRUE|integer|1}} or {{LSL Const|FALSE|integer|0}}
+{{!}} Locks the camera focus so it will not move.
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_FOCUS_OFFSET|integer|1}}
+{{!}} {{#var:cvalue}}
+{{!}} [[vector]]&nbsp;[[meter|meters]]
+{{!}} <0.0,0.0,0.0>
+{{!}} <-10,-10,-10> to <10,10,10>
+{{!}} Adjusts the camera focus [[position]] relative to the target.
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_FOCUS_THRESHOLD|integer|11}}
+{{!}} {{#var:cvalue}}
+{{!}} [[float]]&nbsp;meters
+{{!}} 1.0
+{{!}} 0 to 4
+{{!}} Sets the radius of a sphere around the camera's target position within which its focus is not affected by target motion.
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_PITCH|integer|0}}
+{{!}} {{#var:cvalue}}
+{{!}} [[float]]&nbsp;degrees
+{{!}} 0.0
+{{!}} -45 to 80
+{{!}} Adjusts the angular amount that the camera aims straight ahead vs. straight down, maintaining the same distance; analogous to 'incidence'."
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_POSITION|integer|13}}
+{{!}} {{#var:cvalue}}
+{{!}} [[vector]]&nbsp;position
+{{!}} n/a
+{{!}} n/a
+{{!}} Sets camera position in [[Viewer coordinate frames#Region|region coordinates]].
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_POSITION_LAG|integer|5}}
+{{!}} {{#var:cvalue}}
+{{!}} [[float]]&nbsp;seconds
+{{!}} 0.1
+{{!}} 0 to 3
+{{!}} How much the camera lags as it tries to move towards its 'ideal' position.
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_POSITION_LOCKED|integer|21}}
+{{!}} {{#var:cvalue}}
+{{!}} [[integer]]&nbsp;isLocked
+{{!}} {{LSL Const|FALSE|integer|0}}
+{{!}} {{LSL Const|TRUE|integer|1}} or {{LSL Const|FALSE|integer|0}}
+{{!}} Locks the camera position so it will not move.
+{{!}}- 
+{{!}} {{LSL Const|CAMERA_POSITION_THRESHOLD|integer|10}}
+{{!}} {{#var:cvalue}}
+{{!}} [[float]]&nbsp;meters
+{{!}} 1.0
+{{!}} 0 to 4
+{{!}} Sets the radius of a sphere around the camera's ideal position within which it is not affected by target motion.
+{{!}}}
+|}}

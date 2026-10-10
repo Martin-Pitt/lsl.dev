@@ -1,0 +1,60 @@
+{{Issues/SVC-5772}}{{LSL_Constant/string}}{{LSL Constant
+|name=NULL_KEY
+|type=string
+|value="00000000-0000-0000-0000-000000000000"
+|desc=<span style="color:red;">'''NULL_KEY is a [[string]].'''</span> However it is only really useful as a [[key]].
+
+For {{LSLGC|Conditional}} tests, NULL_KEY evaluates to '''TRUE''' like other strings.
+
+For list search (like [[llListFindList]]), NULL_KEY won't match null keys whose type is '''key''' without typecasting.
+|examples=
+<source lang="lsl2">
+// Returns 2 for valid keys, 1 for NULL_KEY, 0 for invalid keys.
+integer isKey(key input)
+{
+    if (input) return 2;
+    return (input == NULL_KEY);
+}
+</source>
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        // NULL_KEY itself is evaluated as FALSE only when typecast to key.
+        if (NULL_KEY) { llOwnerSay("NULL_KEY is TRUE");  } // Correct.
+        else          { llOwnerSay("NULL_KEY is FALSE"); } // Never.
+
+        if ((key) NULL_KEY) { llOwnerSay("Casted NULL_KEY is TRUE");  } // Never.
+        else                { llOwnerSay("Casted NULL_KEY is FALSE"); } // Correct.
+
+        // NULL_KEY won't match keys in lists without typecasting.
+        // The following list contains a null key because avatars don't have creators:
+        list details = llGetObjectDetails(llGetOwner(), [OBJECT_CREATOR]);
+        integer index = llListFindList(details, [NULL_KEY]);
+        if (index >= 0) { llOwnerSay("NULL_KEY was found in list"); } // Never.
+        else             { llOwnerSay("NULL_KEY was NOT found in list"); } // Correct.
+    }
+}
+</source>
+|notes=In most situations NULL_KEY isn't needed; an empty string ("") will suffice. To take advantage of this certain practices have to be avoided. In many applications keys are checked against NULL_KEY to determine if they are valid; this is bad practice.
+
+LSL makes it easy to check if a key is valid. Simply use the key as the parameter for a conditional.
+
+That is, instead of <code>if(uuid != NULL_KEY)</code>, use <code>if(uuid)</code>. <code>if(uuid)</code> will only return [[TRUE]] if it is a valid key that is also not a null key.
+|functions=
+{{LSL DefineRow||[[llAvatarOnSitTarget]]|}}
+{{LSL DefineRow||[[llDetectedKey]]|}}
+{{LSL DefineRow||[[llGetNotecardLine]]|}}
+{{LSL DefineRow||[[llGetLandOwnerAt]]|}}
+{{LSL DefineRow||[[llGetPermissionsKey]]|}}
+{{LSL DefineRow||[[llGetTexture]]|}}
+{{LSL DefineRow||[[llListen]]|}}
+|events=
+{{LSL DefineRow||[[attach]]|}}
+|haiku={{Haiku|My hopes for nothing|but for thirty two zeros,|have been dashed, four times.}}
+|cat1=Key
+|cat2
+|cat3
+|cat4
+}}

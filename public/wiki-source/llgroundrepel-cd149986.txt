@@ -1,0 +1,43 @@
+{{LSL_Function
+|inject-2={{LSL_Function/physical}}
+{{LSL_Function/damping|tau}}
+|func=llGroundRepel
+|func_id=230|func_sleep=0.0|func_energy=10.0
+|p1_type=float|p1_name=height|p1_desc=Distance above the ground
+|p2_type=integer|p2_name=water|p2_desc=boolean, if [[TRUE]] then hover above water too.
+|p3_type=float|p3_name=tau
+|func_footnote=Do not use with vehicles.
+|func_desc=Critically damps to {{LSLP|height}} if within <code>{{LSLPT|height}} * 0.5</code> of ground or water level (which ever is higher). 
+|return_text
+|spec=Does not pull the object down if it is stuck higher than that, unlike the similar [[llSetHoverHeight]].
+
+To stop llGroundRepel, this seems to work: <code>llGroundRepel(0.0, FALSE, 0.0)</code>
+|caveats=
+* This is not a prim property; stopping or resetting the script stops llGroundRepel; same with the similar [[llSetHoverHeight]]
+* Crossing a sim border will cancel llGroundRepel, unlike [[llSetHoverHeight]]
+* A negative height value allows you to hover underwater, same as [[llSetHoverHeight]]
+* A previous version of this page suggested that [[llStopHover]] will stop llGroundRepel, but it does not
+|constants
+|examples=<source lang="lsl2">default
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHYSICS, TRUE);
+        llGroundRepel(0.5, TRUE, 0.2); // In a 1/2 meter cube this is roughly the minimum height for any noticeable effect.
+        // to
+        llGroundRepel(4096.0, TRUE, 0.2); // There is no restrictive maximum.
+        // However as the prim reaches 4096 meters (bear in mind the prim height will be (float height + ground height))
+        // it will be too high to be allowed to exist.
+    }
+}// This is actually a remarkably fast way to go straight up!!</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llSetHoverHeight]]| Similar to llGroundRepel, but also pulls down}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Hover
+|cat2=Movement
+|cat3=Physics
+|cat4
+}}

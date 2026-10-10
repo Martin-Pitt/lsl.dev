@@ -1,0 +1,71 @@
+{{LSL_Function
+|inject-2={{LSL_Function/limits}}{{LSL_Function/chat||msg}}
+|func_id=292|func_sleep=0.0|func_energy=10.0
+|func=llOwnerSay|p1_type=string|p1_name=msg
+|func_desc=Says {{LSLP|msg}} to the object's owner only, if the owner is currently in the same [[region]].
+|return_text
+|spec
+|caveats=
+* If {{LSLP|msg}} is longer than 1024 bytes, it will be truncated to 1024 bytes. This can convey 1024 ASCII characters, or fewer if non-ASCII are present.
+* Silently fails ~45 seconds after the owner leaves the region the object is in.
+* Silently fails when the object to which the script is attached is [[deed]]ed to a group.
+* Some viewers do not display llOwnerSay text when {{LSLP|msg}} is empty ({{String}}).
+* Produces swirly particle effects for the owner (who sees the message) but these effects do not appear to be visible to other avatars (who don't).
+|constants
+|examples=
+<source lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        llOwnerSay("Ouch!");
+    }
+}
+</source>
+|helpers=
+<source lang="lsl2">
+// llOwnerSay extension for preventing silent failures
+// paste this code at the top of the script and replace
+// any calls to llOwnerSay with uOwnerSayPlus
+
+uOwnerSayPlus(string inputString)
+{
+    key owner = llGetOwner();
+
+    // single owner that the region still has a handle for
+    if (llKey2Name(owner))
+    {
+        llOwnerSay(inputString);
+    }
+    // group owned, must send the message publicly
+    else if (llList2Key(llGetObjectDetails(llGetKey(), [OBJECT_GROUP]), 0) == owner)
+    {
+        llWhisper(0, "/me : " + inputString);
+    }
+    // single owner, not present, send them an IM
+    else
+    {
+        llInstantMessage(owner, inputString);
+    }
+}
+</source>
+|also_functions=
+{{LSL DefineRow||[[llRegionSay]]|Sends chat region wide}}
+{{LSL DefineRow||[[llWhisper]]|Sends chat limited to 10 meters}}
+{{LSL DefineRow||[[llSay]]|Sends chat limited to 20 meters}}
+{{LSL DefineRow||[[llShout]]|Sends chat limited to 100 meters}}
+{{LSL DefineRow||[[llRegionSayTo]]|Sends private chat region wide}}
+{{LSL DefineRow||[[llInstantMessage]]|Sends private chat anywhere on the grid}}
+|also_events
+|also_tests=
+{{LSL DefineRow|[[llOwnerSay Test]]|}}
+|also_articles
+|notes
+|permission
+|negative_index
+|cat1=Communications
+|haiku={{Haiku|Speak to me only.|Murmur secrets in my ear:|Clandestine whispers.}}
+|cat2=Chat
+|cat3
+|cat4
+}}

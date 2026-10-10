@@ -1,0 +1,419 @@
+Basic Tutorial on LSL.
+By [[User:James Benedek|James Benedek]]
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+
+When you create a '''New Script''' from within the Content tab of a prim or from the context menu of your inventory, the system writes a simple script with the following lines of LSL code:
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+    touch_start(integer total_number)
+    {
+        llSay(0, "Touched.");
+    }
+}
+</source>
+
+The above script will basically chat "Hello, Avatar!" on the public channel when it is created and will then chat "Touched." on the same public channel when an avatar touches the prim the script is in.
+
+'''Script formatting and Indenting'''
+-------------------------------
+Throughout these examples you will observe a strict layout being followed. Each closing } aligns vertically with its opening {. Code within { and } is indented. It is strongly recommended that you follow this practice rigorously. While the compiler is only concerned with bracket matching, indenting and vertical bracket alignment are of great assistance when studying the logic of a script. There is a free tool, lslEditor, for editing, compiling, and even testing scripts off-world, that includes an excellent facility for automatically indenting your code correctly. You can download lslEditor from http://sourceforge.net/projects/lsleditor/  and the auto-indent facility is invoked via CTRL+D.
+
+'''Errors and how to fix them?'''
+---------------------------
+If you get an error while scripting at any time, it may well be that you have missed
+out a ; at the end of a function or a { or a } after or before an event. These are the most
+common errors (a syntax error). Sometimes this may not be the case though.
+
+'''Basic terms''':
+-----------------------------
+LSL '''Functions''' are shown as red within the Script Editor's composing window.
+
+LSL '''Events''' are shown in blue.
+
+'''TRUE''' and '''FALSE''' are Boolean variables. [[FALSE]] is equal to the integer 0 and [[TRUE]] is equal to the integer 1.
+
+'''DATA Types'''
+
+A '''String''' is a string of alphanumeric characters surrounded by quotation marks, (eg. "Hello Bill").
+
+An '''Integer''' is a whole number between −2,147,483,648 and +2,147,483,647, which includes 0.
+
+A '''Float''' is a number with a decimal fraction like 1.0 or 1.23456 depending on the precision you need in your calculations.
+
+A '''Vector''' is a set of three floats enclosed in < pointy brackets > like so: <0.0, 0.0, 0.0>. They can represent colours and positions.
+
+A '''Key''' is a randomly generated Universally Unique Identifier (UUID). This specialized string consists of 32 hex characters with four dashes.
+
+
+'''TASK 1''':
+-------
+Let's begin by learning an easy task first by making the box say something else
+when you touch/click it. You can do this by editing the "[[llSay]](0, "Touched.");" line within the touch_start event. Just edit the string between the quote marks. The function [[llSay]]()'s format is interpreted as meaning:
+[[llSay]](Channel number to transmit the text, "string of text to send");
+
+[[llSay]] is not the only communication function within the LSL. You can also try out:
+
+[[llShout]](Channel, "SHOUT STUFF");//can be heard 100m away from originating script
+[[llWhisper]](Channel, "WHISPER STUFF");//can be heard 10m distance
+[[llOwnerSay]]("SAY STUFF TO YOU ONLY");
+[[llRegionSay]](Channel, "REGION SAY STUFF");//can be heard within the entire region
+
+
+'''TASK 2''':
+-------
+Let's just add some information after this explaining what it each thing does,
+you can do this by adding // and anything after it will appear orange, this is a comment.
+Your script should look something like this:
+
+<source lang="lsl2">
+default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+        llSay(0, "Touched.");
+    }
+}
+</source>
+
+'''TASK 3''':
+-------
+Let's now try make it change its color when we click it, the function we will need is
+llSetColor, its layout is like this llSetColor(vector color, integer face); this basically
+means if i wanted the cube to be red i would use the vector <1,0,0>, green <0,1,0>, blue <0,0,1>.
+For a full color chart see the link below:
+
+http://www.lslwiki.net/lslwiki/wakka.php?wakka=color
+
+If it was a linked object you could use [[llSetLinkColor]]; its layout is
+[[llSetLinkColor]](integer linknumber, vector color, integer face).
+Your script should look something like this:
+
+<source lang="lsl2">
+default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+    //  color all faces red
+        llSetColor(<1.0, 0.0, 0.0>, ALL_SIDES);
+    }
+}
+</source>
+
+
+'''TASK 4''':
+-------
+Let's now make it have text appear over it, you can do this by using the function
+[[llSetText]], its layout is [[llSetText]](string text, vector color, float alpha).
+Basically if you do this [[llSetText]]("HELLO CAN YOU READ THIS",<1,0,0>,1);
+will appear as HELLO CAN YOU READ THIS in the colour red. Alpha is the transparency,
+if you did [[llSetText]]("HELLO CAN YOU READ THIS",<1,0,0>,0); you wouldn't be able to see it.
+0 = high transparency, 0.5 = in the middle, 1 = no transparency.
+Your script should look something like this:
+
+<source lang="lsl2">
+default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+    //  green and opaque floattext
+        llSetText("Nice to meet you!", <0.0, 1.0, 0.0>, 1.0);
+    }
+}
+</source>
+
+'''TASK 5''':
+-------
+Now that you understand alpha we shall make our object disappear!
+To do this we will use the function [[llSetAlpha]], its layout is [[llSetAlpha]](float alpha, integer face).
+[[llSetAlpha]](0, [[ALL_SIDES]]); would make all the faces of the object transparent.
+If it was a linked object you could use [[llSetLinkAlpha]], which its layout is
+[[llSetLinkAlpha]](integer linknumber, float alpha, integer face).
+Your script should look something like this:
+
+<source lang="lsl2">
+default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+    //  set all faces to transparent
+        llSetAlpha(0.0, ALL_SIDES);
+    }
+}
+</source>
+
+
+'''Task 6''':
+-------
+Let's try make our object texture itself, to do this we will use the function [[llSetTexture]], its
+layout is [[llSetTexture]](string texture, integer face).You can do this two ways, you can place a
+texture inside the object or use a UUID. To make it change to a texture you have placed inside
+the object, do it like this [[llSetTexture]]("NAME OF TEXTURE", [[ALL_SIDES]]);
+If you want to use a UUID, find a texture in your inventory, right click it > copy asset UUID,
+then paste the UUID in the "" so it looks like this
+[[llSetTexture]]("j4m3s000-0000-0000-0000-b3n3d3k00000", [[ALL_SIDES]]);
+If it was a linked object you could use llSetLinkTexture, which its layout is
+[[llSetLinkTexture]](integer linknumber, string texture, integer face);
+Your script should look something like this:
+
+<source lang="lsl2">
+default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+    //  apply texture within contents of the same prim
+        llSetTexture("name of texture", ALL_SIDES);
+    }
+}
+</source>
+
+'''Task 7''':
+-------
+Now let's move onto something more tricky. As you understand a bit about keys we will make our object
+only respond when the owner clicks the object. This is called an if statement.
+To do this we will need to use the functions [[llGetOwner]]() and [[llDetectedKey]](0);, [[llGetOwner]] will
+return your key UUID and [[llDetectedKey]](0) when put under the touch event will return the key of who is
+clicking/touching your object. So firstly lay out your script like this:
+
+<source lang="lsl2">
+default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+        key owner = llGetOwner();
+        key touchingAvatar = llDetectedKey(0);
+
+        if (owner == touchingAvatar)
+            llSay(0, "Touched by owner.");
+    }
+}
+</source>
+
+If you want it to do something when someone else other than the owner touches it, use an else statement.
+You can do this by laying out your script like this:
+
+<source lang="lsl2">
+default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+        key owner = llGetOwner();
+        key touchingAvatar = llDetectedKey(0);
+
+        if (owner == touchingAvatar)
+            llSay(0, "Touched by owner.");
+        else
+            llSay(0, "Touched by someone else.");
+    }
+}
+</source>
+
+'''Task 8''':
+-------
+Now let's try make an object do something when you say something, to do this
+we will have to use a [[llListen]] function, its layout is this
+[[llListen]](integer channel, string name, key id, string msg);
+We will firstly place this under the state_entry() event.
+In this task we will just make it use the public channel, which is 0, and we will make it
+listen to only you, which requires the [[llGetOwner]]() function we used previously.
+We will then need to use a listen event, its layout is like this
+listen(integer channel, string name, key id, string message) {, replace the touch event with this.
+we will then make the object annoy you by it saying "Really?" whenever you type something XD
+This will involve using a [[llSay]] like we used in task 1.
+Your script should look something like this:
+
+<source lang="lsl2">
+default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        key owner = llGetOwner();
+
+        llListen(0, "", owner, "");
+    }
+
+//  when something has been heared
+    listen(integer channel, string name, key id, string message)
+    {
+        llSay(0, "Received: '" + message + "'.");
+    }
+}
+</source>
+
+To make it only listen for commands not on the [[PUBLIC_CHANNEL]], which will be more secret and
+which is less laggy in complex scripts, you can do this by changing the integer 0 to something
+like 99, this time use a [[llOwnerSay]] instead of a llSay, which should make it secret.
+Your script should look something like this:
+
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llListen(99,"",llGetOwner(),"");
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+
+        llOwnerSay("Really?");
+    }
+}
+</source>
+
+To chat in another channel, just type in the chat bar /channel before you type something,
+in this case it will be "/99 hello" for example.To make it do only certain stuff when you say
+certain commands we will have to use a if statement, like before but this time we will have
+to check if the message equals the command, [[if]] (message == "Your Command Here").
+Your script should look something like this:
+
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llListen(99,"",llGetOwner(),"");
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        if (message == "hello")
+        {
+            llOwnerSay("Hello to you too!");
+        }
+        else
+        {
+            llOwnerSay("INVALID COMMAND");
+        }
+    }
+}
+</source>
+
+To learn more about llListen take a look at:
+
+https://wiki.secondlife.com/wiki/llListen
+
+'''TASK 9''':
+-------
+Now let's experiment with vectors, and make your object move non physically,
+to do this we will need to use the function [[llSetPos]], its layout is [[llSetPos]](vector pos);
+We will also use [[llGetPos]]() so we can make it move +1 of its current position.
+Place the [[llSetPos]] function under a touch event with a vector <0,0,1> + [[llGetPos]]();.
+Your script should look something like this:
+
+<source lang="lsl2">
+default
+{
+//  when the script has been saved (only in default) or when re-entering this state
+    state_entry()
+    {
+        // Some scripters prefer to use a 'Mnemonic Constant' for channel zero
+        // However, Mnemonic constants are much more useful and are recommended for less obvious values like CHANGED_OWNER instead of remembering the value 128
+        // Here is an example. 'PUBLIC_CHANNEL' has the value 0.
+        llSay(PUBLIC_CHANNEL, "Hello, Avatar!");
+    }
+
+//  when someone starts touching the prim
+    touch_start(integer num_detected)
+    {
+        vector oldPosition = llGetPos();
+
+        llSetPos(oldPosition + <0.0, 0.0, 1.0>);
+    }
+}
+</source>
+
+A position vector layout is in the format x,y,z, so <0,0,1> will make it go up 1m.
+to learn more take a look at:
+
+https://wiki.secondlife.com/wiki/llSetPos
+
+'''TASK 10''':
+--------
+Like when editing an object, you can make it Phantom, Physical...
+You can also do this with scripting, the function you have to use to do this is
+[[llSetStatus]], its layout is [[llSetStatus]](integer status, integer value);, so if i wanted
+to make my object go physical the integer status would be [[STATUS_PHYSICS]] or 1, if i wanted
+to make my object go phantom i would use [[STATUS_PHANTOM]] or 16.
+Your script should look something like this:
+
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHYSICS, TRUE);
+    }
+}
+</source>
+
+---------------------------------------------------------------------------------------------------
+
+You now know pretty much the basics of scripting,
+but there are still many more functions to use and experiment with yet!!!!!!
+To know more functions and what they do, take a look at these links below:
+
+http://wiki.secondlife.com/wiki/LSL_Portal
+
+http://www.lslwiki.net/lslwiki/wakka.php?wakka=HomePage
+
+http://rpgstats.com/wiki/index.php?title=Main_Page
+
+---------------------------------------------------------------------------------------------------
+{{LSLC|Tutorials}}

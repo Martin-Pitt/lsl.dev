@@ -1,0 +1,41 @@
+{{Issues/SVC-6549}}{{LSL Constant
+|name=STATUS_PHYSICS
+|type=integer
+|value={{LSL Hex|0x1}}
+|desc=This property (set FALSE by default) if set TRUE allows that the object is subject to and can offer physical interactions and forces.
+|examples=Simple script to turn on and off the physics of an object.
+<syntaxhighlight lang="lsl2">default
+{
+    state_entry()
+    {
+        llSetTimerEvent(llFrand(10) + 5.0); // Set a random time in seconds between 5 and 15
+    }
+    timer()
+    {
+        if(!llGetStatus(STATUS_PHYSICS)) // Check the physical status is non-phys
+        {
+            llSetStatus(STATUS_PHYSICS, TRUE); // Set the object physical
+            llMoveToTarget(llGetPos() + <0.0,0.0,10.0>, 1.0); // Move to a point 10 meters above the present position
+        }
+        else // If physical
+        {
+            llSetStatus(STATUS_PHYSICS, FALSE); // Set the object non-phys
+            llSetTimerEvent(0.0); // Stop the timer
+        }
+    }
+}</syntaxhighlight>
+|constants=
+{{!}}
+{{{!}}
+{{LSL DefineRow||[[PRIM_PHYSICS]]|}}
+{{!}}}
+{{LSL Constants/Status|no_default=*}}
+|functions=
+{{LSL DefineRow||[[llSetStatus]]|}}
+{{LSL DefineRow||[[llGetStatus]]|}}
+|events=
+|cat1=Status
+|cat2
+|cat3
+|cat4
+}}

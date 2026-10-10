@@ -1,0 +1,46 @@
+{{LSL_Function
+|func_id=77|func_sleep=0.0|func_energy=10.0
+|sort=GetVel
+|func=llGetVel|return_type=vector
+|func_footnote=Speed is the magnitude of the velocity. Speed is measured in meter per second.<br>
+Velocity reported is relative to the [[Viewer coordinate frames#Global|global coordinate frame]] (the object rotation has no affect on this functions output).<br>
+For physic objects , velocity is the velocity of its center of mass [[llGetCenterOfMass]] . ( When the object has some torque and has not force , position of the object moves ( it turns )  , but its center of mass is unchanged , so the velocity is null )
+|func_desc
+|return_text=that is the velocity of the object.
+|spec
+|caveats
+|constants
+|examples=<source lang="lsl2">//A very simple (and not very effective) way of keeping a physical object in place.
+//If you ever want to actually stop an object, use llMoveToTarget(llGetPos(), .1)
+
+default
+{
+    state_entry()
+    {
+        vector spd;
+        {
+            @loop;
+            if (llVecMag(spd = llGetVel()) > .001)
+            { //We're accelerating...
+                llApplyImpulse(-spd, 0); //Slow us down.
+            }
+        jump loop;
+        }
+    }
+}//Written by Xaviar Czervik</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetAccel]]|}}
+{{LSL DefineRow||[[llGetOmega]]|}}
+{{LSL DefineRow||[[llGetForce]]|Gets the objects force}}
+{{LSL DefineRow||[[llGetTorque]]|}}
+{{LSL DefineRow||[[llGetMass]]|}}
+|also_events
+|also_articles
+|notes=To get the velocity relative the local frame (the direction the object is pointing), divide the output of this function by that of its rotation.
+<source lang="lsl2">vector local_vel = llGetVel() / llGetRot()</source>
+|cat1=Physics
+|cat2=Movement
+|cat3=Vehicle
+|cat4
+}}

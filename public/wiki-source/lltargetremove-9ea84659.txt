@@ -1,0 +1,57 @@
+{{LSL_Function
+|inject-2={{LSL Function/handle|handle|at_target|not_at_target}}
+|func_id=67|func_sleep=0.0|func_energy=10.0
+|func=llTargetRemove
+|p1_type=integer|p1_subtype=handle|p1_name=handle
+|func_footnote
+|func_desc=Removes positional target {{LSLP|handle}} registered with [[llTarget]]
+|return_text
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">
+integer target_id;
+vector target_pos;
+
+default
+{
+    state_entry()
+    {
+        target_pos = llGetPos() + <1.0, 0.0, 0.0>;
+        target_id = llTarget(target_pos, 0.5);
+    }
+    at_target(integer tnum, vector targetpos, vector ourpos)
+    {
+        if (tnum == target_id)
+        {
+            llOwnerSay("object is within range of target");
+            llOwnerSay("target position: " + (string)targetpos + ", object is now at: " + (string)ourpos);
+            llOwnerSay("this is " + (string)llVecDist(targetpos, ourpos) + " meters from the target");
+            llTargetRemove(target_id);
+        }
+    }
+    not_at_target()
+    {
+        llOwnerSay(
+            "not there yet - object is at " + (string)llGetPos() + 
+            ", which is " + (string)llVecDist(target_pos, llGetPos()) + 
+            " meters from the target (" + (string)target_pos + ")"
+        );
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llTarget]]}}
+{{LSL DefineRow||[[llRotTarget]]}}
+{{LSL DefineRow||[[llRotTargetRemove]]}}
+|also_tests
+|also_events={{LSL DefineRow||[[at_target]]}}
+{{LSL DefineRow||[[not_at_target]]}}
+|also_articles
+|notes
+|cat1=Target
+|cat2=Physics
+|cat3=Stop
+|cat4=At Target
+}}

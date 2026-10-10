@@ -1,0 +1,66 @@
+{{LSL_Function
+|inject-2={{LSL Function/uuid|target|object=*}}
+|func=llEvade
+|func_desc=Characters will (roughly) try to hide from their pursuers if there is a good hiding spot along their fleeing path. Hiding means no direct line of sight from the head of the character (center of the top of its physics bounding box) to the head of its pursuer and no direct path between the two on the navmesh.|
+|p1_type=key
+|p1_name=target
+|p1_desc=&#32;to evade
+|p2_type=list
+|p2_subtype=instructions
+|p2_name=options
+|p2_desc=No options currently available
+|caveats=*Must use [[llCreateCharacter]] or script will shout an error "You must call llCreateCharacter before llEvade.".
+<!--*Vertical positions specified for any vectors should be chosen to be as close as possible to the actual height of the terrain requested. Large difference between the provided vertical position and the actual terrain/object will result in failure of the behavior.-->
+*If the {{LSLP|target}} is an object, it must be unlinked or be the root prim of a linkset.
+|examples=
+<source lang="lsl2">
+vector start_position;
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        llDeleteCharacter();
+        llCreateCharacter([CHARACTER_MAX_SPEED, 25, CHARACTER_DESIRED_SPEED, 15.0]);
+
+        start_position = llGetPos();
+        llWanderWithin(start_position, <10.0, 10.0, 2.0>, [] );
+    }
+ 
+    touch_start(integer num_detected)
+    {
+        llEvade(llDetectedKey(0), []);
+        llSetTimerEvent(20.0);
+    }
+
+    timer()
+    {
+    //  do not keep running away...
+        llSetTimerEvent(0.0);
+
+        llWanderWithin(start_position, <10.0, 10.0, 2.0>, [] );
+    }
+}
+</source>
+|also_functions=
+* [[llCreateCharacter]]
+* [[llDeleteCharacter]]
+* [[llEvade]]
+* [[llExecCharacterCmd]]
+* [[llGetClosestNavPoint]]
+* [[llFleeFrom]]
+* [[llNavigateTo]]
+* [[llPatrolPoints]]
+* [[llPursue]]
+* [[llUpdateCharacter]]
+* [[llWanderWithin]]
+|also_events=
+* [[path_update]]
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/12#12.07.31.262785 | 31/07/2012 ]]
+|cat1=Pathfinding
+}}

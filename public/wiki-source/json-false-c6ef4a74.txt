@@ -1,0 +1,63 @@
+{{LSL Constant
+|name=JSON_FALSE
+|type=string
+|value="�"
+|dvalue={{HoverText|"�"|Special Unicode Character&#x000d;Unicode:&#x0009;U+FDD7&#x000d;HTML:&#x0009;&amp;#xFDD7;&#x000d;llUnescapeUrl({{String|%EF%B7%97}});}}
+|desc=Return value for [[llJsonValueType]] function indicating the data type of a given address specifier in a given string-serialized JSON object.
+
+Also used to set the bare word 'false' as a Value within a Json text using [[llJsonSetValue]] and [[llList2Json]]. 
+|constants={{LSL Constants/JSON}}
+|examples=
+<source lang="lsl2">
+//  showing difference between JSON_TRUE & JSON_FALSE
+//  and their LSL equivalents within a JSON text string
+
+run_json_test(string input)
+{
+//  [true,false]
+    say(input);
+
+//  unicode equivalent of JSON_FALSE
+    say(llJsonGetValue(input, [1]));
+
+    input = llList2Json(JSON_ARRAY, [TRUE, FALSE]);
+
+//  [1,0]
+    say(input);
+
+//  0
+    say(llJsonGetValue(input, [1]));
+}
+
+say(string message)
+{
+    llOwnerSay(message);
+//  llRegionSayTo(llGetOwner(), PUBLIC_CHANNEL, message);
+//  llWhisper(PUBLIC_CHANNEL, message);
+}
+ 
+default
+{
+    touch_end(integer num_detected)
+    {
+        string TEST_STRING_JSON = llList2Json(JSON_ARRAY, [
+                                              JSON_TRUE, JSON_FALSE]);
+
+//      copy 'TEST_STRING_JSON' from the following function call
+//      to the string 'input' in the function declaration
+//      and run a test on 'input' to not (!) modify 'TEST_STRING_JSON'
+//      but its copy instead
+
+        run_json_test(TEST_STRING_JSON);
+    }
+}
+</source>
+|functions=
+{{LSL DefineRow||[[llJsonValueType]]|}}
+|events
+|cat1=JSON
+|cat2
+|cat3
+|cat4
+|self
+}}

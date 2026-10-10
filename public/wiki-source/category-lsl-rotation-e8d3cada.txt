@@ -1,0 +1,71 @@
+{{LSL Header|ml=*}}{{LSLC|}}{{LSLC|Types}}
+A rotation is a data {{LSLGC|Types|type}} that contains a set of four {{LSLGC|Float|float}} values.
+
+===Components===
+Each element can be accessed individually by appending .x, .y, .z or .s to the variable name.
+
+<syntaxhighlight lang="lsl2">
+rotation rot = <1, 2, 3, 4>;
+float x = rot.x; // 1.0
+float y = rot.y; // 2.0
+float z = rot.z; // 3.0
+float s = rot.s; // 4.0
+</syntaxhighlight>
+
+Note that components can be only accessed with rotation variables. Attempting to access the components of a rotation literal or a return value from a function is illegal.
+<syntaxhighlight lang="lsl2">
+// These are not valid component accesses
+float f1 = <0.707, 0, 0, 0.707>.x;
+float f2 = llGetRot().s;
+</syntaxhighlight>
+
+===Operators===
+Rotations support the following operations:
+==== Composition, Operators "*" and "/" ====
+Composition combines two rotations into a new rotation representing the combined action of both, unlike addition/subtraction. "/" rotates in the opposite direction to "*". Composition is not commutative, i.e. the order of the operands matters.
+<syntaxhighlight lang="lsl2">
+// 90 degree rotation around x-axis
+rotation r1 = llEuler2Rot(<PI_BY_TWO, 0, 0>); // <0.70711, 0, 0, 0.70711>
+// 90 degree rotation around z-axis
+rotation r2 = llEuler2Rot(<0, 0, PI_BY_TWO>); // <0, 0, 0.70711, 0.70711>
+// combined rotation
+rotation r3 = r1*r2; // <0.5, 0.5, 0.5, 0.5>
+// combined rotation, r2 in reverse direction
+rotation r4 = r1/r2; // <0.5, -0.5, -0.5, 0.5>
+// note the non-commutativity: different result from r1*r2
+rotation r5 = r2*r1; // <0.5, -0.5, 0.5, 0.5>
+</syntaxhighlight>
+* Rotation multiplication is always true [[quaternion]] multiplication, but division is multiplication by the {{wikipedia|Quaternion#Conjugation,_the_norm,_and_reciprocal|conjugate}} instead. This will not produce true quaternion results unless the rotation is normalized.<ref name="division">I.e. rotation division is <code>q/p = qp̅</code>. To get true quaternion division <code>q/p = qp̅/‖p‖²</code> even for non-normalized rotations, the result must be divided by the squared magnitude of the divisor <code>m = ‖p‖² = p.x*p.x+p.y*p.y+p.z*p.z+p.s*p.s</code>. Since LSL doesn't support multiplying/dividing a rotation by a float, the scaling must be done componentwise, e.g. <code>p = <p.x/m, p.y/m, p.z/m, p.s/m></code> or by multiplying by a scalar rotation <code>p = p*<0, 0, 0, 1.0/m></code>.</ref>
+
+==== Vector Rotation, Operators "*" and "/" ====
+Produces a rotated vector. "/" rotates in the opposite direction to "*".
+Vectors can be rotated only from the right side: rotation*vector is illegal.
+<syntaxhighlight lang="lsl2">
+// vector pointing 1 unit forward (x), 2 units left (y), 0 units up (z)
+vector v = <1, 2, 0>;
+// see r1-r5 from composition example above
+vector vr1 = v*r1; // <1, 0, 2> - rotated 90 degrees around x-axis
+vector vr2 = v*r2; // <-2, 1, 0> - rotated 90 degrees around z-axis
+vector vr3 = v*r3; // <0, 1, 2> - rotated 90 degrees around x, then 90 degrees around z
+vector vr4 = v*r4; // <0, -1, 2> - rotated 90 degrees around x, then -90 degrees around z
+vector vr4 = v*r5; // <-2, 0, 1> - rotated 90 degrees around z, then 90 degrees around x
+</syntaxhighlight>
+
+==== Addition and Subtraction, Operators "+" and "-" ====
+Note that this is only component-wise addition and does ''not'' combine two rotations in a way that is meaningful for rotation calculations.
+<syntaxhighlight lang="lsl2">
+rotation ra = <1, 2, 3, 4> + <0.5, 0.5, 0.5, 0.5>; // <1.5, 2.5, 3.5, 4.5>
+rotation rs = <1, 2, 3, 4> - <0.5, 0.5, 0.5, 0.5>; // <0.5, 1.5, 2.5, 3.5>
+</syntaxhighlight>
+
+==Uses==
+Functions in this category fall into two categories: rotations in the purely mathematical sense and rotations as in prim / object rotation. The [[rotation]] page has detailed information about how to work with rotations. [[Quaternion]] is an alias for variables of rotation type, and the article explains some further mathematical details behind them.
+* Rotations are also the most memory-efficient way of storing non-rotation related bundles of 4 [[float]] values, especially inside [[list]]s.
+* Rotations can substitute for {{wikipedia|Complex number|complex numbers}}: by choosing one of the x/y/z components to represent the complex imaginary part, the s component to represent the real part and leaving the others at 0, the rotation operations behave like their complex equivalents, other than division that requires adjustment<ref name="division"/>.
+
+==Useful Snippets==
+To reverse a rotation (say something is facing north and you want it to face south, e.g. 180 degrees difference), add pi to the z value of the euler vector:
+<syntaxhighlight lang="lsl2">llEuler2Rot(<0.0, 0.0, PI>) * llGetRot()</syntaxhighlight>
+
+== Footnotes ==
+<references/>

@@ -1,0 +1,73 @@
+{{LSL_Function
+|inject-2={{Issues/SCR-66}}
+{{LSL_Function/uuid|target|sim=*|group=}}
+|func_id=363
+|func_sleep=0.0
+|func_energy=10.0
+|func=llRegionSayTo
+|sort=RegionSayTo
+|p1_type=key|p1_name=target
+|p2_type=integer|p2_name=channel
+|p3_type=string|p3_name=msg
+|func_desc=Says<ref name="send">In this context, ''saying'' or ''speaking'' means that a message is being ''sent'' to the recipient (object or avatar); it's not about audio/voice chat!</ref> the text supplied in string {{LSLP|msg}} on channel supplied in [[integer]] {{LSLP|channel}} to the [[object]] or [[avatar]] specified by {{LSLP|target}}
+|return_text
+|spec
+|caveats=
+*Text is spoken<ref name="send" /> directly to the [[object]] or [[avatar]] within the same [[region]] as the [[script]].
+*Script in tasks other than {{LSLP|target}} can neither listen for<ref>In this context, this means waiting to ''receive'' a message.</ref>, nor receive these text messages, with an exception for attachments as described below.
+*{{LSLP|msg}} can be a maximum of 1024 bytes. This can convey 1024 ASCII characters, or 256-512 multibyte UTF-8 characters such as <code>á</code> (2 bytes), <code>ℋ</code> (3 bytes) or <code>🧡</code> (4 bytes).
+*A [[prim]] cannot hear itself, to prevent problems with recursion. Use [[llMessageLinked]] instead for intra-prim messaging.
+*Sending text on {{LSLP|DEBUG_CHANNEL}} is not supported.
+*Text sent to an avatar's [[UUID|ID]] on channel [[PUBLIC_CHANNEL|zero]] will be sent to the receiver's viewer.
+*Text sent to an avatar's ID on non-zero channels can be heard<ref>I.e., ''received''</ref> by any attachment on the avatar.
+*A quick series of messages sent by [[llRegionSayTo]] cannot be relied on to arrive at their destination in the same order as sent.
+*There is a per-destination throttle of 200 messages sent over 10 seconds on channel [[PUBLIC_CHANNEL|zero]].   Thereafter, there is also a per-sending-object throttle of 100 messages on channel zero over 300 seconds (5 minutes).  This throttle is relevant only after the first throttle is activated.  Messages sent on channels other than zero do not trigger the throttle but, once it is triggered, the block applies to ''all'' channels. The block is region-wide and applies to all objects with the same [[:Category:LSL_Owner|owner]]. The block apparently lasts until the region is restarted.
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+
+        // send a message to the chat window of the avatar touching
+        llRegionSayTo(id, 0, "You touched this!");
+
+        // send a message to the attachments of the avatar touching
+        // example channel: -12345
+        llRegionSayTo(id, -12345, "Hello there attachments!");
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_events=
+{{!}}-
+{{!}}{{!}}{{!}} style="width:9em;" {{!}}
+{{LSL DefineRow||[[listen]]|Receives chat}}
+|also_functions=
+{{!}}-
+{{!}}{{!}}{{!}} style="width:9em;" {{!}}
+{{LSL DefineRow||[[llListen]]|Ask for [[listen]] events}}
+{{LSL DefineRow||[[llInstantMessage]]|Sends chat to a specific avatar, inside or outside the current region.}}
+{{LSL DefineRow||[[llOwnerSay]]|Sends chat to the owner only to avoid spamming the [[PUBLIC_CHANNEL]]}}
+{{LSL DefineRow||[[llRegionSay]]|Sends chat region wide}}
+{{LSL DefineRow||[[llSay]]|Sends chat limited to 20 meters}}
+{{LSL DefineRow||[[llShout]]|Sends chat limited to 100 meters}}
+{{LSL DefineRow||[[llWhisper]]|Sends chat limited to 10 meters}}
+|also_tests
+|also_articles={{LSL DefineRow||[[Hello Avatar]]}}
+|notes=
+* If one object 'says'<ref name="send" /> something to another object (''e.g.'', a button that, when touched, turns on a lamp), consider using a very negative {{LSLP|channel}}, ''e.g.'',
+:<syntaxhighlight lang="lsl2">llRegionSayTo("55499a64-45c3-4b81-8880-8ffb5a7c251b", -5243212, "turn on");</syntaxhighlight>
+:Using negative channels for script communications remains a common practice because, prior to September 2016, the standard Second Life Viewer was unable to chat directly on those channels (<kbd>/-xxxx message</kbd> wouldn't chat {{mono|message}} on {{LSLPT|channel}} {{mono|-xxxx}}). 
+* Messages sent on channel zero via [[llRegionSayTo]]() are blocked after 200 messages on to the same destination in a 10 second period.  After this throttle is activated, there is a further throttle, on objects belonging to the owner of the object that triggered the first throttle, of 100 messages per object over 5 minutes (see {{Jira|BUG-5457}}). The block is region-wide and applies to all objects belonging to the owner, so if a script triggers the throttle, all objects in the same region belonging to the same owner will also be blocked. Messages sent on channels other than zero do not trigger the throttles.  The throttles apparently reset only when the region is restarted. 
+
+Therefore, [[llRegionSayTo]]() is unsuitable for (say) verbose script debugging, and even moderate use can break users' content completely unrelated to the script for an indeterminate (and potentially very long) period of time.   Consider using [[llOwnerSay]]() for debugging instead or, if this is not appropriate, try {{mono|llRegionSayTo(avatar, non-zero-channel, message)}} and have an attachment relay the message using [[llOwnerSay]](). 
+|cat1
+|cat2
+|cat3
+|cat4
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/11#11.04.26.227686 | 26/04/2011 ]]
+}}
+
+[[Category:LSL_Chat]]

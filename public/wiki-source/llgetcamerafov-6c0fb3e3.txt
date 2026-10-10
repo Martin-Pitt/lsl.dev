@@ -1,0 +1,57 @@
+{{LSL_Function/permission|PERMISSION_TRACK_CAMERA}}{{LSL_Function
+|func=llGetCameraFOV
+|sort=GetCameraFOV
+|func_id=546
+|func_sleep=0.0
+|func_energy=10.0
+|return_type=float
+|func_desc
+|return_text=value for the current camera's field of view (FOV), in radians, of the agent for which the task has permissions.
+|spec
+|caveats=Returns zero when permissions have not been granted.
+|examples=
+<syntaxhighlight lang="lsl2">// say the camera aspect ratio and field of view (FOV)
+integer has_perms = FALSE;
+default
+{
+    on_rez(integer a)
+    {
+        llResetScript();
+        has_perms = FALSE;
+    }
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TRACK_CAMERA);
+    }
+    run_time_permissions(integer permission)
+    {
+        has_perms = (permission == PERMISSION_TRACK_CAMERA);
+    }
+    touch_start(integer num_touches)
+    {
+        if (has_perms)
+        {
+            float aspect = llGetCameraAspect();
+            float fov = llGetCameraFOV();
+            llOwnerSay("aspect = " + (string)aspect + "  FOV = " + (string)fov);
+        }
+        else
+        {
+            llRequestPermissions(llGetOwner(), PERMISSION_TRACK_CAMERA);
+        }
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||{{LSLG|llGetCameraAspect}}|}}
+{{LSL DefineRow||{{LSLG|llGetCameraPos}}|}}
+{{LSL DefineRow||{{LSLG|llGetCameraRot}}|}}
+{{LSL DefineRow||{{LSLG|llSetCameraParams}}|}}
+{{LSL DefineRow||{{LSLG|llSetCameraAtOffset}}|}}
+{{LSL DefineRow||{{LSLG|llSetCameraEyeOffset}}|}}
+|notes
+|cat1=Camera
+|cat2
+|cat3
+|cat4
+}}

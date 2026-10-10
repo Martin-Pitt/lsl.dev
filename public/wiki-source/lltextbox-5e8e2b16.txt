@@ -1,0 +1,77 @@
+{{LSL_Function
+|inject-2=
+{{LSL_Function/avatar|avatar|region=*}}
+{{LSL_Function/chat|channel|message|dialog=text box}}
+|func_id=335|func_sleep=1.0|func_energy=10.0
+|func=llTextBox
+|p1_type=key|p1_name=avatar
+|p2_type=string|p2_name=message
+|p3_type=integer|p3_name=channel
+|return_type
+|return_text
+|func_desc=Shows a dialog box on {{LSLP|avatar}}'s screen with the text {{LSLP|message}}. It contains a text box for input, any text that is entered is [[llSay|said]] by {{LSLP|avatar}} on {{LSLP|channel}} when the "Submit" button is clicked.
+|func_footnote
+|caveats=* Not supported in official Linden Lab viewers prior to version 2.4, and some [[Third_Party_Viewer_Directory|TPVs]] may not support it. Unsupported viewers will display a dialog box with a single option of "!!llTextBox!!".
+* There is no way by script to kill a text box.
+* There is no way for the script to detect if the user clicked the small "ignore" button (no chat is generated as a result of pressing this button).
+* If the listening prim is out of the 20 meter range of the sending prim when the "Submit" button is pressed, it will not be able to hear the response.
+** This limitation affects attachments too if the wearer moves more than 20 meters from where the listener is located. 
+* The textbox input is limited to 250 bytes (characters). This can be a problem for larger text input; if the input can be over 250 characters, you will have to accept it through chat.
+* There is an undocumented throttle on llTextBox requests. Exceeding it will shout an error on [[DEBUG_CHANNEL|DEBUG_CHANNEL]] until the "average" falls.
+
+===message limits===
+*If it exceeds 7 (Viewer 3) or 8 (Viewer 1) lines a scroll bar will appear.
+*{{LSLP|message}} must be less than 512 bytes and not empty. Otherwise, it will shout an error on [[DEBUG_CHANNEL]]. One easy way to create an empty message is to use a line feed, as in <source lang="lsl2">llTextBox(avatar_key," \n",dialog_channel);</source>
+
+|notes=
+Instead of mouse clicking: "Submit", you can use keyboard keys: press {{K|Tab}} and then {{K|Enter}}
+
+|examples=
+<source lang="lsl2">
+integer  gListener;
+default
+{
+    touch_start(integer total_number)
+    {
+        // See 'discussion' page for more comments on choosing a channel and possible left-open listener
+        integer channel = -13572468;
+        // "" saves byte-code over NULL_KEY
+        gListener = llListen( channel, "", "", "");     
+        llTextBox(llDetectedKey(0), "Some info text for the top of the window...", channel);
+    }
+    listen(integer channel, string name, key id, string message)
+    {
+        llListenRemove(gListener);
+        llSay(0, "You wrote: " + message);
+    }
+}
+</source>
+If the user hits {{K|Enter}} before clicking the <code>"Submit"</code> button, there will be a final carriage return in the message. In the rare event that this could be a problem, it is easily removed:
+<source lang="lsl2">
+        message = llStringTrim(message,STRING_TRIM);
+</source>
+
+|spec
+|constants
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llDialog]]}}
+{{LSL DefineRow||[[llListen]]}}
+{{LSL DefineRow||[[llSay]]}}
+{{LSL DefineRow||[[llWhisper]]}}
+{{LSL DefineRow||[[llShout]]}}
+{{LSL DefineRow||[[llRegionSay]]}}
+|also_tests
+|also_events=
+{{LSL DefineRow||[[listen]]}}
+|notes
+|location=
+{{SourceLink|viewer|indra/llcommon/lllslconstants.h|line=189}}
+<cpp>// llTextBox() magic token string - yes this is a hack.  sue me.
+const std::string TEXTBOX_MAGIC_TOKEN = "!!llTextBox!!";</cpp>
+|history=Introduced in {{SVN|568|rev=88085|trunk=*|anchor=file33|date=Wednesday, 21 May 2008}}
+|cat1=Dialog
+|cat2=Chat
+|cat3
+|cat4
+}}

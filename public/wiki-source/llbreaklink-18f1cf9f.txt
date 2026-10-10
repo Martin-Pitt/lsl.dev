@@ -1,0 +1,50 @@
+{{LSL_Function|func_id=142|func_sleep=0.0|func_energy=10.0|func=llBreakLink
+|inject-2={{Issues/SVC-3510}}
+{{LSL_Function/link|link|nlf=*}}
+{{LSL_Function/permission|PERMISSION_CHANGE_LINKS|grant=the owner}}
+|p1_type=integer|p1_subtype=link|p1_name=link
+|func_desc=Delinks the [[Primitive|prim]] with the given [[link]] number in a [[Link set|linked object set]]
+|func_footnote
+|return_text
+|spec
+|caveats=*This function removes sitting [[Avatar|avatars]] from the [[Object|object]], even if not sitting on the unlinked prim.
+*This function silently fails if the link number refers to a seated avatar. Use [[llUnSit]] instead
+*This function silently fails if called from a [[Script|script]] inside an [[Attachment|attachment]].
+*This function fails if the [[Owner|owner]] does not have edit permissions on the object containing the script, the system message "''Delink failed because you do not have edit permission''" is received by the owner.
+*A prim with [[PERMISSION_CHANGE_LINKS]] can delink any prim in the linked object set even itself or the root
+*The only [[:Category:LSL Link|LINK_*]] flag that {{LSLP|link}} currently supports is [[LINK_ROOT]]. [[#SVC-3510|SVC-3510]]
+**Use [[llGetLinkNumber]]() as the parameter to unlink the script's prim, not [[LINK_THIS]].
+**Use [[llBreakAllLinks]]() instead of using [[LINK_SET]], [[LINK_ALL_CHILDREN]], or [[LINK_ALL_OTHERS]] as the parameter for [[llBreakLink]].
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">//-- requests permission to change links, then breaks the link
+//-- between the prim and the rest of the object, on touch.
+default
+{
+    touch_start(integer vIntTouched)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_CHANGE_LINKS);
+    }
+ 
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_CHANGE_LINKS)
+        {
+            llBreakLink(llGetLinkNumber());
+        }
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llBreakAllLinks]]|Break all links}}
+{{LSL DefineRow||[[llCreateLink]]|Link to another object}}
+|also_tests
+|also_events={{LSL DefineRow||[[changed]]|[[CHANGED_LINK]]}}
+|also_articles
+|notes
+|permission
+|cat1=Link
+|cat2=Link/Management
+|cat3
+|cat4
+|haiku={{Haiku|Unbinds the object,|Link number separates,|Primitives disentwine.|author=ChatGPT 4.0}}
+}}

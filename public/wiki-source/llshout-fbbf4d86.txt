@@ -1,0 +1,47 @@
+{{LSL_Function
+|inject-2={{LSL_Function/chat|channel|msg}}
+|func_id=24
+|func_sleep=0.0
+|func_energy=10.0
+|func=llShout
+|sort=Shout
+|p1_type=integer|p1_name=channel
+|p2_type=string|p2_name=msg
+|func_desc=Shouts the text supplied in string {{LSLP|msg}} on channel supplied in integer {{LSLP|channel}}.
+|spec
+|constants
+|caveats=*Text can be a maximum of 1024 bytes. This can convey 1024 ASCII characters, or 512 UTF-8 characters such as á
+*Shouts can be heard within 100 meters of the speaking prim (rather than the root). This is contrary to how [[listen]]s work, where a message can only be heard by any prim in the object if and only if the root prim is capable of hearing it.
+*A prim can '''not''' hear itself, this to prevent problems with recursion. It can however hear other prims within the same object. Use [[llMessageLinked]] instead for intra-prim messaging.
+|examples=
+If  you prefer, you can make use of certain mnemonic constants such as [[PUBLIC_CHANNEL]] instead of channel 0 and [[DEBUG_CHANNEL]] instead of channel +2,147,483,647.
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llShout(0, "I scream icecream!");
+    }
+}
+</source>
+For communicating with a user or owner it is preferable to use  [[llOwnerSay]] or [[llInstantMessage]] or [[llRegionSayTo]] as they won't spam other users.
+The latter is also an excellent choice for communicating to an attachment of a known avatar, or to an object of known UUID.
+|helpers
+|also_events={{LSL DefineRow||[[listen]]|}}
+|also_functions=
+{{LSL DefineRow||[[llListen]]|}}
+{{LSL DefineRow||[[llOwnerSay]]|}}
+{{LSL DefineRow||[[llRegionSay]]|Sends chat region wide}}
+{{LSL DefineRow||[[llRegionSayTo]]|Sends chat region wide to a specific avatar, or their attachments, or to a rezzed object of known UUID}}
+{{LSL DefineRow||[[llWhisper]]|Sends chat limited to 10 meters}}
+{{LSL DefineRow||[[llSay]]|Sends chat limited to 20 meters}}
+{{LSL DefineRow||[[llInstantMessage]]|}}
+|also_tests
+|also_articles
+|notes
+|cat1=Communications
+|cat2=Chat
+|haiku={{Haiku|From the pitcher's mound|Infielders hear your grumbling|But center field can't.}}
+|cat3
+|cat4
+}}

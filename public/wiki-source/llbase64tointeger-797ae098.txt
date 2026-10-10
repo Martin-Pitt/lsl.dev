@@ -1,0 +1,32 @@
+{{LSL_Function
+|func_id=281|func_sleep=0.0|func_energy=10.0
+|func=llBase64ToInteger|sort=Base64ToInteger
+|return_type=integer|p1_type=string|p1_name=str|p1_desc=Base64 string
+|return_text=that is '''str''' {{LSLGC|Base64}} decoded as a big endian integer.
+|spec
+|caveats=*If {{LSLPT|str}} contains fewer than 6 characters, any incomplete least-significant bytes of the integer are set to 0.
+**For example, the Base64 value <code>"qqqqqq=="</code> corresponds to the hexadecimal value <code>0xAAAAAAAA</code>. If the padding "=" characters and the last "q" are dropped, there are 5*6=30 bits remaining and those can form only 3 full bytes (24 bits). The result is <code>0xAAAAAA00</code>.
+**The Base64 value <code>"qqqq"</code> has 4*6=24 bits available, which is enough for the same 3 full bytes. The result is also <code>0xAAAAAA00</code>.
+**Similarly, 3-character Base64 has 18 bits, enough for 2 bytes, and 2-character Base64 has 12 bits, enough for one byte.
+**Finally, single-character Base64 has only 6 bits and thus no complete bytes, and the result is always zero.
+*Returns zero if {{LSLPT|str}} is longer than 8 characters.
+|constants
+|examples=<source lang="lsl2">
+integer value = llBase64ToInteger("3q0AAA==");
+
+// writes out -559087616
+llOwnerSay((string)value);
+</source>
+|helpers
+|also_functions={{LSL DefineRow||{{LSLG|llIntegerToBase64}}|}}
+|also_events
+|also_tests
+|also_articles={{LSL DefineRow||{{LSLGC|Base64}}|}}
+|notes
+|permission
+|negative_index
+|cat1=Base64
+|cat2=Encoding
+|cat3
+|cat4
+}}

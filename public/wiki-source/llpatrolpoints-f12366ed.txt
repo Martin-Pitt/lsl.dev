@@ -1,0 +1,45 @@
+{{LSL_Function
+|func=llPatrolPoints
+|func_desc=Sets the object patrolling between the points specified in patrolPoints.
+|p1_type=list|p1_name=patrolPoints|p1_desc=A list of vectors for the character to travel through sequentially.  The list must contain at least two entries.
+|p2_type=list|p2_subtype=instructions|p2_name=options|p2_desc=PATROL_* flags and their parameters
+|caveats=
+* Must use [[llCreateCharacter]] or script won't compile
+* Vertical positions specified for any vectors should be chosen to be as close as possible to the actual height of the terrain requested. Large difference between the provided vertical position and the actual terrain/object will result in failure of the behavior.
+* The {{LSLP|patrolPoints}} list requires a minimum of two valid vectors.
+** If a vector in the list is outside the nav volume (e.g.: too high,) it will be ignored.
+|constants={{LSL_Constants/llPatrolPoints}}
+|examples=
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llCreateCharacter([CHARACTER_MAX_SPEED, 25, CHARACTER_DESIRED_SPEED, 15.0]);
+        //MAX_SPEED is @ 20 by default
+    }
+
+    touch_start(integer total_number)
+    {
+        list points = [llGetPos() + <5,0,0>, llGetPos() - <5,0,0>];
+        llPatrolPoints(points, [PATROL_PAUSE_AT_WAYPOINTS, TRUE]);
+    }
+}		
+</source> 
+|also_functions=
+* [[llCreateCharacter]]
+* [[llDeleteCharacter]]
+* [[llEvade]]
+* [[llExecCharacterCmd]]
+* [[llGetClosestNavPoint]]
+* [[llFleeFrom]]
+* [[llNavigateTo]]
+* [[llPatrolPoints]]
+* [[llPursue]]
+* [[llUpdateCharacter]]
+* [[llWanderWithin]]
+|also_events=
+* [[path_update]]
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/12#12.07.31.262785 | 31/07/2012 ]]
+|cat1=Pathfinding
+}}

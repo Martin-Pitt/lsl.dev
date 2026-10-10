@@ -1,0 +1,56 @@
+{{LSL_Function
+|inject-2={{LSL_Function/face|face|return=1.0|get=returns the sum of alpha of all the faces on the prim, range {{Interval|gte=0|lte=[[llGetNumberOfSides|sides]]|lteh=sides|center=return}}{{Interval/Footnote}}.}}
+{{LSL_Function/alpha|alpha}}
+|func_id=50|func_sleep=0.0|func_energy=10.0
+|func=llGetAlpha|return_type=float
+|p1_type=integer|p1_name=face
+|func_footnote=
+Otherwise the return is in the range {{Interval|gte=0|lte=1|center=return}}, with 0.0 being fully transparent and 1.0 being fully solid.
+|func_desc
+|return_text=that is the [[PBR_Materials#Nomenclature_changes|Blinn-Phong]] alpha of {{LSLP|face}}.
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">//Tells the owner the alpha on all sides
+default
+{
+    state_entry()
+    {
+        integer i = 0;
+        integer max = llGetNumberOfSides();
+        while(i < max)
+        {
+            llSay(0,"Face "+(string)i+" alpha is " + (string)llGetAlpha(i));
+            ++i;
+        }
+    }
+}</source>
+|helpers=
+<source lang="lsl2">float AveragePrimAlpha()
+{//Since this is so simple you may just want to inline it instead of including the function.
+    return (llGetAlpha(ALL_SIDES) / llGetNumberOfSides());
+}</source>
+<source lang="lsl2">//if face 0 is "transparent" then make the prim "visible"
+if (llGetAlpha(0))  ;
+else llSetAlpha(1.0, ALL_SIDES);</source>
+|also_functions=
+{{LSL DefineRow||[[llSetAlpha]]|Sets the prim's alpha}}
+{{LSL DefineRow||[[llGetColor]]|Gets the prim's color}}
+{{LSL DefineRow||[[llSetColor]]|Sets the prim's color}}
+{{LSL DefineRow||[[llSetLinkColor]]|Sets link's color}}
+{{LSL DefineRow||[[llSetLinkAlpha]]|Sets link's alpha}}
+{{LSL DefineRow||[[llGetNumberOfSides]]|Gets the number of faces on the prim}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|permission
+|deepnotes=
+====Rounding====
+Alpha is stored in a single 8-bit byte, meaning there are 256 values that are possible. Consequently the values returned by this function are all multiples of 1/255. When the alpha value is initially stored the float value is rounded to the nearest multiple, turning 0.5 into 128/255 for example.
+|cat1
+|cat2
+|cat3
+|cat4
+}}

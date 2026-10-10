@@ -1,0 +1,57 @@
+{{LSL Function
+|inject-2={{Issues/BUG-4703}}{{Issues/SVC-6357}}
+|func_id=316|func_sleep=0.0|func_energy=10.0
+|sort=GetUnixTime|func=llGetUnixTime|return_type=integer
+|func_footnote
+|func_desc
+|return_text=that is the number of seconds elapsed since 00:00 hours, Jan 1, 1970 {{Wikipedia|Coordinated Universal Time|UTC}} from the system clock ([https://en.wikipedia.org/wiki/Unix_time Unix time]).
+|spec
+|caveats=
+* Time codes outside 1901-12-13 20:45:52 UTC and 2038-01-19 03:14:08 UTC cannot be represented in LSL due to its use of signed 32-bit integers for Unix times. Scripts that rely on this function after January 19, 2038 may have logical errors.
+** Consider [[llGetTimestamp]] instead, which will correctly report time through 2038.
+** Lua scripts (not including LSL scripts compiled for the Luau VM) do not have this limitation with <code>os.time()</code>, since it returns a 64-bit number and will correctly represent time through the likely heat death of the universe.
+|constants
+|examples=<syntaxhighlight lang="lsl2">
+// Reset tracker
+integer BOOT_TIME;
+default
+{
+    state_entry()
+    {
+        BOOT_TIME = llGetUnixTime(); 
+        llSetTimerEvent(0.1);
+    }
+    
+    timer()
+    {
+        llSetText((string)(llGetUnixTime() - BOOT_TIME) + " Seconds since boot.\n\n ", <1,0,0>, 1.0);
+        llSetTimerEvent(1);
+    }
+}
+</syntaxhighlight>
+|helpers=
+=== Helper Functions: ===
+{{{!}}
+{{LSL DefineRow||[[Unix2StampLst]]|Converts Unix Time stamp to a list. ex: 1234567890 to [2009, 2, 13, 23, 31, 30]}}
+{{LSL DefineRow||[[Stamp2UnixInt]]|Converts date to Unix Time stamp. ex: [2009, 2, 13, 23, 31, 30] to 1234567890}}
+{{LSL DefineRow||[[uuLinuxTime]]|Converts date to Unix Time stamp (from Linux kernel's sources)}}
+{{LSL DefineRow||[[Unix2WeekdayStr]]|Gets the weekday from a Unix Time stamp. ex: "Friday" from 1234567890}}
+{{LSL DefineRow||[[Unix2PST_PDT]]|Converts Unix Time stamp to an SLT date/time string with PST or PDT indication as appropriate}}
+{{LSL DefineRow||[[Unix2GMTorBST]]|Converts Unix Time stamp to a UK date/time string with GMT or BST indication as appropriate}}
+{{!}}}
+|also_functions=
+{{LSL DefineRow||[[llGetTimestamp]]|Human Readable UTC Date and time}}
+{{LSL DefineRow||[[llGetDate]]|Human Readable UTC Date}}
+{{LSL DefineRow||[[llGetTime]]|Elapsed script-time.}}
+|also_events
+|also_tests={{LSL DefineRow||[[llGetUnixTime/test|llGetUnixTime Conformance Test]]|}}
+|also_articles
+|notes
+|permission
+|negative_index
+|haiku={{Haiku|Ticking time bomb waits,|A few years till scripts explode—|Y2K, take two!|author=ChatGPT 4}}
+|cat1=Time
+|cat2
+|cat3
+|cat4
+}}

@@ -1,0 +1,74 @@
+{{LSL_Function
+|inject-2={{LSL_Function/detected|number|pos|error=[[ZERO_VECTOR|<0.0, 0.0, 0.0>]]}}
+|func_id=35|func_sleep=0.0|func_energy=10.0
+|sort=DetectedPos|func=llDetectedPos
+|return_type=vector
+|p1_type=integer|p1_name=number
+|func_footnote=Returns {{LSLG|ZERO_VECTOR|<0.0, 0.0, 0.0>}} if number is not valid sensed object.
+|func_desc
+|return_text=that is the position (in [[Viewer_coordinate_frames#Region|region coordinates]]) of {{LSLGC|Detected|detected}} object number.
+|spec
+|caveats
+|constants
+|examples=
+
+<source lang="lsl2">// Get position and distance of toucher
+
+default
+{
+    touch_start(integer total_number)
+    {
+	// get the position of the avatar touching this prim
+	vector pos = llDetectedPos(0);
+		
+	// compute how far away they are
+	float dist = llVecDist(pos, llGetPos() );
+		
+	llSay(0, "You are " + (string) dist + " metres from me, at coordinates " + (string) pos);
+    }
+}</source>
+
+<source lang="lsl2">// get name and sim position of Avatars within "say" range
+
+default
+{
+    state_entry()
+    {
+        llOwnerSay( "Touch me to get the positions of avatars in 'Say' range" );
+    }
+
+    touch_start( integer vIntTouchCount )
+    {
+        // Do a one-off sensor sweep over a 20m radius sphere for avatars
+        llSensor( "", "", AGENT, 20, PI );
+    }
+
+    sensor( integer vIntFound )
+    {
+        integer vIntCounter = 0;
+        //-- loop through all avatars found
+        do
+        {
+            llOwnerSay( llDetectedName( vIntCounter )
+                // get the position of this detected avatar
+                + (string) llDetectedPos( vIntCounter ) );
+        } while (++vIntCounter < vIntFound); 
+    }
+
+    // sensor does not detect owner if it's attached
+    no_sensor()
+    {
+        llOwnerSay( "I couldn't find anybody" );
+    }
+}</source>
+|helpers
+|also_functions
+|also_events
+|also_articles
+|notes
+|permission
+|cat1
+|cat2
+|cat3
+|cat4
+}}

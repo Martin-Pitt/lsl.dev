@@ -1,0 +1,71 @@
+{{LSL_Event
+|inject-2={{Issues/SVC-23}}{{Issues/SVC-391}}{{Issues/SVC-412}}{{Issues/SCR-499}}{{Issues/BUG-229767}}
+|event_id=21|event_delay
+|event=email
+|p1_type=string|p1_name=time|p1_desc=In the <code>(string)[[llGetUnixTime]]</code> format|p1_hover=In the (string)llGetUnixTime format
+|p2_type=string|p2_name=address|p2_desc
+|p3_type=string|p3_name=subject|p3_desc
+|p4_type=string|p4_name=message|p4_desc
+|p5_type=integer|p5_name=num_left|p5_desc=The number of emails remaining in the email queue.{{Footnote|The email being processed is not counted as it has already been popped from the queue.}}|p5_hover=The number of emails left in the email queue.
+|event_desc=Triggered as a result of calling [[llGetNextEmail]] where there is a matching email in the email queue.
+|event_footnote=The email queue is associated with the prim and any script in the prim can access it. <br/> The prim's email address is its key with "@lsl.secondlife.com" appended, <code>[[llGetKey]]() + "@lsl.secondlife.com"</code>{{Footnote|1=Preview grid email address are constructed differently: <code style="font-size: 123%;">[[llGetKey]]() + "@lsl." + grid + ".lindenlab.com"</code>; for the main beta grid set grid to {{String|aditi}}.|2=Beta grid email address are constructed differently: llGetKey() + {{String|@lsl.}} + grid + {{String|.lindenlab.com}}; for the main beta grid set grid to {{String|aditi}}.}}.
+|constants
+|spec=The email event is triggered as a result of calling [[llGetNextEmail]] when there is an email that matches [[llGetNextEmail]]'s optional filters. The first email that matches the filters is removed from the email queue and its data is used as the parameters for this event. If no email matches the filters but the queue is not empty this event is not triggered. Besides the effects of filtering, the email queue is {{HoverText|FIFO|First In First Out}}.
+|caveats=
+* The email queue is limited to 100 emails, any email after that is bounced.
+* The message field may have a maximum of 1000 single-byte characters. This count includes the header information ('''address''', '''subject''', etc).
+* [[llEmail|Emails sent from within SL]] will have their message body prefixed with a header detailing the originating prim. See [[llEmail]] for more details.
+* Due to bug {{Jira|SVC-23}} (present since 2005), objects may stop receiving emails completely until either the region is restarted or the object crosses a region boundary (resetting the script doesn't help).
+* Due to bug {{JIRA|BUG-229767}}, an object's email queue can still become suspended until the object crosses a region border (neither a region restart nor a script reset helps). First analysis has revealed a potential workaround, by implementing a delay of about 30 seconds before first trying to send email to a freshly rezzed script - apparently registering the email(...) event handler can take quite some time, and emails arriving prior to said registry process is what gets the entire queue stuck. Official Linden response still pending.
+
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(5.0);
+    }
+
+    timer()
+    {
+    //  get next email, don't filter by sender or subject
+        llGetNextEmail("", "");
+    }
+
+    email( string time, string address, string subject, string message, integer num_left )
+    {
+    //  if we received an email from an object within Second Life
+        if (llGetSubString(address, -19, -1) == "@lsl.secondlife.com")
+//      {
+            message = llDeleteSubString(message, 0, llSubStringIndex(message, "\n\n") + 1);
+//      }
+
+    //  PUBLIC_CHANNEL has the integer value 0
+        llSay(PUBLIC_CHANNEL, message);
+
+    //  if there's another email in the queue waiting
+    //  get next email, don't filter by sender or subject
+        if(num_left)
+            llGetNextEmail("", "");
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_header
+|also_events
+|also_functions={{LSL DefineRow||[[llEmail]]|}}
+{{LSL DefineRow||[[llGetNextEmail]]|}}
+|also_articles
+|also_footer
+|notes=
+For tips on how to process emails sent from within SL, see the entry on [[llEmail#Prim2Prim_Email|llEmail]].
+|mode
+|deprecated
+|haiku={{Haiku|Refulgent cockcrow|A red, full mailbox blows up|near the avatar}}
+|cat1=Email
+|cat2
+|cat3
+|cat4
+}}

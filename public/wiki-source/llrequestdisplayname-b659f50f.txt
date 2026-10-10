@@ -1,0 +1,52 @@
+{{#vardefine:p_data_desc|DATA_* flag}}{{LSL_Function
+|inject-1=
+{{LSL Function/avatar|id}}
+{{LSL_Function/warning|Security|It is a '''terrible''' idea to tie any security measures to display names; they are not unique and can easily be changed.}}
+{{LSL_Function/warning|Data Execution|Display names can contain [[Display_names#Punctuation_characters_allowed_in_your_display_name|quotes and some punctuation]]. While this is ''not'' a problem for LSL, remember to '''escape''' strings being passed to command line scripts, sql queries, etc.<br/>See: [http://xkcd.com/327/ XKCD: Exploits of a Mom]}}
+|func_id=361|func_sleep=0.0|func_energy=10.0
+|func=llRequestDisplayName
+|return_type=key
+|return_subtype=handle
+|p1_type=key|p1_name=id
+|func_footnote
+|func_desc=Requests the '''[[Display_Names|Display Name]]''' of the agent identified by '''id'''. When the Display Name is available the [[dataserver]] event will be raised. The agent identified by '''id''' does not need to be in the same region or online at the time of the request.
+|Return_text=that is used to identify the [[dataserver]] event when it is raised.
+|spec
+|caveats=
+*If the request fails for any reason, there will be no error notice or dataserver event. You may use a timer to check for stale requests.
+*If you merely wish to show the agent display name in the viewer window, it may be more straightforward to use [[Viewer_URI_Name_Space|Viewer URI Name Space]] and avoid a dataserver event, e.g.: <source lang="lsl2">llSay(0, "secondlife:///app/agent/" + (string)id + "/displayname");</source>
+|constants
+|examples=<source lang="lsl2">key owner_key;
+key owner_name_query;
+string owner_display_name;
+
+default
+{
+    state_entry()
+    {
+        owner_key = llGetOwner();
+        owner_name_query = llRequestDisplayName(owner_key);
+    }
+    dataserver(key queryid, string data)
+    {
+        if ( owner_name_query == queryid )
+        {
+            owner_display_name = data;
+            llSay(0, "The display name of the owner of this script : " + owner_display_name );
+        }
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetDisplayName]]|}}
+{{LSL DefineRow||[[llRequestUsername]]|}}
+|also_tests
+|also_events={{LSL DefineRow||[[dataserver]]|}}
+|also_articles
+|notes
+|deprecated
+|cat1=Dataserver
+|cat2=Avatar
+|cat3=Avatar/Name
+|cat4=Display Name
+}}

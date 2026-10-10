@@ -1,0 +1,67 @@
+{{LSL_Function
+|func_id=71|func_sleep=0.0|func_energy=10.0
+|func=llStopMoveToTarget
+|func_footnote=Use in conjunction with {{LSLG|llMoveToTarget}}<br/>
+To stop rotation movement use {{LSLG|llStopLookAt}}
+|func_desc=Stops critically damped motion
+|return_text
+|spec
+|caveats
+|constants
+|examples
+|helpers
+|also_functions
+|also_tests
+|also_events
+|also_articles
+|notes
+|examples=<source lang="lsl2">integer gLockPrimInPlace;
+
+default
+{
+
+    on_rez(integer sp)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        llStopMoveToTarget();
+        llSetStatus(STATUS_PHYSICS, TRUE);
+    }
+
+    touch_start(integer total_number)
+    {
+
+        if (llDetectedKey(0) != llGetOwner())
+        {
+            return;
+        }
+
+        if (!llGetStatus(STATUS_PHYSICS))
+        {
+            llOwnerSay("Locking or unlocking position works only for physical objects.");
+            return;
+        }
+
+        gLockPrimInPlace = !gLockPrimInPlace;
+        if (gLockPrimInPlace)
+        {
+            llMoveToTarget(llGetPos(), 0.05);
+            llOwnerSay("Locked in place.");
+        }
+        else
+        {
+            llStopMoveToTarget();
+            llOwnerSay("Unlocked.");
+        }
+
+    }
+
+}</source>
+|cat1=Movement
+|cat2=Physics
+|cat3=Target
+|cat4
+}}

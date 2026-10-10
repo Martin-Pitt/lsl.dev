@@ -1,0 +1,121 @@
+<onlyinclude>{{#if:
+{{#vardefine:light_const|{{LSL Const|PRIM_POINT_LIGHT|integer|23|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the prim's point light configuration}}}}
+{{#vardefine:p_radius_desc|ranges from 0.1 to 20.0}}
+{{#vardefine:p_falloff_desc|ranges from 0.0 to 2.0}}
+{{#vardefine:p_intensity_desc|ranges from 0.0 to 1.0}}
+}}</onlyinclude>{{#if:
+{{LSL_Function/boolean|boolean}}
+{{LSL_Function/linear_color|linear_color}}
+}}{{LSL Constant
+|inject-2={{LSL PrimitiveParam Categorize|Prim}}
+|name=PRIM_POINT_LIGHT
+|type=integer
+|value=23
+|desc=PRIM_POINT_LIGHT is used to configure the point light configuration of the prim
+|pa={{LSL Constant/List|i_front=[&#32;{{#var:light_const}},&#32;|i_end=&nbsp;]
+|text=When used with [[llSetPrimitiveParams]] & [[llSetLinkPrimitiveParams]] & [[llSetLinkPrimitiveParamsFast]]
+|toc=llSetPrimitiveParams
+|i1_type=integer|i1_subtype=boolean|i1_name=boolean
+|i2_type=vector|i2_name=linear_color
+|i3_type=float|i3_name=intensity
+|i4_type=float|i4_name=radius
+|i5_type=float|i5_name=falloff}}
+|pb={{LSL Constant/List|i_front=[[llGetPrimitiveParams]]([&nbsp;{{#var:light_const}}|i_end=&nbsp;]);|
+|r_front=Returns the list [&nbsp;|r_end=&nbsp;]
+|text
+|toc=llGetPrimitiveParams
+|r1_type=integer|r1_subtype=boolean|r1_name=boolean
+|r2_type=vector|r2_name=linear_color
+|r3_type=float|r3_name=intensity
+|r4_type=float|r4_name=radius
+|r5_type=float|r5_name=falloff 
+}}
+|caveats=
+* Viewers that do not have advanced lighting enabled can only render 6 lights at a time and projectors will be rendered as omnidirectional light sources. (OpenGL limitations allow for 8 light sources, SL appears to reserve one each for the Sun and Moon.)
+** Viewers that '''do''' have advanced lighting enabled can render as many lights as their graphics card allows; it is not hard-limited by the viewer.
+* Lights with a high intensity have a wash-out effect when overlapping. Keep this in mind when using multiple lights. '''''Never''' create an abundance of lights to get around the 6 light maximum in basic lighting'', as viewers with advanced lighting will be washed out and may suffer from client lag.
+* Unlike most color in LSL, which expects a gamma-encoded value (sRGB), this expects a non-gamma-encoded value (linear RGB). This means that the value you set as the light color is not the same value you'd pass to make the source (e.g. filament ) glow the same color. You may wish to implement an [[llsRGB2Linear|sRGB Electro-Optical Transfer Function (EOTF)]] to bypass this.
+* The {{LSLP|falloff}} parameter is a bit of a misnomer. Instead of modifying the characteristics of light decay over distance, it instead acts as a modifier to a light's overall intensity value.
+|examples=
+Set the prim's color and the color of the light it emits to the same color:-
+<syntaxhighlight lang="lsl2">
+integer switch;
+
+vector gLampCol = <255,190,121>; //Light colour in regular (0-255) sRGB space. This will be converted to LSL later.
+
+default
+{
+    state_entry()
+    {
+        gLampCol /= 255; //Convert to LSL colour.
+    }
+
+    touch_start(integer total_number)
+    {
+        switch = !switch; //toggle the switch
+        llSetLinkPrimitiveParamsFast(LINK_THIS,[
+            PRIM_POINT_LIGHT,switch,llsRGB2Linear(gLampCol),1,20,0, //Convert colour to linear RGB as PRIM_POINT_LIGHT requires, using llsRGB2Linear
+            PRIM_COLOR,ALL_SIDES,gLampCol,1,
+            PRIM_GLOW,ALL_SIDES,switch,
+            PRIM_FULLBRIGHT,ALL_SIDES,switch]);
+    }
+}
+</syntaxhighlight>
+
+Basic light script:-
+<syntaxhighlight lang="lsl2">
+integer isLightTurnedOn;
+
+default
+{
+    touch_start(integer total_number)
+    {
+//      toggle isLightTurnedOn between TRUE and FALSE
+        isLightTurnedOn = !isLightTurnedOn;
+
+        if (isLightTurnedOn)
+        {
+            llSetPrimitiveParams([
+                PRIM_FULLBRIGHT, ALL_SIDES, FALSE,
+                PRIM_POINT_LIGHT, FALSE, ZERO_VECTOR, 1.0, 10.0, 0.6]);
+        }
+        else
+        {
+            vector COLOR_ORANGE  = <1.000, 0.522, 0.106>;
+
+            llSetPrimitiveParams([
+                PRIM_FULLBRIGHT, ALL_SIDES, TRUE,
+                PRIM_POINT_LIGHT, TRUE, COLOR_ORANGE, 1.0, 10.0, 0.6]);
+        }
+    }
+}
+</syntaxhighlight>
+
+A compact version of the above:-
+<syntaxhighlight lang="lsl2">
+integer switch;
+default
+{
+    touch_start(integer total_number)
+    {
+        llSetPrimitiveParams(
+        [       PRIM_FULLBRIGHT, ALL_SIDES, switch = !switch,
+                PRIM_POINT_LIGHT, switch, <1, 0.5, 0.1> *  switch, 1, 10, 0.6 ] );      
+    }
+}
+</syntaxhighlight>
+|constants
+|functions=
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParamsFast]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llsRGB2Linear]]|}}
+|events
+|location
+|cat1=Light
+|cat2
+|cat3
+|cat4
+}}

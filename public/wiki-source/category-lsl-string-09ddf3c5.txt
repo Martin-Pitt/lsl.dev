@@ -1,0 +1,256 @@
+{{LSL Header|ml=*}}{{LSLC|}}{{LSLC|Types}}
+{{RightToc}}
+
+See also [[:Category:LSL_Text|Text]].
+
+A string is text data.
+
+String values are enclosed in double quotes when defined in LSL text.
+
+Any character may be used in a string, except for the "NUL" character, though some will need to be escaped (see the [[#Escape Codes|Escape Codes section]] on this page for more info.) The "NUL" character is Unicode value U+0000 and cannot exist in an LSL string. Therefore for example llUnescapeURL("%00") results in an empty string "".
+
+The length of a string is only limited by available [[LlGetFreeMemory|script memory]]. (see the [[#String_Length_Restraints|String Length Restraints]] section on this page for some operational restraints.) Note that in Mono, strings use [https://en.wikipedia.org/wiki/UTF-16 UTF-16 encoding] and occupy two memory bytes per character for characters U+0001 to U+FFFF, or 4 bytes for Unicode characters U+10000 and higher.
+
+Strings can be concatenated (joined together) using the '''+''' operator. Note that concatenation cannot be done when defining a string as a global variable, as + is treated as an executable instruction, it's not handled by the compiler. Concatenation can only be done within executable code, i.e. inside a user defined function or in an event.
+
+Some string operations can be done via built-in functions, such as those that can make text all upper and lower case. Other operations, such as replace, left, right, wrap, etc, must be done via functions invented by other LSL users (examples of which are at the bottom of this page.)
+
+You have no control over the font face, size, weight or colour that string output is displayed in on user screens or on menus. The look of text that displays on screens, such as chat from a text, is controlled by users (though not many change the defaults.) You can only control whether the text is lower or upper case.
+
+(The only time you have control over the colour of displayed text is when it is [[LlSetText|Floating Text]].)
+
+
+{|
+|
+String examples:
+<source lang="lsl2">"Hello Avatar!"
+"Yes"
+"No"
+"It's 10 o'clock."
+"I am 21 years old!"
+"Help " + "me"
+EOF
+
+//The following two strings have the same value (i.e. they will both produce text with line breaks in it.)
+
+"I scream,\nyou scream,\nwe all scream,\nfor ice-cream!"
+"I scream,
+you scream,
+we all scream,
+for ice-cream!"
+</source>
+|}
+
+{{#vardefine:p_name_desc|variable name
+}}{{#vardefine:p_value_desc|string expression or constant
+}}{{#vardefine:p_value_t_desc|expression or constant
+}}
+<div id="box">
+== Variable: string {{LSL Param|name}}; ==
+<div style="padding: 0.5em;">
+<source lang="lsl2">string name;</source>
+Declares a variable of type string named '''name''', with the value {{HoverText|""|empty string}}
+{|
+{{LSL DefineRow|variable|name|{{#var:p_name_desc}}}}
+|}
+</div></div>
+
+<div id="box">
+== Variable: string {{LSL Param|name}} {{=}} {{LSL Param|value}}; ==
+<div style="padding: 0.5em;">
+<source lang="lsl2">string name = value;</source>
+Declares a variable of type string named '''name''', with the value '''value'''.
+{|
+{{LSL DefineRow|variable|name|{{#var:p_name_desc}}}}
+{{LSL DefineRow|expression|value|{{#var:p_value_desc}}}}
+|}
+</div></div>
+
+<div id="box">
+== [[Typecast]]: (string){{LSL Param|value_t|value}} ==
+<div style="padding: 0.5em;">
+<source lang="lsl2">(string)value</source>
+Converts '''value''' to a value of type string.
+{|
+{{LSL DefineRow|expression|value|{{#var:p_value_t_desc}}}}
+|}
+</div></div>
+
+<div id="box">
+
+== [[LSL Operators|Operators]] == 
+<div style="padding: 0.5em;">
+See [[LSL Operators|Operators]] for more information.
+<div id="box" style="padding-left: 0.5em;padding-right: 0.5em;padding-bottom: 0.5em;">
+=== Combine: {{LSL Param|value|value1}} + {{LSL Param|value|value2}} ===
+<source lang="lsl2">(value1 + value2)</source>
+Combines two strings into a single string without modifying the inputs. Appends '''value2''' to '''value1''' and returns the resulting string.
+{|
+{{LSL DefineRow|expression|value1|{{#var:p_value_desc}}}}
+{{LSL DefineRow|expression|value2|{{#var:p_value_desc}}}}
+|}
+</div>
+<div id="box" style="padding-left: 0.5em;padding-right: 0.5em;padding-bottom: 0.5em;">
+
+=== Comparison: {{LSL Param|value|value1}} <nowiki>==</nowiki> {{LSL Param|value|value2}} ===
+<source lang="lsl2">(value1 == value2)</source>
+Compares two strings, returns {{HoverText|one|1}} if same length and same characters, else returns zero.
+This operator works exactly like <code>!strcmp('''value1''', '''value2''')</code> in C, thus technically differs from the counterintuitive behavior of the == operator in C and in Java.
+{|
+{{LSL DefineRow|expression|value1|{{#var:p_value_desc}}}}
+{{LSL DefineRow|expression|value2|{{#var:p_value_desc}}}}
+|}
+</div>
+<div id="box" style="padding-left: 0.5em;padding-right: 0.5em;padding-bottom: 0.5em;">
+=== Comparison: {{LSL Param|value|value1}} != {{LSL Param|value|value2}} ===
+<source lang="lsl2">(value1 != value2)</source>
+Compares two strings, returns {{HoverText|zero|0}} if same length and same characters, otherwise non-zero.
+This operator works exactly like <code>strcmp('''value1''', '''value2''')</code> in C, thus technically differs from the counterintuitive behavior of the != operator in C and in Java.
+{|
+{{LSL DefineRow|expression|value1|{{#var:p_value_desc}}}}
+{{LSL DefineRow|expression|value2|{{#var:p_value_desc}}}}
+|}
+</div>
+</div></div>
+
+<div id="box">
+== Escape Codes==
+<div style="padding: 0.5em;">
+{|{{Prettytable|style=float:left;}}
+|+
+|-{{Hl2}}
+!Substring
+!Replaced with
+|-
+|| \t || four spaces
+|-
+|| \n || new line
+|-
+|| \" || double quote
+|-
+|| \\ || backslash
+|}
+Escape codes are translated when the script is compiled; not while it's running. The compiler will ignore any other combination of \ with a character by removing the \. So "\a" means "a".
+The result is that only strings that are inside your script when it is compiled will get, say, \n turned into a "new line" character.  Text you read in from a notecard, chat, http, object name or description, etc, will not be checked for escape codes -- that same \n typed in a notecard doesn't automatically turn into a "new line" character.  You'll have to do that yourself, if you really really need it for some reason. 
+
+Those who are coming to LSL from such languages as C and Java may find these LSL string escape rules confusing at first. In LSL, "\n" means [[llUnescapeURL]]("%0A"), as it does in C and Java, but "\t" means [[llUnescapeURL]]("%20%20%20%20") rather than [[llUnescapeURL]]("%09"). Additionally there is no "\r" escape code and "\r" will translate to "r" rather than [[llUnescapeURL]]("%0D").
+
+For runtime translation of escaped characters try the user function [[Unescape]].
+</div></div>
+
+<div id="box">
+
+==Characters with Accents==
+<div style="padding: 0.5em;">
+It used to be that your script would not compile if you included in it a string containing a character with an accent, such as "écoutez", or punctuation not used in English, such as "¿Entiende?".
+
+Sometime in late spring / early summer 2008, scripts began compiling with accents in text strings.
+
+That is to say:
+
+<source lang="lsl2">string hello = "Avatar écoutez";</source>
+</div></div>
+
+<div id="box">
+==String Length Restraints==
+<div style="padding: 0.5em;">
+As noted at the start of this page, the length of a single string is only limited by available [[script memory]]. However, there are some operational limitations. Many {{LSLGC|Communications}} functions and some other functions also impose limits on input strings. Those limits may result in error messages at runtime or "silent" truncation (i.e. you get no error notice, nor any indication that it has been done.).
+
+'''Examples'''
+* [[llSay]] -  When using llSay, any text string being said will be truncated to 1024 CHARACTERS, both under LSO and Mono. (That's 2048 bytes of memory space in Mono (UTF-16) ).
+* [[llGetNotecardLine]] - When reading in lines from notecards, lines longer than 1023 characters will be truncated silently. (Limit was formerly 255, however with [https://releasenotes.secondlife.com/simulator/2021-10-25.565008.html SLS 565008] this has been increased.)
+* [[llDialog]] - If the message or button texts are too long a non-fatal error is produced when the function is called.
+
+'''Notes'''<br/>
+Limits of this type are always documented, an absence of limits in the documentation means there are no known limits (that are outside the norm for the language).
+</div>
+
+<div id="box">
+
+==Trimming a String==
+<div style="padding: 0.5em;">
+Trimming a string used to require user-created functions, such as those created for the purpose in Strife Onizuka's library.
+
+Now, however, there is a native LSL function, [[llStringTrim]], which can be used to remove leading and/or trailing spaces. Note though that it does not remove excess spaces that a user may have entered in the middle of a sentence or string, nor is there any other native LSL function which does.
+
+The following code ''will'' remove both all double spaces inside a string, as well as any leading and trailing spaces; it will how ever require a substantial amount of memory overhead.
+
+<source lang="lsl2">string myTrimmedText = llDumpList2String(llParseString2List(src, [" "], []), " ");</source>
+
+When accepting user text input from chat, a notecard, or a prim name or description, or any other "free-wheeling" source, it's a good idea to always [[llStringTrim]] first before beginning to work with it.
+</div></div>
+
+<div id="box">
+== Examples ==
+<div style="padding: 0.5em;">
+<source lang="lsl2">integer int = 48934;
+string str = (string)int;
+string str_2;
+str_2 = str;</source>
+</div></div>
+<div id="box">
+== Useful Functions ==
+<div style="padding: 0.5em;">
+=== User-created utility functions ===
+These functions have been created and contributed by LSL users to perform operations not covered by built-in LSL functions.
+
+{|{{Prettytable}}
+|+
+|-{{Hl2}}
+!function
+!purpose
+|-
+|| [[Chr]] || <strike>Returns the Unicode character with the given code. See also [[Ord]].</strike> Built-in function: [[llChar]].
+|-
+|| [[Float2String]] || Allows string output of a float in a tidy text format, with optional rounding.
+|-
+|| [[Left]] || Returns text left of a specified separator.
+|-
+|| [[Like]] || See if one word matches part of another.
+|-
+|| [[Ord]] || <strike>Returns the ordinal (Unicode code) of a character. See also [[Chr]].</strike> Built-in function: [[llOrd]].
+|-
+|| [[RandomString]] || Creates a random string.
+|-
+|| [[RemoveHTMLTags]] || Removes HTML tags from a string ( and newline characters )
+|-
+|| [[Right]] || Returns text right of a specified separator.
+|-
+|| [[Library_Combined_Library#str_replace|str_replace]] || <strike>Replace all instances of a string with another string in a target string.</strike> Built-in function: [[LlReplaceSubString]].
+|-
+|| [[Stristr]] || Returns a string from the first occurrence of needle to the end of haystack.
+|-
+|| [[SplitLine]] || Insert 'new line' escape codes at certain positions of a string.
+|-
+|| [[WrapText]] || Break text into line lengths of your specification.
+|}
+
+=== Text-Related Items from the Script Library ===
+{| {{Prettytable}}
+|-
+|{{Hl2}}| '''Name'''
+|{{Hl2}}| '''Creator'''
+|{{Hl2}}| '''Description'''
+|-
+||[[ParseString2List]]
+||[[User:Strife Onizuka|Strife Onizuka]]
+||Same as [[llParseString2List]] and [[llParseStringKeepNulls]], but not limited to 8 spacers or separators. Thus substitute a call to the [[llParseString2List]] and [[llParseStringKeepNulls]] functions by a call to [[Parse_String_To_List|ParseString2List]] whenever you have more than 8 separators or more than 8 spacers.
+|-
+
+||[[String Compare]]
+||[[User:Xaviar Czervik|Xaviar Czervik]]
+||Compares two strings and reliably returns either 1, -1, or 0 if they are the same.
+|-
+||[[XyText 1.5|XyText]]
+||[[User:Xylor Baysklef|Xylor Baysklef]]
+|| Display text (up to 10 characters) on a prim. Use as many prims as desired.
+|-
+||[[XyyyyzText|XyyyyzText]]
+||[[User:Criz Collins|Criz Collins]]
+|| Display text (up to 10 characters) on a prim. Displays different text for each line instead of one single text, that will be broken into the next lines. Watch here for what that means: http://screencast.com/t/1wMLujLcEO
+|-
+||[[XyzzyText|XyzzyText]]
+||[[User:Thraxis Epsilon|Thraxis Epsilon]] and [[User:Gigs Taggart|Gigs Taggart]]
+|| Display text (up to 10 characters) on a prim. Way more efficient than XyText.
+|}
+</div>

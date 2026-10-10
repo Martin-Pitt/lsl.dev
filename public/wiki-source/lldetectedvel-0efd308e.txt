@@ -1,0 +1,37 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-5821}}{{LSL_Function/detected|number|vel|error=[[ZERO_VECTOR|<0.0, 0.0, 0.0>]]}}
+|func_id=36|func_sleep=0.0|func_energy=10.0
+|sort=DetectedVel|func=llDetectedVel|return_type=vector
+|p1_type=integer|p1_name=number
+|func_footnote=Returns {{LSLG|ZERO_VECTOR|<0.0, 0.0, 0.0>}} if {{LSLP|number}} is not valid sensed object or avatar.
+|func_desc
+|Return_text=velocity of {{LSLGC|Detected|detected}} object or avatar {{LSLP|number}}.
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">
+//Tells the name and velocity of all near-by avatars.
+default 
+{
+    state_entry() 
+    {
+        // Scan once for avatars within a 96 metre radius sphere
+        llSensor("", "", AGENT, 96, PI);
+    }
+    sensor(integer num) 
+    {
+        // num will initially be 1 or more. When num is 1, the index of the detected avatar will be zero       
+        while(num--) 
+        {
+            llOwnerSay(llDetectedName(num) + " is moving at " + (string)llVecMag(llDetectedVel(num)) + " m/s.");
+        }
+    }
+}
+</source>
+|helpers
+|also_functions
+|also_events
+|also_articles
+|notes
+}}

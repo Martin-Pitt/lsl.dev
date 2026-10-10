@@ -1,0 +1,88 @@
+<onlyinclude>{{#if:
+
+{{Issues/BUG-7306}}
+
+{{#vardefine:alpha_mode_const|{{LSL Const|PRIM_ALPHA_MODE|integer|38|c=Used to {{GetSet|{{{1|}}}|get|set|/}} diffuse texture alpha rendering mode of a prim's face.}}}}
+
+{{#vardefine:p_face_desc|a [[face]] number or [[ALL_SIDES]]}}
+{{#vardefine:p_alpha_mode_desc|PRIM_ALPHA_MODE_* flag}}
+{{#vardefine:p_mask_cutoff_desc|when the alpha rendering mode is '''PRIM_ALPHA_MODE_MASK''', sets the alpha value above which a pixel renders as fully opaque, in the range 0 to 255}}
+{{#vardefine:p_mask_cutoff_hover|when the alpha rendering mode is PRIM_ALPHA_MODE_MASK, sets the alpha value above which a pixel renders as fully opaque, in the range 0 to 255}}
+
+
+{{#vardefine:p_alpha_mode_rows|
+!{{!}} {{LSLPT|alpha_mode}} Flags
+! title="value" {{!}} V
+! colspan="3" {{!}} Description
+! colspan="3" {{!}} Notes
+{{!}}-
+{{!}} {{LSL Const|PRIM_ALPHA_MODE_NONE|integer|0|c=Render the diffuse texture as though the alpha channel were nonexistent}}
+{{!}} {{#var:value}}
+{{!}} colspan="3" {{!}} {{#var:comment}}
+{{!}} colspan="3" {{!}} The viewer’s build tool sets this by default when a face has a material and no alpha channel is present in the diffuse texture.
+{{!}}-
+{{!}} {{LSL Const|PRIM_ALPHA_MODE_BLEND|integer|1|c=Render the diffuse texture with alpha-blending.}}
+{{!}} {{#var:value}}
+{{!}} colspan="3" {{!}} {{#var:comment}}
+{{!}} colspan="3" {{!}} This value is also used as the default to clear the materials settings from a prim face.
+{{!}}-
+{{!}} {{LSL Const|PRIM_ALPHA_MODE_MASK|integer|2|c=Render the prim face in alpha-masked mode.}}
+{{!}} {{#var:value}}
+{{!}} colspan="3" {{!}} {{#var:comment}}
+{{!}} colspan="3" {{!}} Diffuse texture pixels which are more opaque than {{LSLP|mask_cutoff}} will be rendered as fully opaque, while the other pixels will be fully transparent.
+{{!}}-
+{{!}} {{LSL Const|PRIM_ALPHA_MODE_EMISSIVE|integer|3|c=Render the prim face in emissivity mode.}}
+{{!}} {{#var:value}}
+{{!}} colspan="3" {{!}} {{#var:comment}}
+{{!}} colspan="3" {{!}} Diffuse texture pixels opacity maps to their emissivity when rendered.  Fully opaque pixels will effectively be rendered as ‘full bright’.
+}}
+
+}}</onlyinclude>{{#if:
+
+}}{{LSL Constant
+|name=PRIM_ALPHA_MODE
+|type=integer
+|value=38
+|desc=Used to specify how the alpha channel of the diffuse texture should affect rendering of a prim’s face.
+|examples
+|constants
+|notes=* Note that as with [[PRIM_NORMAL]] and [[PRIM_SPECULAR]], setting a custom (i.e. not [[PRIM_ALPHA_MODE_BLEND]]) alpha mode on a prim faces causes the linkset to use the  [http://community.secondlife.com/t5/English-Knowledge-Base/Calculating-land-impact/ta-p/974163 new prim accounting system].
+* {{LSLP|mask_cutoff}} is not used or stored unless the mode is set to [[PRIM_ALPHA_MODE_MASK]].
+* To delete the material from {{LSLP|face}}, set the {{LSLP|alpha_mode}} to [[PRIM_ALPHA_MODE_BLEND]], in addition to clearing [[PRIM_NORMAL]] and [[PRIM_SPECULAR]]
+* If {{LSLP|face}} indicates a face that exists but does not contain a material, the [[PRIM_ALPHA_MODE]] return is '[ [[PRIM_ALPHA_MODE_BLEND]], 0 ]'
+|pa={{LSL Constant/List|i_front=[&#32;{{#var:alpha_mode_const}},&#32;|i_end=&nbsp;]
+|text=When used with [[llSetPrimitiveParams]] & [[llSetLinkPrimitiveParams]]
+|i1_type=integer|i1_name=face
+|i2_type=integer|i2_name=alpha_mode
+|i3_type=integer|i3_name=mask_cutoff
+|toc=llSetPrimitiveParams
+}}
+|pb={{LSL Constant/List|i_front=[[llGetPrimitiveParams]]([&nbsp;{{#var:alpha_mode_const}},&#32;|i_end=&nbsp;]);
+|r_front=Returns the [[list]] [&nbsp;|r_end=&nbsp;]
+|text
+|toc=llGetPrimitiveParams
+|i1_type=integer|i1_name=face
+|r1_type=integer|r1_name=alpha_mode
+|r2_type=integer|r2_name=mask_cutoff
+
+}}
+|pc=
+{{{!}} class="sortable" {{Prettytable|style=margin-top:0;}}
+{{!}}- {{Hl2}}
+{{#var:p_alpha_mode_rows}}
+{{!}}}
+|articles
+|functions=
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParamsFast]]|}}
+|events
+|examples=<source lang="lsl2">llSetPrimitiveParams([ PRIM_ALPHA_MODE, ALL_SIDES, PRIM_ALPHA_MODE_NONE, 0 ]);
+llSetPrimitiveParams([ PRIM_ALPHA_MODE, ALL_SIDES, PRIM_ALPHA_MODE_MASK, 130 ]);</source>
+|location
+|history
+|cat1=Texture
+|cat2
+}}

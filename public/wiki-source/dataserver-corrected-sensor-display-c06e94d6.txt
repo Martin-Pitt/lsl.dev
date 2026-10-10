@@ -1,0 +1,142 @@
+{{LSL Header}}
+====Dataserver corrected sensor display====
+--[[User:BETLOG Hax|BETLOG Hax]] UTC+10: 20090703 1045 [SLT: 20090702 1745]
+
+Getting data via sensor often required some other lookup.
+<br>This example converts an object's owner key to a name via a dataserver call, and collates it into a list for llSetText display.
+<br>IIRC this was for finding someone elses junk on Bio's land.
+
+
+
+
+The core scanner bit.
+<source lang="lsl2">
+//=========================================================================
+// BETLOG Hax
+// For Bio Flow - complete rewrite based on his script :'take 2.4 moved to dataserver'
+// UTC10: 20090412 1737 [SLT:  20090412 0037]
+//=========================================================================
+// ---LICENCE START---
+// http://creativecommons.org/licenses/by-sa/3.0/
+//     Attribution licence:
+// You must:
+//    -Include this unaltered licence information.
+//    -Supply my original script with your modified version.
+//    -Retain the original scripts' SL permissions. [+c/+m/+t]
+// Or:
+//    -Link to the wiki URL from which you copied this script.
+//    -Document: "Uses parts of <scriptname> by BETLOG Hax"
+// ---LICENCE END---
+//=========================================================================
+// CONFIGURATION
+float       gDisplayFreq    = 5.0;
+float       gScanFreq       = 1.0;
+integer     gStride         = 3;
+//----------------------------------
+// CORE CODE
+key         gQueryId;
+list        gDataList       = [];
+list        gQueryList     = [];
+integer     gPrims;
+integer     gLink;
+//----------------------------------
+default
+{   on_rez(integer start)
+    {   llResetScript();
+    }
+    changed(integer change)
+    {   if (change & CHANGED_LINK)
+            llResetScript();
+    }
+    state_entry()
+    {   llSetText("", <1.0, 1.0, 1.0>, 1.0);
+        gPrims = llGetNumberOfPrims();
+        llSensorRepeat("","",PASSIVE|SCRIPTED, 20.0, PI, gScanFreq);
+        llSetTimerEvent(gDisplayFreq);
+        integer c = gPrims;
+        while(c>1)
+            llMessageLinked(c--,7 ,"",""); //reset all the text
+    }
+    sensor(integer num)
+    {   key uuid;
+        key owner;
+        integer range;
+        while(num>0)
+        {   --num;
+            uuid = llDetectedKey(num);
+            owner = llDetectedOwner(num);
+            if(uuid != (key)"" 
+                && uuid != llGetOwner() 
+                && owner != llGetOwner() 
+                && ~llDetectedType(num) & AGENT 
+                && !llSameGroup(uuid) 
+                && -1==llListFindList(gDataList, [uuid]))
+            {   if (llKey2Name(owner) == "")
+                {   gQueryId = llRequestAgentData(owner, DATA_NAME);
+                    gDataList += [range, "UNKNOWN", uuid];
+                    gQueryList += [gQueryId, uuid];
+//llOwnerSay("UNRESOLVED name- querying dataserver");                    
+                }
+                else
+                {   gDataList += [llRound(llVecDist(llGetPos(), llDetectedPos(num)))
+                                    , llKey2Name(owner)
+                                    , uuid];
+//llOwnerSay("RESOLVED name - adding data");
+                }
+            }
+        }
+    }
+    timer()
+    {   gDataList = llListSort(gDataList, gStride, TRUE);
+        integer c = (gDataList != [])-1; //magic
+        while(c>-1)
+        {   gLink = (++gLink)%gPrims;
+//llOwnerSay((string)(gLink+1));            
+            list chunk = llList2List(gDataList, c-(gStride-1), c);
+            llMessageLinked(gLink+1, 7
+                ,(string)llList2Integer(chunk, 0)+"m]"
+                    +"\t Owner:"+(string)llList2String(chunk, 1)
+                    +"\t Object:"+(string)llKey2Name(llList2String(chunk, 2))                    
+                , ""
+            );
+//llMessageLinked(LINK_SET,7,(string)num + "|" + text,"");            
+//llOwnerSay(llList2CSV(llList2List(gDataList, c-(gStride-1), c)));
+            c-=gStride;
+        }
+    }
+    dataserver(key queryid, string data)
+    {   integer index = llListFindList(gQueryList, [queryid]);
+        if (-1<index)
+        {   key uuid = llList2Key(gQueryList, index+1);
+            index = llListFindList(gDataList, [uuid]);
+            if (-1<index)
+            {   gDataList = llListReplaceList(gDataList, [
+                    llRound(
+                        llVecDist(llGetPos(),llList2Vector(llGetObjectDetails(uuid, ([OBJECT_POS])), 0))
+                    )
+                    , data, uuid], index-(gStride-1), index
+                );
+//llOwnerSay("DATASERVER returned name - adding data");
+            }
+        }
+    }
+}
+//=========================================================================
+</source>
+
+The text receiver/display bit:
+<source lang="lsl2">
+//=========================================================================
+default
+{   state_entry()
+    {
+    }
+    link_message(integer sender_num, integer num, string str, key id)
+    {   if(sender_num != 1) return;
+        if(num != 7) return;
+        llSetText(str, <1.0, 1.0, 1.0>, 1.0);
+    }
+}
+//=========================================================================
+</source>
+[[Category:LSL Examples]]

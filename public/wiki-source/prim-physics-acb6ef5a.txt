@@ -1,0 +1,60 @@
+<onlyinclude>{{#if:
+
+{{#vardefine:physics_const|{{LSL Const|PRIM_PHYSICS|integer|3|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the object's physical status}}}}
+
+}}</onlyinclude>{{#if:
+
+{{LSL_Function/boolean|boolean}}
+
+}}{{LSL Constant
+|inject-2={{LSL PrimitiveParam Categorize|Object}}
+|name=PRIM_PHYSICS
+|type=integer
+|value=3
+|desc=Used to get or set the object's [[STATUS_PHYSICS|physics]] {{LSLGC|Status|status}}. When enabled the object responds to SL physics.
+|pa={{LSL Constant/List|i_front=[[llSetPrimitiveParams]]([&#32;{{#var:physics_const}},&#32;|i_end=&nbsp;]);
+|text={{LSL Constant/PrimParamText|set}}
+|i1_type=integer|i1_subtype=boolean|i1_name=boolean
+|toc=llSetPrimitiveParams
+}}
+|pb={{LSL Constant/List|i_front=[[llGetPrimitiveParams]]([&nbsp;{{#var:physics_const}}|i_end=&nbsp;]);|
+|r_front=Returns the list [&nbsp;|r_end=&nbsp;]
+|text={{LSL Constant/PrimParamText|get}}
+|r1_type=integer|r1_subtype=boolean|r1_name=boolean
+|toc=llGetPrimitiveParams
+}}
+|examples=<source lang="lsl2">default
+{
+    state_entry()
+    {
+        llSetPrimitiveParams([PRIM_PHYSICS, TRUE]); // makes the object physical...
+        
+        integer isPhysical = llList2Integer(llGetPrimitiveParams([PRIM_PHYSICS]), 0);
+        
+        if( isPhysical == 1 )
+        {
+            llSetText("Object is Physical", <1, 1, 1>, 1.0);
+        }
+        
+        else
+        {
+            llSetText("Object is non-Physical", <1, 1, 1>, 1.0);
+        }
+    }
+}</source>
+|caveats=
+*calls to set PRIM_PHYSICS in attachments fail silently
+|constants=
+{{LSL DefineRow||[[STATUS_PHYSICS]]|}}
+|functions=
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetStatus]]|}}
+{{LSL DefineRow||[[llGetStatus]]|}}
+|events
+|location
+|cat1=Status
+|cat2=Physics
+|cat3
+}}

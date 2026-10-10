@@ -1,0 +1,48 @@
+{{LSL_Function
+|inject-2={{LSL Function/avatar|id}}
+{{Issues/SCR-388}}
+|func_id=359|func_sleep=0.0|func_energy=10.0
+|func=llRequestUsername
+|return_type=key
+|return_subtype=handle
+|return_text=that is used to identify the [[dataserver]] event when it is raised.
+If {{LSLPT|id}} is not the UUID of an avatar, the [[dataserver]] event is not raised.
+|p1_type=key|p1_name=id
+|func_desc=Requests the '''[[Usernames|Username]]''' of the agent identified by {{LSLPT|id}}. When the '''[[Usernames|Username]]''' is available the [[dataserver]] event will be raised. The agent identified by {{LSLPT|id}} does not need to be in the same region or online at the time of the request. 
+|func_footnote=If the name has been changed some time in the past, this provides only the current name.
+|spec
+|caveats=
+*If you merely wish to show the agent username in the viewer window, it may be more straightforward to use [[Viewer URI Name Space]] and avoid a dataserver event, e.g.:<source lang="lsl2">llSay(0, "secondlife:///app/agent/" + (string)id + "/username");</source>
+* This function is throttled. The throttle is undocumented, but as of October 2018 the function appears to support bursts of up to 20 requests and sustained use at an average rate of 1.9 requests per second per owner, per region. (Meaning the throttle applies to all objects in the region with the same owner.) Once tripped, the function fails and says "Too many llRequestUsername requests.  Throttled until average falls." on [[DEBUG_CHANNEL]].
+|constants
+|examples=<source lang="lsl2">key owner_name_query;
+ 
+default
+{
+    state_entry()
+    {
+        owner_name_query = llRequestUsername(llGetOwner());
+    }
+
+    dataserver(key queryid, string data)
+    {
+        if ( owner_name_query == queryid )
+        {
+            llSay(0, "The username of the owner of this script : " + data);
+        }
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetUsername]]|works only for avatars that are present}}
+{{LSL DefineRow||[[llRequestUserKey]]|general way to translate a name to a key}}
+|also_tests
+|also_events={{LSL DefineRow||[[dataserver]]|}}
+|also_articles
+|notes
+|deprecated
+|cat1=Dataserver
+|cat2=Avatar
+|cat3=Avatar/Name
+|cat4=Username
+}}

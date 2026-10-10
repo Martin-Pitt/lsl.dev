@@ -1,0 +1,62 @@
+{{LSL Function
+|func_sleep=0.0|func_energy=10.0
+|func=llChar|sort=Char
+|func_desc=Construct a single character string from the supplied Unicode value.
+|return_type=string
+|p1_type=integer|p1_name=val|p1_desc=Unicode value for character.
+|p1_hover=Unicode value for character.
+|return_text=
+|func_footnote=This function returns a single character string generated from the character at the indicated UTF-32 codepoint.<br/>If {{LSLP|val}} is negative, the codepoint has no valid single-character UTF-16 representation such as a part of a surrogate pair, or is outside defined range, the Unicode replacement character "�" (<code>0xFFFD</code>) is returned. (Slua's equivilant <code>utf8.char</code> instead raises the error <code>"invalid argument #1 to 'char' (value out of range)"</code> in this situation).</br>If {{LSLP|val}} is 0, an empty string is returned.
+|spec
+|caveats=
+* Value range is between <code>0x1</code>&ndash;<code>0x10FFFF</code>
+* Values in the surrogate range <code>0xD800</code>&ndash;<code>0xDFFF</code> will return the replacement character "�" (<code>0xFFFD</code>) instead
+* Values for the special noncharacters <code>0xFFFE</code> and <code>0xFFFF</code> will return the replacement character instead
+* SLua's equivilant <code>utf8.char</code> has none of the above caveats, and also handles <code>0x0</code> (the null character) correctly ([https://github.com/secondlife/lsl-definitions/pull/74#discussion_r2934141244 validation script, in SLua])
+* Values for UTF-8 multibyte ranges are:
+** 1 byte: <code>0x0</code>&ndash;<code>0x7F</code>
+** 2 bytes: <code>0x80</code>&ndash;<code>0x07FF</code>
+** 3 bytes: <code>0x0800</code>&ndash;<code>0xFFFF</code>
+** 4 bytes: <code>0x10000</code>&ndash;<code>0x10FFFF</code>
+|examples=
+<source lang="lsl2">
+default
+{
+    touch_start(integer total_number)
+    {
+        string test_string = "The quick brown fox jumped over the lazy dog";
+        list test_list = [];
+        string test_string2 = "";
+        
+        integer index;
+        integer ord;
+        for (index = 0; index < llStringLength(test_string); ++index)
+        {
+            ord = llOrd(test_string, index);
+            test_list = test_list + [ ord ];
+        }
+        
+        string char;
+        for (index = 0; index < llGetListLength(test_list); ++index)
+        {
+            ord = llList2Integer(test_list, index);
+            char = llChar(ord);
+            test_string2 = test_string2 + char;
+        }
+        
+        llSay(0, "\"" + test_string + "\" -> [" + 
+            llDumpList2String(test_list, ", ") + "] -> \"" + test_string2 + "\"");
+    }
+}
+</source>
+|helpers|related
+|also_functions=
+{{LSL DefineRow|[[llOrd]]|Convert a character into an ordinal}}
+{{LSL DefineRow|[[llHash]]|Calculate a 32bit hash for a string}}
+|also_articles={{LSL DefineRow||{{wikipedia|UTF-32}}|}}
+|notes
+|cat1
+|cat2
+|cat3
+|cat4
+}}

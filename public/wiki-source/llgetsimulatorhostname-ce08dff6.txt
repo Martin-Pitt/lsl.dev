@@ -1,0 +1,77 @@
+{{LSL_Function
+|func_id=283|func_sleep=10.0|func_energy=10.0
+|func=llGetSimulatorHostname
+|return_type=string
+|func_footnote
+|func_desc
+|return_text=that is the hostname of the machine the script is running on (same as string in viewer Help dialog)
+|spec
+|caveats
+|constants
+|examples=<source lang="lsl2">
+// The beginnings of a region-info script.
+string region;
+string sim;
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(1.0);
+    }
+    timer()
+    {
+        string here = llGetRegionName();
+        if(region != here)
+        {
+            sim = llGetSimulatorHostname();
+            region = here;
+        }
+        llSetText(
+                "   REGION NAME : " + region + 
+              "\n  SIM HOSTNAME : " + sim + 
+              "\nTIME DIALATION : " + (string)llGetRegionTimeDilation() +
+              "\n    REGION FPS : " + (string)llGetRegionFPS(),
+            <0,1,0>, 1.0);
+    }
+}
+</source>
+<source lang="lsl2">
+// llGetEnv now offers an equivalent function without the 10 second delay.
+SaySimulatorHostname()
+{ 
+    llOwnerSay("Simulator Hostname: " + llGetEnv("simulator_hostname") );
+}
+ 
+default
+{
+    on_rez(integer start_param)
+    {
+        SaySimulatorHostname();
+    }
+ 
+    changed(integer iChange)
+    {
+        if (iChange & (CHANGED_REGION_START|CHANGED_REGION))
+            SaySimulatorHostname();
+    }
+ 
+    state_entry()
+    {
+        SaySimulatorHostname();
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llGetRegionFPS]]|Gets the region FPS}}
+{{LSL DefineRow||[[llGetRegionTimeDilation]]|Gets the region time dilation}}
+{{LSL DefineRow||[[llGetEnv]]("simulator_hostname")|Equivalent function without the script delay}}
+|also_tests
+|also_events
+|also_articles={{LSL DefineRow||[[Simulator IP Addresses]]|}}
+|notes
+|cat1=Region
+|cat2
+|cat3
+|cat4
+}}

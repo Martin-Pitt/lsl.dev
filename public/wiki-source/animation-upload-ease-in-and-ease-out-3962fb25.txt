@@ -1,0 +1,37 @@
+__NOTOC__
+{{Help
+|Object=*
+}}
+
+The purpose of easing is to provide smooth transitions between the previous, current, and next animations.  This is very helpful since the animation that was playing previously, and the one that will play next, can usually vary.
+
+==How It Works==
+Ease In starts when your animation starts, and stops after the number of seconds you chose.  Ease Out starts the number of seconds you chose before the end of the animation, and stops when your animation stops.  Easing doesn't add to the length of the animation.
+
+Most animators are concerned with easing between a animation just stopped and the next animation, usually with the same priority.  A practical example would be changing between standing animations in a animation overrider.  This works as expected so long as there is little or no time between the previous animation stopping and the next starting.
+
+Easing can also occur between simultaneously played animations.  For example, a standing animation is already playing, then a animation for a waving gesture starts, then the waving animation stops.  In this example easing on the wave animation could provide a smooth transition between the standing animation and the beginning and end of the wave animation.
+
+==Limits==
+Ease In and Ease Out can never be less than 0 or more than 10 seconds.
+
+In linear animations Ease In is limited to the length of the animation minus the seconds used for Ease Out, and Ease Out is limited to the length of the animation minus the seconds used for Ease In.  This assures easing can't take longer than the animation (which is necessary, since it occurs during the animation, rather than before and after), and that Ease In and Ease Out do not overlap.
+
+In looped animations Ease In and Ease Out can always be up to 10 seconds.  This allows 1 frame animations, like those widely used in furniture and pose stands, to have smooth transitions.
+
+==Choosing a Value==
+If you know what positions you will be transitioning from (for Ease In) and to (for Ease Out) determine how long it takes to do so believably.
+
+If you don't know what positions you will be transitioning from or to you may want to use standing with the arms at the sides as a substitute.  Most positions you would find a humanoid in don't vary wildly from that.  It's used as the neutral pose by many motion capture studios for that reason.
+
+Even though easing doesn't add frames between animations, using the amount of time it takes to believably transition from the end of the previous animation to the start of yours for Ease In, and from the end of your animation to the start of the next for Ease Out, seems to work well.
+
+For most kinds of animations (e.g. ones for animation overriders, furniture, and dances) you should divide the time you found by 2, because you would expect the previous and next animations to have easing, and you don't want it to last twice as long as intended.
+
+For animations intended to be played over top of other animations (e.g. for gestures and attachments) you should ''not'' divide the time you found by 2, because all easing will be done by your animation.
+
+== See Also ==
+*[[Animation Upload Loop Controls]]
+*[[Animation Upload Priority]]
+
+[[Category:LSL_Animation]]

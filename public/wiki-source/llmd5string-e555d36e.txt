@@ -1,0 +1,35 @@
+{{LSL Function
+|inject-1={{LSL Function/warning|Security|The MD5 hashing algorithm should not be used because it is too easy to generate collisions (two inputs which result in the same hash). http://www.kb.cert.org/vuls/id/836068}}
+|func_id=258|func_sleep=0.0|func_energy=10.0
+|func=llMD5String|return_type=string|p1_type=string|p1_name=src|p2_type=integer|p2_name=nonce
+|func_footnote
+|func_desc
+|return_text=of 32 hex characters that is the {{Wikipedia|MD5|MD5}} checksum of {{LSLP|src}} with a {{Wikipedia|salt (cryptography)|salt}} of <code>":"+{{LSLPT|nonce}}</code>.
+|spec={{LSLP|nonce}} is casted to string, then appended to {{LSLP|src}} after a colon (<code>{{LSLPT|src}} + ":" + {{LSLPT|nonce}}</code>).  This is important to know if you are calculating a hash in another language and wish to compare with one calculated in LSL. It could be written as <code>MD5Hash({{LSLPT|src}} + ":" + {{LSLPT|nonce}})</code>
+
+The character encoding used by llMD5String is the UTF-8 format.
+|caveats
+|constants
+|examples=
+<source lang="lsl2">
+llSay(0, llMD5String("Hello, Avatar!", 0)); // returns 112abd47ceaae1c05a826828650434a6
+</source>
+
+====Linux Example====
+<source lang="bash">
+$ echo -n 'Hello, Avatar!:0' | openssl md5
+112abd47ceaae1c05a826828650434a6
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llSHA1String]]}}
+{{LSL DefineRow||[[llSHA256String]]}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Hash
+|cat2=Encoding
+|cat3=String
+|cat4
+}}{{LSLC{{#var:lang}}|Encryption|llMD5String}}

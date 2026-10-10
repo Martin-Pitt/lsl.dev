@@ -1,0 +1,99 @@
+<onlyinclude>{{#if:
+
+{{#vardefine:p_intensity_desc|ranges from 0.0 to 1.0}}
+
+{{#vardefine:return|[&nbsp;{{HoverText|0.0|float intensity}}&nbsp;]}}
+
+{{#vardefine:glow_const|{{LSL Const|PRIM_GLOW|integer|25|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the glow of a prim's face}}}}
+
+{{#vardefine:facetable|{{#var:facetable}}
+{{!}}-
+{{!}} [ {{#var:glow_const}} ]
+{{!}} {{#var:return}} }}
+
+}}</onlyinclude>{{#if:
+
+{{LSL_Function/face|face|{{#var:glow_const}}|!footer=*|return={{#var:return}}}}
+
+}}{{LSL Constant
+|inject-2={{LSL PrimitiveParam Categorize|Face}}
+|name=PRIM_GLOW
+|type=integer
+|value=25
+|desc=PRIM_GLOW is used to get or set the glow status of the {{LSLP|face}}. Use the integer number 25 if the compiler rejects the named constant.
+|pa={{LSL Constant/List|i_front=[&#32;{{#var:glow_const}},&#32;|i_end=&nbsp;]
+|text=When used with [[llSetPrimitiveParams]] & [[llSetLinkPrimitiveParams]]
+|toc=llSetPrimitiveParams
+|i1_type=integer|i1_name=face
+|i2_type=float|i2_name=intensity}}
+|pb={{LSL Constant/List|i_front=[[llGetPrimitiveParams]]([&nbsp;{{#var:glow_const}},&#32;|i_end=&nbsp;]);|
+|r_front=Returns the list [&nbsp;|r_end=&nbsp;]
+|text= 
+====Caveats====
+{{#var:caveats}}{{#vardefine:caveats}}
+|toc=llGetPrimitiveParams
+|i1_type=integer|i1_name=face
+|r1_type=float|r1_name=intensity
+}}
+|examples=
+basic syntax to set glow
+<source lang="lsl2">
+// adjust as desired .3 to a float number from 0 to 1.0 inclusive
+// adjust as desired ALL_SIDES to specific prim faces if desired
+
+llSetPrimitiveParams( [ PRIM_GLOW, ALL_SIDES, .3 ] ) ; 
+</source>
+
+basic syntax to get glow status
+<source lang="lsl2">
+list mylist = llGetPrimitiveParams([ PRIM_GLOW,ALL_SIDES] );
+llSay(0, llList2CSV(mylist));
+
+//Assuming for this example that all sides are set to the same float of .3 
+//In a box, which has 6 sides, the above example returns 0.300000, 0.300000, 0.300000, 0.300000, 0.300000, 0.300000
+//In a prism, which has 5 sides, returns 0.300000, 0.300000, 0.300000, 0.300000, 0.300000
+//In a sphere, which has only 1 side (as it were), returns 0.300000
+//change ALL_SIDES to a specific prim face if desired.
+
+</source>
+
+
+
+<source lang="lsl2">//Each time the prim is touched, the intensity of the glow is increased (until it maxes out and cycles back to zero).
+integer steps = 10;
+integer counter = 0;
+
+default 
+{
+    touch_start(integer total_number) 
+    { 
+        llSetPrimitiveParams( [ PRIM_GLOW, ALL_SIDES,  counter / (steps - 1.0) ]);
+        counter = (counter + 1) % steps;
+    } 
+}</source><source lang="lsl2">//Each time the prim is touched, the intensity of the glow is decreased (until it hits zero and cycles back to one).
+integer steps = 10;
+integer counter = 0;
+
+default 
+{
+    touch_start(integer total_number) 
+    { 
+        llSetPrimitiveParams( [ PRIM_GLOW, ALL_SIDES,  counter / (steps - 1.0) ]);
+        counter = (counter + steps - 1) % steps;
+    } 
+}</source>
+|constants=
+{{LSL ConstRow|CHANGED_TEXTURE}}
+|functions=
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+|events=
+{{LSL DefineRow||[[changed]]|}}
+|location
+|history=Added in {{SVN|337|rev=81900|branch=Release|ver=1.20.0|anchor=file6|date=Monday, 10 March 2008}}
+|cat1
+|cat2
+|cat3
+|cat4
+}}

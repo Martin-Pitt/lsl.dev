@@ -1,0 +1,77 @@
+{{LSL_Event|event_id=29|event_delay|event=link_message
+|p1_type=integer|p1_subtype=link|p1_name=sender_num|p1_desc=The link number of the prim that contained the script that called [[llMessageLinked]].
+|p2_type=integer|p2_name=num|p2_desc=Second parameter of the llMessageLinked call.
+|p3_type=string|p3_name=str|p3_desc= The message that was sent from the script that called [[llMessageLinked]].
+|p4_type=key|p4_name=id|p4_desc=Fourth parameter of the llMessageLinked call.
+|event_desc=Triggered when the script receives a link message that was sent by a call to [[llMessageLinked]]. llMessageLinked is used to send messages from one script to another.
+|event_footnote={{LSLP|id}} is often used as a second string field (in LSL the [[key]] type is implemented as a [[string]] with just custom operators). [[typecast|Typecasting]] between [[string]] and [[key]] types has no effect on the data contained. The sizes of {{LSLP|str}} and {{LSLP|id}} are only limited by available script memory.
+|constants
+|spec
+|caveats=*64 link_message events can queue, past that, they are silently dropped!  Don't do too much in the event if they might be coming in fast.
+*{{LSLP|sender_num}} does not reflect how a message was sent, there is no way to know if it was sent with a LINK_* flag or the [[llGetLinkNumber|specific link number]].
+*If {{LSLP|str}} and {{LSLP|id}} are bigger than available memory the script will crash with a Stack-Heap Collision.
+|examples=
+<source lang="lsl2">
+// This is just an example script, you shouldn't handle touches within a single script this way.
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        llMessageLinked(LINK_THIS, 0, llDetectedName(0), llDetectedKey(0));
+    }
+
+    link_message(integer source, integer num, string str, key id)
+    {
+        llWhisper(0, str + " (" + (string)id + ") touched me!");
+    }
+}
+</source>
+|helpers=
+=== Sending Lists ===
+<source lang="lsl2">
+// This is just an example script, you shouldn't handle link messages within a single script this way.
+
+default
+{
+    // To propagate an unlimited number of arguments of any type, as long as you don't run out of memory.
+    // For low-latency operations, it is more efficient to concatenate the parameters into a string manually all at once, which avoids the comparatively slower llDumpList2String call but is not as flexible.
+    // The separator string cannot be used in any source string, or the resulting list will be incorrectly parsed.
+    // It is possible to design your own custom escape sequence for any instances of the separator string or use a rarer character, though that is outside the scope of this snippet.
+
+    state_entry()
+    {
+        list my_list = [1, 2.0, "a string", <1, 2, 3>, <1, 2, 3, 4>, llGetOwner()];
+        string list_parameter = llDumpList2String(my_list, "|");	// Produce a | delimited string from the list
+        llMessageLinked(LINK_THIS, 0, list_parameter, NULL_KEY);
+    }
+
+    link_message(integer sender_num, integer num, string list_argument, key id) 
+    {
+        if (list_argument != "")
+        {
+            list re_list = llParseStringKeepNulls(list_argument, ["|"], [""]);	// Convert the string back to a list
+            // llParseStringKeepNulls is used here in lieu of llParseString2List to accommodate any elements of my_list that were empty strings, which would otherwise be deleted.
+            // Note that re_list will be a list of strings no matter what my_list contained, so only llList2String can be used on it, not llList2Integer, llList2Vector, etc.
+        }
+        else
+        {
+            // my_list was an empty list (or a list that contained only one empty string), so llParseStringKeepNulls is not necessary because it would potentially incorrectly return a list with a single blank string.
+            // It is not possible to distinguish between the two, so it would be wise to check which is the case before sending if possible.
+        }
+    }
+}
+</source>
+|also_header
+|also_events
+|also_functions={{LSL DefineRow||[[llMessageLinked]]}}
+|also_articles
+|also_footer
+|notes={{LSL Tip|A script can hear its own link messages.}}
+* {{LSLP|sender_num}} can be compared to [[llGetLinkNumber]] to determine whether the message was sent by the same prim, regardless of whether the prim is unlinked, a root, or a child.
+|mode
+|cat1=Link
+|cat2=Communications
+|cat3=Link Message
+|cat4
+}}

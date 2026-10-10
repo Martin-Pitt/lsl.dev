@@ -1,0 +1,61 @@
+{{LSL_Function
+|func_id=157|func_sleep=0.0|func_energy=10.0
+|sort=SetDamage
+|func=llSetDamage|p1_type=float|p1_name=damage|p1_desc=range: -100.0 (full heal) ~ 100.0 (instant kill)
+|func_footnote
+|func_desc=Sets the amount of {{LSLP|damage}} that will be done when this object hits an avatar.
+|return_text
+|spec=
+For an avatar to take damage when the object collides with an avatar...
+*The object must not be [[STATUS_PHANTOM|phantom]] or [[llVolumeDetect]]([[TRUE]])
+*The avatar must be on the land where "Safe (no damage)" is disabled.
+**The object however does not need to be on or even partially over damage enabled land.
+When these preconditions are met, the avatar receives the damage, and the object will [[llDie|die]] without calling the {{LSLGC|Collision|collision}} events.
+|caveats=
+*{{LSLP|damage}} is a [[Prim Properties|Prim Property]], and may be applied even if there is no running script.
+*If {{LSLP|damage}} is 100.0 or greater, the object will instantly [[death|kill]] even a fully healthy avatar.
+*If {{LSLP|damage}} is less than zero, the avatar will he healed for the indicated amount.
+*If a damage enabled object hits a physics enabled object that one or more avatars are sitting on, damage will be distributed to all seated avatars.
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">//Simple autokiller bullet:
+// This will instantly "kill" on collision if contact is made with avatar on damage enabled land.
+
+default
+{
+    on_rez(integer param) // Becomes active when rezzed.
+    {
+        llSetDamage(100.0); // Set the damage to maximum.
+        llSensor("", "", AGENT, 96.0, PI); // Sweep a 96 meter sphere searching for agents.
+    }
+    sensor(integer num) // If an agent is detected...
+    {
+        llSetStatus(STATUS_PHYSICS, TRUE); // Enable physics to allow physical movement.
+        llSetTimerEvent(10.0); // Set a 10 second timer.
+        llMoveToTarget(llDetectedPos(0), 0.5); // Move to the detected position.
+    }
+    no_sensor() // If no agents are detected...
+    {
+        llDie(); // Auto destruct.
+    }
+    timer() // If we missed our target...
+    {
+        llDie(); // Auto destruct.
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions
+|also_events
+|also_articles=
+{{LSL DefineRow||[[Damage]]|How damage works in Second Life}}
+{{LSL DefineRow||[[Death]]|The concept of death in Second Life}}
+{{LSL DefineRow||[[Combat]]|Combat in Second Life}}
+{{LSL DefineRow||[[Weapon]]|Weapons in Second Life}}
+|notes
+|permission
+|negative_index
+|cat1
+|cat2
+|cat3
+|cat4
+}}

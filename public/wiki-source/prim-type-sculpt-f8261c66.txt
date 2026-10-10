@@ -1,0 +1,96 @@
+<onlyinclude>{{#if:
+
+{{#vardefine:type_sculpt_const|{{LSL Const|PRIM_TYPE_SCULPT|integer|7|c=A parameter of PRIM_TYPE used to make prim into a sculpty and to change specific properties that define it's shape and type.}}}}
+
+{{#if:{{{child|}}}||
+
+{{#vardefine:caveats-before|{{#var:caveats}}{{#vardefine:caveats}}}}
+
+{{LSL_Function/inventory|map|uuid=true|type=texture|full={{{remote|}}}|remote={{#ifeq:{{{1|set}}}|get|*}}}}
+
+{{#vardefine:p_type_desc|PRIM_SCULPT_TYPE_* flag with optional additional PRIM_SCULPT_FLAG_* flags OR'ed on}}
+
+{{#vardefine:caveats-get|{{#var:caveats-get}}
+*The value of {{LSLP|map}} is {{LSL Constant/NULL KEY}} when the {{LSLGC|Owner|owner}} does not have {{LSLGC|Permissions/Asset|full permissions}} to the object and the map asset is not in the prim's inventory.
+{{#var:caveats}}}}
+
+{{#vardefine:caveats|{{#var:caveats-before}}{{#vardefine:caveats-before}}
+{{#var:caveats-{{{1|get}}}}}{{#vardefine:caveats-{{{1|get}}}}}}}
+
+{{#vardefine:caveats-set|{{#var:caveats-set}}
+*While it is possible to use {{#if:<noinclude>1</noinclude>|this|{{#var:type_sculpt_const}}}} to animate an object, it is not recommended. For details see: [[Why UUID Flipping is Bad]]}}
+
+}}
+
+}}</onlyinclude>{{#if:
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#var:caveats-set}}}}
+
+}}{{LSL Constant
+|name=PRIM_TYPE_SCULPT
+|type=integer
+|value=7
+|desc=PRIM_TYPE_SCULPT is a parameter of [[PRIM_TYPE]] used to make a prim into a sculpty of specific shape and type.<br/>
+[[Sculpted Prims: FAQ]]
+|pa={{LSL Constant/List|i_front=[ {{LSL_Const|PRIM_TYPE|integer|9}}, [[PRIM_TYPE_SCULPT]],&#32;|i_end=&nbsp;]
+|text=For use with [[llSetPrimitiveParams]] and [[llSetLinkPrimitiveParams]]
+{{LSL_Constants/PrimitiveParams/sculpt_types|table=*|sortable=*}}
+{{LSL Const|PRIM_SCULPT_TYPE_MASK|integer|7|c=Used to filter out the PRIM_SCULPT_FLAG_* flags from the type to determine the PRIM_SCULPT_TYPE_* flag}} can be used to filter out the PRIM_SCULPT_FLAG_* flags from the {{LSLP|type}} to determine the PRIM_SCULPT_TYPE_* flag. The main application of this would be when using [[llGetPrimitiveParams]].
+|i1_type=string |i1_name=map
+|i2_type=integer|i2_name=type
+|toc=PRIM_TYPE
+}}
+|examples=
+<source lang="lsl2">llSetPrimitiveParams([PRIM_TYPE, 
+                        PRIM_TYPE_SCULPT, 
+                            "d962089b-2197-993c-9ec9-4993eb0a95f2",  // sculpty texture
+                            PRIM_SCULPT_TYPE_SPHERE                  // type
+                            | PRIM_SCULPT_FLAG_MIRROR     // use pipe | to add each flag
+                      ]);</source>
+<source lang="lsl2">//Rotates between the different sculpt types.
+default
+{
+    touch_start(integer a)
+    {
+        list b = llGetPrimitiveParams([PRIM_TYPE]);
+        integer type = llList2Integer(b,2) % 4;
+        llSetObjectDesc(llList2String([ "Sphere",
+                                        "Torus",
+                                        "Plane",
+                                        "Cylinder"], type));
+        llSetPrimitiveParams(PRIM_TYPE + llList2List(b, 0, 1) + (type + 1));
+    }
+}</source>
+
+<source lang="lsl2">//A simple script to setup a prim as a sculpty.
+default
+{
+    state_entry()
+    {
+        llSetPrimitiveParams([
+            PRIM_TYPE, PRIM_TYPE_SCULPT, "your Sculpt map name in the object", PRIM_SCULPT_TYPE_SPHERE
+          , PRIM_TEXTURE, ALL_SIDES, "your texture name in the object", <1.0, 1.0, 0.0>, <0.0, 0.0, 0.0>, 0.0 //comment out if not needed.
+//          , PRIM_SIZE, <0.63,0.199,0.52> // If you need to change the scale (size) of the object, uncomment this line.
+        ]);
+    } // The gray color you see on your sculpt object is the SL no found texture that is gray.
+}</source>
+
+|constants=
+{{LSL ConstRow|PRIM_TYPE}}
+{{LSL ConstRow|CHANGED_SHAPE}}
+|functions=
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+|events=
+{{LSL DefineRow||[[changed]]|}}
+|location
+|history=
+* {{SVN|1053|rev=94734|branch=trunk|date=Tuesday, 19 August 2008}} - PRIM_SCULPT_FLAG_* syntax merged into the Trunk. Support for syntax slated for Client 1.21.0
+* {{SVN|758|rev=91966|branch=featurettes-5|date=Thursday, 10 July 2008}} - Introduction of PRIM_SCULPT_FLAG_* extended syntax.
+|cat1=Prim
+|cat2
+|cat3
+|cat4
+}}

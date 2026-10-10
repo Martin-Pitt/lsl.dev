@@ -1,0 +1,366 @@
+{{LSL Header}}
+This is a library to emulate associative arrays using lists.  I've been using this code in more than a few projects and decided to release it here.
+From here on out I will call them 'dictionaries' or 'dicts' because I come from a FORTH background ^o.o^
+
+Using this library is relatively simple.  To create a dictionary, (where 'dict' and 'result' are already declared lists):
+<br><code> dict = dictNew(<elements>);</code><br>
+This initializes the list to be usable as a dictionary.
+
+You can preload a list with a dictionary like this (which also serves to show the format of the dictionary style list):
+<br><code> dict = [<elements>, <key1>, <element-1>, ... <element-n>, <key2>, <element-1>, ... <element-n>, ... ];</code><br>
+Here is an example for a 1 and 2 element dictionary (with similar elements):
+<br><code> dict = [1, "Fox", "Vulpine", "Rabbit", "Lapine", "Wolf", "Lupine", "Dog", "Canine"];</code><br>
+<code> dict = [2, "Fox", "Vulpine", "Yip", "Rabbit", "Lapine", "Churr", "Wolf", "Lupine", "Aroo", "Dog", "Canine", "Bark"];</code><br>
+When constructing a dictionary manually, always make sure to provide all the elements!  If you want to skip an element, use a null key.  Also you might want to use more sparse formatting, like this:
+<br><code>
+ dict = [2, 
+  "Fox", 
+   "Vulpine", "Yip", 
+  "Rabbit", 
+   "Lapine", "Churr", 
+  "Wolf", 
+   "Lupine", "Aroo", 
+  "Dog", 
+   "Canine", "Bark"
+  ];
+</code><br>
+
+
+To add or edit a dictionary entry:
+<br><code> dict = dictSetItem(dict,"<key>",[list of elements]);</code><br>
+The list of elements should equal the same number of items as you declared in dictNew().  If it does not, the list will be chopped or padded with null keys.  Keys are created on the fly if they do not exist, there is no need to pre-add them.  Note that even one element dictionaries need to be sent as a one element list.  The data can be of any type.
+
+To get the data stored in a dictionary entry:
+<br><code> result = dictGetItem(dict,"<key>");</code><br>
+You will get all elements for that key.  Elements are always returned as a list, whether there are one or multiple, as this allows you to store and retrieve any datatype you want.  The result, of course, can be retrieved using the llList2<type> statements.   If the key is not found you get a null list.
+
+To remove a dictionary entry:
+<br><code> dict = dictDelItem(dict,"<key>");</code><br>
+The modified dictionary is returned, but if the key was not found, the dictionary is returned unmodified.
+
+To change individual elements in a dictionary entry, there is the method of dictGetItem, modifying the list, and dictSetItem it back.  However the library provides a faster way:
+<br><code> dict = dictSetElement(dict,"<key>",<element#>,[single item]);</code><br>
+Element# is zero based, so the first element associated with the key is 0. Only a single item can be set at a time, so place only one item cast as a list in the last argument.
+
+Similarly there is a function to retrieve a single element associated with a key:
+<br><code> result = dictGetElement(dict,"<key>",<element#>);</code><br>
+As with the dictSetElement statement, the element is 0 based, so a 3 element dictionary has elements 0, 1 and 2.  It returns a 1 item list.  Like dictGetItem, if the key is not found, you get an empty list.
+
+NOTE that for changing or retrieving single elements it is more efficient to use dict*Element, but if you want to use all the arguments in the list, it is more efficient to use them all at once using dict*Item, then manipulate them using llList2<type> statements.
+
+You can get a list of all the valid keys in a dictionary using:
+<br><code> result = dictGetKeys(dict);</code><br>
+and you can get a list of all the elements in the keys at a certain position using:
+<br><code> result = dictGetElems(dict,<pos>);</code><br>
+
+You can search for a key using:
+<br><code> integer keypos = dictFindKey(dict,"<key>");</code><br>
+which of course, returns the key position (0 based) or -1 if not found, and you can get the number of keys in a dictionary using:
+<br><code> integer keycount = dictCount(dict);</code><br>
+
+<source lang="lsl2">
+// Alynna's Dictionary Tools, released GPLv3, anyone can use it.   Created by Alynna Vixen.
+// Try to credit me someplace if you use it.
+// This library emulates dictionaries (associative arrays) using lists.
+ 
+// Create a new dictionary, which just creates a list initialized with the number of data elements per key.
+// The initialized dictionary is returned, with no keys.
+list dictNew(integer elements)
+{
+    return [elements];
+}
+ 
+// Delete an item from the dictionary.
+// If the key is not found or null, the result is an unchanged dictionary,
+// Else it is the dictionary with the key and its data removed.
+list dictDelItem(list dict, string dkey)
+{
+    if (dkey == "") return dict; dkey = llToLower(dkey);
+    integer elements = llList2Integer(dict,0);
+    integer loc = llListFindList(llList2ListStrided(llList2List(dict,1,-1),0,-1,elements+1),[dkey]);
+    if (loc<0)
+        return dict;
+    else
+        return [elements] + llDeleteSubList(llList2List(dict,1,-1),loc*(elements+1),(loc*(elements+1))+elements);
+}
+ 
+// Set an item in the dictionary.
+// If the key is null, the dictionary is returned unchanged.
+// If the key is not found, it and the data is appended to the current dictionary,
+// Else, the data given replaces the data in the given key, the key remains unchanged.
+// The changed dictionary is returned.
+list dictSetItem(list dict, string dkey, list data)
+{
+    if (dkey == "") return dict; dkey = llToLower(dkey);
+    integer elements = llList2Integer(dict,0);
+    integer loc = llListFindList(llList2ListStrided(llList2List(dict,1,-1),0,-1,elements+1),[dkey]);
+    if (loc<0)
+        return dict + [dkey] + llList2List(data+[NULL_KEY,NULL_KEY,NULL_KEY,NULL_KEY,NULL_KEY,NULL_KEY,NULL_KEY,NULL_KEY],0,elements-1);
+    else
+        return [elements] + llListReplaceList(llList2List(dict,1,-1), [dkey] + llList2List(data+[NULL_KEY,NULL_KEY,NULL_KEY,NULL_KEY,NULL_KEY,NULL_KEY,NULL_KEY,NULL_KEY],0,elements-1),loc*(elements+1),(loc*(elements+1)+elements));
+}
+ 
+// Get an item from the dictionary.
+// If the key is not found, or null, the result is an empty list.
+// If the key is found, the result is the list of values for that key in the dictionary.
+list dictGetItem(list dict, string dkey)
+{
+    if (dkey == "") return []; dkey = llToLower(dkey);
+    integer elements = llList2Integer(dict,0);
+    integer loc = llListFindList(llList2ListStrided(llList2List(dict,1,-1),0,-1,elements+1),[dkey]);
+    if (loc<0)
+        return [];
+    else
+        return llList2List(llList2List(dict,1,-1),loc*(elements+1)+1,loc*(elements+1)+elements);
+}
+ 
+// Get a list of elements from the dictionary
+// If the element is -1, returns a list of all valid keys.
+// Else a list of the element values for every key is returned.
+list dictGetElems(list dict, integer elem)
+{
+    integer elements = llList2Integer(dict,0);
+    return llList2ListStrided(llList2List(dict,elem+2,-1),0,-1,elements+1);
+}
+// An alias for dictGetElems(<list>, -1)
+list dictGetKeys(list dict)
+{
+    return dictGetElems(dict, -1);
+}
+ 
+// Set an element within an item in the dictionary.
+// The dictionary is returned unchanged, if the key is not found, the element out of range, or key is null.
+// Else, the dict is returned with the element changed.
+list dictSetElement(list dict, string dkey, integer elem, list data)
+{
+    if (dkey == "") return dict; dkey = llToLower(dkey);
+    integer elements = llList2Integer(dict,0);
+    integer loc = llListFindList(llList2ListStrided(llList2List(dict,1,-1),0,-1,elements+1),[dkey]);
+    if (elem<0 || elem>elements-1) return dict;
+    if (loc<0)
+        return dict;
+    else
+        return [elements] + llListReplaceList(llList2List(dict,1,-1), llList2List(data,0,0),loc*(elements+1)+(elem+1),(loc*(elements+1)+(elem+1)));
+}
+ 
+// Get a list of elements from the dictionary
+// If the element is -1, returns a list of all valid keys.
+// Else a list of the element values for every key is returned.
+list dictGetElement(list dict, string dkey, integer elem)
+{
+    if (dkey == "") return []; dkey = llToLower(dkey);
+    integer elements = llList2Integer(dict,0);
+    integer loc = llListFindList(llList2ListStrided(llList2List(dict,1,-1),0,-1,elements+1),[dkey]);
+    if (loc>=0)
+        return llList2List(llList2List(dict,1,-1),loc*(elements+1)+(elem+1),loc*(elements+1)+(elem+1));
+    else
+        return [];
+}
+ 
+// Returns the position in the dictionary of a key.  If it is not found, will return -1.
+// Good for testing for a key's existence.
+integer dictFindKey(list dict, string dkey)
+{
+    if (dkey == "") 
+        return -1;
+    else {
+        integer elements = llList2Integer(dict,0);
+        return llListFindList(llList2ListStrided(llList2List(dict,1,-1),0,-1,elements+1),[dkey]);
+    }
+}
+ 
+// Simply returns the number of items in the dictionary.
+integer dictCount(list dict)
+{
+    return (llGetListLength(dict)-1)/(llList2Integer(dict,0)+1);
+}
+ 
+// Delete the stuff below here its just for testing, unless you want to see how everything works.
+// In that case, drop this entire script into a box, compile it and click the box.
+ 
+string stackdump(list x) {
+    return "["+llDumpList2String(x, "] | [")+"]";
+}
+default
+{
+    touch_start(integer total_number)
+    {
+         llSay(0,"Begin AlyDictLib: One element tests.");
+        llSay(0,"x = dictNew(1)");
+        list x = dictNew(1);
+        list y;
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictSetItem(x, 'kitty', ['cute'])");
+        x = dictSetItem(x, "kitty", ["cute"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictSetItem(x, 'puppy', ['cuter'])");
+        x = dictSetItem(x, "puppy", ["cuter"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictSetItem(x, 'foxy', ['cutest'])");
+        x = dictSetItem(x, "foxy", ["cutest"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictDelItem(x, 'kitty')");
+        x = dictDelItem(x, "kitty");
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictSetItem(x, 'bunny', ['cute'])");
+        x = dictSetItem(x, "bunny", ["cute"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictSetItem(x, 'foxy', ['supercute'])");
+        x = dictSetItem(x, "foxy", ["supercute"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"y = dictGetItem(x, 'foxy')");
+        y = dictGetItem(x, "foxy");
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"y = dictGetItem(x, 'bunny')");
+        y = dictGetItem(x, "bunny");
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"y = dictGetElems(x, 0)");
+        y = dictGetElems(x, 0);
+        llSay(0,"y: "+stackdump(y));
+ 
+ 
+        llSay(0,"y = dictGetKeys(x)");
+        y = dictGetKeys(x);
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0," ---------- ");
+        llSay(0,"Begin AlyDictLib: Multi element tests.");
+        llSay(0,"x = dictNew(3)");
+        x = dictNew(3);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictSetItem(x, 'kitty', ['feline', 'cute', 'meow'])");
+        x = dictSetItem(x, "kitty", ["feline", "cute", "meow"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictSetItem(x, 'puppy', ['canine', 'cuter', 'bark'])");
+        x = dictSetItem(x, "puppy", ["canine", "cuter", "bark"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictSetItem(x, 'foxy', ['vulpine', 'cutest', 'yip'])");
+        x = dictSetItem(x, "foxy", ["vulpine", "cutest", "yip"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictDelItem(x, 'kitty')");
+        x = dictDelItem(x, "kitty");
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictSetItem(x, 'bunny', ['lapine', 'cute', 'churr'])");
+        x = dictSetItem(x, "bunny", ["lapine", "cute", "churr"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"x = dictSetItem(x, 'foxy', ['vulpine', 'supercute', 'yerf'])");
+        x = dictSetItem(x, "foxy", ["vulpine", "supercute", "yerf"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"y = dictGetItem(x, 'foxy')");
+        y = dictGetItem(x, "foxy");
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"y = dictGetItem(x, 'bunny')");
+        y = dictGetItem(x, "bunny");
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"y = dictGetElems(x, 0)");
+        y = dictGetElems(x, 0);
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"y = dictGetElems(x, 1)");
+        y = dictGetElems(x, 1);
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"y = dictGetElems(x, 2)");
+        y = dictGetElems(x, 2);
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"y = dictGetKeys(x)");
+        y = dictGetKeys(x);
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"x = dictSetElement(x, 'foxy', 2, ['yip'])");
+        x = dictSetElement(x, "foxy", 2, ["yip"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"y = dictGetElement(x, 'bunny', 1)");
+        y = dictGetElement(x, "bunny", 1);
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"dictFindKey(x, 'foxy'): "+(string)dictFindKey(x,"foxy"));
+        llSay(0,"dictFindKey(x, 'ferret'): "+(string)dictFindKey(x,"ferret"));
+        llSay(0,"dictCount(x): "+(string)dictCount(x));
+ 
+        llSay(0," ---------- ");
+        llSay(0,"Begin AlyDictLib: Error handling tests.");
+ 
+        llSay(0,"x = dictNew(3)");
+        x = dictNew(3);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"Extra items: x = dictSetItem(x, 'kitty', ['feline', 'cute', 'meow', 'garbage'])");
+        x = dictSetItem(x, "kitty", ["feline", "cute", "meow", "garbage"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"Insufficient items: x = dictSetItem(x, 'puppy', ['canine', 'cuter'])");
+        x = dictSetItem(x, "puppy", ["canine", "cuter"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"Mixed items (technically NOT an error): x = dictSetItem(x, 'foxy', ['vulpine', 9001, 'yip'])");
+        x = dictSetItem(x, "foxy", ["vulpine", 9001, "yip"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"Set of null key: x = dictSetItem(x, '', ['vulpine', 9001, 'yip'])");
+        x = dictSetItem(x, "", ["vulpine", 9001, "yip"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"Get of null key: y = dictGetItem(x, '')");
+        y = dictGetItem(x, "");
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"Deletion of non-existent item: x = dictDelItem(x, 'ferret')");
+        x = dictDelItem(x, "ferret");
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"Addition of item: x = dictSetItem(x, 'bunny', ['lapine', 'cute', 'churr'])");
+        x = dictSetItem(x, "bunny", ["lapine", "cute", "churr"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"Correction of item: x = dictSetElement(x, 'puppy', 2, ['bark'])");
+        x = dictSetElement(x, "puppy", 2, ["bark"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"Get of non-existent item: y = dictGetItem(x, 'ferret')");
+        y = dictGetItem(x, "ferret");
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"Get of null key: y = dictGetItem(x, '')");
+        y = dictGetItem(x, "");
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"Set of nonexistent element: x = dictSetElement(x, 'foxy', 4, ['yerf'])");
+        x = dictSetElement(x, "foxy", 4, ["yerf"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"Get of nonexistent element: y = dictGetElement(x, 'bunny', 6)");
+        y = dictGetElement(x, "bunny", 6);
+        llSay(0,"y: "+stackdump(y));
+ 
+        llSay(0,"Set of nonexistent key: x = dictSetElement(x, '', 4, ['yerf'])");
+        x = dictSetElement(x, "", 4, ["yip"]);
+        llSay(0,"x: "+stackdump(x));
+ 
+        llSay(0,"Get of nonexistent key: y = dictGetElement(x, '', 6)");
+        y = dictGetElement(x, "", 6);
+        llSay(0,"y: "+stackdump(y));                                      
+    }
+}
+</source>
+[[Category:LSL Library]]

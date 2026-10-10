@@ -1,0 +1,14 @@
+{{LSL Header|ml=*}}
+
+Within [[state]]s LSL works on events, such as the scripted object starting to move ([[moving_start]]), colliding with things ([[collision_start]]) or a recurring timer ([[timer]]).
+
+Events do not interrupt each other, but instead are queued {{HoverText|FIFO|First In, First Out}}, though the [[state_entry]] event can jump the queue. If more that 64 events are waiting, new events are discarded until free slots become available. If the script is paused, such as when an object is taken to inventory, pending events are preserved and handled the next time the object is rezzed.
+On state change the event queue is cleared and any open listens are [[llListenRemove|removed]] automatically. Reoccurring sensor events ([[sensor]]) are set not to reoccur in the new state and must be manually re-enabled (via [[llSensor]] or [[llSensorRepeat]]), but timer events (from [[llSetTimerEvent]]) ''do'' reoccur. Please refer to the [[State]] article for further details.
+
+For legacy LSL - the events are registered as bit flags in an unsigned-64 bit integer, meaning there can only ever be 64 events.
+
+
+{{KBtrivia|<b><code>event</code></b> is a reserved word in LSL, but it is not used. If you try to use it as a function or variable name, it will cause a syntax error.}}
+
+{{LSLC|Keywords}}
+{{LSLC|}}

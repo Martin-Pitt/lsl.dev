@@ -1,0 +1,108 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-4897}}
+{{LSL_Function/inventory|sound|uuid=true|type=sound|volume=volume}}
+{{LSL_Function/position|top_north_east|region=*}}
+{{LSL_Function/position|bottom_south_west|region=*}}
+|func_id=212|func_sleep=0.0|func_energy=10.0
+|func=llTriggerSoundLimited|sort=TriggerSoundLimited
+|p1_type=string|p1_name=sound|p1_desc
+|p2_type=float|p2_name=volume|p2_desc
+|p3_type=vector|p3_name=top_north_east
+|p4_type=vector|p4_name=bottom_south_west
+|func_footnote=If the object moves the sound does not move with it.<br/>Use {{LSLG|llPlaySound}} to play a sound attached to the object.
+|func_desc=Plays {{LSLPT|sound}} at {{LSLPT|volume}}, centered at but not attached to the object, limited to the box defined by vectors {{LSLPT|top_north_east}} and {{LSLPT|bottom_south_west}}
+|return_text
+|spec
+|caveats=
+* Unlike [[llSetSoundRadius]], the sound audibility is determined by '''avatar''' position and not camera position.
+* If the script is attached and the parcel has avatar sounds turned off, an error is shouted on {{#var:DEBUG_CHANNEL}}: "Too many sound triggers."
+|constants
+|examples=<syntaxhighlight lang="lsl2">
+/*
+    Single Prim llTriggerSoundLimited Helper by Daemonika Nightfire.
+ 
+    Just use this script in a single prim and make the prim as big as your room.
+    If you then click on the prim, the sound will only be triggered inside and you will get a message with a finished LSL code.
+    You can simply copy this code to the clipboard and use it in your actual script.
+    
+    Important:
+    You cannot rotate the prim, the code needs global coordinates.
+*/
+
+string sound = "c704dbd8-53b1-246d-e197-b486e92da45b"; // use here your own sound uuid
+
+////////// nothing to do below this line \\\\\\\\\\
+default
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHANTOM, TRUE);
+        llSetRot(ZERO_ROTATION);
+    }
+
+    touch_start(integer total_number)
+    {
+        llSetRot(ZERO_ROTATION);
+        vector my_pos = llGetPos();
+        vector my_scale = llGetScale();
+        
+        float _X = my_scale.x/2;
+        float _Y = my_scale.y/2;
+        float _Z = my_scale.z/2;
+        
+        vector bottom_south_west = <my_pos.x - _X, my_pos.y - _Y, my_pos.z - _Z>;
+        vector top_north_east    = <my_pos.x + _X, my_pos.y + _Y, my_pos.z + _Z>;
+        
+        llTriggerSoundLimited(sound, 1.0, top_north_east, bottom_south_west);
+        
+        llOwnerSay("\nllTriggerSoundLimited(\"" + sound + "\", 1.0, " + (string)top_north_east + ", " + (string)bottom_south_west + ");");
+    }
+    
+    on_rez(integer Dae)
+    {
+        llResetScript();
+    }
+}
+</syntaxhighlight>
+=== Secret Collision Sound ===
+This will play a sound on collision, only to the person who collided with it.
+It can be used for haunted houses where you want to add confusion, since others wont hear!
+
+<syntaxhighlight lang="lsl2">
+string sound = "a9da4612-5d4b-662a-050a-c821c394991f"; // squeaky toy
+
+playSoundAt(key avatar, string sound, float volume)
+{
+    if (llGetAgentSize(avatar)) // Make sure theyre actually present
+    {
+        vector pos = (vector)llList2String(llGetObjectDetails(avatar, [OBJECT_POS]),0); // Their position
+        list scale = llGetBoundingBox(avatar); // The corners of their bounding box
+        vector corner2 = pos+llList2Vector(scale,1); // Top northeast corner of their bounding box
+        vector corner1 = pos+llList2Vector(scale,0); // Bottom southwest corner of their bounding box
+        llTriggerSoundLimited(sound, volume, corner2, corner1); // Play sound in their location only
+    }
+}
+default
+{
+    collision_start(integer n)
+    {
+        key bumper = llDetectedKey(0);
+        float volume = 1.0; // Volume is affected by distance like llPlaySound!
+        playSoundAt(bumper, sound, volume);
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llPlaySound]]}}
+{{LSL DefineRow||[[llTriggerSound]]}}
+{{LSL DefineRow||[[llSetSoundRadius]]}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Sound
+|cat2
+|cat3
+|cat4
+|history={{LSL Added|0.4.0|remote=http://secondlife.wikia.com/wiki/Version_0.4.0}}
+}}

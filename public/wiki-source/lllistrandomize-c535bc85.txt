@@ -1,0 +1,67 @@
+{{LSL_Function
+|inject-2={{LSL_Function/stride|stride}}
+|sort=ListRandomize|func=llListRandomize
+|func_id=197|func_sleep=0.0|func_energy=10.0
+|p1_type=list
+|p1_name=src
+|p1_desc=A list you want to randomize.
+|p2_type=integer
+|p2_name=stride
+|return_type=list
+|return_text=which is a randomized permutation of {{LSLP|src}}.
+|spec=
+When you want to randomize the position of every list element, specify a stride of 1. This is perhaps the setting most used.
+
+If the stride is not a factor of the list length, the {{LSLP|src}} list is returned. In other words, <code>llGetListLength({{LSLPT|src}}) % stride</code> must be 0.
+
+Conceptually, the algorithm selects <code>llGetListLength({{LSLPT|src}}) / stride</code> buckets, and then for each bucket swaps in the contents with another bucket.
+|caveats=
+|examples=
+<source lang="lsl2">list dice = ["2", "4", "1", "6", "3", "5"];
+
+default
+{
+    touch_start(integer num_detected) {
+        list shuffled = llListRandomize(dice, 1);
+        llOwnerSay(llList2CSV(shuffled));
+    }
+}</source>
+
+
+<source lang="lsl2">list list01 = ["Cold", "pizza", "in", "the", "early", "morning"];
+
+list list_random = llListRandomize(list01, 2);</source>
+
+<tt>list_random</tt> could be:
+
+# ["Cold", "pizza", "in", "the", "early", "morning"]
+# ["Cold", "pizza", "early", "morning", "in", "the"]
+# ["in", "the", "Cold", "pizza", "early", "morning"]
+# ["in", "the", "early", "morning", "Cold", "pizza"]
+# ["early", "morning", "Cold", "pizza", "in", "the"]
+# ["early", "morning", "in", "the", "Cold", "pizza"]
+
+Notice that two adjacent elements from the original list are always kept together, because the stride of 2 was specified.
+
+<source lang="lsl2">list list_random = llListRandomize(list01, 6);</source>
+
+list_random in this instance is the original list, exactly in the order it already was, because we told it to keep every set of six elements together, and there are only six elements in the list.
+|constants
+|helpers
+|also_header
+|also_functions={{LSL DefineRow||[[llListSort]]|}}
+{{LSL DefineRow||[[llFrand]]|}}
+|also_tests
+|also_articles
+|also_footer
+|notes=Bear in mind that the source list will remain unchanged. Instead, a new list will be produced. So, it's important that you capture this with a variable (unless you are acting directly on the results.)
+|mode
+|deprecated
+|permission
+|negative_index
+|cat1=List
+|cat2
+|cat3
+|cat4
+|location=lsa_randomize(): 'linden\indra\lscript\lscript_library\lscript_alloc.cpp'
+}}

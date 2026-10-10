@@ -1,0 +1,247 @@
+==LSL HTTP Server URL Registration==
+
+One of the challenges of using HTTP to interact with an external web service is that the URL for the HTTP Server in an in-world object is dynamic; it changes whenever a region restarts or when the object moves from one region to another. This means that the object must obtain its new URL and then register that URL with the external web service. There are times (such as during a grid roll) when the external service may get many of these registration requests, possibly so many that it cannot respond to them all in a timely way. This script shows how to get a URL for the HTTP Server in your object and register it with an external web service, including how to do backoff and retry when acting as an HTTP Client during registration (the same backoff technique should be used whenever your script is acting as an HTTP Client).
+
+<syntaxhighlight lang="lsl2">
+/// This script shows how to register the url for an in-world object
+/// with an external service, including backoff and retry.
+///
+/// This implements a fuzzy exponential backoff for any failure. This is
+/// standard technique for dealing with network or server failures; by
+/// waiting an exponentially increasing time for each retry, this method
+/// prevents a temporary failure from becoming a major congestion event
+/// as all clients flood the server with requests at the same time.
+/// The 'fuzzy' part is a little randomness added to the retry time so
+/// that competing objects who start together will gradually spread their
+/// retries out over time.
+///
+/// Constants that configure url allocation and registration:
+float BaseBackoffSeconds = 30.0;   // first backoff time, increases exponentially until MaximumBackoff
+float MaximumBackoff     = 7200.0; // two hours
+float VariableSeconds    = 10.0;   // backoff will have a random value from 0 to this added after the above
+
+integer DebugRetry       = FALSE;  // if TRUE, uses debug_retry below to add chatty llOwnerSay messages
+
+string RegistrationServerURL = "http://your-server.example.com/register"; /// FILL IN YOUR SERVER URL
+                                   /// The server should expect a POST request whose single url parameter is
+                                   /// the url for your in-world object like:
+    /// http://your-server.example.com/register?http%3A//sim10772.agni.lindenlab.com%3A12046/cap/4e468698-63c3-eeb2-4d81-a5cc1bc1bda
+                                   /// If your server needs the request in some other form, modify
+                                   /// the register_my_url function below to construct the request.
+
+/// Constants Internal to registration
+float NO_TIME = 0.0;
+
+/// Variables used by url allocation and registration
+string  myURL = "";
+integer numRetries = 0;
+key     urlRequestId = NULL_KEY;
+key     registrationRequestId = NULL_KEY;
+
+/// Functions used by server url allocation and registration
+
+debug_retry(string message)/// you may remove all use of debug_retry without modifying the behavior
+{
+    if (DebugRetry)
+    {
+        llOwnerSay(message);
+    }
+}
+
+float min(float x, float y)
+{
+    if (x > y)
+        return y;
+    return x;
+}
+
+/// This function uses the global 'numRetries' to implement the backoff
+/// by setting a timer. If your script makes other requests, you
+/// can use this to implement backoff for those as well.
+/// Remember to reset numRetries to zero after any successful request
+backoff_and_retry(float suggested_time)
+{
+    float fixed_time;
+    if (suggested_time == NO_TIME)
+    {
+        fixed_time = BaseBackoffSeconds * llPow(2, (float)numRetries);
+    }
+    else
+    {
+        debug_retry("suggested minimum retry " + (string)suggested_time);
+        fixed_time = llFabs(suggested_time);
+    }
+    numRetries += 1;
+    fixed_time = min(fixed_time, MaximumBackoff);
+    float variable_time = llFrand(VariableSeconds); // make the retries a little fuzzy
+    debug_retry("backing off " + (string)fixed_time + " + " + (string)variable_time + " seconds");
+    llSetTimerEvent(fixed_time + variable_time);
+}
+
+request_my_url()
+{
+    debug_retry("requesting new server url");
+    urlRequestId = llRequestURL();
+}
+
+register_my_url()
+{
+    debug_retry("attempting registration to " + RegistrationServerURL);
+    registrationRequestId = llHTTPRequest(RegistrationServerURL + "?" + llEscapeURL(myURL)
+                                          ,[ HTTP_METHOD, "POST" ]
+                                          ,""
+                                          );
+    if (registrationRequestId == NULL_KEY) // outbound request was throttled
+    {
+        debug_retry("registration throttled");
+        backoff_and_retry(NO_TIME);
+    }
+}
+
+////////////////////////////////////////////////////////////////
+/// States
+////////////////////////////////////////////////////////////////
+default
+{
+    state_entry()
+    {
+        /// add any initialization needed
+        state get_my_url;
+    }
+
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+}
+
+state get_my_url
+{
+    // This state is responsible for getting an inbound URL allocated for the object
+    // once allocated, it goes to 'registration' state to send that url to the server
+
+    state_entry()
+    {
+        numRetries = 0;
+        myURL = "";
+        llSetTimerEvent(NO_TIME); // turn off any running timer
+        request_my_url();
+    }
+
+    http_request(key id, string method, string body)
+    {
+        if (id == urlRequestId)
+        {
+            if (method == URL_REQUEST_DENIED)
+            {
+                debug_retry("server url request denied");
+                backoff_and_retry(NO_TIME);
+            }
+            else if (method == URL_REQUEST_GRANTED)
+            {
+                myURL = body;
+                debug_retry("server url: " + myURL);
+                state registration;
+            }
+        }
+    }
+
+    timer()
+    {
+        llSetTimerEvent(NO_TIME); // turn off timer
+        debug_retry("url request backoff timer expired");
+        request_my_url();
+    }
+
+    changed(integer change)
+    {
+        if (change & (CHANGED_OWNER | CHANGED_REGION | CHANGED_REGION_START))
+        {
+            state default; // which will immediately change back to get_my_url
+        }
+    }
+}
+
+state registration
+{
+    // This state is responsible for registering myURL with the server
+    // Once the url is registered, it transitions to 'operational' state
+    state_entry()
+    {
+        numRetries = 0;
+        llSetTimerEvent(NO_TIME); // turn off any running timer
+        register_my_url();
+    }
+
+    http_response(key request_id, integer status, list metadata, string body)
+    {
+        if (request_id == registrationRequestId)
+        {
+            if (status == 200) // our address is registered; ready to go!
+            {
+                debug_retry("registration successful");
+                state operational;
+            }
+            else
+            {
+                debug_retry("registration failed status=" + (string)status + "\n" + body);
+                // If the server sends a 'Retry-After: <seconds>' header in the failure
+                // response, use that (plus a little random 'fuzz') as the retry time
+                // rather than our internal default time. Be careful if your server
+                // sends this, as the script will not do exponential backoff.
+                backoff_and_retry((float)llGetHTTPHeader(request_id, "retry-after"));
+            }
+        }
+    }
+
+    timer()
+    {
+        llSetTimerEvent(NO_TIME); // turn off timer
+        debug_retry("registration backoff timer expired");
+        register_my_url();
+    }
+
+    changed(integer change)
+    {
+        if (change & (CHANGED_OWNER | CHANGED_REGION | CHANGED_REGION_START))
+        {
+            llReleaseURL(myURL);
+            state get_my_url;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// This state is where your object should expect to begin handling requests.  //
+// If your code has reason to believe that the server has lost its url,       //
+//  it may set the state to either 'get_my_url' to get a new url and register //
+//  it or to 'registration' to get a new url and register that.               //
+////////////////////////////////////////////////////////////////////////////////
+state operational
+{
+    state_entry()
+    {
+        numRetries = 0;
+        debug_retry("entering operational state");
+    }
+
+    changed(integer change)
+    {
+        if (change & (CHANGED_OWNER | CHANGED_REGION | CHANGED_REGION_START))
+        {
+            llReleaseURL(myURL);
+            state get_my_url;
+        }
+    }
+
+    http_request(key request_id, string method, string body)
+    {
+        llHTTPResponse(request_id, 500, "Unimplemented operational request"); /// Do whatever you do with requests
+    }
+}
+</syntaxhighlight>
+{{LSLC|}}
+{{LSLC|Communications}}
+{{LSLC|HTTP}}
+{{LSLC|HTTP/Server}}
+{{LSLC|Examples}}

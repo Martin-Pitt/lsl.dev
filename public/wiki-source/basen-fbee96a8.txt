@@ -1,0 +1,751 @@
+{{LSL Header}}
+__Toc__
+
+This script allows you to make maximum use of available bits in strings for transport or storage in memory. By being able to code integers into the usable space of UTF-8 and UTF-16.
+
+Note that this script does not code to the same standards such as Base64, but instead maps dynamically to the ''usable code points'' as allowed by Linden Lab.
+
+For the LSL Implementation the scripts' primary functions are:
+string Compress( integer Bytes, list Input );
+list Decompress( integer Bytes, string Encrypted );
+
+For the PHP Implementation:
+function BaseN_Enc( $Bytes, $Input );
+function BaseN_Dec( $Bytes, $Encrypted );
+
+
+The Bytes parameter specifies how many bytes each encoded string character should use. The most efficient seems to be using only a single byte. -1 is useful for the PHP Implementation if a HTTP Request returns using the charset ISO-8859-1 to encode in a better ratio.
+
+
+{{box|LSL Implementation|
+<source lang="lsl2">
+/*/
+        Variable Base Compression
+    created by Nexii
+    unless otherwise noted
+/*/
+
+integer UTF8ToInt(string input) {// by Strife
+    integer result = llBase64ToInteger(llStringToBase64(input));//input = llGetSubString(input,0,0)));
+    if(result & 0x80000000){
+        integer end = (integer)("0x"+llGetSubString(input = (string)llParseString2List(llEscapeURL(input),(list)"%",[]),-8,-1));
+        integer begin = (integer)("0x"+llDeleteSubString(input,-8,-1));
+        return  (   (  0x0000003f &  end         ) | (( 0x00003f00 &  end) >> 2   ) | 
+                    (( 0x003f0000 &  end) >> 4   ) | (( 0x3f000000 &  end) >> 6   ) |
+                    (( 0x0000003f &  begin) << 24) | (( 0x00000100 &  begin) << 22) ) & 
+                    (0x7FFFFFFF >> (5 * ((integer)(llLog(~result) / 0.69314718055994530941723212145818) - 25)));
+    } return result >> 24; }
+string IntToUTF8(integer input) {// by Strife
+    integer bytes = llCeil(llLog(input) / 0.69314718055994530941723212145818);
+    bytes = (input >= 0x80) * (bytes + ~(((1 << bytes) - input) > 0)) / 5;
+    string result = "%" + byte2hex((input >> (6 * bytes)) | ((0x3F80 >> bytes) << !bytes));
+    while (bytes) result += "%" + byte2hex((((input >> (6 * (bytes = ~-bytes))) | 0x80) & 0xBF));
+    return llUnescapeURL(result); }
+string byte2hex(integer x) { integer y = (x >> 4) & 0xF;// By Strife
+    return llGetSubString(Hex, y, y) + llGetSubString(Hex, x & 0xF, x & 0xF); }
+string Hex = "0123456789abcdef";
+key Ints2Key( integer a, integer b, integer c, integer d ) {
+    return byte2hex(a>>24)+byte2hex(a>>16)+byte2hex(a>>8)+byte2hex(a)+"-"+
+           byte2hex(b>>24)+byte2hex(b>>16)+"-"+byte2hex(b>>8)+byte2hex(b)+"-"+
+           byte2hex(c>>24)+byte2hex(c>>16)+"-"+byte2hex(c>>8)+byte2hex(c)+
+           byte2hex(d>>24)+byte2hex(d>>16)+byte2hex(d>>8)+byte2hex(d); }
+
+integer fui(float input){// by Strife
+    if((input) != 0.0){
+        integer sign = (input < 0) << 31;
+        if((input = llFabs(input)) < 2.3509887016445750159374730744445e-38)
+            return sign | (integer)(input / 1.4012984643248170709237295832899e-45);
+        integer exp = llFloor((llLog(input) / 0.69314718055994530941723212145818));
+        return (0x7FFFFF & (integer)(input * (0x1000000 >> sign))) | (((exp + 126 + (sign = ((integer)input - (3 <= (input /= (float)("0x1p"+(string)(exp -= ((exp >> 31) | 1)))))))) << 23 ) | sign);
+    } return ((string)input == (string)(-0.0)) << 31; }
+float iuf(integer input){// by Strife
+    return llPow(2.0, (input | !input) - 150) * (((!!(input = (0xff & (input >> 23)))) << 23) | ((input & 0x7fffff))) * (1 | (input >> 31)); }
+
+
+list Unusable = [0x00,1, 0x0D,1, /*|*/0x7C,1, /*~*/0x7E,1, 0xD800,2047, 0xFDD0,31, 0xFFFE,2];
+    // Unusable: 0000, 000D, D800-DFFF, FDD0-FDEF, FFFE and FFFF.
+    //              0(1), 13(1), 124(1), 126(1), 55296(2047), 64976(31), 65534(2),
+    // Reserved for delimiters: '~' and '|'.
+    // 1-byte: Base123, 2-byte: Base2043, 3-byte: Base1112025
+
+string IntToBaseToUTF8( integer Int, integer Base ) { integer Original = Int;
+    // Integer to Base
+    integer Sign = (Int < 0); if(Sign) Int = -Int;
+    integer M = Int%(Base/2);
+    list Coded = [M + (Base/2)*Sign];
+    Int = Int / (Base/2);
+    while( Int > Base ) { Coded = [Int%Base] + Coded; Int /= Base; }
+    if(Int) Coded = [Int] + Coded;
+    
+    // Base to UTF8
+    integer a; integer b = llGetListLength(Coded); list lEnc;
+    for( ; a < b; ++a ) {
+        Int = llList2Integer(Coded,a);
+        integer c; integer d = llGetListLength(Unusable);
+        for(; c < d; c += 2 ) {
+            if( Int >= llList2Integer(Unusable,c) )
+                Int += llList2Integer(Unusable,c+1);
+            else c = d;
+        } lEnc += IntToUTF8(Int);
+    }
+    
+    if(Base > 60000) return llDumpList2String(lEnc,"|");
+                else return (string)lEnc;
+}
+
+integer UTF8ToBaseToInt( string UTF8, integer Base ) {
+    // UTF8 to Base
+    list lDec;
+    if(Base > 60000) lDec = llParseString2List(UTF8,["|"],[]);
+    else { integer h = llStringLength(UTF8);
+           while(h--) lDec = llGetSubString(UTF8,h,h) + lDec; }
+    
+    integer i; integer j = llGetListLength(lDec); list Coded;
+    for(; i < j; ++i ) {
+        string Char = llList2String(lDec,i);
+        integer Int = UTF8ToInt(Char); integer l = llGetListLength(Unusable)-1;
+        for(; l > 0; l -= 2 ) {
+            if( Int >= llList2Integer(Unusable,l-1) )
+                Int -= llList2Integer(Unusable,l);
+        } Coded += [Int];
+    }
+    
+    // Base to Integer
+    integer Int; integer k = llGetListLength(Coded); integer Exp = Base/2; integer Sign;
+    Int = llList2Integer(Coded,--k);
+    if( Int > Exp ) { Sign = 1; Int -= Exp; }
+    while( k-- ){ Int += llList2Integer(Coded,k) * Exp; Exp *= Base; }
+    if(Sign) Int = -Int;
+    return Int;
+}
+
+string Compress( integer Bytes, list Input ) {
+    integer Base;
+    if(Bytes == 1) Base = 123; else
+    if(Bytes == 2) Base = 2043; else
+    if(Bytes == 3) Base = 1112025; else
+    if(Bytes ==-1) Base = 251;// Use for web with "charset=ISO-8859-1"
+    list Types; list Compressed; integer x; integer y = llGetListLength(Input);
+    for( ; x < y; ++x ) {
+        
+        // Get as Integer(s) from List Entry, and compress
+        integer Type = llGetListEntryType(Input,x);
+        if(Type == TYPE_INTEGER) {
+            integer Int0 = llList2Integer(Input,x);
+            Compressed += [IntToBaseToUTF8(Int0,Base)];
+        } else if(Type == TYPE_FLOAT) {
+            integer Int0 = fui(llList2Float(Input,x));
+            Compressed += [IntToBaseToUTF8(Int0,Base)];
+        } else if(Type == TYPE_KEY) {
+            string s = llDumpList2String(llParseString2List(llList2String(Input,x), ["-"], []), "");
+            integer Int0 = (integer)("0x"+llGetSubString(s,0,7));
+            integer Int1 = (integer)("0x"+llGetSubString(s,8,15));
+            integer Int2 = (integer)("0x"+llGetSubString(s,16,23));
+            integer Int3 = (integer)("0x"+llGetSubString(s,24,31));
+            Compressed += [IntToBaseToUTF8(Int0,Base),
+                           IntToBaseToUTF8(Int1,Base),
+                           IntToBaseToUTF8(Int2,Base),
+                           IntToBaseToUTF8(Int3,Base)];
+        } else if(Type == TYPE_VECTOR) {
+            vector v = llList2Vector(Input,x);
+            integer Int0 = fui(v.x);
+            integer Int1 = fui(v.y);
+            integer Int2 = fui(v.z);
+            Compressed += [IntToBaseToUTF8(Int0,Base),
+                           IntToBaseToUTF8(Int1,Base),
+                           IntToBaseToUTF8(Int2,Base)];
+        } else if(Type == TYPE_ROTATION) {
+            rotation v = llList2Rot(Input,x);
+            integer Int0 = fui(v.x);
+            integer Int1 = fui(v.y);
+            integer Int2 = fui(v.z);
+            integer Int3 = fui(v.s);
+            Compressed += [IntToBaseToUTF8(Int0,Base),
+                           IntToBaseToUTF8(Int1,Base),
+                           IntToBaseToUTF8(Int2,Base),
+                           IntToBaseToUTF8(Int3,Base)];
+        } else if(Type == TYPE_STRING) {
+            Compressed += llList2String(Input,x);
+        }
+        
+        // Add to header
+        integer Row = x%10;
+        if(!Row) Types += Type; else {
+            integer Col = x/10;
+            integer t = llList2Integer( Types, Col );
+            t = t | (Type<<(Row*3));
+            Types = llListReplaceList( Types, [t], Col, Col );
+    }   }
+    // Compress header
+    y = llGetListLength((Types = y + Types));
+    for( x = 0; x < y; ++x )
+        Types = llListReplaceList( Types, [IntToBaseToUTF8(llList2Integer(Types,x),Base)], x, x );
+    
+    return llDumpList2String(Types + Compressed,"~"); }
+
+list Decompress( integer Bytes, string Encrypted ) {
+    integer Base;
+    if(Bytes == 1) Base = 123; else
+    if(Bytes == 2) Base = 2043; else
+    if(Bytes == 3) Base = 1112025; else
+    if(Bytes ==-1) Base = 251;// Use for web with "charset=ISO-8859-1"
+    list Input = llParseString2List(Encrypted,["~"],[]);
+    
+    integer Total = UTF8ToBaseToInt( llList2String(Input,0), Base );
+    integer x; integer y; list Types;
+    for( y = 1+(Total/10); x < y; ++x )
+        Types += UTF8ToBaseToInt( llList2String(Input,x+1), Base );
+    
+    list Output; integer Ptr = y;
+    for( x = 0; x < Total; ++x ) {
+        integer Row = x%10;
+        integer Col = x/10;
+        integer Type = (llList2Integer(Types,Col)>>(Row*3))&7;
+        
+        if(Type == TYPE_INTEGER) {
+            Output += [UTF8ToBaseToInt(llList2String(Input,Ptr++),Base)];
+        } else if(Type == TYPE_FLOAT) {
+            Output += [iuf(UTF8ToBaseToInt(llList2String(Input,Ptr++),Base))];
+        } else if(Type == TYPE_KEY) {
+            integer Int0 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            integer Int1 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            integer Int2 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            integer Int3 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            Output += [Ints2Key(Int0,Int1,Int2,Int3)];
+        } else if(Type == TYPE_VECTOR) {
+            integer Int0 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            integer Int1 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            integer Int2 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            Output += [<iuf(Int0),iuf(Int1),iuf(Int2)>];
+        } else if(Type == TYPE_ROTATION) {
+            integer Int0 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            integer Int1 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            integer Int2 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            integer Int3 = UTF8ToBaseToInt(llList2String(Input,Ptr++),Base);
+            Output += [<iuf(Int0),iuf(Int1),iuf(Int2),iuf(Int3)>];
+        } else if(Type == TYPE_STRING) {
+            Output += [llList2String(Input,Ptr++)];
+        }
+    }
+    return Output;
+}
+
+
+integer UTF8Length(string msg) {// by kimmie Loveless
+    integer rNum = llStringLength(msg); return rNum + ((llStringLength(llEscapeURL(msg)) - rNum)/4); }
+
+default {
+    state_entry() {
+        llSetText("", <1,1,1>, 1);
+        llTriggerSound("992192a0-c900-25ae-562c-4c23d3d49e99",1);
+        string HR = "------";
+        list In = [ 25.6, 29555, 655960, -90005, -65.0125, <6, -6, 6>, <7, -7, -7, 7>,
+            (key)"75078730-ebc8-4a80-adb9-1cfd2d95b5ca", 9, 10., 1, <2.,0,0>, 3, 4., 5,
+            <6.,0,0,0>, 7, <8.,0,0>, 9, 1564.756560 ];
+        
+        llSetText(HR+" Compress "+HR, <1,1,1>, 1);
+        string Enc = Compress(-1, In );
+        llTriggerSound("0cec13f2-7daa-0fa8-c099-a32cecc4a138",1);
+        
+        llSetText(HR+" Decompress "+HR, <1,1,1>, 1);
+        list Dec = Decompress(-1, Enc );
+        llTriggerSound("0cec13f2-7daa-0fa8-c099-a32cecc4a138",1);
+        
+        string dIn = llDumpList2String(In,",");
+        string dDec = llDumpList2String(Dec,",");
+        
+        llSetText( HR+" Debug "+HR, <1,1,1>, 1);
+        llOwnerSay( (string)[HR," Debug ",HR,
+            "\n",HR," Input ",HR,"\n",dIn,
+            "\n",HR," Encrypted (",UTF8Length(Enc)," bytes) ",HR,"\n",Enc,
+            "\n",HR," Output ",HR,"\n",dDec] );
+        llTriggerSound("0cec13f2-7daa-0fa8-c099-a32cecc4a138",1);
+        
+        llSetText( HR+" Trying PHP Implementation "+HR, <1,1,1>, 1);
+        llHTTPRequest("http://example.com/BaseN_DecodingTest.php"
+                      + "?b=1&a="+llEscapeURL(Compress(1,In)),
+                      [HTTP_METHOD, "GET"],
+                      "" );
+    }
+    
+    http_response( key k, integer s, list m, string b ) {
+        llSetText("", <1,1,1>, 1);
+        llOwnerSay( "Sent Encoded. PHP Script returns as Decoded.\n"+b );
+        llTriggerSound("0cec13f2-7daa-0fa8-c099-a32cecc4a138",1);
+    }
+}
+</source>
+}}
+
+{{box|PHP Implementation|
+<source lang="php">
+<?php
+
+define( "TYPE_INTEGER",		1 );
+define( "TYPE_FLOAT",		2 );
+define( "TYPE_STRING",		3 );
+define( "TYPE_KEY",			4 );
+define( "TYPE_VECTOR",		5 );
+define( "TYPE_ROTATION",	6 );
+
+$Unusable = array(
+	array( 0x0000, 1 ),
+	array( 0x000D, 1 ),
+	array( 0x007C, 1 ),
+	array( 0x007E, 1 ),
+	array( 0xD800, 2047 ),
+	array( 0xFDD0, 31 ),
+	array( 0xFFFE, 2 )
+);
+
+//function unichr($u) {
+//    return mb_convert_encoding('&#' . intval($u) . ';', 'UTF-8', 'HTML-ENTITIES');
+//}
+
+function mb_str_split( $String ) {
+	$stop = mb_strlen( $String);
+	$result = array();
+	for( $idx = 0; $idx < $stop; $idx++)
+		$result[] = mb_substr( $String, $idx, 1);
+	return $result;
+}
+
+
+function IntToBaseToUTF8( $Int, $Base ) {
+	global $Unusable;
+	$Base = (int)$Base;
+	
+	// Integer to Base
+	$HalfBase = (int)floor($Base/2);
+	$Sign = $Int < 0;
+	if($Sign) $Int = -$Int;
+	$M = $Int % $HalfBase;
+	$Coded = array( $M + $HalfBase * $Sign );
+	$Int = (int)($Int / $HalfBase);
+	while( $Int > $Base ) {
+		array_unshift( $Coded, $Int % $Base );
+		$Int = (int)($Int / $Base);
+	} if( $Int ) array_unshift( $Coded, $Int );
+	
+	// Base to UTF8
+	$Enc = array();
+	$Unusables = count($Unusable);
+	foreach( $Coded as $Val ) {
+		$Int = $Val;
+		for( $i = 0; $i < $Unusables; ++$i ) {
+			if( $Int >= $Unusable[$i][0] )
+				$Int += $Unusable[$i][1];
+			else $i = $Unusables;
+		}
+		$IntArr = array($Int);
+		$Str = UnicodeToUTF8($IntArr);//<- Handles multi-octets, old: unichr($Int); 
+		$Enc[] = $Str;
+	}
+	
+	if($Base > 60000) return implode( '|', $Enc );
+				 else return implode( '', $Enc );
+}
+
+function UTF8ToBaseToInt( $UTF8, $Base ) {
+	global $Unusable;
+	$Base = (int)$Base;
+	
+	$Dec = array();
+	if(Base > 60000) $Dec = mb_split( '/\|/', $UTF8 );
+				else $Dec = mb_str_split( $UTF8 );
+	
+	// UTF8 to Base
+	$Int = 0;
+	$Coded = array();
+	foreach( $Dec as $Char ) {
+		list($Int) = UTF8ToUnicode( $Char );
+		$Unusables = count($Unusable);
+		for( $i = $Unusables-1; $i >= 0; --$i ) {
+			if( $Int >= $Unusable[$i][0] )
+				$Int -= $Unusable[$i][1];
+		} $Coded[] = $Int;
+	}
+	
+	// Base to Int
+	$k = count($Coded);
+	$Exp = (int)floor($Base/2);
+	$Int = $Coded[--$k];
+	if( $Int > $Exp ) { $Sign = 1; $Int -= $Exp; } else $Sign = 0;
+	while( $k-- ) {
+		$Int += $Coded[$k] * $Exp;
+		$Exp *= $Base;
+	}
+	if($Sign) $Int = -$Int;
+	
+	return $Int;
+}
+
+
+function BaseN_Enc( $Bytes, $Input ) {
+	if($Bytes == 1) $Base = 123; else
+	if($Bytes == 2) $Base = 2043; else
+	if($Bytes == 3) $Base = 1112025; else
+	if($Bytes ==-1) $Base = 251;// Use for web transport with "charset=ISO-8859-1"
+	
+	$Compressed = array();
+	$Types = array();
+	
+	for($x = 0, $y = count($Input); $x < $y; ++$x ) {
+		$Var = $Input[$x];
+		
+		// Get as Integer(s) from Input array, and compress into Compressed array
+		if( is_int($Var) ) {
+			$Compressed[] = IntToBaseToUTF8( $Var, $Base );
+			$Type = TYPE_INTEGER;
+		} else if( is_float($Var) ) {
+			$Compressed[] = IntToBaseToUTF8( fui($Var), $Base );
+			$Type = TYPE_FLOAT;
+		} else if( IsKey($Var) ) {
+			$Var = str_replace('-', '', $Var);
+			$Compressed[] = IntToBaseToUTF8( (int)('0x'.substr($Var, 0,8)), $Base );
+			$Compressed[] = IntToBaseToUTF8( (int)('0x'.substr($Var, 8,8)), $Base );
+			$Compressed[] = IntToBaseToUTF8( (int)('0x'.substr($Var,16,8)), $Base );
+			$Compressed[] = IntToBaseToUTF8( (int)('0x'.substr($Var,24,8)), $Base );
+			$Type = TYPE_KEY;
+		} else if( ($Array = IsVecOrRot($Var)) !== FALSE ) {
+			foreach($Array as $Val)
+				$Compressed[] = IntToBaseToUTF8( fui($Val), $Base );
+			if(count($Array) == 3)
+				 $Type = TYPE_VECTOR;
+			else $Type = TYPE_ROTATION;
+		} else if( is_string($Var) ) {
+			// May be a conflict if string contains any delimiter characters '~', '|'
+			$Compressed[] = $Var;
+			$Type = TYPE_STRING;
+		}
+		
+		// Add to header
+		$Row = $x % 10;
+		if(!$Row) $Types[] = Type; else {
+			$Col = $x / 10;
+			$t = $Types[$Col];
+			$t |= $Type << ($Row*3);
+			$Types[$Col] = $t;
+		}
+	}
+	// Compress header
+	$y = count( $Types = array_merge( (array)$y, $Types ) );
+	for( $x = 0; $x < $y; ++$x ) {
+		$Types[$x] = IntToBaseToUTF8( $Types[$x], $Base );
+	}
+	
+	return implode( '~', array_merge( $Types, $Compressed ) );
+}
+
+function BaseN_Dec( $Bytes, $Encrypted ) {
+	if($Bytes == 1) $Base = 123; else
+	if($Bytes == 2) $Base = 2043; else
+	if($Bytes == 3) $Base = 1112025; else
+	if($Bytes ==-1) $Base = 251;// Use for web transport with "charset=ISO-8859-1"
+	
+	$Input = explode( '~', $Encrypted );
+	
+	$Total = UTF8ToBaseToInt( $Input[0], $Base );
+	$Types = array();
+	for( $x = 0, $y = 1+($Total/10); $x < $y; ++$x )
+		$Types[] = UTF8ToBaseToInt( $Input[$x+1], $Base );
+	
+	$Output = array();
+	$Ptr = $y;
+	for( $x = 0; $x < $Total; ++$x ) {
+		$Row = $x % 10;
+		$Col = $x / 10;
+		$Type = ($Types[$Col] >> ($Row*3)) & 7;
+		
+		if($Type == TYPE_INTEGER) {
+			$Output[] = UTF8ToBaseToInt( $Input[$Ptr++], $Base );
+		} else if($Type == TYPE_FLOAT) {
+			$Output[] = iuf( UTF8ToBaseToInt( $Input[$Ptr++], $Base ) );
+		} else if($Type == TYPE_KEY) {
+			$Int0 = UTF8ToBaseToInt( $Input[$Ptr++], $Base );
+			$Int1 = UTF8ToBaseToInt( $Input[$Ptr++], $Base );
+			$Int2 = UTF8ToBaseToInt( $Input[$Ptr++], $Base );
+			$Int3 = UTF8ToBaseToInt( $Input[$Ptr++], $Base );
+			
+			$Output[] = Ints2Key( $Int0, $Int1, $Int2, $Int3 );
+		} else if($Type == TYPE_VECTOR) {
+			$VX = iuf( UTF8ToBaseToInt( $Input[$Ptr++], $Base ) );
+			$VY = iuf( UTF8ToBaseToInt( $Input[$Ptr++], $Base ) );
+			$VZ = iuf( UTF8ToBaseToInt( $Input[$Ptr++], $Base ) );
+			$Output[] = Floats2Vec( $VX, $VY, $VZ );
+		} else if($Type == TYPE_ROTATION) {
+			$RX = iuf( UTF8ToBaseToInt( $Input[$Ptr++], $Base ) );
+			$RY = iuf( UTF8ToBaseToInt( $Input[$Ptr++], $Base ) );
+			$RZ = iuf( UTF8ToBaseToInt( $Input[$Ptr++], $Base ) );
+			$RS = iuf( UTF8ToBaseToInt( $Input[$Ptr++], $Base ) );
+			$Output[] = Floats2Rot( $RX, $RY, $RZ, $RS );
+		} else if($Type == TYPE_STRING) {
+			$Output[] = $Input[$Ptr++];
+		}
+	}
+	return $Output;
+}
+
+function IsKey( $UUID ) {
+	return preg_match( '@[[:xdigit:]-]{36}@', $UUID );
+}
+
+function IsVecOrRot( $Input ) {
+	$Total = preg_match_all('/-?[0-9]*\.[0-9]+|[0-9]+/', $Input, $Matches );
+	if($Total == 3 || $Total == 4) return $Matches; else return FALSE;
+}
+
+function Ints2Key( $a, $b, $c, $d ) {
+	return sprintf('%x%x-%x-%x-%x-%x%x%x',
+		($a>>16)&0xFFFF, $a&0xFFFF, ($b>>16)&0xFFFF, $b&0xFFFF,
+		($c>>16)&0xFFFF, $c&0xFFFF, ($d>>16)&0xFFFF, $d&0xFFFF );
+}
+
+function Floats2Vec( $x, $y, $z ) {
+	return sprintf('<%F, %F, %F>', $x, $y, $z );
+}
+
+function Floats2Rot( $x, $y, $z, $s ) {
+	return sprintf('<%F, %F, %F, %F>', $x, $y, $z, $s );
+}
+
+function fui( $float ) {// Port of Strifes' function
+	if(($float) != 0.0) {
+		$sign = (int)($float < 0) << 31;
+		if(($float = abs($float)) < 2.3509887016445750159374730744445e-38)
+			return $sign | (int)($float / 1.4012984643248170709237295832899e-45);
+		if($float > 3.4028234663852885981170418348452e+38)
+			return $sign | 0x7F800000;
+		$exp = (int)floor((log($float) / 0.69314718055994530941723212145818));
+        $float /= pow(2.0, $exp -= (($exp >> 31) | 1));
+		$d = (int)$float - (3 <= $float);
+		return (0x7FFFFF & (int)($float * (0x1000000 >> $d))) | ((($exp + 126 + $d) << 23 ) | $sign);
+	}
+	return (int)((string)$float == (string)(-0.0)) << 31;
+}
+
+function iuf( $int ) {// Port of Strifes' function
+	if(($int & 0x7FFFFFFF) == 0x7F800000)//Infinity Check
+        return (($int >> 31) | 1) / 0.0;
+	$exp = ($int >> 23) & 0xFF;
+	
+	return sprintf( '%.6F', pow( 2.0, ($exp | !$exp) - 150) * (((!!$exp) << 23) | (($int & 0x7FFFFF))) * (1 | ($int >> 31)) );
+}
+
+
+
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: NPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Netscape Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/NPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Mozilla Communicator client code.
+ *
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ * Henri Sivonen, hsivonen@iki.fi
+ *
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the NPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the NPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+/*
+ * For the original C++ code, see
+ * http://lxr.mozilla.org/seamonkey/source/intl/uconv/src/nsUTF8ToUnicode.cpp
+ * http://lxr.mozilla.org/seamonkey/source/intl/uconv/src/nsUnicodeToUTF8.cpp
+ *
+ * The latest version of this file can be obtained from
+ * http://iki.fi/hsivonen/php-utf8/
+ *
+ * Version 1.0, 2003-05-30
+ */
+
+/**
+ * Takes an UTF-8 string and returns an array of ints representing the 
+ * Unicode characters. Astral planes are supported ie. the ints in the
+ * output can be > 0xFFFF. Occurrances of the BOM are ignored. Surrogates
+ * are not allowed.
+ *
+ * Returns false if the input string isn't a valid UTF-8 octet sequence.
+ */
+function UTF8ToUnicode(&$str)
+{
+  $mState = 0;     // cached expected number of octets after the current octet
+                   // until the beginning of the next UTF8 character sequence
+  $mUcs4  = 0;     // cached Unicode character
+  $mBytes = 1;     // cached expected number of octets in the current sequence
+
+  $out = array();
+
+  $len = strlen($str);
+  for($i = 0; $i < $len; $i++) {
+    $in = ord($str{$i});
+    if (0 == $mState) {
+      // When mState is zero we expect either a US-ASCII character or a
+      // multi-octet sequence.
+      if (0 == (0x80 & ($in))) {
+        // US-ASCII, pass straight through.
+        $out[] = $in;
+        $mBytes = 1;
+      } else if (0xC0 == (0xE0 & ($in))) {
+        // First octet of 2 octet sequence
+        $mUcs4 = ($in);
+        $mUcs4 = ($mUcs4 & 0x1F) << 6;
+        $mState = 1;
+        $mBytes = 2;
+      } else if (0xE0 == (0xF0 & ($in))) {
+        // First octet of 3 octet sequence
+        $mUcs4 = ($in);
+        $mUcs4 = ($mUcs4 & 0x0F) << 12;
+        $mState = 2;
+        $mBytes = 3;
+      } else if (0xF0 == (0xF8 & ($in))) {
+        // First octet of 4 octet sequence
+        $mUcs4 = ($in);
+        $mUcs4 = ($mUcs4 & 0x07) << 18;
+        $mState = 3;
+        $mBytes = 4;
+      } else if (0xF8 == (0xFC & ($in))) {
+        /* First octet of 5 octet sequence.
+         *
+         * This is illegal because the encoded codepoint must be either
+         * (a) not the shortest form or
+         * (b) outside the Unicode range of 0-0x10FFFF.
+         * Rather than trying to resynchronize, we will carry on until the end
+         * of the sequence and let the later error handling code catch it.
+         */
+        $mUcs4 = ($in);
+        $mUcs4 = ($mUcs4 & 0x03) << 24;
+        $mState = 4;
+        $mBytes = 5;
+      } else if (0xFC == (0xFE & ($in))) {
+        // First octet of 6 octet sequence, see comments for 5 octet sequence.
+        $mUcs4 = ($in);
+        $mUcs4 = ($mUcs4 & 1) << 30;
+        $mState = 5;
+        $mBytes = 6;
+      } else {
+        /* Current octet is neither in the US-ASCII range nor a legal first
+         * octet of a multi-octet sequence.
+         */
+        return false;
+      }
+    } else {
+      // When mState is non-zero, we expect a continuation of the multi-octet
+      // sequence
+      if (0x80 == (0xC0 & ($in))) {
+        // Legal continuation.
+        $shift = ($mState - 1) * 6;
+        $tmp = $in;
+        $tmp = ($tmp & 0x0000003F) << $shift;
+        $mUcs4 |= $tmp;
+
+        if (0 == --$mState) {
+          /* End of the multi-octet sequence. mUcs4 now contains the final
+           * Unicode codepoint to be output
+           *
+           * Check for illegal sequences and codepoints.
+           */
+
+          // From Unicode 3.1, non-shortest form is illegal
+          if (((2 == $mBytes) && ($mUcs4 < 0x0080)) ||
+              ((3 == $mBytes) && ($mUcs4 < 0x0800)) ||
+              ((4 == $mBytes) && ($mUcs4 < 0x10000)) ||
+              (4 < $mBytes) ||
+              // From Unicode 3.2, surrogate characters are illegal
+              (($mUcs4 & 0xFFFFF800) == 0xD800) ||
+              // Codepoints outside the Unicode range are illegal
+              ($mUcs4 > 0x10FFFF)) {
+            return false;
+          }
+          if (0xFEFF != $mUcs4) {
+            // BOM is legal but we don't want to output it
+            $out[] = $mUcs4;
+          }
+          //initialize UTF8 cache
+          $mState = 0;
+          $mUcs4  = 0;
+          $mBytes = 1;
+        }
+      } else {
+        /* ((0xC0 & (*in) != 0x80) && (mState != 0))
+         * 
+         * Incomplete multi-octet sequence.
+         */
+        return false;
+      }
+    }
+  }
+  return $out;
+}
+
+/**
+ * Takes an array of ints representing the Unicode characters and returns 
+ * a UTF-8 string. Astral planes are supported ie. the ints in the
+ * input can be > 0xFFFF. Occurrances of the BOM are ignored. Surrogates
+ * are not allowed.
+ *
+ * Returns false if the input array contains ints that represent 
+ * surrogates or are outside the Unicode range.
+ */
+function UnicodeToUTF8(&$arr)
+{
+  $dest = '';
+  foreach ($arr as $src) {
+    if($src < 0) {
+      return false;
+    } else if ( $src <= 0x007f) {
+      $dest .= chr($src);
+    } else if ($src <= 0x07ff) {
+      $dest .= chr(0xc0 | ($src >> 6));
+      $dest .= chr(0x80 | ($src & 0x003f));
+    } else if($src == 0xFEFF) {
+      // nop -- zap the BOM
+    } else if ($src >= 0xD800 && $src <= 0xDFFF) {
+      // found a surrogate
+      return false;
+    } else if ($src <= 0xffff) {
+      $dest .= chr(0xe0 | ($src >> 12));
+      $dest .= chr(0x80 | (($src >> 6) & 0x003f));
+      $dest .= chr(0x80 | ($src & 0x003f));
+    } else if ($src <= 0x10ffff) {
+      $dest .= chr(0xf0 | ($src >> 18));
+      $dest .= chr(0x80 | (($src >> 12) & 0x3f));
+      $dest .= chr(0x80 | (($src >> 6) & 0x3f));
+      $dest .= chr(0x80 | ($src & 0x3f));
+    } else { 
+      // out of range
+      return false;
+    }
+  }
+  return $dest;
+}
+
+?>
+</source>
+}}
+
+{{LSLC|Library}}

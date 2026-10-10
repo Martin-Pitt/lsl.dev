@@ -1,0 +1,74 @@
+{{LSL_Function
+|inject-2={{LSL_Function/detected|number|grab|error=[[ZERO_VECTOR|<0.0, 0.0, 0.0>]]}}
+|func_id=37|func_sleep=0.0|func_energy=10.0
+|sort=DetectedGrab|func=llDetectedGrab
+|return_type=vector
+|p1_type=integer|p1_name=number
+|func_desc
+|return_text=that is the {{LSLGC|Grab|grab}} offset of the user [[touch|touching]] the object; only works in the [[touch]] event.
+|func_footnote=Returns [[ZERO_VECTOR|<0.0, 0.0, 0.0>]] if {{LSLP|number}} is out of range or if called from an event other than the [[touch]] event.
+|spec=*If the object is [[LSL Glossary#physical|physical]], grabs are detected if the avatar has permission to move the object and the object is not [[locked]].
+*If the object is [[LSL Glossary#nonphysical|nonphysical]], grabs from all avatars are detected.
+|caveats=
+*When called in HUD attachments, values returned are affected by the wearer's position and rotation.
+|constants
+|examples=
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llSetStatus(PRIM_PHYSICS,TRUE);//This allows the object to be "grabbed" and dragged
+    }
+    touch(integer num_detected)
+    {
+        llSay(0,(string)llDetectedGrab(0));//Be prepared for a great amount of chatted info.
+                                           //The faster you move the mouse while grabbing the object the greater the offset becomes.
+                                           //This is not due to the speed but the reaction time of the turn around of the physical prim,
+                                           //thus an offset (distance from grab to prim center) is created and measured by this function.
+    }
+}
+</source>
+
+<source lang="lsl2">/******
+
+Simple llDetectedGrab illustration, rez a prim and add this script.
+The prim will become a cone that follows mouse grabs.
+
+ Click and hold the mouse button down on the object, then:
+ - Drag left and right to move parallel to the camera focal plane.
+ - Drag up and down to move to and from the camera.
+ - Hold down Ctrl, then drag up and down to move vertically.
+ 
+******/
+
+default
+{
+    state_entry()
+    {
+        llMinEventDelay(0.25);
+        llSetStatus(STATUS_PHYSICS, FALSE); // make the object static for simplicity
+        llSetPrimitiveParams([
+            PRIM_SIZE, <0.5, 0.5, 0.5>,
+            PRIM_TYPE, PRIM_TYPE_CYLINDER, PRIM_HOLE_DEFAULT, <0.0, 1.0, 0.0>,
+              0.0, ZERO_VECTOR, ZERO_VECTOR, ZERO_VECTOR
+        ]); // a cone that can follow the mouse pointer
+    }
+    
+    touch(integer total_number)
+    {
+        llLookAt(llGetPos() + llDetectedGrab(0), 1.0, 1.0);
+    }
+}</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llPassTouches]]|}}
+|also_events={{LSL DefineRow||[[touch_start]]|}}
+{{LSL DefineRow||[[touch]]|}}
+{{LSL DefineRow||[[touch_end]]|}}
+|also_articles={{LSL DefineRow||{{LSLGC|Grab}}|}}
+|notes=llDetectedGrab() is not blocked by [[STATUS_BLOCK_GRAB]] or [[STATUS_BLOCK_GRAB_OBJECT]].
+|cat1=Grab
+|cat2=Touch
+|cat3
+|cat4
+}}

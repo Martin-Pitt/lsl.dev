@@ -1,0 +1,62 @@
+{{LSL Constant
+|name=INVENTORY_NONE
+|type=integer
+|value=-1
+|desc=Value returned by {{LSLGC|Inventory|Inventory}} functions, to indicate that the inventory item doesn't exist.
+|examples=<source lang="lsl2">
+string ItemName = "MyTexture";
+default
+{
+    state_entry()
+    {
+        if (llGetInventoryType(ItemName) == INVENTORY_NONE)
+            llOwnerSay( "There is nothing named '" + ItemName + "' in this prim's contents");
+    }
+}</source>
+|helpers=<source lang="lsl2">string InventoryName(string name, integer type)
+{//finds an item in a case insensitive fashion of the given type and returns its true name.
+    integer a = llGetInventoryType(name); 
+    if(!~a)//a == INVENTORY_NONE
+    {//it should be noted that INVENTORY_NONE == INVENTORY_ALL == -1; which is why '!~a' works.
+        string lc_name = llToLower(name);
+        a = llGetInventoryNumber(type);
+        while(a)
+        {//(a = ~-a) is equivalent to --a, but runs faster.
+            if(llToLower(name = llGetInventoryName(type, a = ~-a)) == lc_name)
+            {//we found a match ^_^
+                return name;
+            }
+        }
+    }
+    else if((a == type) ^ (!~type))//return name, as long as a == type or type == INVENTORY_ALL
+    {//we already know that a != INVENTORY_NONE, but just in case we use xor instead of or.
+        return name;
+    }
+    return "";//no match ~_~
+}
+
+integer InventoryExists(string name, integer type)
+{//only included to show how this type of check could be done if the value of 'type' is not constant and could be INVENTORY_ALL.
+    return (llGetInventoryType(name) == type) ^ (!~type);
+}//Since INVENTORY_ALL == INVENTORY_NONE, the extra part on the end is required to invert the result.</source>
+|constants={{LSL DefineRow||[[INVENTORY_ALL]]|}}
+{{LSL DefineRow||[[INVENTORY ANIMATION]]|}}
+{{LSL DefineRow||[[INVENTORY BODYPART]]|}}
+{{LSL DefineRow||[[INVENTORY CLOTHING]]|}}
+{{LSL DefineRow||[[INVENTORY GESTURE]]|}}
+{{LSL DefineRow||[[INVENTORY LANDMARK]]|}}
+{{LSL DefineRow||[[INVENTORY NOTECARD]]|}}
+{{LSL DefineRow||[[INVENTORY OBJECT]]|}}
+{{LSL DefineRow||[[INVENTORY SCRIPT]]|}}
+{{LSL DefineRow||[[INVENTORY SETTING]]|}}
+{{LSL DefineRow||[[INVENTORY SOUND]]|}}
+{{LSL DefineRow||[[INVENTORY TEXTURE]]|}}
+|functions={{LSL DefineRow||[[llGetInventoryType]]|}}
+{{LSL DefineRow||[[llGetInventoryNumber]]|}}
+{{LSL DefineRow||[[llGetInventoryName]]|}}
+|events
+|cat1=Inventory
+|cat2
+|cat3
+|cat4
+}}

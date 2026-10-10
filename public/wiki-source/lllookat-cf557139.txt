@@ -1,0 +1,107 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-1903}}
+{{LSL Function/damping|damping}}
+{{LSL Function/strength|strength}}
+{{LSL Function/position|target|region=*}}
+|func_id=105|func_sleep=0.0|func_energy=10.0
+|func=llLookAt|p1_type=vector|p1_name=target|p2_type=float|p2_name=strength|p3_type=float|p3_name=damping
+|func_footnote=To change the position in the same manner use [[llMoveToTarget]].
+|func_desc=Cause object to point its {{LSLP|up}} axis (positive z) towards {{LSLP|target}}, while keeping its {{LSLP|forward}} axis (positive x) below the horizon.
+
+Continues to track {{LSLP|target}} until [[llStopLookAt]] is called.
+|return_text
+|spec= Strength is an inverse value meaning lower values cause the object to turn faster. Damping smooths the objects movements out preventing jitter or sharp movements. Object size, mass, and shape do not effect the function other than a large physical object that is resting on or colliding with other objects might not be able to turn correctly or fully.
+
+|caveats=*Object must be physical or this will do nothing.
+*If the prim is not the root, then {{LSLP|target}} will need correction for the root prim's rotation (see example below).
+*If the object is an attachment, then {{LSLP|target}} will need correction for the wearer's rotation.
+*Low strength values paired with low damping can cause the object to wobble and never fully face the {{LSLP|target}}.
+|constants
+|examples=
+<source lang="lsl2">//Causes Object to look at nearest Avatar.
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", "", AGENT, 20.0, PI, 0.2);
+    }
+
+    sensor(integer total_number)
+    {
+        llLookAt( llDetectedPos(0) + <0.0, 0.0, 1.0>, 3.0, 1.0 );
+    }
+}</source>
+
+<source lang="lsl2">
+// Same as above, but for use inside a child prim or the root of an attachment.
+// Make the child or attachment look at nearest Avatar.
+
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", "", AGENT, 20.0, PI, 0.2);
+    }
+ 
+    sensor(integer total_number)
+    {
+        vector p = llGetPos();
+        llLookAt(p + (llDetectedPos(0) + <0.0, 0.0, 1.0> - p) / llGetRootRotation(), 3.0, 1.0);
+    }
+}
+</source>
+|helpers=
+* If you want a (mostly) smooth, one time, constant rate of motion, (using the {{LSLP|x}} axis) in a non-physical object try this instead...
+<source lang="lsl2">//-- rotate objects x axis toward vPosTarget (local offset), at vFltRate (in radians per second)
+//-- vFltRate < ~0.00000003rad/sec, (~0.00002deg/sec) will result in errors (and is just too slow anyway)
+//-- vFltRate >= (PI * 5.0)rad/sec, (900deg/sec) will result in a single snap move to vRotTarget
+uSteppedLookAt( vector vPosTarget, float vFltRate ){
+	rotation vRotTarget = llRotBetween( <1.0, 0.0, 0.0>,  vPosTarget );
+	if ((integer)(vFltRate = llAcos( (vPosTarget = llVecNorm( vPosTarget )) *
+	                                 (<1.0, 0.0, 0.0> * llGetLocalRot()) ) / (vFltRate / 5.0))){
+		rotation vRotStep = llAxisAngle2Rot( llRot2Axis( vRotTarget / llGetLocalRot() ),
+		                    (1.0 / vFltRate) * llRot2Angle( vRotTarget / llGetLocalRot() ) );
+		vFltRate = (integer)vFltRate;
+		do{
+			llSetLocalRot( vRotStep * llGetLocalRot() );
+		}while( --vFltRate );
+	}
+	llSetLocalRot( vRotTarget );
+} //-- for fixed time on any rotation try llKeyframeMotion</source>
+
+* If you want to use the LookAt function on a linked object...
+<source lang="lsl2">
+LinkedLookAt( vector Target){
+    rotation rotvec = llRotBetween(<0,1,0>,llVecNorm((Target - llGetPos())));
+    rotation rotbet = rotvec/llGetRootRotation();
+    llSetRot(rotbet);
+}
+
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", "", AGENT, 20.0, PI, 1.0);
+    }
+
+    sensor(integer total_number)
+    {
+        vector p = llDetectedPos(0);
+        LinkedLookAt(p);
+    }
+}
+</source>
+|also_functions=
+{{LSL DefineRow||[[llRotLookAt]]}}
+{{LSL DefineRow||[[llStopLookAt]]}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|cat1=Physics
+|cat2=Target
+|cat3=Rotation
+|cat4
+}}

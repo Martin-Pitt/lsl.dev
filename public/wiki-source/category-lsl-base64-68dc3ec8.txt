@@ -1,0 +1,26 @@
+{{LSL Header|ml=*}}{{LSLC|}}{{LSLC|Encoding}}
+== About Base64 encoding ==
+Base64 conversion expands three bytes of arbitrary binary data into four bytes of common ASCII characters in a completely reversible algorithm. It is generally used to convert binary data to strings so they can be sent across a text interface where ASCII control characters might be misinterpreted as end of string (\0) newline (\n) or otherwise not be transferred properly to the receiving process. In LSL this might be used to store binary data in an object's description, break data into bytes for cryptographic processing, or send data from one process to another using chat or linked messages.
+
+Base64 input can be any sequence of bytes, the output consists exclusively of uppercase and lowercase letters, digits and the plus (+), slash (/) and equals (=) characters. Conversion to Base64 is done in blocks of three bytes (24 bits), padded if needed. These twenty-four bits are split into four six bit numbers which become an index to the conversion key ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/") and written out as the eight bit ASCII character. Since the data is converted three bytes at a time, zero one or two equals characters are added to indicate how much padding was done in the last block. See [http://en.wikipedia.org/wiki/Base64 the Wikipedia article] for more information.
+
+== Examples ==
+String and integer data in Base64.
+<div align="left">
+{| style="border:1px solid #A3B1BF; text-align:left; background:#f5faff"
+|-
+| width="50%" style="background: #cee0f2; padding: 0.3em; text-align:center;"|'''Text'''
+| style="background: #cee0f2; padding: 0.3em; text-align:center;"|'''Base64'''	
+|-
+|Abcde
+|QWJjZGU=
+|-
+|ⓐⓑⓒⓓⓔ
+|4pOQ4pOR4pOS4pOT4pOU
+|-
+|12345 (as an [[llIntegerToBase64|integer]])
+|AAAwOQ==
+|}
+
+== Deprecated Functions ==
+There are several Base64 XOR functions in LSL. [[llXorBase64]] is the latest. Deprecated implementations include [[llXorBase64Strings]] and [[llXorBase64StringsCorrect]]. The big difference between the various versions is how they handle NULL characters.

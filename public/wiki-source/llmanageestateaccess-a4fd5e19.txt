@@ -1,0 +1,55 @@
+{{LSL_Function
+|inject-2=
+{{LSL_Function/avatar|avatar|group=*}}
+<!-- Grab caveats etc from them
+{{:ESTATE_ACCESS_ALLOWED_AGENT_ADD|set}}
+{{:ESTATE_ACCESS_ALLOWED_AGENT_REMOVE|set}}
+{{:ESTATE_ACCESS_ALLOWED_GROUP_ADD|set}}
+{{:ESTATE_ACCESS_ALLOWED_GROUP_REMOVE|set}}
+{{:ESTATE_ACCESS_BANNED_AGENT_ADD|set}}
+{{:ESTATE_ACCESS_BANNED_AGENT_REMOVE|set}}
+-->
+{{Issues/SCR-293}}
+|func=llManageEstateAccess
+|sort=ManageEstateAccess
+|func_id|func_sleep|func_energy
+|p1_type=integer|p1_name=action|p1_desc=ESTATE_ACCESS_* flag
+|p2_type=key|p2_name=avatar
+|func_desc=Use to add or remove agents from the estate's agent access or ban lists or groups from the estate's group access list.
+|func_footnote=Only works for objects owned by the Estate Owner or an [[Estate Manager]]. By default, the object owner is notified of every change made using this function.  But if the owner grants [[PERMISSION_SILENT_ESTATE_MANAGEMENT]] to the script, the owner will not be notified.
+|return_text=[[TRUE]] if the call was successful; [[FALSE]] if throttled, invalid action, invalid or null id or object owner is not allowed to manage the estate. 
+|return_type=integer
+|return_subtype=boolean
+|constants=
+{{LSL Constants/llManageEstateAccess}}
+|signature
+|spec
+|caveats=
+* Calls are throttled at a rate of 30 calls per 30 seconds.
+* [[FALSE]] will be returned...
+** if throttled,
+** if object owner doesn't have power to perform {{LSLP|action}},
+** if {{LSLP|avatar}} is invalid or null
+* If used on [[mainland]] the message "llManageEstateAccess does not work on mainland" is [[llShout|shouted]] on [[DEBUG_CHANNEL]].
+* If the object owner is not allowed to manage the estate the message "llManageEstateAccess object owner must manage estate." is [[llShout|shouted]] on [[DEBUG_CHANNEL]]. -- {{Jira|SRC-233}}
+* If a legit estate manager tries to exceed the max number of entries in the list the call will return [[TRUE]] but the operation be truncated at the limit.
+|examples
+|helpers
+|related
+|also_functions=
+{{LSL DefineRow||[[llAddToLandPassList]]|}}
+{{LSL DefineRow||[[llAddToLandBanList]]|}}
+{{LSL DefineRow||[[llRemoveFromLandBanList]]|}}
+{{LSL DefineRow||[[llRemoveFromLandPassList]]|}}
+{{LSL DefineRow||[[llResetLandBanList]]|}}
+{{LSL DefineRow||[[llResetLandPassList]]|}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|cat1=Security
+|cat2=Region
+|cat3=Estate
+|cat4
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/11#11.10.18.243270 | 18/10/2011 ]]
+}}

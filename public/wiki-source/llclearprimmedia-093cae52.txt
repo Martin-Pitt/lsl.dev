@@ -1,0 +1,76 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-4939}}{{LSL_Function/face|face|notall=*}}
+|func_id=352|func_sleep=1.0|func_energy=10.0|mode
+|func=llClearPrimMedia|return_type=integer|return_subtype=status
+|p1_type=integer|p1_name=face|p1_desc
+|func_footnote=
+|func_desc=Clears (deletes) the media and all {{HoverText|params|params specified by llSetPrimMediaParams}} from the given {{LSLP|face}}.
+|return_text=that is a STATUS_* flag which details the success/failure of the operation.
+|spec=
+|caveats
+|constants={{LSL Constants/ReturnStatus|table=*|sortable=*}}
+|examples=
+<source lang="lsl2">
+//  when dropping this script into a prim
+//  it will remove all set media-on-a-prim
+//  on all sides of the prim containing the script
+//  and then the script will delete itself
+
+
+
+publish_returned_status_flag(integer inputLink, integer inputFace, integer inputStatus)
+{
+    /* if (inputInteger == 0) */ string outputStatus = "STATUS_OK";
+    if (inputStatus == 1000) outputStatus = "STATUS_MALFORMED_PARAMS";
+    else if (inputStatus == 1001) outputStatus = "STATUS_TYPE_MISMATCH";
+    else if (inputStatus == 1002) outputStatus = "STATUS_BOUNDS_ERROR";
+    else if (inputStatus == 1003) outputStatus = "STATUS_NOT_FOUND";
+    else if (inputStatus == 1004) outputStatus = "STATUS_NOT_SUPPORTED";
+    else if (inputStatus == 1999) outputStatus = "STATUS_INTERNAL_ERROR";
+    else if (inputStatus == 2001) outputStatus = "STATUS_WHITELIST_FAILED";
+
+    // PUBLIC_CHANNEL has the integer value 0
+    llSay(PUBLIC_CHANNEL, "llClearLinkMedia(link " + (string)inputLink
+        + ", face " + (string)inputFace + ") = " + outputStatus + ";");
+}
+
+default
+{
+    state_entry()
+    {
+        integer link = llGetLinkNumber();
+        integer numOfSides = llGetLinkNumberOfSides(link);
+        integer face;
+
+        do
+        {
+            integer clearMediaSucceeded = llClearPrimMedia(face);
+            publish_returned_status_flag(link, face, clearMediaSucceeded);
+
+            ++face;
+        }
+        while (face < numOfSides);
+
+        string thisScript = llGetScriptName();
+        llRemoveInventory(thisScript);
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llClearLinkMedia]]}}
+{{LSL DefineRow||[[llSetPrimMediaParams]]}}
+{{LSL DefineRow||[[llGetPrimMediaParams]]}}
+|also_tests
+|also_events=
+|also_articles=
+|notes
+|deepnotes
+|history=
+*{{SVN|2816|rev=134947|trunk=*|anchor=|ver=|ser=}}
+*{{JIRA|SVC-4939}}
+|cat1=Prim Media
+|cat2=Media
+|cat3
+|cat4
+}}

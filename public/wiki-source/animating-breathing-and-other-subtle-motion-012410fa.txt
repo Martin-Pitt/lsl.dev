@@ -1,0 +1,86 @@
+{{Help
+|Object=*
+}}
+
+Many animators report difficulties with subtle motion.  One of the most subtle movements one might need to animate is breathing, and it's also one of the most common tasks a animator will face, since almost every animation should include breathing.
+
+Hopefully this article will clear up some misunderstandings.
+
+==Breathing==
+Breathing is simulated in Second Life by rocking the chest joint along the X axis, since it is impossible to expand and contract the chest and stomach.
+
+Both the depth and rate of breathing varies depending on the activity of the person in question.
+
+Since people don't really breath by rocking back and forth, it's impossible to say what the range of motion should be on the chest joint, but a good upper limit would be about 10 degrees.  If you go much beyond that it starts looking too exaggerated.
+
+The respiration rate of an adult human is bounded.  Respiration rates of less than 3 or more than 70 breaths per minute are unheard of.
+
+{|{{prettytable}}
+|-{{Hl2}}
+! Activity
+! Breaths Per Minute
+|-
+| breathing meditation
+| 5
+|-
+| at rest or sleeping
+| 12
+|-
+| average adults doing strenuous work
+| 40
+|-
+| athletes at peak
+| 65
+|}
+
+Breathing meditation is something of a special case.  Normally inhalation and exhalation take about the same amount of time, but during breathing meditation the exhalation consumes about 3/4ths of the time.  The breaths are also very deep.
+
+==Subtle Motion==
+Second Life lossily compresses animations.  This has raised concern about subtle motions being stripped, and questions about how subtle a motion can be before it is removed.
+
+The following information was gathered by testing.
+
+The minimum location change that is stored is 0.0057 inches, and a rotation change of 0.0053 degrees is always stored.  Only the hip can be relocated.  Joints nearer the hip will store rotations less than 0.0053.  For instance, the minimum Thigh rotation that is stored is 0.0019.
+
+The minimum location and rotation change that is stored is the same regardless of BVH file frame rate.
+
+Lossiness is not effected by the speed of change.  The minimum location and rotation change that is stored is the same regardless of the number of frames it's spread across.
+
+These results were obtained by using a cube and a skin that were sharply contrasting, moving the cube to clip through the avatar, and watching the area where the avatar met the surface of the cube for movement.  This was necessary since the motions that are lost are so small.
+
+The amount of time it takes to find the cutoff can be reduced by using binary search.  Specifically, start with a value you think will be near the cutoff.  Note whether or not it is stored.  If it's stored, try a lower value.  If not, try a higher value.  Once you find a value that is stored, and one that is not, you can start repeatedly halving the distance.  This can be achieved by averaging the high and low numbers, or using the following formula:
+
+(high - low)/2 + low
+
+Since averaging is simpler and faster, I suggest that method.
+
+For example:
+* you start with 1 degree, and find it stored
+* then try 0.0001 degree, and find it is not stored
+* (1 + 0.0001)/2 = 0.5000
+* you find that 0.5000 is stored
+* (0.5000 + 0.0001)/2 = 0.2500
+* you find that 0.2500 is stored...
+
+Those wishing to repeat the experiment may find it helpful to use a viewer that allows you to: disable the minimum camera zoom distance, allow the camera to move without constraints through prims, and provides in-world animation preview.  The first two features make it easier to notice movements this small.  The last one will save you lindens if you're not doing the testing on the Beta Grid and allows you to avoid waiting on the animation to upload, which is useful because you would be uploading a very large number of animations otherwise.  An example of a viewer with these features is [https://www.firestormviewer.org/ Firestorm] (free and open source).
+
+The tool used to produce the animation must be accurate.  This is fairly easy to verify by opening the BVH files in a text editor since they are human readable.  [https://qavimator.bitbucket.io/ QAvimator] (free and open-source multi-platform tool) is sufficient for this purpose.
+
+As you can see, even very faint breathing will survive Second Life's lossy compression.
+
+Since the changes removed by Second Life's lossy compression are so small, you should check for other possible explanations before concluding that is the source of your problem.
+
+Likely explanations for visible imperfections in animations include:
+* you forgot to take off your animation overrider when testing the animation, resulting in unexpected mixing
+* your BVH file has a incorrect reference frame
+* you uploaded at the wrong priority
+* you struck the hip location limits
+* the animation exporter is incorrectly configured (Second Life uses inches for location changes, rather than metric units, which is a likely source of problems)
+* the animation exporter is flawed (check your animation in an offline viewer like [http://davedub.co.uk/bvhacker/ bvhacker] or [https://qavimator.bitbucket.io/ QAvimator], both of which are free)
+
+== See Also ==
+*[[Animation Upload Priority]]
+*[[BVH Hip Location Limits]]
+*[[BVH Reference Frame]]
+
+[[Category:LSL_Animation]]

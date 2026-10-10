@@ -1,0 +1,68 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-91}}{{Issues/SVC-3177}}{{LSL Function/avatar|id|sim=*}}
+|func=llGetAgentInfo
+|sort=GetAgentInfo
+|func_id=206|func_sleep=0.0|func_energy=10.0
+|return_type=integer|return_subtype=bit field
+|p1_type=key|p1_name=id
+|func_footnote
+|func_desc
+|return_text=containing the agent information about {{LSLP|id}}.
+|spec
+|caveats=* [[AGENT_BUSY]] indicates that the "busy" [[Internal Animations|internal animation]] is playing, even if the user is not truly in busy mode.
+* '''On server 1.40 and below''', [[AGENT_TYPING]] indicated that the "type" internal animation is playing, it would not be set if the user disabled [[Debug Settings|PlayTypingAnim]]. '''On server 1.42 and up''', it reflects [[ChatFromViewer|typing start/stop messages]] from the client and does not depend on the  animation. If the old behavior is desired, use [[llGetAnimationList]] and look for {{NoWrap|{{String|c541c47f-e0c0-058b-ad1a-d6ae3a4584d9}}}} &mdash; {{Jira|SVC-787}}
+* <code>[[AGENT_ALWAYS_RUN]] {{!}} [[AGENT_WALKING]]</code> indicates that the user requested to run using standard viewer controls. Use [[llGetAnimation]] to also detect running caused by physics.
+* This function does not return reliable information immediately after a border crossing. Use [[llGetAnimation]] instead, if you can. &mdash; {{Jira|SVC-3177}}
+* [[AGENT_AUTOMATED]] may unexpectedly be enabled, see [[AGENT_AUTOMATED|its caveats]] for more detail.
+|constants=
+{{LSL Constants/llGetAgentInfo|table=*}}
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer buf)
+    {
+        buf = llGetAgentInfo(llDetectedKey(0));
+        string out;
+        if(buf & AGENT_FLYING)
+            out += "The agent is flying.\n";
+        else
+            out += "The agent is not flying.\n";
+ 
+        if(buf & AGENT_ATTACHMENTS)
+        {
+            if(buf & AGENT_SCRIPTED)
+                out += "The agent has scripted attachments.\n";
+            else
+                out += "The agent's attachments are unscripted.\n";
+        }
+        else
+            out += "The agent does not have attachments.\n";
+ 
+        if(buf & AGENT_MOUSELOOK)
+            out += "the agent is in mouselook.";
+        else
+            out += "the agent is in normal camera mode.";
+        llWhisper(0, out);
+    }
+}
+</syntaxhighlight>
+
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llRequestAgentData]]|}}
+{{LSL DefineRow||[[llGetAnimation]]|}}
+{{LSL DefineRow||[[llGetAnimationList]]|}}
+|also_events
+|also_tests=
+{{LSL DefineRow||[[llGetAgentInfo_Test]]|}}
+|also_articles
+|notes=This is not a good way of testing if an avatar is in the region, use [[llGetAgentSize]] instead.
+|history={{LSL Added|0.4.0|remote=http://secondlife.wikia.com/wiki/Version_0.4.0#Scripting}} along with these flags [[AGENT_FLYING]], [[AGENT_ATTACHMENTS]], & [[AGENT_SCRIPTED]].
+*[[AGENT_AUTOPILOT]] was added in {{SVN|2900|rev=136439|trunk=*|ser=1.33.0|anchor=file21}}
+|haiku={{Haiku|Information search:|The avatar was revealed,|Mystery solved.}}
+|cat1=Avatar
+|cat2
+|cat3
+|cat4
+}}

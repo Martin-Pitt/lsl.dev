@@ -1,0 +1,53 @@
+{{LSL_Function
+|inject-2={{LSL_Function/detected|index|touchNormal|simple=*}}
+|func_id=340|func_sleep=0.0|func_energy=10.0
+|func=llDetectedTouchNormal
+|return_type=vector|return_text=that is the surface normal (perpendicular to the surface) where the touch event was triggered.  Along with [[llDetectedTouchBinormal]], this information can be used to find the [http://en.wikipedia.org/wiki/Tangent_space tangent space] at the touch location.
+|p1_type=integer|p1_name=index
+|func_footnote=For the {{LSLGC|Touch|touch}} category of events only. The prim that was touched may not be the prim receiving the event, use [[llDetectedLinkNumber]] to check for this; likewise you can use [[llDetectedTouchFace]] to determine which face was touched.{{PBR}}To find the third tangent vector, [[LSL Cross Product|cross]] the [[llDetectedTouchBinormal|binormal]] with this vector.
+|func_desc
+|spec
+|caveats=
+*{{LSL Const|TOUCH_INVALID_VECTOR|vector|{{LSL_VR|0.0|0.0|0.0}}|c=same as ZERO_VECTOR}} is returned when...
+** The avatar's viewer does not support face touch detection.
+*** To check if face touch detection is supported check the return of [[llDetectedTouchFace]].
+** The touch has moved off the surface of the prim.
+** The event triggered is not a {{LSLGC|Touch|touch}} event.
+* The rotation of a legacy sphere prim does not influence touch normal like it does with other legacy prims.
+|examples=<source lang="lsl2">
+default
+{
+    touch_start(integer total_num)
+    {
+        llOwnerSay((string)llDetectedTouchNormal(0)); //Says the vector where the touched face is pointing to.
+    }
+}
+</source>
+|helpers=
+<source lang="lsl2">touch_start(integer total_number){
+    // rotates the prim, so the touched position points upwards
+    llSetRot(llGetRot()*llRotBetween(llDetectedTouchNormal(0),<0,0,1>));
+}</source>
+|related
+|also_functions=
+{{LSL DefineRow||[[llDetectedLinkNumber]]}}
+{{LSL DefineRow||[[llDetectedTouchFace]]}}
+{{LSL DefineRow||[[llDetectedTouchST]]}}
+{{LSL DefineRow||[[llDetectedTouchUV]]}}
+{{LSL DefineRow||[[llDetectedTouchPos]]}}
+{{LSL DefineRow||[[llDetectedTouchBinormal]]}}
+|also_events=
+{{LSL DefineRow||[[touch_start]]|}}
+{{LSL DefineRow||[[touch]]|}}
+{{LSL DefineRow||[[touch_end]]|}}
+|also_articles
+|notes
+|history=* Introduced in Viewer {{SVN|870|rev=92872|branch=Release|anchor=file14|date=Wednesday, 23 July 2008}}, no server support, no viewer binary released.
+*Server support available on preview grid in Second Life Beta Server 1.24, client support in Preview Grid viewer 1.20.15 (93532) 
+*Date of Release Server [[ Release_Notes/Second_Life_Beta_Server/1.24#Release_Notes_for_Second_Life_Beta_Server_1.24.3_.28August_29th.2C_2008.29 | 29-08-2008 ]]
+*Date of Release Client  [[ Release_Notes/Second_Life_Release/1.21 | 16-10-2008 ]]
+|cat1=Touch
+|cat2
+|cat3
+|cat4
+}}

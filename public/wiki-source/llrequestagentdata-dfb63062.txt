@@ -1,0 +1,115 @@
+{{LSL_Function
+|inject-2={{LSL Function/avatar|id}}{{Issues/SVC-215}}{{Issues/SVC-6831}}
+|func_id=155|func_sleep=0.1|func_energy=10.0
+|func=llRequestAgentData
+|return_type=key
+|return_subtype=handle
+|p1_type=key|p1_name=id
+|p2_type=integer|p2_name=data|p2_desc=DATA_* flag
+|func_footnote
+|func_desc=Requests {{LSLP|data}} about agent {{LSLP|id}}. When {{LSLP|data}} is available the [[dataserver]] event will be raised
+|Return_text=for the [[dataserver]] event when it is raised.
+|spec
+|caveats=*[[DATA_BORN]] is not UTC. It is Pacific Time based.
+* It's worth restating: if the requested data does not exist - or if the key given is not for an agent - then [[dataserver]] will '''not''' be raised.
+|constants={{{!}} {{Prettytable|style=margin-top:0;margin-right:0;}}
+{{!}}- {{Hl2}}
+! colspan="2" {{!}} {{LSL Param|data}} Constant
+! Type
+! colspan="4" {{!}} Description
+{{!}}-
+{{Template:LSL_Constants/llRequestAgentData}}
+{{!}}}
+|examples='''DATA_NAME'''<syntaxhighlight lang="lsl2">key owner_key;
+key owner_name_query;
+string owner_name;
+
+default
+{
+    state_entry()
+    {
+        owner_key = llGetOwner();
+        owner_name_query = llRequestAgentData(owner_key, DATA_NAME);
+    }
+    dataserver(key queryid, string data)
+    {
+        if ( owner_name_query == queryid )
+        {
+            owner_name = data;
+            llSay(0, "The owner of this script is called : " + owner_name );
+        }
+    }
+}//Anylyn Hax 06:19, 23 July 2007 (PDT)</syntaxhighlight>
+
+'''DATA_ONLINE'''<syntaxhighlight lang="lsl2">/*
+    Server friendly online status example by Daemonika Nightfire.
+    
+    It is not a big load for the server to check every 2 minutes if there is an avatar in the region.
+    But it is nonsense to trigger a dataserver event for online status when nobody is in the region.
+    For this purpose, the script checks the number of avatars in the region on each pass.
+*/
+
+
+key owner;
+float repeat = 120.0; // 60 - 120 sec. Recommended, faster than 60 seconds and LL will kick your XXX.
+
+key status_request;
+Status()
+{
+    integer agent_count = llGetRegionAgentCount();
+    if(agent_count > 0) // skip the request if nobody is in the region
+    {
+        status_request = llRequestAgentData(owner, DATA_ONLINE);
+    }
+}
+
+default
+{
+    state_entry()
+    {
+        owner = llGetOwner();
+        llSetTimerEvent(repeat);
+        Status();
+    }
+
+    timer()
+    {
+        Status();
+    }
+    
+    dataserver(key queryid, string data)
+    {
+        if(queryid == status_request) 
+        {
+            // requested data contains the string "0" or "1" for DATA_ONLINE
+            // i convert it to an integer and use the boolean as index
+            
+            //list index = [   0,       1,     2(0+2), 3(1+2)  ]
+            list status = ["OFFLINE","ONLINE",<1,0,0>,<0,1,0>];
+            
+            string text = llList2String(status,(integer)data);    // boolean/index = 0   or 1
+            vector color = llList2Vector(status,(integer)data+2); // boolean/index = 0+2 or 1+2
+            
+            llSetText(text, color, 1.0);
+        }
+    }
+    
+    on_rez(integer Dae)
+    {
+        llResetScript();
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llGetAgentInfo]]|}}
+|also_tests
+|also_events={{LSL DefineRow||[[dataserver]]|}}
+|also_articles
+|notes
+|deepnotes=
+If you merely wish to show avatar name information in the viewer window, it may be more straightforward to avoid a DATA_NAME dataserver event and simply output: <syntaxhighlight lang="lsl2">llSay(0, "secondlife:///app/agent/" + (string)id + "/about");</syntaxhighlight>
+|deprecated
+|cat1=Dataserver
+|cat2=Avatar
+|cat3=Avatar/Name
+|cat4
+}}

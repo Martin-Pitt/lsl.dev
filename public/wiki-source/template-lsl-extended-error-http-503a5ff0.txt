@@ -1,0 +1,73 @@
+{{#if:
+
+{{LSL Function/boolean|verify|if=*|td=the server SSL certificate must be verifiable using one of the standard certificate authorities|fd=any server SSL certificate will be accepted.}}
+
+{{LSL Function/boolean|noisy|if=*|td=shout error messages to [[DEBUG_CHANNEL]] if the outgoing request rate exceeds the [[Limits|server limit]]|fd=the error messages are suppressed.}}
+
+{{LSL Function/boolean|send_header|if=when|td=the {{String|Pragma: no-cache}} header is sent|fd=no {{String|Pragma}} header is sent.}}
+
+{{#vardefine:p_method_hover|A valid HTTP method, such as {{String|GET}}, {{String|POST}}, {{String|PUT}} and {{String|DELETE}}}}
+
+{{#vardefine:p_name_hover|The name of the header to be set.}}
+{{#vardefine:p_value_hover|The value of the header to be set.}}
+
+{{#vardefine:p_length_hover|The maximum length allowed for an HTTP body; this is also capped by the VM in use.}}
+
+{{#vardefine:p_MIME_type_hover|}}
+
+}}
+
+====Extended Errors====
+When the [[HTTP_EXTENDED_ERROR]] parameter is [[TRUE]], [[llHTTPRequest]] will return extended error information to the script through the [[http_response]] event. A detailed error explanation is returned as a [[Json usage in LSL|JSON blob]] blob in the body of the event and an error code is provided through the HTTP status. The format of the [[Json usage in LSL|JSON blob]] is described in detail in [https://tools.ietf.org/html/rfc7807 RFC&nbsp;7807].
+
+<syntaxhighlight lang="JavaScript">
+{
+    "type":   "http://wiki.secondlife.com/wiki/llHTTPRequest", // reference to the documentation for llHTTPRequest.
+    "title":  "Error Title", // A human readable title for the error.
+    "detail": "Description of error condition.", // A human readable description of the error condition.
+    "status": 400 // The HTTP Status for the call.
+}
+</syntaxhighlight>
+
+{{{!}} class="sortable" {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! '''Error'''
+! title="Status" {{!}}
+! class="unsortable" {{!}} '''Description'''
+{{!}}-
+{{!}} Method Not Allowed
+{{!}} 405
+{{!}} The HTTP method specified for [[HTTP_METHOD]] is not supported.
+{{!}}-
+{{!}} Unsupported Media Type
+{{!}} 415
+{{!}} The mime type specified in [[HTTP_MIMETYPE]] or [[HTTP_ACCEPT]] is not supported.
+{{!}}-
+{{!}} Enhance Your Calm
+{{!}} 420
+{{!}} HTTP requests have been throttled for this object, script, or owner. Back off making further HTTP calls until the throttle has cleared.
+{{!}}-
+{{!}} HTTP Unavailable
+{{!}} 470
+{{!}} HTTP and/or HTTPS have been disabled in this region.
+{{!}}-
+{{!}} Invalid URL
+{{!}} 471
+{{!}} The URL passed to [[llHTTPRequest]] contains invalid characters or uses a protocol other than http or https.
+{{!}}-
+{{!}} Parameter Error
+{{!}} 472
+{{!}} There was an issue with the parameters passed to [[llHTTPRequest]]. One of the following conditions may be the problem
+* The type of the parameter value may be incorrect.
+* The parameter key may be something other than an integer.
+* A parameter may be missing.
+* The value for a parameter failed validation.
+{{!}}-
+{{!}} Illegal Request Header
+{{!}} 473
+{{!}} A request header passed to [[HTTP_CUSTOM_HEADER]] is not allowed.
+{{!}}-
+{{!}} Too Many Headers
+{{!}} 474
+{{!}} Too many request headers have been specified with [[HTTP_CUSTOM_HEADER]].
+{{!}}}

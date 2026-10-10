@@ -1,0 +1,140 @@
+{{LSL_Function
+|func_id=315|func_sleep=0.0|func_energy=10.0
+|func=llListStatistics|return_type=float|p1_type=integer|p1_name=operation|p1_desc=a LIST_STAT_* flag
+|p2_type=list|p2_name=src
+|func_footnote=If a list entry type is not a float or an integer it is silently ignored. 
+|func_desc
+|return_text=that is the result of performing statistical aggregate function {{LSLP|operation}} on {{LSLP|src}}.
+|spec
+|caveats
+|constants={{{!}} class="sortable" {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+!Constant
+! title="Value" {{!}}
+! class="unsortable" {{!}} Description
+{{!}}-
+{{!}} {{LSL Const|LIST_STAT_RANGE|integer|0|c=Calculates the range.}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LIST_STAT_MIN|integer|1|c=Calculates the smallest number.}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LIST_STAT_MAX|integer|2|c=Calculates the largest number.}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LIST_STAT_MEAN|integer|3|c=Calculates the mean (average).}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LIST_STAT_MEDIAN|integer|4|c=Calculates the median number.}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LIST_STAT_STD_DEV|integer|5|c=Calculates the standard deviation.}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LIST_STAT_SUM|integer|6|c=Calculates the sum.}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LIST_STAT_SUM_SQUARES|integer|7|c=Calculates the sum of the squares.}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LIST_STAT_NUM_COUNT|integer|8|c=Determines the number of float and integer elements.}}
+{{!}} {{#var:value}}
+{{!}} Determines the number of [[float]] and [[integer]] elements.
+{{!}}-
+{{!}} {{LSL Const|LIST_STAT_GEOMETRIC_MEAN|integer|9|c=Calculates the geometric mean.}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}}
+|examples=
+<source lang="lsl2">// Show results for each operation for a sample list
+default
+{
+    state_entry()
+    {
+        list LX = [-1, 3.33, 17, "object", -4.5, 0.8675 ];
+
+        llSay(0, "G.Mean= " + (string) llListStatistics(LIST_STAT_GEOMETRIC_MEAN, LX) );           // 0. 000000
+        llSay(0, "Max= " + (string) llListStatistics(LIST_STAT_MAX, LX) );                         // 17.000000
+        llSay(0, "Min= " + (string) llListStatistics(LIST_STAT_MIN, LX) );                         // -4.500000
+        llSay(0, "Mean= " + (string) llListStatistics(LIST_STAT_MEAN, LX) );                       // 3.139500
+        llSay(0, "Median= " + (string) llListStatistics(LIST_STAT_MEDIAN, LX) );                   // 0.867500
+        llSay(0, "Count= " + (string) llListStatistics(LIST_STAT_NUM_COUNT, LX) );                 // 5.000000
+        llSay(0, "Range= " + (string) llListStatistics(LIST_STAT_RANGE, LX) );                     // 21.500000
+        llSay(0, "Std.Dev= " + (string) llListStatistics(LIST_STAT_STD_DEV, LX) );                 // 8.258468
+        llSay(0, "Sum= " + (string) llListStatistics(LIST_STAT_SUM, LX) );                         // 15.697500
+        llSay(0, "Sum of squares= " + (string) llListStatistics(LIST_STAT_SUM_SQUARES, LX) );      // 322.091500
+
+    }
+}
+// Note that LSLEditor produces "NaN" (Not A Number) for the geometric mean above. Geometric mean applies only to numbers of the same sign.
+</source>
+
+<source lang="lsl2">// shows just how bad SL is behaving and demonstrates the use of llListStatistics()
+list dil_s;
+list fps_s;
+integer ticks = 0;
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(1.0);
+    }
+    
+    on_rez (integer parm)
+    {
+        llResetScript();
+    }
+    
+    timer()
+    {
+        dil_s = llList2List(dil_s + llGetRegionTimeDilation(), -60, -1);
+        fps_s = llList2List(fps_s + llGetRegionFPS(), -60, -1);
+        if(3 <= ++ticks)
+        {
+            llSetText(
+                "Dilation: min="+(string) llListStatistics(LIST_STAT_MIN, dil_s) + ", mean=" +
+                    (string) llListStatistics(LIST_STAT_MEAN, dil_s) + ", max=" +
+                    (string) llListStatistics(LIST_STAT_MAX, dil_s) + ", std.dev=" +
+                    (string) llListStatistics(LIST_STAT_STD_DEV, dil_s) + "\n" + 
+                    "FPS: min="+(string) llListStatistics(LIST_STAT_MIN, fps_s) + ", mean=" +
+                    (string) llListStatistics(LIST_STAT_MEAN, fps_s) + ", max=" +
+                    (string) llListStatistics(LIST_STAT_MAX, fps_s) + ", std.dev=" +
+                    (string) llListStatistics(LIST_STAT_STD_DEV, fps_s),
+                <1.0, 1.0, 0.0>, //yellow
+                1.0);
+        }
+    }
+    
+    changed(integer change)
+    {
+        if(change & CHANGED_REGION)
+        {
+            llResetScript();
+        }
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetListEntryType]]|}}
+|also_events
+|also_tests=
+{{LSL DefineRow||[[llListStatistics Test]]|}}
+|also_articles
+|notes=Given that this operation ignores any non-numbers in a list, it can be used to tell you, in a mixed list, how many of the elements in a list are numbers (when used with the [[LIST_STAT_NUM_COUNT]] parameter.)
+|permission
+|negative_index
+|sort=ListStatistics
+|cat1=List
+|cat2=Math
+|cat3
+|cat4
+}}

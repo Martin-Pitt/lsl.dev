@@ -1,0 +1,33 @@
+{{LSL Constant
+|name=JSON_DELETE
+|type=string
+|value="�"
+|dvalue={{HoverText|"�"|Special Unicode Character&#x000d;Unicode:&#x0009;U+FDD8&#x000d;HTML:&#x0009;&amp;#xFDD8;&#x000d;llUnescapeUrl({{String|%EF%B7%98}});}}
+|desc=A [[:Category:LSL_Constants|constant]] used to delete a value within a [http://www.json.org/ JSON] text string.
+|constants={{LSL Constants/JSON}}
+|examples=<source lang="lsl2">default
+{
+    touch_start(integer num_detected)
+    {
+        string jsonString = "[1,2,3,4,5]";
+
+        llSay(PUBLIC_CHANNEL, "Original: " + jsonString);
+
+    //  we remove the first item (list has zero-based index!)
+        jsonString = llJsonSetValue(jsonString, [0], JSON_DELETE);
+
+    //  "[2,3,4,5]"
+        llSay(PUBLIC_CHANNEL, "Modified: " + jsonString);
+    }
+}</source>
+|caveats=*Using JSON_DELETE will '''not''' prune empty objects or arrays at higher levels.
+* Using JSON_DELETE to delete a non-existent array or object element in a JSON string will return [[JSON_INVALID]], not an unaltered string.
+|functions=
+{{LSL DefineRow||[[llJsonSetValue]]|}}
+|events
+|cat1=JSON
+|cat2
+|cat3
+|cat4
+|self
+}}

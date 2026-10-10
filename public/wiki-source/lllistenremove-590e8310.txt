@@ -1,0 +1,45 @@
+{{LSL_Function
+|inject-2={{LSL Function/handle|handle|listen}}
+|func_id=27|func_sleep=0.0|func_energy=10.0
+|func=llListenRemove
+|p1_type=integer|p1_subtype=handle|p1_name=handle
+|func_footnote
+|func_desc=Removes listen event callback {{LSLP|handle}}
+|return_text
+|spec
+|caveats=*On [[state]] change or [[llResetScript|script reset]] all listens are removed automatically.
+**A state change can be used as a shortcut to releasing all listens in the script.
+*No error is thrown if {{LSLP|handle}} has already been released or is invalid.
+|constants
+|examples=<syntaxhighlight lang="lsl2">
+// Listen for one line of chat from the owner, echo it back to them, then stop listening
+integer ListenHandle;
+default
+{
+    state_entry()
+    {
+        // Start listening on channel 0, for text from owner only
+        ListenHandle = llListen(0, "", llGetOwner(), "");
+    }
+    listen(integer channel, string name, key id, string message)
+    {
+        llOwnerSay(message);            // Echo the message back to the owner
+        llListenRemove(ListenHandle);   // Stop listening
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llListen]]}}
+{{LSL DefineRow||[[llListenControl]]}}
+|also_events={{LSL DefineRow|[[listen]]|}}
+|also_tests
+|also_articles
+|notes=*It is good practice to remove listeners when they are no longer required, or set them inactive via [[llListenControl]]
+|permission
+|negative_index
+|sort=ListenRemove
+|haiku={{Haiku|Wee break of the day|A good listener removed|out of primitive}}
+|cat1=Communications
+|cat2=Chat
+|cat3
+|cat4
+}}

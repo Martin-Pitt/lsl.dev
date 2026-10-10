@@ -1,0 +1,89 @@
+{{LSL Function
+|inject-2={{LSL Function/inventory|script|uuid=false|type=script}}
+|func_id=250|func_sleep=0.0|func_energy=10.0
+|func=llGetScriptState|return_type=integer|return_subtype=boolean|p1_type=string|p1_name=script
+|func_footnote
+|func_desc
+|return_text=that is [[TRUE]] if the {{LSLP|script}} is running.
+|spec
+|caveats
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        integer numberOfScripts = llGetInventoryNumber(INVENTORY_SCRIPT);
+
+        integer index;
+        do
+        {
+            string scriptName = llGetInventoryName(INVENTORY_SCRIPT, index);
+            integer scriptState = llGetScriptState(scriptName);
+
+        //  default value
+            string output = "FALSE";
+        //  else
+            if (scriptState) output = "TRUE";
+
+            // PUBLIC_CHANNEL has the integer value 0
+            llSay(PUBLIC_CHANNEL,
+                "Script named '" + scriptName + "' has current script state '" + output + "'.");
+        }
+        while (++index < numberOfScripts);
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+// Monitor other scripts in the object, then report, restart or both if some have crashed
+// NB: cannot distinguish a manually stopped script or restart one
+integer TRY_RESTART = FALSE;
+integer REPORT = TRUE;
+
+default
+{
+    state_entry() {
+        // monitoring rate = once per minute
+        llSetTimerEvent(60);
+    }
+    
+    timer() {
+        integer i = llGetInventoryNumber(INVENTORY_SCRIPT);
+        string script_name;
+        list stopped;
+        
+        while(--i >= 0) {
+            // the script will also monitor itself, but there is little reason to specifically skip
+            script_name = llGetInventoryName(INVENTORY_SCRIPT, i);
+            if(!llGetScriptState(script_name)) {
+                if(TRY_RESTART)
+                    llResetOtherScript(script_name);
+                if(REPORT)
+                    stopped += script_name;
+            }
+        }
+        if(stopped) {
+            string message = "The following scripts were crashed/stopped: " + llList2CSV(stopped) + ".";
+            if(TRY_RESTART)
+                message += " A restart was attempted.";
+            llInstantMessage(llGetOwner(), message);
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llSetScriptState]]|}}
+{{LSL DefineRow||[[llResetOtherScript]]|}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|history=*There was a time when [[llGetScriptState]] would return [[TRUE]] even if the script had encountered a {{LSLGC|Error|run-time error}}. This is no longer the case.
+|sort=GetScriptState
+|cat1=Inventory
+|cat2=Script
+|cat3=
+|cat4=
+}}

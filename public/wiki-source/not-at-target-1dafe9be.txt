@@ -1,0 +1,62 @@
+{{LSL_Event
+|event_id=17
+|event_delay
+|event=not_at_target
+|event_desc=Triggered if an object has not yet reached the target set by the call to [[llTarget]].
+|event_footnote=This event may be triggered multiple times if the target has not been reached.
+|constants
+|spec
+|caveats
+|examples=
+<source lang="lsl2">
+integer target_id;
+vector target_pos;
+
+default
+{
+    state_entry()
+    {
+        target_pos = llGetPos() + <5.0, 0.0, 0.0>;
+        target_id = llTarget(target_pos, 0.5);
+        llSetStatus(STATUS_PHYSICS, TRUE);
+        llMoveToTarget(target_pos, 0.4);
+    }
+    at_target(integer tnum, vector targetpos, vector ourpos)
+    {
+        if (tnum == target_id)
+        {
+            llOwnerSay("object is within range of target");
+            llOwnerSay("target position: " + (string)targetpos + ", object is now at: " + (string)ourpos);
+            llOwnerSay("this is " + (string)llVecDist(targetpos, ourpos) + " meters from the target");
+            llTargetRemove(target_id);
+        }
+    }
+    not_at_target()
+    {
+        llOwnerSay(
+            "not there yet - object is at " + (string)llGetPos() + 
+            ", which is " + (string)llVecDist(target_pos, llGetPos()) + 
+            " meters from the target (" + (string)target_pos + ")"
+        );
+    }
+}
+</source>
+|helpers
+|also_header
+|also_events={{LSL DefineRow||[[at_target]]|}}
+{{LSL DefineRow||[[at_rot_target]]|}}
+{{LSL DefineRow||[[not_at_rot_target]]|}}
+|also_functions={{LSL DefineRow||[[llTarget]]|Setup a target position}}
+{{LSL DefineRow||[[llTargetRemove]]|Stop a target position}}
+{{LSL DefineRow||[[llRotTarget]]|Setup a target rotation}}
+{{LSL DefineRow||[[llRotTargetRemove]]|Stop a target rotation}}
+|also_articles
+|also_footer
+|notes
+|mode
+|deprecated
+|cat1=Target
+|cat2=Physics
+|cat3=At Target
+|cat4
+}}

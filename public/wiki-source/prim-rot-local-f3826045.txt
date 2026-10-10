@@ -1,0 +1,90 @@
+<onlyinclude>{{#if:
+
+{{#vardefine:rot_local_const|{{LSL Const/ja|PRIM_ROT_LOCAL|integer|29|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the prim's local rotation}}}}
+
+{{#vardefine:p_rot_local_desc|Any valid rotation}}
+<!--
+{{#ifeq:{{{1|set}}}|set|{{Issues/SVC-93}}}}
+
+{{#vardefine:caveats-get|{{#var:caveats-get}}
+* '''{{LSL Param|rot}}''' is always the [[Viewer_coordinate_frames#global|global rotation]], even if the prim is a child or the root prim of an [[attachment]].
+}}
+-->
+{{#switch:{{{1|}}}
+|get={{#vardefine:caveats|{{#var:caveats}}
+{{#var:caveats-get}}}}
+|set={{#vardefine:caveats|{{#var:caveats}}
+{{#var:caveats-set}}}}
+
+}}
+
+}}</onlyinclude>{{#if:
+
+}}{{LSL Constant
+|inject-2={{LSL PrimitiveParam Categorize|Prim}}
+|name=PRIM_ROT_LOCAL
+|type=integer
+|value=29
+|desc=PRIM_ROT_LOCAL is used to get or set the prim's local rotation.
+|pa={{LSL Constant/List|i_front=[[llSetPrimitiveParams]]([&#32;{{#var:rot_local_const}},&#32;|i_end=&nbsp;]);
+|text=When used with [[llSetPrimitiveParams]] & [[llSetLinkPrimitiveParams]]
+{{LSL Generic/Caveats|caveats={{#var:caveats-set}}|title=*}}
+|toc=llSetPrimitiveParams
+|i1_type=rotation|i1_name=rot_local|i1_disp=rot
+}}
+|pb={{LSL Constant/List|i_front=[[llGetPrimitiveParams]]([&nbsp;{{#var:rot_local_const}}|i_end=&nbsp;]);|
+|r_front=Returns the list [&nbsp;|r_end=&nbsp;]
+|text={{LSL Generic/Caveats|caveats={{#var:caveats-get}}|title=*}}
+|toc=llGetPrimitiveParams
+|r1_type=rotation|r1_name=rot_local|r1_disp=rot
+}}
+|examples=<source lang="lsl2">integer isRotated = FALSE;
+vector rotated = <25, 25, 0>;
+rotation notRotated = ZERO_ROTATION;
+rotation rot;
+
+default
+{
+    state_entry()
+    {
+        rotated *= DEG_TO_RAD;
+        rot = llEuler2Rot( rotated );
+    }
+    
+    touch_start(integer total_number)
+    {
+        if( isRotated ) 
+        {
+            llSetLinkPrimitiveParams( 2, [PRIM_ROT_LOCAL, notRotated] );
+            isRotated = FALSE;
+        }
+        
+        else if( !isRotated ) 
+        {
+            isRotated = TRUE;
+            llSetLinkPrimitiveParams( 2, [PRIM_ROT_LOCAL, rot] );
+        }
+    }
+}
+</source>
+|constants=
+<!--{{LSL ConstRow|CHANGED_SHAPE}}-->
+|functions=
+{{LSL DefineRow||[[llGetPrimitiveParams/ja]]|}}
+{{LSL DefineRow||[[llGetLinkPrimitiveParams/ja]]|}}
+{{LSL DefineRow||[[llSetPrimitiveParams/ja]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams/ja]]|}}
+{{LSL DefineRow||[[llGetRot/ja]]|}}
+{{LSL DefineRow||[[llSetRot/ja]]|}}
+{{LSL DefineRow||[[llSetLocalRot/ja]]|}}
+{{LSL DefineRow||[[llGetLocalRot/ja]]|}}
+{{LSL DefineRow||[[llGetRootRotation/ja]]|}}
+{{LSL DefineRow||[[llGetObjectDetails/ja]]|}}
+|events=
+<!--{{LSL DefineRow||[[changed/ja]]|}}-->
+|location
+|cat1
+|cat2=Rotation/ja
+|cat3=Movement/ja
+|cat4
+}}

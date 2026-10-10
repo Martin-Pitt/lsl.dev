@@ -1,0 +1,111 @@
+{{LSL_Function
+|inject-2=
+|func_id=|func_sleep=0.0|func_energy=10.0
+|func=llScaleByFactor|sort=ScaleByFactor
+|return_type=integer
+|p1_type=float|p1_name=scaling_factor|p1_desc=The multiplier to be used with the prim sizes and their local positions.
+|func_desc=Attempts to resize the entire object by {{LSLP|scaling_factor}}, maintaining the size-position ratios of the prims.
+
+Resizing is subject to prim scale limits and linkability limits. This function can not resize the object if the linkset is physical, a pathfinding character, in a keyframed motion, or if resizing would cause the parcel to overflow.
+|return_type=integer
+|return_subtype=boolean
+|return_text=[[TRUE]] if it succeeds, [[FALSE]] if it fails.
+|spec
+|caveats=
+*Due to floating point precision issues (often, sqrt(x*x) != x), avoid rescaling by the values returned by [[llGetMinScaleFactor]] and [[llGetMaxScaleFactor]].  To guarantee successful rescaling, use values slightly within the limits returned by those functions.
+|constants
+|examples=
+<source lang="lsl2">//  Touching this script causes the object to double or halve in size.
+
+integer growing;
+
+default
+{
+    state_entry()
+    {
+        llSay(PUBLIC_CHANNEL, "Touch to toggle scale.");
+    }
+
+    touch_start(integer num_detected)
+    {
+        growing = !growing;
+
+        float min_factor = llGetMinScaleFactor();
+        float max_factor = llGetMaxScaleFactor();
+
+        llSay(PUBLIC_CHANNEL, "min_scale_factor = " + (string)min_factor
+                            + "\nmax_scale_factor = " + (string)max_factor);
+
+        integer success;
+
+        if (growing) success = llScaleByFactor(2.0);
+        else         success = llScaleByFactor(0.5);
+
+        if (!success) llSay(PUBLIC_CHANNEL, "Scaling failed!");
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llScaleByFactor]]|}}
+{{LSL DefineRow||[[llGetMaxScaleFactor]]|}}
+{{LSL DefineRow||[[llGetMinScaleFactor]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=<!--Object  enable when/if it goes live-->
+|cat2
+|cat3
+|cat4
+|cat5
+|deepnotes=This function is roughly equivalent to the following:
+<source lang="lsl2">
+float VectorAbsStatistics(integer flag, vector a){
+    return llListStatistics(flag, [llFabs(a.x), llFabs(a.y), llFabs(a.z)]);
+}
+
+integer ScaleByFactor(float scale) {
+    vector root = llGetScale() * scale;
+
+    if (VectorAbsStatistics(LIST_STAT_MAX, root) > 64
+        || VectorAbsStatistics(LIST_STAT_MIN, root) < 0.01
+        || scale <= 0)
+    {
+        return ERR_MALFORMED_PARAMS;
+    }
+
+    integer prims = llGetNumberOfPrims();
+    list set = [PRIM_LINK_TARGET, prims > 1, PRIM_SIZE, root];
+
+    if (prims > 1) {
+        list get = [];
+        integer count = prims;
+        do {
+            get += [PRIM_LINK_TARGET, count, PRIM_SIZE, PRIM_POS_LOCAL];
+        } while(--count);
+        get = llGetPrimitiveParams(get);
+        count = 0;
+        do {
+            vector size = llList2Vector(get, ++count) * scale;
+            vector pos  = llList2Vector(get, ++count) * scale;
+
+            if (VectorAbsStatistics(LIST_STAT_MAX, size) > 64
+                || VectorAbsStatistics(LIST_STAT_MIN, size) < 0.01
+                || VectorAbsStatistics(LIST_STAT_MAX, pos) > 54 )
+            {
+                return ERR_MALFORMED_PARAMS;
+            }
+
+            set += [PRIM_LINK_TARGET, prims,
+                        PRIM_POS_LOCAL, pos,
+                        PRIM_SIZE, size];
+        } while(--prims > 1);
+    }
+    llSetPrimitiveParams(set);
+    return TRUE;
+}
+</source>
+|history=
+*Mentioned in [[Simulator_User_Group/Transcripts/2013.12.10]]
+*Mentioned in [[Simulator_User_Group/Transcripts/2013.12.17]]
+}}

@@ -1,0 +1,58 @@
+{{LSL_Function
+|inject-2={{LSL_Function/face|face|notall=*}}{{LSL_Function/link|link|nogroup=*|noavatar=*}}{{Issues/SVC-7422}}
+|func_id=?|func_sleep=0.0|func_energy=0.0|mode
+|func=llSetLinkMedia|return_type=integer|return_subtype=status
+|p1_type=integer|p1_subtype=link|p1_name=link|p1_desc
+|p2_type=integer|p2_name=face|p2_desc
+|p3_type=list|p3_subtype=instructions|p3_name=params|p3_desc=a set of name/value pairs (in no particular order)
+|func_footnote=
+|func_desc=Set the media {{LSLP|params}} for a particular {{LSLP|face}} on the {{LSLP|link}}ed prim(s) without a delay.
+|return_text=that is a STATUS_* flag which details the success/failure of the operation(s).
+|spec=
+|caveats=*If prim media is not already on this object, it will be added.
+*If prim media is newly added to this object, params not specified take their default value.
+*If prim media is already on this object, params not specified are unchanged.
+* About <code>[[PRIM_MEDIA_WIDTH_PIXELS]]</code> ({{LSLPT|width}}) and <code>[[PRIM_MEDIA_HEIGHT_PIXELS]]</code> ({{LSLPT|height}}) ...
+** Both {{LSLPT|width}} and {{LSLPT|height}} must be specified for either to work. They narrow the texture space while inversely widening the aperture, i.e. smaller values "zoom in."
+*** If {{LSLPT|width}} and {{LSLPT|height}} are not specified, the function assumes 1024 for each.
+** When <code>[[PRIM_MEDIA_AUTO_SCALE]]</code> is <code>[[TRUE]]</code>, any value for {{LSLPT|width}} and {{LSLPT|height}} that is not precisely 2<sup>''n''</sup> where 0 &le; ''n'' &lt; 12 will be "rounded up" to the next value, i.e. setting <code>[[PRIM_MEDIA_WIDTH_PIXELS]]</code> to 257 has the same effect as setting it to 512. Any value outside the range of {{Interval|gte=0|lte=2048}} will cause the function to shout a message to <code>[[DEBUG_CHANNEL]]</code> and fail. Using 0 (zero) results in the default value being used, which is 1024.
+** <strike>It might be helpful to think of {{LSLPT|width}} and {{LSLPT|height}} as setting your "screen size." If the media is smaller than this "screen," there will be empty space below and/or to the right of the media. If the media is larger than this "screen," scroll bars will be made visible. Re-scaling the prim without altering the face's ''Horizontal scale,'' ''Vertical scale,'' ''Horizontal offset,'' and ''Vertical offset'' will only distort (stretch/compress) the media.</strike><sub>''Pending review. - NM''</sub>
+* {{LSLPT|width}} and {{LSLPT|height}} scaled larger than 1024 pixels will require the texture backdrop to be resized to fit. (See [[#Useful_Snippets|Useful Snippets]])
+** If resized to fit, the resulting view will cut off scrolled content outside the bounds making it impossible to be viewed.
+|constants={{LSL Constants/ReturnStatus|table=*|sortable=*}}{{LSL Constants/PrimMedia|set}}
+|examples
+|helpers=<source lang="lsl2">//-- expand media textures greater than 1024 pixel in a direction to fit the media face
+//-- does exactly what the "align" button does in the edit window
+//-- original by Edelman Linden (or Kate Linden), tweaked by Void Singer
+uExpandMediaTexture( integer vIntWidth, integer vIntHeight, integer vIntFace ){
+    integer vIntTemp;
+    vector  vSizScale;
+
+    while (vIntWidth >> ++vIntTemp);
+    vSizScale.x = vIntWidth / (float)(1 << vIntTemp);
+    vIntTemp = 0;
+    while (vIntHeight >> ++vIntTemp);
+    vSizScale.y = vIntHeight / (float)(1 << vIntTemp);
+    llSetLinkPrimitiveParamsFast( LINK_THIS,
+                                  [PRIM_TEXTURE, vIntFace] +
+                                  llListReplaceList( llGetLinkPrimitiveParams(LINK_THIS, [PRIM_TEXTURE, vIntFace] ),
+                                                    [vSizScale, ((vSizScale - <1.0, 1.0, 0.0>) / 2.0)],
+                                                    1,
+                                                    2 ) );
+}</source>
+|also_functions=
+{{LSL DefineRow||[[llSetPrimMediaParams]]}}
+{{LSL DefineRow||[[llGetLinkMedia]]}}
+{{LSL DefineRow||[[llClearLinkMedia]]}}
+|also_tests
+|also_events=
+|also_articles=*[[User:Kelly Linden/lsl hacks]]
+|notes
+|deepnotes
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/11#11.08.10.238207 | 10/08/2011 ]]
+|cat1=Prim Media
+|cat2=Media
+|cat3=Link/Set
+|cat4
+}}
+[[Category:Shared Media]]

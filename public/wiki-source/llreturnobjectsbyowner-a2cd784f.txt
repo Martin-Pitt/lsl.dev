@@ -1,0 +1,57 @@
+{{LSL_Function
+|inject-2=
+{{Issues/SVC-6281}}
+{{LSL_Function/permission|PERMISSION_RETURN_OBJECTS}}
+{{LSL_Function/avatar|owner|group=*}}
+|func_id=|func_sleep=0.0|func_energy=
+|func=llReturnObjectsByOwner|sort=ReturnObjectsByOwner
+|p1_type=key|p1_name=owner
+|p2_type=integer|p2_name=scope|p2_desc=OBJECT_RETURN_* flag
+|return_type=integer
+|func_footnote=If the return value is negative, it represents an [[#{{anchorencode:Error Flags}}|error]] flag.
+|func_desc=If the script is owned by an agent, [[PERMISSION_RETURN_OBJECTS]] may be granted by the owner.  If the script is owned by a group, this permission may be granted by an agent belonging to the group's "Owners" role.
+|return_text=that is the number of objects successfully returned to their owners or an [[#{{anchorencode:Error Flags}}|ERR_*]] flag.
+|spec=
+==== Throttle ====
+Throttled at max parcel land impact capacity region-wide per hour.
+|caveats=
+* Parcel owner, estate owner and estate managers can not have their objects returned by this method.
+* Objects which are owned by the group the land is set to will not be returned by this method.
+** Objects owned by other groups will be returned to their previous owner if the object is transferable. If not transferable they are deleted.
+|constants=
+<div style="display:inline-block; vertical-align: top;">
+{{{!}} class="sortable" {{prettytable|style=margin: 0px 10px 10px 0pt;}}
+{{!}}- {{hl2}}
+! class="sortable" {{!}} {{LSLPT|scope}} Flag
+! title="Value" class="sortable" {{!}}
+!{{!}} Description
+{{!}}-
+{{LSL ConstTB|OBJECT_RETURN_PARCEL|integer||c=return all objects on the same parcel as the script which are owned by 'owner'}}
+{{!}} Return all objects on the same parcel as the script which are owned by {{LSLPT|owner}}. <br/> The script must be owned by an estate manager or over a parcel owned by the owner of the script.
+{{!}}-
+{{LSL ConstTB|OBJECT_RETURN_PARCEL_OWNER|integer||c=return all objects owned by 'owner' which are over parcels owned by the owner of the script.}}
+{{!}} Return all objects owned by {{LSLPT|owner}} which are over parcels owned by the owner of the script.
+{{!}}-
+{{LSL ConstTB|OBJECT_RETURN_REGION|integer||c=return all objects in the region owned by 'owner'}}
+{{!}} Return all objects in the region owned by {{LSLPT|owner}}. <br/> The script must be owned by the estate owner or an estate manager.
+{{!}}}
+</div><div style="display:inline-block; vertical-align: top;">
+{{LSL_Constants/ReturnError|table=*|sortable=*}}
+</div>
+|examples
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llReturnObjectsByID]]|}}
+{{LSL DefineRow||[[llGetParcelPrimOwners]]|}}
+{{LSL DefineRow||[[llDie]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes=For group-owned land you may want to explicitly code a group owner's key into the script as there is no way to determine if a user is a group owner.
+|cat1=Parcel
+|cat2=Region
+|cat3=Owner
+|cat4=Security<!--not really security but I think it's useful to have it in that category-->
+|cat5=Cleanup
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/13#13.06.18.277494 | 18/06/2013 ]]
+}}

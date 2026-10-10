@@ -1,0 +1,56 @@
+{{LSL_Function
+|func_id=225|func_sleep=0.0|func_energy=10.0
+|func=llGetFreeMemory
+|return_type=integer
+|func_desc
+|Return_text=of the number of free bytes of memory the script can use.
+|func_footer
+|spec=
+This function's behavior is dependent upon the VM the script is using. [[#Mono|Mono]] is the new VM, [[#LSO|LSO]] is the old VM. The big difference between Mono and LSO is that Mono scripts run faster and can utilize four times more memory.
+
+===Mono===
+
+In Mono the value returned is the amount of free memory available to the script prior to garbage collection being run. This means that memory that is awaiting garbage collection counts against the scripts 64KiB allotment. {{Cn}}
+
+In addition to this, Mono does not enforce the memory restrictions as strictly as the LSO VM did{{Footnote|http://www.langnetsymposium.com/2009/talks/17-JimPurbrick-SecondLife.html}}{{Footnote|In LSO, all types are immutable, every operation results in Heap values being duplicated}}. (With LSO it was <u>impossible</u> to exceed the 16KiB memory cap.)
+
+===LSO===
+
+In LSO, the value returned by this function is the amount of memory that the Stack can use of the Heap has yet to allocate for itself.
+
+The LSL memory space is divided into four sections: Byte-code, Stack, Free Memory, Heap. Free Memory isn't an allocated block of memory, it's just the space between Stack and Heap. The size of all four sections combined is 16384 bytes (16KiB).
+
+[[String]]s, [[list]]s and [[key]]s are stored in the Heap. Heap pointers (for [[string]]s, [[list]]s & [[key]]s), [[integer]]s, [[float]]s, [[vector]]s and [[rotation]]s are all temporarily stored in the stack as the script executes.
+
+As the script executes the Stack grows and shrinks in size depending upon the complexity of the expressions being executed. Likewise the Heap grows as the script executes but unlike the Stack, it never shrinks in size. When there is no free memory left for Stack or Heap to use they collide and a Stack-Heap Collision error is thrown causing the script to crash.
+
+The Heap can become fragmented and blocks of memory in it can become unusable (due to their size). There is no defragment function{{Footnote|Due to the design of the LSO VM, a defragment function is impossible.}} but there are scripting techniques that can be used to reduce fragmentation.
+|caveats=
+*The number of free bytes the Heap can use may be greater but not less.
+*"''the number of free bytes of memory the script can use''" means that if a memory limit is set (via [[llSetMemoryLimit]]), this function will report the free space between the script's current memory usage and the defined memory limit, '''not''' the uncapped memory limit.
+|constants
+|examples=
+Calling [[llGetFreeMemory]] can look like this:
+<syntaxhighlight lang="lsl2">
+llOwnerSay((string)llGetFreeMemory() + " bytes of free memory available for allocation.");
+</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetUsedMemory]]|}}
+{{LSL DefineRow||[[llScriptProfiler]]|A more advanced function for analyzing script performance, and can also measure memory usage over time.}}
+{{LSL DefineRow||[[llSetMemoryLimit]]|Define a memory limit (lower than the maximum for the appropriate VM).}}
+|also_events
+|also_tests
+|also_articles=
+{{LSL DefineRow||[[LSL Errors#Script_run-time_error:_Stack-Heap_Collision|Stack-Heap Collision]]|[[LSL Errors|LSL Error]] caused by the script running out of memory.}}
+|notes=The amount of free memory is updated only at the start of a server frame, meaning the values from this function can fluctuate. To ensure stable values, use a single-frame sleep, e.g. [[llSleep]](0.01) before the call to llGetFreeMemory.
+|lso=This function does not count free memory, and the name of this function makes this function difficult for people to learn. People say this function may be redefined or superseded by another more useful function when the LSL VM moves to [[Mono]].
+
+We can concisely specify [[llGetFreeMemory]] in the context of the classic Unix model for a parallel task/ thread/ process. Think of the task of the script always holding 16384 bytes (16 KiB). Let the byte code and then stack grow up from the bottom, let the heap grow down from the top. [[llGetFreeMemory]] then returns the "historic lowest heap pointer minus the stack end pointer".
+
+llGetFreeMemory does not count the bytes freed, [[llGetFreeMemory]] instead counts all the bytes never yet used.
+|cat1=Script
+|cat2=Memory
+|cat3
+|cat4
+}}

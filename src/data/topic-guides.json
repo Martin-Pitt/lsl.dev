@@ -1,0 +1,1287 @@
+{
+  "asset_permissions": {
+    "summary": "Inspect object and inventory permission masks.",
+    "tasks": [
+      {
+        "label": "llGetInventoryPermMask",
+        "function": "llGetInventoryPermMask",
+        "description": "Returns the specified item's permission flags for the specified group."
+      },
+      {
+        "label": "llGetObjectPermMask",
+        "function": "llGetObjectPermMask",
+        "description": "Returns the script's object's permission flags for the specified group."
+      }
+    ]
+  },
+  "attachments": {
+    "summary": "Attach objects to avatars and inspect attachment state.",
+    "tasks": [
+      {
+        "label": "llAttachToAvatar",
+        "function": "llAttachToAvatar",
+        "description": "Attaches the object to the avatar who has granted the PERMISSION_ATTACH permission. Takes the object into the user's inventory and attaches it at attach_point."
+      },
+      {
+        "label": "llGetAttached",
+        "function": "llGetAttached",
+        "description": "Returns the integer attachment point (an ATTACH_* constant) that the object is attached to, or 0 if it is unattached or pending detachment."
+      },
+      {
+        "label": "llDetachFromAvatar",
+        "function": "llDetachFromAvatar",
+        "description": "Detaches the object containing the script from the avatar. Requires the PERMISSION_ATTACH runtime permission (automatically granted to attached objects). Note that the detached object is completely removed from the region and not dropped on the ground."
+      }
+    ]
+  },
+  "avatar_animation": {
+    "summary": "Play avatar animations and manage animation overrides.",
+    "tasks": [
+      {
+        "label": "llStartAnimation",
+        "function": "llStartAnimation",
+        "description": "Starts the animation anim (inventory or built-in) on the avatar who granted the script the PERMISSION_TRIGGER_ANIMATION permission (automatically granted for attached or sat-on objects)."
+      },
+      {
+        "label": "llStopAnimation",
+        "function": "llStopAnimation",
+        "description": "Stops the specified animation anim (inventory, built-in, or UUID) on the avatar who granted the script the PERMISSION_TRIGGER_ANIMATION permission (automatically granted for attached or sat-on objects)."
+      },
+      {
+        "label": "llSetAnimationOverride",
+        "function": "llSetAnimationOverride",
+        "description": "Overrides the default animation for anim_state with anim (which must be in the object's inventory or a built-in animation). Requires the PERMISSION_OVERRIDE_ANIMATIONS permission."
+      }
+    ]
+  },
+  "avatar_communication": {
+    "summary": "Send messages and present interactive prompts to avatars.",
+    "tasks": [
+      {
+        "label": "llDialog",
+        "function": "llDialog",
+        "description": "Shows a dialog box on the screen of the specified agent, displaying msg along with up to 12 choice buttons. Clicking a button chats its label on channel. The chat originates at the object's position, but uses the agent's name and UUID, so it can be heard as long as the agent is still in the region."
+      },
+      {
+        "label": "llInstantMessage",
+        "function": "llInstantMessage",
+        "description": "Sends an instant message containing msg to the agent identified by their key."
+      },
+      {
+        "label": "llTextBox",
+        "function": "llTextBox",
+        "description": "Opens an input text box dialog displaying msg to the agent. Submitting text chats the input string on channel as if said by the agent. The chat originates at the object's position, but uses the agent's name and UUID, so it can be heard as long as the agent is still in the region."
+      }
+    ]
+  },
+  "avatar_inventory": {
+    "summary": "Give inventory items to avatars.",
+    "tasks": [
+      {
+        "label": "llGiveInventory",
+        "function": "llGiveInventory",
+        "description": "Gives the specified inventory item to the target, as permitted by the permissions system. The target can be any agent or an object located in the same region."
+      },
+      {
+        "label": "llGiveInventoryList",
+        "function": "llGiveInventoryList",
+        "description": "Gives the list of inventory items to target as a new folder named folder. If target is an object, the items are passed directly into its inventory and no folder is created. The target must be an agent or an object in the same region."
+      },
+      {
+        "label": "llGiveAgentInventory",
+        "function": "llGiveAgentInventory",
+        "description": "Gives the specified inventory items to the agent as a new folder named folder, as permitted by the permissions system. Customizes the transfer using options."
+      }
+    ]
+  },
+  "avatar": {
+    "summary": "Inspect avatars and find APIs that act on them.",
+    "tasks": [
+      {
+        "label": "llGetAgentInfo",
+        "function": "llGetAgentInfo",
+        "description": "Returns an integer bitfield containing status information about the agent specified by id (such as AGENT_FLYING, AGENT_ATTACHMENTS, AGENT_SITTING, etc.)."
+      },
+      {
+        "label": "llGetAgentList",
+        "function": "llGetAgentList",
+        "description": "Requests a list of avatar UUID keys for agents currently in the region, limited by scope. Returns a list of keys or a list containing an error message string."
+      },
+      {
+        "label": "llGetDisplayName",
+        "function": "llGetDisplayName",
+        "description": "Returns the display name string of the avatar specified by id if they are in the region or cached; returns an empty string otherwise (use llRequestDisplayName if the avatar is absent)."
+      }
+    ]
+  },
+  "camera": {
+    "summary": "Read camera state and configure scripted camera behavior.",
+    "tasks": [
+      {
+        "label": "llGetCameraPos",
+        "function": "llGetCameraPos",
+        "description": "Returns a vector representing the camera's current position in region coordinates of the agent who granted PERMISSION_TRACK_CAMERA. Returns ZERO_VECTOR if permissions are not granted."
+      },
+      {
+        "label": "llSetCameraParams",
+        "function": "llSetCameraParams",
+        "description": "Sets multiple camera parameters simultaneously using the list of rules. Requires the PERMISSION_CONTROL_CAMERA runtime permission."
+      },
+      {
+        "label": "llClearCameraParams",
+        "function": "llClearCameraParams",
+        "description": "Resets all camera parameters to default values and turns off scripted camera control. Requires the PERMISSION_CONTROL_CAMERA runtime permission (automatically granted for attached or sat-on objects)."
+      }
+    ]
+  },
+  "chat": {
+    "summary": "Send and receive messages on chat channels.",
+    "tasks": [
+      {
+        "label": "llSay",
+        "function": "llSay",
+        "description": "Broadcasts the message msg to all scripts or agents listening on channel within llGetEnv(\"chat_range\"), which is 20m on most regions. Agents listen on PUBLIC_CHANNEL (0) and DEBUG_CHANNEL (2147483647). All other channels are for script-to-script communication."
+      },
+      {
+        "label": "llListen",
+        "function": "llListen",
+        "description": "Creates a listener on channel from name and id for msg. Returns an integer listener handle used to control or remove the listener. Empty strings or NULL_KEY filters do not filter on those parameters."
+      },
+      {
+        "label": "llRegionSayTo",
+        "function": "llRegionSayTo",
+        "description": "Sends the message msg on Channel privately to the targeted agent or object (if within the region). If target is an agent and channel is non-zero, the message can also be heard by any attachments worn by the avatar."
+      }
+    ]
+  },
+  "combat": {
+    "summary": "Build combat interactions with damage, health, and damage events.",
+    "tasks": [
+      {
+        "label": "llDamage",
+        "function": "llDamage",
+        "description": "Generates a damage event delivering the specified amount of damage and damage_type to the targeted avatar or task in the same region."
+      },
+      {
+        "label": "llGetHealth",
+        "function": "llGetHealth",
+        "description": "Returns a float representing the current health of the avatar or object specified by id."
+      },
+      {
+        "label": "llDetectedDamage",
+        "function": "llDetectedDamage",
+        "description": "Returns a list containing pending damage information for the event specified by number, including the current damage, the damage type, and the original damage delivered."
+      },
+      {
+        "label": "llAdjustDamage",
+        "function": "llAdjustDamage",
+        "description": "Modifies the amount of damage applied by the current on_damage event after it completes processing, specified by the damage event index number."
+      }
+    ]
+  },
+  "cryptography": {
+    "summary": "Find hashing, message authentication, and signature operations.",
+    "tasks": [
+      {
+        "label": "llComputeHash",
+        "function": "llComputeHash",
+        "description": "Returns a hex-encoded hash digest string of message using the specified cryptographic algorithm."
+      },
+      {
+        "label": "llHMAC",
+        "function": "llHMAC",
+        "description": "Returns a Base64-encoded HMAC hash of msg using the secret key private_key and the specified digest algorithm (md5, sha1, sha224, sha256, sha384, or sha512)."
+      },
+      {
+        "label": "llVerifyRSA",
+        "function": "llVerifyRSA",
+        "description": "Returns TRUE if the Base64-formatted signature is verified as valid for the message msg when using the digest algorithm and public_key. Returns FALSE otherwise."
+      }
+    ]
+  },
+  "data_conversion": {
+    "summary": "Convert values between text, lists, JSON, and encoded forms.",
+    "tasks": [
+      {
+        "label": "llParseString2List",
+        "function": "llParseString2List",
+        "description": "Breaks the string src into a list of substrings, discarding any separators, keeping spacers, and omitting any empty null values. separators and spacers accept up to 8 string entries each."
+      },
+      {
+        "label": "llDumpList2String",
+        "function": "llDumpList2String",
+        "description": "Returns a string that is the list src converted to a single string, with separator placed between each entry."
+      },
+      {
+        "label": "llStringToBase64",
+        "function": "llStringToBase64",
+        "description": "Returns the Base64 representation string of str, interpreting it as a UTF-8 byte sequence."
+      }
+    ]
+  },
+  "data_storage": {
+    "summary": "Choose APIs for linkset data, experience data, and notecard reads.",
+    "tasks": [
+      {
+        "label": "llLinksetDataWrite",
+        "function": "llLinksetDataWrite",
+        "description": "Creates or updates an unprotected key-value pair (name and value) in the linkset's datastore. Returns an integer success or failure code."
+      },
+      {
+        "label": "llReadKeyValue",
+        "function": "llReadKeyValue",
+        "description": "Starts an asynchronous transaction to read the value associated with key k in the experience. Returns a key query handle for the dataserver event. Fails with XP_ERROR_KEY_NOT_FOUND if the key does not exist."
+      },
+      {
+        "label": "llGetNotecardLine",
+        "function": "llGetNotecardLine",
+        "description": "Asynchronously requests the line index line of the notecard name from the dataserver. Returns a key query handle for the dataserver event, which will return 'EOF' when reaching past the end of the notecard."
+      }
+    ]
+  },
+  "dataserver": {
+    "summary": "Request data delivered through the dataserver event.",
+    "tasks": [
+      {
+        "label": "llRequestAgentData",
+        "function": "llRequestAgentData",
+        "description": "Asynchronously requests the specified data category (DATA_*) about the agent id. Triggers a dataserver event with the results and returns a key query handle."
+      },
+      {
+        "label": "llGetNotecardLine",
+        "function": "llGetNotecardLine",
+        "description": "Asynchronously requests the line index line of the notecard name from the dataserver. Returns a key query handle for the dataserver event, which will return 'EOF' when reaching past the end of the notecard."
+      },
+      {
+        "label": "llRequestSimulatorData",
+        "function": "llRequestSimulatorData",
+        "description": "Asynchronously requests data (using a DATA_SIM_* constant) about the region. Triggers a dataserver event and returns a key query handle."
+      }
+    ]
+  },
+  "detected": {
+    "summary": "Read information about detections reported by events.",
+    "tasks": [
+      {
+        "label": "llDetectedKey",
+        "function": "llDetectedKey",
+        "description": "Returns the key (UUID) of the detected object or avatar specified by number, or NULL_KEY if number is not a valid index."
+      },
+      {
+        "label": "llDetectedPos",
+        "function": "llDetectedPos",
+        "description": "Returns the vector position (in region coordinates) of the detected object or avatar specified by number, or <0.0, 0.0, 0.0> if number is not a valid index."
+      },
+      {
+        "label": "llDetectedTouchFace",
+        "function": "llDetectedTouchFace",
+        "description": "Returns the integer index of the face clicked by the avatar in the touch event specified by index."
+      }
+    ]
+  },
+  "effects": {
+    "summary": "Add particles, texture animation, and floating text.",
+    "tasks": [
+      {
+        "label": "llParticleSystem",
+        "function": "llParticleSystem",
+        "description": "Creates or updates a particle system on the prim containing the script based on rules. An empty list removes the particle system."
+      },
+      {
+        "label": "llSetTextureAnim",
+        "function": "llSetTextureAnim",
+        "description": "Animates the texture on face of the prim by setting its scale and offset. mode defines options, sizex/sizey define frames, start defines the start frame/angle, length defines duration, and rate defines playback speed."
+      },
+      {
+        "label": "llSetText",
+        "function": "llSetText",
+        "description": "Displays floating text above the prim with the specified color vector and transparency alpha."
+      }
+    ]
+  },
+  "experience": {
+    "summary": "Work with experience permissions, information, and persistent data.",
+    "tasks": [
+      {
+        "label": "llRequestExperiencePermissions",
+        "function": "llRequestExperiencePermissions",
+        "description": "Requests permission from the specified agent to participate in the experience. These permissions are persistent and apply grid-wide across all scripts in the experience, automatically triggering experience_permissions or experience_permissions_denied."
+      },
+      {
+        "label": "llGetExperienceDetails",
+        "function": "llGetExperienceDetails",
+        "description": "Returns a list of details for the specified experience_id, formatted as [string experience_name, key owner_id, key experience_id, integer state, string state_message, key group_id]."
+      },
+      {
+        "label": "llCreateKeyValue",
+        "function": "llCreateKeyValue",
+        "description": "Starts an asynchronous transaction to create a key-value pair (k and v) associated with the script's experience. Returns a key query handle for the dataserver event. Fails with XP_ERROR_STORAGE_EXCEPTION if the key already exists."
+      }
+    ]
+  },
+  "experience_data": {
+    "summary": "Create, read, update, and delete experience key-value data.",
+    "tasks": [
+      {
+        "label": "llCreateKeyValue",
+        "function": "llCreateKeyValue",
+        "description": "Starts an asynchronous transaction to create a key-value pair (k and v) associated with the script's experience. Returns a key query handle for the dataserver event. Fails with XP_ERROR_STORAGE_EXCEPTION if the key already exists."
+      },
+      {
+        "label": "llReadKeyValue",
+        "function": "llReadKeyValue",
+        "description": "Starts an asynchronous transaction to read the value associated with key k in the experience. Returns a key query handle for the dataserver event. Fails with XP_ERROR_KEY_NOT_FOUND if the key does not exist."
+      },
+      {
+        "label": "llUpdateKeyValue",
+        "function": "llUpdateKeyValue",
+        "description": "Starts an asynchronous transaction to update the key k to value v inside the experience datastore. If checked is TRUE, the update fails with XP_ERROR_RETRY_UPDATE unless the existing value matches original_value."
+      },
+      {
+        "label": "llDeleteKeyValue",
+        "function": "llDeleteKeyValue",
+        "description": "Starts an asynchronous transaction to delete the key-value pair associated with key k in the experience. Returns a key query handle for the dataserver event."
+      }
+    ]
+  },
+  "input": {
+    "summary": "Handle avatar controls and inspect game-control modes.",
+    "tasks": [
+      {
+        "label": "llTakeControls",
+        "function": "llTakeControls",
+        "description": "Intercepts inputs (keyboard/mouse clicks) from the agent, specifically those specified by controls. The boolean accept determines if events are generated, and pass_on determines if inputs also perform their default functions. Requires the PERMISSION_TAKE_CONTROLS runtime permission."
+      },
+      {
+        "label": "llReleaseControls",
+        "function": "llReleaseControls",
+        "description": "Stops taking inputs (previously acquired via llTakeControls) from the avatar, dequeuing any remaining control events and revoking the PERMISSION_TAKE_CONTROLS permission."
+      },
+      {
+        "label": "llGetGameControlMode",
+        "function": "llGetGameControlMode",
+        "description": "Returns a GAME_CONTROL_MODE_* integer indicating the current game-control mode for the avatar specified by id."
+      }
+    ]
+  },
+  "json": {
+    "summary": "Read and modify JSON values and convert between JSON and lists.",
+    "tasks": [
+      {
+        "label": "llJsonGetValue",
+        "function": "llJsonGetValue",
+        "description": "Parses the JSON string json and returns the value found by traversing the specified path of specifiers as a string."
+      },
+      {
+        "label": "llJsonSetValue",
+        "function": "llJsonSetValue",
+        "description": "Returns a new JSON string representing json with the target located at specifiers set to value. Supports JSON_APPEND to append elements. Writing JSON_DELETE deletes the target. Overwriting array bounds or setting non-array levels with array indices returns JSON_INVALID."
+      },
+      {
+        "label": "llList2Json",
+        "function": "llList2Json",
+        "description": "Converts the list values into a JSON string of the specified type (either a JSON_ARRAY or a JSON_OBJECT). Returns JSON_INVALID if an error is encountered."
+      }
+    ]
+  },
+  "land_moderation": {
+    "summary": "Manage land access and return or eject unwanted visitors and objects.",
+    "tasks": [
+      {
+        "label": "llManageEstateAccess",
+        "function": "llManageEstateAccess",
+        "description": "Adds or removes agents from the estate's access or ban lists, or groups from the estate's group access list, specified by the action. Returns TRUE if successful, or FALSE if throttled, if the action/ID is invalid, or if the script owner lacks estate management rights."
+      },
+      {
+        "label": "llAddToLandBanList",
+        "function": "llAddToLandBanList",
+        "description": "Adds the avatar to the parcel ban list for the specified number of hours. A value of 0 hours adds the avatar indefinitely. Banned users teleporting to the parcel are redirected to a neighboring parcel; the minimum accepted duration is 0.01 hours (approximately 36 seconds)."
+      },
+      {
+        "label": "llReturnObjectsByID",
+        "function": "llReturnObjectsByID",
+        "description": "Returns objects specified by the list of UUIDs objects to their owners. Requires the PERMISSION_RETURN_OBJECTS permission, and the script owner must own the parcel or be an estate manager/region owner."
+      }
+    ]
+  },
+  "linkset_data": {
+    "summary": "Store key-value data in a linkset and respond to changes.",
+    "tasks": [
+      {
+        "label": "llLinksetDataWrite",
+        "function": "llLinksetDataWrite",
+        "description": "Creates or updates an unprotected key-value pair (name and value) in the linkset's datastore. Returns an integer success or failure code."
+      },
+      {
+        "label": "llLinksetDataRead",
+        "function": "llLinksetDataRead",
+        "description": "Reads and returns the string value corresponding to key name from the linkset's datastore."
+      },
+      {
+        "label": "llLinksetDataFindKeys",
+        "function": "llLinksetDataFindKeys",
+        "description": "Returns an alphabetically sorted list of up to count keys from the datastore that match the regular expression pattern, starting at index start (returns all matching keys if count < 1)."
+      },
+      {
+        "label": "llLinksetDataDelete",
+        "function": "llLinksetDataDelete",
+        "description": "Deletes the unprotected key-value pair specified by name from the linkset's datastore, triggering a linkset_data event."
+      }
+    ]
+  },
+  "linkset": {
+    "summary": "Inspect and update linked objects and their constituent prims.",
+    "tasks": [
+      {
+        "label": "llGetLinkPrimitiveParams",
+        "function": "llGetLinkPrimitiveParams",
+        "description": "Returns a list of primitive parameters requested in params for the linked prim specified by link (equivalent to llGetPrimitiveParams)."
+      },
+      {
+        "label": "llSetLinkPrimitiveParamsFast",
+        "function": "llSetLinkPrimitiveParamsFast",
+        "description": "Sets primitive parameters for the linked prim link according to rules with no built-in script sleep delay."
+      },
+      {
+        "label": "llGetLinkKey",
+        "function": "llGetLinkKey",
+        "description": "Returns the key (UUID) of the linked prim or avatar specified by link."
+      }
+    ]
+  },
+  "list": {
+    "summary": "Search, extract, modify, and sort list entries.",
+    "tasks": [
+      {
+        "label": "llListFindList",
+        "function": "llListFindList",
+        "description": "Returns the integer index of the first instance of list test within the list src (returns -1 if not found)."
+      },
+      {
+        "label": "llList2List",
+        "function": "llList2List",
+        "description": "Returns a new list containing the subset of entries from src within the inclusive range specified by the start and end indices. Negative indices count backward from the end."
+      },
+      {
+        "label": "llListReplaceList",
+        "function": "llListReplaceList",
+        "description": "Returns a copy of the list dest with the inclusive range from start to end removed, and the elements of src inserted in its place at start."
+      },
+      {
+        "label": "llListSort",
+        "function": "llListSort",
+        "description": "Returns a copy of the list src, sorted into blocks of stride in ascending order (if ascending is TRUE) or descending order (if FALSE). Only works if the first entry of each block shares the same datatype."
+      }
+    ]
+  },
+  "math": {
+    "summary": "Find numeric, random, statistical, and geometric operations.",
+    "tasks": [
+      {
+        "label": "llRound",
+        "function": "llRound",
+        "description": "Returns val rounded to the nearest integer. Halfway values are rounded toward infinity."
+      },
+      {
+        "label": "llFrand",
+        "function": "llFrand",
+        "description": "Returns a pseudo-random float in the range [0.0, mag) or (mag, 0.0] depending on the sign of mag. The value is inclusive of 0.0 but exclusive of mag."
+      },
+      {
+        "label": "llListStatistics",
+        "function": "llListStatistics",
+        "description": "Returns the numeric result of the statistical aggregate function operation (a LIST_STAT_* constant) on the numeric list src."
+      }
+    ]
+  },
+  "math_3d": {
+    "summary": "Work with distances, directions, and rotations in three dimensions.",
+    "tasks": [
+      {
+        "label": "llVecDist",
+        "function": "llVecDist",
+        "description": "Returns a float representing the undirected, non-negative distance between vectors vec_a and vec_b."
+      },
+      {
+        "label": "llVecNorm",
+        "function": "llVecNorm",
+        "description": "Returns the normalized unit vector pointing the same direction as vec. If <0, 0, 0>, return <0, 0, 0>."
+      },
+      {
+        "label": "llRotBetween",
+        "function": "llRotBetween",
+        "description": "Returns the shortest-path quaternion that rotates start_vec onto end_vec."
+      }
+    ]
+  },
+  "math_trig": {
+    "summary": "Calculate trigonometric values and work with angles.",
+    "tasks": [
+      {
+        "label": "llSin",
+        "function": "llSin",
+        "description": "Returns the sine of theta. Theta is in radians."
+      },
+      {
+        "label": "llCos",
+        "function": "llCos",
+        "description": "Returns the cosine of theta. Theta is in radians."
+      },
+      {
+        "label": "llAtan2",
+        "function": "llAtan2",
+        "description": "Returns the arctangent of y/x in radians, using the signs to determine the quadrant. Note the argument order: Y is the first parameter, X is the second parameter."
+      }
+    ]
+  },
+  "media": {
+    "summary": "Configure media on prims and parcels.",
+    "tasks": [
+      {
+        "label": "llSetPrimMediaParams",
+        "function": "llSetPrimMediaParams",
+        "description": "Sets the media parameters specified by params on the designated face of the prim. Returns an integer STATUS_* flag detailing success or failure."
+      },
+      {
+        "label": "llParcelMediaCommandList",
+        "function": "llParcelMediaCommandList",
+        "description": "Controls the playback of movies and other multimedia resources on a parcel or for an agent, using the PARCEL_MEDIA_COMMAND_* settings specified in commandList."
+      },
+      {
+        "label": "llSetParcelMusicURL",
+        "function": "llSetParcelMusicURL",
+        "description": "Sets the streaming audio (music) URL for the parcel containing the object. The object owner must match the landowner or land group."
+      }
+    ]
+  },
+  "money": {
+    "summary": "Configure payments and transfer Linden dollars.",
+    "tasks": [
+      {
+        "label": "llSetPayPrice",
+        "function": "llSetPayPrice",
+        "description": "Suggests default amounts for the pay text input field price and the four payment dialog quick_pay_buttons when an avatar pays this object."
+      },
+      {
+        "label": "llTransferLindenDollars",
+        "function": "llTransferLindenDollars",
+        "description": "Transfers amount of L$ from the script owner to the destination avatar, requiring the PERMISSION_DEBIT permission. Returns a key query handle matching the resulting transaction_result event."
+      },
+      {
+        "label": "llGiveMoney",
+        "function": "llGiveMoney",
+        "description": "Transfers the specified amount of L$ from the script owner to the destination avatar. Silently fails if the PERMISSION_DEBIT permission has not been granted. Returns 0 (use llTransferLindenDollars to match transactions to transaction_result events)."
+      }
+    ]
+  },
+  "movement": {
+    "summary": "Position, rotate, and move objects using scripted motion.",
+    "tasks": [
+      {
+        "label": "llSetRegionPos",
+        "function": "llSetRegionPos",
+        "description": "Tries to move the entire object so that its root prim is within 0.1m of the vector position (underground positions are set to ground level). Returns TRUE on success or FALSE on failure."
+      },
+      {
+        "label": "llSetRot",
+        "function": "llSetRot",
+        "description": "Sets the rotation of the prim to rot. If in a child prim, rot is treated as root-relative; if in the root prim of a non-physical object, rotates the entire object."
+      },
+      {
+        "label": "llSetKeyframedMotion",
+        "function": "llSetKeyframedMotion",
+        "description": "Smoothly moves a non-physical object between the positions, orientations, and times specified in the keyframes list, configured via options. Collisions with keyframed objects are ignored. An empty keyframes list terminates the motion."
+      }
+    ]
+  },
+  "notecard": {
+    "summary": "Read and search notecard text.",
+    "tasks": [
+      {
+        "label": "llGetNotecardLine",
+        "function": "llGetNotecardLine",
+        "description": "Asynchronously requests the line index line of the notecard name from the dataserver. Returns a key query handle for the dataserver event, which will return 'EOF' when reaching past the end of the notecard."
+      },
+      {
+        "label": "llGetNotecardLineSync",
+        "function": "llGetNotecardLineSync",
+        "description": "Synchronously reads the line index line of the notecard name from the region's cache, immediately returning its text without raising a dataserver event. Returns 'NAK' if not cached or 'EOF' if out of bounds."
+      },
+      {
+        "label": "llGetNumberOfNotecardLines",
+        "function": "llGetNumberOfNotecardLines",
+        "description": "Asynchronously requests the total line count of the notecard name. Returns a key query handle for the dataserver event."
+      }
+    ]
+  },
+  "object_animation": {
+    "summary": "Inspect and control object animations.",
+    "tasks": [
+      {
+        "label": "llGetObjectAnimationNames",
+        "function": "llGetObjectAnimationNames",
+        "description": "Returns a list of strings representing the names or UUIDs of all active animations currently playing on the object."
+      },
+      {
+        "label": "llStartObjectAnimation",
+        "function": "llStartObjectAnimation",
+        "description": "Starts the specified animation anim (inventory or built-in) on the rigged mesh object associated with the current script."
+      },
+      {
+        "label": "llStopObjectAnimation",
+        "function": "llStopObjectAnimation",
+        "description": "Stops the specified animation anim (inventory, built-in, or UUID) on the rigged mesh object associated with the current script."
+      }
+    ]
+  },
+  "object": {
+    "summary": "Query objects by key for properties, ownership, and geometry.",
+    "tasks": [
+      {
+        "label": "llGetObjectDetails",
+        "function": "llGetObjectDetails",
+        "description": "Returns a list containing the requested parameters of the specified avatar or object id, retrieved in the order requested by params."
+      },
+      {
+        "label": "llGetOwnerKey",
+        "function": "llGetOwnerKey",
+        "description": "Returns the key (UUID) of the owner of the prim specified by id."
+      },
+      {
+        "label": "llGetBoundingBox",
+        "function": "llGetBoundingBox",
+        "description": "Returns the bounding box of object (including any linked prims) relative to its root prim in local coordinates, formatted as [ (vector) min_corner, (vector) max_corner ]."
+      }
+    ]
+  },
+  "parcel": {
+    "summary": "Inspect parcel properties, resources, access, and environment.",
+    "tasks": [
+      {
+        "label": "llGetParcelDetails",
+        "function": "llGetParcelDetails",
+        "description": "Returns a list containing the requested parcel details specified by params (retrieved in the same order) for the parcel at the vector pos."
+      },
+      {
+        "label": "llGetParcelFlags",
+        "function": "llGetParcelFlags",
+        "description": "Returns an integer bitfield of parcel flags (PARCEL_FLAG_*) for the parcel at the position pos."
+      },
+      {
+        "label": "llGetParcelPrimCount",
+        "function": "llGetParcelPrimCount",
+        "description": "Returns an integer representing the total land impact of objects on the parcel at pos in the specified category. If sim_wide is TRUE, returns combined usage for all regional parcels owned by the parcel owner; if FALSE, returns usage for only the specified parcel."
+      }
+    ]
+  },
+  "parcel_appearance": {
+    "summary": "Read and update environment settings.",
+    "tasks": [
+      {
+        "label": "llGetEnvironment",
+        "function": "llGetEnvironment",
+        "description": "Returns a list containing the current environment parameters for the parcel or region at pos, retrieved in the order specified by params."
+      },
+      {
+        "label": "llSetEnvironment",
+        "function": "llSetEnvironment",
+        "description": "Overrides the environmental settings at position for a parcel (or region if position is <-1.0, -1.0, z>) using the parameters in params. Passing an empty params list removes previous overrides."
+      },
+      {
+        "label": "llReplaceEnvironment",
+        "function": "llReplaceEnvironment",
+        "description": "Replaces the environment on the parcel containing position (or the entire region if position is <-1.0, -1.0, -1.0>) for the specified track_no. Modifies day_length and day_offset if specified. Requires edit permissions on the parcel or estate management rights."
+      }
+    ]
+  },
+  "parcel_media": {
+    "summary": "Control parcel media playback and music.",
+    "tasks": [
+      {
+        "label": "llParcelMediaCommandList",
+        "function": "llParcelMediaCommandList",
+        "description": "Controls the playback of movies and other multimedia resources on a parcel or for an agent, using the PARCEL_MEDIA_COMMAND_* settings specified in commandList."
+      },
+      {
+        "label": "llParcelMediaQuery",
+        "function": "llParcelMediaQuery",
+        "description": "Queries the media properties of the parcel containing the script, returning a list of values in the order requested by query. Only works if the object is owned by the landowner or deeded to the land's group."
+      },
+      {
+        "label": "llSetParcelMusicURL",
+        "function": "llSetParcelMusicURL",
+        "description": "Sets the streaming audio (music) URL for the parcel containing the object. The object owner must match the landowner or land group."
+      }
+    ]
+  },
+  "particles": {
+    "summary": "Configure particle systems on the current prim or a link.",
+    "tasks": [
+      {
+        "label": "llParticleSystem",
+        "function": "llParticleSystem",
+        "description": "Creates or updates a particle system on the prim containing the script based on rules. An empty list removes the particle system."
+      },
+      {
+        "label": "llLinkParticleSystem",
+        "function": "llLinkParticleSystem",
+        "description": "Creates or updates a particle system on the linked prim link based on the list of rules. An empty list removes the particle system."
+      }
+    ]
+  },
+  "pathfinding": {
+    "summary": "Create characters and direct their navigation.",
+    "tasks": [
+      {
+        "label": "llCreateCharacter",
+        "function": "llCreateCharacter",
+        "description": "Converts the linkset containing the script into a pathfinding character entity (required to use pathfinding functions) using the specified options."
+      },
+      {
+        "label": "llNavigateTo",
+        "function": "llNavigateTo",
+        "description": "Directs a pathfinding character to navigate to the position pos (located in the current or adjacent regions) using the parameters specified in options."
+      },
+      {
+        "label": "llPatrolPoints",
+        "function": "llPatrolPoints",
+        "description": "Directs a pathfinding character to patrol sequentially through the coordinates specified in patrolPoints, configured by options."
+      },
+      {
+        "label": "llExecCharacterCmd",
+        "function": "llExecCharacterCmd",
+        "description": "Sends a command (specified by command) to the pathing system with options. Currently only supports stopping pathfinding or making the character jump."
+      }
+    ]
+  },
+  "permissions": {
+    "summary": "Request and inspect permissions for avatar and scripted actions.",
+    "tasks": [
+      {
+        "label": "llRequestPermissions",
+        "function": "llRequestPermissions",
+        "description": "Requests permissions (a bitfield specified by permissions) from the agent in the same region, calling run_time_permissions if granted. This call does not pause script execution."
+      },
+      {
+        "label": "llGetPermissions",
+        "function": "llGetPermissions",
+        "description": "Returns an integer bitfield representing the permissions (PERMISSION_*) currently granted to the script."
+      },
+      {
+        "label": "llGetPermissionsKey",
+        "function": "llGetPermissionsKey",
+        "description": "Returns the key (UUID) of the avatar that last granted or declined permissions to the script, or NULL_KEY if the permissions request was ignored or cancelled."
+      }
+    ]
+  },
+  "physics": {
+    "summary": "Work with forces, collisions, mass, and physical properties.",
+    "tasks": [
+      {
+        "label": "llApplyImpulse",
+        "function": "llApplyImpulse",
+        "description": "Applies a linear impulse (momentum) to a physical object. If local is TRUE, the impulse is applied in local coordinates; otherwise, it is applied in global region coordinates."
+      },
+      {
+        "label": "llSetForce",
+        "function": "llSetForce",
+        "description": "Applies a constant linear force to a physical object. If local is TRUE, force is applied relative to local coordinates; if FALSE, applied relative to region coordinates."
+      },
+      {
+        "label": "llGetPhysicsMaterial",
+        "function": "llGetPhysicsMaterial",
+        "description": "Returns a list of the format [float gravity_multiplier, float restitution, float friction, float density] detailing the physical characteristics of the object."
+      },
+      {
+        "label": "llCastRay",
+        "function": "llCastRay",
+        "description": "Casts a ray into the physics world from start to end and reports collision data for intersections with objects based on options. Returns a list of strided values [UUID_1, {link_number_1}, hit_position_1, {hit_normal_1}, ..., status_code]. A negative status_code indicates an error; otherwise, it represents the number of hits."
+      }
+    ]
+  },
+  "prim_appearance": {
+    "summary": "Change colors, textures, materials, and visual properties.",
+    "tasks": [
+      {
+        "label": "llSetLinkPrimitiveParamsFast",
+        "function": "llSetLinkPrimitiveParamsFast",
+        "description": "Sets primitive parameters for the linked prim link according to rules with no built-in script sleep delay."
+      },
+      {
+        "label": "llSetRenderMaterial",
+        "function": "llSetRenderMaterial",
+        "description": "Applies material (UUID or inventory name) to face of the prim. Note: This clears most PRIM_GLTF_* properties on the face except for repeats, offsets, and rotation."
+      },
+      {
+        "label": "llSetLinkGLTFOverrides",
+        "function": "llSetLinkGLTFOverrides",
+        "description": "Sets or removes individual GLTF override parameters specified by params on face of the linked prim link."
+      }
+    ]
+  },
+  "prim_inventory": {
+    "summary": "Inspect, transfer, remove, and rez object inventory.",
+    "tasks": [
+      {
+        "label": "llGetInventoryNumber",
+        "function": "llGetInventoryNumber",
+        "description": "Returns the count of items of the specified type (INVENTORY_*) in the prim's inventory."
+      },
+      {
+        "label": "llGetInventoryName",
+        "function": "llGetInventoryName",
+        "description": "Returns the name of the inventory item of the specified type (INVENTORY_*) at the specified inventory index."
+      },
+      {
+        "label": "llGiveInventory",
+        "function": "llGiveInventory",
+        "description": "Gives the specified inventory item to the target, as permitted by the permissions system. The target can be any agent or an object located in the same region."
+      },
+      {
+        "label": "llRezObject",
+        "function": "llRezObject",
+        "description": "Instantiates the named inventory object with the bounding box centered at pos with velocity vel and rotation rot, passing param as the on_rez start parameter. The vel parameter is ignored if the rezzed object is non-physical."
+      }
+    ]
+  },
+  "prim_media": {
+    "summary": "Read and configure media on prim faces.",
+    "tasks": [
+      {
+        "label": "llGetPrimMediaParams",
+        "function": "llGetPrimMediaParams",
+        "description": "Returns a list containing the media parameters of the specified face, retrieved in the order requested by params. Returns an empty list if no media exists on the face."
+      },
+      {
+        "label": "llSetPrimMediaParams",
+        "function": "llSetPrimMediaParams",
+        "description": "Sets the media parameters specified by params on the designated face of the prim. Returns an integer STATUS_* flag detailing success or failure."
+      },
+      {
+        "label": "llClearPrimMedia",
+        "function": "llClearPrimMedia",
+        "description": "Deletes the media and clears all parameters from the specified face. Returns an integer STATUS_* flag detailing the success or failure of the operation."
+      }
+    ]
+  },
+  "prim_properties": {
+    "summary": "Read and update object identity and prim settings.",
+    "tasks": [
+      {
+        "label": "llGetObjectName",
+        "function": "llGetObjectName",
+        "description": "Returns a string containing the name of the specific prim containing the script."
+      },
+      {
+        "label": "llSetObjectDesc",
+        "function": "llSetObjectDesc",
+        "description": "Sets the description of the prim containing the script to description (limited to 127 characters)."
+      },
+      {
+        "label": "llSetLinkPrimitiveParamsFast",
+        "function": "llSetLinkPrimitiveParamsFast",
+        "description": "Sets primitive parameters for the linked prim link according to rules with no built-in script sleep delay."
+      }
+    ]
+  },
+  "prim": {
+    "summary": "Read and change properties of the prim containing the script.",
+    "tasks": [
+      {
+        "label": "llGetPos",
+        "function": "llGetPos",
+        "description": "Returns a vector representing the current position of the object in region coordinates."
+      },
+      {
+        "label": "llGetRot",
+        "function": "llGetRot",
+        "description": "Returns a rotation representing the prim's orientation relative to the region's axes."
+      },
+      {
+        "label": "llSetScale",
+        "function": "llSetScale",
+        "description": "Sets the physical scale (dimensions) of the prim containing the script to size."
+      }
+    ]
+  },
+  "quaternion": {
+    "summary": "Create, convert, and inspect rotations.",
+    "tasks": [
+      {
+        "label": "llEuler2Rot",
+        "function": "llEuler2Rot",
+        "description": "Returns the quaternion representation of the Euler angles (in radians) within vec."
+      },
+      {
+        "label": "llRot2Euler",
+        "function": "llRot2Euler",
+        "description": "Returns a vector of Euler angles (roll, pitch, yaw) of q. The angles will be in radians."
+      },
+      {
+        "label": "llAxisAngle2Rot",
+        "function": "llAxisAngle2Rot",
+        "description": "Returns the rotation that rotates angle radians around the axis vector."
+      }
+    ]
+  },
+  "region": {
+    "summary": "Inspect region information, performance, terrain, and environment.",
+    "tasks": [
+      {
+        "label": "llGetRegionName",
+        "function": "llGetRegionName",
+        "description": "Returns a string containing the name of the current region."
+      },
+      {
+        "label": "llGetRegionFlags",
+        "function": "llGetRegionFlags",
+        "description": "Returns an integer bitfield representing the region flags (REGION_FLAG_*) currently enabled for the region containing the object."
+      },
+      {
+        "label": "llGetRegionTimeDilation",
+        "function": "llGetRegionTimeDilation",
+        "description": "Returns a float representing the current physics time dilation of the region, ranging from 0.0 (full dilation / slow) to 1.0 (no dilation / real-world speed)."
+      }
+    ]
+  },
+  "region_appearance": {
+    "summary": "Inspect region environment and avatar environment settings.",
+    "tasks": [
+      {
+        "label": "llGetRegionSunDirection",
+        "function": "llGetRegionSunDirection",
+        "description": "Returns a normalized vector representing the current direction of the region's sun, taking altitude into account."
+      },
+      {
+        "label": "llGetRegionMoonDirection",
+        "function": "llGetRegionMoonDirection",
+        "description": "Returns a normalized vector representing the current direction of the region's moon, taking altitude into account."
+      },
+      {
+        "label": "llSetAgentEnvironment",
+        "function": "llSetAgentEnvironment",
+        "description": "Sets an individual agent's environmental settings using the attributes in params over a duration of transition seconds. Must be used as part of an experience; passing an empty list removes overrides."
+      }
+    ]
+  },
+  "rez": {
+    "summary": "Create and remove in-world objects and read rez parameters.",
+    "tasks": [
+      {
+        "label": "llRezObject",
+        "function": "llRezObject",
+        "description": "Instantiates the named inventory object with the bounding box centered at pos with velocity vel and rotation rot, passing param as the on_rez start parameter. The vel parameter is ignored if the rezzed object is non-physical."
+      },
+      {
+        "label": "llRezObjectWithParams",
+        "function": "llRezObjectWithParams",
+        "description": "Instantiates the named inventory object (defaulting to the rezzing prim's position unless REZ_POS is specified) using the initial set of parameters specified in options. Returns the key of the rezzed object, or a blank key on failure."
+      },
+      {
+        "label": "llGetStartParameter",
+        "function": "llGetStartParameter",
+        "description": "Returns an integer representing the start/rez parameter passed to the object on creation (returns 0 if rezzed by an agent)."
+      },
+      {
+        "label": "llDie",
+        "function": "llDie",
+        "description": "Deletes the entire object containing the script (the object does not go to inventory). Use llBreakLink first to delete only a single prim."
+      }
+    ]
+  },
+  "script": {
+    "summary": "Inspect and manage script execution, memory, and timing.",
+    "tasks": [
+      {
+        "label": "llGetFreeMemory",
+        "function": "llGetFreeMemory",
+        "description": "Returns an integer representing the number of free bytes of memory currently available to the script."
+      },
+      {
+        "label": "llGetTime",
+        "function": "llGetTime",
+        "description": "Returns a float representing the elapsed script time in seconds with subsecond precision (since the script started, was reset, or since the last call to llResetTime or llGetAndResetTime)."
+      },
+      {
+        "label": "llResetScript",
+        "function": "llResetScript",
+        "description": "Resets the current script."
+      }
+    ]
+  },
+  "script_communication": {
+    "summary": "Exchange data between scripts and external services.",
+    "tasks": [
+      {
+        "label": "llMessageLinked",
+        "function": "llMessageLinked",
+        "description": "Triggers a link_message event, sending num, str, and id to the scripts in the prim(s) specified by link to allow scripts within the same object to communicate."
+      },
+      {
+        "label": "llHTTPRequest",
+        "function": "llHTTPRequest",
+        "description": "Sends an HTTP request to the specified url containing body and configured via parameters. Raises an http_response event and returns a key query handle identifying the request."
+      },
+      {
+        "label": "llEmail",
+        "function": "llEmail",
+        "description": "Sends an email with the given destination address, subject, and body msg. The email will be sent from `{ll.GetKey()}@lsl.secondlife.com`. This can be used for script communication; see llGetNextEmail()"
+      }
+    ]
+  },
+  "sensor": {
+    "summary": "Detect nearby entities, cast rays, and configure collision handling.",
+    "tasks": [
+      {
+        "label": "llSensor",
+        "function": "llSensor",
+        "description": "Performs a single scan from the prim's forward vector for name and id of type within radius meters and arc radians. Results trigger a sensor or no_sensor event. Passing empty filters (blank name, 0 type, or NULL_KEY id) disables that filter."
+      },
+      {
+        "label": "llSensorRepeat",
+        "function": "llSensorRepeat",
+        "description": "Sets up a repeating periodic scan every rate seconds for name and id of type within radius meters and arc radians of the forward vector. Results trigger sensor or no_sensor events."
+      },
+      {
+        "label": "llCastRay",
+        "function": "llCastRay",
+        "description": "Casts a ray into the physics world from start to end and reports collision data for intersections with objects based on options. Returns a list of strided values [UUID_1, {link_number_1}, hit_position_1, {hit_normal_1}, ..., status_code]. A negative status_code indicates an error; otherwise, it represents the number of hits."
+      }
+    ]
+  },
+  "sit": {
+    "summary": "Configure sit targets and inspect seated avatars.",
+    "tasks": [
+      {
+        "label": "llSitTarget",
+        "function": "llSitTarget",
+        "description": "Sets the sit target position (offset) and rotation (rot) relative to the prim's position and orientation. Clears the sit target if offset is ZERO_VECTOR."
+      },
+      {
+        "label": "llLinkSitTarget",
+        "function": "llLinkSitTarget",
+        "description": "Sets the sit target position (offset) and orientation (rot) for the linked prim link, relative to the prim's own position and rotation. Clear by setting offset to <0.0, 0.0, 0.0>."
+      },
+      {
+        "label": "llAvatarOnSitTarget",
+        "function": "llAvatarOnSitTarget",
+        "description": "Returns the UUID of the avatar seated on the prim's sit target (defined via llSitTarget), or NULL_KEY if no avatar is sitting there or the prim lacks a sit target."
+      }
+    ]
+  },
+  "sound": {
+    "summary": "Play, loop, and control sounds on objects and links.",
+    "tasks": [
+      {
+        "label": "llPlaySound",
+        "function": "llPlaySound",
+        "description": "Plays the specified sound once at volume, attached to the object. Only one sound can be attached to a prim at a time; new sounds or calling llStopSound stops previous playback. A second call with the same sound adjusts the volume without restarting it."
+      },
+      {
+        "label": "llLoopSound",
+        "function": "llLoopSound",
+        "description": "Plays the attached sound looping indefinitely at the specified volume. Only one sound can be attached to a prim at a time; new loops adjust the volume of the currently playing sound without restarting it."
+      },
+      {
+        "label": "llStopSound",
+        "function": "llStopSound",
+        "description": "Stops playback of the currently playing attached sound."
+      }
+    ]
+  },
+  "string": {
+    "summary": "Search, extract, construct, and transform text.",
+    "tasks": [
+      {
+        "label": "llGetSubString",
+        "function": "llGetSubString",
+        "description": "Returns a copy of the substring from src within the inclusive codepoint range start_index..end_index. Negative indices count backward from the end of the string. If start_index is greater than end_index, the substring is the excluded range."
+      },
+      {
+        "label": "llSubStringIndex",
+        "function": "llSubStringIndex",
+        "description": "Returns the codepoint index of the first occurrence of pattern inside the string source. Returns -1 if not found. No regex."
+      },
+      {
+        "label": "llStringTrim",
+        "function": "llStringTrim",
+        "description": "Returns a copy of the string src with leading, trailing, or both types of whitespace (including spaces, tabs, and line feeds) eliminated, according to the specified trim type."
+      },
+      {
+        "label": "llToLower",
+        "function": "llToLower",
+        "description": "Returns a lowercase copy of the string src. Converts all unicode characters, not just ASCII."
+      }
+    ]
+  },
+  "teleport": {
+    "summary": "Move avatars between locations or offer a map destination.",
+    "tasks": [
+      {
+        "label": "llTeleportAgent",
+        "function": "llTeleportAgent",
+        "description": "Teleports the owning agent (who must grant PERMISSION_TELEPORT) to a landmark in the object's inventory. If landmark is empty, teleports them to position within the current region. Upon arrival, the agent is turned to face look_at. Can only teleport the owner."
+      },
+      {
+        "label": "llTeleportAgentGlobalCoords",
+        "function": "llTeleportAgentGlobalCoords",
+        "description": "Teleports the owning agent (who must grant PERMISSION_TELEPORT) to region_coordinates within a target region specified by global_coordinates. Upon landing, the agent faces the direction look_at. Can only teleport the owner."
+      },
+      {
+        "label": "llMapDestination",
+        "function": "llMapDestination",
+        "description": "Opens the world map for the avatar touching or wearing the object, centered on simname with pos highlighted. Only works for attached scripts or during touch events. Note: look_at currently has no effect."
+      }
+    ]
+  },
+  "time": {
+    "summary": "Read clocks, dates, timestamps, and script timers.",
+    "tasks": [
+      {
+        "label": "llGetTimestamp",
+        "function": "llGetTimestamp",
+        "description": "Returns a string containing the current date and time in the UTC time zone formatted as an ISO 8601 timestamp ('YYYY-MM-DDThh:mm:ss.ff..fZ')."
+      },
+      {
+        "label": "llGetUnixTime",
+        "function": "llGetUnixTime",
+        "description": "Returns an integer representing the current Unix timestamp (the number of seconds elapsed since 00:00:00 Jan 1, 1970 UTC)."
+      },
+      {
+        "label": "llSetTimerEvent",
+        "function": "llSetTimerEvent",
+        "description": "Sets a timer to trigger a timer event periodically every sec seconds. Passing 0.0 stops further timer events."
+      }
+    ]
+  },
+  "touch": {
+    "summary": "Inspect touch positions, faces, and texture coordinates.",
+    "tasks": [
+      {
+        "label": "llDetectedTouchPos",
+        "function": "llDetectedTouchPos",
+        "description": "Returns the vector position where the object was touched (specified by index) in region coordinates, or in screen-space coordinates if the object is attached as a HUD."
+      },
+      {
+        "label": "llDetectedTouchFace",
+        "function": "llDetectedTouchFace",
+        "description": "Returns the integer index of the face clicked by the avatar in the touch event specified by index."
+      },
+      {
+        "label": "llDetectedTouchUV",
+        "function": "llDetectedTouchUV",
+        "description": "Returns the texture coordinates (<u, v, 0.0>) where the prim was touched, specified by index. X and Y contain the horizontal (u) and vertical (v) texture coordinates, typically in the interval [0.0, 1.0] (affected by repeats and rotation). Returns TOUCH_INVALID_TEXCOORD if coordinates cannot be determined."
+      }
+    ]
+  },
+  "uuid": {
+    "summary": "Obtain and work with keys identifying in-world entities.",
+    "tasks": [
+      {
+        "label": "llGetKey",
+        "function": "llGetKey",
+        "description": "Returns the key (UUID) of the prim containing the script."
+      },
+      {
+        "label": "llGenerateKey",
+        "function": "llGenerateKey",
+        "description": "Generates and returns a unique versioned UUID key (utilizing SHA-1 hashing). Due to being versioned, it will not return NULL_KEY; however, the exact UUID version is an implementation detail that should not be relied upon."
+      },
+      {
+        "label": "llDetectedKey",
+        "function": "llDetectedKey",
+        "description": "Returns the key (UUID) of the detected object or avatar specified by number, or NULL_KEY if number is not a valid index."
+      }
+    ]
+  },
+  "user_interface": {
+    "summary": "Present dialogs, text prompts, links, and map destinations.",
+    "tasks": [
+      {
+        "label": "llDialog",
+        "function": "llDialog",
+        "description": "Shows a dialog box on the screen of the specified agent, displaying msg along with up to 12 choice buttons. Clicking a button chats its label on channel. The chat originates at the object's position, but uses the agent's name and UUID, so it can be heard as long as the agent is still in the region."
+      },
+      {
+        "label": "llTextBox",
+        "function": "llTextBox",
+        "description": "Opens an input text box dialog displaying msg to the agent. Submitting text chats the input string on channel as if said by the agent. The chat originates at the object's position, but uses the agent's name and UUID, so it can be heard as long as the agent is still in the region."
+      },
+      {
+        "label": "llLoadURL",
+        "function": "llLoadURL",
+        "description": "Shows a dialog box displaying message to the avatar avatar offering to open the specified url. Clicking yes launches the URL in their default web browser."
+      }
+    ]
+  },
+  "vector": {
+    "summary": "Measure and normalize vectors and derive directions from rotations.",
+    "tasks": [
+      {
+        "label": "llVecMag",
+        "function": "llVecMag",
+        "description": "Returns the magnitude (geometric length) of vec."
+      },
+      {
+        "label": "llVecNorm",
+        "function": "llVecNorm",
+        "description": "Returns the normalized unit vector pointing the same direction as vec. If <0, 0, 0>, return <0, 0, 0>."
+      },
+      {
+        "label": "llRot2Fwd",
+        "function": "llRot2Fwd",
+        "description": "Returns the unit vector pointing toward positive X (forward) in the coordinate space of rotation q. Equivalent to <1, 0, 0> * q."
+      }
+    ]
+  },
+  "vehicles": {
+    "summary": "Configure vehicle type, parameters, and behavior flags.",
+    "tasks": [
+      {
+        "label": "llSetVehicleType",
+        "function": "llSetVehicleType",
+        "description": "Sets the vehicle physics preset type to one of the default vehicle types."
+      },
+      {
+        "label": "llSetVehicleFloatParam",
+        "function": "llSetVehicleFloatParam",
+        "description": "Sets the specified vehicle float parameter param to value."
+      },
+      {
+        "label": "llSetVehicleVectorParam",
+        "function": "llSetVehicleVectorParam",
+        "description": "Sets the specified vehicle vector parameter param to vec."
+      },
+      {
+        "label": "llSetVehicleFlags",
+        "function": "llSetVehicleFlags",
+        "description": "Enables the vehicle flags specified in the Flags bitmask."
+      }
+    ]
+  },
+  "web": {
+    "summary": "Send HTTP requests, handle inbound requests, and encode URLs.",
+    "tasks": [
+      {
+        "label": "llHTTPRequest",
+        "function": "llHTTPRequest",
+        "description": "Sends an HTTP request to the specified url containing body and configured via parameters. Raises an http_response event and returns a key query handle identifying the request."
+      },
+      {
+        "label": "llRequestSecureURL",
+        "function": "llRequestSecureURL",
+        "description": "Asynchronously requests one secure HTTPS (SSL, port 12043) URL for use by this object, triggering an http_request event. Returns a key query handle."
+      },
+      {
+        "label": "llHTTPResponse",
+        "function": "llHTTPResponse",
+        "description": "Responds to the incoming HTTP request identified by request_id with the HTTP status code status and the payload body."
+      },
+      {
+        "label": "llEscapeURL",
+        "function": "llEscapeURL",
+        "description": "Returns a string representing the escaped/encoded version of url, replacing spaces with '%20' and non-alphanumeric characters with their '%xx' hexadecimal UTF-8 equivalent."
+      }
+    ]
+  }
+}

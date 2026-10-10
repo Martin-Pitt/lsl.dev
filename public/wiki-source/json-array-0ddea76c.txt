@@ -1,0 +1,67 @@
+{{LSL Constant
+|name=JSON_ARRAY
+|type=string
+|value="﷒"
+|dvalue={{HoverText|"﷒"|Special Unicode Character&#x000d;Unicode:&#x0009;U+FDD2&#x000d;HTML:&#x0009;&amp;#xFDD2;&#x000d;llUnescapeUrl({{String|%EF%B7%92}});}}
+|desc=Used with the [[llList2Json]] function to indicate that the provided list (which may be empty) is to be used to encode and return a string serialization of a Json array.
+
+Also a possible return value for the [[llJsonValueType]] function that indicates the Json data type of at the specifier location within a given Json text is, in fact, a Json array.
+|constants={{LSL Constants/JSON}}
+|examples=Showing usage to form a Json array:
+<source lang="lsl2">string jsonText;
+
+default
+{
+	state_entry()
+	{
+		jsonText = llList2Json(JSON_ARRAY, ["A", 3, "B", <1.0,1.0,1.0>, "C", "A phrase", "D", PI]);
+	}
+	touch_start(integer total_number)
+	{
+		// In the resulting Json array, all Values are separated by a comma (,).
+		llOwnerSay(jsonText); //  ["A",3,"B","<1.000000, 1.000000, 1.000000>","C","A phrase","D",3.141593]
+	}
+}</source>
+
+Showing usage to determine if a Value within a Json text is an array:
+<source lang="lsl2">string jsonText;
+
+default
+{
+	state_entry()
+	{
+		// Set jsonText to [3,{"A":77,"B":66},"A phrase"]
+		// A Json array whose second element is a Json object
+		jsonText = "[3,{\"A\":77,\"B\":66},\"A phrase\"]";
+		llOwnerSay(jsonText);
+	}
+	touch_start(integer total_number)
+	{
+		// Test the entirety of the Json text to see if it's an array
+		// Note use of the empty list for this
+		if (llJsonValueType(jsonText, []) == JSON_ARRAY)
+		{
+			llOwnerSay("The supplied string is a Json array."); // TRUE
+		} else {
+			llOwnerSay("The supplied string is not a Json array.");
+		}
+
+		// Test second element of the array
+		if (llJsonValueType(jsonText, [1]) == JSON_ARRAY)
+		{
+			llOwnerSay("The second element of the array is a Json array.");
+		} else {
+			llOwnerSay("The second element of the array is not a Json array."); // TRUE
+		}
+	}
+}</source>
+|functions=
+{{LSL DefineRow||[[llList2Json]]|}}
+{{LSL DefineRow||[[llJsonValueType]]|}}
+|events
+|cat1=JSON
+|cat2
+|cat3
+|cat4
+|self
+}}

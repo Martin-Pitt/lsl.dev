@@ -1,0 +1,79 @@
+{{LSL_Function
+|func_id=???|func_sleep=0.0|func_energy=???
+|func=llSetMemoryLimit
+|p1_type=integer|p1_name=limit
+|return_type=integer|return_subtype=boolean
+|func_desc=Request {{LSLP|limit}} bytes to be reserved for this script.
+|Return_text=[[TRUE]] if the memory limit was successfully set (or [[FALSE]] if not).
+|func_footer
+|spec=
+This function's behavior is dependent upon the VM the script is using. [[#Mono|Mono]] is the new VM, [[#LSO|LSO]] is the old VM.
+
+;Mono:Sets the memory limit for the script.
+* The memory limit can be set up to 64k.
+* The memory limit can not be set lower than the memory currently in use by the script.
+* All new scripts start with a limit of 64k
+* Mono scripts compiled before this function was introduced continue to use the 64k limit.
+* A lower limit will effect the amount of memory reported in the viewer UI and by [[llGetObjectDetails]].
+* The memory limit is not the amount of real memory actually used by the script, just the upper limit on it.
+
+;LSO:Has no effect on LSO scripts which will always use exactly 16k
+|caveats=
+;Mono:When '''''n''''' is too small, llSetMemoryLimit('''''n''''') is ignored and the memory limit is not changed
+|examples=
+<source lang="lsl2">
+// Memory-walkthrough by Daemonika Nightfire (daemonika.nightfire)
+
+integer limit = 20000; // <- bytes
+
+Test()
+{
+    llSetText("Limited Memory " + (string)llGetMemoryLimit() +
+              "\nUsed Memory " + (string)llGetUsedMemory() +
+              "\nFree Memory " + (string)llGetFreeMemory(),<1,1,1>,1);
+}
+
+default
+{
+    state_entry()
+    {
+        llSetMemoryLimit(limit);
+        
+        llScriptProfiler(PROFILE_SCRIPT_MEMORY);
+        Test();
+        llScriptProfiler(PROFILE_NONE);
+        
+        llSay(0,"This script used at most " + (string)llGetSPMaxMemory() + " bytes of memory during Test.");
+    }
+}
+
+// Result:
+        
+// Floating Text:
+// Limited Memory 20000
+// Used Memory 4972
+// Free Memory 15100
+        
+// Chat:
+// [05:11] Object: This script used at most 4972 bytes of memory during Test.
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llScriptProfiler]]|}}
+{{LSL DefineRow||[[llGetSPMaxMemory]]|}}
+{{LSL DefineRow||[[llGetMemoryLimit]]|}}
+{{LSL DefineRow||[[llGetFreeMemory]]|}}
+{{LSL DefineRow||[[llGetUsedMemory]]|}}
+{{LSL DefineRow||[[llGetObjectDetails]]|}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|history=*Scheduled for [[Beta/Magnum|RC Magnum]] channel, week of August 3, 2011.
+|lso
+|cat1=Script
+|cat2=Memory
+|cat3=Script Profiler
+|cat4
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/11#11.08.10.238207 | 10/08/2011 ]]
+}}

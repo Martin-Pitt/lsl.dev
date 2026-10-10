@@ -1,0 +1,55 @@
+{{LSL Header}}{{#vardefine:p_channel_desc|channel number the script is listening on
+}}{{#vardefine:p_message_desc|message to display
+}}
+
+A simple script thats lets anyone say a messages over a dialog instead of using [[llSay]] or [[llShout]].
+
+===Usage: /{{LSL Param|channel}} dialog {{LSL Param|message}}===
+{|
+{{LSL DefineRow|integer|channel|{{#var:p_channel_desc}}}}
+{{LSL DefineRow|string|message|{{#var:p_message_desc}}}}
+|}
+
+<source lang="lsl2">
+integer channel = 1000;
+
+string token;
+string data;
+
+default
+{
+    state_entry()
+    {
+        llListen(channel, "", "", "");
+    }
+    
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+        
+    sensor(integer num_detected)
+    { 
+        if(token == "dialog")
+        {
+            integer i = 0;
+            for(; i < num_detected; ++i)
+                llDialog(llDetectedKey(i), data, [], channel );
+        }
+    }
+    
+    listen(integer chan, string name, key id, string command)
+    {
+        integer s = llSubStringIndex(command," ");
+        if (~s)
+        {
+            token = llDeleteSubString(command, s, -1);
+            data = llDeleteSubString(command, 0, s);
+            if(token == "dialog")
+                llSensor( "", "", AGENT, 32, PI );
+        }
+    }
+}
+</source>
+
+{{LSLC|Examples}}

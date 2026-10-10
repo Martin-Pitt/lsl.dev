@@ -1,0 +1,48 @@
+<includeonly><!--
+   # Using a sub-template, so that we never have more than one call to the {{Wikipedia|WP:EXPENSIVE}} function {{PAGESINCATEGORY}}
+   #
+   # TOC, depending on category size
+   # <= 100 pages → no TOC
+   # 101–1200 pages → {{Category TOC}}
+   # > 1200 pages → {{Large category TOC}}
+
+ ###########################################################################
+ # NOTE: The sort key {{PAGENAME}} is used on all the tracking categories  #
+ #       to override any {{DEFAULTSORT}} used in the category              #
+ ###########################################################################
+
+ -->{{#ifexpr: {{{pagecount}}} > 1200 <!--
+    -->|<!--
+          # > 1200, so large TOC
+        -->{{Large category TOC<!--
+            -->|CatAutoTOC=yes<!--
+            -->|pagecount={{{pagecount}}}<!--
+        -->}}<!--
+        -->[[Category:CatAutoTOC generates Large category TOC|{{PAGENAME}}]]<!--
+    -->|<!--
+          # < 1200, so check again
+        -->{{#ifexpr: {{{pagecount}}} > 100<!--
+            -->|<!--
+                 # > 100, so std TOC
+                -->{{Category TOC<!--
+                    -->|pagecount={{{pagecount}}}<!--
+                    -->|CatAutoTOC=yes<!--
+                    -->|align     = {{#if: {{{align|}}} | {{{align}}} |left}}<!--
+                    -->|top       = {{#if: {{{top|}}} | {{{top}}} |yes}}<!--
+                    -->|numerals  = {{#if: {{{numerals|}}} | {{{numerals}}} |group}}<!--
+                    -->|uppercase = {{#if: {{{uppercase|}}} | {{{uppercase}}} |yes}}<!--
+                    -->|lowercase = {{#if: {{{lowercase|}}} | {{{lowercase}}} |no}}<!--
+                -->}}<!--
+                -->[[Category:CatAutoTOC generates standard Category TOC|{{PAGENAME}}]]<!--
+            -->|<!--
+                 # <= 100, so no TOC
+                -->[[Category:CatAutoTOC generates no TOC|{{PAGENAME}}]]<!--
+        -->}}<!--
+ -->}}<!--
+ -->{{#ifeq: {{{pagecount}}} | 0 <!--
+     -->|[[Category:CatAutoTOC on pages where PAGESINCATEGORY returns zero|{{PAGENAME}}]]<!--
+ -->}}<!--
+-->{{clear}}</includeonly><noinclude>
+{{Documentation|Template:{{ROOTPAGENAME}}/doc}}
+[[Category:CatAutoTOC]]
+</noinclude>

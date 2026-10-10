@@ -1,0 +1,163 @@
+{{Help}}{{LSL Header|ml=*}} __NOTOC__
+
+The Combat2 Project is an enhancement to the Linden Combat system.
+
+This is not meant to be a complete combat system on its own but to provide the tools that allow you to do that.
+
+In Second Life there are a host of combat communities scattered across the grid. These communities use a wide variety of combat systems, HUDs and weapon systems. Some are completely custom, relying on scripts to arbitrate health and damage, while others are based on the Linden Lab Combat System (LLCS). See [[Combat]] for more.
+
+The goal of the Combat2 project is to provide a coherent set of tools and systems that allow the residents to create complex and compelling combat systems using a common and easy to use framework.
+
+
+{|cellspacing="0"
+|valign="top" width="50%"|
+
+<div id="box" style="width:95%;">
+<h2>Introduced are new concepts</h2>
+<div style="padding: 0.5em">
+* Can apply damage [[llDamage|directly]]
+* Damage can have a [[Damage Types|damage type]] associated to it
+* Damage events
+** If a script (object, vehicle or attachment) has a [[on_damage|damage event]] this will be called first before [[final_damage|final damage]] is applied
+** Scripts may [[llAdjustDamage|modify the actual amount of damage]] in a damage event if the region allows it
+* [[PRIM_HEALTH|Objects have a health property]]
+** Scripts have to manage this property themselves; Unlike agents the simulator will not apply damage to the object health and instead only trigger damage and final damage events
+** Sensors can scan for [[DAMAGEABLE|damageable]] objects and avatars that are not on a safe parcel
+* [[Combat Log]] has been added which allows for auditing and other usecases
+** Records all damage events, damage adjustments and kills in a [[COMBAT_CHANNEL|combat-specific public channel]]
+** System generated messages by a [[COMBAT_LOG_ID|specific ID]] that scripts may filter to
+** Scripts may write to this channel if not restricted so by the region
+* New region-wide settings, region owners may:
+** Throttle damage per second dealt to a target by a single source
+** Limit damage to a target by a maximum per a single event
+** Select a number of options as to what happens when agent health drops to 0 such as:
+**# Teleport home (same as old LLCS)
+**# Teleport to region's telehub
+**# Teleport to parcel's landing point
+**# No action -- Which can allow a custom scripted respawn system to act instead for example
+** Set a brief period of invulnerability, during which agents may neither deal nor receive damage
+** Whether health is reset to 100% on death
+** Tweak the speed of health regeneration per second or disable health regeneration
+** Whether scripts are allowed to adjust damage or write to the combat log
+** Currently these new settings are available through the [[Region Debug Console]]
+</div>
+</div>
+
+
+|valign="top" align="left" width="50%"|
+
+<div id="box" style="width:95%;">
+<h2>New Functions and Events</h2>
+<div style="padding: 0.5em">
+These are the functions and events directly related to Combat2 as well as new related functions
+{|
+{{LSL DefineRow|key|[[llRezObjectWithParams]](string inventory, list params)|}}
+{{LSL DefineRow|void|[[llAdjustDamage]](integer number, float new_damage)|}}
+{{LSL DefineRow|void|[[llDamage]](key target, float damage, integer damage_type)|}}
+{{LSL DefineRow|list|[[llDetectedDamage]](integer number)|}}
+{{LSL DefineRow|key|[[llDetectedRezzer]](integer number)|}}
+{{LSL DefineRow|float|[[llGetHealth]](key id)|}}
+{{LSL DefineRow|event|[[on_damage]](integer num_detected)|}}
+{{LSL DefineRow|event|[[final_damage]](integer num_detected)|}}
+{{LSL DefineRow|event|[[on_death]]()|}}
+{{LSL DefineRow|string|[[llGetStartString]]()|}}
+{{LSL DefineRow|string|[[llDerezObject]](key id, integer flag)|}}
+|}
+</div>
+</div>
+
+<div id="box" style="width:95%;">
+<h2>[[Combat Log]]</h2>
+<div style="padding: 0.5em">System-generated log messages are collected and sent into the <code>COMBAT_CHANNEL</code> in a JSON format.</div>
+</div>
+
+<div id="box" style="width:95%;">
+<h2>[[Damage Types]]</h2>
+<div style="padding: 0.5em">The damage amount can be supported via a damage type field, which can match a default DAMAGE_TYPE_* or a custom integer; Additionally the field may be repurposed.</div>
+</div>
+
+|}
+
+
+<div id="box" style="width:95%;">
+<h2>Scripting Details</h2>
+<div style="padding: 0.5em">
+Here are the new functions and events in detail
+{|
+{{LSL DefineRow|key|[[llRezObjectWithParams]](string inventory, list params)|New function for rezzing objects with a variety of parameters, particularly useful for avoiding the overhead of starting a script for each bullet}}
+{{LSL DefineRow|void|[[llAdjustDamage]](integer number, float new_damage)|Modifies the amount of damage that will be applied by the current [[on_damage]] event after it has completed processing}}
+{{LSL DefineRow|void|[[llDamage]](key target, float damage, integer damage_type)|Delivers damage to tasks and agent in the same region with an [[:Category:LSL_Combat2#Damage_Types|integer describing the type of damage]]. Negative damage can be used to heal instead. You can also go above 100.0 damage unlike collideable damage}}
+{{LSL DefineRow|list|[[llDetectedDamage]](integer number)|Returns a list describing a single damage event within an [[on_damage]] event}}
+{{LSL DefineRow|key|[[llDetectedRezzer]](integer number)|Returns a key that is the UUID of the object or avatar that rezzed the detected object}}
+{{LSL DefineRow|float|[[llGetHealth]](key id)|Returns the current health of an avatar or object in the region}}
+{{LSL DefineRow|event|[[on_damage]](integer num_detected)|Triggered when damage has been inflicted on an avatar or task in the world but before damage has been applied or distributed}}
+{{LSL DefineRow|event|[[final_damage]](integer num_detected)|Triggered after after all [[on_damage]] events in all scripts and attachments have processed and damage has been applied to the avatar or distributed to all seated avatars}}
+{{LSL DefineRow|event|[[on_death]]()|Triggered on all attachments worn by an avatar when that avatar's health reaches 0}}
+{{LSL DefineRow|string|[[llGetStartString]]()|New function to retrieve the string passed with [[llRezObjectWithParams]] via REZ_PARAM_STRING, particularly useful for avoiding overhead and delay when having to communicate any necessary information}}
+{{LSL DefineRow|string|[[llDerezObject]](key id, integer flag)|Derezzes an object previously rezzed from within the object containing the script}}
+|}
+</div>
+</div>
+
+<div id="box" style="width:95%;">
+<h2>Additional</h2>
+<div style="padding: 0.5em">
+* [[:Template:LSL_Constants/Damage_Types|Damage types]] — Provided for convenience and a suggestion. Scripters can add custom ones or repurpose the damage type fields
+* [[llListen]]
+** Channel reserved at [[COMBAT_CHANNEL]]
+** System generated combat log messages sent by [[COMBAT_LOG_ID]]
+** Scripts may also write to this channel if the region allows it (see "restrict_combat_log" below)
+* [[llSensor]] — Scripts may filter by [[DAMAGEABLE]] for objects in world that process damage (that is if they have a [[on_damage]] and/or [[final_damage]] event -- the object's health doesn't matter)
+* [[llGetObjectDetails]] — Additional values around health, damage and type
+** [[OBJECT_HEALTH]] — Retrieves the health of an avatar or prim
+** [[OBJECT_DAMAGE]] — Retrieves the amount of damage a prim inflicts on collision
+** [[OBJECT_DAMAGE_TYPE]] — Retrieves the type of damage a prim inflicts on collision
+* [[llRezObjectWithParams]] — Apply damage to rezzed objects
+** [[REZ_DAMAGE]] — The amount of damage applied to an agent upon collision with this object
+** [[REZ_DAMAGE_TYPE]] — The damage type to apply when this prim collides with another object
+** [[REZ_PARAM_STRING]] — String parameter that can be passed into the rezzed object with a maximum string length of 1024 bytes
+* [[llSetLinkPrimitiveParamsFast]] — New parameter added to adjust damage amount and damage type for collision damage
+** [[PRIM_DAMAGE]] — Set damage amount and damage type
+* [[llGetEnv]] — Several new values are added
+** "allow_damage_adjust" — Are scripts allowed to adjust damage
+** "restrict_combat_log" — Are scripts allowed to write to the combat log
+** "restore_health" — Is health reset to 100% on death
+** "invulnerability_time" — Invulnerablitiy time applied after avatar death
+** "damage_throttle" — The maximum number of points of damage a single source may inflict on a target per second. This is a Damage Per Second (DPS) throttle
+** "damage_limit" — The maximum number of points of damage a single damage collision or call via [[llDamage]] may inflict
+** "health_regen_rate" — The speed of health regeneration in hitpoints per second
+** "death_action" — Set the action to take when an avatar dies in the region
+* [[llSetLinkSitFlags]] — Flags that can be applied to sit targets
+** SIT_FLAG_NO_COLLIDE — Disable the avatar's collision volume when they are seated on this sit target
+** SIT_FLAG_NO_DAMAGE — Do not distribute damage to agents sitting on this sit target
+</div>
+</div>
+
+
+
+
+==Damage Types==
+
+{{LSL_Constants/Damage_Types}}
+{{LSL_Constants/Custom_Damage_Types}}
+
+
+==Related==
+
+* Thread on the Second Life community forums by Rider Linden announcing the project: [https://community.secondlife.com/forums/topic/506317-pew-pew-pew-linden-damage-combat-20/ Pew! Pew! Pew! Linden Damage & Combat 2.0]
+* [https://feedback.secondlife.com/combat-20 Feedback for suggesting, voting and commenting on ideas]
+* Thread on draft proposal for Combat 2.1 changes by adding Teams & Respawns concepts from Rider Linden: [https://community.secondlife.com/forums/topic/516319-combat-21-teams-respawn/]
+
+
+==Known Issues==
+
+* Sitting Avatars with SIT_FLAGS_NO_DAMAGE may still attempt to process damage which can cause various issues, such as still generating damage logs and affecting objects with llSetDamage
+** [https://feedback.secondlife.com/scripting-features/p/adjust-sit-flag-no-damage-so-combat-log-reports-are-not-generated Adjust SIT_FLAG_NO_DAMAGE so combat log reports are not generated]
+** [https://feedback.secondlife.com/scripting-bugs/p/sit-flags-no-damage-still-attempts-to-process-llcs-damage-on-sitting-avatars SIT_FLAGS_NO_DAMAGE still attempts to process LLCS damage on sitting avatars]
+
+
+==Wishlist==
+
+* [https://feedback.secondlife.com/scripting-features/p/combat-21-teams Combat2.1 Teams]
+* [https://feedback.secondlife.com/scripting-features/p/combat-21-respawns Combat2.1 Respawns]
+* [https://feedback.secondlife.com/feature-requests/p/combat2-prim-max-health-prim-property-would-be-useful PRIM_MAX_HEALTH]

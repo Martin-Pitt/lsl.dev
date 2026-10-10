@@ -1,0 +1,53 @@
+{{LSL_Function
+|func_id=59|func_sleep=0.0|func_energy=10.0
+|func=llGetPos|sort=GetPos
+|return_type=vector
+|func_footnote
+|func_desc
+|Return_text=position of the task in [[Viewer coordinate frames#Region|region]] coordinates
+|spec
+|caveats=*When called from the root of an attachment, returns the wearer's region position. To see the position used, enable '''Develop>Avatar>Display Agent Target''' and use the red crosshair. If the avatar is sitting on an object, the red crosshair may be hidden by the white one, in the same position.
+
+*When called in an attachment's child prim, the position given is again relative to the ''avatar's'' root position and rotation, but with the offset from the root prim added. Visually, the reported position will only be correct if the object's root is attached to [[ATTACH_AVATAR_CENTER]], at [[ZERO_ROTATION]] and [[ZERO_VECTOR]]. Moving the attachment's root or changing the attachment point will not affect the reported position. Avatar animation is invisible to the simulator, so it also does not affect the reported position.
+|constants
+|examples=<syntaxhighlight lang="lsl2">default
+{
+    touch_start(integer total_number)
+    {
+        // When touched, check the position of
+        // the object, save it to "position",
+        // then convert it into a string and
+        // say it.
+        vector position = llGetPos();
+        llSay(0, (string)position);
+    }
+}</syntaxhighlight>
+<syntaxhighlight lang="lsl2">default
+{
+    on_rez(integer param)
+    {
+        // Adding .x .y or .z after the vector name can be used to get the float value of just that axis.
+        vector pos = llGetPos();
+        float Z = pos.z; // <--- Like this.
+        if(Z > 500.0)
+        llOwnerSay("Oooh! I'm up high!");
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetLocalPos]]|Gets the prim [[Viewer coordinate frames#Local|local]] position}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|Gets prim properties}}
+{{LSL DefineRow||[[llGetRootPosition]]|Gets the root prims position}}
+{{LSL DefineRow||[[llSetPos]]|Sets the prim position}}
+{{LSL DefineRow||[[llSetPrimitiveParams]]|Sets prim properties}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|Sets linked prim properties}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Movement
+|cat2=Prim
+|cat3
+|cat4
+|haiku={{Haiku|Remote yesteryear|A precise position shows|out of primitive}}
+}}

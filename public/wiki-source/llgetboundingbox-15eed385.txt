@@ -1,0 +1,144 @@
+{{LSL_Function
+|inject-2={{LSL_Function/uuid|object|sim=*|group=}}
+|func_id=277|func_sleep=0.0|func_energy=10.0
+|func=llGetBoundingBox|return_type=list
+|p1_type=key|p1_name=object
+|func_footnote=The bounding box is for the entire link set, not just the requested prim.<br/>Returns an empty list (<code>[]</code>) if {{LSLP|object}} is not found.
+|func_desc
+|return_text=that is the bounding box of {{LSLP|object}} relative to its root prim, in [[Viewer_coordinate_frames#local|local coordinates]].<br/>Format: <code>[ (vector) {{HoverText|min_corner|vector min_corner;}}, (vector) {{HoverText|max_corner|vector max_corner;}} ]</code>
+|spec=
+The physical representation of an object is made up of the shape of the prims and avatars seated upon it. The bounding box is the smallest possible cuboid which can contain the physical representation of the object and have its faces aligned to the object's local axes.
+|caveats=
+* Regardless if {{LSLP|object}} is a non-root prim, the bounding box of the object is returned.  This also applies if {{LSLP|object}} is an agent sitting on an object - the bounding box of the sat-upon object (including the agent's shape) is returned.
+* The bounding box is determined by the physics models, not the visual representation.
+** A child prim with its physics mode set to none will not affect the bounding box.
+** [[Phantom]] and [[llVolumeDetect|volume detect]] objects do have physics interactions, which is why they still have bounding boxes.
+** Attachments have no bounding boxes of their own as they have no physics interaction, instead the bounding box of the avatar is returned.
+
+|constants
+|examples=<source lang="lsl2">default//An avatar bounding box ruler thingy
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHANTOM, TRUE);
+    }
+    
+    touch_start(integer total_number)
+    {
+        key target = llDetectedKey(0);
+        list box = llGetBoundingBox(target);
+        vector center = llDetectedPos(0) + (llList2Vector(box, 0) + llList2Vector(box, 1)) * 0.5;
+        vector size = llList2Vector(box, 1) - llList2Vector(box, 0);
+        llSetPrimitiveParams([PRIM_POSITION, center, PRIM_SIZE, size]);
+        llSetText("Name: " + llDetectedName(0) + ", UUID: " + (string)target + 
+                "\nBounding Box Size: " + (string)size, <1.0, 1.0, 1.0>, 1.0);
+    }
+}</source>
+
+<source lang="lsl2">
+// Enclose a named object in the tightest possible box
+// that is aligned with the object's root prim axes.
+// Drop this script in a box near the object to enclose
+// (must be in a 10m range)
+
+string ObjectNameToEnclose = "SearchMe";
+key UUID;
+
+default
+{
+    state_entry()
+    {
+        llSensor(ObjectNameToEnclose, "", ACTIVE | PASSIVE, 10, PI);
+    }
+
+    sensor(integer n)
+    {
+        UUID = llDetectedKey(0);
+        llSetTimerEvent(1);
+    }
+
+    timer()
+    {
+        list info = llGetObjectDetails(UUID, [OBJECT_POS, OBJECT_ROT]) + llGetBoundingBox(UUID);
+        vector pos = llList2Vector(info, 0);
+        rotation rot = llList2Rot(info, 1);
+        vector corner1 = llList2Vector(info, 2) * rot + pos;
+        vector corner2 = llList2Vector(info, 3) * rot + pos;
+        vector size = llList2Vector(info, 3) - llList2Vector(info, 2);
+
+        llSetPos((corner1 + corner2) * 0.5); // Set position to the midpoint (average) of the corners
+        llSetRot(rot);
+        llSetScale(size);
+    }
+}
+</source>
+
+|helpers=
+<source lang="lsl2">
+//(bool) isInPrim - determines whether a given vector position in the region is within the borders of a cuboid,
+// respecting the cuboid's rotation.
+integer isInPrim(vector vPos)
+{
+    list bb = llGetBoundingBox(llGetKey());
+    vector min = llList2Vector(bb, 0);
+    vector max = llList2Vector(bb, 1);
+    vPos = (vPos - llGetPos()) / llGetRot();
+    float fTemp;
+    if (min.x > max.x)
+    {
+        fTemp = max.x;
+        max.x = min.x;
+        min.x = fTemp;
+    }
+    if (min.y > max.y)
+    {
+        fTemp = max.y;
+        max.y = min.y;
+        min.y = fTemp;
+    }
+    if (min.z > max.z)
+    {
+        fTemp = max.z;
+        max.z = min.z;
+        min.z = fTemp;
+    }
+    if (vPos.x < min.x)
+    {
+        return FALSE;
+    }
+    if (vPos.y < min.y)
+    {
+        return FALSE;
+    }
+    if (vPos.z < min.z)
+    {
+        return FALSE;
+    }
+    if (vPos.x > max.x)
+    {
+        return FALSE;
+    }
+    if (vPos.y > max.y)
+    {
+        return FALSE;
+    }
+    if (vPos.z > max.z)
+    {
+        return FALSE;
+    }
+    return TRUE;
+}
+</source>
+|also_functions={{LSL DefineRow||[[llGetAgentSize]]|}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|history=
+===== Sitting in 1.36 =====
+Avatars historically when they sit upon an object have been treated as part of the object, like a prim, even being assigned a link number (which can be used to detect and manipulate them to some extent). Unrelated to this, requesting the bounding box for a child prim of an object would return the bounding box for the entire object (unless it was an attachment, which point it would return the bounding box for the avatar). The first is something of a misfeature, the latter is an honest to goodness feature; the combination of these two lead to something interesting: Prior to 1.36 requesting the bounding box of an attachment while seated returned the bounding box for the object sat upon. It got reported as a bug {{JIRA|SVC-1174}}, and the behavior was changed in 1.36. The bounding box for the object sat upon is unchanged by 1.36, the avatar still counts. However when the bounding box for the seated avatar is requested it does not fall through to the object being sat upon.
+|cat1=Physics
+|cat2
+|cat3
+|cat4
+}}

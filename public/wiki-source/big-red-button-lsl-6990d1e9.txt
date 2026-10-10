@@ -1,0 +1,79 @@
+<source lang="lsl2">
+
+// Global Variables
+integer active = 0;
+integer toAllChannel = -255;                    // general channel - linked message
+
+default
+{
+    state_entry()
+    {
+        //on a reset or statup this registration button can be used
+        active = 0;
+        //set color to avaliable
+        llSetColor( <255,0,0>, ALL_SIDES);
+        llSetTexture( "busy_anim v5_9", ALL_SIDES);
+        llSetTextureAnim( ANIM_ON, ALL_SIDES, 5, 5, 24, 1, 10 );
+    }
+
+    touch_start(integer total_number)
+    {
+
+           active = 1; 
+           llMessageLinked(LINK_ALL_OTHERS, toAllChannel, "ActivateRegistration", NULL_KEY);
+           //set color to busy
+           llSetColor( <255,255,255>, ALL_SIDES);
+           llSetTexture( "busy_anim v5_9", ALL_SIDES);
+           llSetTextureAnim( ANIM_ON | LOOP , ALL_SIDES, 5, 5, 0, 23, 10 );
+       
+    }
+
+///////////////////////////////////////////////////////
+//  Link Message of default state                    //
+///////////////////////////////////////////////////////   
+    link_message(integer sender_number, integer number, string message, key id)
+    {
+        //if link message is on the correct channel
+        if(number == toAllChannel)
+        {
+            if(llSubStringIndex( message, "ActivateRegistration") != -1)
+            {
+                llSetTexture( "alpha", ALL_SIDES);
+            }
+            if(llSubStringIndex( message, "RegistrationComplete") != -1)
+            {
+              if(active == 1)
+              {
+                llMessageLinked(LINK_ALL_OTHERS, toAllChannel, "ActivateTest", NULL_KEY);
+              }
+            }
+            if(llSubStringIndex( message, "TestComplete") != -1)
+            {
+              if(active == 1)
+              {
+                llMessageLinked(LINK_ALL_OTHERS, toAllChannel, "ActivateReport", NULL_KEY);
+            }
+            }
+            if(llSubStringIndex( message, "ReportComplete") != -1)
+            {
+                //set color to avaliable
+                llSetColor( <255,0,0>, ALL_SIDES);
+                llSetTexture( "busy_anim v5_9", ALL_SIDES);
+                llSetTextureAnim( ANIM_ON, ALL_SIDES, 5, 5, 24, 1, 10 );
+              
+            }
+            
+                    
+            if( message == "reset" )
+            {
+              llResetScript();    
+            }
+            
+        }
+        
+    } //end of link message
+    
+}
+
+</source>
+{{LSLC|Examples|Big red button}}

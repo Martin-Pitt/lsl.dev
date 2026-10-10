@@ -1,0 +1,42 @@
+{{LSL_Function
+|func_id=195|func_sleep=0.0|func_energy=10.0
+|func=llList2CSV|return_type=string|p1_type=list|p1_name=src
+|func_footnote=More precisely the values are separated with a comma and a space (", ").<br/><br/>
+This function's functionality is equivalent to <code style="white-space: nowrap;">[[llDumpList2String]]('''src''', ", ");</code><br/><br/>
+The result of this function is more or less the {{Wikipedia|Comma-separated_values|CSV}} format, but it does not conform in all its details.<br/><br/>
+To reverse the process use [[llCSV2List]].  But see the Caveat.
+|func_desc
+|return_text=of comma separated values taken in order from '''src'''.
+|spec
+|caveats=*[[llCSV2List]] will not reverse the process if there are commas or oddly matched angle brackets ('''<''' and '''>''') in any of the original strings. For details see the article [[llCSV2List]].
+** One way around this is to first use [[llEscapeURL]] on any user-supplied strings before adding them to the list. [[llUnescapeURL]] will reverse [[llEscapeURL]]. 
+** If your strings may contain commas but not unmatched angle brackets you can wrap your strings with angle brackets (< and >) like you would use double quotes around the string and then use [[llGetSubString]] with START at 1 and END at -2 to remove them.
+|constants
+|examples=
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        list my_list = [FALSE, PI, "a string", ZERO_VECTOR, ZERO_ROTATION, NULL_KEY];
+        llOwnerSay(llList2CSV(my_list));        
+    }
+}
+</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llCSV2List]]}}
+{{LSL DefineRow||[[llDumpList2String]]}}
+{{LSL DefineRow||[[llParseString2List]]}}
+{{LSL DefineRow||[[llParseStringKeepNulls]]}}
+|also_events
+|also_tests
+|also_articles={{LSL DefineRow||[[Typecast]]}}
+|notes
+|permission
+|negative_index
+|sort=List2CSV
+|cat1=List
+|cat2=String
+|cat3=Data Conversion
+|cat4=CSV
+}}

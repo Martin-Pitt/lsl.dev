@@ -1,0 +1,45 @@
+{{LSL_Event
+|event_id=27|event_delay|event=on_rez
+|p1_type=integer|p1_name=start_param|p1_desc=parameter supplied to [[llRezObject]] or [[llRezAtRoot]]
+|event_desc=Triggered when an object is rezzed (by script or by user). Also triggered in attachments when a user logs in, or when the object is [[attach]]ed from inventory.
+|event_footnote='''start_param''' is always zero when an object is not rezzed by [[llRezObject]] or [[llRezAtRoot]]. 
+<br/>When an object is rezzed by [[llRezObject]] or [[llRezAtRoot]], then '''start_param''' will be the value given as the last parameter of the rezzing command.
+<br/>'''start_param''' is available at any subsequent time by calling [[llGetStartParameter]] (unless it has been overridden by [[llRemoteLoadScriptPin]]).
+|constants
+|spec
+|caveats=*If an object is rezzed by another object then the [[object_rez]] event in the parent object does not trigger at the same time as the on_rez event in the child object and the order of the events is not guaranteed. See the examples in [[object_rez]] for how to reliably establish communications between objects when rezzing.
+|examples=<syntaxhighlight lang="lsl2">default
+{
+    on_rez(integer start_param)
+    {
+        // Restarts the script every time the object is rezzed
+        llResetScript(); 
+    }
+}</syntaxhighlight>
+|helpers
+|also_header
+|also_events=
+{{LSL DefineRow||[[object_rez]]|triggered when this object rezzes an object from inventory}}
+{{LSL DefineRow||[[state_entry]]|triggered during script startup, reset and state change}}
+|also_functions=
+{{LSL DefineRow||[[llGetStartParameter]]|}}
+{{LSL DefineRow||[[llRezObject]]|}}
+{{LSL DefineRow||[[llRezAtRoot]]|}}
+|also_articles
+|also_footer
+|notes=
+===[[state_entry]] & [[on_rez]]===
+[[state_entry]] will be triggered prior to [[on_rez]] if [[state_entry]] has not been run prior.
+
+===[[on_rez]] & [[attach]]===
+[[on_rez]] will be triggered prior to [[attach]] when attaching from inventory or during login.
+
+===[[on_rez]] & slow events===
+If the script was already processing an event at rez time, [[on_rez]] does not '''not''' trigger until the current event handler is completed. (same with [[attach]])
+|mode
+|deprecated
+|cat1=Script
+|cat2=Rez
+|cat3
+|cat4
+}}

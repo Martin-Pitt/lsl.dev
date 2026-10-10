@@ -1,0 +1,52 @@
+Simple group inviter script to issue group invitation with [http://www.smartbots2life.com/docs/AdminBot AdminBot].
+
+AdminBot LSL library allows to manipulate the group from LSL script: send group invites, listen to the group chat and do more amazing things.
+
+<source lang="lsl2">
+////////////////////////////////////////////////////
+// SmartBots AdminBot, http://www.smartbots2life.com
+// Group Inviter Script example
+////////////////////////////////////////////////////
+
+// AdminBot commands, codes etc... (according to AdminBot docs]
+// Setup and startup
+integer SB_SETUP_SETGROUP=180101; integer SB_SETUP_SETGROUPUUID=180102; integer SB_SETUP_DEBUG=180103;
+integer SB_STATUS_QUERY=180104; integer SB_INVITE_SEND=180105; integer SB_CHAT_SAY=180106;
+integer SB_GROUP_EJECT=180107; integer SB_CHAT_LISTEN=180108; integer SB_NOTICE_SEND=180109;
+integer SB_RESET_ADMINBOT=9996660; integer SB_SETUP_SETLINK=180110; integer SB_COMMAND_FAILED=180201;
+integer SB_STATUS_REPLY=180202; integer SB_CHAT_MESSAGE=180203; integer SB_SETUP_SUCCESS=180204;
+integer SB_SETUP_FAILED=180205; integer SB_CHAT_SUCCESS=180206;
+
+default
+{
+  state_entry() {
+    // Setup group inviter
+    // We'll set our group on start up. Do not forget to place your own "Security Code" here
+    llMessageLinked(LINK_SET,SB_SETUP_SETGROUP,"Your group name","SECURITY CODE");
+
+    // AdminBot will issue the link message on success or error - see link_message
+  }
+ 
+  // We will issue the direct group invitation on touch. Do that by sending group invite message.
+  touch_start(integer detected) {
+    // "FORCE" means to invite existing group members too
+    llMessageLinked(LINK_SET,SB_INVITE_SEND,"FORCE",llDetectedKey(0));
+  }
+
+
+  // This event parses different replies from AdminBot (error messages)  
+  link_message(integer sender,integer cmd, string data, key id) {
+    /////////////////// Group setup failed
+    if(cmd==SB_COMMAND_FAILED)
+      llOwnerSay("AdminBot command failed, error code:\n"+data);
+ 
+    /////////////////// Group setup failed
+    if(cmd==SB_SETUP_FAILED)
+      llOwnerSay("AdminBot group setup failed:\n"+data);
+  }
+}
+</source>
+
+See [http://www.smartbots2life.com/docs/AdminBot_Examples AdminBot Examples] page for more examples.
+
+{{LSLC|Examples}}

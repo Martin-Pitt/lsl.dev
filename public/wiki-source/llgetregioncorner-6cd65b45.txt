@@ -1,0 +1,53 @@
+{{LSL_Function
+|func_id=199|func_sleep=0.0|func_energy=10.0
+|func=llGetRegionCorner
+|func_desc
+|func_footnote=Divide the returned value by 256 to get the region offset.
+|return_type=vector
+|return_text=in meters that is the global location of the south-west corner of the region the object is in. The z component is 0.0
+|constants
+|spec
+|caveats
+|examples=
+<syntaxhighlight lang="lsl2">
+// Calculates your position relative to <0,0,0> of 'Da Boom' in meters when you touch it
+vector vecrel; //a sum of llgetpos and llgetregioncorner (and another vector). Saving time doing vector math.
+
+default
+{
+    state_entry()
+    {
+        llSetText("Touch me to get your position", <1.0,1.0,1.0>, 1.0);
+    }
+    
+    touch_start(integer total_number)
+    {
+        vecrel = llGetRegionCorner() + llDetectedPos(0);
+        llWhisper(0, "llGetRegionCorner() is:"+(string)vecrel); //for debugging before vector addition
+        
+        vecrel -= <256000.0, 256000.0, 0.0>;//Da Boom's region corner is at <256000.0, 256000.0, 0.0>
+        llWhisper (0, "Position relative to <0,0,0> of 'Da Boom': " + 
+        (string)llRound(vecrel.x) + ", " + (string)llRound(vecrel.y) + ", " + (string)llRound(vecrel.z) + ".");
+        
+        llWhisper(0, "Position relative to <0,0,0> of 'Da Boom':" +(string)vecrel); //faster but unformatted output
+    }
+}
+</syntaxhighlight>
+|helpers
+|haiku={{Haiku|Code lines whisper low|llGetRegionCorner unfolds|Meters reveal truth.}}
+|also_header
+|also_functions
+|also_tests
+|also_events
+|also_articles
+|also_footer
+|notes=The great zero is at region offset <1000,1000>, {{SLurl|region=Da Boom|x=0|y=0|title=Great Zero}}
+|mode
+|location
+|cat1=Region
+|cat2
+|cat3
+|cat4
+|cat5
+|cat6
+}}

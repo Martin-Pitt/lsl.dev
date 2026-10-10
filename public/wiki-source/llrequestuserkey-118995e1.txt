@@ -1,0 +1,43 @@
+{{LSLC|Functions}}
+{{LSL_Function
+|func=llRequestUserKey
+|sort=llRequestUserKey
+|return_type=key
+|p1_type=string|p1_name=username|p1_desc=the username of the avatar to retrieve the UUID of.
+|func_desc=Requests the Agent ID for the agent identified by name from the dataserver. The name given may be either the current name of an avatar or a historical name that has been used in the past. If no agent can be found with the supplied name this function returns the value [[NULL_KEY]]. 
+
+Returns a handle (a key) that can be used to identify the request when the dataserver event is raised. 
+
+The agent being searched for with this function does not need to be signed on to Second Life.
+|spec
+|caveats=
+* This function is throttled. The throttle is undocumented, but as of October 2018 the function appears to support bursts of up to 20 requests and sustained use at an average rate of 1.9 requests per second per owner, per region. (Meaning the throttle applies to all objects in the region with the same owner.) Once tripped, the function fails and says "Too many llRequestUserKey requests.  Throttled until average falls." on [[DEBUG_CHANNEL]].
+* This function will return a NULL_KEY for any agent that has yet to log on to the grid the function is used on.
+|examples=<source lang="lsl2">key name_key_query;
+default
+{
+   state_entry()
+   {
+       name_key_query = llRequestUserKey("rider.linden");
+   }
+
+   dataserver(key queryid, string data) 
+   {
+       if ( name_key_query == queryid )
+       {
+           llSay(0, "The key for this user is : " + data);
+       }
+   }
+}</source>
+|helpers
+|related
+|also
+|also_functions=
+{{LSL DefineRow||[[llRequestUsername]]|to translate a key to a name}}
+{{LSL DefineRow||[[llName2Key]]|to fetch avatar UUID by name.}}
+|notes=Names are always provided in the form <nowiki>"First[ Last]" or "first[.last]"</nowiki> (first name with an optional last name.) If the last name is omitted a last name of "Resident" is assumed. Case is not considered when resolving agent names.
+|cat1=Dataserver
+|cat2=Avatar
+|cat3=Username/As A Parameter
+|cat4=Legacy Name/As A Parameter
+}}

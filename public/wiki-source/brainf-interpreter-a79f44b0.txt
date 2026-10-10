@@ -1,0 +1,163 @@
+(http://www.gnu.org/copyleft/fdl.html) in the spirit of which this script is GPL'd. Copyright (C) 2013 Subus Tremor
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+This is an esoteric language - that implies a useless programming language (except for the fun of it). 
+It interprets correct Brainf*** code. 
+There is no debugging etc. provided.
+
+Create a box, and drop this script in it. Then edit the script and assign a valid Brainf*** program code to variable program.
+Save the script and touch your box to run the code
+
+<lsl>
+// The esoteric computer language Brainf*** - Interpreter for SL by Subus Tremor
+//
+// Data to the Interpreter - replace the string by any valid Brainf*** program
+// if it's a valid progam AND has correct syntax AND does not run out of space -
+// then it runs :-) otherwise not :-( have fun.
+
+//sample program1
+string program1 = "Hello World program
+++++++++++ initialize
+[ start loop
+>+++++++>++++++++++>+++>+<<<<- set some values
+] end loop
+>++. H out
+>+. e out
++++++++. l out
+. l out
++++. o out
+>++. blank out
+<<+++++++++++++++. W out
+>. o out
++++. r out
+------. l out
+--------. d out
+>+. ! out
+>. lineend 
+";
+
+//sample program2
+string program2 = "this brainf*** program asks for your name and then greets you
+>+++++++++++[<++++++++>-]<-.>++++[<++++>-]<+.-------.>+++++
+[<++++>-]<-.[-]>++++++++[<++++>-]<.>+++++++++[<++++++++>-]<
++.++++++++++.[-]>++++++++[<++++>-]<.>+++++++++++[<++++++++>
+-]<+.----------.++++++.---.[-]>++++++++[<++++>-]<.>++++++++
++++++[<++++++>-]<.-------------.++++++++++++.--------.>++++
+++[<------>-]<--.[-]+++++++++++++.---.[-]+[>,-------------]
+>+++++++++[<++++++++>-]<.>+++++++[<++++>-]<+.+++++++..+++.[
+-]>++++++++[<++++>-]<.[-]<-[<-]>[++++++++++++++.>]+++++++++
++.";
+
+list input = [82, 117, 116, 104, 13]; // input Ruth (the "name" the program is asking for)
+integer n=0;
+
+// The Brainf*** interpreter
+integer commandpointer = 0;         //point to 0 at start
+string  command = "";               
+list  storage = ["0"];              //first storage cell inizialized to 0
+integer cellpointer = 0;
+integer cell=0;                     
+
+string  bfelements = "+-><[].,";    //the Brainf*** commands
+integer pl=0;                       //program lenght
+integer pc=0;                       //blockcounter
+integer si=0;                       //stackindex
+string program;                     //contains the progeam to be interpreted
+
+list blocklist;
+integer waitforchar=FALSE;
+
+makeblocklist() { // to avoid searching - loop structure [ ] is evaluated in advance
+    integer i=0;
+    list stack;
+    integer s;
+    integer ie = llStringLength(program);
+    for(; i < ie; i+=1) {
+        if(llGetSubString(program, i, i)=="[") { //begin
+        stack = i + stack;        
+        }
+        if(llGetSubString(program, i, i)=="]") { //end
+            if(llGetListLength(stack)>0) {
+                s = llList2Integer(stack,0);
+                stack = llDeleteSubList(stack,0,0);
+                blocklist = blocklist + s + i;
+            }  
+        }
+    }   
+}
+
+default
+{
+    state_entry()
+    {
+        program=program1;   // assign valid Brainf*** code to the variable program
+                            // either program1 or program2 or your own code
+        makeblocklist();    // build the loop structure in advance
+    }
+    touch_start(integer total_number)
+    {
+        llSay(0,"Interpreter start");
+        state interpret;
+    }
+}
+
+state interpret {
+    state_entry() // run the Brainf*** Interpreter
+    {
+        do { // interpret the Brainf*** code in variable program
+            command = llGetSubString( program, commandpointer, commandpointer );
+            if(command=="+") { // increment cell at cellpointer
+                cell = llList2Integer(storage,cellpointer)+1;
+                storage = llListReplaceList(storage, [cell], cellpointer, cellpointer);
+            }
+            if(command=="-") { // decrement cell at cellpointer
+                cell = llList2Integer(storage,cellpointer)-1;
+                storage = llListReplaceList(storage, [cell], cellpointer, cellpointer);
+            }
+            if(command==">") { // point at next cell
+                if((llGetListLength(storage)-1)==cellpointer) storage += 0;
+                cellpointer+=1;
+                cell = llList2Integer(storage,cellpointer);
+            }
+            if(command=="<") { // point ar previous cell
+                cellpointer-=1;
+                cell = llList2Integer(storage,cellpointer);
+            }
+            if(command==".") { // output one character
+                cell = llList2Integer(storage,cellpointer);
+                llSay(0,llGetSubString(llBase64ToString(llIntegerToBase64((integer)cell << 24)),0,0));
+            }
+            if(command==",") { // input one character
+                if(waitforchar==FALSE) {
+                    waitforchar=TRUE;
+                    llSay(0,"reading 1 input char now");
+                    state waitchar;
+                }
+                else {
+                    waitforchar = FALSE;
+                    storage = llListReplaceList(storage, [cell], cellpointer, cellpointer);
+                }
+            }            
+            if(((command=="]")&&(cell!=0))||((command=="[")&&(cell==0))) { // handle loops 
+                    integer bindex = llListFindList(blocklist,[commandpointer]);
+                    if(command=="[") bindex++; else bindex--;
+                    commandpointer = llList2Integer(blocklist, bindex)+1;
+            }
+            else commandpointer++; // point at next instruction
+        } while (commandpointer<llStringLength(program)-1);
+        llSay(0,"Interpreter finished");
+        llResetScript();
+    }
+}
+state waitchar {
+    state_entry() // get inputcharacters, input ends if char hex 13 is detected
+    {
+        if(n<llGetListLength(input)) {
+            cell = llList2Integer(input,n);
+            n++;
+        }
+    state interpret;        
+    }  
+}
+</lsl>

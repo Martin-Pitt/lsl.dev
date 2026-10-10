@@ -1,0 +1,129 @@
+{{LSL_Function
+|inject-2={{LSL Function/color|color}}{{LSL_Function/face|face|}}
+|func_id=49|func_sleep=0.0|func_energy=10.0
+|func=llSetColor
+|p1_type=vector|p1_name=color|p2_type=integer|p2_name=face
+|func_footnote
+|func_desc=Sets the [[PBR_Materials#Nomenclature_changes|Blinn-Phong]] {{LSLP|color}} on {{LSLP|face}} of the prim.
+|return_text
+|spec
+|caveats=
+* llSetColor will have no visible effect on faces with a PBR material. To work on faces both with and without a PBR material, use this snippet: <source lang="lsl2">
+if (llIsLinkGLTFMaterial(LINK_THIS, ALL_SIDES)) {
+    llSetLinkGLTFOverrides(LINK_THIS, ALL_SIDES, [OVERRIDE_GLTF_BASE_COLOR_FACTOR, llsRGB2Linear(color)]);
+} else {
+    llSetColor(color, ALL_SIDES);
+}
+</source>
+|constants
+|examples=<source lang="lsl2">
+integer face = -1;
+vector color = <1.0, 1.0, 1.0>;
+
+default
+{
+    touch_start(integer num)
+    {
+        if(~face)       //quick & dirty but efficient way of testing if face is not equal to -1
+            llSetColor(color, face); //restore the color
+        face = (face + 1) % llGetNumberOfSides(); //increment and keep the face number in range
+        color = llGetColor(face); //save the face's color
+        llSetColor(<0.5, 0.0, 0.0>, face );  //change the face's color
+    }
+}
+</source>
+|helpers=
+{{{!}} class="sortable" {{Prettytable}}
+{{!}}- {{Hl2}}
+! Color
+! Hexadecimal code
+! LSL color representations
+{{!}}-
+{{!}} style="color: white; background: #001f3f" {{!}}NAVY
+{{!}} #001f3f
+{{!}}<code><0.000, 0.122, 0.247></code>
+{{!}}-
+{{!}} style="background: #0074d9" {{!}}BLUE
+{{!}} #0074d9
+{{!}}<code><0.000, 0.455, 0.851></code>
+{{!}}-
+{{!}} style="background: #7fdbff" {{!}}AQUA
+{{!}} #7fdbff
+{{!}}<code><0.498, 0.859, 1.000></code>
+{{!}}-
+{{!}} style="background: #39cccc" {{!}}TEAL
+{{!}} #39cccc
+{{!}}<code><0.224, 0.800, 0.800></code>
+{{!}}-
+{{!}} style="background: #3d9970" {{!}}OLIVE
+{{!}} #3d9970
+{{!}}<code><0.239, 0.600, 0.439></code>
+{{!}}-
+{{!}} style="background: #2ecc40" {{!}}GREEN
+{{!}} #2ecc40
+{{!}}<code><0.180, 0.800, 0.251></code>
+{{!}}-
+{{!}} style="background: #01ff70" {{!}}LIME
+{{!}} #01ff70
+{{!}}<code><0.004, 1.000, 0.439></code>
+{{!}}-
+{{!}} style="background: #ffdc00" {{!}}YELLOW
+{{!}} #ffdc00
+{{!}}<code><1.000, 0.863, 0.000></code>
+{{!}}-
+{{!}} style="background: #ff851b" {{!}}ORANGE
+{{!}} #ff851b
+{{!}}<code><1.000, 0.522, 0.106></code>
+{{!}}-
+{{!}} style="background: #ff4136" {{!}}RED
+{{!}} #ff4136
+{{!}}<code><1.000, 0.255, 0.212></code>
+{{!}}-
+{{!}} style="color: white; background: #85144b" {{!}}MAROON
+{{!}} #85144b
+{{!}}<code><0.522, 0.078, 0.294></code>
+{{!}}-
+{{!}} style="background: #f012be" {{!}}FUCHSIA
+{{!}} #f012be
+{{!}}<code><0.941, 0.071, 0.745></code>
+{{!}}-
+{{!}} style="color: white; background: #b10dc9" {{!}}PURPLE
+{{!}} #b10dc9
+{{!}}<code><0.694, 0.051, 0.788></code>
+{{!}}-
+{{!}} style="background: #ffffff" {{!}}WHITE
+{{!}} #ffffff
+{{!}}<code><1.000, 1.000, 1.000></code>
+{{!}}-
+{{!}} style="background: #dddddd" {{!}}SILVER
+{{!}} #dddddd
+{{!}}<code><0.867, 0.867, 0.867></code>
+{{!}}-
+{{!}} style="background: #aaaaaa" {{!}}GRAY
+{{!}} #aaaaaa
+{{!}}<code><0.667, 0.667, 0.667></code>
+{{!}}-
+{{!}} style="color: white; background: #111111" {{!}}BLACK
+{{!}} #111111
+{{!}}<code><0.067, 0.067, 0.067></code>
+{{!}}}
+|also_functions=
+{{LSL DefineRow||[[llGetAlpha]]|Gets the prim's alpha}}
+{{LSL DefineRow||[[llSetAlpha]]|Sets the prim's alpha}}
+{{LSL DefineRow||[[llGetColor]]|Gets the prim's color}}
+{{LSL DefineRow||[[llSetLinkColor]]|Sets link's color}}
+{{LSL DefineRow||[[llSetLinkAlpha]]|Sets link's alpha}}
+{{LSL DefineRow||[[PRIM_COLOR]]|The equivilant parameter for [[llSetPrimitiveParams]]}}
+{{LSL DefineRow||[[PRIM_GLTF_BASE_COLOR]]|The equivilant PBR parameter for [[llSetPrimitiveParams]]}}
+|also_tests
+|also_events=
+{{LSL DefineRow||[[changed]]|[[CHANGED_COLOR]]}}
+|also_articles=
+{{LSL DefineRow||[[Color and Scripting]]}}
+|notes
+|deprecated
+|cat1
+|cat2
+|cat3
+|cat4
+}}

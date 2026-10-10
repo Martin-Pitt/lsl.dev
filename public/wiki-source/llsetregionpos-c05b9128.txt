@@ -1,0 +1,76 @@
+{{LSL Function
+|inject-2={{LSL_Function/position|position|region=*}}
+|func_id=?|func_sleep=0.0|func_energy=0.0
+|func=llSetRegionPos
+|p1_type=vector|p1_name=position
+|return_type=integer
+|return_subtype=boolean
+|return_text=, [[TRUE]] if the object is successfully placed within 0.1 m of {{LSLP|position}}, [[FALSE]] otherwise. See [[#Specification]] for details.
+|func_desc=Tries to move the entire object so that the root prim is within 0.1m of {{LSLP|position}}.
+|func_footnote=Only if [[TRUE]] is returned does the object move, if [[FALSE]] is returned, the object does not change position. (Spec does not quite agree, if object tries to go underground, the spec says it moves to ground level with the provided X and Y.)
+|spec=
+The object with the script will move the root prim position to the given location. The position is any position within the region. If the position is below ground, it will be set to the ground level at that X,Y spot. The function has no delay or throttle.
+* Returns [[TRUE]] if the object is successfully placed within 0.1 m of position.
+* Returns [[FALSE]] and does not move the object if...
+** {{LSLP|position}} is more than 10m off region or above 4096m.
+*** The x & y components of {{LSLP|position}} must be in the range {{Interval|gte=-10.0|lte=266.0}}.{{Interval/Footnote}}
+*** The z component must be in the range {{Interval|gte=0.0|lte=4096}}.
+** the object is dynamic (has [[STATUS_PHYSICS|physics enabled]]).
+** the object can not move to position due to parcel/region restrictions (object entry rules, prim limits, bans, etc).
+** the object is an avatar attachment.
+* Returns [[FALSE]] if the position is a point more than 0.1 m below region ground level, but the object will still be moved so that the midpoint of the root prim is snapped to the ground. If the point is less than 0.1 m below ground, the object is moved as before and [[TRUE]] is returned as per the first case.
+|caveats=
+|constants
+|examples=
+
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        vector currentPosition = llGetPos();
+
+        // check whether the object has successfully been moved
+        // to the center of the sim at the same height
+        integer hasMoved = llSetRegionPos(<128.0, 128.0, currentPosition.z>);
+
+        if (hasMoved)
+        {
+            llOwnerSay("My new position is now:\n"
+                + "http://maps.secondlife.com/secondlife/" + llEscapeURL(llGetRegionName())
+                + "/128/128/" + (string)llRound(currentPosition.z) + "/");
+        }
+        else if ( currentPosition.z < llGround(ZERO_VECTOR) )
+        {
+            llOwnerSay("My new position is now:\n"
+                + "http://maps.secondlife.com/secondlife/" + llEscapeURL(llGetRegionName())
+                + "/128/128/" + (string)llCeil(llGround(ZERO_VECTOR)) + "/");
+        }
+        else
+            llOwnerSay("Move was not possible!");
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llGetLocalPos]]|Returns the prim's local position if it is attached or non-root (otherwise it returns the global position)}}
+{{LSL DefineRow||[[llGetRootPosition]]|Gets the root prims position}}
+{{LSL DefineRow||[[llGetPos]]|Returns the prim's global position, even if it is attached or non-root}}
+{{LSL DefineRow||[[llSetPos]]|}}
+{{LSL DefineRow||[[llEdgeOfWorld]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes=
+This function is intended to replace [[WarpPos]].
+|history=
+* New LSL function integer llSetRegionPos(vector position) in Second Life Server 12.01.24.248357
+*: The object with the script will move the root prim position to the given location. The position is any position within the region. If the position is below ground, it will be set to the ground level at that X,Y spot. The function has no delay or throttle.
+*:* Returns 1 if the object is successfully placed within 0.1 m of position.
+*:* Returns 0 and does not move the object if position is more than 10m off region or above 4096m.
+*:* Returns 0 and does not move the object if the object is dynamic (has physics enabled).
+*:* Returns 0 and does not move the object if the object can not move to position due to object entry rules, prim limits, bans, etc.
+|cat1=Movement
+|cat2=Prim
+|cat3
+|cat4
+}}

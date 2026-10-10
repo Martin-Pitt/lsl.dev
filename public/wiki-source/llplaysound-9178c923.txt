@@ -1,0 +1,53 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-4897}}{{Issues/BUG-4130}}
+{{LSL_Function/inventory|sound|uuid=true|type=sound|volume=volume}}
+|func_id=86|func_sleep=0.0|func_energy=10.0
+|func=llPlaySound|sort=PlaySound
+|p1_type=string|p1_name=sound
+|p2_type=float|p2_name=volume
+|func_footnote
+|func_desc=Plays {{HoverText|attached|The sound moves with the prim}} {{LSLPT|sound}} once at {{LSLPT|volume}}
+|return_text
+|spec
+|caveats=*A call to llPlaySound replaces any other sound (so that only one sound can be played at the same time from the same prim), except sounds started with the deprecated [[llSound]] which always plays sound files till the end.
+*Sound files must be 30 seconds or shorter.
+*[[Sound Clips|Sounds are always sampled]] at 44.1KHz, 16-bit (unsigned), mono (stereo files will have one channel dropped — merged (as in combined) — when uploading).
+*If the object playing the sound is a {{HoverLink|HUD|Heads Up Display}}, the sound is only heard by the user the HUD is attached to.
+**To play a sound inworld from a HUD use [[llTriggerSound]].
+*It is impossible to play two (or more) sounds at the same time and have them start playing at exactly the same time ~ {{JIRA|VWR-15663}}
+**If multiple sound emitters play the same exact sound within range of the viewer at the same time, they are usually not in sync due to latency between the server/client and script execution & communication delays. This can produce echoes, odd resonance, and other strange effects that you (probably) do not want.
+*When used in conjunction with [[llSetSoundQueueing]], sounds may incorrectly. [https://community.secondlife.com/forums/topic/443645-llplaysound-plays-the-sound-twice-or-more/ play more than once.] This can be fixed by disabling the sound queue if only a single sound sample is to be played.
+*Playing sounds is throttled. If the average number of played sounds per second exceeds the limit (22 sounds/s), all sounds from the object are suppressed until the average falls sufficiently. The throttle is per object, not per link or per script, so multiple links cannot be used to overcome the throttle.
+** Once the throttle is hit, the following error will be shown in debug channel: "Too many sound requests.  Throttled until average falls."
+|constants
+|examples=<syntaxhighlight lang="lsl2">
+default
+ {
+     state_entry()
+     {
+          llPlaySound("some_sound",1.0);
+     }
+ }
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llTriggerSound]]|3=Plays a sound {{HoverText|unattached|The sound does not move with the prim}}.}}
+{{LSL DefineRow||[[llTriggerSoundLimited]]}}
+{{LSL DefineRow||[[llLoopSound]]|3=Plays a sound {{HoverText|attached|The sound moves with the prim}}.}}
+{{LSL DefineRow||[[llLoopSoundMaster]]}}
+{{LSL DefineRow||[[llLoopSoundSlave]]}}
+{{LSL DefineRow||[[llPlaySoundSlave]]}}
+{{LSL DefineRow||[[llSetSoundQueueing]]|3=Sets a prim property which allows sounds to be queued, instead of overwriting each other.}}
+{{LSL DefineRow||[[llStopSound]]}}
+{{LSL DefineRow||[[llLinkPlaySound]]|3=Plays a sound from a prim in the linkset, with flexible options.}}
+{{LSL DefineRow||[[llPreloadSound]]|3=Preloads sound on viewers in range.}}
+{{LSL DefineRow||[[llAdjustSoundVolume]]|3=Adjusts volume of {{HoverText|attached|The sound moves with the prim}} sound.}}
+|also_events
+|also_tests
+|also_articles={{LSL DefineRow|[[Sound Clips]]|3=Specifications for uploading sounds.}}
+|notes
+|cat1=Sound
+|cat2
+|cat3
+|cat4
+|haiku={{Haiku|Mono sound it hums,|Sync lost, echoes' chaos drums—|HUD whispers alone.|author=ChatGPT Plus}}
+}}

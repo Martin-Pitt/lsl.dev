@@ -1,0 +1,116 @@
+{{{{FULLPAGENAME}}|multiple=*}}
+== Template ==
+<onlyinclude><div id="multilang">{{#if:
+
+{{#vardefine:ml-cat|{{#if:{{{category|}}}|/{{{category|}}}|{{#var:ml-cat}}}}}}
+
+{{#vardefine:lang|{{#if:{{#var:lang}}|{{#var:lang}}|{{{2|}}}}}}}
+
+{{#vardefine:ml-|-{{#len:{{#var:lang}}}}}}
+
+{{#vardefine:langbase|{{#if:{{#var:langbase}}|{{#var:langbase}}|{{#if:{{{1|}}}|{{{1|}}}|{{#if:{{#var:lang}}|{{#ifeq:{{#sub:{{FULLPAGENAME}}|{{#var:ml-}}}}|{{#var:lang}}|{{#sub:{{FULLPAGENAME}}|0|{{#var:ml-}}}}|{{FULLPAGENAME}}}}|{{#switch:{{#sub:{{FULLPAGENAME}}|-3|1}}|/|\={{#sub:{{FULLPAGENAME}}|0|-3}}|{{FULLPAGENAME}}}}}}}}}}}}
+
+{{#vardefine:ml-|{{#sub:{{FULLPAGENAME}}|{{#len:{{#var:langbase}}}}}}}}
+
+{{#vardefine:lang|{{#if:{{#var:lang}}|{{#var:lang}}|{{#switch:{{#sub:{{#var:ml-}}|0|1}}|/|\={{#var:ml-}}|}}}}}}
+
+{{#vardefine:ml-base-version|{{#if:{{{noVersion|}}}|0.0|{{#ifexist::{{#var:langbase}}/version|{{:{{#var:langbase}}/version|ml-base-version}}|-1.0}}}}}}
+
+{{#vardefine:ebase|{{#ifeq:{{#var:lang}}||en|{{#explode:{{#var:lang}}|/|-1}}}}}}
+
+{{#ifeq:{{#var:ebase}}|zh-Hant|{{#vardefine:ebase|zh-TW}}}}
+
+}}{{#if:{{#var:ml-included}}||[[en:{{#var:langbase}}]]
+{{Languages/Lang|de|b={{#var:ebase}}|{{#var:langbase}}|Deutsch|}}
+{{Languages/Lang|es|b={{#var:ebase}}|{{#var:langbase}}|Español|}}
+{{Languages/Lang|el|b={{#var:ebase}}|{{#var:langbase}}|ελληνικά|}}
+{{Languages/Lang|fr|b={{#var:ebase}}|{{#var:langbase}}|Français|}}
+{{Languages/Lang|he|b={{#var:ebase}}|{{#var:langbase}}|עברית|}}
+{{Languages/Lang|it|b={{#var:ebase}}|{{#var:langbase}}|Italiano|}}
+{{Languages/Lang|ja|b={{#var:ebase}}|{{#var:langbase}}|日本語|}}
+{{Languages/Lang|ko|b={{#var:ebase}}|{{#var:langbase}}|한국어|}}
+{{Languages/Lang|nl|b={{#var:ebase}}|{{#var:langbase}}|Nederlands|}}
+{{Languages/Lang|hu|b={{#var:ebase}}|{{#var:langbase}}|Magyar|}}
+{{Languages/Lang|no|b={{#var:ebase}}|{{#var:langbase}}|Norsk|}}
+{{Languages/Lang|da|b={{#var:ebase}}|{{#var:langbase}}|Dansk|}}
+{{Languages/Lang|sv|b={{#var:ebase}}|{{#var:langbase}}|Svenska|}}
+{{Languages/Lang|tr|b={{#var:ebase}}|{{#var:langbase}}|Türkçe|}}
+{{Languages/Lang|pl|b={{#var:ebase}}|{{#var:langbase}}|Polski|}}
+{{Languages/Lang|pt|b={{#var:ebase}}|{{#var:langbase}}|Português|}}
+{{Languages/Lang|ru|b={{#var:ebase}}|{{#var:langbase}}|Русский|}}
+{{Languages/Lang|th|b={{#var:ebase}}|{{#var:langbase}}|ไทย|}}
+{{Languages/Lang|uk|b={{#var:ebase}}|{{#var:langbase}}|украї́нська|}}
+{{Languages/Lang|zh-Hans|b={{#var:ebase}}|{{#var:langbase}}|中文(简体)|}}
+{{Languages/Lang|zh-Hant|b={{#var:ebase}}|t=zh-TW|{{#var:langbase}}|中文(繁體)|}}
+<div width="0" height="0" id="PageLanguage" style="display:none;">{{#var:lang}}</div>
+<div width="0" height="0" id="PageCategory" style="display:none;">{{#var:ml-cat}}</div>
+{{#if:{{#var:lang}}|
+{{#ifexpr:({{#var:ml-base-version}} > 0.0) and ({{#if:{{{version|}}}|{{{version|}}}|0.0}} >= 0.0)|
+{{#ifexpr:{{#var:ml-base-version}} > {{#if:{{{version|}}}|{{{version|}}}|0.0}}
+|[[Category:Articles in need of updating{{#var:ml-cat}}{{#var:lang}}{{#if:{{#var:priority}}|{{!}}{{#var:priority}}}}]]{{#if:{{#var:ml-base-message}}|
+{{Multi-lang/Out of date}}<div class="L10n-hidden">{{Help/Box|1={{#if:{{#var:ml-base-message-title}}|{{#var:ml-base-message-title}}|Page in need of update}}|2=
+{{#var:ml-base-message}}}}</div>}}
+|{{#ifexpr:{{#var:ml-base-version}} < {{#if:{{{version|}}}|{{{version|}}}|0.0}}|
+<div class="L10n-hidden">{{Help/Box|1=[[Multi-lang]] Usage Error|2=
+Article version supplied exceeds base article version!!!
+*Max article version supported: [[{{#var:langbase}}/version#Article_Version|{{#var:ml-base-version}}]]
+*Article version supplied: {{{version|}}}
+}}</div>}}}}}}|{{#ifexpr:{{#var:ml-base-version}} < 0.0|[[Category:Articles in need of version number{{#var:ml-cat}}{{#var:lang}}]]|}}}}}}{{#vardefine:ml-included|{{#if:{{{multiple|}}}||*}}}}</div></onlyinclude>
+
+== Syntax ==
+ <nowiki>{{Multi-lang|PageName|Language Code}}</nowiki>
+
+* '''PageName''' (optional) - the name of the page to display language links for.  If omitted then the English version of the current page is used.  This parameter can normally be omitted, as it is only required if you want to link to a page other than the one you place the template on, which is very uncommon.  If this parameter is used on a sub-page make sure you supply the root name, not the full page name (e.g. on [[MediaWiki/fr]] you would need to use <code><nowiki>{{Multi-lang|MediaWiki}}</nowiki></code> and not <code><nowiki>{{Multi-lang|MediaWiki/fr}}</nowiki></code>).
+
+== Usage ==
+Place this template on pages that exist in more than one language in the same location on each translation of the page.
+
+The English version of a page is always the main version, with all other languages as sub-pages, named using the appropriate language code (see below). 
+
+For example, on the Main Page you would include the text <code><nowiki>{{Multi-lang}}</nowiki></code>, both on [[Main Page]] itself, and on each of its language sub-pages.  The template automatically creates links to any language sub-pages that exist, e.g. <tt>Main Page/ja</tt>, <tt>Main Page/fr</tt>, and ignores non-existent languages.
+
+See [[Project:Languages]] for further details about translating pages.
+
+== Supported languages ==
+The template contains a list of supported languages.  Although it is easy to add a new language to the list, do not add unnecessary languages.  The language that has no pages in that language should be kept out of the list.
+
+== Articles in need of translation ==
+
+The following link to articles in need of translation. They are in no particular order.
+
+{{Needs_Translation|style={{NewStyle|column-width|8em|moz=*|webkit=*}}|col=10}}
+
+== Versioning ==
+
+The template offers the possibility to define a version number for an English parent article. If such a value is defined, translated articles need to match the version number. In case they don't match, they're registered to subcategories of [[:Category:Articles in need of updating]]. For example [[:Category:Articles in need of updating/KB/de]] or [[:Category:Articles in need of updating/LSL/fr]]. Additionally, a message box is displayed on top of the article, in order to inform about the needed update. This message box can contain information on the update, to make it easier for translators to find the changes and to sync it with the translated versions.
+
+To define a version number, create a subpage at ''English_Article_Name/version'' and add
+
+ <nowiki>{{Multi-lang/Version
+ |version number
+ |title
+ |message
+ }}</nowiki>
+
+For example:
+
+ <nowiki>{{Multi-lang/Version
+ |2
+ |needs update
+ |A new paragraph is added to the English article.
+ }}</nowiki>
+
+The version number for translated articles can be set via the '''version''' parameter. E.g.:
+
+ <nowiki>{{Multi-lang
+ |English Article
+ |/ISO-639-1-code
+ |version=2
+ }}</nowiki>
+
+Translated articles can be exempt from the update-prompt by setting them to a ''negative'' version number.
+
+== Origin ==
+This template is originally taken from [http://www.mediawiki.org/wiki/Template:Languages Template:Languages on the MediaWiki web site].
+
+[[Category:L10n Templates]]

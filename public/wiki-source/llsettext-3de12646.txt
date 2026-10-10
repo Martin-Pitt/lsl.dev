@@ -1,0 +1,262 @@
+{{LSL_Function
+|inject-2={{:PRIM_TEXT|set}}{{Issues/SVC-4539}}{{Issues/BUG-11077}}
+|func_id=152
+|func_sleep=0.0
+|func_energy=10.0
+|func=llSetText
+|sort=SetText
+|p1_type=string|p1_name=text
+|p2_type=vector|p2_name=color
+|p3_type=float|p3_name=alpha
+|func_desc=Displays {{LSLP|text}} that hovers over the prim with specific {{LSLP|color}} and translucency (specified with {{LSLP|alpha}}).
+|return_text
+|spec=
+|caveats=
+*If more than one [[llSetText]] is called (By reset,interaction or script state) within a prim the latest call will take priority over the previous.
+*{{LSLP|text}} is limited to 254 [[bytes]] (compare [[Limits#Building]]) in UTF-8 encoding. If the [[string]] is longer it will be truncated to 254 [[bytes]], and any multibyte characters getting split will be removed entirely.
+*An unbroken line of text of a great length may be broken automatically into two lines (one above the other).
+*{{LSLP|text}} can be seen through walls and other object. Be considerate of neighbors in malls and apartment buildings.
+**Visibility distance increases with prim size.
+*Removing the script or deactivating it '''will not remove''' a prim's {{LSLP|text}} property. Floating {{LSLP|text}} is not dependent on a script for its continued existence but only when wanting to change it.
+*To remove a prim's {{LSLP|text}}, use the following:
+{{{!}} class="sortable" width="100%" {{Prettytable}}
+{{!}}- {{Hl2}}
+! '''Preferred method to remove a prim's floating {{LSLP|text}}'''
+! '''Second method does the same effect-wise.'''
+{{!}}-
+{{!!}}
+<syntaxhighlight lang="lsl2">
+//  empty string & black & transparent
+    llSetText("", ZERO_VECTOR, 0);
+</syntaxhighlight>
+{{!!}}
+<syntaxhighlight lang="lsl2">
+//  empty string & black & transparent
+    llSetText("", <0.0, 0.0, 0.0>, 0.0);
+</syntaxhighlight>
+{{!}}}
+*Vertical whitespace is removed from the end of the {{LSLP|text}} string, so if you want vertical whitespace put any character (like a space) on the last line.
+*Multiple linebreaks with empty lines are converted to a single linebreak, so add a whitespace character on every line you want to skip:
+{{{!}} class="sortable" width="100%" {{Prettytable}}
+{{!}}- {{Hl2}}
+! '''Good'''
+! '''Bad'''
+{{!}}-
+{{!!}}
+<syntaxhighlight lang="lsl2">
+    vector COLOR_WHITE = <1.0, 1.0, 1.0>;
+    float  OPAQUE      = 1.0;
+
+    llSetText("Monkeys\n \n \n \n \n ", COLOR_WHITE, OPAQUE);
+</syntaxhighlight>
+{{!!}}
+<syntaxhighlight lang="lsl2">
+    vector COLOR_WHITE = <1.0, 1.0, 1.0>;
+    float  OPAQUE      = 1.0;
+
+    llSetText("Monkeys\n\n\n\n\n", COLOR_WHITE, OPAQUE);
+</syntaxhighlight>
+{{!}}}
+*'''Measurements showed a high impact of process time when doing numerous iterations in a while loop'''. For approx. 65 thousand iterations the process times are ca. 5 seconds without floating text, 24 seconds with [[llSetText]] and 96 seconds when using [[llSetPrimitiveParams#llSetLinkPrimitiveParamsFast]] in combination with [[PRIM_TEXT]]. Thats why you are '''not advised''' to make excessive use of changing a prim's {{LSLP|text}} within such iterations.
+|examples=
+Example of how [[llSetText]] could be used to show prim's name in green {{LSLP|text}}:
+<syntaxhighlight lang="lsl2">
+default
+{
+    state_entry()
+    {
+        vector COLOR_GREEN = <0.0, 1.0, 0.0>;
+        float  OPAQUE      = 1.0;
+
+//      prim's name (not necessarily object's)
+        llSetText(llGetObjectName(), COLOR_GREEN, OPAQUE );
+
+//      delete the script as we only needed it to change the floating text property
+        llRemoveInventory(llGetScriptName());
+    }
+}
+</syntaxhighlight>
+By default the floating {{LSLP|text}} will appear on a single line. However, it can be spread over multiple lines by using a line break <code>"\n"</code> (read [[SplitLine]] in section 'See Also').
+
+===String escape codes:===
+
+LSL has four [[String#Escape Codes|string escape codes]]:
+* <code>\n</code> for a new line
+* <code>\\</code> for a backslash
+* <code>\t</code> for a tab
+* <code>\"</code> for a double-quote
+
+===Color & Alpha===
+
+{{{!}} class="sortable" {{Prettytable}}
+{{!}}- {{Hl2}}
+! Color
+! Code
+{{!}}-
+{{!}} style="color: white; background: #001f3f" {{!}}NAVY
+{{!}}<code><0.000, 0.122, 0.247></code>
+{{!}}-
+{{!}} style="background: #0074d9" {{!}}BLUE
+{{!}}<code><0.000, 0.455, 0.851></code>
+{{!}}-
+{{!}} style="background: #7fdbff" {{!}}AQUA
+{{!}}<code><0.498, 0.859, 1.000></code>
+{{!}}-
+{{!}} style="background: #39cccc" {{!}}TEAL
+{{!}}<code><0.224, 0.800, 0.800></code>
+{{!}}-
+{{!}} style="background: #3d9970" {{!}}OLIVE
+{{!}}<code><0.239, 0.600, 0.439></code>
+{{!}}-
+{{!}} style="background: #2ecc40" {{!}}GREEN
+{{!}}<code><0.180, 0.800, 0.251></code>
+{{!}}-
+{{!}} style="background: #01ff70" {{!}}LIME
+{{!}}<code><0.004, 1.000, 0.439></code>
+{{!}}-
+{{!}} style="background: #ffdc00" {{!}}YELLOW
+{{!}}<code><1.000, 0.863, 0.000></code>
+{{!}}-
+{{!}} style="background: #ff851b" {{!}}ORANGE
+{{!}}<code><1.000, 0.522, 0.106></code>
+{{!}}-
+{{!}} style="background: #ff4136" {{!}}RED
+{{!}}<code><1.000, 0.255, 0.212></code>
+{{!}}-
+{{!}} style="color: white; background: #85144b" {{!}}MAROON
+{{!}}<code><0.522, 0.078, 0.294></code>
+{{!}}-
+{{!}} style="background: #f012be" {{!}}FUCHSIA
+{{!}}<code><0.941, 0.071, 0.745></code>
+{{!}}-
+{{!}} style="color: white; background: #b10dc9" {{!}}PURPLE
+{{!}}<code><0.694, 0.051, 0.788></code>
+{{!}}-
+{{!}} style="background: #ffffff" {{!}}WHITE
+{{!}}<code><1.000, 1.000, 1.000></code>
+{{!}}-
+{{!}} style="background: #dddddd" {{!}}SILVER
+{{!}}<code><0.867, 0.867, 0.867></code>
+{{!}}-
+{{!}} style="background: #aaaaaa" {{!}}GRAY
+{{!}}<code><0.667, 0.667, 0.667></code>
+{{!}}-
+{{!}} style="color: white; background: #111111" {{!}}BLACK
+{{!}}<code><0.000, 0.000, 0.000></code>
+{{!}}}
+
+The x, y & z [[Vector#Components|components of the vector]] are used to represent red, green, and blue respectively. The range is <span style="background-color: yellow">different from traditional RGB</span>, instead of being 0 -> 255, LSL uses 0 -> 1. <code><1.0, 1.0, 1.0></code> represents "white" and <code><0.0, 0.0, 0.0></code> represents "black":
+<syntaxhighlight lang="lsl2">
+//  white & opaque
+    llSetText("I am white", <1.0, 1.0, 1.0>, 1.0);
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+    vector myColor;// defaults to ZERO_VECTOR or <0.0, 0.0, 0.0> which is black
+
+    llSetText("I am black and 30% transparent.", myColor, 0.7);
+
+    llSleep(7.5);   // before: <0.0, 0.0, 0.0> black
+    myColor.x = 1.0;// now:    <1.0, 0.0, 0.0> red
+
+    llSetText("I am now red and 10% transparent.", myColor, 0.9);
+</syntaxhighlight>
+If {{LSLP|alpha}} is 1.0 it means the {{LSLP|text}} is fully opaque (alpha), 0.0 would make it completely transparent (invisible):
+<syntaxhighlight lang="lsl2">
+    llSetText("green text with alpha 0.7", <0.0, 1.0, 0.0>, 0.7);
+
+    llSetText("white text with alpha 0.4\n60% transparent", <1.0, 1.0, 1.0>, 0.4);
+    llSetText("white text with alpha 1.0\nfully opaque", <1.0, 1.0, 1.0>, 1.0);
+
+//  next to lines have the same effect
+    llSetText("invisible black text with alpha 0.0\nfully transparent", ZERO_VECTOR, 0);
+    llSetText("invisible black text with alpha 0.0\nfully transparent", <0.0, 0.0, 0.0>, 0.0);
+</syntaxhighlight>
+===Multiple lines===
+<syntaxhighlight lang="lsl2">
+//  two lines of orange text
+
+    llSetText("I am\non two lines!", <1.0, 0.4, 0.0>, 1.0);
+</syntaxhighlight>
+|helpers=
+Drag this script out of inventory onto an object to erase its set text:
+<syntaxhighlight lang="lsl2">
+// http://wiki.secondlife.com/wiki/llSetText
+
+default
+{
+    state_entry()
+    {
+//      remove floating text (empty string & black & 100% transparent)
+        llSetText("", ZERO_VECTOR, 0.0);
+
+//      delete the script as we only needed it to change the floating text property
+        llRemoveInventory(llGetScriptName());
+    }
+}
+</syntaxhighlight>
+Code to easily specify appearance of hovertext:
+<syntaxhighlight lang="lsl2">
+vector NAVY    = <0,     0.122, 0.247>;
+vector BLUE    = <0,     0.455, 0.851>;
+vector AQUA    = <0.498, 0.859, 1    >;
+vector TEAL    = <0.224, 0.8,   0.8  >;
+vector OLIVE   = <0.239, 0.6,   0.439>;
+vector GREEN   = <0.18,  0.8,   0.251>;
+vector LIME    = <0.004, 1    , 0.439>;
+vector YELLOW  = <1    , 0.863, 0    >;
+vector ORANGE  = <1    , 0.522, 0.106>;
+vector RED     = <1    , 0.255, 0.212>;
+vector MAROON  = <0.522, 0.078, 0.294>;
+vector FUCHSIA = <0.941, 0.071, 0.745>;
+vector PURPLE  = <0.694, 0.051, 0.788>;
+vector WHITE   = <1    , 1    , 1    >;
+vector SILVER  = <0.867, 0.867, 0.867>;
+vector GRAY    = <0.667, 0.667, 0.667>;
+vector BLACK   = <0.000, 0.000, 0.000>;
+
+string  hoverText   = "TEXT GOES HERE";
+vector  hoverColor  = LIME;//  set predefined color or any RGB color vector in float form
+float   hoverAlpha  = 1.0; // Sets the text's transparency, 1.0 being opaque, while 0.0 would be transparent
+
+default
+{
+    state_entry()
+    {
+        llSetText(hoverText, hoverColor, hoverAlpha);
+    }
+}
+</syntaxhighlight>
+To make hovertext when using linked prims you can use this simple function:
+<syntaxhighlight lang="lsl2">
+mySetLinkText(integer linknum, string text, vector color, float alpha) {
+    llSetLinkPrimitiveParamsFast(linknum, [PRIM_TEXT, text, color, alpha]);
+}
+
+// For example:
+
+default
+{
+    touch_start(integer total_number)
+    {
+        mySetLinkText(LINK_SET, "TEST", <0, 1, 0>, 0.5);
+    }
+}
+</syntaxhighlight>
+|also
+|also_functions
+|also_constants=
+{{LSL DefineRow||[[PRIM_TEXT]]}}
+|also_articles=
+{{LSL DefineRow||[[:Category:LSL Examples|Examples]]: [[SplitLine]]|Insert 'new line' escape codes at certain positions of a string}}
+{{LSL DefineRow||Useful snippet: [[llGetObjectPermMask]]|Label an object with text and newlines to give away or sell}}
+{{LSL DefineRow||[[escape codes]]|for details on how and when they work}}
+
+|notes=To actually display text on a prim, see [[XyzzyText]], or consider using parcel prim [[:Category:LSL_Media|Media]] options (useful only if you have control over the land's media settings.)
+----
+The function displays {{LSLP|text}} that hover over the prim's center, the prim position. The height over the center is proportional to the prim's Z-dimension exclusively
+* It doesn't matter how the prim is rotated, so if Z is smaller than X and Y the {{LSLP|text}} may be seen {{LSLP|on}} the prim
+|cat1=Effects
+|cat2=Prim
+|cat3=Stop
+|cat4=Floating Text
+}}

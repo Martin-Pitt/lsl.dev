@@ -1,0 +1,122 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-3272}}{{Issues/STORM-2006}}{{Issues|BUG-4929|[[llModifyLand]] modifies wrong location in region, when called in a child prim|type=bug}}
+|func_id=159|func_sleep=0.0|func_energy=10.0
+|func=llModifyLand
+|p1_type=integer|p1_name=action|p1_desc=LAND_* flag
+|p2_type=integer|p2_name=brush|p2_desc=LAND_BRUSH_* flag
+|func_footnote=The position of the prim is used to determine the input for various flags.
+|func_desc=Modify land with {{LSLP|action}} on {{LSLP|brush}}
+|return_text
+|spec
+|caveats=*This function has no effect if the script's owner is offline or not in the same sim as the scripted object.
+*Uncontrolled use of llModifyLand in scripted objects may force the region's navmesh to rebake continually and cause Memory Allocated for the region to exceed its limit, making it impossible to rez objects. ({{jira|BUG-9047}})
+*This function has no effect if the scripted object is deeded to a group.
+* "LAND_BRUSH_*" constants are only present on Lua-enabled sims. On older sims, use their values 0, 1, and 2 instead. The "LAND_*_BRUSH" constants have incorrect values and are not recommended
+*If the script is in a prim that is attached to an avatar or is in the child prim of a linkset, then the local position relative to it's attachment point or root prim is used rather than the position within the region. ({{jira|BUG-4929}})
+*If land is not owned by script owner or the owner doesn't have terraform permissions, the script will silently fail.
+*You cannot change altitude beyond land terraform limits for the specified parcel..
+|constants=
+<div>
+<div style="width:auto; height:auto; display:inline; vertical-align:top;">
+<div style="display:table-cell; vertical-align:top;" valign="top">
+{{{!}} class="sortable" border="2" cellspacing="0" cellpadding="3" rules="all" style="margin:0 1em 1em 0; border:solid 1px #AAAAAA; border-collapse:collapse; background-color:#F9F9F9; font-size:90%; empty-cells:show; vertical-align:top;"
+{{!}}-{{Hl2}}
+!Action
+!title="Value"{{!}}
+!class="unsortable"{{!}}Description
+{{!}}-
+{{!}}{{LSL Const|LAND_LEVEL|integer|0|c=Levels on prim center}}
+{{!}}{{#var:value}}
+{{!}}{{#var:comment}}
+{{!}}-
+{{!}}{{LSL Const|LAND_RAISE|integer|1|c=Raises the land}}
+{{!}}{{#var:value}}
+{{!}}{{#var:comment}}
+{{!}}-
+{{!}}{{LSL Const|LAND_LOWER|integer|2|c=Lowers the land}}
+{{!}}{{#var:value}}
+{{!}}{{#var:comment}}
+{{!}}-
+{{!}}{{LSL Const|LAND_SMOOTH|integer|3|c=Smooths the land}}
+{{!}}{{#var:value}}
+{{!}}{{#var:comment}}
+{{!}}-
+{{!}}{{LSL Const|LAND_NOISE|integer|4|c=Makes the land rough}}
+{{!}}{{#var:value}}
+{{!}}{{#var:comment}}
+{{!}}-
+{{!}}{{LSL Const|LAND_REVERT|integer|5|c=Restores to baked value}}
+{{!}}{{#var:value}}
+{{!}}{{#var:comment}}
+{{!}}}
+</div>
+</div>
+<div style="width:auto; height:auto; display:inline; vertical-align:top;">
+<div style="display:table-cell; vertical-align:top;" valign="top">
+{{{!}} class="sortable" border="2" cellspacing="0" cellpadding="3" rules="all" style="margin:0 1em 1em 0; border:solid 1px #AAAAAA; border-collapse:collapse; background-color:#F9F9F9; font-size:90%; empty-cells:show; vertical-align:top;"
+{{!}}-{{Hl2}}
+!Brush
+!{{HoverText|Value|Use these instead of the constant names}}
+! Size
+{{!}}-
+{{!}}{{LSL Const|LAND_BRUSH_SMALL|integer|0|c=2m x 2m|nolink=*}}
+{{!}}0
+{{!}}2m x 2m
+{{!}}-
+{{!}}{{LSL Const|LAND_BRUSH_MEDIUM|integer|1|c=4m x 4m|nolink=*}}
+{{!}}1
+{{!}}4m x 4m
+{{!}}-
+{{!}}{{LSL Const|LAND_BRUSH_LARGE|integer|2|c=8m x 8m|nolink=*}}
+{{!}}2
+{{!}}8m x 8m
+{{!}}-
+{{!}}<s>{{LSL Const|LAND_SMALL_BRUSH|integer|1|c=Should do 2m x 2m but does 4m x 4m|nolink=*}}</s>
+{{!}}1
+{{!}}4m x 4m
+{{!}}-
+{{!}}<s>{{LSL Const|LAND_MEDIUM_BRUSH|integer|2|c=Should do 4m x 4m but does 8m x 8m|nolink=*}}</s>
+{{!}}2
+{{!}}8m x 8m
+{{!}}-
+{{!}}<s>{{LSL Const|LAND_LARGE_BRUSH|integer|3|c=8m x 8m|nolink=*}}</s>
+{{!}}3
+{{!}}8m x 8m
+{{!}}-class="sortbottom"
+{{!}}colspan="3"{{!}}<small>The "LAND_*_BRUSH constants are wrong.<br/>Use the "LAND_BRUSH_*" constants instead.</small>
+{{!}}style="display:none;"{{!}}
+{{!}}style="display:none;"{{!}}
+{{!}}}
+</div>
+</div>
+</div>
+|examples=
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(0.1);
+    }
+    
+    timer()
+    {
+        llModifyLand(LAND_LEVEL, LAND_BRUSH_SMALL);
+    }
+}
+</source>
+|helpers
+|also_functions
+|also_tests
+|also_events
+|also_articles
+|notes
+|signature=
+{{LSL Const/Signature|LAND_BRUSH_SMALL|integer|0|c=2m x 2m}}
+{{LSL Const/Signature|LAND_BRUSH_MEDIUM|integer|1|c=4m x 4m}}
+{{LSL Const/Signature|LAND_BRUSH_LARGE|integer|2|c=8m x 8m}}
+|cat1=Parcel
+|cat2=Ground
+|cat3
+|cat4
+}}

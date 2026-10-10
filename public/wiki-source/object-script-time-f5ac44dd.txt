@@ -1,0 +1,32 @@
+{{LSL Constant
+|inject-1
+|name={{PAGENAMEE}}
+|type=integer
+|value=12
+|desc=This is a flag used with [[llGetObjectDetails]] to get the average CPU time (in seconds) used by scripts in an object or agent.  Like [[Viewerhelp:Top_Colliders_and_Top_Scripts|top scripts]], the  time reported is the average script time per frame for the last 30 minutes for all scripts on the object. If the object has been in the region for less than 30 minutes, the number reported will be the average time per frame since the object entered the region.
+
+|examples=
+<source lang="lsl2">// Avatar CPU time check
+default{
+    state_entry(){
+     llSetText("Touch to find your\nscript cpu usage", <1.0,1.0,1.0>, .8);  
+    }
+    
+    touch_start(integer total_number){
+        list details = llGetObjectDetails(llDetectedKey(0), ([OBJECT_SCRIPT_TIME]));
+        integer script_time = (integer)(llList2Float(details,0) * 1e6);
+        llSay(0, llDetectedName(0)+ " is using " + (string)script_time +" µs of script time, on average.");
+    }
+}
+</source>
+
+
+
+|functions={{LSL DefineRow||[[llGetObjectDetails]]}}
+|constants={{!}}{{LSL_Constants/Object_Details}}
+|events
+|cat1=Prim
+|cat2=
+|cat3
+|cat4
+}}

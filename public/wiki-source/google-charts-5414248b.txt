@@ -1,0 +1,98 @@
+{{LSL Header}}
+
+This script allows you to take an existing list of values and represent it as a chart using [http://code.google.com/apis/chart/ Google's Chart API]. The example here takes a list of visitors per hour and represents it as a bar chart. The simpleEncoding method provided by Google has been converted to LSL script.
+
+[http://chart.apis.google.com/chart?chs=200x125&chd=s:99WPHmWPPWHetWe1mtmmemmte&cht=lc&chxt=x,y&chxl=0:|4AM|4PM|4AM|1:||8 Example]
+
+<source lang="lsl2">
+string simpleEncode(list values, float min, float max)
+{
+    string text = "";
+    float range = 244 / (min - max);//4 * 61
+    integer index = -llGetListLength(values);
+
+    do
+    {
+        integer type = llGetListEntryType(values, index);
+        if(type == TYPE_FLOAT || type == TYPE_INTEGER)
+            text = llGetSubString(llIntegerToBase64((integer)(range * (min - llList2Float(values, index)))), 4, 4) + text;
+        else
+            text = "_" + text;
+
+        ++index;
+    }
+    while (index);
+
+    return text;
+}
+
+string cleanup(float value)
+{
+    string str = (string)value;
+    if(value >= 10.0)
+        return llGetSubString(str, 0, -8);
+
+    integer i = -1;
+    while(llGetSubString(str, i, i) == "0")
+        --i;
+
+    if(llGetSubString(str, i, i) == ".")
+        --i;
+
+    return llGetSubString(str, 0, i);
+}
+
+string chartUrl(list values, list captions, integer yDivisions)
+{
+    integer min = llFloor(llListStatistics(LIST_STAT_MIN, values));
+    integer max = llCeil(llListStatistics(LIST_STAT_MAX, values));
+
+    string url = "http://chart.apis.google.com/chart"
+               + "?chs=200x125"
+               + "&chd=s:" + simpleEncode(values, min, max)
+               + "&cht=lc"
+               + "&chxt=x,y"
+               + "&chxl=0:";
+
+    integer index = -llGetListLength(captions);
+    do
+    {
+        url += "|" + llEscapeURL(llList2String(captions, index));
+        ++index;
+    }
+    while (index);
+
+    url += "|1:";
+    ++yDivisions;
+    float range = max - min;
+
+    index = 1;
+    do
+    {
+        url += "|" + cleanup(((index * range) / yDivisions) + min);
+        ++index;
+    }
+    while (index <= yDivisions);
+
+    return url;
+}
+
+default
+{
+    state_entry()
+    {
+        // PUBLIC_CHANNEL has the integer value 0
+        llSay(PUBLIC_CHANNEL,
+            chartUrl([8,8,3,2,1,5,3,2,2,3,1,4,6,3,4,7,5,6,5,5,4,5,5,6,4], ["4AM", "4PM", "4AM"], 0));
+    }
+
+    touch_start(integer total_number)
+    {
+        llSay(PUBLIC_CHANNEL,
+            chartUrl([8,8,3,2,1,5,3,2,2,3,1,4,6,3,4,7,5,6,5,5,4,5,5,6,4], ["4AM", "4PM", "4AM"], 0));
+    }
+}
+</source>
+
+{{LSLC|Library|Google Charts}} 
+{{LSLC|Examples|Google Charts}}

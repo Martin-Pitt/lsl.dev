@@ -1,0 +1,70 @@
+{{LSL_Function
+|inject-2={{LSL Function/position|pos|region=*}}
+|func=llNavigateTo
+|func_desc=Directs an object to travel to a defined position in the region or adjacent regions.
+|func_footnote=Adjacent regions can be reached by extending the position vector into the nearby region.
+|p1_type=vector
+|p1_name=pos
+|p1_desc=&#32;for the character to navigate to.
+|p1_hover=&#32;for the character to navigate to.
+|p2_type=list
+|p2_subtype=instructions
+|p2_name=options
+|p2_desc=List of parameters to control the type of pathfinding used.
+|constants={{LSL_Constants/NavigateTo}}
+|caveats=
+* Must use llCreateCharacter first or the function will fail with a viewer error.
+* Vertical positions specified for any vectors should be chosen to be as close as possible to the actual height of the surface requested. Large difference between the provided vertical position and the actual terrain/object will result in failure of the behavior.
+* If you want to chase an agent or object as per the example below, it's much more elegant and less sim resource intensive to use [[llPursue]] instead.
+|examples=
+<source lang="lsl2">
+vector last_touched_pos;
+key last_touched_key;
+
+default
+{
+    state_entry()
+    {
+        llCreateCharacter([CHARACTER_DESIRED_SPEED, 50.0]);
+    }
+
+    touch_start(integer total_number)
+    {
+        last_touched_key = llDetectedKey(0);
+        last_touched_pos = llList2Vector(llGetObjectDetails(last_touched_key, [OBJECT_POS]), 0);
+        llNavigateTo(last_touched_pos, []);
+        llSetTimerEvent(0.2);
+    }
+
+    timer()
+    {
+        vector last_touched_pos_now = llList2Vector(llGetObjectDetails(last_touched_key, [OBJECT_POS]), 0);
+        if ( llVecDist(last_touched_pos_now, last_touched_pos) > 1 )
+        {
+            last_touched_pos = last_touched_pos_now;
+            llNavigateTo(last_touched_pos, []);
+        }
+    }
+}
+</source> 
+|notes=
+* FORCE_DIRECT_PATH can be used to rescue characters that have somehow fallen off the navigable zone as it doesn't use the navmesh.
+(Needs verification.)
+* The position vector can be set outside the current region by using extended range region coordinates: e.g., to go to the SE corner of the region to the East of the current one, you could llNavigateTo(<0.0, 512.0, 0.0>, []); 
+|also_functions=
+* [[llCreateCharacter]]
+* [[llDeleteCharacter]]
+* [[llEvade]]
+* [[llExecCharacterCmd]]
+* [[llGetClosestNavPoint]]
+* [[llFleeFrom]]
+* [[llNavigateTo]]
+* [[llPatrolPoints]]
+* [[llPursue]]
+* [[llUpdateCharacter]]
+* [[llWanderWithin]]
+|also_events=
+* [[path_update]]
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/12#12.07.31.262785 | 31/07/2012 ]]
+|cat1=Pathfinding
+}}

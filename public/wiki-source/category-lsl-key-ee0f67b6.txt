@@ -1,0 +1,125 @@
+{{LSL Header|ml=*}}{{LSLC|}}{{LSLC|Types}}
+
+== Intro: ==
+
+A key is a '''universal unique identifier''' in Second Life for anything mostly, be it a [[prim]], [[avatar]], [[:Category:LSL_Texture|texture]], etc.
+
+You may see key referred to as [[UUID]], UID, "Asset UUID", or "asset-ID".
+
+The key itself is formed of {{Wikipedia|Hexidecimal|hexadecimal}} characters <code>[0-9a-f]</code> and each section of the key is broken up by dashes (for a total amount of 36 characters).
+
+<syntaxhighlight lang="lsl2">
+    key whatever = "01234567-89ab-cdef-0123-456789abcdef";
+</syntaxhighlight>
+
+'''Some keys''' in Second Life are a [http://en.wikipedia.org/wiki/UUID#Version_4_.28random.29 UUID-4] as defined in {{RFC|4122|target=section-4.1.3}}.
+
+<syntaxhighlight lang="lsl2">
+    key uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
+
+//  where:
+//      4 is 4
+//      x is [0-9a-f]
+//      y is [8-9a-b]
+</syntaxhighlight>
+
+== Receiving keys: ==
+
+There are several ways to acquire the key of something:
+
+# Having someone supply it to you;
+# Using a built-in [[LSL_Portal|LSL]] [[:Category:LSL_Functions|function]] such as [[llGetKey]], [[llGetLinkKey]] etc.
+# In your inventory, right-clicking over something and choosing <code>Copy Asset UUID</code>. Note this will only work on items that you have full permissions to.
+
+== Generating keys: ==
+
+Built-in [[LSL_Portal|LSL]] [[:Category:LSL_Functions|functions]]:
+
+{|{{Prettytable}}
+|+
+|-{{Hl2}}
+!function
+!purpose
+|-
+|| [[llGenerateKey]] || Generates a key using [http://en.wikipedia.org/wiki/UUID#Version_5_.28SHA-1_hash.29 Version 5 (SHA-1 hash)] [[UUID]] generation to create a unique key.
+|}
+
+User-defined functions:
+{|{{Prettytable}}
+|+
+|-{{Hl2}}
+!function
+!purpose
+|-
+|| [[GenerateKey]] || Generates an MD5-based (version 3) type UUID. Useful for identifying link-messages and for other purposes.
+|-
+|| [[GenUUID]] || Generates a UUID based on PHP com_create_guid.
+|}
+
+== Converting Keys: ==
+
+When a key is supplied to you as a text [[string]], you convert it to the key data-type like this:
+
+<syntaxhighlight lang="lsl2">key whatever = (key)"01234567-89ab-cdef-0123-456789abcdef";</syntaxhighlight>
+
+Implicit conversion will happen automatically when supplying a string where a key is required.
+
+<syntaxhighlight lang="lsl2">key uuid = "01234567-89ab-cdef-0123-456789abcdef";
+llKey2Name("01234567-89ab-cdef-0123-456789abcdef");</syntaxhighlight>
+
+However there is no implicit conversion with [[llListFindList]]. [[llListFindList]] requires not only the values to match but also the types. 
+
+<syntaxhighlight lang="lsl2">llListFindList(["01234567-89ab-cdef-0123-456789abcdef"], [(key)"01234567-89ab-cdef-0123-456789abcdef"]) == -1;</syntaxhighlight>
+
+
+== Displaying avatar or group information: ==
+
+If you know an avatar's key, you can display the avatar's name in the viewer window and chat history by using the following special URL:
+<syntaxhighlight lang="lsl2">llOwnerSay("secondlife:///app/agent/" + (string)owner_key + "/about");</syntaxhighlight>
+
+This displays both [[Display names|display name]] and [[Usernames|username]] as a clickable link that brings up an avatar profile window when clicked.  It is easier than using [[llRequestAgentData]] or [[llRequestUsername]] or [[llRequestDisplayName]], since there is no need to use a [[dataserver]] event.
+
+If you know a group key (as a result of calling <code>[[llGetObjectDetails]]([[key]] id, <nowiki>[</nowiki>[[OBJECT_GROUP]]<nowiki>]</nowiki>)</code>, or calling <code>[[llGetParcelDetails]]([[vector]] pos, <nowiki>[</nowiki>[[PARCEL_DETAILS_GROUP]]<nowiki>]</nowiki>)</code>), you can display the group's name with the following special URL:
+<syntaxhighlight lang="lsl2">llOwnerSay("secondlife:///app/group/" + (string)group_key + "/about");</syntaxhighlight>
+
+This displays the group name as a clickable link that brings up a group profile window when clicked.  This is especially useful since there is no other way to do this; there is no LSL function to print out a group's name.
+
+Finally, if you know a [[Land#Parcel|parcel]] key (as a result of calling <code>[[llGetParcelDetails]]([[vector]] pos, <nowiki>[</nowiki>[[PARCEL_DETAILS_ID]]<nowiki>]</nowiki>)</code>), you can create a clickable link that brings up a place profile window when clicked, using the following special URL:
+<syntaxhighlight lang="lsl2">llOwnerSay("secondlife:///app/parcel/" + (string)parcel_key + "/about");</syntaxhighlight>
+
+== Testing for a valid key: ==
+
+To test for a valid key, just do this:
+
+<syntaxhighlight lang="lsl2">if(uuid){
+     //do something
+}</syntaxhighlight>
+
+<code>if(uuid)</code> will only return true if it is supplied a key that is both (A) valid, and (B) NOT a [[NULL_KEY]].
+
+Tip! In techy talk, this method is called "passing it as the parameter for a {{LSLGC|Conditional|conditional}}"
+
+Note! It is important for the above example that <code>uuid</code> be defined as a key. It can of course be typecast to be a key as well: <code>if((key)uuid)</code>
+
+Here is an example of how to build a function around this:
+
+<syntaxhighlight lang="lsl2">
+// 2:         valid key, not NULL_KEY
+// 1 (TRUE):  NULL_KEY
+// 0 (FALSE): not a key
+
+integer isKey(key in)
+{
+    if (in)
+        return 2;
+    return (in == NULL_KEY);
+}
+</syntaxhighlight>
+
+== Caveats: ==
+* Assigning an arbitrary string to a key is allowed and the key variable retains the string value, but will be considered an invalid key unless it matches the correct key character pattern with hexadecimal digits and dashes. In most contexts invalid keys work like the NULL_KEY, e.g. if given to a function that can filter by UUID such as [[llListen]], no filtering will be performed.
+* <syntaxhighlight lang="lsl2">if (uuid)</syntaxhighlight> is a special case. Keys cannot be converted to [[Integer|integers]], so logical [[LSL_Operators|operators]] such as <code>!</code>, <code>||</code> and <code>&&</code> cannot be used with keys. If you wish to do <syntaxhighlight lang="lsl2">if (!uuid) { /* wont work */ }</syntaxhighlight> then you can use a simple workaround like so: <syntaxhighlight lang="lsl2">if (uuid) { } else { /* will work */ }</syntaxhighlight> This is particularly useful if we wish to discard invalid string content (i.e - ensure that a key is actually a key) like so:<syntaxhighlight lang="lsl2">if (uuid) ; else uuid = NULL_KEY;</syntaxhighlight>
+* Checking key validity with an if statement doesn't ensure the key actually refers to an asset, an avatar or anything at all, only that it has the correct structure.
+* Be careful when adding key literals to lists, no implicit typecasting will take place. Failing to ensure that key literals are keys will cause problems with [[llListFindList]].
+* Furthermore, LSO and Mono do not work the same when it comes to typecasting strings to keys.
+** There is a bug in LSO that LL has declined to fix, the reason given is that fixing it would break existing content.

@@ -1,0 +1,41 @@
+{{LSL_Function
+|inject-1={{LSL Function/warning|Security|The SHA-1 hashing algorithm is considered broken but the attacks are largely still theoretical and not very practical. Consider the more secure [[llSHA256String]]. {{Wikipedia|SHA-1#Comparison_of_SHA_functions|Comparison of SHA functions}}}}
+|func_id=343|func_sleep=0.0|func_energy=10.0
+|func=llSHA1String|return_type=string|p1_type=string|p1_name=src
+|func_footnote
+|func_desc
+|return_text=of 40 hex characters that is the {{Wikipedia|SHA-1|SHA-1}} security hash of {{LSLP|src}}.
+|spec=LSL strings are stored in the UTF-8 format.
+|caveats=There's no way to input a zero-byte value into this function, nor any byte value from 128-255, therefore it's currently broken for many purposes (like HMAC-SHA1). The reason is because LSL strings cannot have a unicode null character (U+0000) in them, and LSL has no escape code for the null character (many programming languages use \0 but LSL does not have this feature). llEscapeURL("%00") yields an empty string. As well, inside this function, each character with a Unicode integer value over U+0127 / 007F are dealt with in UTF-8 fashion: in the hex values, 0xC2 is appended to the byte value (hence 0x0080-0x00FF become 0xC280-0xC2FF inside the llSHA1String() routine). A JIRA has been filed for this.
+|constants
+|examples=
+<source lang="lsl2">
+llSay(0, llSHA1String("Hello, Avatar!")); // returns 2E73318E547AF1B28CC0C96F95DDC9B1EE906B8D
+</source>
+
+====Linux Example====
+<pre>
+$ echo -n 'Hello, Avatar!' | openssl sha1
+2E73318E547AF1B28CC0C96F95DDC9B1EE906B8D
+</pre>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llMD5String]]}}
+{{LSL DefineRow||[[llSHA256String]]}}
+|also_tests
+|also_events
+|also_articles=
+{{LSL DefineRow||[[SHA-1]] (script implementation)}}
+|notes
+|deepnotes=
+Prior to this, the only way to get the SHA-1 hash was to use the LSL SHA-1 port: [[SHA-1]]
+|history=
+*{{SVN|1291|rev=98903|trunk=*|anchor=file13|ver=1.21.5.97417|ser=1.24.9.98650}} Initial introduction.
+*{{SVN|1298|rev=99021|branch=OpenAL|ver=1.21.5.97417|ser=1.24.9.98650|path=branches/openal/indra/lscript/lscript_library/lscript_library.cpp}} 
+Integration into OpenAL branch.
+* Date of Release [[ Release_Notes/Second_Life_Beta_Server/1.25#Server_Release_Notes.2C_Second_Life_Beta_Server_1.25.0 | 2008-10-31 ]]
+|cat1=Hash
+|cat2=Encoding
+|cat3
+|cat4
+}}{{LSLC{{#var:lang}}|Encryption|llSHA1String}}

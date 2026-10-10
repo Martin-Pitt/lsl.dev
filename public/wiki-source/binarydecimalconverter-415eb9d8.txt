@@ -1,0 +1,41 @@
+{{LSL Header}}
+The next function converts a binary value to a decimal number. Works +/- 5 times faster than [[Base2Dec]] :
+<source lang="lsl2">integer binToDec(string val)
+{
+    integer dec = 0;
+    integer i = ~llStringLength(val);
+    while(++i)
+        dec = (dec << 1) + (integer)llGetSubString(val, i, i);
+    return dec;
+}</source>
+
+This one converts a decimal to a binary value:
+
+<source lang="lsl2">string decToBin(integer val)
+{
+    string binary = (string)(val & 1);
+    for(val = ((val >> 1) & 0x7FFFffff); val; val = (val >> 1))
+    {
+        if (val & 1)
+            binary = "1" + binary;
+        else
+            binary = "0" + binary;
+    }
+    return binary;
+}</source>
+
+Greets from Soundless :)
+
+This version of decToBin doesn't crash on negatives, is shorter source code and about 50 bytes shorter in Mono bytecode than the original, but sadly about 50% slower. << and >> are expensive on bytecode.
+
+<source lang="lsl2">
+string decToBin(integer val)
+{
+    string binary;
+    do
+        binary = (string) (val & 1) + binary;
+    while (val /= 2);
+    return binary;
+}
+</source>
+((Omei))

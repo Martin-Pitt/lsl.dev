@@ -1,0 +1,35 @@
+Put this script in an attachment to make your avatar smile.
+
+<syntaxhighlight lang="lsl2">
+//  be happy
+
+default
+{
+    attach(key attached)
+    {
+        if (attached)
+            llResetScript();
+    //  else
+    //      has been detached
+    }
+
+    state_entry()
+    {
+        key owner = llGetOwner();
+
+        llRequestPermissions(owner, PERMISSION_TRIGGER_ANIMATION);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if(perm & PERMISSION_TRIGGER_ANIMATION)
+            llSetTimerEvent(5.0);
+    }
+
+    timer()
+    {
+        llStartAnimation("express_toothsmile");
+    }
+}
+</syntaxhighlight>
+{{LSLC|Examples|Be happy}}

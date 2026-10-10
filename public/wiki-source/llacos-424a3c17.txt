@@ -1,0 +1,51 @@
+{{LSL Function
+|func_id=172|func_sleep=0.0|func_energy=10.0
+|func=llAcos|sort=Acos
+|return_type=float
+|p1_type=float|p1_name=val|p1_desc=must fall in the range {{Interval|gte=-1.0|center=val|lte=1.0}}
+|p1_hover=must fall in the range {{Interval/Text2|gte=-1.0|center=val|lte=1.0}}
+|return_text=that is the arccosine in radians of {{LSLP|val}}
+|func_footnote=The returned value is in the range {{Interval|gte=0.0|center=return|lte=[[PI]]|lteh=PI}}{{Interval/Footnote}}, or {{abbr|NaN|not a number}} signifying a complex result when the parameter is out of range.
+|spec
+|caveats=*Triggers a {{LSLGC|Error/Math|Math Error}} for complex results if not compiled in Mono.
+|examples=
+<syntaxhighlight lang="lsl2">
+//  This example exercises the full valid range of argument from -1.0 to +1.0
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        float random = llFrand(2.0) - 1.0;
+
+        llOwnerSay("The arccosine of " + (string)random + " is " + (string)llAcos(random));
+    }
+}
+</syntaxhighlight>
+
+<syntaxhighlight lang="lsl2">
+// An example for the Law of Cosines to calculate any angle of a triangle from 3 known side lengths.
+default
+{
+    touch_start(integer num_detected)
+    {        
+        vector t = <llFrand(9.0)+1.0, llFrand(9.0)+1.0, llFrand(9.0)+1.0>; // The 3 values of this vector are used to set the lengths of 3 sides of a triangle.
+
+        float anglexy = llAcos((t.x*t.x+t.y*t.y-(t.z*t.z)) / ( 2*t.x*t.y)); // Law Of Cosines
+
+        llOwnerSay("Using the Law Of Cosines, the angle of a triangle between side a=" + (string)t.x + "and side b=" + (string)t.y + " is = " + (string)anglexy + " radians=" + (string)(anglexy * RAD_TO_DEG) + "° and that angle is not on side c=" + (string)t.z);
+    }
+}
+</syntaxhighlight>
+|helpers|related
+|also_functions=
+{{LSL DefineRow|[[llSin]]|[[llAsin]]|sine & inverse Sine}}
+{{LSL DefineRow|[[llCos]]||cosine}}
+{{LSL DefineRow|[[llTan]]|[[llAtan2]]|tangent & inverse tangent}}
+|also_articles={{LSL DefineRow||{{wikipedia|Inverse trigonometric function}}|}}
+|notes
+|cat1=Math/Trigonometry
+|cat2
+|cat3
+|cat4
+}}

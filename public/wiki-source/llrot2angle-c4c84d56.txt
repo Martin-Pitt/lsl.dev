@@ -1,0 +1,48 @@
+{{LSL_Function
+|func_id=171|func_sleep=0.0|func_energy=10.0
+|func=llRot2Angle|sort=Rot2Angle
+|return_type=float|p1_type=rotation|p1_name=rot
+|func_footnote=Use in conjunction with [[llRot2Axis]].<br/>To undo use [[llAxisAngle2Rot]].
+|func_desc
+|return_text=that is the rotation angle represented by '''rot'''
+|spec
+|caveats=This always returns a positive angle <= PI radians, that is, it is the unsigned minimum angle. A rotation of 3/2 PI radians (270 degrees) will return an angle of PI / 2 radians, not -PI / 2.
+|constants
+|examples
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llAxisAngle2Rot]]}}
+{{LSL DefineRow||[[llRot2Axis]]}}
+{{LSL DefineRow||[[llRot2Up]]}}
+{{LSL DefineRow||[[llRot2Fwd]]}}
+{{LSL DefineRow||[[llRot2Left]]}}
+{{LSL DefineRow||[[llAngleBetween]]|Similar functionality.}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=Rotation
+|cat2
+|cat3
+|cat4
+|deepnotes= ===Reference Implementation===
+<table width=800><tr><td>
+<source lang="lsl2">float Rot2Angle(rotation a)//simple but turns out to not be very accurate.
+{ 
+    return 2.0 * llAcos(llSqrt((a.s * a.s) / (a.x * a.x + a.y * a.y + a.z * a.z + a.s * a.s));
+}</source>
+
+<source lang="lsl2">float Rot2Angle(rotation r)//more complex implementation but more accurate, and reasonably fast.
+{
+    float s2 = r.s * r.s; // square of the s-element
+    float v2 = r.x * r.x + r.y * r.y + r.z * r.z; // sum of the squares of the v-elements
+
+    if (s2 < v2) // compare the s-component to the v-component
+        return 2.0 * llAcos(llSqrt(s2 / (s2 + v2))); // use arccos if the v-component is dominant
+    if (v2) // make sure the v-component is non-zero
+        return 2.0 * llAsin(llSqrt(v2 / (s2 + v2))); // use arcsin if the s-component is dominant
+
+    return 0.0; // argument is scaled too small to be meaningful, or it is a zero rotation, so return zero
+}//Written by Moon Metty & Miranda Umino. Minor optimizations by Strife Onizuka</source>
+</td></tr></table>
+}}

@@ -1,0 +1,66 @@
+{{LSL_Function
+|inject-1={{Issues/SVC-1500}}{{Issues/SVC-3199}}{{Issues/SVC-914}}
+{{LSL Function/inventory|texture|uuid=true|type=texture|full=*}}{{LSL Function/link-face|link|face}}
+|func_id=329|func_sleep=0.2|func_energy=10.0
+|func=llSetLinkTexture
+|p1_type=integer|p1_name=link
+|p2_type=string|p2_name=texture
+|p3_type=integer|p3_name=face
+|func_footnote
+|func_desc=If a prim exists in the link set at {{LSLP|link}}, set [[PBR_Materials#Nomenclature_changes|Blinn-Phong]] diffuse {{LSLP|texture}} on {{LSLP|face}} of that prim.
+|return_text
+|spec
+|sort=SetLinkTexture
+|caveats
+|constants
+|examples=Cover a link set in the texture "bark" (from the library)
+<source lang="lsl2">
+default
+{
+    touch_start(integer detected)
+    {
+        llSetLinkTexture(LINK_SET, "66bf4030-04f9-a808-43ab-b48b6aeb6456", ALL_SIDES);
+    }
+}
+</source>
+|helpers= ===SetLinkTextureFast===
+This function doesn't have the 0.2 second delay. It's not very fast anyway though, but faster than '''llSetLinkTexture'''.
+<source lang="lsl2">
+SetLinkTextureFast(integer link, string texture, integer face)
+{
+    // Obtain the current texture parameters and replace the texture only.
+    // If we are going to apply the texture to ALL_SIDES, we need
+    // to adjust the returned parameters in a loop, so that each face
+    // keeps its current repeats, offsets and rotation.
+    list Params = llGetLinkPrimitiveParams(link, [PRIM_TEXTURE, face]);
+    integer idx;
+    face *= face > 0; // Make it zero if it was ALL_SIDES
+    // This part is tricky. The list returned by llGLPP has a 4 element stride
+    // (texture, repeats, offsets, angle). But as we modify it, we add two
+    // elements to each, so the completed part of the list has 6 elements per
+    // stride.
+    integer NumSides = llGetListLength(Params) / 4; // At this point, 4 elements per stride
+    for (idx = 0; idx < NumSides; ++idx)
+    {
+        // The part we've completed has 6 elements per stride, thus the *6.
+        Params = llListReplaceList(Params, [PRIM_TEXTURE, face++, texture], idx*6, idx*6);
+    }
+    llSetLinkPrimitiveParamsFast(link, Params);
+}
+</source>
+|also_functions=
+{{LSL DefineRow||[[llSetLinkAlpha]]|}}
+{{LSL DefineRow||[[llSetLinkColor]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+|also_tests
+|also_events
+|also_articles={{LSL DefineRow||[[Internal Textures]]|}}
+|notes
+|deprecated
+|cat1=Texture
+|cat2=Link/Set
+|cat3
+|cat4
+|history =
+*Date of release [[ Release_Notes/Second_Life_Release/1.13#Release_Notes_for_Second_Life_1.13.4.281.29_February_21.2C_2007 | 21-02-2007 ]]
+}}

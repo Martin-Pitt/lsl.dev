@@ -1,0 +1,132 @@
+[[Category:glTF]]
+
+{{LSL_Function
+|inject-2={{Issues/SVC-4897}}{{Issues/SVC-3925}}{{Issues/SVC-1242}}{{Issues/VWR-4018}}
+|inject-3=
+{{LSL_Function/face|face}}
+{{LSL_Function/negative index|true|start}}
+|func_id=211
+|func_sleep=0.0
+|func_energy=10.0
+|sort=SetTextureAnim
+|func=llSetTextureAnim
+|p1_type=integer|p1_subtype=bit_field|p1_name=mode|p1_desc=Mask of Mode flags
+|p2_type=integer|p2_name=face|p2_desc=
+|p3_type=integer|p3_name=sizex|p3_desc=Horizontal frames (ignored for [[ROTATE]] and [[SCALE]])
+|p4_type=integer|p4_name=sizey|p4_desc=Vertical frames (ignored for [[ROTATE]] and [[SCALE]])
+|p5_type=float|p5_name=start|p5_desc=Start position/frame number (or radians for [[ROTATE]])
+|p6_type=float|p6_name=length|p6_desc=Number of frames to display (or radians for [[ROTATE]])
+|p7_type=float|p7_name=rate|p7_desc=Frames per second, or radians per second when [[ROTATE]] is set, or UV coordinates when [[SMOOTH]] is set (must not be zero)
+|func_footnote=Frames are numbered from left to right, top to bottom, starting at 0.<br/>If {{LSLP|rate}} is negative, it has the same effect as using the [[REVERSE]] flag.{{Footnote|Though if {{LSLP|rate}} is negative and the [[REVERSE]] flag is used, they cancel each other out.|Though if 'rate' is negative and the [[REVERSE]] flag is used, they cancel each other out.}}<br/>If {{LSLP|length}} is 0, it is considered to be {{LSLP|sizex}}*{{LSLP|sizey}} if both are above 0, otherwise 1.
+|func_desc=Animate the texture on the specified face/faces by setting the texture scale and offset.
+|return_text
+|spec=
+===Frames===
+Frames are sub-rectangles within the texture. A set of frames with 2 horizontal ({{LSLP|sizex}}) and 3 vertical ({{LSLP|sizey}}) means the overall texture is divided into 3 rows of 2 columns of images, each of which is a frame. llSetTextureAnim will animate across these 6 starting with the top left image and going across and down, optionally repeating. If [[SMOOTH]] is set, the frames slide smoothly from one to the next across each row but will "jump" from one row to the next, if off, each frame is displayed in turn centered on the face.
+|caveats=*You can only have one texture animation on a prim.
+**Calling llSetTextureAnim more than once on a prim will reset the existing animation.
+**Calling llSetTextureAnim again with exact same values will not reset animation (a small difference in rate will suffice).
+*You cannot combine [[ROTATE]] and [[SCALE]] flags.
+*{{LSLP|sizex}} and {{LSLP|sizey}} are both limited to a range of 0 to 255.
+**Negative sizes behave as if texture repeats were set to 0, and cannot be used to mirror frames.
+*Different animation modes override some of the prim's texture parameters, but others can still be used:
+**Texture offsets are ignored in frame-based and [[SMOOTH]] scrolling modes.
+***Repeats are ignored if {{LSLP|sizex}} and {{LSLP|sizey}} are not 0.
+***With either of the sizes set to 0, [[SMOOTH]] scrolling will use the prim's texture repeats. In frame-based animation, there is no meaningful effect.
+**The texture rotation is ignored in [[ROTATE]] mode.
+**Texture repeats are ignored in [[SCALE]] mode.
+*An animation using only [[SMOOTH]] without [[LOOP]] behaves poorly, whether scrolling, rotating or scaling. The animation timing is based on the object's time of existence for the viewer, so a non-looped SMOOTH animation may not play at all if the object time is out of bounds for the specified start/end, and attempting to replay it after it has stopped has no effect.
+** Playing a SMOOTH animation backwards may loop even if not told to do so, and will "rewind" the internal timer allowing it to play forwards afterwards, possibly longer than what the parameters specified suggest.
+*Selecting and un-selecting a prim with animation will reset animation from beginning.
+*While a texture animation is active on any face of a prim, [[PRIM_NORMAL]] and [[PRIM_SPECULAR]] are usually forced to have their repeats, rotations and offsets to match the [[PRIM_TEXTURE]] ones, even on faces that are '''not''' being animated. Non-animated PBR textured faces are unaffected by this limitation.
+*As of server version 2025-09-03.17442317385, this prim property is maintained when copying in-world.
+|constants={{{!}} class="sortable collapsible" {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! Modes
+! title="Value" {{!}}
+! class="unsortable" {{!}} Description
+{{!}}-
+{{!}}[[ANIM_ON]]
+{{!}}{{LSL Hex||1|chars=2}}
+{{!}}Texture animation is on. This must be set to start the animation, cleared to stop it.
+{{!}}-
+{{!}}[[LOOP]]
+{{!}}{{LSL Hex||2|chars=2}}
+{{!}}Loop the texture animation.
+{{!}}-
+{{!}}[[REVERSE]]
+{{!}}{{LSL Hex||4|chars=2}}
+{{!}}Play animation in reverse direction.
+{{!}}-
+{{!}}[[PING_PONG]]
+{{!}}{{LSL Hex||8|chars=2}}
+{{!}}Play animation going forwards, then backwards.
+{{!}}-
+{{!}}[[SMOOTH]]
+{{!}}{{LSL Hex||16|chars=2}}
+{{!}}Slide in the X direction, instead of playing separate frames.<br/>In both [[SCALE]] and [[ROTATE]] modes, causes smooth transitions.
+{{!}}-
+{{!}}[[ROTATE]]
+{{!}}{{LSL Hex||32|chars=2}}
+{{!}}Animate texture rotation.<br>Does not work with [[SCALE]]
+{{!}}-
+{{!}}[[SCALE]]
+{{!}}{{LSL Hex||64|chars=2}}
+{{!}}Animate the texture scale.<br>Does not work with [[ROTATE]]
+{{!}}}
+|examples=
+This slides a texture smoothly, along the horizontal U-axis, and loops it when it gets to the end.
+
+For [[PBR_Materials#Nomenclature_changes|Blinn-Phong]] materials, the texture's rotation for each side affects the apparent motion. So if the texture is rotated 90 degrees by use of the edit box, the texture may not flow in the direction expected.
+
+For PBR materials, the Blinn-Phong texture rotation for each side affects the apparent motion, and any Blinn-Phong transform component (for example the offsets argument of [[PRIM_TEXTURE]]) which is not animated will be applied to the PBR material as well. Thus, a GLTF material without a GLTF texture transform will animate identically to a Blinn-Phong material. If a GLTF texture transform (for example [[PRIM_GLTF_BASE_COLOR]]) is applied, it will be in addition to the Blinn-Phong transform and texture animation. This allows for more flexibility; however, a more complex GLTF texture transform will not loop as easily.
+
+<syntaxhighlight lang="lsl2">llSetTextureAnim(ANIM_ON | SMOOTH | LOOP , ALL_SIDES, 1, 1, 1.0, 1.0, 1.0);</syntaxhighlight>
+
+This slides a texture smoothly, along the horizontal U-axis, in the opposite direction.
+<syntaxhighlight lang="lsl2">llSetTextureAnim(ANIM_ON | SMOOTH | LOOP , ALL_SIDES, 1, 1, 1.0, 1.0, -1.0);</syntaxhighlight>
+
+This divides a texture into 64 "cells", 8 across, and 8 down, and flips through them, left to right, top to bottom. This is useful for cell animation.
+<syntaxhighlight lang="lsl2">llSetTextureAnim( ANIM_ON | LOOP, ALL_SIDES, 8, 8, 0.0, 64.0, 6.4 );</syntaxhighlight>
+
+This rotates a texture counter-clockwise at 2 revolutions per second. Change the last value to -2*TWO_PI to rotate clockwise.
+<syntaxhighlight lang="lsl2">llSetTextureAnim(ANIM_ON | SMOOTH | ROTATE | LOOP, ALL_SIDES,1,1,0, TWO_PI, 2*TWO_PI);</syntaxhighlight>
+
+This scales a texture larger and smaller.
+<syntaxhighlight lang="lsl2">llSetTextureAnim(ANIM_ON | SMOOTH | SCALE | PING_PONG | LOOP, ALL_SIDES, 1, 1, 1.0, 3.0, 2.0);</syntaxhighlight>
+
+This turns off all texture animations.
+<syntaxhighlight lang="lsl2">llSetTextureAnim(FALSE, ALL_SIDES, 0, 0, 0.0, 0.0, 1.0);</syntaxhighlight>
+
+This toggles a looping animation to make it stop at a specific frame.
+<syntaxhighlight lang="lsl2">
+integer textureIsBeingAnimated;
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        if (textureIsBeingAnimated)
+            llSetTextureAnim(ANIM_ON | LOOP, ALL_SIDES, 1, 5, 0.0, 0.0, 1.0);
+        else
+            llSetTextureAnim(ANIM_ON | SMOOTH, ALL_SIDES, 1, 5, 5.0, 1.0, 1.0);
+
+        // toggle back and forth between TRUE (1) and FALSE (0)
+        textureIsBeingAnimated = !textureIsBeingAnimated;
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llSetLinkTextureAnim]]}}
+|also_events
+|also_articles
+|notes=
+Texture animation is a property of the prim (i.e., you can remove the script that started the animation, and the prim will remember the settings anyway.)
+|cat1=Media
+|cat2=Effects
+|cat3=Texture
+|cat4=Video
+|cat5
+|cat6
+|history={{LSL Added|0.4.0|remote=http://secondlife.wikia.com/wiki/Version_0.4.0#Scripting}} 
+}}

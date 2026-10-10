@@ -1,0 +1,45 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-4939}}{{LSL_Function/face|face|notall=*|return=an empty list.}}
+|func_id=351|func_sleep=1.0|func_energy=10.0|mode
+|func=llGetPrimMediaParams|return_type=list|return_subtype=parameters|return_subtype_disp=parameter list
+|p1_type=integer|p1_name=face|p1_desc
+|p2_type=list|p2_subtype=instructions|p2_name=params|p2_desc=a set of name (in no particular order)
+|func_footnote=Returns an empty list if no media exists on the face.
+|func_desc=Get the media params for a particular face on an object, given the desired list of names.
+|return_text=of values in the order requested.
+|spec=
+|caveats=
+|constants={{LSL Constants/PrimMedia|get}}
+|examples
+|helpers=<source lang="lsl2">list GetPrimMediaParams(integer face, list input)
+{//Returns a list that can be fed to llSetLinkMedia or llSetPrimMediaParams
+    list output;
+    integer c = ~llGetListLength(input);
+    while((c = - ~c))
+    {
+        list flag = llList2List(input, c, c);
+        output += flag + llGetLinkMedia(LINK_THIS, face, flag);
+    }
+    if(output == input)
+        return [];
+    return output;
+}</source>
+|also_functions=
+{{LSL DefineRow||[[llGetLinkMedia]]}}
+{{LSL DefineRow||[[llSetPrimMediaParams]]}}
+{{LSL DefineRow||[[llSetLinkMedia]]}}
+{{LSL DefineRow||[[llClearPrimMedia]]}}
+{{LSL DefineRow||[[llClearLinkMedia]]}}
+|also_tests
+|also_events=
+|also_articles=
+|notes
+|deepnotes
+|history=
+*{{SVN|2816|rev=134947|trunk=*|anchor=|ver=|ser=}}
+*{{JIRA|SVC-4939}}
+|cat1=Prim Media
+|cat2=Media
+|cat3
+|cat4
+}}

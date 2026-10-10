@@ -1,0 +1,48 @@
+{{LSL Header|ml=*}}{{LSLC|}}{{LSLC|Communications}}
+Chat communication is as it sounds. It is text "said" so that anyone (or anything) listening within range can hear it. It can be two-way communication.
+
+When a user in SL begins a chat message (in the client) in the chat text-entry field as {{mono|/1}}, the 1 is the channel the user is speaking on{{Footnote|This is a Linden Lab SL client feature and not part of the protocol; other clients may implement this differently or not at all.}}.
+
+{{KBtip|{{mono|//}} (two forward-slashes) is a shortcut for the last special channel you entered in chat.}}
+
+From at least September 2016 (see [[Release_Notes/Second_Life_Release/4.0.9.320038]]), users have been able to chat on both positive and negative channels. Previously, users in SL could directly chat only on positive channels{{Footnote|This is likely just a limitation of the Linden Lab SL client and not an actual restriction; it should not be depended upon.}}, and can only see chat sent on the two public channels, 0 (aka [[PUBLIC_CHANNEL]] in more technical language) and 2147483647 (aka [[DEBUG_CHANNEL]]).
+
+Scripts, on the other hand can [[listen]] to and "talk" on any chat channel, be it a positive one, or a negative one, within the complete range of channels from -2147483648 to 2147483647.
+
+Chat messages can be a maximum of 1023 bytes; they are truncated past that. Viewer chat on negative channels is currently capped at 254 bytes (see [https://jira.secondlife.com/browse/BUG-41541 BUG-41541]).
+
+A scripted prim cannot hear itself speak. Scripts listening in a linked prim, though, will hear the chat. Generally, though, communication between scripts in the same object is handled via [[llMessageLinked]].
+
+To "hear" chat, a script has to specifically initiate a "listen." A single script has a limit of 65 listens at any one time; beyond that it will emit a "Too Many Listens" squawk, and crash. The script can manage its listens, creating, releasing and disabling them. 
+
+{| {{Prettytable|style=float:left;margin-top:0;}}
+|+
+|-{{Hl2}}
+!Function
+!Distance
+|-
+|| [[llWhisper]] || 10 metres
+|-
+|| [[llSay]] || 20 metres
+|-
+|| [[llShout]] || 100 metres
+|-
+|| [[llRegionSay]] || region-wide
+|-
+|| [[llRegionSayTo]] || region-wide
+|}
+The distance that chat can be heard depends on the type of chat used, and where the speaker is. The sphere in which the chat can be heard is centered on the position of speaker, be that an avatar or a prim.
+
+There is no way to lengthen or shorten the distance or direct it in any special direction.
+
+[[llRegionSay]] is an exception. It can be heard anywhere in the region but with the limitation that it cannot broadcast on channel 0 (aka {{LSL Const|PUBLIC_CHANNEL|integer|0}} ){{Footnote|llRegionSay was introduced to eliminate the need for repeaters for scripted systems spread out over a large area.}}. [[llRegionSayTo]] also can be heard anywhere in the region, and it also can send on channel 0.
+<div style="clear:left;"></div>
+
+=== User-created utility functions ===
+{|
+{{LSL DefineRow||[[mySay]]|Cleaner chat messages on a user's screen}}
+{{LSL DefineRow||[[mySayOwner]]|Cleaner chat messages on a user's screen (speaks to owner only)}}
+|}
+
+=== Footnotes ===
+{{Footnotes}}

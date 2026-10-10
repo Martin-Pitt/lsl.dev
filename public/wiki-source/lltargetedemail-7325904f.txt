@@ -1,0 +1,70 @@
+{{LSL_Function
+|func_id=119|func_sleep=20.0|func_energy=10.0
+|sort=Email|func=llTargetedEmail
+|p1_type=integer|p1_name=target
+|p2_type=string|p2_name=subject
+|p3_type=string|p3_name=message
+|func_footnote=The entire message (including the address, subject and other miscellaneous fields) can't be longer than 4096 bytes combined.
+|func_desc=Sends an email to the owner (selected by {{LSLP|target}}) of an object with {{LSLP|subject}} and {{LSLP|message}}.
+|return_text
+|spec=The target parameter selects which agent the email is sent to
+{{LSL_Constant/llTargetedEmail}}
+The {{LSLP|message}} is prefixed with information about the prim sending the email.
+{{{!}}{{Prettytable}}
+{{!}}-{{Hl2}}
+!Template
+!Example
+{{!}}-
+{{!}}<pre>
+Object-Name: *prim*
+Region: *simname* (*simpos.x*, *simpos.y*)
+Local-Position: (*primpos.x*, *primpos.y*, *primpos.z*)
+
+*message*
+</pre>
+{{!}}
+<pre>
+Object-Name: Object
+Region: Gibson (254976, 256000)
+Local-Position: (117, 129, 50)
+
+The real message starts here.
+</pre>
+{{!}}}
+|caveats=* Originally this function was intended to enable sending email to either the object owner or creator; however, the ability to email creators was removed to avoid abuse scenarios.
+* There is a limit to the number of email messages an object can send in a given amount of time. 
+* There is a limit of 500 messages from a single agent's objects in a one hour period.
+* The 4096 byte size limit includes the subject line and automatically added text.  The practical maximum body size is approximately 3600 bytes.
+* (Sept-2008) The Email Throttle was modified slightly, Per {{User|Prospero Linden}}'s comments: "there has long been a throttle that makes a single script sleep for 20 seconds after sending an email. The new throttle is per user... some were using many, many different scripts to send spam. (the new throttle applies) when the destination is outside of Second Life. I know that messages within the same region were not throttled (beyond the 20-second delay), and I *believe* that messages between different sims were not throttled (between the 20-second delay)."
+* Due to the bug {{Jira|SVC-23}} (present since 2005), objects may stop receiving emails completely until either the region is restarted or the object crosses a region boundary (resetting the script doesn't help).  Emails sent may eventually be received after a restart/region-cross.  Hence, don't rely on this function for reliable inter-region messaging. 
+* Due to the bug {{Jira|SVC-391}} llEmail will silently fail (no mail will arrive) when non-ascii characters are present in the subject. However, non-ascii characters in the message body will be replaced by "?".
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+string emailSubject = "Someone touched me!";
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        // llSay(PUBLIC_CHANNEL, "Sending eMail report now, this will take ~20 seconds.");
+
+        key id = llDetectedKey(0);
+        string name = llDetectedName(0);
+
+        llTargetedEmail(TARGETED_EMAIL_OBJECT_OWNER, emailSubject,
+            "I was touched by: '" + name + "' (" + (string)id + ").");
+
+        // llSay(PUBLIC_CHANNEL, "Email has been sent.");
+    }
+}
+</syntaxhighlight>
+|also_functions=
+{{LSL DefineRow||[[llEmail]]}}
+|permission
+|negative_index
+|cat1=Communications
+|cat2=Email
+|cat3
+|cat4
+}}

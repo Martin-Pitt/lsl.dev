@@ -1,0 +1,95 @@
+{{LSL Function/Headless
+|default={{{default|}}}
+|p1_type=list|p1_name=rules
+|p1_desc=Particle system rules list in the format [ rule1, data1, rule2, data2 . . . rule'''n''', data'''n''' ]
+|p1_hover=Particle system rules list in the format [ rule1, data1, rule2, data2 . . . rulen, datan ]
+|inject-2={{LSL Function/link|link|mode=Set}}
+|inject-4={{Issues/SVC-1640}}{{Issues/SVC-4897}}{{Issues/SVC-185}}{{LSL Function/ParticleSystem}}
+|summary=These functions are almost entirely identical. 
+
+The big difference is that [[#llParticleSystem|llParticleSystem]] acts upon the prim the script is in, [[#llLinkParticleSystem|llLinkParticleSystem]] on the other hand can act upon any prim in the object.
+|head={{LSL Function/Head
+|func_id=229|func_sleep=0.0|func_energy=10.0|func=llParticleSystem|sort=ParticleSystem
+|p1_type=list|p1_subtype=instructions|p1_name=rules
+|func_desc=Defines a particle system for the containing prim based on a list of {{LSLP|rules}}.
+|return_text
+}}{{LSL Function/Head
+|func_id=355|func_sleep=0.0|func_energy=10.0|func=llLinkParticleSystem|sort=LinkParticleSystem
+|p1_type=integer|p1_subtype=link|p1_name=link
+|p2_type=list|p2_subtype=instructions|p2_name=rules
+|func_desc=A particle system defined by a list of {{LSLP|rules}} is set for the prim(s) {{LSLP|link}}.
+|return_text
+}}
+|spec=Defines a particle system that sets the state of the [[particle emitter]] within the [[primitive|prim]] that contains the [[script]]. Any other scripts, in the same prim, that call this function will modify the state of the same particle emitter. As such, the particle system defined by this function is a [[primitive property|prim property]], just like its size, shape, color, etc.
+
+Each prim has only '''one (1)''' particle emitter, located at its [[geometric center]], and aligned along the prim's [[Viewer coordinate frames#Local|local]] Z-axis, pointing in the positive Z direction.
+
+This is the one of the only {{LSLGC|Particles|functions}} which alters the state of the prim's particle emitter; thus, if you wish to change the emitter to a different state (i.e., emitting a different particle system entirely, or shut off the emitter completely), just call the function with the parameters of the new particle system you wish to render instead. Specifying an empty list (i.e., <code>llParticleSystem([])</code>; ) turns the emitter off.
+
+Particles are essentially 2D {{Wikipedia|Sprite (computer graphics)|sprites}} and are always rendered facing the viewer's camera (except when PSYS_PART_RIBBON_MASK is enabled).
+
+The rule / data values are defined below.
+|caveats=
+#When using particle systems that have a non-zero emitter age (PSYS_SRC_MAX_AGE) setting, you may notice that the particle system may restart without any scripted trigger going off. This is due to a bug which causes the emitter to "reset" when any of the prim properties are updated or otherwise sent to the viewer. As a result, you may have to use a [[timer]] or a forced [[llSleep|sleep]] and then clear the particle system once the age has expired. Debbie Trilling has posted a work-around here: https://forums-archive.secondlife.com/54/fa/260031/1.html#post1996465
+#The spin defined by PSYS_SRC_OMEGA is relative to the [[Viewer coordinate frames#Region|region]] coordinate system, NOT the prim's [[Viewer coordinate frames#Local|local]] coordinate system.
+#New non-zero vector values for PSYS_SRC_OMEGA will not re-align the emitter with the prim before they take effect.  The viewer will continue rotating the emitter with the new omega values, starting from the last known orientation of the emitter.  The emitter's current orientation is determined by the viewer, not the simulator, and two people looking at the same effect may see different results.  To re-align the emitter with the prim, create an effect with PSYS_SRC_OMEGA set to [[ZERO_VECTOR]] long enough for the viewer to have a chance to render it.   
+#Particles moving towards a humanoid avatar, specified by PSYS_SRC_TARGET_KEY rule and setting the PSYS_PART_TARGET_POS_MASK flag, will end up at the geometric center of the avatar's bounding box which, unfortunately, make them appear to be striking the person in the groin area. If you want them to end up at another point on a target avatar, you instead have to place a target prim that is moved to the position where you wish them to end up, and use the key of that prim for the value of the PSYS_SRC_TARGET_KEY rule.
+#The Second Life viewer uses optimizations in culling objects which are too small to see at certain distances. If your emitter is very small, and is culled due to distance, the particle system associated with it will not be rendered either.
+#Particles will also be culled beyond a maximum distance depending on their own scale. If particles are desired to be visible from further away yet be visually smaller, a larger scale and a texture with empty padding space are needed. If using PSYS_PART_RIBBON_MASK, make sure the Y scale is set properly, as it is used for this calculation even the rendering of the ribbon particles themselves ignores it.
+#When PSYS_PART_FOLLOW_VELOCITY_MASK is enabled, particles with zero velocity (e.g. generated by the DROP pattern, without acceleration, wind or target position following) are not rendered at all. Particles following their source via PSYS_PART_FOLLOW_SRC_MASK does not count as having a velocity, even if the source is moving.
+|notes=
+=== Other Notes ===
+*The default particle count for the client is normally set at 4096. That is the max particle count the client will render for ALL active particle systems within view range. Good particle system design is key to avoid "spamming" everyone with your particles, and starving out other people's particle systems. As such, if you are experiencing trouble getting your particle emitter to emit as many particles as you like, it may be the victim of particle starvation. Client/viewer lag (low frame rates) can also cause this issue, as particles are a rather low priority for rendering. The best solution for this is to move to a less laggy environment relatively free of other particle systems when designing and testing your own.
+*Once particles are emitted, their direction of motion can only be affected by PSYS_SRC_ACCEL, the PSYS_PART_TARGET_POS_MASK flag, or the PSYS_PART_FOLLOW_SRC_MASK flag. As such, there is no good way to create the "swirling vortex" effect (like the one used in the viewer to indicate an object talking, begin derezzed, or when an avatar leaves the sim/grid). The effect can be created with a moving particle source (E.G. An orbiting script.)
+*Although the declared particle sizes are always in multiples of 0.03125 meters, PSYS_PART_INTERP_SCALE_MASK allows smooth transitions between the start and end values. This also applies to a size of [[ZERO_VECTOR]], e.g. scaling a particle from or to nothing.
+*[[https://wiki.secondlife.com/wiki/User:Talia_Tokugawa/concept/CrazyParticle Something Talia realised that blew her mind]], Documenting experiments with particles, including tutorial of how to do video particles, and how to (disputably) massively exceed the 8192 Limit in terms of how many particles SL can render at one time. (Whilst rendering video on particles is not new just (until now) undocumented, I am fairly confident in saying the method to exceed the particle limit is new.) 
+
+|examples=
+*[[Example Particle Script]]
+*[[Neurocam Particle Engine]]
+
+
+
+This example produces an effusion of glowing red spheres:
+<syntaxhighlight lang="lsl2">llParticleSystem( [
+        PSYS_PART_FLAGS,       PSYS_PART_WIND_MASK | PSYS_PART_EMISSIVE_MASK,
+        PSYS_SRC_PATTERN,      PSYS_SRC_PATTERN_EXPLODE, 
+        PSYS_PART_START_COLOR, <1.0, 0.0, 0.0>
+    ] );</syntaxhighlight>
+|helpers=
+'''Useful functions for storing/retrieving color and alpha values to/from integers:'''<br />
+<syntaxhighlight lang="lsl2">integer ColorAlphatoRGBA(vector color, float alpha) {
+    return (((integer)(alpha   * 255.0) & 0xFF) << 24) |
+           (((integer)(color.x * 255.0) & 0xFF) << 16) |
+           (((integer)(color.y * 255.0) & 0xFF) <<  8) |
+            ((integer)(color.z * 255.0) & 0xFF);
+}
+
+vector RGBAtoColor(integer rgba) {
+    return < ((rgba >> 16) & 0xFF) / 255.0, ((rgba >> 8) & 0xFF) / 255.0, (rgba & 0xFF) / 255.0 >;
+}
+
+float RGBAtoAlpha(integer rgba) {
+    return ((rgba >> 24) & 0xFF) / 255.0;
+}</syntaxhighlight>
+|deepnotes=
+===Missing 14===
+There is a missing constant which would have the value 14, the underlying enumeration {{SourceLink/github|viewer|indra/llmessage/llpartdata.h|rev=e45b615|line=51|text=LLPSScriptFlags}} has that as {{SourceLink/github|viewer|indra/llmessage/llpartdata.h|rev=e45b615|line=70|text=LLPS_SRC_BURST_DURATION}}, the value is used nowhere else in the client source. This isn't surprising considering that the burst duration is dependent on the values of PSYS_SRC_BURST_PART_COUNT and PSYS_SRC_BURST_RATE.
+===Default texture===
+At the time of writing, the default particle texture is actually loaded from the viewer's install directory and does not have its own UUID. The filepath is '''Viewer\skins\default\textures\''pixiesmall.j2c'''''
+
+One historically used UUID for this asset is <code>"168e6813-096e-07ea-97ae-fd416826f627"</code> as [https://wiki.secondlife.com/wiki/User:Kizmut_Smit/ClientAssetKeys listed here.]
+|also_articles
+|also_events
+|also_functions
+|cat1
+|cat2
+|cat3
+|cat4
+|cat5
+|cat6
+|location
+|haiku={{Haiku|Cherry blossom sprites|alight upon fickle breezes|to fall through the ground.}}
+|history = *Date of release llParticleSystem [[ Release_Notes/Second_Life_Release/1.13#Release_Notes_for_Second_Life_1.13.4.281.29_February_21.2C_2007 | 21-02-2007 ]] or [[ Release_Notes/Second_Life_Release/1.14 | 14-03-2007 ]]
+*Date of release llLinkParticleSystem[[ Release_Notes/Second_Life_Server/1.38#New_Features | 29-03-2010 ]]
+}}

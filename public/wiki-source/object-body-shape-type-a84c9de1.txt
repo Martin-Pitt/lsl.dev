@@ -1,0 +1,48 @@
+{{LSL Constant
+|inject-1
+|name={{PAGENAMEE}}
+|type=integer
+|value=26
+|desc=This is a flag used with [[llGetObjectDetails]] to get the "gender" setting of an avatar's currently worn shape.
+
+If '''id''' is not an avatar, -1.0 is returned.
+
+Normal operational values are in the range {{Interval|gte=0.0|lte=1.0|center=shape}}. 0.0 is standard female setting, 1.0 is standard male setting. Intermediate values with visible differences are possible with manually crafted shapes.
+
+Note that this value ''only'' reflects the currently worn shape. The avatar itself has no defined gender, and no information is available about the the avatar's human operator.
+
+[[Image:Avatar_shape_male_parameter_effects.jpg{{!}}frame{{!}}none{{!}}Effect of "male" (id=80) parameter on the library "Ruth" avatar's shape, 0.0 and 1.0 are the standard female and male settings available in the shape editor.]]
+|examples=
+<syntaxhighlight lang="lsl2">
+string GetAvatarGender(key avatar)
+{
+    list details = llGetObjectDetails(avatar, [OBJECT_BODY_SHAPE_TYPE]);
+    if (details == []) return "not found";
+    float gender = llList2Float(details, 0);
+    if (gender < 0.0)   return "undefined (not an avatar)"; // agent not found
+    if (gender == 0.0)  return "female";
+    string rv = " (" + (string)gender + ")";
+    if (gender < 0.5)   return "somewhat feminine" + rv;
+    if (gender == 0.5)  return "androgynous" + rv;
+    if (gender < 1.0)   return "somewhat masculine" + rv;
+    return "male"; 
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        llWhisper(0, llDetectedName(0) + "'s shape is " + GetAvatarGender(llDetectedKey(0)));
+    }
+}
+</syntaxhighlight>
+
+|functions={{LSL DefineRow||[[llGetObjectDetails]]}}
+|constants={{!}}{{LSL_Constants/Object_Details}}
+|events
+|cat1=Prim
+|cat2=
+|notes
+|cat3
+|cat4
+}}

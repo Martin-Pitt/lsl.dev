@@ -1,0 +1,83 @@
+{{LSL_Function
+|func=GradientValue
+|mode=user
+|p1_type=vector|p1_name=start|p1_desc=Gradient start color
+|p2_type=vector|p2_name=end|p2_desc=Gradient end color
+|p3_type=float|p3_name=percentage|p3_desc=Percentage in the range (0.0 to 100.0) from start to end
+|return_type=vector|return_text=that is the color vector between {{LSLP|start}} and {{LSLP|end}} depending upon {{LSLP|percentage}} if the vector between can be calculated, else returns <code>{{LSL VR|-1|-1|-1}}</code>.
+|func_footnote
+|caveats
+|spec=
+<source lang="lsl2">
+//  Created by Ugleh Ulrik
+
+vector GradientValue(vector start, vector end, float percentage)
+{
+    list colorParams = [start.x, start.y, start.z, end.x, end.y, end.z];
+
+    if (percentage < 0.0
+        || 100.0 < percentage
+        || llListStatistics(LIST_STAT_MIN, colorParams) < 0.0
+        || 1.0 < llListStatistics(LIST_STAT_MAX, colorParams))
+    {
+        return <-1, -1, -1>;
+    }
+
+    percentage /= 100.0;// convert to decimal for further use
+
+    return start + percentage*(end - start);
+}
+</source>
+|examples=
+<source lang="lsl2">
+vector GradientValue(vector start, vector end, float percentage)
+{
+    list colorParams = [start.x, start.y, start.z, end.x, end.y, end.z];
+
+    if (percentage < 0.0
+        || 100.0 < percentage
+        || llListStatistics(LIST_STAT_MIN, colorParams) < 0.0
+        || 1.0 < llListStatistics(LIST_STAT_MAX, colorParams))
+    {
+        return <-1, -1, -1>;
+    }
+
+    percentage /= 100.0;
+
+    return start + percentage*(end - start);
+}
+
+default
+{
+    state_entry()
+    {
+        vector maroon = <0.522, 0.078, 0.294>;
+        vector teal   = <0.224, 0.800, 0.800>;
+
+        vector ColorBetween = GradientValue(maroon, teal, 50.0);
+//             ColorBetween = <0.373, 0.439, 0.547>
+
+        if (ColorBetween != <-1, -1, -1>)
+            llSetColor(ColorBetween, ALL_SIDES);
+    }
+}
+</source>
+|helpers
+|notes
+|also
+|also_constants=
+{{LSL DefineRow||[[PRIM_COLOR]]}}
+{{LSL DefineRow||[[CHANGED_COLOR]]}}
+|also_functions=
+{{LSL DefineRow||[[llGetColor]]}}
+{{LSL DefineRow||[[llGetLinkPrimitiveParams]]}}
+{{LSL DefineRow||[[llSetColor]]}}
+{{LSL DefineRow||[[llSetLinkColor]]}}
+|also_articles=
+{{LSL DefineRow||[[Color and Scripting]]}}
+{{LSL DefineRow||{{LSLGC|Color}}}}
+|cat1=Examples
+|cat2=User-Defined_Functions
+|cat3
+|cat4
+}}

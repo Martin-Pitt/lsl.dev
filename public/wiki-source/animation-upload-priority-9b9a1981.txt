@@ -1,0 +1,188 @@
+__NOTOC__
+{{Help
+|Object=*
+}}
+{{Merge to|Animation Priority|discuss=Talk:Animation_Priority|date=February 2011}}
+
+Uploaded animations need to match, or more commonly, exceed, the priority of built-in animations to be visible when they are played.  That determines the minimum priority you could use.
+
+Determining the priority of the built-in animations is not as straightforward as it first appears.  The priority displayed by Animation Info has no apparent relation to the priority of the joints.
+
+{| class="sortable" {{prettytable}}
+|+ Built-In Animations with Misleading Priorities
+|-{{Hl2}}
+! Type
+! Visible Priority
+! Actual Priority
+|-
+| turn left
+| 1
+| 3
+|-
+| turn right
+| 1
+| 3
+|-
+| prejump
+| 0
+| 3
+|-
+| jump
+| 0
+| 3
+|-
+| hover
+| 0
+| 3
+|-
+| slow fly
+| 0
+| 3
+|-
+| fly
+| 0
+| 3
+|-
+| upward fly
+| 0
+| 3
+|-
+| downward fly
+| 0
+| 3
+|-
+| land
+| 0
+| 3
+|}
+
+It's possible to mix animations by playing different priority animations at the same time, or equal priority animations in the right order, and this is a very useful feature.  For instance, you could play a priority 2 standing animation while playing a priority 4 gesture animation to wave your arm.  Another example would be playing a priority 4 animation to sit on a couch, and then another priority 4 animation to move your arms to hold and eat from a bag of popcorn.  Using the lowest priority that will work makes mixing easier, because so long as the animations have different priorities you don't have to care about the order in which they are played.
+
+A priority less than 2 is generally not useful.  At priority 0 many built-in animations will mix with your animation.  It will be obviously unusable.  At priority 1 the built-in <code>[[Internal Animations#Viewer-generated motions|head_rot]]</code> animation will always mix with your animation.  This moves the abdomen too much to be usable for many animations.
+
+At priority 2 the abdomen will constantly be moved slightly in random directions by the built-in <code>[[Internal Animations#Viewer-generated motions|body_noise]]</code> animation.  If you want to avoid this, you will need to upload at priority 3 instead.
+
+Most animations should define chest and abdomen movement.  If chest motion is not defined breathing will be added for you by the <code>[[Internal Animations#Viewer-generated motions|breathe_rot]]</code> built-in animation, which could be a problem if you wanted to control the breathing rate, or don't want breathing (e.g. for a robot avatar).  If abdomen motion is not defined the abdomen will move due to the <code>head_rot</code> built-in animation.
+
+{| class="sortable" {{prettytable}}
+|+ Recommended Animation Upload Priorities
+|-{{Hl2}}
+! Type
+! Upload Priority
+|-
+| stand
+| 2
+|-
+| turn left
+| 4
+|-
+| turn right
+| 4
+|-
+| walk
+| 2
+|-
+| run
+| 2
+|-
+| crouch
+| 2
+|-
+| crouch walk
+| 2
+|-
+| sit
+| Not Applicable{{Footnote|Overriding the normal '''sit''' in an animation overrider is pointless since it will almost always be overridden by pose balls.  Doing so often prevents pose balls from working.  Overriding '''ground_sit''' in an animation overrider '''is''' useful.|handle=a}}
+|-
+| ground sit
+| 4
+|-
+| prejump
+| 4
+|-
+| jump
+| 4
+|-
+| hover
+| 4
+|-
+| slow fly
+| 4
+|-
+| fly
+| 4
+|-
+| upward fly
+| 4
+|-
+| downward fly
+| 4
+|-
+| fall
+| 4
+|-
+| land
+| 4
+|-
+| stand up
+| 4
+|-
+| typing
+| 4
+|-
+| floating{{Footnote|underwater "hover"|handle=b}}
+| 4
+|-
+| swimming forward{{Footnote|underwater "fly"|handle=c}}
+| 4
+|-
+| swimming up{{Footnote|underwater "upward fly"|handle=d}}
+| 4
+|-
+| swimming down{{Footnote|underwater "downward fly"|handle=e}}
+| 4
+|-
+| furniture{{Footnote|no built-in animation|handle=f}}
+| 4
+|-
+| dance{{Footnote|handle=f}}
+| 4
+|-
+| pose stand{{Footnote|handle=f}}
+| 4
+|-
+| gesture{{Footnote|handle=f}}
+| 4
+|-
+| drink/eat{{Footnote|handle=f}}
+| 4
+|}
+
+== Overriding Animations ==
+Consider leaving the head and neck joints undefined in standing and sitting (ground and furniture{{Footnote|In Second Life, many furniture items — chairs, benches, beds, etc. — will include animations appropriate for the avatar interaction with the furniture; others might use [[Poseball|pose balls]] instead.}} included) animations.  This will allow the head to follow the camera and pointer.
+
+It's okay to upload stand, walk, run, crouch, and crouch walk animations at priority 3, instead of the suggested priority 2.  That will stop the built-in <code>body_noise</code> animation from messing up your work, at the cost of reducing your ability to mix.
+
+Some animation overriders (like the free and open source [https://marketplace.secondlife.com/p/ZHAO-II/1593159 ZHAO-II]) will allow you to play multiple animations at once.  This is useful for working around several problems.
+
+If you decide to make a standing animation priority 3 consider defining the motion of the '''lShldr''', '''lForeArm''', and '''lHand''' joints in a separate priority 2 animation.  This will allow the left arm to aim at what is being pointed to.  You may want to do the same thing, for the same reason, when making priority 4 sitting (ground and furniture included) animations that you expect to be used where people build or teach.
+
+You may not want to define hip motion for animations where your feet touch the ground and you are upright with your hips not moving (standing and turning animations).  If you don't, the angle of the hip will be matched to the terrain.  You may not want to define Foot movement for walking animations for the same reason.
+
+Flying and swimming animations that do not define hip motion will roll to follow the angle of flight.  This is usually desirable.
+
+Typing animations should only effect the arms so they can be used with other animations (like furniture animations).  This is also why I suggest uploading them at priority 4, even though priority 3 is sufficient to override the built-in animation.
+
+== Animated Attachments ==
+Attachments for drinking and eating should only effect the head, neck, and arms so they can be used with other animations (like furniture animations).
+
+You're best off using the [[Internal Animations#User-playable animations|Linden Lab provided animations]] (<code>hold_r_bazooka</code>/<code>aim_r_bazooka</code>, <code>hold_l_bow</code>/<code>aim_l_bow</code>/<code>shoot_l_bow</code>, <code>hold_r_handgun</code>/<code>aim_r_handgun</code>, <code>hold_r_rifle</code>/<code>aim_r_rifle</code>) for projectile weapons.  They have their joints adjusted to increase realism when in [[Viewerhelp:Glossary#mouselook|mouselook mode]].
+
+== See Also ==
+*[[BVH Reference Frame]]
+*[[Internal Animations]]
+
+== Footnotes ==
+{{Footnotes}}
+
+[[Category:LSL_Animation]]

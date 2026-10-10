@@ -1,0 +1,60 @@
+{{LSL Constant
+|name=DATA_SIM_STATUS
+|type=integer
+|value=6
+|desc=Returns one of these strings.
+* "up": simulator currently up and running
+* "down": simulator currently down
+* "starting": simulator currently starting
+* "stopping": simulator currently stopping
+* "crashed": simulator has crashed
+* "unknown": simulator status unknown or unknown simulator
+|pa=
+|text=
+|pb=
+|examples=<source lang="lsl2">key queryData;
+
+default
+{
+    // querry immediately for simulator data on current status of sim.
+    state_entry()
+    {
+        queryData = llRequestSimulatorData( llGetRegionName(), DATA_SIM_STATUS );
+    }
+    
+    // if another owner or the region changes where the script operates in reset script
+    changed( integer isChanged )
+    {
+        if( isChanged & CHANGED_REGION )
+        {
+            llResetScript();
+        }
+        
+        if( isChanged & CHANGED_OWNER )
+        {
+            llResetScript();
+        }
+    }
+    
+    // how to handle the query information.
+    dataserver( key queryID, string info )
+    {
+        if( queryID == queryData )
+        {
+            // output to upper case characters the current state of the sim. 
+            llOwnerSay( "This region is currently: " + llToUpper(info) );
+        }
+    }
+}</source>
+|constants=
+<!--{{LSL ConstRow|PAYMENT_INFO_ON_FILE}}-->
+|functions=
+{{LSL DefineRow||[[llRequestSimulatorData]]|}}
+|events=
+<!--{{LSL DefineRow||[[changed]]|}}-->
+|location
+|cat1
+|cat2
+|cat3
+|cat4
+}}

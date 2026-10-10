@@ -1,0 +1,483 @@
+{{Multi-lang}}
+{{LSL Header}}{{LSLC|Dialog}}{{LSLC|Communications}}
+In Second Life, a dialog menu is a dialog box that appears on the corner of your screen {{Footnote|There are also hud prim-based items that one could call menu systems, but this article concerns itself with Second Life's native dialog system.}} when a [[ScriptDialog]] message is received.
+
+Note: Technically the box that people get is a "Dialog Box", not a menu, but for the purpose of simplicity in this article we will refer to it as a menu.
+
+The box has on it a message and choice buttons, as well as an ignore button.
+
+When you press a button, the script that generated the menu acts on the choice and performs the operation that the user chose by sending a [[ScriptDialogReply]] message.
+
+There is no way to change the actual size of the menu box, nor change its color.
+
+In this article, we are going to build a dialog menu step by step. Advanced scripters will consider this primitive, but this article is not for them :} and it will do the job while illustrating all the key principles involved.
+
+
+== Components Involved in Generating a Menu ==
+
+At its most basic, you have to draw on the following tools to generate a menu, and make it work:
+
+#A message to appear on the dialog box;
+#A list of menu choices;
+#A Channel that the menu communication will happen on;
+#The llDetectedKey() function to determine whom to present the menu to;
+#The llDialog function to present the menu to that user;
+#A llListen to hear what choice the user made;
+#A Listen Event to Capture the Listen;
+#The llListenRemove function to eventually remove the listen.
+#A timer to make sure the listen does eventually get removed.
+
+== The Message ==
+
+The message must be less than 512 bytes {{Footnote|It is problematic to give you with any certainly how many characters that is, but you should be able to get at least a paragraph in, if you really have that much to say in a menu message!}} and must not be empty. That is to say, "" won't work. If it is empty, llDialog will shout "llDialog: must supply a message" on the DEBUG_CHANNEL. If it is greater than or equal to 512 bytes, it shouts (again on the debug channel): "llDialog: message too long, must be less than 512 characters".  In both instances, the dialog box will not be created for avatar.
+
+If the text of your message requires more than eight lines to display it, a vertical scroll bar will appear in the dialog box.
+
+The message text can be formatted somewhat using "\n" (for newline) and "\t" (for tab). You can do nothing, though, to influence the font face, size or weight.
+
+
+
+== The List of Choices ==
+
+An ignore button is generated automatically at the bottom-right hand corner of the menu; you do nothing to generate it, and can do nothing to make it NOT appear.
+
+The dialog box can only present a maximum of 12 buttons to the user.
+
+Note: it's okay to have more than 12 choices you want to give the user; you just need a way to give them MORE and BACK buttons. We'll cover options for this later.
+
+You feed the choices to the dialog menu as a list.
+
+Example:
+<source lang="lsl2">
+list colourchoices = ["Red", "Green", "Yellow"];
+</source>
+
+llDialog is picky about the lists it is fed. It will shout an error if it is unhappy about anything of the following things in a list:
+
+#If any element in the list is anything other than a string;<blockquote>BAD example # 1:<source lang="lsl2">[1, "Green", <0.0, 0.0, 0.0>];</source>Only "Green" is a string in the list.</blockquote>
+#If a button list contains more than 12 entries;
+#If any item in the list is a null string;<blockquote>BAD example # 2:<source lang="lsl2">["", "Green", "Yellow"];</source></blockquote>. But a blank button is OK, i.e. " ";
+
+All that aside, it IS okay to feed the menu a completely empty list. (When fed an empty list, the menu will generate just an ["OK"] button (along with the ever present Ignore button too, of course.)
+
+<source lang="lsl2">
+list colourchoices = [];
+</source>
+
+Tip! Often people like to create a place holder button to line buttons on menus up in a  
+certain way. " ", "-" and "(-)" are such buttons that are commonly used. But don't use ""!
+
+Let's make our sample list now:
+
+<source lang="lsl2">
+list colourchoices = ["-", "Red", "Green", "Yellow"];
+</source>
+
+
+== Menu Communication Channel ==
+
+Menus use Chat to work, and Chat uses channels. If you need to review these concepts, see the entry on [[Chat]].
+
+Negative channels remain popular for dialog menu communications because the client was formerly unable to chat directly on those channels. The important things are not to use channel zero (PUBLIC_CHANNEL), and to select a channel that's unlikely to be used by other objects.
+
+You can ensure that all of your scripted objects have a unique (though predictable!) chat channel with this small snippet of code:- 
+
+<source lang="lsl2">
+//  global variables
+integer channel_dialog;
+
+    // The channel computation can go in state_entry() or similar
+            channel_dialog = -1 - (integer)("0x" + llGetSubString( (string) llGetKey(), -7, -1) );
+
+</source>
+
+This generates a negative (and non-zero) number from the last 7 digits of the UUID of the object.
+
+Because this snippet draws on the unique UUID of the object to form a channel, it ensures that even if two of your products are operating side-by-side, they won't get mixed up listening to each other's messages. This is a great way to avoid unintended cross-talk between objects; however, do not rely on channel selection methods like this as a security mechanism.
+
+== Detecting the User ==
+
+When presenting a menu, you obviously don't want to present it to every person who happens to be within a 10-block radius. You want to present it to the person who invoked it.
+
+Most often, users are invited to invoke a menu via touching an object. When someone has touched an object, you can get their UUID (which is what you need for presenting the menu to them). You use the llDetectedKey() function in a touch event to do this.
+
+<source lang="lsl2">
+    touch_start(integer num_detected)
+    {
+        ToucherID = llDetectedKey(0);
+    }
+</source>
+
+Click here if you wish more information on the [[Touch_start]] event.
+
+Tip! You could also get a user's UUID from when they do things such as speak in chat, or bump into something, or sit on something. And there may be times when that is appropriate. But touch is not only the most common way, but also perhaps the surest way to ensure that the person actually wanted a dialog menu from you.
+
+== Presenting the Dialog Menu ==
+
+We now have all the components we need to present the menu.
+
+This is done by the llDialog function. It builds a dialog box from the message and button choices you feed it, and presents that dialog box to the avatar UUID that you supplied to it.
+
+Tip! Reminder to non-Americans; Dialog has to be spelt the American way.
+
+We'll start putting our example together now:{{Footnote|In this example, we really don't need to capture and store the UUID of the toucher -- we could just use it right away. But as there will be many instances in which you want to pass the ToucherID along to other menus, or other scripts, we're showing you how to in this example. As well, we could just type the list of choices right into the llDialog parameters, but often you'll draw on them from other sources, such as a notecard, for instance.}}
+
+
+
+<source lang="lsl2">
+list colorChoices = ["-", "Red", "Green", "Yellow"];
+string message = "\nPlease make a choice.";   // The newline (\n) helps to visually separate this text from the dialog heading line 
+
+key ToucherID;
+integer channelDialog;
+
+default
+{
+    state_entry()
+    {
+        channelDialog = -1 - (integer)("0x" + llGetSubString( (string)llGetKey(), -7, -1) );
+    }
+
+    touch_start(integer num_detected)
+    {
+        ToucherID = llDetectedKey(0);
+
+        llDialog(ToucherID, message, colorChoices, channelDialog);
+    }
+}
+</source>
+
+We have now presented choices to the user. But next, we need a way to know what button is chosen.
+
+== Listening to Hear the User's Choice ==
+
+You know what a user chose by listening for the response. The choice they make will be chatted on the channel that you specified as part of the llDialog parameters.
+
+So, we'll open up a listen on that channel. And, we'll make sure that on that channel, we listen only to our target user.
+
+You do that like this:
+
+<source lang="lsl2">
+llListen(channelDialog, "", ToucherID, "");
+</source>
+
+(For full specs on how to use this function, see the entry on [[llListen]].)
+
+This listen will listen only to that user (ToucherID) on our channel.
+
+Now, because we're going to be responsible SL citizens later on, and remove that listen, we're going to have that listen assigned to a "handle", so that it's easy to kill it off just by killing off the handle. 
+
+<source lang="lsl2">
+    listen_id = llListen(channelDialog, "", ToucherID, "");
+</source>
+
+(Oh, and we have to make that listen handle a global integer by declaring it in the global area of our script: integer listen_id; )
+
+Here's our example now.
+
+<source lang="lsl2">
+list colorChoices = ["-", "Red", "Green", "Yellow"];
+string message = "\nPlease make a choice.";
+
+key ToucherID;
+integer channelDialog;
+
+integer listenId; // OUR NEW HANDLE
+
+default
+{
+    state_entry()
+    {
+        channelDialog = -1 - (integer)("0x" + llGetSubString( (string)llGetKey(), -7, -1) );
+    }
+
+    touch_start(integer num_detected)
+    {
+        ToucherID = llDetectedKey(0);
+        llDialog(ToucherID, message, colorChoices, channelDialog);
+        listenId = llListen(channelDialog, "", ToucherID, "");// OUR NEW LISTEN
+    }
+}
+</source>
+
+== A Listen Event to Capture the Response ==
+
+Listening isn't the same as hearing. So, we need to add a "listen" event.
+
+In it, we start evaluating what got returned to us as a choice, and we process it.
+
+<source lang="lsl2">
+    listen(integer channel, string name, key id, string message)
+    {
+        if (message == "-")
+        {
+            llDialog(ToucherID, info, colorChoices, channelDialog);
+        }
+        else if (message == "Red")
+        {
+            ;//do something
+        }
+        else if (message == "Green")
+        {
+            ;//do something
+        }
+        else
+        {
+            ;//do something else.
+        }
+    }
+</source>
+
+We just threw a lot at you above. Don't panic, though, here are some notes on it:
+
+*Some scripters may refer to the "string choice" seen above in the listen event as string msg, string message, etc. It doesn't matter what it's referred to -- string banana would work equally well, and you can call it what you want. Whatever you call it is what you define in the last part of the list() statement itself, and you refer to that same name each time you evaluate to see what the user chose.
+*Above, we use if / else if etc to figure out what the user chose. {{Footnote|In a listen event in a dialog menu situation, the "key id" part gives the UUID of the person who clicked a button. But, in this example, there is no need to try to further filter the listen event with "ifs" evaluating to see if that person was our ToucherID. We did that when we set up the listen. To do the further test would just waste script memory.}}
+*If our budding Einstein user chooses the "-" placeholder, we cycle the dialog menu back to him/her with another llDialog. Note that because we had defined all the parameters as variables, it is easy for us to keep on shooting the menu back to them until they get tired and pick something we can use.
+*Note that comparisons are done by using == NOT =  In evaluating dialog box choices, this is one of the more common mistakes that tired fingers can make, and tired eyes can miss. In theory, the compiler should catch this when you go to save the script, but there are situations when it won't always. So if you're not picking up the answer that you think you should, check your == signs.
+*When you have a really elaborate set of choices going, you may need to step through many else if's. There is a limit, however, to how many else if's you can have. When you reach the limit and go to save your script, it will give you -- unhelpfully -- a "syntax" error that will have you tearing your hair out looking everywhere else in the script but here. Generally, you are considered safe having 23 or under chained together -- but it's not unknown for the error to occur with fewer. Watch out for this.
+*And finally, note that there is NO WAY to know if the user hit the ignore button to make the menu go away.
+
+
+Now, let's update our example by bringing the above listen event into it:
+
+<source lang="lsl2">
+list buttons = ["-", "Red", "Green", "Yellow"];
+string dialogInfo = "\nPlease make a choice.";
+
+key ToucherID;
+integer dialogChannel;
+integer listenHandle;
+
+default
+{
+    state_entry()
+    {
+        dialogChannel = -1 - (integer)("0x" + llGetSubString( (string)llGetKey(), -7, -1) );
+    }
+
+    touch_start(integer num_detected)
+    {
+        ToucherID = llDetectedKey(0);
+
+        llDialog(ToucherID, dialogInfo, buttons, dialogChannel);
+        listenHandle = llListen(dialogChannel, "", ToucherID, "");
+    }
+
+    //HERE'S OUR NEWLY ADDED LISTEN EVENT
+    listen(integer channel, string name, key id, string message)
+    {
+        if (message == "-")
+        {
+            llDialog(ToucherID, dialogInfo, buttons, dialogChannel);
+        }
+        else if (message == "Red")
+        {
+            ;//do something
+        }
+        else if (message == "Green")
+        {
+            ;//do something
+        }
+        else
+        {
+            ;//do something else.
+        }
+    }
+}
+</source>
+
+== Remove the listen ==
+
+Because you are a responsible SL scripter, you want to remove the listen when you no longer need it.
+
+And because we were clever enough to assign it to a listen handle in advance, it's really easy to do:
+
+Just:
+
+<source lang="lsl2">
+    llListenRemove(listen_id);
+</source>
+
+Time to update the example by adding that into our listen event:
+
+<source lang="lsl2">
+list buttons = ["-", "Red", "Green", "Yellow"];
+string dialogInfo = "\nPlease make a choice.";
+
+key ToucherID;
+integer dialogChannel;
+integer listenHandle;
+
+default
+{
+    state_entry()
+    {
+        dialogChannel = -1 - (integer)("0x" + llGetSubString( (string)llGetKey(), -7, -1) );
+    }
+
+    touch_start(integer num_detected)
+    {
+        ToucherID = llDetectedKey(0);
+
+        llDialog(ToucherID, dialogInfo, buttons, dialogChannel);
+        listenHandle = llListen(dialogChannel, "", ToucherID, "");
+    }
+
+    //HERE'S OUR NEWLY ADDED LISTEN EVENT
+    listen(integer channel, string name, key id, string message)
+    {
+        if (message == "-")
+        {
+            llDialog(ToucherID, dialogInfo, buttons, dialogChannel);
+        // in case we re-open the dialog, return now before removing the listener
+            return;
+        }
+        
+        // Turn off the listener at a convenient common junction. You can usually avoid coding this multiple times.
+        llListenRemove(listenHandle);   
+
+        if (message == "Red")
+        {
+            ;//do something
+        }
+        else if (message == "Green")
+        {
+            ;//do something
+        }
+        else
+        {
+            ;//do something else.
+        }
+    }
+}
+</source>
+
+== A timer to make sure the listen does get removed ==
+
+If the user hits the ignore button, or crashes while using a menu, or simply walks or tp's away, your listen could go on forever.
+
+So let's set a time limit after which the listen will time out:
+
+<source lang="lsl2">
+    llSetTimerEvent(60.0);
+</source>
+
+And a timer event that will kick in when those 60 seconds are up:
+<source lang="lsl2">
+    timer()
+    {
+    //  stop timer
+        llSetTimerEvent(0);
+
+        llListenRemove(listenHandle);
+        llWhisper(0, "Sorry. You snooze; you lose.");
+    }
+</source>
+
+To learn more about timers, see here: [[Timer]]
+
+== Further Listener Removal ==
+
+Our script as it now stands, still has the potential to accumulate open listeners that don't get closed. If a person clicks on the object but doesn't then click one of the dialog buttons (or clicks 'ignore'), and a second avatar clicks on the object within the 60 second time-out period, then a new listener will be opened, without closing the last. This COULD eventually lead to the script crashing with "Too many listeners open". We can avoid this by always closing any open listener inside the touch_start() event. The down-side is a slim chance that a second person can prevent an earlier person's response being heard.
+
+In addition, it is advisable to start listening before issuing the llDialog(). So our touch_start() now looks like this:
+
+<source lang="lsl2">
+    touch_start(integer num_detected)
+    {
+        ToucherID = llDetectedKey(0);
+        llListenRemove(listenHandle);    // It doesn't matter if we try closing an already closed, or non-existent listener  
+        listenHandle = llListen(dialogChannel, "", ToucherID, "");
+        llDialog(ToucherID, dialogInfo, buttons, dialogChannel);
+        llSetTimerEvent(60.0); // Here we set a time limit for responses
+    }
+</source>
+
+
+== Completed Example ==
+
+Let's add those two timer bits to our example, to make the example complete:
+
+<source lang="lsl2">
+list buttons = ["-", "Red", "Green", "Yellow"];
+string dialogInfo = "\nPlease make a choice.";
+
+key ToucherID;
+integer dialogChannel;
+integer listenHandle;
+
+default
+{
+    state_entry()
+    {
+        dialogChannel = -1 - (integer)("0x" + llGetSubString( (string)llGetKey(), -7, -1) );
+    }
+
+    touch_start(integer num_detected)
+    {
+        ToucherID = llDetectedKey(0);
+        llListenRemove(listenHandle);
+        listenHandle = llListen(dialogChannel, "", ToucherID, "");
+        llDialog(ToucherID, dialogInfo, buttons, dialogChannel);
+        llSetTimerEvent(60.0); // Here we set a time limit for responses
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        if (message == "-")
+        {
+            llDialog(ToucherID, dialogInfo, buttons, dialogChannel);
+            return;
+        }
+
+        llListenRemove(listenHandle);
+        //  stop timer since the menu was clicked
+        llSetTimerEvent(0);
+
+        if (message == "Red")
+        {
+            // process Red here
+        }
+        else if (message == "Green")
+        {
+            // process Green here
+        }
+        else
+        {
+            // do any other action here
+        }
+    }
+
+    timer()
+    {
+    //  stop timer
+        llSetTimerEvent(0);
+
+        llListenRemove(listenHandle);
+        llWhisper(0, "Sorry. You snooze; you lose.");
+    }
+}
+</source>
+
+== Comments ==
+
+We have completed a simple, primitive dialog menu script. There are more efficient ways to code a dialog menu, but they are far more complex and not for the level of scripter that this document is aimed at. The example above may do the job for your first few menus, until your needs start to grow.
+
+You will eventually ask questions such as how do I have one menu button bring up another different menu; in presenting more than 12 choices on two or more dialog boxes, how do I make forward and back buttons (and process those responses,) etc.
+
+To do these things, you may wish to consider looking at the script sample for learners here [[SimpleDialogMenuSystem]]. It is commented with straightforward usage steps, and you shouldn't run into much trouble with it if you just follow those steps.
+
+
+=== User-created utility functions ===
+{|
+{{LSL DefineRow||[[SimpleDialogMenuSystem]]|Multi-paging, next and previous pages}}
+{{LSL DefineRow||[[Dialog NumberPad]]|Lets a dialog menu act as a number pad}}
+{{LSL DefineRow||[[Texture Menu Management]]|Builds a list of textures in a prim, presents choices to user, and displays choices on that prim}}
+{{LSL DefineRow||[[Dialog Control]]|Many advanced features — but complex}}
+{{LSL DefineRow||[[Dialog Menus Control]]|Many advanced features — but complex}}
+
+|}
+
+=== Footnotes ===
+{{Footnotes}}
+{{LSLC|Tutorials}}

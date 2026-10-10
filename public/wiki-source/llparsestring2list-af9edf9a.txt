@@ -1,0 +1,108 @@
+{{LSL_Function
+|func_id=214|func_sleep=0.0|func_energy=10.0
+|func=llParseString2List|return_type=list
+|p1_type=string|p1_name=src|p1_desc=source string
+|p2_type=list|p2_name=separators|p2_desc=separators to be discarded
+|p3_type=list|p3_name=spacers|p3_desc=spacers to be kept
+|func_footnote=In most situations [[llParseStringKeepNulls]] should be used instead. Discarding null values is rarely desired.
+
+When dealing with [[vector]] and [[rotation]] data, consider using [[llCSV2List]] instead, since it can correctly parse them.
+|func_desc
+|return_text=that is {{LSLP|src}} broken into a list of strings, discarding {{LSLP|separators}}, keeping {{LSLP|spacers}}, discards any null (empty string) values generated.
+|spec
+|caveats=
+*All empty strings (that would arise from a spacer or separator being adjacent to each other or the ends) are removed;
+**If you want them (to keep the order of a list, for example) use [[llParseStringKeepNulls]] instead;
+*Only the first 8 separators and first 8 spacers supplied will be used. Any beyond that will be ignored. To work around this see [[#Useful Snippets]] section below. The only limit on the number of items in the output is available script memory.
+* All separators and spacers must be strings. All other types will be ignored;
+* Separators take precedent over spacers. The string is parsed from start to finish. Each position is compared against the separators then spacers before moving onto the next position;
+* Duplicate separators and spacers have no ill effects;
+* All elements in the list returned by llParseString2List are strings, and must be explicitly typecast if they are to be used as other types. Do not rely upon the implicit typecasting of the other llList2* functions (as they typically return a default value);
+* Remember to capture the result of the operation with a variable, unless you are planning to act directly on the results.
+|examples=
+<source lang="lsl2">default
+{
+    state_entry()
+    {
+        // This will say:
+        // <A><crazy><fox><.><Saw><the><moon><.><.>
+        string my_string = "A crazy fox.  Saw the moon..";
+        list my_list = llParseString2List(my_string,[" "],["."]);
+        llOwnerSay("<" + llDumpList2String(my_list,"><") + ">");
+        
+        // This will say:
+        //  <A><crazy><fox><.><><><Saw><the><moon><.><><.><>
+        my_list = llParseStringKeepNulls(my_string,[" "],["."]);
+        llOwnerSay("<" + llDumpList2String(my_list,"><") + ">");
+    }
+}</source>
+
+While LSL does not support lists-in-lists, you can emulate lists-in-lists by making successive calls or you could use {{LSLGC|JSON}}.
+
+In this example some items have additional information supplied.
+<source lang="lsl2">   
+string shoppinglist = "macaroni::pepperoni::bread#wheat::sausage#italian::coffee::syrup::apple::ice cream#strawberry#chocolate#vanilla";
+
+default
+{
+    state_entry()
+    {
+        list items = llParseString2List(shoppinglist, ["::"], []);
+        integer i = 0;
+        integer j = llGetListLength(items);
+        for(;i < j; ++i)
+        {
+            list desc = llParseString2List(llList2String(items, i), ["#"], []);
+            if(llGetListLength(desc) > 1)
+            {
+                list types = llDeleteSubList(desc,0,0);
+                llOwnerSay("Item: "+ llList2String(desc, 0) + "  Type: " + llList2CSV(llDeleteSubList(types,-2,-1) + llDumpList2String(llList2List(types,-2,-1), " & ")));
+            } else {
+                llOwnerSay("Item: "+ (string)desc);
+            }
+        }
+    }
+}</source>
+|helpers=
+'''Examples of processing more than 8 spacers or separators:'''
+{{{!}}
+{{LSL DefineRow||[[ParseString2List]]|Functions exactly the same as [[llParseString2List]] and [[llParseStringKeepNulls]].}}
+{{LSL DefineRow||[[Separate Words|separateWords]]|Functions exactly the same as [[llParseString2List]] unless you violate it's additional preconditions.
+Appears to be correct at a glance.}}
+{{!}}}
+|also_functions={{LSL DefineRow||[[llParseStringKeepNulls]]}}
+{{LSL DefineRow||[[llDumpList2String]]}}
+{{LSL DefineRow||[[llCSV2List]]}}
+{{LSL DefineRow||[[llList2CSV]]}}
+|also_events
+|also_tests
+|also_articles={{LSL DefineRow||[[Separate Words]]}}
+{{LSL DefineRow||[[LSL-Editor/Bugs]]}}
+|notes=Whenever you need to process the resulting list entries further (eg. typecasting), remember to [[llStringTrim]] any whitespace characters from the string. This can prevent issues such as unexpected values for vectors and rotations.
+-----
+If you indicate some items as separators, it will split the string where it finds the indicated separators, and strip out the separators.
+
+If instead you indicate some items as spacers, it will split the string where it finds the spacers, but leave the spacers there, including them as separate entries in the result list.
+
+<source lang="lsl2">string myString = "What Are You Looking At?";
+
+llSay(0, llList2CSV( llParseString2List(myString,  ["W", "A", "Y", "L"], [] ) ) );
+//returns:  hat , re , ou , ooking , t?
+    
+llSay(0, llList2CSV( llParseString2List(myString, [], ["W", "A", "Y", "L"] ) ) );
+//returns: W, hat , A, re , Y, ou , L, ooking , A, t?</source>
+
+Using " " as a separator will parse a sentence into words.
+
+If there is no spacer you care about, just use <code>[]</code> as the spacer.
+
+If an empty string is used as a separator or a spacer, it will have no effect.
+|permission
+|negative_index
+|sort=ParseString2List
+|cat1=List
+|cat2=String
+|cat3=Data Conversion
+|cat4
+|history={{LSL Added|0.6.0|remote=http://secondlife.wikia.com/wiki/Version_0.6.0}}
+}}

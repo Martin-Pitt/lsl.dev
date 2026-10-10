@@ -1,0 +1,39 @@
+<includeonly></includeonly>{{#if:
+
+{{#if:{{{hex|}}}|
+
+{{#vardefine:hex|{{#ifeq:{{#sub:{{{hex|}}}|0|1}}|<nowiki>#</nowiki>|{{#sub:{{{hex|}}}|0|1}}|{{{hex|}}}}}}}
+
+{{#vardefine:int|{{LSL Hex/Parse|{{#var:hex}}}}}}
+
+{{#vardefine:x|{{#expr:(({{#var:int}} / 256 / 256) mod 256) / 255 round {{{round|3}}}}}}}
+{{#vardefine:y|{{#expr:(({{#var:int}} / 256 ) mod 256) / 255 round {{{round|3}}}}}}}
+{{#vardefine:z|{{#expr:({{#var:int}} mod 256) / 255 round {{{round|3}}}}}}}
+
+|
+
+{{#vardefine:hex|{{LSL Hex/Write|{{#expr:{{{1|0}}} mod 256}}|chars=2}}{{LSL Hex/Write|{{#expr:{{{2|0}}} mod 256}}|chars=2}}{{LSL Hex/Write|{{#expr:({{{3|0}}} mod 256)}}|chars=2}}}}
+
+{{#vardefine:x|{{#expr:({{{1|0}}} mod 256) / 255 round {{{round|3}}}}}}}
+{{#vardefine:y|{{#expr:({{{2|0}}} mod 256) / 255 round {{{round|3}}}}}}}
+{{#vardefine:z|{{#expr:({{{3|0}}} mod 256) / 255 round {{{round|3}}}}}}}
+
+}}
+
+{{#vardefine:padding|{{#expr:{{{round|3}}}+2}}}}
+{{#vardefine:vector|&lt;{{padright:{{#var:x}}{{#ifexpr:{{#len:{{#var:x}}}} = 1|.}}|{{#var:padding}}|0}}, {{padright:{{#var:y}}{{#ifexpr:{{#len:{{#var:y}}}} = 1|.}}|{{#var:padding}}|0}}, {{padright:{{#var:z}}{{#ifexpr:{{#len:{{#var:z}}}} = 1|.}}|{{#var:padding}}|0}}&gt;}}
+
+}}<noinclude>
+Parameters:
+* 1 = r [0, 255]
+* 2 = g [0, 255]
+* 3 = b [0, 255]
+* hex=rrggbb ('''no''' "{{code|#}}" prefix is allowed on this template!)
+
+Output:
+* <nowiki>{{#var:hex}}</nowiki> - html style color integer, without "#"
+* <nowiki>{{#var:vector}}</nowiki> - LSL style vector with values [0, 1]
+
+{{ColorMath|hex=001f3f}} - {{#var:hex}} - {{#var:vector}}
+{{ColorMath|0|31|63}} - {{#var:hex}} - {{#var:vector}}
+</noinclude>

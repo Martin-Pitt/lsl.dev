@@ -1,0 +1,50 @@
+{{LSL_Function
+|inject-2={{LSL Function/uuid|target|object=*}}
+|func=llPursue
+|func_desc=Causes the object to pursue {{LSLP|target}}.
+|p1_type=key
+|p1_name=target
+|p1_desc=&#32;to pursue.
+|p2_type=list
+|p2_name=options
+|p2_subtype=instructions
+|p2_desc=Parameters for pursuit; see below.
+|constants={{LSL_Constants/Pursue}}
+|caveats=
+* Must use llCreateCharacter or script crash (script error)
+* Vertical positions specified for any vectors should be chosen to be as close as possible to the actual height of the terrain requested. Large difference between the provided vertical position and the actual terrain/object will result in failure of the behaviour.
+* Z value is unused (erroneous if not 0.0) in parameter for PURSUIT_OFFSET.
+* REQUIRE_LINE_OF_SIGHT does not require line of sight immediately after llPursue() is called - it only affects target position updates after the target object/agent moves.
+* FUZZ_FACTOR picks a point within an area of approximately (scale * lengthOfOffset) around the offset position. Value must be between 0.0 and 1.0.
+|examples=
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llCreateCharacter([CHARACTER_DESIRED_SPEED, 35.0, CHARACTER_MAX_SPEED, 35.0]);
+    }
+
+    touch_start(integer total_number)
+    {
+        llPursue(llDetectedKey(0), [PURSUIT_OFFSET, <-2.0, 0.0, 0.0>, PURSUIT_FUZZ_FACTOR, 0.2]);
+    }
+}
+</source> 
+|also_functions=
+* [[llCreateCharacter]]
+* [[llDeleteCharacter]]
+* [[llEvade]]
+* [[llExecCharacterCmd]]
+* [[llGetClosestNavPoint]]
+* [[llFleeFrom]]
+* [[llNavigateTo]]
+* [[llPatrolPoints]]
+* [[llPursue]]
+* [[llUpdateCharacter]]
+* [[llWanderWithin]]
+|also_events=
+* [[path_update]]
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/12#12.07.31.262785 | 31/07/2012 ]]
+|cat1=Pathfinding
+}}

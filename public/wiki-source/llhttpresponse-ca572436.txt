@@ -1,0 +1,103 @@
+{{LSL_Function
+|inject-2={{Issues/SCR-396}}
+|func_id=348|func_sleep=0.0|func_energy=10.0|mode
+|func=llHTTPResponse
+|p1_type=key|p1_subtype=handle|p1_name=request_id|p1_desc=A valid HTTP request key.
+|p2_type=integer|p2_name=status|p2_desc={{Wikipedia|List_of_HTTP_status_codes|HTTP Status}} (200, 400, 404, etc)|p2_hover=HTTP Status (200, 400, 404, etc)
+|p3_type=string|p3_name=body|p3_desc=Contents of the response.
+|func_footnote=The response need not be made inside the [[http_request]] event but if it does not happen in a timely fashion the request will time out (within 25 seconds).
+|func_desc=Responds to {{LSLP|request_id}} with {{LSLP|status}} and {{LSLP|body}}.
+|return_text
+|spec
+|caveats=* This call must be made by the script containing the [[http_request]] event where the {{LSLP|request_id}} was received.
+* There is no limit, other than script size, to the amount of data that can be sent by this function.
+** [[llHTTPRequest]] can truncate the response length in ''receiving'' scripts. Be aware when using them together for prim-to-prim communications.
+* The response by default has <code>{{String|content-type: text/plain}}</code>. Use [[llSetContentType]] to optionally return a different type, like <code>{{String|text/html}}</code>.
+* Besides [[llSetContentType]], there is no way to set any custom HTTP headers in the response.
+|constants
+|examples=
+<source lang="lsl2">
+string url;
+
+default
+{
+    changed(integer change)
+    {
+        if (change & (CHANGED_REGION_START | CHANGED_REGION | CHANGED_TELEPORT))
+            llResetScript();
+    }
+
+    state_entry()
+    {
+        llRequestURL();
+    }
+
+    touch_start(integer num_detected)
+    {
+    //  PUBLIC_CHANNEL has the integer value 0
+        if (url != "")
+            llSay(PUBLIC_CHANNEL, "URL: " + url);
+    }
+
+    http_request(key id, string method, string body)
+    {
+    //  http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
+        list CRUDmethods = ["GET", "POST", "PUT", "DELETE"];
+    //  it's bit-wise NOT ( ~ ) !!!
+        integer isAllowedMethod = ~llListFindList(CRUDmethods, [method]);
+
+        if (isAllowedMethod)
+        {
+            llHTTPResponse(id, 200, "Body of request below:\n" + body);
+        }
+        else if (method == URL_REQUEST_GRANTED)
+        {
+        //  don't forget the trailing slash
+            url = body + "/";
+
+            llOwnerSay("URL: " + url);
+        }
+        else if (method == URL_REQUEST_DENIED)
+        {
+            llOwnerSay("Something went wrong, no URL.\n" + body);
+        }
+        else
+        {
+            llOwnerSay("Ummm... I have no idea what SL just did. Method=\""+method+"\"\n" + body);
+        }
+    }
+}
+</source>
+|helpers
+|also_constants=
+{{LSL DefineRow|1=|2={{LSL Const|CONTENT_TYPE_TEXT}}|3={{#var:comment}}}}
+{{LSL DefineRow|1=|2={{LSL Const|CONTENT_TYPE_HTML}}|3={{#var:comment}}}}
+{{LSL DefineRow|1=|2={{LSL Const|CONTENT_TYPE_XML}}|3={{#var:comment}}}}
+{{LSL DefineRow|1=|2={{LSL Const|CONTENT_TYPE_XHTML}}|3={{#var:comment}}}}
+{{LSL DefineRow|1=|2={{LSL Const|CONTENT_TYPE_ATOM}}|3={{#var:comment}}}}
+{{LSL DefineRow|1=|2={{LSL Const|CONTENT_TYPE_JSON}}|3={{#var:comment}}}}
+{{LSL DefineRow|1=|2={{LSL Const|CONTENT_TYPE_LLSD}}|3={{#var:comment}}}}
+{{LSL DefineRow|1=|2={{LSL Const|CONTENT_TYPE_FORM}}|3={{#var:comment}}}}
+{{LSL DefineRow|1=|2={{LSL Const|CONTENT_TYPE_RSS}}|3={{#var:comment}}}}
+|also_functions=
+{{LSL DefineRow||[[llGetFreeURLs]]}}
+{{LSL DefineRow||[[llRequestURL]]}}
+{{LSL DefineRow||[[llRequestSecureURL]]}}
+{{LSL DefineRow||[[llReleaseURL]]}}
+{{LSL DefineRow||[[llGetHTTPHeader]]}}
+{{LSL DefineRow||[[llSetContentType]]}}
+|also_tests
+|also_events=
+{{LSL DefineRow||[[http_request]]}}
+{{LSL DefineRow||[[http_response]]}}
+|also_articles=
+{{LSL DefineRow||[[LSL http server]]}}
+|notes
+|deepnotes=
+|history=
+*{{SVN|1836|rev=112899 |trunk=*|anchor=file22|ver=|ser=}}
+|cat1=HTTP
+|cat2=HTTP/Server
+|cat3
+|cat4
+}}

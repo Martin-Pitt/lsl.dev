@@ -1,0 +1,82 @@
+{{LSL Function
+|inject-2={{LSL Function/rotation|rot|region=*}}
+|func_id=68|func_sleep=0.0|func_energy=10.0
+|func=llRotTarget
+|return_type=integer
+|return_subtype=handle
+|p1_type=rotation|p1_name=rot|p1_desc=target rotation
+|p2_type=float|p2_name=error|p2_desc=angle in radians, defines when {{LSLP|rot}} has been reached|p2_hover=angle in radians, defines when 'rot' has been reached
+|func_footnote=A similar function exists for positions: [[llTarget]]<br/>This function does not rotate the object, to do that use [[llSetRot]], [[llRotLookAt]] or [[llLookAt]].
+|func_desc=This function is to have the script know when it has reached a rotation.<br/>It registers a {{LSLP|rot}} with a {{LSLP|error}} that triggers [[at_rot_target]] and [[not_at_rot_target]] events continuously until unregistered.
+|return_text=to unregister the target with {{LSLG|llRotTargetRemove}}
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">
+vector standrot = <0.0, 0.0, 0.0>;
+vector fliprot = <45.0, 0.0, 0.0>;
+
+// simple two-state rot target detection and rotation by Hypatia Callisto
+// works, to detect a rotation target. An example I wrote
+// since there is almost zilch for clean examples for 
+// at_rot_target, not_at_rot_target, llRotTarget, llRotTargetRemove
+
+integer rottarget;
+
+default
+{
+
+    state_entry(){ 
+        rottarget = llRotTarget(llEuler2Rot(fliprot*DEG_TO_RAD), 0.1);
+        llSetPrimitiveParams ([PRIM_ROTATION, llEuler2Rot(standrot*DEG_TO_RAD)]); // rotate to starting point
+    }
+
+    not_at_rot_target()
+    { 
+        llRotTargetRemove( rottarget );
+        llOwnerSay("not there"); //not at target
+    }
+        
+    touch_start (integer total_number)
+    {
+        state rotatestate; // change to state for new position
+    }
+}
+             
+      
+state rotatestate 
+{ 
+    state_entry(){ 
+        rottarget = llRotTarget(llEuler2Rot(fliprot*DEG_TO_RAD), 0.1);
+        llSetPrimitiveParams ([PRIM_ROTATION, llEuler2Rot(fliprot*DEG_TO_RAD)]); // rotate to new point
+    }
+    
+    at_rot_target(integer tnum, rotation targetrot, rotation ourrot)
+    { 
+        llRotTargetRemove( rottarget );
+        llOwnerSay("there"); //reached the target
+    }
+
+    touch_start(integer touched){ 
+        state default; 
+    }
+    
+}
+</source>
+|helpers
+|also_tests
+|also_events=
+{{LSL DefineRow|[[at_rot_target]]|[[not_at_rot_target]]|rotational target events}}
+{{LSL DefineRow|[[at_target]]|[[not_at_target]]|positional target events}}
+|also_functions=
+{{LSL DefineRow||[[llRotTargetRemove]]|Cancel a target rotation}}
+{{LSL DefineRow||[[llTarget]]|Register a target position}}
+{{LSL DefineRow||[[llTargetRemove]]|Cancel a target position}}
+|also_articles
+|notes
+|cat1=Physics
+|cat2=Target
+|cat3=At Target
+|cat4
+}}

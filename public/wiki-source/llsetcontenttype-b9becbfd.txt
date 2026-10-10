@@ -1,0 +1,111 @@
+{{LSL_Function
+|func=llSetContentType
+|func_id=?
+|func_energy=?
+|func_sleep
+|func_desc=Sets the {{Wikipedia|Internet media type|Internet media type}} <code>{{String|Content-Type}}</code> header of any subsequent [[LSL HTTP server]] response via [[llHTTPResponse]].
+|sort
+|func_footnote
+|return_type
+|return_text
+|p1_type=key|p1_subtype=handle|p1_name=request_id|p1_desc=a valid [[http_request]]() key|p1_hover=a valid http_request() key
+|p2_type=integer|p2_name=content_type|p2_desc=Media type to use with any following [[llHTTPResponse]]({{LSLP|request_id}}, ...)
+|p2_hover=Media type to use with any following llHTTPResponse(request_id, ...) 
+|constants={{LSL Constants/Content Type}}
+|spec
+|caveats=
+* When using [[CONTENT_TYPE_HTML]], this setting will be ignored unless all of these conditions are met: 
+*# the web browser is the Second Life client
+*# the user (logged into the SL client viewing the page) is the owner of the object.
+*# the user (logged into the SL client viewing the page) is connected to the region the object is located in
+*: Obviously this is not compatible with group owned objects. One way around this limitation would be to [[llAttachToAvatarTemp|temporarily attach]] a repeater.
+|examples=
+<syntaxhighlight lang="lsl2">
+key url_request;
+
+string HTML_BODY =
+"<!DOCTYPE html>
+<html>
+<body>
+
+<h1>My First Heading</h1>
+
+<p>My first paragraph.</p>
+
+</body>
+</html>";
+
+default
+{
+    state_entry()
+    {
+        url_request = llRequestURL();
+    }
+
+    http_request(key id, string method, string body)
+    {
+        key owner = llGetOwner();
+        vector ownerSize = llGetAgentSize(owner);
+
+        if (url_request == id)
+        {
+        //  if you're usually not resetting the query ID
+        //  now is a good time to start!
+            url_request = "";
+
+            if (method == URL_REQUEST_GRANTED)
+            {
+                llOwnerSay("URL: " + body);
+
+            //  if owner in sim
+                if (ownerSize)//  != ZERO_VECTOR
+                    llLoadURL(owner, "I got a new URL!", body);
+            }
+
+            else if (method == URL_REQUEST_DENIED)
+                llOwnerSay("Something went wrong, no url:\n" + body);
+        }
+
+        else
+        {
+            llOwnerSay("request body:\n" + body);
+
+        //  if owner in sim
+            if (ownerSize)//  != ZERO_VECTOR
+            {
+                llSetContentType(id, CONTENT_TYPE_HTML);
+                llHTTPResponse(id, 200, HTML_BODY);
+            }
+            else
+            {
+                llSetContentType(id, CONTENT_TYPE_TEXT);
+                llHTTPResponse(id, 200, "OK");
+            }
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_header
+|also_constants
+|also_events=
+{{LSL DefineRow||[[http_request]]}}
+{{LSL DefineRow||[[http_response]]}}
+|also_functions={{LSL DefineRow||[[llHTTPResponse]]}}
+|also_articles=
+{{LSL DefineRow||[[LSL HTTP server]]}}
+{{LSL DefineRow||[[HTML HUD Demo]]}}
+|also_footer
+|notes=
+* There is no way to set any other headers in an HTTP response.
+* A workaround for displaying HTML to non-owners inworld can be found [[Teacup|here]].
+|history=* Released August 16, 2011.
+*{{Jira|SCR-394}} - Documentation revised but no change in functionality.
+|mode
+|deprecated
+|permission
+|cat1=HTTP
+|cat2=HTTP/Server
+|comments=The client and owner limitations are most likely to remove the possibility of running a website from a prim.
+|haiku={{Haiku|A web of code spun,|Content-Type set in response,|Limits weave constraints.|author=ChatGPT}}
+}}

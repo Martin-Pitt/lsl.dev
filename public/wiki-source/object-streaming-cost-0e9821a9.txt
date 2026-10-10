@@ -1,0 +1,36 @@
+{{LSL Constant
+|name={{PAGENAMEE}}
+|type=integer
+|value=15
+|desc=This is a flag used with [[llGetObjectDetails]] to get the [[Mesh/Mesh_Streaming_Cost|streaming/download cost]] of the object.
+|examples=<source lang="lsl2">getStreamingCost( key id )
+{
+    list downloadWeight = llGetObjectDetails( id, [OBJECT_STREAMING_COST] );
+    
+    llSetText( "Download (streaming) cost\n" + llList2String( downloadWeight, 0 ), 
+        <1, 0, 0>, 1.0 );
+}
+
+default
+{
+    state_entry()
+    {
+        llSetMemoryLimit( 6000 ); // set memory limit 
+        
+        getStreamingCost( llGetOwner() ); // get the streaming cost of the owner
+    }
+
+    touch_start(integer total_number)
+    {
+        getStreamingCost( llDetectedKey(0) ); // the person that touched the box streaming weight
+    }
+}
+</source>
+|functions={{LSL DefineRow||[[llGetObjectDetails]]}}
+|constants={{!}}{{LSL_Constants/Object_Details}}
+|events
+|cat1=Prim
+|cat2=
+|cat3
+|cat4
+}}

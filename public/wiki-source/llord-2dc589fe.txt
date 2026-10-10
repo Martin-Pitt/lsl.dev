@@ -1,0 +1,58 @@
+{{LSL Function
+|inject-2={{LSL_Function/negative index|true|index}}
+|func_sleep=0.0|func_energy=10.0
+|func=llOrd|sort=Ord
+|func_desc=Calculate the ordinal value for a character in a string.
+|return_type=integer
+|p1_type=string|p1_name=val|p1_desc=Source string for character ordinal.
+|p1_hover=Source string for character ordinal.
+|p2_type=integer|p2_name=index|p2_desc=Index of character ordinal to retrieve.
+|p2_hover=Index of character ordinal to retrieve.
+|return_text=
+|func_footnote=The returned value is the UTF-32 value of the character at the specified index.  If index is outside the bounds of the string, this function returns 0.
+|spec
+|caveats=
+* Characters in the surrogate range (<code>"\u{D800}"</code> - <code>"\u{0xDFFF}"</code>) will return <code>0x3F</code> = <code>63</code>. This might not be observable on LSL, only SLua. SLua's equivalent <code>utf8.codepoint</code> instead raises an error <code>"invalid UTF-8 code"</code> in this situation.
+|examples=
+<source lang="lsl2">
+default
+{
+    touch_start(integer total_number)
+    {
+        string test_string = "The quick brown fox jumped over the lazy dog";
+        list test_list = [];
+        string test_string2 = "";
+        
+        integer index;
+        integer ord;
+        for (index = 0; index < llStringLength(test_string); ++index)
+        {
+            ord = llOrd(test_string, index);
+            test_list = test_list + [ ord ];
+        }
+        
+        string char;
+        for (index = 0; index < llGetListLength(test_list); ++index)
+        {
+            ord = llList2Integer(test_list, index);
+            char = llChar(ord);
+            test_string2 = test_string2 + char;
+        }
+        
+        llSay(0, "\"" + test_string + "\" -> [" + 
+            llDumpList2String(test_list, ", ") + "] -> \"" + test_string2 + "\"");
+    }
+}
+</source>
+
+|helpers|related
+|also_functions=
+{{LSL DefineRow|[[llChar]]|Convert an ordinal into a character}}
+{{LSL DefineRow|[[llHash]]|Calculate a 32bit hash for a string}}
+|also_articles={{LSL DefineRow||{{wikipedia|UTF-32}}|}}
+|notes
+|cat1
+|cat2
+|cat3
+|cat4
+}}

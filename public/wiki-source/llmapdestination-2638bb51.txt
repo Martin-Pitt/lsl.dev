@@ -1,0 +1,69 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-3455}}{{Issues/SVC-1038}}{{Issues/SVC-1795}}{{Issues/VWR-2060}}{{Issues/VWR-7331}}
+{{LSL Function/position|pos|region=*}}
+{{LSL Function/position|look_at|local=*}}
+|func_id=309|func_sleep=1.0|func_energy=10.0
+|func=llMapDestination|sort=MapDestination
+|p1_type=string|p1_name=simname|p1_desc=Region name
+|p2_type=vector|p2_name=pos
+|p3_type=vector|p3_name=look_at|p3_desc=&#32;(not used)
+|func_footnote=(NOTE: {{LSLP|look_at}} currently does nothing)
+|func_desc=Opens world map centered on {{LSLP|simname}} with {{LSLP|pos}} highlighted.<br />Only works for scripts [[attach]]ed to avatar, or during {{LSLGC|Touch|touch}} events.
+|return_text
+|spec
+|caveats=
+* if {{LSLP|simname}} is {{HoverText|omitted|an empty string: {{String}}}} or invalid, the map will open centered on object, but {{LSLP|pos}} will not be highlighted. Since this function requests the client to perform a task, there is no way for script to know if it has failed.
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+string simName = "Help Island Public";
+vector tpDest = <128.0, 128.0, 24.0>;
+vector lookAt = ZERO_VECTOR;
+
+default
+{
+    state_entry()
+    {
+        // set white, opaque floattext with teleport destination
+        llSetText("click to teleport\nto '" + simName + "'", <1.0, 1.0, 1.0>, (float)TRUE);
+    }
+
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+
+        string oldSlurlPrefix = "http://slurl.com/secondlife/";
+        string newSlurlPrefix = "http://maps.secondlife.com/secondlife/";
+        string slurlSuffix = llEscapeURL(simName)
+            + "/" + (string)llRound(tpDest.x)
+            + "/" + (string)llRound(tpDest.y)
+            + "/" + (string)llRound(tpDest.z);
+
+        llInstantMessage(id, oldSlurlPrefix + slurlSuffix);
+        llInstantMessage(id, newSlurlPrefix + slurlSuffix);
+
+        llMapDestination(simName, tpDest, lookAt);
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llRequestInventoryData]]|}}
+{{LSL DefineRow||[[llMapBeacon]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes=
+* {{LSLP|pos}} will work with [[Viewer_coordinate_frames#Region|Region]] coordinates not inside {{LSLP|simname}}. (like those returned by [[llRequestInventoryData]])
+* if called from non {{LSLGC|Touch|touch}} events, it only works for the {{LSLGC|Owner|owner}}.
+* if called from touch, it may only work for the first or last touch in the event queue (example: {{Mono|num_touched > 1}})
+* if called inside an [[attachment]], it only works for the owner.
+|permission
+|inventory
+|negative_index
+|cat1=Dialog
+|cat2=Attachment
+|cat3=Avatar
+|cat4=Touch
+|issues
+}}

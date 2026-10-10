@@ -1,0 +1,148 @@
+When working with Shared Media, a common issue is getting the media to visually appear as intended on the prim. This article helps solve a common problem: how to do the equivalent of pressing the texture panel '''Align''' button from Linden Script (LSL).
+
+
+=== Using the Align Button on the Texture Panel ===
+<br>
+
+First, let's put a Shared Media texture on a prim the interactive way:
+
+
+'''1. Here I've rezzed a rectangular prim:'''
+
+
+[[image:P1.jpg|466px]]
+
+
+'''2. I have a web page that I want to display such that the content will take up the entire surface of the prim.'''
+
+
+[[Image:P2.jpg|466px]]
+
+
+This web page is "test content" - it's just a page with a 0 pixel margin that's displaying a "test pattern" image that is 300x200 pixels. This will help make it easier to see what's happening when it's rendered inworld.
+
+HTML:
+<source lang="html4strict">
+<style type="text/css">
+body {
+margin-left: 0px;
+margin-top: 0px;
+margin-right: 0px;
+margin-bottom: 0px;
+background-color: #eeeeee;
+font: .8em/1.3em verdana,arial,helvetica,sans-serif;
+}
+</style>
+<image width="300" height="200" src="test_pattern.png" />
+</source>
+
+And here's the image, in case you want it:
+
+
+[[Image:P3.png]]
+
+
+'''3. After selecting the face, entering the URL for the Shared Media, and setting the size explicitly to 300X200, the texture does not yet appear as I want it. Notice how it's squished into the corner.'''
+
+
+[[Image:P3.jpg|466px]]
+
+
+'''4. To fix this, I click the "Align" button on the texture panel:'''
+
+
+[[Image:P4.jpg|466px]]
+
+
+And voila!
+
+=== How would you do this if the Shared Media was added from Linden Script? ===
+<br>
+
+For example, the same "Not yet aligned" problem occurs with the script that put the Shared Media on this prim:
+
+
+[[Image:P5.jpg|466px]]
+
+
+Here's that script:
+
+<source lang="lsl2">
+init()
+{
+    integer face = 2;
+    integer w = 300;
+    integer h = 200;
+    string url = "http://www.uccellogames.com/media_demos/test_pattern.html";
+   
+    llClearPrimMedia(face); // forces refresh of cache if reloading the same page
+    llSetPrimMediaParams(face, [
+        PRIM_MEDIA_CURRENT_URL, url,
+        PRIM_MEDIA_AUTO_SCALE, FALSE,
+        PRIM_MEDIA_AUTO_PLAY, TRUE,
+        PRIM_MEDIA_WIDTH_PIXELS, w,
+        PRIM_MEDIA_HEIGHT_PIXELS, h
+    ]);
+}
+ 
+default
+{
+    state_entry()
+    {
+        init();
+    }
+   
+    on_rez(integer start_param)
+    {
+    }
+}
+</source>
+
+There is no LSL command that does the same thing as clicking the '''Align''' button on the texture panel. Help!
+
+
+=== Help has arrived! ===
+
+
+Here's some LSL that has the same effect as the texture button.
+
+<source lang="lsl2">
+doAlign(integer w, integer h, integer face)
+{
+    // compute scale factors based on next bigger power of 2
+    integer div;
+    div = 2;
+    while (div < w) div*=2;    
+    float scale_s = (float)w / div;
+    div = 2;
+    while (div < h) div*=2;
+    float scale_t = (float)h / div;
+   
+    // compute offset from scale
+    float offset_u = -(1.0 - scale_s) / 2.0;
+    float offset_v = -(1.0 - scale_t) / 2.0;
+ 
+    // do the "Align":   
+    llOffsetTexture(offset_u, offset_v, face);
+    llScaleTexture(scale_s, scale_t, face);
+}
+</source>
+
+This LSL does the same math that the Second Life Viewer would do internally if you clicked the '''Align''' button.
+
+And so by adding a call
+
+    doAlign(w, h, face)
+
+
+after the call to llSetPrimMediaParams, it fixes it! Hooray! 
+
+
+[[Image:P6.jpg|466px]]
+
+
+I hope this saves you the time and trouble I spent on this issue.  Happy Shared Media content building.
+
+Edelman Linden
+
+[[Category:LSL]] [[Category:Shared Media]]

@@ -1,0 +1,34 @@
+{{LSL Header|ml=*}}{{LSLC|}}{{LSLC|Data Conversion}}
+
+The most important thing to know about LSL CSV, it's not traditional CSV. It is not RFC 4180.
+
+
+
+<div id="box">
+== Caveats ==
+<div style="padding: 0.5em;">
+
+There are four caveats with LSL CSV.
+#Spaces are trimmed from the beginning and the end of entries.
+#Anything following a "<" is considered part of the same item as long as the number of ">" and "<" are unbalanced.
+#*All "<" and ">" are included in the output string.
+#*Having a ">" before a "<" has no effect on the output, having too many ">" is not an issue.
+#All Commas not encapsulated in "<" ">" will be treated as deliminators.
+#Any datatype containing a float value when converted to a CSV may loose precision.
+
+<lsl>llCSV2List("<>,>,a")   == ["<>", ">", "a"]; //didn't match the last ">"
+llCSV2List("<<>,>,a")  == ["<<>,>", "a"];   //matched everything
+llCSV2List("<<<>,>,a") == ["<<<>,>,a"];     //didn't match the last "<"</lsl>
+</div></div>
+<div id="box">
+
+== Examples ==
+<div style="padding: 0.5em;">
+
+'''One Way To Embed CSV Lists in CSV Lists'''
+<lsl>string a = llList2CSV([
+        "<"+llList2CSV(["a", "b", "c"])+">",
+        "<"+llList2CSV(["d", "e", "f"])+">",
+        "<"+llList2CSV(["g", "h", "i"])+">"
+    ]);</lsl>
+</div></div>

@@ -1,0 +1,33 @@
+{{LSL Constant
+|inject-1
+|name={{PAGENAMEE}}
+|type=integer
+|value=9
+|desc=This is a flag used with [[llGetObjectDetails]] to get the number of [[LlGetScriptState|running]] scripts.
+|examples=<source lang="lsl2">// an example that demonstrates running scripts, total scripts, memory usage, and script time usage. 
+
+default
+{
+    touch_start( integer params )
+    {
+        key toucher = llDetectedKey(0);
+        
+        list scriptInfo = llGetObjectDetails( toucher, [OBJECT_TOTAL_SCRIPT_COUNT, OBJECT_RUNNING_SCRIPT_COUNT, OBJECT_SCRIPT_TIME, OBJECT_SCRIPT_MEMORY]);
+
+        string displayMessage = llGetDisplayName( toucher ) + ", has " + llList2String( scriptInfo, 1 ) + 
+            " number of scripts running, with a total of " + llList2String( scriptInfo, 0 ) + 
+            " scripts.\nThese take up " + (string)(llList2Integer( scriptInfo, 3 ) * 1024) +
+            " KiB of memory while using up " + (string)(llList2Float( scriptInfo, 2 ) * 1000) +
+            "ms of script time.";
+            
+        llSetPrimitiveParams([ PRIM_TEXT, displayMessage, <0, 1, 1>, 1.0 ]);
+    }
+}</source>
+|functions={{LSL DefineRow||[[llGetObjectDetails]]}}
+|constants={{!}}{{LSL_Constants/Object_Details}}
+|events
+|cat1=Prim
+|cat2=
+|cat3
+|cat4
+}}

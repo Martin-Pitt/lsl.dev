@@ -1,0 +1,98 @@
+{{LSL_Function
+|inject-2={{LSL Function/link|link|, controls which prim(s) receive the [[link_message]].|, controls which prim(s) receive the link_message.|verb=sends to}}
+|func_id=164|func_sleep=0.0|func_energy=10.0
+|func=llMessageLinked|sort=MessageLinked
+|p1_type=integer|p1_subtype=link|p1_name=link|p1_desc
+|p2_type=integer|p2_name=num|p2_desc=Value of the second parameter of the resulting [[link_message]] [[event]].|p2_hover=Value of the second parameter of the resulting link_message event.
+|p3_type=string|p3_name=str|p3_desc=Value of the third parameter of the resulting [[link_message]] [[event]].|p3_hover=Value of the third parameter of the resulting link_message event.
+|p4_type=key|p4_name=id|p4_desc=Value of the fourth parameter of the resulting [[link_message]] [[event]].|p4_hover=Value of the fourth parameter of the resulting link_message event.
+|func_desc=The purpose of this function is to allow scripts in the same object to communicate. It triggers a [[link_message]] [[event]] with the same parameters {{LSLP|num}}, {{LSLP|str}}, and {{LSLP|id}} in all scripts in the prim(s) described by {{LSLP|link}}.
+|func_footer=You can use {{LSLP|id}} as a second string field{{Footnote|In LSL the [[key]] type is implemented as a [[string]] (but with different operators and restrictions). [[typecast|Typecasting]] between string and key types has no effect on the data contained.}}. The sizes of {{LSLP|str}} and {{LSLP|id}} are only limited by available script memory.
+|constants
+|func_footnote
+|return_text
+|spec
+|caveats=*A script can hear its own linked messages if {{LSLP|link}} targets the prim it is in{{Footnote|There are four ways for a script to target itself: by [[llGetLinkNumber|precise link number]], [[LINK_THIS]], [[LINK_SET]] and [[LINK_ALL_CHILDREN]] (if the prim is a child prim).}}. This creates the possibility of an infinite loop (a bad thing); be very careful about how messages are handled and passed along.
+* Messages sent via [[llMessageLinked]] to a script that is [[llSleep|sleeping]], [[LSL Delay|delayed]], or [[lag|lagged]], are queued until the end of the delay. The [[event]] queue can hold 64 [[event|events]].
+** If an [[event]] is received and the queue is full the [[event]] is silently dropped.
+** Avoid sending link_messages to large numbers of scripts simultaneously as it can cause lag spike. This most often happens when using the multi-prim <code>LINK_*</code> flags and can cause script execution to slow or halts.
+** Avoid sending link_messages to a target faster than they can be handled. Doing so risks filling the [[event]] queue and subsequent messages being silently discarded.
+* When a script [[state]] changes, all pending [[event|events]] are deleted, including queued link_messages.
+* If {{LSLP|link}} is an invalid link number then the function silently fails.
+* If {{LSLP|str}} & {{LSLP|id}} exceed the available memory of a script that catches the resulting [[link_message]] [[event]], that script will crash with a [[LSL_Errors#Script_run-time_error:_Stack-Heap_Collision|Stack-Heap Collision]].
+|examples=<source lang="lsl2">default
+{
+    // assumptions  // object name: LSLWiki // script name: _lslwiki
+    state_entry()
+    {
+        llMessageLinked(LINK_THIS, 0, llGetScriptName(), "");
+    }
+
+    link_message(integer sender_num, integer num, string msg, key id)
+    {
+        llOwnerSay(msg);
+        // the owner of object LSLWiki will hear
+        // LSLWiki:_lslwiki
+    }
+}</source>
+
+=== Infinite Loop ===
+
+<source lang="lsl2">Message_Control(integer l, integer n) // Message_Total_Lack_Of_Control
+{
+    integer r = (++n); // Increment the value of n.
+    llMessageLinked( l, r, "", ""); // Send the result to l
+}
+
+default
+{
+    state_entry()
+    {
+        Message_Control(LINK_SET, 0); // Tell all the scripts in the object that we have state_entered.
+    }
+    link_message(integer Sender, integer Number, string String, key Key) // This script is in the object too.
+    {
+        Message_Control(Sender, Number); // No filtering condition exists.
+        llOwnerSay(((string)Number)); // Look at all the pretty numbers!
+    }
+}</source>
+|helpers=<source lang="lsl2">default
+{
+    // Quick and dirty debugging link_messages
+    link_message(integer sender_num, integer num, string msg, key id)
+    {
+        llSay(DEBUG_CHANNEL, llList2CSV([sender_num, num, msg, id]));
+    }
+}</source>
+<source lang="lsl2">// This is just an example script, you shouldn't handle link message within single script this way.
+
+default
+{
+    // To propagate an unlimted number of arguments of any type.
+    // Presumed, the separator string isn't used in any source string!
+    state_entry()
+    {
+        list my_list = [1, 2.0, "a string", <1, 2, 3>, <1, 2, 3, 4>, llGetOwner()];
+        string list_parameter = llDumpList2String(my_list, "|");    // Convert the list to a string
+        llMessageLinked(LINK_THIS, 0, list_parameter, "");
+    }
+
+    link_message(integer sender_num, integer num, string list_argument, key id)
+    {
+        list re_list = llParseString2List(list_argument, ["|"], []);    // Parse the string back to a list
+    }
+}</source>
+|also_header
+|also_events={{LSL DefineRow||[[link_message]]|}}
+|also_functions
+|also_articles
+|also_footer
+|notes=*Using [[llMessageLinked]] in a single prim object allows developers to mitigate some [[Limits#Scripting|LSL limits]] by breaking up functionality between cooperating scripts and synchronizing actions. When you do this, be extremely careful not to create infinite loops as mentioned above.
+*Estimated <code>.25</code> to <code>.50</code> delay between receiving and sending of [[llMessageLinked]] has been observed by some users
+*Some users have noted occasional failures of linked messages when sending a message to a large number of receiving scripts in different prims using [[LINK_SET]], [[LINK_ALL_OTHERS]], & [[LINK_ALL_CHILDREN]]. If you encounter this problem, a workaround is to place all child prim scripts in a single prim, using targeted functions like [[llSetLinkPrimitiveParams]] to modify the prim in which the script previously resided. -- [[User:Void Singer|Void Singer]]
+*This function seems to create a lower lag level then [[llListen]] since it does not need a listener.
+|cat1=Communications
+|cat2=Link
+|cat3=Link Message
+|cat4
+}}

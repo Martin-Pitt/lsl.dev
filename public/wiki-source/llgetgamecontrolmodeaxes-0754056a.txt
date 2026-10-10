@@ -1,0 +1,73 @@
+{{LSL_Function
+|func=llGetGameControlModeAxes
+|sort=GetGameControlModeAxes
+|func_id|func_sleep=0.0|func_energy=10.0
+|return_type=list
+|p1_type=key|p1_name=id|p1_desc=avatar UUID
+|func_footnote
+|func_desc=Returns the ''semantic'' (mode-dependent) axis values of {{LSLP|id}} for the current [[game_control]] input.
+|return_text=of {{LSLG|float}} values whose length and meaning depend on the mode returned by [[llGetGameControlMode]]. The list is empty when no game-control data is available for {{LSLP|id}}.
+|spec=Where the '''axes''' parameter of the [[game_control]] event reports the raw gamepad sticks and triggers, this function reports the axes the viewer derived from them for the current mode: reordered, combined (the two triggers become one axis) and remapped according to the user's bindings.
+
+For '''GAME_CONTROL_MODE_AVATAR''', '''GAME_CONTROL_MODE_MOUSELOOK''' and '''GAME_CONTROL_MODE_CAPTIVE''' the list has 5 elements, each in the range [-1.0, 1.0]:
+{{LSL Constants/GameControlModeAxes/Avatar}}
+
+For '''GAME_CONTROL_MODE_FLYCAM''' the list has 7 elements, each in the range [-1.0, 1.0]:
+{{LSL Constants/GameControlModeAxes/Flycam}}
+
+For '''GAME_CONTROL_MODE_CURSOR''' the list has 6 elements:
+{{LSL Constants/GameControlModeAxes/Cursor}}
+
+CURSOR_PX/CURSOR_PY are measured within the rectangle the cursor is allowed to move in: {{HoverText|<0, 0>|zero, zero}} is its upper-left corner. CURSOR_NX/CURSOR_NY are the same position normalized to that rectangle. CURSOR mode has no turn/look slot: turning and looking still work, they are simply not mirrored here because those slots carry cursor position instead.
+|caveats=* Only meaningful inside a [[game_control]] event: the values are a snapshot taken when the event was queued, so the mode, buttons and axes read by a script are all consistent with the event being processed.
+* Returns an empty list when the script has no game-control snapshot for {{LSLP|id}}, for example when called outside of a [[game_control]] event.
+* Game-control input is only delivered to scripts which have been granted [[PERMISSION_GAME_CONTROL]] by {{LSLP|id}}.
+* '''The length of the list depends on the mode and may grow in the future.''' Do not read the list from the end, do not use negative indexes, and do not assume its length; check [[llGetGameControlMode]] and index from the front.
+* Unlike the [[game_control]] event's '''axes''' list, CURSOR_PX and CURSOR_PY are '''not''' restricted to [-1.0, 1.0]: they are pixel values.
+* Several directional buttons are folded into these axes (for example the D-pad contributes to AXIS_ADVANCE and AXIS_STRAFE) while also appearing in [[llGetGameControlModeButtons]]; reacting to both will double-count the input. In CURSOR mode the D-pad is ''not'' folded into the axes.
+* If enabled at the client, keyboard avatar movement may also be translated into game-control input.
+|constants=
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    game_control(key id, integer button_levels, list axes)
+    {
+        integer mode = llGetGameControlMode(id);
+        list mode_axes = llGetGameControlModeAxes(id);
+        if (mode_axes == [])
+            return;
+
+        if (mode == GAME_CONTROL_MODE_AVATAR
+            || mode == GAME_CONTROL_MODE_MOUSELOOK
+            || mode == GAME_CONTROL_MODE_CAPTIVE)
+        {
+            float strafe  = llList2Float(mode_axes, 0);
+            float advance = llList2Float(mode_axes, 1);
+            float rise    = llList2Float(mode_axes, 4);
+            llOwnerSay("move: " + (string)llList2Vector(
+                [<strafe, advance, rise>], 0));
+        }
+        else if (mode == GAME_CONTROL_MODE_CURSOR)
+        {
+            llOwnerSay("cursor at <"
+                + (string)llList2Float(mode_axes, 4) + ", "
+                + (string)llList2Float(mode_axes, 5) + "> (normalized)");
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_header
+|also_functions=
+{{LSL DefineRow||[[llGetGameControlMode]]|Current game-control mode}}
+{{LSL DefineRow||[[llGetGameControlModeButtons]]|Semantic button bitfield for the current mode}}
+|also_events={{LSL DefineRow||[[game_control]]|}}
+|also_articles=[[LSL Game Control Beta]]
+|also_footer
+|notes=The semantic axes are supplied by the viewer in the '''GameControlData''' message. Older viewers that only send the deprecated '''GameControlInput''' message provide raw axes through the [[game_control]] event but no semantic axes, so this function returns an empty list for them.
+|mode
+|deprecated
+|cat1=Controls
+|cat2=Avatar
+}}

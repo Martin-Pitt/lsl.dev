@@ -1,0 +1,110 @@
+<noinclude>{{Multi-lang|category=LSL}}</noinclude>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:header|{{#var:header}}
+{{#switch:{{#if:{{{nc|}}}|Template|{{NAMESPACE}}}}|Template=|User=|}}}}
+
+<includeonly>
+{{#ifeq:{{#var:article-type}}|event||{{#if:{{#pos:{{#var:moded}}|r}}{{#pos:{{#var:moded}}|u}}||{{#vardefine:hidden-text|{{#var:hidden-text}}
+{{LSLC|Link{{#var:lang}}}}{{#if:{{{mode|}}}|{{LSLC|Link/{{{mode}}}{{#var:lang}}}}}}
+}}}}}}
+</includeonly>
+
+{{#if:{{{nlf|}}}{{{noconst|}}}{{#var:link_constants}}||
+{{#vardefine:constants_nb|
+{{{!}} style={{{ostyle|}}}
+{{!}}- valign="top"
+{{!}}
+{{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! colspan="2" {{!}}Flag
+!Description
+{{!}}-
+{{!}} {{LSL Const|LINK_ROOT|integer|1|c={{{verb|refers to}}} the root prim in a multi-prim linked set}}
+{{!}} {{#var:value}}
+{{!}} {{{verb|refers to}}} the [[Link#Root_Prim|root]] prim in a multi-prim linked set{{Footnote|handle=LINK_ROOT|LINK_ROOT does not work on single [[prim]] [[object|objects]]. Unless there is an avatar sitting on the [[object]].}}
+{{#if:{{{nogroup|}}}||{{!}}-
+{{!}} {{LSL Const|LINK_SET|integer|-1|c={{{verb|refers to}}} all prims}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}
+{{!}}-
+{{!}} {{LSL Const|LINK_ALL_OTHERS|integer|-2|c={{{verb|refers to}}} all other prims}}
+{{!}} {{#var:value}}
+{{!}} {{#var:comment}}}}
+{{!}}}
+{{!}}
+{{{!}} {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! colspan="2" {{!}}Flag
+!Description
+{{!}}-
+{{#if:{{{nogroup|}}}||{{!}} {{LSL Const|LINK_ALL_CHILDREN|integer|-3|c={{{verb|refers to}}} all children, (everything but the root)}}
+{{!}} {{#var:value}}
+{{!}} {{{verb|refers to}}} all children, (everything but the [[Link#Root_Prim|root]])}}
+{{!}}-
+{{!}} {{LSL Const|LINK_THIS|integer|-4|c={{{verb|refers to}}} the prim the script is in}}
+{{!}} {{#var:value}}
+{{!}} {{{verb|refers to}}} the [[prim]] the [[script]] is in
+{{!}}}
+{{!}}}
+{{#var:constants_nb}}}}
+{{#vardefine:link_constants|*}}
+}}
+
+{{#vardefine:p_{{{1|}}}_desc|[[Link]] number ({{#if:{{{nounlinked|}}}||0: {{HoverText|unlinked|When an object is made up of only one prim, and there are no avatars seated upon it, the link number of the (root) prim is zero.}},&#32;}}1: {{HoverText|[[Link#Root_Prim|root]] prim|When an object is made up of multiple prims or there is an avatar seated upon the object, the root prim's link number is one}}, &gt;1: child prims{{#if:{{{noavatar|}}}||&#32;and {{HoverText|seated avatars|Avatars sitting on objects are assigned link numbers. They are always greater than prim link numbers.}}}}) {{#if:{{{nlf|}}}||or a <code>LINK_*</code> [[flag]]}}{{{2|}}}&#32;}}
+{{#vardefine:p_{{{1|}}}_hover|Link number ({{#if:{{{nounlinked|}}}||0: unlinked,&#32;}}1: root prim, &gt;1: child prims{{#if:{{{noavatar|}}}||&#32;and seated avatars}}) {{#if:{{{nlf|}}}||or a LINK_* flag}}{{#if:{{{3|}}}|{{{3|}}}|{{{2|}}}}}&#32;}}
+
+{{#if:{{{nocaveats|}}}||{{#if:{{{noavatar|}}}|
+{{#vardefine:caveats|
+*{{LSLP|{{{1|}}}}} cannot be a {{HoverText|seated avatar|Avatars sitting on objects are assigned link numbers. They are always greater than link numbers of prims.}}.
+{{#var:caveats}}}}
+}}{{#if:{{{nogroup|}}}|
+{{#vardefine:caveats|
+*{{LSLP|{{{1|}}}}} needs to be either an actual [[llGetLinkNumber|link number]] or a link constants that equate to a single prim, such as [[LINK_ROOT]] and [[LINK_THIS]].
+**[[LINK_SET]], [[LINK_ALL_CHILDREN]] and [[LINK_ALL_OTHERS]] will not work.
+{{#var:caveats}}}}
+}}}}
+
+{{#if:{{#var:link_stuff}}||
+{{#vardefine:link_stuff|*}}
+{{#vardefine:notes|
+<h3>Link Numbers</h3>
+Each prim that makes up an [[object]] has an address, a link number. To access a specific [[prim]] in the [[object]], the [[prim]]'s link number must be known. In addition to [[prim|prims]] having link numbers, avatars seated upon the [[object]] do as well.
+* If an [[object]] consists of only one [[prim]], and there are no avatars seated upon it, the ([[Link#Root_Prim|root]]) [[prim]]'s link number is zero.
+* However, if the [[object]] is made up of multiple prims or there is an avatar seated upon the [[object]], the [[Link#Root_Prim|root]] [[prim]]'s link number is one.
+
+When an avatar sits on an [[object]], it is added to the end of the link set and will have the largest link number. In addition to this, while an avatar is seated upon an object, the object is unable to link or unlink prims without [[llUnSit|unseating]] all avatars first.
+<h4>Counting Prims & Avatars</h4>
+There are two functions of interest when trying to find the number of prims and avatars on an object.
+* <code>[[llGetNumberOfPrims]]()</code> - Returns the number of [[prim|prims]] and seated avatars.
+* <code>[[llGetObjectPrimCount]]([[llGetKey]]())</code> - Returns only the number of [[prim|prims]] in the [[object]] but will return zero for attachments.
+
+<syntaxhighlight lang="lsl2">integer GetPrimCount() { //always returns only the number of prims
+    if(llGetAttached())//Is it attached?
+        return llGetNumberOfPrims();//returns avatars and prims but attachments can't be sat on.
+    return llGetObjectPrimCount(llGetKey());//returns only prims but won't work on attachments.
+}</syntaxhighlight>See [[llGetNumberOfPrims]] for more about counting prims and avatars.
+
+<h4>Errata</h4>
+If a script located in a [[Link#Child_Prim|child]] prim erroneously attempts to access link 0, it will get or set the property of the linkset's [[Link#Root_Prim|root]] prim.  This bug ({{jira|BUG-5049}}) is preserved for broken legacy scripts. {{PBR}}
+{{#var:notes}}
+}}
+
+{{#vardefine:also_functions|{{#var:also_functions}}
+{{LSL DefineRow||[[llGetLinkNumber]]|Returns the link number of the [[prim]] the script is in.}}}}
+}}
+
+}}<noinclude>
+{| {{Prettytable}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|p_{{{1|}}}_desc}}
+|-
+{{VarPairTable|also_functions}}
+|-
+{{VarPair|constants_nb}}
+|-
+{{VarPair|notes}}
+|}
+</noinclude>

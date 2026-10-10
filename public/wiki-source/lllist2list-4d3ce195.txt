@@ -1,0 +1,63 @@
+{{LSL_Function
+|inject-2={{LSL_Function/negative index|true|start|end}}
+|func_id=192|func_sleep=0.0|func_energy=10.0
+|sort=List2List
+|func=llList2List
+|return_type=list
+|p1_type=list|p1_name=src
+|p2_type=integer|p2_name=start
+|p3_type=integer|p3_name=end
+|func_footnote
+|func_desc
+|return_text=that is a slice of {{LSLP|src}} from {{LSLP|start}} to {{LSLP|end}}.
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">
+list numbers = [1, 2, 3, 4, 5];
+default
+{
+    state_entry()
+    {
+        integer index = llListFindList(numbers, [3]);
+        if (index != -1)
+        {
+            list three_four = llList2List(numbers, index, index + 1);
+            llOwnerSay(llDumpList2String(three_four, ","));
+            // Object: 3,4
+        }
+    }
+}
+</source>
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        //as shown below, there is no way to achieve a "wraparound" order of list elements [8,9,0,1]
+        
+        list NUMBERS = [0,1,2,3,4,5,6,7,8,9];
+        list L2L;
+        L2L = llList2List(NUMBERS, 8, 1); // [0,1,8,9]
+        L2L = llList2List(NUMBERS, 8,-9); // [0,1,8,9]
+        L2L = llList2List(NUMBERS,-2,-9); // [0,1,8,9]
+        L2L = llList2List(NUMBERS,-2, 1); // [0,1,8,9]
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llList2ListStrided]]|Similar function for strided lists.}}
+{{LSL DefineRow||[[llDeleteSubList]]}}
+{{LSL DefineRow||[[llListInsertList]]}}
+{{LSL DefineRow||[[llListReplaceList]]}}
+|also_events
+|also_articles
+|notes
+|permission
+|cat1=List
+|cat2
+|cat3
+|cat4
+}}

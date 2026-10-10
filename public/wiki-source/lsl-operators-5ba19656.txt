@@ -1,0 +1,272 @@
+{{LSL Header|ml=*}}
+Operators are used to cause an operation (or mathematical action) to be performed on one (such as !) or two operands. The easy and common example is 1 + 2 where 1 and 2 are operands, and the '''+''' is the operator. This concept can be extended much further with LSL since operands can be variables with the special case of the assignment operators requiring that the left hand side be a variable.
+
+The following table lists the operators in descending order of evaluation, i.e. higher in the table means higher evaluation precedence. Multiple operators on the same line share evaluation precedence. Parenthesize an expression if you need to force an evaluation order.
+
+{| bgcolor="#FFFFFF" border="1"  cellspacing="2" cellpadding="6"
+|- bgColor="#A7C1F2"
+! Operator
+! Description
+! Usage Example
+|- 
+| <code>()</code>
+|| parentheses: grouping and evaluation precedence
+|| <code>integer val = a * (b + c);</code>
+|-
+| <code>[]</code>
+|| brackets: list constructor
+|| <code>list lst = [a, 2, "this", 0.01];</code>
+|-
+| <code>(''type'')</code>
+|| typecasting
+|| <code>string message = "The result is:" + (string)result;</code>
+|- 
+| <code>!</code> <code>~</code> <code>++</code> <code>--</code>
+|| logical NOT, bitwise NOT, increment, decrement
+|| <code>counter++;</code>
+|-
+| <code>*</code> <code>/</code> <code>%</code>
+|| multiply/dot product, divide, modulus/cross product
+|| <code>integer rollover = (count + 1) % 5;</code>
+|-
+| <code>-</code>
+|| subtraction, negation
+|| <code>integer one = 3 - 2;</code>
+<code>integer neg_one = -1;</code>
+|-
+| <code>+</code>
+|| addition, string concatenation
+|| <code>integer two = 1 + 1;</code>
+<code>string text = "Hello" + " world";</code>
+|-
+| <code>+</code>
+|| list concatenation
+|| <code>list myList = [1, 2, 3] + [4, 5];</code>
+<code>list newList = oldList + addList;</code>
+|-
+| <code>&lt;&lt;</code> <code>&gt;&gt;</code>
+|| {{Wikipedia|Arithmetic_shift|arithmetic}} left shift, {{Wikipedia|Arithmetic_shift|arithmetic}} right shift
+|| <code>integer eight = 4 &lt;&lt; 1;</code>
+<code>integer neg_one = -2 &gt;&gt; 1;</code>
+|-
+| <code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code>
+|| less than, less than or equal to, greater than, greater than or equal to
+|| <code>integer isFalse = (6 &lt;= 4);</code>
+|-
+| <code>==</code> <code>!=</code>
+|| comparison: equal, not equal
+|| <code>integer isFalse = ("this" == "that");</code>
+|-
+| <code>&</code>
+|| bitwise AND
+|| <code>integer zero = 4 & 2;</code>
+<code>integer four = 4 & 4;</code>
+|-
+| <code>^</code>
+|| bitwise XOR
+|| <code>integer zero = 4 ^ 4;</code>
+<code>integer six = 4 ^ 2;</code>
+|-
+| <code><nowiki>|</nowiki></code>
+|| bitwise OR
+|| <code>integer four = 4 <nowiki>|</nowiki> 4;</code>
+<code>integer six = 4 <nowiki>|</nowiki> 2;</code>
+|-
+| <code>&&</code> <code><nowiki>||</nowiki></code>
+|| logical AND, logical OR
+|| <code>integer isFalse = (FALSE && TRUE);</code>
+<code>integer isTrue = (FALSE <nowiki>||</nowiki> TRUE);</code>
+|-
+| <code>=</code> <code>+=</code> <code>-=</code> <code>*=</code> <code>/=</code> <code>%=</code>
+|| assignment
+|| <code>integer four = 4;</code>
+<code>integer eight = four; eight *= 2;</code>
+|}
+
+
+'''Note:''' Unlike most other languages that use the C-style <code>&&</code> and <code>||</code> operators, '''both''' operands are '''always''' evaluated.  For example,
+
+<syntaxhighlight lang="lsl2">if (TRUE || 1/0) llSay(PUBLIC_CHANNEL, "Aha!");</syntaxhighlight> 
+
+: will cause a Math Error rather than say "Aha!"
+
+'''Note:''' The <code>++</code> (increment) and <code>--</code> (decrement) operators have two versions, pre- and post-. The ''pre''-increment (or ''pre''-decrement) operator increments (or decrements) its operand by 1; the value of the expression is the incremented (or decremented) value. The ''post''-increment (or ''post''-decrement) operator increases (or decreases) the value of its operand by 1, but the value of the expression is the operand's original value ''prior'' to the operation.
+
+<syntaxhighlight lang="lsl2">integer count = 0;
+if( ++count == 1 ) // 'count' is incremented then evaluated.
+    llSay(PUBLIC_CHANNEL, "Aha"); // message will be said.</syntaxhighlight>
+
+<syntaxhighlight lang="lsl2">integer count = 0;
+if( count++ == 1 ) // 'count' is evaluated then incremented.
+    llSay(PUBLIC_CHANNEL, "Aha"); // message will not be said.</syntaxhighlight>
+
+'''Note:''' In most programming languages, and in the LSL bitwise operators, the AND operator has greater precedence than the OR operator. However, the LSL logical operators <nowiki>||</nowiki> and <nowiki>&&</nowiki> have ''the same'' precedence. For example:
+
+<syntaxhighlight lang="lsl2">1 || 1 && 0  // result: 0 because it's the same as (1 || 1) && 0</syntaxhighlight>
+<syntaxhighlight lang="lsl2">1 | 1 & 0    // result: 1 because it's the same as 1 | (1 & 0)</syntaxhighlight>
+
+'''Note:''' The order of evaluation is from right to left.  If the value of x starts as 1 then the first two conditions below evaluate false and the second two evaluate true:
+
+<syntaxhighlight lang="lsl2">(x && (x = 0) == 0 && x)</syntaxhighlight>
+<syntaxhighlight lang="lsl2">(x && (x = 0) == 0 && x == 0)</syntaxhighlight>
+<syntaxhighlight lang="lsl2">(x == 0 && (x = 0) == 0)</syntaxhighlight>
+<syntaxhighlight lang="lsl2">(x == 0 && (x = 0) == 0 && x)</syntaxhighlight>
+
+Both sides are evaluated regardless of the the truth of either side.
+
+==% Modulus==
+
+'''Note:''' Modulus (<code>%</code>), like division, cause a ''Script run-time error. Math Error'' when its second operand equals zero.
+
+'''Note:''' The <code>%</code> operator only accepts integer (<code>%</code> as modulus) and vector (<code>%</code> as cross product) operands.
+
+The modulus, also known as {{wikipedia|Modulo}}, produces the remainder after the first operand is divided by the second. Mathematically <code>a % b</code> is equivalent to <code>a - (a/b) * b</code>, since integer division <code>a/b</code> is truncated. This is also why the second operand cannot be zero.
+
+The operator can be confusing, even to veteran scripters. The following example(s) may prove useful in understanding how modulus can be used:
+
+* Determine if an integer '''''input''''' is even or odd:
+<syntaxhighlight lang="lsl2">
+if (input % 2 == 0) // input is even
+{
+    // do even things
+}
+else // it's odd
+{
+    // do odd things
+}
+</syntaxhighlight>
+* In the LSL implementation, the result always has the same sign as the first operand.
+** -7 divided by 3 is -2 with a remainder of -1 (3 * -2 = -6, so the difference is -7 - -6 = -7 + 6 = -1), <code>-7 % 3 == -1</code>.
+** Conversely, 7 divided by -3 is -2 with a remainder of 1 (-3 * -2 = 6, so the difference is 7 - 6 = 1), <code>7 % -3 == 1</code>.
+* If the second operand is known to be a positive power of two, the modulus <code>a % b</code> can be replaced with the bitwise AND operator <code>a & (b-1)</code> which is more efficient.
+** <code>7 % 4</code> and <code>7 & 3</code> are both 3.
+** However, AND always returns a positive value: <code>-7 % 4 == -3</code>, but <code>-7 & 3 == 1</code>, which is 4 greater than the modulus putting it in the positive. This may or may not be desirable depending on the situation.
+* Sometimes taking a modulus of floating point numbers is useful. The formula from the introduction works as long as the quotient is cast to an integer: <code>a - (integer)(a/b) * b</code>.
+** Take the fractional part of <code>a</code> (<code>b</code> is 1.0 and can be left out): <code>7.8813 - (integer)(7.8813) == 0.8813</code>.
+** Limit an angle <code>a</code> within TWO_PI radians, i.e. a full circle: <code>7.8813 - (integer)(7.8813/TWO_PI) * TWO_PI == 1.598114</code>.
+
+==+ Operator==
+'''Note:''' Equality test on lists does not compare contents, only the length.
+{| {{Prettytable}}
+|+
+<code>result = left + right</code>
+|-{{Hl2}}
+!Left Type
+!Right Type
+!Result Type
+!Description
+|-
+|integer
+|integer
+|integer
+|Adds '''left''' and '''right'''
+|-
+|integer
+|float
+|float
+|Adds '''left''' and '''right'''
+|-
+|float
+|integer
+|float
+|Adds '''left''' and '''right'''
+|-
+|string
+|string
+|string
+|Concatenates '''right''' onto the end of '''left'''.
+|-
+|list
+|*
+|list
+|Concatenates '''right''' onto the end of '''left'''.
+|-
+|*
+|list
+|list
+|Affixes '''left''' onto the start of '''right'''.
+|-
+|vector
+|vector
+|vector
+|Adds '''left''' and '''right'''
+|-
+|rotation
+|rotation
+|rotation
+|Adds '''left''' and '''right'''<br/>Not useful for combining rotations, use [[#* Operator|*]] or [[#/ Operator|/]] instead.
+|}
+
+==Shorthand Operators==
+{| {{Prettytable}}
+|+
+Alternatives to the simple '=' operator...
+|-{{Hl2}}
+!Simple assignment operator
+!Shorthand operator
+|-
+|a = a + 1
+|a += 1
+|-
+|a = a – 1
+|a -= 1
+|-
+|a = a * (n+1)
+|a *= (n+1)
+|-
+|a = a / (n+1)
+|a /= (n+1)
+|-
+|a = a % b
+|a %= b
+|}
+
+=={{Wikipedia|De Morgan's laws|w=n}}==
+{| {{Prettytable|style=margin-top:0; float:left;}}
+|+ Bitwise Equivalencies
+!AND
+!OR
+|-
+|| <code>~(a & b)</code> || <code>~a &#124; ~b</code>
+|-
+|| <code>~a & ~b</code> || <code>~(a &#124; b)</code>
+|-
+| colspan="2" |
+|-
+|| <code>a & ~b</code> || <code>~(~a &#124; b)</code>
+|-
+|| <code>~(a & ~b)</code> || <code>~a &#124; b</code>
+|-
+|}
+{| {{Prettytable|style=margin-top:0; float:left;}}
+|+ Boolean Equivalencies
+!AND
+!OR
+|-
+|| <code>!(a && b)</code> || <code>!a &#124;&#124; !b</code>
+|-
+|| <code>!a && !b</code> || <code>!(a &#124;&#124; b)</code>
+|-
+| colspan="2" |
+|-
+|| <code>a && !b</code> || <code>!(!a &#124;&#124; b)</code>
+|-
+|| <code>!(a && !b)</code> || <code>!a &#124;&#124; b</code>
+|-
+|}
+Due to {{Wikipedia|De Morgan's laws|w=n}}, by row, code in the '''AND''' column is logically equivalent to code in the '''OR'''. '''a''' and '''b''' need not be variables, they can be expressions. In certain circumstances these equivalencies can be used to simplify complex code. It is important not to confuse the two sets when using them. The first two rows depict De Morgan's laws as it is formulated, the second two build upon it.
+
+{{clear}}
+
+== Useful Snippets ==
+
+Typecasting can also be used if you have to concatenate many parts into a string:
+
+<syntaxhighlight lang="lsl2">
+// the following twp statements are equivalent:
+string message1 = (string)["I have ", 5, " children at the average age of ", 8.2, " years"];
+string message2 = "I have 5 children at the average age of 8.200000 years";
+</syntaxhighlight>
+
+{{LSLC|}}{{LSLC|Syntax}}{{LSLC|Keywords}}
+{{LSLC|FixMe}}<!-- This article is woefully incomplete, it needs more Operator tables -->

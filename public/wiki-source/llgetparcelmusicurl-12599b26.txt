@@ -1,0 +1,41 @@
+{{LSL_Function|func_id=
+|func_sleep|func_energy
+|func=llGetParcelMusicURL|sort=GetParcelMusicURL
+|return_text=containing the parcel [[Streaming Music|streaming audio]] URL.
+|return_type=string
+|func_footnote=The object owner must also be the land owner. If the land is deeded to a group the object will need to be deeded to the same group for this function to work.
+|func_desc|spec|caveats
+|examples=
+<source lang="lsl2">
+string parcel_music_url()
+{
+    string parcelMusicURL = llGetParcelMusicURL();
+
+    if (parcelMusicURL != "")
+        return parcelMusicURL;
+//  else
+        return "Sorry, could not retrieve parcel's music URL.\n"
+            + "You'll either need to be the land owner or able to deed me.";
+
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        // PUBLIC_CHANNEL has the integer value 0
+        llSay(PUBLIC_CHANNEL, parcel_music_url() );
+    }
+}
+</source>
+|helpers|related
+|also_functions=
+{{LSL DefineRow||[[llSetParcelMusicURL]]|Sets the music stream URL for the parcel object is on}}
+|deepnotes=*With this function, music display boards can learn the URL that the parcel is tuned to.
+|history=
+*Suggested: {{Jira|SCR-31}}
+*Server release notes for [[Release_Notes/Second_Life_Server/11#11.12.03.246118|11.12.03.246118]] on the main channel indicate that this function was added.  Testing on the main release on 19-Dec-2011 has this function compiling without error but the output is empty.
+* Tests OK on main channel as of January 22 2012
+|cat1=Parcel
+|cat2=Sound
+|cat3=Media}}

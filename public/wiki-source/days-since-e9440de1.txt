@@ -1,0 +1,155 @@
+{{LSL Header}}
+====Days Since====
+--[[User:BETLOG Hax|BETLOG Hax]] UTC+10: 20090909 1421 [SLT: 20090908 2121]
+
+<source lang="lsl2">
+//==============================================================
+// BETLOG Hax
+//
+//----------------------------------
+//        **** LICENCE START ****
+// http://creativecommons.org/licenses/by-sa/3.0/
+//             Attribution licence:
+// You must:
+//    -Include this unaltered licence information.
+//    -Supply my original script with your modified version.
+//    -Retain the original scripts' SL permissions. [+c/+m/+t]
+// Or:
+//    -Link to the wiki URL from which you copied this script.
+//    -Document: "Uses parts of <scriptname> by BETLOG Hax"
+// AND:
+//   Credit for original logic : Robert Baruch
+//      http://www.jguru.com/faq/view.jsp?EID=14092
+//        **** LICENCE END ****
+//----------------------------------
+// SHARED CONFIGURATION
+//----------------------------------
+// CONFIGURATION
+key         gDataId;
+//string      gName               = "";
+//----------------------------------
+// CORE CODE
+//----------------------------------
+integer f_daysSince(string input)
+{   list l = llParseString2List(input, ["-"],[]);
+    integer Y = (integer)llList2String(l,0);
+    integer M = (integer)llList2String(l,1);    
+    integer D = (integer)llList2String(l,2);
+    if(M==1 || M==2)
+    {   --Y;
+        M+=12;
+    }
+    integer A = Y/100;
+    integer B = A/4;
+    integer C = 2-A-B; //(or C=0 if you're using the Julian calendar)
+    float E = 365.25*(Y+4716);
+    float F = 30.6001*(M+1);
+    integer age = C+D+(integer)E+(integer)F-1524;
+//llOwnerSay("Julian Day = "+(string)age );
+
+    l = llParseString2List(llGetDate(), ["-"],[]);
+    Y = (integer)llList2String(l,0);
+    M = (integer)llList2String(l,1);    
+    D = (integer)llList2String(l,2);
+    if(M==1 || M==2)
+    {   --Y;
+        M+=12;
+    }
+    A = Y/100;
+    B = A/4;
+    C = 2-A-B; //(or C=0 if you're using the Julian calendar)
+    E = 365.25*(Y+4716);
+    F = 30.6001*(M+1);
+    return C+D+(integer)E+(integer)F-1524-age; 
+}
+
+//==============================================================
+default 
+{   state_entry() 
+    {   llListen(33, "", llGetOwner(), "");
+    }
+    touch_start(integer num)
+    {   //gName = llDetectedName(0);
+        gDataId = llRequestAgentData(llDetectedKey(0), DATA_BORN);
+    }    
+    listen(integer channel, string name, key id, string message)
+    {   if((key)message)
+            gDataId = llRequestAgentData((key)message, DATA_BORN);
+    }
+    dataserver(key queryid, string data) 
+    {   if(gDataId==queryid)
+        {   llOwnerSay("Age: "+(string)
+                f_daysSince(data)//YYYY-MM-DD
+            );
+        }
+    }
+}
+//==============================================================
+
+/*
+DERIVED FROM:
+http://www.jguru.com/faq/view.jsp?EID=14092
+
+ Question         How can I get the number of days that have elapsed between two Date objects?
+Derived from     A question posed by J. Scott Stanlick
+Topics     Java:Language, Java:API:Internationalization
+Author     Robert Baruch
+Created     Feb 14, 2000     Modified     May 29, 2000 
+
+
+Answer
+That depends on what you mean by "between".
+
+If you want to find out the number of 24-hour periods between two Date objects d1 and d2 (d2 > d1) then you would do this:
+
+double days = (d2.getTime()-d1.getTime())/1000/60/60/24;
+
+Since Date.getTime returns milliseconds, you divide by 1000 to get seconds, by 60 to get minutes, by 60 again to get hours, and by 24 to get days.
+
+Sometimes this can cause difficulties, especially in countries that have a form of daylight savings time. For example, in the U.S., there is one day in the Fall which has 25 hours, and one day in the Spring which has 23 hours. An elapsed-number-of-days calculation on Dates falling on one of these days may not give the answer you expect.
+
+Anyway, that's the easy way, and if you're satisfied with that, then read no further.
+
+If, on the other hand, you mean the number of midnight-crossings (so that the number of days elapsed between 11:00 PM and 1:00 AM the next day is 1) then you're better off using the Calendar class and computing the Julian Day.
+
+By the way, don't mistake the Julian Day for the Julian Calendar. The two are different and named after different "Julians".
+
+The Julian Day is defined as the number of days elapsed since Nov 24, 4714 BC, 12:00 GMT Gregorian. The year was chosen as being sufficiently in the past so as not to have negative Julian Days, the date was chosen because of the (in that year) 37-day difference between the Julian and Gregorian calendars (Nov 24, 4714 BC Gregorian would be Jan 1, 4713 BC Julian), and the time was chosen because astronomers do their work at night, and it would be a little confusing (to them) to have the Julian Day change in the middle of their work. (I could be wrong)
+
+Anyway, the algorithm for computing the Julian Day from a Gregorian or Julian calendar date for years 400 AD and above is as follows:
+
+Let the date be Y, M, D, where Y is the AD year, M is the month (January=1, December=12), and D is the day (1-31).
+
+For the following calculations, use integer arithmetic (i.e. lop off the fractional part of any result).
+
+If M==1 or M==2 then Y--, M+=12.
+Let A = Y/100
+Let B = A/4
+Let C = 2-A-B (or C=0 if you're using the Julian calendar)
+Let E = 365.25*(Y+4716)
+Let F = 30.6001*(M+1)
+
+Julian Day = C+D+E+F-1524.5
+
+There would be a further adjustment for the time of day, but we're not looking at that. If you want your Julian Days to start at midnight, subtract 1524 rather than 1524.5.
+
+And so, your number-of-days-elapsed calculation would look like this:
+
+Calendar c1 = new GregorianCalendar();
+Calendar c2 = new GregorianCalendar();
+
+c1.setTime(d1);
+c2.setTime(d2);
+
+long j1 = julian_day(c1.get(YEAR),
+  c1.get(MONTH)+1, c1.get(DAY));
+long j2 = julian_day(c2.get(YEAR),
+  c2.get(MONTH)+1, c2.get(DAY));
+
+long days_elapsed = j2-j1;
+
+And this would properly calculate the number of midnight-crossings between 11:00 PM on one day and 1:00 AM the next day. 
+/*
+</source>
+
+[[Category:LSL Examples]]

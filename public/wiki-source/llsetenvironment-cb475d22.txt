@@ -1,0 +1,48 @@
+{{LSL_Function
+|func=llSetEnvironment
+|func_desc=This function overrides the environmental settings for a region or a parcel. The owner of the script must have permission to modify the environment on the parcel or be an estate manager to change the entire region.
+
+An override for a given parameter can be set at the region scope or parcel scope.  It can also be set for a single sky track, all sky tracks, or both.  If an override of a given parameter is specified for both an individual track and all tracks, the individual track's override takes priority.
+
+Note that the list of valid parameters differs from those available for [[llGetEnvironment]].
+|return_type=integer
+|p1_type= vector|p1_name= position|p1_desc= The location on the region of the parcel to be changed. Use &lt;-1, -1, z&gt; for the entire region.  The z-component specifies which sky track to change, based on elevation.  Use z=-1 to set an override on the special 'all tracks' slot.
+|p2_type= list|p2_name= params|p2_desc= A list of parameters to change for the parcel or region. Passing an empty list will remove any modifications from previous calls to llSetEnvironment.
+|constants=
+{{{!}} class="sortable" {{Prettytable|style=margin-top:0;}}
+{{!}}+ '''Return Values'''
+{{!}}-{{Hl2}}
+!Value
+!Constant
+!Description
+{{!}}-
+{{!}} ENV_OK {{!!}} 1 {{!!}} The parcel or region will attempt to change the applied environment.
+{{!}}-
+{{!}} ENV_NO_ENVIRONMENT {{!!}} -3 {{!!}} There is no environment on this parcel to modify.
+{{!}}-
+{{!}} ENV_INVALID_RULE {{!!}} -5 {{!!}} There was an issue with one of the rules.
+{{!}}-
+{{!}} ENV_VALIDATION_FAIL {{!!}} -6 {{!!}} Unable to validate values passed.
+{{!}}-
+{{!}} ENV_THROTTLE {{!!}} -8 {{!!}} The scripts have exceeded the throttle.  Wait and retry the request.
+{{!}}-
+{{!}} ENV_NO_PERMISSIONS {{!!}} -9 {{!!}} The script does not have rights to modify this parcel or region.
+{{!}}}
+
+{{:LSL Constants/llSetEnvironment}}
+
+|caveats= 
+* An environment set locally on the viewer will override any environment set from this function.
+* When changing a parcel's environment it must first have had an environment set.
+* If the parcel is group-owned, the script must either be deeded to the group, or the script owner must have "Modify environment settings and day cycle" group ability '''and''' have an active agent in the sim.
+* The ENV_OK constant is only present on Lua-enabled sims. On older sims, use it's value of 1 instead
+|examples=
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetEnvironment]]|}}
+{{LSL DefineRow||[[llSetAgentEnvironment]]|}}
+{{LSL DefineRow||[[llReplaceAgentEnvironment]]|}}
+{{LSL DefineRow||[[llReplaceEnvironment]]|}}
+|notes
+|history = Date of Release  [https://releasenotes.secondlife.com/simulator/2022-08-12.574216.html 12/08/2022]
+}}

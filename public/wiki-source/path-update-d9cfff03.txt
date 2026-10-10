@@ -1,0 +1,114 @@
+[[Category:LSL Pathfinding]]{{LSL_Event
+|event=path_update
+|event_desc=Event description goes here.
+|p1_type=integer|p1_name=type
+|p1_desc=A <code>PU_*</code>, it's the path event type
+|p1_hover=A PU_* flag, it's the path event type
+|p2_type=list|p2_name=reserved
+|p2_desc=Reserved; not currently used.
+|constants={{LSL_Constants/path_update}}
+|caveats=
+* Note that if wandering, the "stop" (<code>{{LSL Const|PU_GOAL_REACHED|hex=0x01|ihex=1}}</code>) type may never occur as a new goal may be chosen when near (<code>{{LSL Const|PU_SLOWDOWN_DISTANCE_REACHED|hex=0x00|ihex=0}}</code>) the previous goal.
+* When the character cannot navigate from the current position (<code>{{LSL Const|PU_FAILURE_INVALID_START|hex=0x02|ihex=2}}</code>) [[llNavigateTo]] with the <code>{{LSL Const|FORCE_DIRECT_PATH|value=1}}</code> option may be helpful.
+|examples=
+<syntaxhighlight lang="lsl2">
+create_wandering_character()
+{
+//  Clear any previous character behaviors
+    llDeleteCharacter();
+
+//  MAX_SPEED is @ 20 by default
+    llCreateCharacter([
+        CHARACTER_MAX_SPEED, 25.0,
+        CHARACTER_DESIRED_SPEED, 15.0]);
+
+    llWanderWithin(llGetPos(), <10.0, 10.0,  2.0>, []);
+}
+
+list get_pathupdate_failure_info(integer type)
+{
+    if (type == PU_SLOWDOWN_DISTANCE_REACHED)
+        return ["Near", FALSE];
+    
+    if (type == PU_GOAL_REACHED)
+        return ["Stopping", FALSE];
+    
+    if (type == PU_FAILURE_INVALID_START)
+        return ["Cannot path find from current location! Attempting "
+                + "to go to the center of the region.", TRUE];
+
+    if (type == PU_FAILURE_INVALID_GOAL)
+        return ["Goal not on navmesh!", FALSE];
+    
+    if (type == PU_FAILURE_UNREACHABLE)
+        return ["Goal unreachable!", FALSE];
+    
+    if (type == PU_FAILURE_TARGET_GONE)
+        return ["Target gone!", FALSE];
+    
+    if (type == PU_FAILURE_NO_VALID_DESTINATION)
+        return ["No place to go!", FALSE];
+    
+    if (type ==  PU_EVADE_HIDDEN)
+        return ["Hiding from pursuer...", FALSE];
+    
+    if (type == PU_EVADE_SPOTTED)
+        return ["Switched from hiding to running...", FALSE];
+    
+    if (type ==  PU_FAILURE_NO_NAVMESH)
+        return ["Region has no nav mesh..", FALSE];
+    
+    if (type == PU_FAILURE_DYNAMIC_PATHFINDING_DISABLED)
+        return ["Dynamic pathfinding is disabled in this region.", FALSE];
+
+    if (type == PU_FAILURE_PARCEL_UNREACHABLE)
+        return ["Parcel entry problem (is the parcel full?).", FALSE];
+
+    if (type == PU_FAILURE_OTHER)
+        return ["Hit an unspecified failure", FALSE];
+
+    return ["Unknown failure", FALSE];
+}
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        create_wandering_character();
+    }
+ 
+    path_update(integer type, list reserved)
+    {
+        list params = get_pathupdate_failure_info(type);
+        string info = llList2String(params, 0);
+        integer /* boolean */ hasToMove = llList2Integer(params, 1);
+
+        llRegionSayTo(llGetOwner(), 0, info);
+        if (hasToMove)
+        {
+            vector currentPosition = llGetPos();
+            llNavigateTo(<128.0, 128.0, llGround(<128.0, 128.0, 0.0> - currentPosition)>, [FORCE_DIRECT_PATH, TRUE]);
+        }
+    }
+}
+</syntaxhighlight> 
+|also_functions=
+* [[llCreateCharacter]]
+* [[llDeleteCharacter]]
+* [[llEvade]]
+* [[llExecCharacterCmd]]
+* [[llGetClosestNavPoint]]
+* [[llFleeFrom]]
+* [[llNavigateTo]]
+* [[llPatrolPoints]]
+* [[llPursue]]
+* [[llUpdateCharacter]]
+* [[llWanderWithin]]
+|also_events
+|history = Date of Release  [[ Release_Notes/Second_Life_Server/12#12.07.31.262785 | 31/07/2012 ]]
+}}

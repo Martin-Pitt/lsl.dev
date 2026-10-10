@@ -1,0 +1,151 @@
+[[Category:Experience Tools]]
+{{LSL_Function
+|inject-2=
+{{LSL Function/KeyValue|k|v|value=value|d2_type=string|d2_name=value}}
+{{LSL Function/Experience|true}}
+|func=llUpdateKeyValue
+|func_desc=Start an asynchronous transaction to update a key-value pair associated with the script's {{LSLGC|Experience}} with the given key ({{LSLPT|k}}) and value ({{LSLPT|v}}).
+|return_type=key|return_subtype=handle
+|return_text=that can be used to identify the corresponding [[dataserver]] event to determine if this command succeeded or failed and the results.
+|p1_type=string|p1_name=k
+|p2_type=string|p2_name=v
+|p3_type=integer|p3_subtype=boolean|p3_name=checked|p3_desc=If [[TRUE]] the update will only happen if {{LSLPT|original_value}} matches the value in the key-value store.
+|p3_hover=If TRUE the update will only happen if "original_value" matches the value in the key-value store.
+|p4_type=string|p4_name=original_value|p4_desc=The value to compare with the current value in the key-value store.
+|p4_hover=The value to compare with the current value in the key-value store.
+|func_footnote=If {{LSLPT|checked}} is set to [[TRUE]] then the update will only happen if {{LSLPT|original_value}} matches the current value in key-value store, otherwise the [[dataserver]] will return a failure along with the error [[XP_ERROR_RETRY_UPDATE]]. This can be used to create an in-use flag so that {{Wikipedia|Atomicity_(database_systems)|Atomicity}} can be achieved.<br/>
+<br/>
+As of Jan 1, 2016 maximum bytes is 1011 for key and 4095 for value for both LSO and Mono scripts.<br/>
+Using llUpdateKeyValue to update a key that does not exist will not generate [[XP_ERROR_KEY_NOT_FOUND]]. Instead, it will generate a new key with the specified value, as if you had used [[llCreateKeyValue]]. 
+|also_functions=
+*[[llGetExperienceErrorMessage]]
+*[[llCreateKeyValue]]
+*[[llReadKeyValue]]
+*[[llUpdateKeyValue]]
+*[[llDeleteKeyValue]]
+*[[llDataSizeKeyValue]]
+*[[llKeyCountKeyValue]]
+*[[llKeysKeyValue]]
+|examples=<source lang="lsl2">key trans;
+default
+{
+    state_entry()
+    {
+        trans = llUpdateKeyValue("FOO", "BLAH", TRUE, "BAR");
+    }
+
+    dataserver(key t, string value)
+    {
+        if (t == trans)
+        {
+            // our llUpdateKeyValue transaction is done
+            list result = llCSV2List(value);
+            if (llList2Integer(result, 0) == 1)
+            {
+                // the key-value pair was successfully updated
+                llSay(0, "New key-value pair was successfully updated");
+            }
+            else
+            {
+                integer error = llList2Integer(result, 1);
+                if(error == XP_ERROR_RETRY_UPDATE)
+                    llSay(0, "Key-value update failed, checked value is out of date");
+                else
+                    llSay(0, "Key-value update failed: " + llGetExperienceErrorMessage(error) );
+            }  
+        }
+    }
+}</source>
+
+This script demonstrates how to avoid update conflicts (two scripts updating the store at the same time), performing fully atomic updates is more complicated. If all scripts writing to the key-value store abide by the virtual lock ($DB_Lock), and only do updates in update_db state, then all writes will be atomic. 
+<source lang="lsl2">key tid;
+list tids;
+
+default {
+    state_entry() {
+        state lock_db;
+    }
+}
+
+state lock_db {
+    state_entry() {
+        tid = llUpdateKeyValue("$DB_Lock", "LOCK", TRUE, "unlock");
+    }
+    dataserver(key did, string value) {
+        if(did == tid) {
+            string payload = llDeleteSubString(value, 0, 1);
+            if(llGetSubString(value+",", 0, 1) == "1,"){
+                llUpdateKeyValue("$DB_LockedBy", llDumpList2String([llGetOwner(),llGetKey(),llGetLinkKey(!!llGetLinkNumber()),llGetRegionName(),llGetPos(),llGetAttached()],":"), FALSE, "");
+                state update_db;
+            } else {
+                integer err = (integer)payload;
+                if(err == XP_ERROR_RETRY_UPDATE) {
+                    llSay(0, "Database is already locked!");
+                } else {
+                    llSay(0, "Key-value update failed: " + llGetExperienceErrorMessage(err) );
+                }
+                state error;
+            }
+        }
+    }
+}
+
+state update_db {
+    state_entry() {
+        tids = [
+            llUpdateKeyValue("CatsPermissable", "5", FALSE, ""),
+            llUpdateKeyValue("MonkeyMutations", "3", FALSE, ""),
+            llUpdateKeyValue("CodFlavorSupport", "NEVER", FALSE, "")
+        ];
+    }
+    dataserver(key did, string value) {
+        integer i = llListFindList(tid, [did]);
+        if(~i) {
+            string payload = llDeleteSubString(value, 0, 1);
+            if(llGetSubString(value+",", 0, 1) == "1,"){
+                tids = llDeleteSubList(tids, i, i);
+                if(tids == []) {
+                    state unlock_db;
+                }
+            } else {
+                llSay(0, "Key-value update failed: " + llGetExperienceErrorMessage((integer)payload) );
+                state error;
+            }
+        }
+    }
+}
+
+state unlock_db {
+    state_entry() {
+        tid = llUpdateKeyValue("$DB_Lock", "unlock", TRUE, "LOCK");
+    }
+    dataserver(key did, string value) {
+        if(did == tid) {
+            string payload = llDeleteSubString(value, 0, 1);
+            if(llGetSubString(value+",", 0, 1) == "1,"){
+                state done;
+            } else {
+                integer err = (integer)payload;
+                if(err == XP_ERROR_RETRY_UPDATE) {
+                    llSay(0, "Someone has violated the database lock!");
+                } else {
+                    llSay(0, "Key-value update failed: " + llGetExperienceErrorMessage(err) );
+                }
+                state error;
+            }
+        }
+    }
+}
+
+state done {
+    state_entry(){;}
+}
+
+state error {
+    state_entry(){;}
+}</source>
+|cat1=Experience
+|cat2=Experience/Data
+|cat3=Dataserver
+|caveats=* It is recommended that keys do not contain commas due to [[llKeysKeyValue]] returning keys in CSV format.
+}}

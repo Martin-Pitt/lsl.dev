@@ -1,0 +1,57 @@
+{{LSL Constant
+|inject-1={{Issues/SVC-6831}}
+|name=DATA_ONLINE
+|type=integer
+|value=1
+|desc=Used with [[llRequestAgentData]] to return a string that contains the integer boolean for if the user is online (or not). [[TRUE]] if online, [[FALSE]] if offline.
+|pa=
+|text=
+|pb=
+|examples=<source lang="lsl2">key queryID; // the id key 
+
+default
+{
+    state_entry()
+    {
+        key id = llGetOwner(); // get the owner key
+        queryID = llRequestAgentData( id, DATA_ONLINE ); // returns if the owner is online or not
+    }
+    
+    dataserver( key query, string info )
+    {
+        // find the correct query id
+        if( query == queryID )
+        {
+            string message;
+            
+            // convert the info to an actual message
+            if( info == "1" ) 
+            {
+                message = "Online";
+            }
+            
+            else if( info == "0" )
+            {
+                message = "Offline";
+            }
+            
+            // display that they are online or offline in owner say.
+            llOwnerSay( "The owner of this object is: " + message );
+        }
+    }
+}</source>
+|constants=
+{{!}}
+{{{!}} {{Prettytable|style=margin-top:0;margin-right:0;}}
+{{LSL_Constants/llRequestAgentData}}
+{{!}}}
+|functions=
+{{LSL DefineRow||[[llRequestAgentData]]|}}
+|events=
+{{LSL DefineRow||[[dataserver]]|}}
+|location
+|cat1
+|cat2
+|cat3
+|cat4
+}}

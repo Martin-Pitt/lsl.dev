@@ -1,0 +1,43 @@
+{{LSL_Function
+|inject-2={{LSL_Function/uuid|target|sim=*|object=*|group=}}
+|func_id=165|func_sleep=0.0|func_energy=10.0
+|func=llPushObject
+|p1_type=key|p1_name=target|p1_desc
+|p2_type=vector|p2_name=impulse|p2_desc=Direction and force of push. Direction is affected by {{LSLP|local}}.|p2_hover=Direction and force of push. Direction is affected by 'local'.
+|p3_type=vector|p3_name=ang_impulse|p3_desc=Rotational force.
+|p4_type=integer|p4_name=local|p4_desc=boolean, if {{LSL Const|TRUE|integer|1}} uses the [[Viewer coordinate frames#Local|local]] axis of {{LSLP|target}}, if {{LSL Const|FALSE|integer|0}} uses the [[Viewer coordinate frames#Region|region]] axis.|p4_hover=boolean, if TRUE uses the local axis of 'target', if FALSE uses the region axis.
+|func_footnote
+|func_desc=Applies {{LSLP|impulse}} and {{LSLP|ang_impulse}} to object {{LSLP|target}}
+|return_text
+|spec
+|caveats=*Only works on land where Push is not restricted or where the script is owned by the land owner.
+**If the land is owned by a group, the scripted object must be deeded to the same group.
+**In no-push areas an object can only push its owner or itself.
+*The effectiveness of Push is modulated by the amount of [[Energy|script energy]] available.
+**There is a [[LlPushObject/Havok4Implementation|simplified code snippet]] describing how Push is implemented in the Havok4 project and reveals some of the details of how the energy budget affects the final Push magnitude.
+*{{LSLP|ang_impulse}} is ignored when applying to agents or their attachments.
+*[[Energy]] is fully depleted by this function when either {{LSLP|impulse}} or {{LSLP|ang_impulse}} is nonzero.  If {{LSLP|impulse}} is nonzero, it will drain all energy in the object before {{LSLP|ang_impulse}} is processed, causing the push to be purely linear.
+*The push impact is diminished with distance by a factor of distance cubed.
+|constants
+|examples=
+<source lang="lsl2">// Pushes the collided object or avatar.
+default
+{
+    collision_start(integer num_detected)
+    {
+        llPushObject(llDetectedKey(0),<0,0,100>, <0,0,100>, TRUE);
+    }
+}</source>
+|helpers
+|also_functions
+|also_events
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|cat1=Physics
+|cat2=Movement
+|cat3
+|cat4
+}}

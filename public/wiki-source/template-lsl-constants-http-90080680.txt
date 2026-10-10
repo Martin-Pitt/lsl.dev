@@ -1,0 +1,105 @@
+{{#if:
+
+{{LSL Function/boolean|verify|if=*|td=the server SSL certificate must be verifiable using one of the standard certificate authorities|fd=any server SSL certificate will be accepted.}}
+
+{{LSL Function/boolean|noisy|if=*|td=shout error messages to DEBUG_CHANNEL if the outgoing request rate exceeds the server limit|fd=the error messages are suppressed.}}
+
+{{LSL Function/boolean|send_header|if=when|td=the {{String|Pragma: no-cache}} header is sent|fd=no {{String|Pragma}} header is sent.}}
+
+{{#vardefine:p_method_hover|A valid HTTP method, such as {{String|GET}}, {{String|POST}}, {{String|PUT}} and {{String|DELETE}}}}
+
+{{#vardefine:p_name_hover|The name of the header to be set.}}
+{{#vardefine:p_value_hover|The value of the header to be set.}}
+
+{{#vardefine:p_length_hover|The maximum length allowed for an HTTP body, this is also capped by the VM in use.}}
+
+{{#vardefine:p_MIME_type_hover|}}
+
+}}{{{!}} class="sortable" {{Prettytable|style=margin-top:0;}}
+{{!}}-{{Hl2}}
+! '''Flag'''
+! title="Value" {{!}}
+! class="unsortable" {{!}} '''Parameter(s)'''
+! class="unsortable" {{!}} '''Default Parameter Value(s)'''
+! class="unsortable" {{!}} '''Description'''
+{{!}}-
+{{!}} {{LSL Const|HTTP_METHOD|integer|0}}
+{{!}} {{#var:value}}
+{{!}} <nowiki>[</nowiki>[[string]]&nbsp;{{LSL Param|method}}<nowiki>]</nowiki>
+{{!}} <nowiki>[</nowiki>"GET"<nowiki>]</nowiki>
+{{!}} "GET", "POST", "PUT" and "DELETE"
+{{!}}-
+{{!}} {{LSL Const|HTTP_MIMETYPE|integer|1}}
+{{!}} {{#var:value}}
+{{!}} <nowiki>[</nowiki>[[string]]&nbsp;{{LSL Param|MIME_type}}<nowiki>]</nowiki>
+{{!}} <nowiki>[</nowiki>"text/plain;charset=utf-8"<nowiki>]</nowiki>
+{{!}} text/* MIME types should specify a charset. To emulate HTML forms use application/x-www-form-urlencoded. This allows you to set the body to a properly escaped ([[llEscapeURL]]) sequence of &lt;name,value&gt; pairs in the form var=value&amp;var2=value2 and have them automatically parsed by web frameworks.
+:MIME types must be specified in the format: ''type'''''/'''''subtype''[''';'''''option'''''='''''value'']
+;Some valid examples are: 
+: <nowiki>"text/html"</nowiki>
+: <nowiki>"text/plain;charset=utf-8"</nowiki>
+: <nowiki>"application/xhtml+xml"</nowiki>
+: <nowiki>"application/json"</nowiki>
+: <nowiki>"application/x-www-form-urlencoded"</nowiki>
+: <nowiki>"application/rss+xml"</nowiki>
+: <nowiki>"multipart/mixed; boundary="---1234567890---""</nowiki>
+{{!}}-
+{{!}} {{LSL Const|HTTP_BODY_MAXLENGTH|integer|2}}
+{{!}} {{#var:value}}
+{{!}} <nowiki>[</nowiki>[[integer]]&nbsp;{{LSL Param|length}}<nowiki>]</nowiki>
+{{!}} <nowiki>[</nowiki>{{BytesHover|2048}}<nowiki>]</nowiki>
+{{!}} Sets the maximum (UTF-8 encoded) byte length of the HTTP response body. The maximum that can be set depends upon which VM is used.
+* '''[[Mono]] Max:''' {{BytesHover|16384}}
+* '''[[LSO]] Max:''' {{BytesHover|4096}}
+{{KBwarning|width=75%|Applies to the [[:Category:LSL HTTP#Understanding_LSL_HTTP_Communications | Outgoing]] pipeline only (HTTP calls invoked by [[llHTTPRequest]],and responses from [[http_response]]).}}
+
+{{KBtip|When you only need to request a small amount of data from a remote source, consider using the [https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Range Content-Range header] instead.}}
+{{!}}-
+{{!}} {{LSL Const|HTTP_VERIFY_CERT|integer|3}}
+{{!}} {{#var:value}}
+{{!}} <nowiki>[</nowiki>[[integer]]&nbsp;{{LSL Param|verify}}<nowiki>]</nowiki>
+{{!}} <nowiki>[</nowiki>[[TRUE]]<nowiki>]</nowiki>
+{{!}} If [[TRUE]], the server SSL certificate must be verifiable using one of the standard certificate authorities{{Footnote|A list of acceptable certificate authorities can be found at {{Jira|SCR-473}}.|A list of acceptable certificate authorities can be found at SCR-473.}} when making HTTPS requests. If [[FALSE]], any server SSL certificate will be accepted.
+{{!}}-
+{{!}} {{LSL Const|HTTP_VERBOSE_THROTTLE|integer|4}}
+{{!}} {{#var:value}}
+{{!}} <nowiki>[</nowiki>[[integer]]&nbsp;{{LSL Param|noisy}}<nowiki>]</nowiki>
+{{!}} <nowiki>[</nowiki>[[TRUE]]<nowiki>]</nowiki>
+{{!}} If [[TRUE]], shout error messages to [[DEBUG_CHANNEL]] if the outgoing request rate exceeds the server limit. If [[FALSE]], the error messages are suppressed (llHTTPRequest will still return [[NULL_KEY]]).
+{{!}}-
+{{!}} {{LSL Const|HTTP_CUSTOM_HEADER|integer|5}}
+{{!}} {{#var:value}}
+{{!}} <nowiki>[</nowiki>[[string]]&nbsp;{{LSL Param|name}}, [[string]]&nbsp;{{LSL Param|value}}<nowiki>]</nowiki>
+{{!}} NA
+{{!}} Add an extra custom HTTP header to the request.  The first string is the name of the parameter to change, e.g. "Pragma", and the second string is the value, e.g. "no-cache".  Multiple custom headers may be configured per request, as long as the combined custom header length is no greater than 4096 characters.  Note that certain headers, such as the default headers, are blocked for security reasons.
+{{!}}-
+{{!}} {{LSL Const|HTTP_PRAGMA_NO_CACHE|integer|6}}
+{{!}} {{#var:value}}
+{{!}} <nowiki>[</nowiki>[[integer]]&nbsp;{{LSL Param|send_header}}<nowiki>]</nowiki>
+{{!}} <nowiki>[</nowiki>[[TRUE]]<nowiki>]</nowiki>
+{{!}} Sends "Pragma: no-cache" header ([[TRUE]]), or does not send a "Pragma" header ([[FALSE]]).
+{{!}}-
+{{!}} {{LSL Const|HTTP_USER_AGENT|integer|7}}
+{{!}} {{#var:value}}
+{{!}} <nowiki>[</nowiki>[[string]]&nbsp;{{LSL Param|user agent value}}<nowiki>]</nowiki>
+{{!}} <nowiki>[</nowiki>''(none)''<nowiki>]</nowiki>
+{{!}}The user agent value is appended to the one generated by LSL itself. It should follow the syntax from the HTTP standard like: "My-Script-Name/1.0 (Mozilla compatible)".
+
+'''Note:''' Spaces are not allowed in HTTP User Agent token values, so "My Script Name/1.0" will produce a script error; change the spaces to hyphens ("-")
+{{!}}-
+{{!}} {{LSL Const|HTTP_ACCEPT|integer|8}}
+{{!}} {{#var:value}}
+{{!}} <nowiki>[</nowiki>[[string]]&nbsp;{{LSL Param|MIME_type}}<nowiki>]</nowiki>
+{{!}} <nowiki>[</nowiki>"text/plain;charset=utf-8"<nowiki>]</nowiki>
+{{!}} HTTP_ACCEPT parameters can be passed to limit the number of mime types that are sent in the Accept: header of the HTTP request.  Specified mime types may include character set and q parameters. This parameter may be specified multiple times.
+
+The specified mime type must be one already recognized by llHTTPRequest.  These include any text/ mime type, or the following application mime types: “application/xhtml+xml”, “application/atom+xml”, “application/json”, “application/xml”, “application/llsd+xml”, “application/x-javascript”, “application/javascript”, “application/x-www-form-urlencoded”, or “application/rss+xml”.
+
+The Content-Type header in the response is checked against the specified HTTP_ACCEPT parameters. If the value of the header is not in the list of acceptable mime types, llHTTPRequest will return 415 as a result code and the body will be "Unsupported or unknown Content-Type."
+{{!}}-
+{{!}} {{LSL Const|HTTP_EXTENDED_ERROR|integer|9}}
+{{!}} {{#var:value}}
+{{!}} <nowiki>[</nowiki>[[integer]]&nbsp;{{LSL Param|extended}}<nowiki>]</nowiki>
+{{!}} <nowiki>[</nowiki>[[FALSE]]<nowiki>]</nowiki>
+{{!}} If [[TRUE]] llHTTPRequest will always return a [[key]]. If there was an error making the HTTP request. Detailed error information will be returned through the [[http_response]] event using the provided key. Error information is delivered in a JSON block as described in [https://tools.ietf.org/html/rfc7807 RFC&nbsp;7807]. Details about extended return codes can be found below.
+{{!}}}

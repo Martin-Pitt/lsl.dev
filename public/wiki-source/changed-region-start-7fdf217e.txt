@@ -1,0 +1,35 @@
+{{LSL Constant
+|name=CHANGED_REGION_START
+|type=integer
+|value={{LSL Hex|0x400}}
+|desc=The region containing the object has just come online.
+|notes=When a region is (re)started all [[http request|HTTP server]] URLs are automatically released and invalidated.
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    changed(integer change)
+    {
+    //  note that it's & and not &&... it's bitwise!
+        if (change & CHANGED_REGION_START)
+        {
+            key owner = llGetOwner();
+            string region = llGetRegionName();
+            llInstantMessage(owner, "Region '" + region + "' has restarted.");
+        }
+    }
+}
+</syntaxhighlight>
+|functions=
+{{LSL DefineRow||[[llRequestSimulatorData]]|}}
+|events=
+{{LSL DefineRow||[[changed]]|}}
+|history=
+*Suggestion: {{Jira|SVC-1086}} - LSL http_server
+*Suggestion: {{Jira|SVC-3773}} - Change CHANGED_REGION_RESTART to CHANGED_REGION_START
+*Implementation: {{SVN|1836|rev=112899 |trunk=*|anchor=file15|ver=1.23.0.0|ser=1.27.0.112940}} ~ Client [[Release Notes/Second Life Release/1.23|1.23]] ~ Server [[Release Notes/Second Life Server/1.27|1.27]]
+|cat1=Region
+|cat2=HTTP/Server
+|cat3
+|cat4
+}}

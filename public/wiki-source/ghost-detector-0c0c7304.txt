@@ -1,0 +1,38 @@
+{{LSL Header|ml=*}}
+
+The following script detects "ghosted" avatars within sensor range.
+
+Avatars sometimes become ghosted due to a longstanding server bug.  Ghosted avatars are motionless and phantom: other avatars can walk through them without colliding.  A ghosted avatar cannot be teleported home using [[The Region-Estate window|estate management tools]]; the error is ''Could not find user to teleport home / estate owner request failed: teleporthomeuser''.  Their visual appearance may be partially or completely grayed; a cloud; or invisible.  Although seemingly present (and detectable by [[llSensor]] and visible on the [[Mini-Map]]), ghosted avatars are in fact usually logged out and unable to log in (although sometimes they will be logged in on some other region).  The only way to "rescue" a ghosted avatar is to [[The Region-Estate window|restart]] the region it is in.
+
+This code takes advantage of the fact that [[llKey2Name]] returns an empty string for ghosted avatars.
+<source lang="lsl2">
+default
+{
+    touch_start(integer total_number)
+    {
+        llSensor("", NULL_KEY, AGENT, 96.0, PI );
+    }
+    
+    sensor(integer num_detected) {
+        integer i;
+        for (i = 0; i < num_detected; i++) {
+            key k = llDetectedKey(i);
+            vector pos = llDetectedPos(i);
+            
+            if (llKey2Name(k) == "") {
+                llOwnerSay("Ghosted avatar: " +
+                 "secondlife:///app/agent/" + (string)k + "/about" +
+                 " at secondlife://" + llEscapeURL(llGetRegionName()) + "/" +
+                 (string)llRound(pos.x) + "/" +
+                 (string)llRound(pos.y) + "/" +
+                 (string)llRound(pos.z) + "/");
+            }
+        }
+    }
+    
+    no_sensor() {
+        llOwnerSay("...");
+    }
+}
+</source>
+{{#vardefine:sort|Ghost Detector}}{{LSLC|Examples}}

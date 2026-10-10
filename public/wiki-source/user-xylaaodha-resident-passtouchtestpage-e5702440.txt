@@ -1,0 +1,98 @@
+__NOINDEX__
+{{NOINDEX}} 
+
+Not sure how this page has become linked on the overview list. It is just a test page to work on while trying to figure out how to fix PASS_ALWAYS being shown as default, and the function say we want to use PASS_ALWAYS all the time.
+
+
+{{LSL_Function
+|inject-2={{Issues/SVC-3306}}{{LSL Function/Pass|pass|{{LSLGC|Touch|touch}}|Touches|default=PASS_IF_NOT_HANDLED|tf=*}}
+|func_id=154|func_sleep=0.0|func_energy=10.0
+|func=llPassTouches|p1_type=integer|p1_subtype=pass|p1_name=pass
+|func_footnote
+|func_desc=Sets the pass-touches [[prim]] attribute.
+|return_text
+|spec
+|constants
+|caveats
+* The in world description in editor, is from before the 1.40.2 change of adding PASS_NEVER. (only checked in FS) 
+|examples=
+<source lang="lsl2">
+/* This script goes in the root prim */
+
+default
+{
+    touch_start(integer total_number)
+    {
+        llSay(0, "Root touched START.");
+    }
+
+    /* Uncomment block to verify behavoir for all types of touch event */
+    /*
+    touch(integer total_number)
+    {
+        llSay(0, "Root touched HELD.");
+    }
+
+    touch_end(integer total_number)
+    {
+        llSay(0, "Root touched END.");
+    }
+    */
+}
+</source>
+<source lang="lsl2">
+/* This script goes in the child prim */
+
+default
+{
+    state_entry()
+    {
+        /* Uncomment PASS_ALWAYS to comfirm this is not the default
+           (as previous stated on this page,
+            the error was corrected when this example was added) */
+        //llPassTouches(PASS_ALWAYS);
+
+        /* Uncomment PASS_IF_NOT_HANDLED to return to default behavour */
+        //llPassTouches(PASS_IF_NOT_HANDLED);
+    }
+    
+    touch_start(integer total_number)
+    {
+        llSay(0, "Child touched, type START.");
+    }
+
+    /* Uncomment block to verify behavoir for all types of touch event */
+    /*
+    touch(integer total_number)
+    {
+        llSay(0, "Child touched, type HELD.");
+    }
+
+    touch_end(integer total_number)
+    {
+        llSay(0, "Child touched, type END.");
+    }
+    */
+}
+</source>
+
+|helpers
+|also_events=
+{{LSL DefineRow||[[touch_start]]|}}
+{{LSL DefineRow||[[touch]]|}}
+{{LSL DefineRow||[[touch_end]]|}}
+|also_functions=
+{{LSL DefineRow||[[llPassCollisions]]|}}
+|also_tests
+|also_articles
+|notes
+|permission
+|history=
+* Introduction: ?
+* Change: {{Jira|SVC-5923}} - Server version 1.40.2 - New {{LSLPT|pass}} value added: 2
+|sort=PassTouches
+|cat1=Touch
+|cat2=Prim
+|cat3=Detected
+|cat4=Passable
+}}

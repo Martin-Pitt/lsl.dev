@@ -1,0 +1,51 @@
+{{Issues/VWR-1331}}{{LSL_Function
+|func_id=269|func_sleep=0.0|func_energy=10.0
+|func=llGetRootRotation|return_type=rotation
+|func_footnote
+|func_desc
+|return_text=that is the [[Viewer coordinate frames#Region|region]] rotation of the root prim of the [[Object|object]].
+|spec
+|caveats=
+* Returns an accurate facing for Avatars seated or in mouselook, but only a rough direction otherwise when called from an attached prim.
+* When a seated avatar is in mouselook, its rotation is affected by the camera's rotation. There is no way to get the actual rotation of an avatar while seated in mouselook.
+* This function incorrectly (but usefully) returns the avatars region rotation when called in an attachment, use the following instead:
+
+<source lang="lsl2">
+//  if called only from the root
+    llGetLocalRot();
+//  if called from in a linked object
+    llList2Rot( llGetLinkPrimitiveParams( LINK_ROOT, [PRIM_ROT_LOCAL] ), 0 );
+//  this alternative works correctly in all scenarios
+    llList2Rot( llGetLinkPrimitiveParams( !!llGetLinkNumber(), [PRIM_ROT_LOCAL] ), 0 );
+</source>
+|constants
+|examples=
+Simple example to set region rotation of child prim in unattached link set
+<source lang="lsl2">
+default
+{
+  state_entry()
+  {
+    //Rotate 45 degrees about Y-axis
+    rotation globalRot = llEuler2Rot(<0.0, 45.0, 0.0> * DEG_TO_RAD);
+    llSetLocalRot(globalRot / llGetRootRotation());
+  }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetRot]]|}}
+{{LSL DefineRow||[[llGetLocalRot]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetLinkPrimitiveParams]]|}}
+|also_events
+|also_tests
+|also_articles
+|notes=In an attached object, returns region rotation of avatar NOT of the object's root prim.  See [[Rotation#Single_or_Root_Prims_vs_Linked_Prims_vs_Attachments|special cases of rotation]].
+|permission
+|negative_index
+|cat1=Movement
+|cat2=Rotation
+|cat3=Prim
+|cat4
+}}

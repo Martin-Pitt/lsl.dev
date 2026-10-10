@@ -1,0 +1,125 @@
+[[Category:glTF]]
+
+<onlyinclude>{{#if:
+
+{{#vardefine:normal_return|an empty list.}}
+
+{{#vardefine:normal_const|{{LSL Const|PRIM_GLTF_EMISSIVE|integer|46|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the [[GLTF Overrides|GLTF]] emission override of an object's face}}}}
+
+{{LSL_Function/angle|rotation_in_radians}}
+
+{{#vardefine:p_repeats_desc|x and y range from -10000.0 to 10000.0. Negative values flip the texture (z is ignored)}}
+{{#vardefine:p_offsets_desc|x and y range from -1.0 to 1.0. (z is ignored)}}
+{{#vardefine:p_tint_color_desc|tint color in linear RGB}}
+
+{{LSL_Function/inventory|texture|uuid=true|type=texture|no_caveat={{#ifeq:{{{1|}}}|get|true|<noinclude>*</noinclude>}}|full={{{remote|}}}|remote={{#ifeq:{{{1|set}}}|get|*}}|target=PRIM_GLTF_EMISSIVE#Target}}
+
+{{#ifeq:{{{1|}}}|none||
+
+{{#vardefine:facetable|{{#var:facetable}}
+{{!}}-
+{{!}} [ {{#var:normal_const}} ]
+{{!}} {{#var:normal_return}} }}
+
+{{#vardefine:caveats_get|
+* {{LSLP|repeats}} is not only used to get the number of repeats but the sign of the individual components indicate if "Flip" is set.
+}}
+
+{{#vardefine:caveats_set|
+* {{LSLP|repeats}} is not only used to set the number of repeats but the sign of the individual components is also used to set the "Flip" attribute.
+* To clear any override parameters, supply an empty string ("") in the parameter slot.
+* {{LSLP|tint_color}} is in linear RGB color space, unlike legacy tint that uses sRGB. Use [[llsRGB2Linear]] and [[llLinear2sRGB]] to perform conversions.
+}}
+
+{{#ifeq:{{{1|}}}|get|
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#var:caveats_get}}
+}}
+
+|
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#var:caveats_set}}
+}}
+
+}}
+
+<noinclude>
+{{:PRIM TEXGEN|{{{1|}}}}}
+</noinclude>
+
+}}
+
+{{#vardefine:shared_caveat|* In the [[PRIM_TEXGEN_DEFAULT|default]] [[PRIM_TEXGEN|texture mapping]] {{LSLP|tg_type|mode}} the [[PRIM_GLTF_EMISSIVE|texture]] {{LSLP|repeats}} units are in texture repeats per face. In the [[PRIM_TEXGEN_PLANAR|planar]] texture mapping mode the texture {{LSLP|repeats}} units are in texture repeats per half meter. This is in contrast to the in-world editing tool, in which the planar texture scaling units are repeats per meter.}}
+
+{{#vardefine:caveats|{{#var:caveats}}
+{{#var:shared_caveat}}}}
+
+}}</onlyinclude>{{#if:
+
+{{#vardefine:caveats_set|{{#var:caveats}}{{#vardefine:caveats|}}}}
+{{#vardefine:issues_set|{{#var:issues}}{{#vardefine:issues|}}}}
+
+{{LSL_Function/face|face|{{#var:normal_const}}|!footer=*|return={{#var:normal_return}}}}
+
+{{#vardefine:caveats_get|{{#var:caveats}}{{#vardefine:caveats|}}
+{{#var:caveats_get}}
+{{#var:shared_caveat}}}}
+{{#vardefine:issues_get|{{#var:issues}}{{#vardefine:issues|}}}}
+
+}}{{LSL Constant
+|inject-2={{LSL PrimitiveParam Categorize|Face}}
+|name=PRIM_GLTF_EMISSIVE
+|type=integer
+|value=46
+|desc=Used to get or set the [[GLTF Overrides|GLTF]] emission override of an object's {{LSLP|face}}.
+|examples=
+|pa={{LSL Constant/List|i_front=[&#32;{{#var:normal_const}},&#32;|i_end=&nbsp;]|
+|inject-1={{#vardefine:p_texture_desc|}}
+{{#vardefine:p_texture_hover|}}
+{{#vardefine:direction|_set}}
+{{LSL_Function/inventory|texture|uuid=true|type=texture}}
+|text=Used with [[llSetPrimitiveParams]] & [[llSetLinkPrimitiveParams]].
+
+{{LSL Generic/Caveats|issues={{#var:issues_set}}|title=*|h=4}}
+
+|toc=llSetPrimitiveParams
+|i1_type=integer|i1_name=face
+|i2_type=string|i2_name=texture
+|i3_type=vector|i3_name=repeats
+|i4_type=vector|i4_name=offsets
+|i5_type=float|i5_name=rotation_in_radians|i5_disp=rot
+|i6_type=vector|i6_name=tint_color
+}}
+|pb={{LSL Constant/List|i_front=[[llGetPrimitiveParams]]([&nbsp;{{#var:normal_const}},&#32;|i_end=&nbsp;]);|
+|inject-1={{#vardefine:p_texture_desc|}}
+{{#vardefine:p_texture_hover|}}
+{{#vardefine:direction|_get}}
+{{LSL_Function/inventory|texture|uuid=true|type=texture|no_caveat=true|full={{{remote|}}}|remote=*|target=#Target}}
+{{LSL Function/link|link|nogroup=*|nocaveats=*}}
+|r_front=Returns the list [&nbsp;|r_end=&nbsp;]
+|text=
+{{LSL Generic/Caveats|caveats={{#var:caveats_get}}{{#vardefine:caveats_get}}|issues={{#var:issues_get}}|title=*|h=4}}
+====Target====
+In the case of llGetPrimitiveParams is either the prim the script resides in, or the prim specified by the immediately prior [[PRIM_LINK_TARGET]] call. However in the case of llGetLinkPrimitiveParams, it is either the value of the {{LSLP|link}} parameter, or the prim specified by the immediately prior [[PRIM_LINK_TARGET]] call.
+|toc=llGetPrimitiveParams
+|i1_type=integer|i1_name=face
+|r1_type=string|r1_name=texture
+|r2_type=vector|r2_name=repeats
+|r3_type=vector|r3_name=offsets
+|r4_type=float|r4_name=rotation_in_radians|r4_disp=rot
+|r5_type=vector|r5_name=tint_color
+}}
+|functions=
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+|events
+|location
+|notes
+|cat1=Texture
+|cat2=PBR
+|cat3
+|cat4
+}}

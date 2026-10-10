@@ -1,0 +1,73 @@
+{{LSL_Function
+|inject-2=
+{{LSL_Function/avatar|avatar|sim=*}}
+|func_id=?
+|func_sleep=0.0
+|func_energy=10.0
+|func=llGetAttachedListFiltered
+|func_desc
+|p1_type=key|p1_name=avatar|p1_desc
+|p2_type=list|p2_name=options|p2_desc
+|return_type=list|return_text=of object keys corresponding to public attachments worn by an {{LSLPT|avatar}} in the order they were attached.
+|func_footnote=
+If avatar is a child agent, ["NOT ON REGION"] is returned.<br/>
+If avatar is not a main agent and not a child agent or not an agent at all, ["NOT FOUND"] is returned.
+|spec
+|caveats=<br>
+When an avatar first arrives in a region, there is a brief period when their attachments are not yet fully rezzed or added.  During this time, those attachments will not appear in the results.
+</br></br>
+|spec=
+Returns a list of attachments on the avatar. 
+
+By default this function will return all attachments on all attachment points. A script may specify multiple [[FILTER_INCLUDE]] options which will limit the returned attachments to only those listed. 
+
+If the script specifies the [[FILTER_FLAGS]] option with [[FILTER_FLAG_HUDS]] this function will include any attached HUDs if the following conditions are met:
+* The script must be compiled with an experience
+* The experience must be active in the region 
+* The avatar must have accepted the experience
+* The HUD must include at least one script that was also compiled with the same experience. 
+
+|constants={{LSL_Constants_Attachment_Filter}}
+
+{{LSL_Constants_Attachment}}
+
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    state_entry()
+    {
+        list attachments = llGetAttachedListFiltered(llGetOwner(), [FILTER_INCLUDE, ATTACH_RHAND]);
+
+        // Object UUIDs:
+        llOwnerSay(llList2CSV(attachments));
+
+        // Object names:
+        integer i;
+        integer max = llGetListLength(attachments);
+        for (i = 0; i < max; ++i)
+        {
+            string name = llList2String(attachments, i);
+            llOwnerSay(llKey2Name(name));
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions={{LSL DefineRow||[[llGetAttachedList]]}}
+{{LSL DefineRow||[[llGetAttached]]}}
+{{LSL DefineRow||[[llGetAttachedList]]}}
+{{LSL DefineRow||[[llAttachToAvatar]]}}
+{{LSL DefineRow||[[llDetachFromAvatar]]}}
+{{LSL DefineRow||[[llAttachToAvatar]]}}
+{{LSL DefineRow||[[llGetObjectDetails]]|[[OBJECT_ATTACHED_POINT]]}}
+|also_events={{LSL DefineRow||[[attach]]}}
+|also_articles
+|notes
+|history
+|cat1=Attachment
+|cat2=Avatar
+|cat3=Experience
+|cat4=Permissions/Experience
+}}
+[[Category:Experience Tools]]

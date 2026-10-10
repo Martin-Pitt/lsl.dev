@@ -1,0 +1,487 @@
+{{LSL Header|ml=*}}{{#vardefine:header_title|Color conversion scripts}}
+
+The following functions convert between LSL [[color]] in Red Green Blue (RGB) format and color in Hue Saturation Value (HSV) format.
+The functions are based on "c" algorithms from [http://www.cs.rit.edu/~ncs/color/t_convert.html c color conversion] but required some debugging and extensive re-working to fit them in to LSL.   For a discussion of HSV color format please see the wikipedia entry at  [http://en.wikipedia.org/wiki/HSV_color_space HSV Color]
+
+
+==RGB to HSV==
+
+<source lang="lsl2">
+// by [[Sally LaSalle]], code released to the public domain under GNU GPL version 3.0 license.
+// you are free to use, and you are free to donate to me if you wish!! :P
+
+// takes an RGB color as a vector, with range <float R[0,1], float G[0,1], float B[0,1]>
+// returns a vector with HSV ranged from <float H[0,360], float S[0,1],  float V[0,1]>
+// H ranges smoothly from Red=0, Yellow=60, Green=120, Cyan=180, Blue=240, Violet=300 and back to Red
+
+vector RGBtoHSV( vector rgb )
+{
+    float R = rgb.x;
+    if (R<0)		// catch malformed input
+        R=0;
+    else if (R>1)
+        R=1;
+    float G = rgb.y;
+    if (G<0)		// catch malformed input
+        G=0;
+    else if (G>1)
+        G=1;
+    float B = rgb.z;
+    if (B<0)		// catch malformed input
+        B=0;
+    else if (B>1)
+        B=1;
+    
+    float H;
+    float S;
+    float V;
+    
+    list rgbList = [R, G, B]; // list used to get min and max
+        
+    float min;
+    float max;
+    float achromatic;  // =1 if R=G=B
+    float delta;
+    
+    vector hsv;  // the return HSV vector
+
+    min = llListStatistics(LIST_STAT_MIN, rgbList); //MIN of ( R, G, B );
+    max = llListStatistics(LIST_STAT_MAX, rgbList); //MAX of ( R, G, B );
+    if (R==G && G==B)
+        achromatic = 1;  // it is a shade of grey, white or black
+    else
+        achromatic = 0;
+
+    V = max;                    // V = brightness Value form 0 to 1
+    delta = max - min;
+
+    if( max != 0 )
+        S = delta / max;        // S = saturation from 0 to 1
+    else {
+        // R = G = B = 0        // S = 0, V = 0, H = 0
+        S = 0;                  
+        V = 0;                  
+        H = 0;
+        
+        hsv.x = H;
+        hsv.y = S;
+        hsv.z = V;
+        return hsv;             //H = S = V = 0
+    }
+
+    if (achromatic == 1)
+        H = 0;
+    else if( R == max )
+        H = 0 + ( G - B ) / delta;    // between red & yellow
+    else if( G == max )
+        H = 2 + ( B - R ) / delta;    // between yellow & cyan
+    else
+        H = 4 + ( R - G ) / delta;    // between cyan & red
+    
+
+    H *= 60;                	      // H is traditionally a figure between 0 and 360 degrees
+    if( H < 0 )
+        H += 360;
+
+    hsv.x = H;
+    hsv.y = S;
+    hsv.z = V;
+    return hsv;
+}
+</source>
+
+
+==HSV to RGB==
+
+<source lang="lsl2">
+// by Sally LaSalle, code released to the public domain under GNU GPL version 3.0 license.
+// you are free to use, and you are free to donate to me if you wish!! :P
+
+// takes a vector encoded Hue Saturation Value (HSV) triplet
+// HSV should be entered with floats the ranges: <float H(0 to 360), float S(0 to 1),float V(0 to 1)>
+// And Returns a vector encode Red Green Blue (RGB) color triplet
+// RGB will be returned with floats in ranges <float R(0 to 1),float G(0 to 1),float B(0 to 1)>
+
+vector HSVtoRGB( vector hsv )
+{
+    integer i;
+	
+     float H = hsv.x;
+     if (H<0)		// catch malformed H input
+	H=0;
+     else if (H>=360)
+	H=0;
+     float S = hsv.y;
+     if (S<0)		// catch malformed S input
+	S=0;
+     else if (S>1)
+	S=1;
+     float V = hsv.z;
+     if (V<0)		// catch malformed V input
+	V=0;
+     else if (V>1)
+	V=1;
+
+    float R;
+    float G;
+    float B;
+    
+    float f; 	    // variables for calculating base color mixing around the "spectrum circle"
+    float p;
+    float q;
+    float t;
+  
+    vector rgb;
+    
+    if( S == 0 ) {  // achromatic (grey) simply set R,G, & B = Value
+        R = V;
+        G = V;
+        B = V;
+
+        rgb.x = R;
+        rgb.y = G;
+        rgb.z = B;
+        return rgb;
+    }
+
+    H /= 60;              // Hue factored into range 0 to 5
+    i = llFloor( H );	  // integer floor of Hue
+    f = H - i;            // factorial part of H
+
+    p = V * ( 1 - S );
+    q = V * ( 1 - S * f );
+    t = V * ( 1 - S * ( 1 - f ) );
+
+    if (i==0){
+        R = V;
+        G = t;
+        B = p;
+    } else if (i==1){
+        R = q;
+        G = V;
+        B = p;
+    } else if (i==2){
+        R = p;
+        G = V;
+        B = t;
+    } else if (i==3){
+        R = p;
+        G = q;
+        B = V;
+    } else if (i==4){
+        R = t;
+        G = p;
+        B = V;
+    } else {       
+        R = V;
+        G = p;
+        B = q;
+    }
+   
+    rgb.x = R;
+    rgb.y = G;
+    rgb.z = B;
+    
+    return rgb;
+}
+</source>
+
+==HSL to RGB==
+
+<source lang="lsl2">
+//HSL to RGB conversion function. By Cobalt Arkright. Released to the public under GNU GPL version 3.0 license.
+//Takes a vector encoded HSL triplet and outputs a vector encoded RGB triplet.
+
+//Input values should be in the following ranges: <float H(0 to 1), float S(0 to 1), float L(0 to 1)>. In this case, set h360 to "false."
+//If you wish to use H(0 to 360), leave the boolean value "h360" set to true.
+
+//Edit 12/27/2009: Cleaned up readability, played around a little bit with value calculation, and hopefully everything is more accurate now. failthfulll Moonwall brought it to my attention that the script wasn't working properly when using H ranges of 0 to 360. Based on my testing, it works now. If anyone else has a problem, feel free to PM me.
+
+vector HSLtoRGB (vector hsl){
+    integer h360 = TRUE;
+    
+    if (h360){
+        //Catch malformed H input for H(0 to 360)
+        if (hsl.x < 0)
+            hsl.x = 0;
+
+        else if (hsl.x > 360)
+            hsl.x = 360;
+        hsl.x = hsl.x / 360;
+    }
+
+    else{
+        //Catch malformed H input for H(0 to 1)
+        if (hsl.x < 0) 
+            hsl.x = 0;
+
+        else if (hsl.x > 1.0) 
+            hsl.x = 1.0;
+    }
+ 
+    //Catch malformed S input
+    if (hsl.y < 0)
+        hsl.y = 0;
+
+    else if (hsl.y > 1.0)
+        hsl.y = 1.0;
+ 
+    //Catch malformed L input
+    if (hsl.z < 0)
+        hsl.z = 0;
+
+    else if (hsl.z > 1.0)
+        hsl.z = 1.0;
+ 
+    //Declare required variables
+    vector rgb;
+    float q;
+    float p;
+    float tr;
+    float tg;
+    float tb;
+ 
+    //Special case: When S = 0, the result is monochromatic, and R = B = G = L.
+    if (hsl.y == 0){
+        rgb.x = rgb.y = rgb.z = hsl.z;
+        return rgb;
+    }
+ 
+    //Set up temporary values for conversion
+    if (hsl.z < 0.5)
+        q = hsl.z * (1.0 + hsl.y);
+
+    else if (hsl.z >= 0.5) 
+        q = hsl.z + hsl.y - (hsl.z * hsl.y);
+    
+    p = 2 * hsl.z - q;
+    
+    tr = hsl.x + (1.0 / 3.0);
+    tg = hsl.x;
+    tb = hsl.x - (1.0 / 3.0);
+ 
+    //Normalize temporary R value
+    if (tr < 0)
+        tr = tr + 1.0;
+    
+    else if (tr > 1.0)
+        tr = tr - 1.0;
+ 
+    //Normalize temporary G value
+    if (tg < 0)
+        tg = tg + 1.0;
+    
+    else if (tg > 1.0)
+        tg = tg - 1.0;
+ 
+    //Normalize temporary B value
+    if (tb < 0)
+        tb = tb + 1.0;
+    
+    else if (tb > 1.0)
+        tb = tb - 1.0;
+ 
+
+    //Calculate R value
+    if (tr < (1.0 / 6.0))
+        rgb.x = p + ((q - p) * 6 * tr);
+    
+    else if ((1.0 / 6.0) <= tr && tr < 0.5)
+        rgb.x = q;
+    
+    else if (0.5 <= tr && tr < (2.0 / 3.0))
+        rgb.x = p + ((q - p) * 6 * ((2.0 / 3.0) - tr));
+    
+    else
+        rgb.x = p;
+ 
+    //Calculate G value
+    if (tg < (1.0 / 6.0))
+        rgb.y = p + ((q - p) * 6 * tg);
+    
+    else if ((1.0 / 6.0) <= tg && tg < 0.5)
+        rgb.y = q;
+    
+    else if (0.5 <= tg && tg < (2.0 / 3.0))
+        rgb.y = p + (( q - p) * 6 * ((2.0 / 3.0) - tg));
+    
+    else
+        rgb.y = p;
+ 
+    //Caluclate B value
+    if (tb < (1.0 / 6.0))
+        rgb.z = p + ((q - p) * 6 * tb);
+    
+    else if ((1.0 / 6.0) <= tb && tb < 0.5)
+        rgb.z = q;
+    
+    else if (0.5 <= tb && tb < (2.0 / 3.0))
+        rgb.z = p + ((q - p) * 6 * ((2.0 / 3.0) - tb));
+    
+    else 
+        rgb.z = p;
+ 
+    //Return the result
+    return rgb;
+}
+</source>
+
+Amazing what a little bit of readability does. If I ever submit anything else that poorly formatted again, someone please smack me upside the head and tell me to come fix it, please.
+
+==HSV to HSL==
+
+For more info about the difference between HSL and HSV, see the wikipedia entry: [http://en.wikipedia.org/wiki/HSL_and_HSV HSL and HSV]
+ 
+Original code most likely from: [http://ariya.blogspot.com/2008/07/converting-between-hsl-and-hsv.html converting-between-hsl-and-hsv.html]
+
+<source lang="lsl2">
+// Convert from HSV (hue, saturation, value) to HSL (hue, saturation, luminosity)
+// Created by Michaelangelo David code released to the public domain under GNU GPL version 3.0 license.
+
+vector hsv_to_hsl( vector HSV )
+{
+     vector HSL;  
+     
+     HSL.x = HSV.x;
+     HSL.z = (2 - HSV.y) * HSV.z;
+     HSL.y = HSV.y * HSV.z;
+     if (HSL.z <= 1) HSL.y /= HSL.z;
+     else HSL.y /= (2 - HSL.z);
+     HSL.z /= 2;
+     
+     return HSL;
+}
+</source>
+
+==HSL to HSV==
+
+<source lang="lsl2">
+// Convert from HSL (hue, saturation, luminosity) to HSV (hue, saturation, value)
+// Created by Michaelangelo David, code released to the public domain under GNU GPL version 3.0 license.
+vector hsl_to_hsv( vector HSL )
+{
+     vector HSV;  
+     HSV.x = HSL.x;
+     HSL.z *= 2;
+     if (HSL.z <= 1) HSL.y *= HSL.z;
+     else HSL.y *= ( 2 - HSL.z);
+     
+     HSV.z = (HSL.z + HSL.y) / 2;
+     HSV.y = (2 * HSL.y) / (HSL.z + HSL.y);
+     
+     return HSV;
+}
+</source>
+
+== HSL to RGB ==
+I wrote the following two functions since the RGBtoHSL By Cobalt Arkright had a strange bug (math error) when some values was passed to the functions. And I couldn't find a reverse function for RGB to HSL.
+I tried to find out where the error was but I didn't succeded in fixing it so i wrote them from the beginning with a different approach. The functions are similar however, just something different in the
+coding.
+
+<source lang="lsl2">
+// HSL to RGB conversion function. By Clematide Oyen (Laura Aastha Bondi).
+// Inspired by a function written by Alec Thilenius in this article: http://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion
+// Released to the public under GNU GPL version 3.0 license.
+// Takes a vector encoded HSL triplet and outputs a vector encoded RGB triplet.
+// Input HSL values should be in the standard format used in the LSL with the following ranges: <float H (0 to 1), float S (0 to 1), float L (0 to 1)>.
+// Output is RGB values in the standard format used in the LSL with the following ranges: <float R (0 to 1), float G (0 to 1), float B (0 to 1)>.
+
+vector HslToRgb(vector hsl)
+{
+    float r;
+    float g;
+    float b;
+
+    if (hsl.y == 0.0) // If saturation is 0 the image is monochrome
+        r = g = b = hsl.z;
+    else
+    {
+        float q;
+        if (hsl.z < 0.5)
+            q = hsl.z * (1.0 + hsl.y);
+        else
+            q = hsl.z + hsl.y - hsl.z * hsl.y;
+        
+        float p = 2.0 * hsl.z - q;
+        
+        r = HueToRgb(p, q, hsl.x + 1.0 / 3.0);
+        g = HueToRgb(p, q, hsl.x);
+        b = HueToRgb(p, q, hsl.x - 1.0 / 3.0);
+    }
+    return <(r), (g), (b)>;
+}
+
+float HueToRgb(float p, float q, float t)
+{
+    if (t < 0.0) t += 1.0;
+    if (t > 1.0) t -= 1.0;
+    if (t < 1.0 / 6.0) return p + (q - p) * 6.0 * t;
+    if (t < 1.0 / 2.0) return q;
+    if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
+    return p;
+}
+</source>
+
+== RGB to HSL ==
+
+<source lang="lsl2">
+// RGB to HSL conversion function. By Clematide Oyen (Laura Aastha Bondi).
+// Inspired by a function written by Alec Thilenius in this article: http://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion
+// Released to the public under GNU GPL version 3.0 license.
+// Takes a vector encoded RGB triplet and outputs a vector encoded HSL triplet.
+// Input RGB values should be in the standard format used in the LSL with the following ranges: <float R (0 to 1), float G (0 to 1), float B (0 to 1)>.
+// Output is HSL values in the standard format used in the LSL with the following ranges: <float H (0 to 1), float S (0 to 1), float L (0 to 1)>.
+
+vector RgbToHsl(vector rgb)
+{
+    float r = rgb.x;
+    float g = rgb.y;
+    float b = rgb.z;
+    float h;
+    float s;
+    float l;
+    float max;
+    float min;
+
+    // Looking for the max value among r, g and b
+    if (r > g && r > b) max= r;
+    else if (g > b) max = g;
+    else max = b;
+    
+    // Looking for the min value among r, g and b
+    if (r < g && r < b) min = r;
+    else if (g < b) min = g;
+    else min = b;
+
+    l = (max + min) / 2.0;
+    
+    if (max == min)
+    {
+        h = 0.0;
+        s = 0.0;
+    }
+    else
+    {
+        float d = max - min;
+
+        if (l > 0.5) s = d / (2.0 - max - min);
+        else s = d / (max + min);
+        
+        if (max == r) {
+            if (g < b) h = (g - b) / d + 6.0;
+            else h = (g - b) / d;
+        }
+        else if (max == g)
+            h = (b - r) / d + 2.0;
+        else
+            h = (r - g) / d + 4.0;
+        h /= 6.0;
+    }
+
+    return <h, s, l>;
+}
+</source>
+
+
+{{LSLC|Library}}
+{{LSLC|Examples}}

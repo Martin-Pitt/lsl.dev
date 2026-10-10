@@ -1,0 +1,136 @@
+{{LSL Function
+|inject-2={{Issues/SVC-924}}{{Issues/SVC-6100}}{{LSL Function/offset}}
+|func_id=238|func_sleep=0.0|func_energy=10.0
+|sort=SitTarget
+|func=llSitTarget
+|p1_type=vector|p1_name=offset|p1_desc=Additional position for the sit target in local prim coordinates.
+|p2_type=rotation|p2_name=rot|p2_desc=Additional rotation for the sit target relative to the prim rotation.
+|func_footnote=If {{LSLP|offset}} == [[ZERO_VECTOR|{{LSL VR|0.0|0.0|0.0}}]] then the sit target is removed.
+|func_desc=Set the sit location for the prim. The sit location is relative to the prim's position and rotation.
+|return_text
+|spec=llSitTarget sets the position for the Agent Target (Advanced -> Character -> View Agent Target). The position of the target is based on {{LSLP|rot}} and the {{LSLP|offset}}{{Footnote|It is widely considered that the {{LSLP|rot}} should not affect the position, unfortunately the sit target code is a {{Wikipedia|Lava flow (programming)|lava-flow}}. ~ {{JIRA|SVC-2277}}|It is widely considered that the ''rot'' should not affect the position, unfortunately the sit target code is a lava-flow. - SVC-2277|handle=rot-offset}}.
+|caveats=*Once a sit target is removed [[llAvatarOnSitTarget]] will only return {{LSL Constant/NULL_KEY}}.
+*Removing or deactivating the script that sets the sit target will not remove the prim's sit target.
+**Sit target is a prim property and not dependent on a script for its continued existence. 
+*To remove sit target, use the following: 
+<syntaxhighlight lang="lsl2">llSitTarget(ZERO_VECTOR, ZERO_ROTATION);</syntaxhighlight>
+*Shift-copying a prim with a sit target, without a script that will set the sit target again, will not keep the sit target on the copy. (The copy is in the original location when shift-copying.)
+*There is no way to remove the Sit option from the menu.
+**It will appear to be removed if the [[llSetSitText]] is set to a space "&nbsp;" or similar transparent string.
+*Attachments cannot be sat upon (see {{jira|SVC-6100}} to vote for such a feature).
+*{{LSLP|rot}} affects the position of the sit target in a buggy way.
+**To correct for the ''rot'' bug, simply subtract <0,0,0.4> from the position when ''rot'' is zero. See example below.
+**[[llSetLinkPrimitiveParams]] is a more difficult work-around.
+**Animations are relative to the Agent Target, but the Agent Target isn't described by the animation.
+*[[llSitTarget]] does not update position of an already seated avatar.
+**[[#UpdateSitTarget|UpdateSitTarget]] described below works around this problem. It works by converting the sit target information into a link position that is passed along to [[llSetLinkPrimitiveParams]]. 
+* {{LSLP|offset}} is limited to 300.0 meters on each axis. The ''x'', ''y'' and ''z'' components must be in the range {{Interval|lte=300.0|gte=-300}}{{Footnote|handle=interval}}.
+** If they are outside the acceptable range they are rounded to the closest limit.
+* If an object has multiple seats (each seat has a script that sets a sit target, or the [[Link Messages|linkset]] has a script that assigns several [[llLinkSitTarget]]s), the following method determines which sit target an avatar ends up at:
+**If the prim that is clicked on ''has'' a sit target and that sit target is not full, that sit target is used.
+**If the prim that is clicked on ''has no sit target'', and one or more other linked prims have sit targets that are not full, the sit target of the prim with the lowest link number will be used.
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">default
+{
+    state_entry()
+    {
+        llSitTarget(<0.0, 0.0, 1.0>, ZERO_ROTATION); //The vector's components must not all be set to 0 for effect to take place.
+    }
+}</syntaxhighlight>
+<syntaxhighlight lang="lsl2">default     //example with work-around for llSetTarget rot bug
+{           //place in any prim large enough to sit on at any angle
+            //click once to choose a place to sit, a second time to sit there
+    touch_start(integer num)
+    {
+        vector pos   = llDetectedTouchPos(0);        //use touch to set sit target
+        vector lft   = llDetectedTouchBinormal(0);   //use normals to rotate avatar to
+        vector up    = llDetectedTouchNormal(0);     //sit upright
+        rotation rot = llAxes2Rot(lft % up, lft, up) / llGetRot();  //rotate avatar to stand there
+        vector siz   = llGetAgentSize(llDetectedKey(0));
+        pos += 0.65 * siz.z * up;       //this places MY avatars feet close to the surface
+        pos = (pos - llGetPos()) / llGetRot();  //llSetTarget expects local co-ordinates
+        if (rot != ZERO_ROTATION) pos -=<0.0, 0.0, 0.4>;  //here is the workaround
+        llSitTarget(pos, rot);
+        llSetClickAction(CLICK_ACTION_SIT);   //switch to sit for second click
+    }
+    changed(integer change)
+    {
+        if (llAvatarOnSitTarget() == NULL_KEY)      //if they unsit,
+            llSetClickAction(CLICK_ACTION_TOUCH);   //go back to click mode
+    }
+}</syntaxhighlight>
+|helpers= ===UpdateSitTarget===
+This function is primarily for use in objects that need to move seated avatars. It is most useful in poseballs, furniture and vehicles (just not while they are moving). There is also a <code>UpdateLinkSitTarget()</code> version of the function that can be found at: [[User:Strife_Onizuka/UpdateLinkSitTarget]].
+<syntaxhighlight lang="lsl2">//Sets / Updates the sit target moving the avatar on it if necessary.
+UpdateSitTarget(vector pos, rotation rot)
+{//Using this while the object is moving may give unpredictable results.
+    llSitTarget(pos, rot);//Set the sit target
+    key user = llAvatarOnSitTarget();
+    if (user)//true if there is a user seated on the sit target; if so, update their position
+    {
+        vector size = llGetAgentSize(user);
+        if (size)//This tests to make sure the user really exists.
+        {
+            //We need to make the position and rotation local to the current prim
+            rotation localrot = ZERO_ROTATION;
+            vector   localpos = ZERO_VECTOR;
+            if (llGetLinkNumber() > 1)//only need the local rot if it's not the root.
+            {
+                localrot = llGetLocalRot();
+                localpos = llGetLocalPos();
+            }
+            integer linkNum = llGetNumberOfPrims();
+            do
+			{
+                if (user == llGetLinkKey(linkNum))//just checking to make sure the index is valid.
+                {
+                    //<0.008906, -0.049831, 0.088967> are the coefficients for a parabolic curve that best fits real avatars. It is not a perfect fit.
+                    float fAdjust = ((((0.008906 * size.z) + -0.049831) * size.z) + 0.088967) * size.z;
+                    llSetLinkPrimitiveParamsFast(linkNum,
+                        [PRIM_POS_LOCAL, (pos + <0.0, 0.0, 0.4> - (llRot2Up(rot) * fAdjust)) * localrot + localpos,
+                         PRIM_ROT_LOCAL, rot * localrot]);
+                    jump end;//cheaper but a tad slower than return
+                }
+            } while(--linkNum);
+        }
+        else
+        {//It is rare that the sit target will bork, but if it does happen, this can help to fix it.
+            llUnSit(user);
+        }
+    }
+    @end;
+}//Written by Strife Onizuka, size adjustment and improvements provided by Talarus Luan</syntaxhighlight>
+===GetSitTarget===
+This function is primarily for configuring sittargets for furniture. Sit an avatar on a box, position the box where you want them and use this function to read the sittarget so that it can be coded into the furniture. See [[/GetSitTarget]] for an example.
+<syntaxhighlight lang="lsl2">list GetSitTarget(integer prim, key av)
+{//WARNING: This function is very good but not perfect. Do not repeatedly pass GetSitTarget to llSitTarget or UpdateSitTarget.
+ //Do not use this on moving avatars or objects, the results will very likely be wrong.
+    vector tp = llGetAgentSize(av);
+    if (tp)
+    {//llGetObjectDetails is used so the av is not required to be seated on the object with the sit target.
+        list details = llGetLinkPrimitiveParams(prim, [PRIM_POSITION, PRIM_ROTATION]) + llGetObjectDetails(av, [OBJECT_POS, OBJECT_ROT]);
+        rotation f = llList2Rot(details, 1);
+        rotation r = llList2Rot(details, 3) / f;
+        float fAdjust = ((((0.008906 * tp.z) + -0.049831) * tp.z) + 0.088967) * tp.z;
+        return [((llList2Vector(details, 2) - llList2Vector(details, 0)) / f) + (llRot2Up(r) * fAdjust) - <0.0, 0.0, 0.4>, r];
+    }
+    return [];
+}//Written by Strife Onizuka, size adjustment provided by Talarus Luan</syntaxhighlight>
+|also_functions=
+{{LSL DefineRow||[[llLinkSitTarget]]|}}
+{{LSL DefineRow||[[llSetSitText]]|}}
+{{LSL DefineRow||[[llAvatarOnSitTarget]]|}}
+{{LSL DefineRow||[[llAvatarOnLinkSitTarget]]|}}
+{{LSL DefineRow||[[llUnSit]]|}}
+|also_events={{LSL DefineRow||[[changed]]|}}
+|also_articles
+|notes
+|cat1=Sit
+|cat2=Vehicle
+|cat3=Prim
+|cat4=Effects
+|cat5=Sit/Teleport
+|cat6=Stop
+|haiku={{Haiku|The seats all taken.|Perch on the tailgate I try.|On the hood I sit.}}
+}}

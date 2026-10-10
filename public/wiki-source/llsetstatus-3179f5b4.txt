@@ -1,0 +1,37 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-6549}}{{Issues/SVC-5531}}{{Issues/SVC-1773}}{{Issues/SVC-4197}}{{Issues/SVC-5723}}{{Issues/SCR-203}}{{LSL_Function/boolean|value|bool=*}}
+|func_id=45|func_sleep=0.0|func_energy=10.0
+|func=llSetStatus
+|p1_type=integer|p1_subtype=bit mask|p1_name=status|p1_desc=bit mask, STATUS_* flags
+|p2_type=integer|p2_name=value
+|func_footnote
+|func_desc=Sets the object status attributes indicated in the {{LSLP|status}}} mask to {{LSLP|value}}
+|return_text
+|spec
+|caveats=*Status is an object attribute; all prims in an object share the same status.
+** Except for [[STATUS_BLOCK_GRAB]], this only affects the prim the script is in, child prims in linked objects will not be affected.
+***Use [[STATUS_BLOCK_GRAB_OBJECT]] to block grabbing of a link_set.
+* Setting [[STATUS_PHYSICS]] fails silently in attached objects. ~ [[#SVC-6549]]
+* The [[STATUS_ROTATE_X]], [[STATUS_ROTATE_Y]] and [[STATUS_ROTATE_Z]] flags all require that the object first be made physical to have any effect.
+|constants={{LSL Constants/Status}}
+|examples=<source lang="lsl2">default
+{
+    state_entry()
+    {
+        llSetStatus( STATUS_DIE_AT_EDGE | STATUS_PHYSICS, TRUE);
+        llSetStatus( STATUS_ROTATE_X | STATUS_ROTATE_Y, FALSE);
+    }
+}</source>
+
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetStatus]]|Gets the object status.}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1
+|cat2=Status
+|cat3=Physics
+|cat4
+}}

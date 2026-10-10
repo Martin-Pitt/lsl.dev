@@ -1,0 +1,35 @@
+{{LSL Constant
+|inject-1
+|name={{PAGENAMEE}}
+|type=integer
+|value=11
+|desc=This is a flag used with [[llGetObjectDetails]] to get the amount of allocated memory in bytes. This value is not recomputed more often than every 10-20 seconds.
+
+* For LSL and Lua scripts running on the Lua VM, this reports the used memory, rounded up to the nearest 4kB.
+* For LSL scripts running on the LSO2 VM, this reports a fixed 16kB, as LSO2 scripts have a fixed memory allocation.
+* For LSL scripts running on the Mono VM, this reports the upper limit of memory that all scripts in an object could use (set by [[llSetMemoryLimit]], or 64kB by default). Mono scripts do not normally use their maximum memory, so this function over estimates Mono memory usage, normally by quite a lot.
+|examples=
+<source lang="lsl2">// Memory Check
+default{
+    state_entry(){
+     llSetText("Touch to find your\nscript memory usage", <1.0,1.0,1.0>, .8);  
+    }
+    
+    touch_start(integer total_number){
+        list details = llGetObjectDetails(llDetectedKey(0), ([OBJECT_SCRIPT_MEMORY]));
+        integer memory_used = llList2Integer(details,0) /1024;
+        llSay(0, llDetectedName(0)+ " is using " + (string)memory_used +" KB of script memory.");
+    }
+}
+</source>
+
+
+
+|functions={{LSL DefineRow||[[llGetObjectDetails]]}}
+|constants={{!}}{{LSL_Constants/Object_Details}}
+|events
+|cat1=Prim
+|cat2=
+|cat3
+|cat4
+}}

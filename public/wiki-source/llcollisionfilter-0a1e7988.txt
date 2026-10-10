@@ -1,0 +1,66 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-2490}}{{LSL_Function/uuid|id|object=*|pd=filter by}}
+{{LSL_Function/boolean|accept|pd=|ph=|td=only process collisions that match|fd=instead excludes matches}}
+|func_id=110|func_sleep=0.0|func_energy=10.0
+|sort=CollisionFilter
+|func=llCollisionFilter
+|p1_type=string|p1_name=name|p1_desc=filter for specific object name or avatar {{LSLGC|Avatar/Name|legacy name}}|p1_hover=filter for specific object name or avatar legacy name
+|p2_type=key|p2_name=id
+|p3_type=integer|p3_subtype=boolean|p3_name=accept
+|func_footnote=If {{LSLP|accept}} == [[TRUE]], only accept collisions with objects {{LSLP|name}} AND {{LSLP|id}} (either is optional), otherwise with objects not {{LSLP|name}} AND {{LSLP|id}}<br/>
+If {{LSLP|name}} or {{LSLP|id}} are blank they are not used to filter incoming messages (or you could say they match everything).
+If {{LSLP|id}} is an invalid key or a [[NULL_KEY|null key]], it is considered blank.<br/>
+|func_desc=Sets the collision filter, exclusively or inclusively.
+|return_text
+|spec
+|caveats=
+*Any call of llCollisionFilter in the same event as [[llVolumeDetect]] changing (not just being called, but actually moving from [[FALSE]] to [[TRUE]] or vice versa) will be disregarded (before or after), '''if''' the event handler previously called a user-defined function. See [[#SVC-2490]]
+**You can get around this by calling them in separate events, such as [[touch_start]] and [[touch_end]].
+*Damage caused by [[llSetDamage]] will still apply to a filtered avatar.
+**Consequently, the object will immediately die on collision with the avatar. (And kill the avatar their health reaches 0.)
+|constants
+|examples=
+*Stop filtering:
+<syntaxhighlight lang="lsl2" inline>llCollisionFilter("", NULL_KEY, TRUE);</syntaxhighlight>
+*Filter out all collisions:
+<syntaxhighlight lang="lsl2" inline>llCollisionFilter("", NULL_KEY, FALSE);</syntaxhighlight>
+
+This script, placed in a wearable object, detects a collision when the person wearing it collides with an object named "Post":
+* 1st instance :
+an object named "Post" has several child prims named "Object" .
+The prim named "Post" hits the scripted object or scripted prim , the collision will be detected
+* 2nd instance :
+an object named "Post" has several child prims named "Object" .
+A child prim named "Object" hits the scripted object or scripted prim, the collision will be detected
+* 3rd instance :
+an object named "Object" has several child prims named "Post" .
+A prim named "Post" hits the scripted object or scripted prim, the collision will not be detected
+
+<syntaxhighlight lang="lsl2">default
+{
+    state_entry()
+    {
+        llCollisionFilter("Post","",TRUE);
+    }
+
+    collision_start(integer total_number)
+    {
+        llSay(0, "OUCH!");
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llPassCollisions]]|}}
+{{LSL DefineRow||[[llVolumeDetect]]|}}
+|also_events=
+{{LSL DefineRow||[[collision_start]]|}}
+{{LSL DefineRow||[[collision]]|}}
+{{LSL DefineRow||[[collision_end]]|}}
+|also_articles
+|notes
+|permission
+|cat1=Collision
+|cat2=Legacy Name/As A Parameter
+|cat3
+|cat4
+}}

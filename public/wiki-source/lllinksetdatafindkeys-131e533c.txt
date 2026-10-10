@@ -1,0 +1,213 @@
+{{LSL_Function
+|func_sleep=0.0|func_energy=10.0
+|func=llLinksetDataFindKeys
+|p1_type=string|p1_name=pattern|p1_desc=A regular expression describing which keys to return.
+|p2_type=integer|p2_name=start|p2_desc=The first key to return.
+|p3_type=integer|p3_name=count|p3_desc=The number of keys to return.
+|return_type=list
+|return_text=of the keys in the datastore.
+|func_footnote
+|func_desc=
+The '''llLinksetDataFindKeys''' function returns a list of up to {{LSLP|count}} keys from the datastore that match {{LSLP|pattern}}, starting at the one indicated by {{LSLP|start}}. If {{LSLP|count}} is less than 1, then all keys between {{LSLP|start}} and the end which match {{LSLP|pattern}} are returned. If {{LSLP|count}} minus {{LSLP|start}} exceeds the number of matching keys, the returned list will be shorter than {{LSLP|count}}, down to a zero-length list if {{LSLP|start}} equals or exceeds the number of matching keys. The list is ordered alphabetically.
+|func_footnote
+|spec=
+{{LSLP|pattern}} is a [https://en.wikipedia.org/wiki/Regular_expression Regular expression].
+
+|caveats=
+*The maximum length for {{LSLP|pattern}} seems to be 800 characters.
+*There seems to be a timing restriction. If the time limit is exceeded, the function fails silently.
+**Returns an empty list and the script continues execution.
+*To delete keys matching an expression, use the similar [[llLinksetDataDeleteFound]].
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llLinksetDataAvailable]]|}}
+{{LSL DefineRow||[[llLinksetDataCountFound]]|}}
+{{LSL DefineRow||[[llLinksetDataCountKeys]]|}}
+{{LSL DefineRow||[[llLinksetDataDelete]]|}}
+{{LSL DefineRow||[[llLinksetDataDeleteFound]]|}}
+{{LSL DefineRow||[[llLinksetDataListKeys]]|}}
+{{LSL DefineRow||[[llLinksetDataRead]]|}}
+{{LSL DefineRow||[[llLinksetDataReset]]|}}
+{{LSL DefineRow||[[llLinksetDataWrite]]|}}
+|also_events
+|also_tests
+|also_articles
+|examples=
+When {{LSLP|pattern}} matches multiple keys, {{LSLP|start}} can be used to skip over some of the first matches.
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llLinksetDataWrite("ThingA_config", "value");
+        llLinksetDataWrite("ThingA_data",   "value");
+        llLinksetDataWrite("ThingB_config", "value");
+        llLinksetDataWrite("ThingB_data",   "value");
+        llLinksetDataWrite("ThingC_config", "value");
+        llLinksetDataWrite("ThingC_data",   "value");
+        list keys;
+
+        // Return 1 key starting from the first match.
+        keys = llLinksetDataFindKeys("Thing", 0, 1); 
+        llOwnerSay(llList2CSV(keys)); // ThingA_config
+
+        // Return 1 key after skipping the first 3 matches.
+        keys = llLinksetDataFindKeys("Thing", 3, 1); 
+        llOwnerSay(llList2CSV(keys)); // ThingB_data
+
+        // Return up to 10 keys after skipping the first match.
+        keys = llLinksetDataFindKeys("_data", 1, 10); 
+        llOwnerSay(llList2CSV(keys)); // ThingB_data, ThingC_data
+    }
+}
+</source>
+
+The following regular expression code can be used to find UUID keys. (Such as those use to identify user UUID)
+<source lang="lsl2">
+        list keysFound = llLinksetDataFindKeys("(?i)^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$",  0, 0);
+</source>
+The following code can also be used to find UUID keys in LinksetData memory.
+<source lang="lsl2">
+        list keysFound = llLinksetDataFindKeys("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",  0, 0);
+</source>
+''Warning: Keep track of how many UUIDs will be returned, as too many can overwhelm script memory and cause a stack-heap crash.''
+
+
+The script below uses llLinksetDataFindKeys for blacklist management.
+<source lang="lsl2">
+integer gDialogChannel;
+integer gDialogHandle;
+integer gManagingBlocks;
+
+startDialog(key person)
+{
+    gManagingBlocks = 0;
+    gDialogHandle = llListen(gDialogChannel, "", person, "");
+    llDialog(person, "\nSelect action", ["List blocks", "Add block", "Remove block"], gDialogChannel);
+    llSetTimerEvent(60);
+}
+
+stopDialog()
+{
+    llSetTimerEvent(0);
+    llListenRemove(gDialogHandle);
+}
+
+default
+{
+
+    on_rez(integer sp)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        gDialogChannel = (integer)(llFrand(-10000000)-10000000);
+        llListen(PUBLIC_CHANNEL, "", NULL_KEY, "");;
+    }
+
+    timer()
+    {
+        stopDialog();
+    }
+
+    touch_start(integer nd)
+    {
+        key toucherKey = llDetectedKey(0);
+        if (toucherKey == llGetOwner())
+        {
+            startDialog(toucherKey);
+        }
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+
+        if (llGetAgentSize(id) == ZERO_VECTOR)
+        {
+            return;
+        }
+
+        if (channel == gDialogChannel)
+        {
+            stopDialog();
+            if (gManagingBlocks)
+            {
+                message = llStringTrim(message, STRING_TRIM);
+                if ((key)message)
+                {
+                    if (gManagingBlocks == 1)
+                    {
+                        llOwnerSay("Addition request has been sent to the blacklist storage");
+                        llLinksetDataWrite("blocklist:" + message, "1");
+                    }
+                    else
+                    {
+                        llOwnerSay("Removal request has been sent to the blacklist storage.");
+                        llLinksetDataDelete("blocklist:" + message);
+                    }
+                }
+                else
+                {
+                    llOwnerSay("The UUID '" + message + "' appears to be invalid.");
+                }
+                startDialog(id);
+            }
+            else if (message == "List blocks")
+            {
+                list blocks = llLinksetDataFindKeys("^blocklist:", 0, 0);
+                integer listLength = llGetListLength(blocks);
+                llOwnerSay("Blacklist items: " + (string)listLength);
+                integer i;
+                while (i < listLength)
+                {
+                    string record = llGetSubString(llList2String(blocks, i), 10, -1);
+                    llOwnerSay("- secondlife:///app/agent/" + record + "/about" + " - " + record);
+                    ++i;
+                }
+                blocks = [];
+                startDialog(id);
+            }
+            else if (message == "Add block" || message == "Remove block")
+            {
+                string label = "add to";
+                gManagingBlocks = 1;
+                if (message == "Remove block")
+                {
+                    gManagingBlocks = 2;
+                    label = "remove from";
+                }
+                gDialogHandle = llListen(gDialogChannel, "", id, "");
+                llTextBox(id, "\nPlease specify one single avatar UUID you'd like to " + label + " the blacklist storage.", gDialogChannel);
+                llSetTimerEvent(60);
+            }
+            return;
+        }
+
+        if (llGetListLength(llLinksetDataFindKeys("blocklist:" + (string)id, 0, 1)) > 0)
+        {
+            llRegionSayTo(id, 0, "You're blacklisted.");
+            return;
+        }
+
+        llRegionSayTo(id, 0, "Hello there, secondlife:///app/agent/" + (string)id + "/about - your message: " + message);
+
+    }
+
+    linkset_data(integer action, string name, string value)
+    {
+        if (action == LINKSETDATA_RESET || action == LINKSETDATA_DELETE || action == LINKSETDATA_UPDATE)
+        {
+            llOwnerSay("Blacklist storage modified.");
+        }
+    }
+
+}</source>
+|notes=
+{{LSL Regular Expressions}}
+|cat1=Script
+|cat2=LinksetData
+|cat3
+|cat4
+}}

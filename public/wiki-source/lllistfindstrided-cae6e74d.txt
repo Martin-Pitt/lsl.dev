@@ -1,0 +1,130 @@
+{{LSL_Function
+|func=llListFindStrided
+|func_id=201|func_sleep=0.0|func_energy=10.0
+|return_type=integer
+|Return_text=index of the first instance of {{LSLP|test}} in {{LSLP|src}} matching conditions.
+|p1_type=list|p1_name=src|p1_desc=what to search in (haystack)
+|p2_type=list|p2_name=test|p2_desc=what to search for (needle)
+|p3_type=integer|p3_name=start|p3_desc=Start of range to search
+|p4_type=integer|p4_name=end|p4_desc=End of range to search
+|p5_type=integer|p5_name=stride|p5_desc=Number of entries per stride within src
+
+|func_footnote=If {{LSLP|test}} matching range and stride conditions is not found in {{LSLP|src}}, -1 (in LSL) or nil (in SLua) is returned.<br/>
+The length of {{LSLP|test}} may be equal to or less than {{LSLP|stride}} in order to generate a match.<br/>
+The index of the first entry in the list is {{HoverText|0|zero}}<br>
+If {{LSLP|test}} is found at the last index in {{LSLP|src}} the positive index is returned (5th entry of 5 returns 4).<br>
+If {{LSLP|start}} or {{LSLP|end}} is negative, it is counted from the end list. The last element in the list is -1, the first is -list_length 
+|func_desc
+|spec
+|caveats=
+* Strict type matching and case sensitivity is enforced.
+** "1" != 1
+** "1.0" != 1.0
+** 1 != 1.0
+** "a822ff2b-ff02-461d-b45d-dcd10a2de0c2" != (key)"a822ff2b-ff02-461d-b45d-dcd10a2de0c2"
+** "Justice" != "justice"
+* If {{LSLP|test}} is an {{HoverText|empty list|[]}} the value returned is {{HoverText|0|zero}} rather than -1.
+|constants
+|examples=<source lang="lsl2">list mylist = ["a",0,"b",1,"c",2,"b",1];
+
+integer result_a = llListFindStrided(mylist, ["b"], 0, -1, 1); //Stride 1 full range functionally equivalent to llListFindList(mylist,"b");
+//result_a = 2
+
+integer result_b = llListFindStrided(mylist, ["b",1], 2, -1, 1); //Inclusive range for start and end will find 2nd list in list
+//result_b = 2
+
+integer result_c = llListFindStrided(mylist, ["b"], 3, -1, 1); //The first "b" is at index 2 and will be skipped by starting at 3
+//result_c = 6
+
+integer result_d = llListFindStrided(mylist, ["b",1], 2, -1, 1); //Inclusive range for start and end will find 2nd item in list
+//result_d = 2
+
+integer result_e = llListFindStrided(mylist, ["b",1], 3, -1, 1); //The first "b",1 series is at index 2 and will be skipped by starting at 3
+//result_e = 6
+
+integer result_f = llListFindStrided(mylist, ["b",1], 3, -2, 1); //The first "b",1 series is at index 2 and will be skipped by starting at 3.  The second ["b",1] set exceeds the range criteria of the search.
+//result_f = -1
+
+integer result_g = llListFindStrided(mylist, ["b",2], 0, -1, 1); //No consecutive elements match ["b",2]
+//result_g = -1
+
+integer result_h = llListFindStrided(mylist, ["c"], 0, -1, 2); //With a stride of 2, "c" will be found.
+//result_h = 4
+
+integer result_i = llListFindStrided(mylist, ["c"], 0, -1, 3); //With a stride of 3, "c" won't be found.
+//result_i = -1
+
+integer result_j = llListFindStrided(mylist, ["c"], 0, -1, 4); //With a stride of 4, "c" will be found.
+//result_j = 4
+
+integer result_k = llListFindStrided(mylist, ["c"], 1, -1, 2); //While the stride is even, starting at the 2nd element will miss this stride.
+//result_k = -1
+
+</source>
+<source lang="lsl2">list numbers = [1, 2, 3, 4, 5];
+default
+{
+    state_entry()
+    {
+        integer index = llListFindStrided(numbers, [3], 0, -1, 1);  //Functionally identical to llListFindList(numbers, [3]);
+        if (index != -1)
+        {
+            list three_four = llList2List(numbers, index, index + 1);
+            llOwnerSay(llDumpList2String(three_four, ","));
+            // Object: 3,4
+        }
+    }
+}</source>
+<source lang="lsl2">//You can also search for two items at once to find a pattern in a list
+list avatarsWhoFoundMagicLeaves = ["Water Duck", "Green Ham", "Fire Centaur","Red Leaf"];
+default
+{
+    state_entry()
+    {
+        integer index = llListFindStrided(avatarsWhoFoundMagicLeaves, ["Fire Centaur","Red Leaf"],0,-1,2);
+        if (index != -1)
+        {
+            list output = llList2List(avatarsWhoFoundMagicLeaves, index, index + 1);
+            llOwnerSay(llDumpList2String(output, ","));
+            // Object: Fire Centaur, Red Leaf
+        }
+    }
+}</source>
+<source lang="lsl2">//It's nearly a database
+list food_db = ["FIRSTNAME", "LASTNAME", "FAVORITE FOOD", "ALLERGIES", 
+                                   "Awesome", "Resident","Apples",0,
+                                   "Charlie", "Kites", "Peanuts", "dogs",
+                                   "Cool", "McLastname", "Burgers","peanuts"];
+default
+{
+    state_entry()
+    {
+        list potential_allergen = ["peanuts"];
+        integer any_allergies = llListFindStrided(food_db, potential_allergen,4,-1,4);
+        if (any_allergies != -1)
+        {
+            llOwnerSay("Every can eat it");
+        }
+        else
+        {
+            list output = llList2List(food_db, any_allergens - 3, any_allergens - 2);
+            llOwnerSay(llDumpList2String(output, " ")+" is allergic to it!");
+            // Object: Cool McLastName is allergic to peanuts
+        }
+    }
+}</source>
+
+|helpers=
+|also_functions=
+{{LSL DefineRow||[[llSubStringIndex]]|Find a string in another string}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|sort=ListFindList
+|cat1=List
+|haiku={{Haiku|I made a database|Using Only Some Lists|Find by last name.}}
+|cat2
+|cat3
+|cat4
+}}

@@ -1,0 +1,183 @@
+{{LSL_Function
+|func=DialogPlus
+|mode=user
+|p1_type=key|p1_name=avatar|p1_desc
+|p2_type=string|p2_name=message|p2_desc=message to be displayed
+|p3_type=list|p3_name=buttons|p3_desc=button labels
+|p4_type=integer|p4_name=channel|p4_desc
+|p5_type=integer|p5_name=CurMenu|p5_desc=Parsed menu index.
+|func_desc=Creates a dialog menu for '''storing more than 12 buttons''', very useful for Inventory items, Scanners, and just huge lists.
+|func_footnote=''''CurMenu'''' will take place of an integer menuindex.<br />This requires a Listen Event when using DialogPlus to allow the Back and Next button to work.
+|spec=
+==For a more flexible multi-page solution, without the owner-only restriction, see [[SimpleDialogMenuSystem]]==
+<source lang="lsl2">
+//Created by Ugleh Ulrik
+//This sort of script should cost, but for you free :)
+//Edited by Taff Nouvelle to put the buttons in correct order.
+
+list order_buttons(list buttons)
+{
+    return llList2List(buttons, -3, -1) + llList2List(buttons, -6, -4) +
+        llList2List(buttons, -9, -7) + llList2List(buttons, -12, -10);
+}
+
+integer menuindex;
+
+DialogPlus(key avatar, string message, list buttons, integer channel, integer CurMenu)
+{
+    if (12 < llGetListLength(buttons))
+    {
+        list lbut = buttons;
+        list Nbuttons = [];
+        if(CurMenu == -1)
+        {
+            CurMenu = 0;
+            menuindex = 0;
+        }
+
+        if((Nbuttons = (llList2List(buttons, (CurMenu * 10), ((CurMenu * 10) + 9)) + ["Back", "Next"])) == ["Back", "Next"])
+            DialogPlus(avatar, message, lbut, channel, menuindex = 0);
+        else
+            llDialog(avatar, message,  order_buttons(Nbuttons), channel);
+    }
+    else
+        llDialog(avatar, message,  order_buttons(buttons), channel);
+}
+</source>
+|examples=
+<source lang="lsl2">
+// Created by Ugleh Ulrik
+// List2DialogPlus Example
+
+// Here we set the Dialog Channel
+integer channel = -900;
+
+integer listen_handle;
+
+// Here we make a huge list for an example
+list The_List = [
+    "Option 1", "Option 2", "Option 3",
+    "Option 4", "Option 5", "Option 6",
+    "Option 7", "Option 8", "Option 9",
+    "Option 10", "Option 11", "Option 12",
+    "Option 13", "Option 14", "Option 15",
+    "Option 16", "Option 17", "Option 18",
+    "Option 19", "Option 20"];
+
+default
+{
+    touch_start(integer total_number)
+    {
+        key owner = llGetOwner();
+        
+        // We set a listen for only the owner
+        // So this script assumes the object will only be touched by the owner
+        listen_handle = llListen(channel, "", owner, "");
+        
+        // Touch_Start we issue menuindex as 0 inside of the function itself
+        DialogPlus(owner, "Select an Option", The_List, channel, menuindex = 0);
+    }
+
+    // We need a listen for the dialog itself, but as well as the Back/Next button.
+    listen(integer chan, string name, key id, string msg)
+    {
+        key owner = llGetOwner();
+
+        // If they clicked Next it will go to the next dialog window
+        if(msg == "Next")
+        {
+            // ++menuindex will turn menuindex plus 1, making it give the next page.
+            DialogPlus(owner, "Select an Option", The_List, channel, ++menuindex);
+        }
+
+        // if they clicked back it will go to the last dialog window.
+        else if(msg == "Back")
+            DialogPlus(owner, "Select an Option", The_List, channel, --menuindex);
+            // --menuindex will turn menuindex minus 1, making it give the previous page.
+
+        // If they choose anything besides Back/Next it will be in this section
+        else
+        {
+            // Be Safe
+            llListenRemove(listen_handle);
+            //Example used, change to whatever you wish.
+            llSay(0, "Your choice was " + msg);
+        }
+    }
+}
+</source>
+
+<source lang="lsl2">
+//Created by Ugleh Ulrik
+//Inventory2DialogPlus Example
+
+//Here we set the Dialog Channel
+integer channel = -900;
+
+integer listen_handle;
+
+list InventoryList;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        InventoryList = [];
+        integer i;
+        integer a = llGetInventoryNumber(INVENTORY_ALL);
+
+        do
+        {
+            InventoryList += [TrimStringToLength(llGetInventoryName(INVENTORY_ALL, i),23)];
+        }
+        while (++i < a);
+
+        key owner = llGetOwner(); 
+      
+        // We set a listen for only the owner
+        // So this script assumes the object will only be touched by the owner
+        listen_handle = llListen(channel, "", owner,"");
+        // touch_start we issue menuindex as 0 inside of the function itself
+        DialogPlus(owner, "Select an Option", InventoryList, channel, menuindex = 0);
+    }
+
+    // We need a listen for the dialog itself, but as well as the Back/Next button.
+    listen(integer chan, string name, key id, string msg)
+    {
+        key owner = llGetOwner();
+
+        // If they clicked Next it will go to the next dialog window
+        if(msg == "Next")
+        {
+            // ++menuindex will turn menuindex plus 1, making it give the next page.
+            DialogPlus(owner, "Select an Option", InventoryList, channel, ++menuindex);
+        }
+
+        //if they clicked back it will go to the last dialog window.
+        else if(msg == "Back")
+        {
+            // --menuindex will turn menuindex minus 1, making it give the previous page.
+            DialogPlus(owner, "Select an Option", InventoryList, channel, --menuindex);
+        }
+
+        // If they choose anything besides Back/Next it will be in this section
+        else
+        {
+            //Be Safe
+            llListenRemove(listen_handle);
+            //Example used, change to whatever you wish.
+            llSay(0, "Your choice was "+ msg);
+        }
+    }
+}
+</source>
+|helpers
+|notes
+|also
+|also_functions
+|also_articles
+|cat1=Examples
+|cat2=User-Defined_Functions
+|cat3
+|cat4
+}}

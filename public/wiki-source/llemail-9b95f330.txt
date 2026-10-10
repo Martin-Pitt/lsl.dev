@@ -1,0 +1,168 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-23}}{{Issues/SVC-391}}{{Issues/SVC-412}}{{Issues/SCR-499}}{{Issues/BUG-229767}}
+|func_id=119|func_sleep=20.0|func_energy=10.0
+|sort=Email|func=llEmail
+|p1_type=string|p1_name=address
+|p2_type=string|p2_name=subject
+|p3_type=string|p3_name=message
+|func_footnote=The entire message (including the address, subject and other miscellaneous fields) can't be longer than 4096 bytes combined.
+|func_desc=Sends an email to {{LSLP|address}} with {{LSLP|subject}} and {{LSLP|message}}.
+|return_text
+|spec=The {{LSLP|message}} is prefixed with information about the [[Primitive|prim]] sending the email.
+{{{!}}{{Prettytable}}
+{{!}}-{{Hl2}}
+!Template
+!Example
+{{!}}-
+{{!}}<pre>
+Object-Name: *prim*
+Region: *simname* (*simpos.x*, *simpos.y*)
+Local-Position: (*primpos.x*, *primpos.y*, *primpos.z*)
+
+*message*
+</pre>
+{{!}}
+<pre>
+Object-Name: Object
+Region: Gibson (254976, 256000)
+Local-Position: (117, 129, 50)
+
+The real message starts here.
+</pre>
+{{!}}}
+|caveats=* If you're sending to the [[object]] [[:Category:LSL_Owner|owner]], prefer the [[llTargetedEmail]] method.
+* There is a limit to the number of email messages an object can send in a given amount of time. 
+* There is a limit of 500 messages from a single [[agent]]'s objects in a one-hour period.
+* The 4096-byte size limit includes the subject line and automatically added text.  The practical maximum body size is approximately 3600 bytes.
+* (Sept-2008) The Email Throttle was modified slightly, Per {{User|Prospero Linden}}'s comments:
+  {{quote|"there has long been a throttle that makes a single script sleep for 20 seconds after sending an email. The new throttle is per user... some were using many, many different [[scripts]] to send spam. (the new throttle applies) when the destination is outside of Second Life. I know that messages within the same [[region]] were not throttled (beyond the 20-second delay), and I *believe* that messages between different [[simulator|sims]] were not throttled (between the 20-second delay)."}}
+* Due to the bug {{Jira|SVC-23}} (present since 2005), objects may stop receiving emails completely until either the region is restarted or the object crosses a region boundary (resetting the script doesn't help).  Emails sent may eventually be received after a restart/region-cross.  Hence, don't rely on this function for reliable inter-region messaging.
+* Due to bug {{JIRA|BUG-229767}}, an object's email queue can still become suspended until the object crosses a region border (neither a region restart nor a script reset helps). First analysis has revealed a potential workaround, by implementing a delay of about 30 seconds before first trying to send email to a freshly rezzed script - apparently registering the [[email|email(...)]] event handler can take quite some time, and emails arriving prior to said registry process is what gets the entire queue stuck. Official Linden Lab response still pending.
+* Due to the bug {{Jira|SVC-391}}, [[llEmail]] will silently fail (no mail will arrive) when {{Wikipedia|ASCII|non-ASCII}} characters are present in the subject. However, non-ASCII characters in the message body will be replaced by {{mono|"?"}}.
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+string emailAddress = "somebody@example.com";
+string emailHeader = "Someone touched me!";
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        // llSay(PUBLIC_CHANNEL, "Sending eMail report now, this will take ~20 seconds.");
+
+        key id = llDetectedKey(0);
+        string name = llDetectedName(0);
+
+        llEmail(emailAddress, emailHeader,
+            "I was touched by: '" + name + "' (" + (string)id + ").");
+
+        // llSay(PUBLIC_CHANNEL, "Email has been sent.");
+    }
+}
+</syntaxhighlight>
+|also_functions=
+{{LSL DefineRow||[[llGetNextEmail]]}}
+{{LSL DefineRow||[[llMessageLinked]]}}
+|also_events=
+{{LSL DefineRow||[[email]]}}
+{{LSL DefineRow||[[link message]]}}
+|also_tests={{LSL DefineRow|[https://osiris.lindenlab.com/mediawiki/index.php/Email_Test internal test]<ref>Probably broken (last tested Feb 2023); the server still exists but is password-protected.</ref>}}
+|also_articles={{LSL DefineRow||[[IM to email]]}}
+{{LSL DefineRow||[[Postcards]]}}
+|notes=* Because of the long delay on this function, it is often called from a second script triggered by [[link_message]].
+* If you are sending email to a prim within Second Life, its address is {{mono|''[key]''@lsl.secondlife.com}}
+** Which means if the key returned by [[llGetKey]] is "{{mono|a2e76fcd-9360-4f6d-a924-000000000003}}", then its email address is "{{mono|a2e76fcd-9360-4f6d-a924-000000000003@lsl.secondlife.com}}".
+** Agents do not have fixed email addresses, use [[llInstantMessage]] or [[llOwnerSay]]<ref>If the agent or object are ''known'' to be in the same region, then you can use [[llRegionSayTo]] instead.</ref>.
+
+===Prim2Prim Email===
+
+In LSL you can both send email with [[llEmail]] and receive it with the [[email]] event.
+
+The email event is triggered with five pieces of information:
+{{{!}}
+{{LSL DefineRow|string|time|When the message was sent, in the <code>(string)[[llGetUnixTime]]</code> format}}
+{{LSL DefineRow|string|address|Who sent the message}}
+{{LSL DefineRow|string|subject|Subject of the message}}
+{{LSL DefineRow|string|message|Body of the message}}
+{{LSL DefineRow|integer|num_left|The number of emails left in the email queue}}
+{{!}}}
+
+When receiving a message sent with [[llEmail]] it helps to separate the message from the prefixed header. The header and original message body are separated by {{mono|"\n\n"}}
+
+<syntaxhighlight lang="lsl2">integer divide = llSubStringIndex(message, "\n\n");
+string header = llDeleteSubString(message, divide, -1);
+message = llDeleteSubString(message, 0, divide + 1);</syntaxhighlight>
+
+To get just one of the header items, do this:
+<syntaxhighlight lang="lsl2">list lines = llParseStringKeepNulls(header, ["\n"], []);
+string objname_line  = llList2String(lines, 0);
+string region_line   = llList2String(lines, 1);
+string localpos_line = llList2String(lines, 2);</syntaxhighlight>
+
+To get a pure region name, do this:
+<syntaxhighlight lang="lsl2">string region_name = llStringTrim(
+            (string)llDeleteSubList(
+                llParseStringKeepNulls(
+                    llDeleteSubString(region_line, 0, 12),
+                    [], 
+                    ["("]
+                ), -2, -1), STRING_TRIM);</syntaxhighlight>
+
+This application uses email to have objects check with a central server to see if the owner has the latest version. In the objects:
+<syntaxhighlight lang="lsl2">string version = "1"; //
+string type = "lolcube";
+default
+{
+    on_rez(integer start_param)
+    {
+        llEmail("5a634b27-f032-283f-2df2-55ead7724b23@lsl.secondlife.com",
+            version,
+            (string)llGetOwner() + "," + type);
+    }
+}</syntaxhighlight>
+The server:
+<syntaxhighlight lang="lsl2">default
+{
+    state_entry()
+    {
+        llSetTimerEvent(15.0);
+    }
+    
+    timer()
+    {
+        llGetNextEmail("", "");
+    }
+    
+    email(string time, string address, string version, string message, integer num_left)
+    {    
+        if ((integer)version < 2)
+        {
+            list info = llCSV2List(llDeleteSubString(message, 0, llSubStringIndex(message, "\n\n") + 1));
+            llGiveInventory(llList2Key(info, 0), llList2String(info, 1));
+        }
+        
+        if (num_left)
+            llGetNextEmail("","");
+    }
+}</syntaxhighlight>
+|helpers=
+<syntaxhighlight lang="lsl2">
+email(string time, string address, string subj, string message, integer num_left)
+{
+    if (llGetSubString(address, -19, -1) == "@lsl.secondlife.com") //trim the header
+        message = llDeleteSubString(message, 0, llSubStringIndex(message, "\n\n") + 1);
+}
+</syntaxhighlight>
+Get the region name and object position of the object that sent the email:
+<syntaxhighlight lang="lsl2">
+string region = llList2String(llParseString2List(message, ["Region: "," ("], []),1);
+vector position = (vector) ("<" + llList2String(llParseString2List(message, ["Local-Position: (",")\n\n"], []),1) + ">");
+</syntaxhighlight>
+|permission
+|negative_index
+|cat1=Communications
+|cat2=Email
+|cat3
+|cat4
+}}

@@ -1,0 +1,26 @@
+__NOTOC__
+{{Help
+|Object=*
+}}
+
+The first frame of a BVH file isn't displayed.  It's used to determine which joints the animation controls.
+
+==Widespread Falsehoods About the First Frame==
+* It must not be changed or 'bad things' (almost never specified) will happen.
+
+:In fact, '''you usually do have to edit the first frame''' to properly control what joints the animation affects.  Animations should rarely influence all joints.
+
+* Any joint with a non-zero value in the first frame will be animated.
+
+:If the values in the first and second frame '''differ''' for a joint, that joint will be animated.  '''If you use the same non-zero values in the first and second frame for a joint, that joint will ''not'' be animated!'''
+
+==You've Got a Bad Hip?==
+Both the position and the rotation of the hip joint are ''relative'' to the values in the first frame.
+
+All other joint rotations are absolute.  That means, except for the hip, it's safe to use any value you please in the first frame to create a difference between it and the second frame, to indicate a joint should be animated.
+
+Relative hip position and rotation has the potential to be '''very''' aggravating, since all other animation programs display absolute positions and rotations.  That means you might not see the same thing in Second Life that you see in your animation program.  I would argue this is a bug, but it appears to be deliberate.
+
+When in doubt use <0.0, 42.100, 0.0> for hip position, and <0.0, 0.0, 0.0> for hip rotation, in the first frame.  If you want the hip to be animated, you will still need to make the position or rotation (either one will suffice, it does not need to be both) differ between the first and second frame.  That does mean it's impossible to make a animation where the hip isn't moved ''and'' is perfectly upright (either one alone is possible).
+
+[[Category:LSL_Animation]]

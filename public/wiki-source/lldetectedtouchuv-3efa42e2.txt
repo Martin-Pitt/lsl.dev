@@ -1,0 +1,90 @@
+{{LSL_Function
+|inject-2={{LSL_Function/detected|index|touchUV|simple=*}}
+|func_id=337|func_sleep=0.0|func_energy=10.0
+|func=llDetectedTouchUV
+|return_type=vector|return_text=that is the texture coordinates for where the prim was touched. The {{LSLP|x}} & {{LSLP|y}} vector positions contain the horizontal ({{LSLP|u}}) & vertical ({{LSLP|v}}) texture coordinates respectively (<code>{{NoWrap|{{LSL_VR|{{LSLPT|u}}|{{LSLPT|v}}|0.0}}}}</code>). Like [[llDetectedTouchST]], the interval of each component will be {{Interval|gte=0.0|center=component|lte=1.0}} unless the texture repeats are set to a non-default value. Increasing or decreasing the texture repeats of the face will change this interval accordingly. Additionally,  unlike with [[llDetectedTouchST]], changing a texture's rotation will change the results of this function.
+
+{{LSL Const|TOUCH_INVALID_TEXCOORD|vector|{{LSL_VR|-1.0|-1.0|0.0}}}} is returned when the touch UV coordinates cannot be determined. See [[#Caveats|Caveats]] for further details.
+|p1_type=integer|p1_name=index
+|func_footnote=For the {{LSLGC|Touch|touch}} category of events only. The prim that was touched may not be the prim receiving the event, use [[llDetectedLinkNumber]] to check for this; likewise you can use [[llDetectedTouchFace]] to determine which face was touched.
+|func_desc
+|spec=
+|caveats=
+*{{LSL Const|TOUCH_INVALID_TEXCOORD|vector|{{LSL_VR|-1.0|-1.0|0.0}}}} is returned when...
+** The avatar's viewer does not support face touch detection.
+*** To check if face touch detection is supported check the return of [[llDetectedTouchFace]].
+** The touch has moved off the surface of the prim.
+** The touch happened too close to the edge of the face to determine a location.
+** The event triggered is not a {{LSLGC|Touch|touch}} event.
+* The vertical coordinate is flipped on a glTF mesh.
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer total_number)
+    {
+        integer face = llDetectedTouchFace(0);
+        vector  touchUV   = llDetectedTouchUV(0);
+
+//      ZERO_VECTOR (<0.0, 0.0, 0.0> ... the origin) is in the bottom left corner of the texture
+//      touchUV.x goes across the texture from left to right
+//      touchUV.y goes up the texture from bottom to top
+
+        if (face == TOUCH_INVALID_FACE)
+            llWhisper(PUBLIC_CHANNEL, "Sorry, your viewer doesn't support touched faces.");
+        else if (touchUV == TOUCH_INVALID_TEXCOORD)
+            llWhisper(PUBLIC_CHANNEL, "Sorry, the touch position upon the texture could not be determined.");
+        else
+            llSay(PUBLIC_CHANNEL, "llDetectedTouchUV(" + (string)touchUV + ")"
+                    + "\ntouchUV.x = " + (string)touchUV.x
+                    + "\ntouchUV.y = " + (string)touchUV.y);
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">
+integer numberOfRows    = 12;
+integer numberOfColumns = 12;
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        vector touchUV = llDetectedTouchUV(0);
+
+//      ZERO_VECTOR (<0.0, 0.0, 0.0> ... the origin) is in the bottom left corner of the texture
+//      touchUV.x goes across the texture from left to right
+//      touchUV.y goes up the texture from bottom to top
+
+        integer columnIndex = (integer) (touchUV.x * numberOfColumns);
+        integer rowIndex    = (integer) (touchUV.y * numberOfRows);
+        integer cellIndex   = rowIndex * numberOfColumns + columnIndex;
+
+        llSay(PUBLIC_CHANNEL, "UV grid (" + (string)columnIndex + ", " + (string)rowIndex + ") --> cell " + (string)cellIndex);
+    }
+}
+</syntaxhighlight>
+|helpers
+|related
+|also_functions=
+{{LSL DefineRow||[[llDetectedLinkNumber]]}}
+{{LSL DefineRow||[[llDetectedTouchFace]]}}
+{{LSL DefineRow||[[llDetectedTouchST]]}}
+{{LSL DefineRow||[[llDetectedTouchPos]]}}
+{{LSL DefineRow||[[llDetectedTouchNormal]]}}
+{{LSL DefineRow||[[llDetectedTouchBinormal]]}}
+|also_events=
+{{LSL DefineRow||[[touch_start]]|}}
+{{LSL DefineRow||[[touch]]|}}
+{{LSL DefineRow||[[touch_end]]|}}
+|also_articles
+|notes
+|history=*Introduced in {{SVN|870|rev=92872|trunk=*|anchor=file14|date=Wednesday, 23 July 2008}}.
+*Date of Release Server [[ Release_Notes/Second_Life_Beta_Server/1.24#Release_Notes_for_Second_Life_Beta_Server_1.24.3_.28August_29th.2C_2008.29 | 29-08-2008 ]]
+*Date of Release Client  [[ Release_Notes/Second_Life_Release/1.21 | 16-10-2008 ]]
+*Server support available in Second Life Server 1.24.7.98039, client support in Release Candidate viewer 1.21.4 (98167).
+|cat1=Touch
+|cat2
+|cat3
+|cat4
+|haiku={{Haiku|Early aurora|A single face gently touched|in front of a cube}}
+}}

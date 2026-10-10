@@ -1,0 +1,95 @@
+Here's a method of authenticating chat with shared secret.
+
+
+<source lang="lsl2">
+//By: Gigs Taggart
+//Modified by Strife Onizuka
+//Released under BSD license
+
+string  gSetupNotecardName = "setup";
+
+string  gPassword;
+integer gSeed;
+
+key     gSetupQueryId;
+integer gSetupNotecardLine;
+
+//to sign a message we hash message+gSecret+llGetKey()
+string sign_message(string message)
+{
+    string hash = llMD5String(message + gPassword + (string)llGetKey(), gSeed);
+    return message + hash;
+}
+
+//to verify a message we do all the same stuff except we get the sender's key
+integer verify_message(string raw, key sender)
+{
+    string hash = llMD5String(llDeleteSubString(message, -32, -1) + gPassword + (string)sender, gSeed);
+    return llGetSubString(message, -32, -1) == hash;
+}
+
+readSettingsNotecard()
+{
+   gSetupNotecardLine = 0;
+   gSetupQueryId = llGetNotecardLine(gSetupNotecardName, gSetupNotecardLine); 
+}
+
+
+default
+{
+    state_entry()
+    {
+         readSettingsNotecard();
+    }
+    dataserver(key queryId, string data)
+    {
+        if(queryId == gSetupQueryId) 
+        {
+            if(data != EOF)
+            {
+                integer split = llSubStringIndex(data, "=");
+                if(~split)
+                {
+                    string setting = llDeleteSubString(data, split, -1);
+                    string value   = llDeleteSubString(data, 0,  split);
+                    if (setting == "password")
+                    {
+                        gPassword = value;
+                    }
+                    else if(setting == "seed")
+                    {
+                        gSeed = (integer)value;
+                    }
+                }
+                gSetupQueryId = llGetNotecardLine(gSetupNotecardName, ++gSetupNotecardLine); 
+            }
+            else
+            {
+                state running;   
+            }
+        }
+    }           
+    changed(integer change)
+    {
+        llResetScript();
+    }
+}
+
+state running
+{
+
+    changed(integer change)
+    {
+        llResetScript();
+    }
+}
+</source>
+
+====Notecard====
+'''Name:''' "setup"
+<pre>
+password=secret
+seed=0xdeadbeef
+</pre>
+
+{{LSLC|Examples|Authenticated Chat}}

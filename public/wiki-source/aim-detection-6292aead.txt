@@ -1,0 +1,42 @@
+This script detects who's aiming at you.
+
+<source lang="lsl2">
+//This script was designed by Han Shuffle AKA MichaelRyan Allen AKA Dugley Reanimator
+//Cleaned up a bit by another resident.
+//Cleaned up some more by another resident.
+
+default
+{
+    state_entry()
+    {
+        // black and transparent floattext
+        llSetText("", ZERO_VECTOR, (float)FALSE);
+
+        llSensorRepeat("", "", AGENT_BY_LEGACY_NAME, 90, PI, 0.1);
+    }
+
+    sensor(integer num_detected)
+    {
+        list output;
+
+        integer i;
+        do
+        {
+            key agentKey = llDetectedKey(i);
+            string agentName = llDetectedName(i);
+            vector agentPosition = llDetectedPos(i);
+            rotation agentRotation = llDetectedRot(i);
+            vector ownPosition = llGetPos();
+
+            if (llGetAgentInfo(agentKey) & AGENT_MOUSELOOK)
+            {
+                if (llVecDist(ownPosition, agentPosition+llRot2Fwd(agentRotation)*llVecDist(ownPosition,agentPosition)) < 1.5)
+                    output += [agentName];
+            }
+        }
+        while (++i < num_detected);
+
+        llSetText(llDumpList2String(output, "\n"), <1.0, 1.0, 1.0>, (float)TRUE);
+    }
+}
+</source>

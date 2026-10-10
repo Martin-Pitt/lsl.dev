@@ -1,0 +1,100 @@
+{{LSL_Event
+|event_id=|event_delay|event=on_damage
+|p1_type=integer|p1_name=num_detected|p1_desc=The number of damage events pending against the avatar or task.
+|event_desc=This event is triggered when damage has been inflicted on an avatar or task in the world but before damage has been applied or distributed.
+
+All llDetected* functions that are normally available within a collision event are available while processing this event. Additionally the [[llDetectedDamage]] and [[llAdjustDamage]] methods may be called while processing this event.
+|event_footnote
+|constants
+|spec
+|caveats=
+* Requires the region to [[llGetEnv|allow damage adjustment]] for the event to run
+|examples=<syntaxhighlight lang="lsl2">string damageType2String(integer type)
+{
+    if (type == DAMAGE_TYPE_GENERIC)
+        return "generic";
+    else if (type == DAMAGE_TYPE_ACID)
+        return "acid";
+    else if (type == DAMAGE_TYPE_BLUDGEONING)
+        return "bludgeoning";
+    else if (type == DAMAGE_TYPE_COLD)
+        return "cold";
+    else if (type == DAMAGE_TYPE_ELECTRIC)
+        return "electric";
+    else if (type == DAMAGE_TYPE_FIRE)
+        return "fire";
+    else if (type == DAMAGE_TYPE_FORCE)
+        return "force";
+    else if (type == DAMAGE_TYPE_NECROTIC)
+        return "necrotic";
+    else if (type == DAMAGE_TYPE_PIERCING)
+        return "piercing";
+    else if (type == DAMAGE_TYPE_POISON)
+        return "poison";
+    else if (type == DAMAGE_TYPE_PSYCHIC)
+        return "psychic";
+    else if (type == DAMAGE_TYPE_RADIANT)
+        return "radiant";
+    else if (type == DAMAGE_TYPE_SLASHING)
+        return "slashing";
+    else if (type == DAMAGE_TYPE_SONIC)
+        return "sonic";
+    else if (type == DAMAGE_TYPE_EMOTIONAL)
+        return "emotional";
+
+    return "type " + (string)type;
+}
+
+default
+{
+    on_death()
+    {
+        llSay(0, "I'll be back!");
+    }
+    
+    on_damage(integer count)
+    {
+        integer index;
+        for (index = 0; index < count; ++index)
+        {
+            key object = llDetectedKey(index);
+            string object_name = llDetectedName(index);
+            key owner = llDetectedOwner(index);
+            key rezzer = llDetectedRezzer(index);
+            list damage = llDetectedDamage(index);
+            
+            string owner_name = llKey2Name(owner);
+            string rezzer_name = llKey2Name(rezzer);
+            
+            llSay(0, "I was struck by " + object_name + "{" + (string)object + "} owned by " +        
+                owner_name + "{" + (string)owner + "} rezzed by " +
+                rezzer_name + "{" + (string)rezzer + "} for " +
+                (string)llList2Float(damage, 0) + " points of " + damageType2String(llList2Integer(damage, 1)) +
+                " damage (originally " + (string)llList2Float(damage, 2));
+            
+            float new_damage = llList2Float(damage, 0) / 2.0;
+            
+            llSay(0, "Reducing damage by 50% to " + (string)new_damage);
+            llAdjustDamage(index, new_damage);
+            llSay(0, "llDetectDamage = [" + llDumpList2String(llDetectedDamage(index), ", ") + "]");
+        }
+        
+    }
+}</syntaxhighlight>
+|helpers
+|also_header
+|also_events={{LSL DefineRow||[[on_death]]|}}
+{{LSL DefineRow||[[final_damage]]|}}
+|also_functions={{LSL DefineRow||[[llDetectedDamage]]|}}
+{{LSL DefineRow||[[llAdjustDamage]]|}}
+{{LSL DefineRow||[[llDamage]]|}}
+|also_articles
+|also_footer
+|notes=
+|mode
+|deprecated
+|cat1=Script
+|cat2=Combat2
+|cat3
+|cat4
+}}

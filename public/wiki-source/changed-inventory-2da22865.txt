@@ -1,0 +1,46 @@
+{{Issues/SVC-304}}{{LSL Constant
+|name=CHANGED_INVENTORY
+|type=integer
+|value={{LSL Hex|0x1}}
+|desc=Prim inventory has [[changed]] by someone who has modification rights to a prim.
+
+'''Inventory changes that cause this event are:'''
+*Inventory item is added or deleted
+*Inventory item name is changed
+*Inventory item permissions are changed
+*A different script in inventory is recompiled
+*A notecard in inventory is saved
+'''This event does not occur when:'''
+*A no-copy inventory item is moved to user inventory
+*A script in inventory is reset
+*A user without modification rights drops an object into a prim's inventory due to [[llAllowInventoryDrop]].
+**In this situation the [[CHANGED_ALLOWED_DROP]] flag is set instead of [[CHANGED_INVENTORY]].
+*An object that was rezzed from inventory is saved back to object contents
+
+'''Important''' : This event is triggered in the root prim by a change in any child prim, unless the child prim has a handler for it. It is not triggered in any other linked prim.
+|examples=
+<source lang="lsl2">
+default
+{
+    changed(integer change)
+    {
+        if (change & CHANGED_INVENTORY) //note that it's & and not &&... it's bitwise!
+        {
+            llOwnerSay("The inventory has changed.");
+        }
+    }
+}
+</source>
+|constants=
+{{LSL DefineRow||[[CHANGED_ALLOWED_DROP]]|[[llAllowInventoryDrop]]}}
+|functions=
+{{LSL DefineRow||[[llGiveInventory]]|}}
+{{LSL DefineRow||[[llRemoveInventory]]|}}
+{{LSL DefineRow||[[llRemoteLoadScriptPin]]|}}
+|events=
+{{LSL DefineRow||[[changed]]|}}
+|cat1=Inventory
+|cat2
+|cat3
+|cat4
+}}

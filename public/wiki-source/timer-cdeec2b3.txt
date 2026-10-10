@@ -1,0 +1,45 @@
+{{LSL_Event|event_id=11|event_delay|event=timer|event_desc=Repeats the code in the timer(). Result of the [[llSetTimerEvent]] library function call.
+|constants
+|spec
+|caveats=
+*The time between timer events can be longer than that specified with [[llSetTimerEvent]], this is caused by:
+** '''Time dilation''' -  See [[llGetRegionTimeDilation]] for more information;
+** '''Default event delay''' - Only so many events can be triggered per second;
+** '''Event Execution''' - If the execution of an event takes too long;
+** '''llSleep()'''.
+*Only one timer can be active at one time.
+*The timer survives state changes, but does not survive resets.
+|examples=
+<source lang="lsl2">
+float gap = 2.0;
+float counter = 0.0;
+
+default
+{
+    state_entry()
+    {
+        // Activate the timer listener every 2 seconds
+        llSetTimerEvent(gap);
+    }
+
+    timer()
+    {
+        counter = counter + gap; 
+        llSay(0, (string)counter+" seconds have passed");
+    }
+}
+</source>
+|helpers
+|also_header
+|also_events
+|also_functions={{LSL DefineRow||[[llSetTimerEvent]]|}}
+|also_articles
+|also_footer
+|notes
+|mode
+|deprecated
+|cat1=Script
+|cat2=Time
+|cat3
+|cat4
+}}

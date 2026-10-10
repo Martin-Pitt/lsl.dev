@@ -1,0 +1,44 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-4413}}
+|func_id=327|func_sleep=0.0|func_energy=10.0
+|func=llGetParcelDetails|return_type=list
+|p1_type=vector|p1_name=pos|p1_desc=only x and y are important and to be given in [[Viewer coordinate frames#Region|region coordinates]]
+|p2_type=list|p2_name=params|p2_desc=a list of PARCEL_DETAILS_* flags.
+|func_footnote=Both {{LSLP|x}} and {{LSLP|y}} components of {{LSLP|pos}} are clamped to the range {{Interval|gte=0.0|lte=256.0|center=component}}, the {{LSLP|z}} component is ignored.
+|func_desc
+|return_text=that is the parcel details specified in {{LSLP|params}} (in the same order) for the parcel at {{LSLP|pos}}.
+|spec
+|caveats=
+*This cannot be used to get the parcel details of parcels in neighboring regions.
+|constants=
+{{LSL Constants/Parcel Details}}
+|examples=
+A very simple example to return the parcel name and description for the current parcel.
+
+<source lang="lsl2">default
+{
+    touch_start(integer total_number)
+    {
+        list details = llGetParcelDetails(llGetPos(), [PARCEL_DETAILS_NAME, PARCEL_DETAILS_DESC]);
+        
+        llSay(0, "Local Parcel Name:" + llList2String(details ,0));
+        llSay(0, "Local Parcel Desc:" + llList2String(details ,1));
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetParcelFlags]]}}
+{{LSL DefineRow||[[llGetRegionFlags]]}}
+{{LSL DefineRow||[[llGetRegionName]]}}
+{{LSL DefineRow||[[llRequestSimulatorData]]}}
+{{LSL DefineRow||[[llGetObjectDetails]]}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|cat1=Parcel
+|cat2=Owner
+|cat3=Group
+|cat4=Parcel/Details
+|issues
+}}

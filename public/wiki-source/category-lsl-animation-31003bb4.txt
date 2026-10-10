@@ -1,0 +1,25 @@
+{{LSL Header|ml=*}}
+== Summary ==
+Second Life [[animations]] are frequently [[llStartAnimation|triggered]] by scripts in order to achieve a variety of effects such as walking, sitting and flying animations, as well as dances, handshakes, hugs, or other things. It is import for a scripter to understand the basic concepts of how the animations work, which is described in detail in other articles, but will be briefly summarised here:
+* An animation only moves specific body parts. While many animations may animate a full-body, others will only manipulate an arm, or the head, allowing for "layered" effects such as a simultaneous wave and nod using two different animations. Combine this with a walking animation and you can walk, wave, and nod at the same time!
+* If multiple animations manipulate the same body part, then which one gets to move it is determined by the [[Animation Priority]] so remember this when triggering animations in your scripts!
+* Looping animations need to be explicitly stopped using <code>[[llStopAnimation|llStopAnimation()]]</code>, or they will continue indefinitely, so make sure your script stops any animations that it starts, and if you wish to avoid conflicts you may use <code>[[llGetAnimationList|llGetAnimationList()]]</code> to find running animations.
+
+== Preloading Animations ==
+If you wish to construct a sequence of animations that move smoothly from one to the other, then it is possible to do-so by taking advantage of [[Animation Priority]]. Quite simply, if you are running a full-body priority 4 animation, then priority 3 and below animations will not be visible (they are overridden), by remembering this it becomes possible to construct an animation sequence so that it will load subsequent steps "in the background".
+
+We do this by starting with a priority 4 animation, moving to a priority 3, then to a priority 2 and so-on. At each stage, the next one is started early, allowing it to download in the background if a user does not yet have that animation. If your animation sequence has more steps than there are priority levels then you can simply group steps together and preload an entire group at the same time.
+
+For example; if your second and third stage are both priority 3, then to begin with you you will start the first stage animation (priority 4), along with the second and third (so that they can preload). When you move to the second stage, you will stop the first and third stages. Stopping the first allows the second to become visible, and we stop the third to avoid conflict (as it has the same priority).
+
+'''Note''': it is technically possible to have all animations in a preloading sequence use the same priority, and take advantage of the fact that more recently triggered animations take precedence over older animations with the same priority. However this is an especially unwieldy method, so it is often better to group animation priorities, and make sure you have an initial "masking" animation with priority 4, that will hide the preloading animations. It is also important to remember not to preload too many animations, as there is a limit to how many animations are active at once, can produce viewer lag, and may also interfere with your efforts to preload specific animations.
+
+== Issues ==
+{{Issues/SVC-4569}}
+{{Issues/SVC-6300}}
+{{Issues/SVC-6866}}
+{{{!}}
+{{#var:issues}}
+{{!}}}
+
+{{LSLC|}}{{LSLC|Inventory}}

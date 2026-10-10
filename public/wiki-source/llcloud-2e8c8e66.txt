@@ -1,0 +1,44 @@
+{{LSL_Function
+|inject-1={{#vardefine:gd_text|Legacy clouds are no longer supported as of [[Release_Notes/Second_Life_Server/13#13.02.08.270166|13.02.08.270166]] - this function now only returns 0.0. See [[llGetEnvironment]] instead.}}
+|inject-2={{LSL Function/offset|offset|noZ=*}}
+|func_id=43|func_sleep=0.0|func_energy=10.0
+|func=llCloud|sort=Cloud
+|return_type=float|p1_type=vector|p1_name=offset
+|func_footnote=Returned values are in the range {{Interval|gte=0.0|lte=2.0|center=density}}{{Interval/Footnote}}. Values above 1.0 indicate rain.
+|return_text=that is the cloud density at the [[llGetPos|prim position]] + {{LSLPT|offset}}
+|spec=
+SL features a [http://web.archive.org/web/20040703050532/http://secondlife.com/about/technology.php#14 cellular automata-based] {{LSLGC|Weather|weather}} system. There are 16x16 square cloud "cells" per [[region]].
+|caveats=
+* There are currently no SecondLife clients that render rain.
+* The client attempts to render clouds from the cloud algorithm results sent from the server, which is why different clients can see different cloud formations and de-synchronizes cloud view from the server over time. The cloud density data is sent from the server to the client when the region is loaded by the client. This can happen when the region comes into view, during teleport or during login.
+|examples=
+<source lang="lsl2">default
+{
+    touch_start(integer num)
+    {
+        llSay(0,"Cloud density:" + (string)llCloud(ZERO_VECTOR));
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llWind]]}}
+{{LSL DefineRow||[[llGetSunDirection]]}}
+|notes=
+Clouds and [[llWind|wind]] are interrelated.
+
+=== Client ===
+
+Clouds are always rendered between about 180-200m absolute height.
+
+=== Algorithm === 
+The cloud seed/growth/dissipation algorithm uses a solenoidal vector field, which is a vector field with zero-divergence: {{noWrap|∇ · v {{=}} 0}}
+
+This condition is satisfied whenever v has a vector potential A, because if {{noWrap|v {{=}} ∇ ⨯ A}} then {{noWrap|∇ · v {{=}} ∇ · (∇ ⨯ A) {{=}} 0}}
+|cat1=Region
+|cat2=Weather
+|cat3
+|cat4
+|history=
+*Deprecated in [[Release_Notes/Second_Life_Server/13#13.02.08.270166|13.02.08.270166]].
+|deprecated=none
+}}

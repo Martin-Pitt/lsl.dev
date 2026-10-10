@@ -1,0 +1,70 @@
+{{LSL_Event|event_id=4|event_delay|event=touch_end
+|p1_type=integer|p1_name=num_detected|p1_desc
+|event_desc=Triggered when agent stops clicking on task
+|constants
+|spec
+|caveats=* If a prim [[face]] has [[Navigating Shared Media|Shared Media]] enabled and the avatar's viewer supports this feature, LSL scripts will not detect touches on that face. Touches from older clients will be detected.
+* Rigged mesh attachments do not support touch events, this is because you can steer your avatar/camera by click dragging your avatar body which is what the rigged mesh replaces. The only way to get a touch event on a rigged mesh attachment is via the right click context menu and clicking the "Touch" button.
+|examples=You can use index 0 through (<code>num_detected</code>-1) with the various llDetected... functions to handle simultaneous touches at once.
+
+For most purposes, it's usually enough to handle just with the first toucher e.g. [[llDetectedKey]](0). It is rare (but not impossible) for <code>num_detected</code> to be greater than 1.
+<source lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        llResetTime();
+    }
+
+    touch_end(integer num_detected)
+    {
+        llInstantMessage(llDetectedKey(0), "You held the mouse button down for " + (string) llGetTime() + " seconds");
+    }
+}</source>
+
+This next example demonstrates detecting when the owner of the object clicks-and-holds on the object for 1 second in order perhaps to access a management menu or similar, Normal brief clicks are distinguished.
+<source lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        llResetTime(); // Set llGetTime to 0
+    }
+
+    touch_end(integer num_detected)
+    {
+        // Check how much time elapsed since touch_start
+        if (llGetTime() <= 1.0)
+        {
+            // The user did a normal quick click on the object
+            // Execute actions for normal clicks...
+        }
+        else
+        {
+            // The owner has touched this object for longer than 1 second
+            // Execute some special feature such as issuing a management dialog...
+        }
+    }
+}
+</source>
+|notes=*If using a touch to change states be careful about the touch_ event order. '''The best advice is NOT to do state changes from within touch_start.''' Use touch_end and do the state change there. Changing state from within touch_start can cause the next occurrence of THAT touch_start code to be missed.  
+
+*On clicking a prim with touch events we trigger touch_start (on first contact), touch (during) and touch_end (as released). 
+
+|helpers
+|also_header
+|also_events=
+{{LSL DefineRow||[[touch_start]]|}}
+{{LSL DefineRow||[[touch]]|}}
+|also_functions=
+{{LSL DefineRow||[[llPassTouches]]|}}
+|also_articles
+|also_footer
+|notes
+|mode
+|deprecated
+|cat1=Touch
+|cat2=Detected
+|cat3=Grab
+|cat4=Passable
+}}

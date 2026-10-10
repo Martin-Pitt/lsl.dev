@@ -1,0 +1,41 @@
+{{LSL_Function
+|func=llGetDayLength|return_type=integer
+|func_desc=Return the number of seconds in the day cycle applied to the current parcel. [[llGetDayLength]] returns the number of seconds for the current parcel, [[llGetRegionDayLength]] is the number of seconds in the day cycle applied to the entire region.
+|examples=
+<syntaxhighlight lang="lsl2">
+// print the apparent time of day as HH:MM (%), just like the environment window in the viewer.
+// Time of day is a fraction between 0 and 1, 0 is midnight, 0.5 is noon
+string printTimeOfDay(float dayFraction) {
+    integer hours = (integer)(dayFraction * 24);
+    integer minutes = (integer)(dayFraction * 24 * 60) % 60;
+    integer percent = (integer)(dayFraction * 100);
+    return (string)hours + ":" + llGetSubString((string)(100+minutes), 1, 2) + " (" + (string)percent + "%)";
+}
+
+default {
+    state_entry() {
+        llSetTimerEvent(5);
+    }
+
+    timer() {
+        float timeOfDay = (llGetUnixTime() + llGetDayOffset()) % llGetDayLength() * 1.0 / llGetDayLength();
+        llSetText(printTimeOfDay(timeOfDay), <1,1,0>, 1);
+    }
+}
+</syntaxhighlight>
+
+|also_functions=
+{{LSL DefineRow||[[llGetEnvironment]]}} Newer function that consolidates many environment-based settings.
+{{LSL DefineRow||[[llGetDayLength]]}}
+{{LSL DefineRow||[[llGetDayOffset]]}}
+{{LSL DefineRow||[[llGetMoonDirection]]}}
+{{LSL DefineRow||[[llGetMoonRotation]]}}
+{{LSL DefineRow||[[llGetSunDirection]]}}
+{{LSL DefineRow||[[llGetSunRotation]]}}
+{{LSL DefineRow||[[llGetRegionDayLength]]}}
+{{LSL DefineRow||[[llGetRegionDayOffset]]}}
+{{LSL DefineRow||[[llGetRegionMoonDirection]]}}
+{{LSL DefineRow||[[llGetRegionMoonRotation]]}}
+{{LSL DefineRow||[[llGetRegionSunDirection]]}}
+{{LSL DefineRow||[[llGetRegionSunRotation]]}}
+}}

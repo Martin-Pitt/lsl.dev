@@ -1,0 +1,171 @@
+{{LSL Header|ml=*}}
+This page shows two methods for getting the day of the week. The first shows how to get the day of the week from a Unix timestamp. The second shows how to get the day of the week from an arbitrary year, month, and day. The first method is faster for dates that fall into the Unix timestamp range (January 1, 1970 - January 19, 2038). The second method is a bit slower, but will work for any date in the Gregorian calendar (roughly, any date in the 17th Century and beyond).
+
+===Day of Week from Unix timestamp===
+
+The first method to get the day of the week is from a Unix timestamp - {{LSLG|llGetUnixTime}}. The timestamp returns the number of seconds elapsed beginning Thursday, January 1, 1970 UTC. This script first converts the seconds to hours, then adds the GMT offset (if desired), then converts the hours to days, and finally grabs the day of the week from a list.
+
+<source lang="lsl2">
+// Give day of the week
+// DoteDote Edison
+
+list weekdays = ["Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday"];
+integer offset = -4; // offset from UTC
+
+default {
+    state_entry() {
+        //
+    }
+    touch_start(integer total_number) {
+        integer hours = llGetUnixTime()/3600;
+        integer days = (hours + offset)/24;
+        integer day_of_week = days%7;
+        llSay(0, "Today is " + llList2String(weekdays, day_of_week));
+    }
+}</source>
+And a function version:
+<source lang="lsl2">
+string getDay(integer offset) {
+    list weekdays = ["Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday"];
+    integer hours = llGetUnixTime()/3600;
+    integer days = (hours + offset)/24;
+    integer day_of_week = days%7;
+    return llList2String(weekdays, day_of_week);
+}
+
+default {
+    touch_start(integer total_number) {
+        integer offset = -4; // offset from UTC
+        llSay(0, "Today is " + getDay(offset) + ".");
+    }
+}
+</source>
+A simpler and more efficient version of the above function:
+<source lang="lsl2">
+// contributed by wrGodLikeBeing
+string timestamp2weekday( integer ts ){
+    return llList2String( ["Thursday","Friday","Saturday","Sunday","Monday","Tuesday","Wednesday"],(ts/86400)%7 );
+}
+</source>
+
+The following code compensates for daylight savings time that changes the offset between -7 and -8 hours throughout the year. Touching the object will yield a message indicating the weekday name for Pacific time, UTC offset of the Pacific Timezone (SL Time), and if daylight savings time is in effect in the pacific time zone.
+Caveat: Switches already to next day for times from 23:58:57 to midnight
+<source lang="lsl2">
+// Dedric Mauriac
+
+integer   minuteSpan = 60; // 60 seconds
+integer   hourSpan = 3600; // 60 seconds * 60 minutes
+integer   daySpan = 86400; // 60 seconds * 60 minutes * 24 hours
+ 
+integer   ptOffset()
+{
+    integer diff = (integer) ( llGetWallclock() - llGetGMTclock() );
+    if (diff > 0)
+        diff += daySpan;
+    return diff;
+}
+
+integer isDaylightSavings()
+{
+    // UTC-8 pacific standard time (PST: november - march)
+    // UTC-7 pacific daylight time (PDT: march - november)
+ 
+    return ptOffset() == -7 * hourSpan;
+}
+string getWeekday()
+{
+    // find the number of days since Jan 1, 1970 (PST)
+    integer days = ( llGetUnixTime() + ptOffset() ) / daySpan;
+ 
+    // All weekday names in order (Jan 1, 1970 starts on a Thursday)
+    list weekdays = ["Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday"];
+ 
+    // find the weekday
+    return llList2String(weekdays, (days % 7) );
+}
+
+sayTheWeekday()
+{
+    llSay(0, "Today is " + getWeekday() + ".");
+    llSay(0, "Offset is " + (string)(ptOffset() / hourSpan) + " hours.");
+ 
+    if(isDaylightSavings())
+        llSay(0, "It is currently daylight savings time.");
+    else
+        llSay(0, "It is currently standard time.");
+}
+default 
+{
+    state_entry()
+    {
+        sayTheWeekday();
+    }
+    touch_start(integer num_detected)
+    {
+        sayTheWeekday();
+    }
+}
+</source>
+
+===Day of Week from Arbitrary Day, Month, and Year===
+
+The second method to get the day of the week uses an arbitrary day, month and year. 
+
+This is based on the ''Zeller's congruence'' algorithm, specified in this Wikipedia page: [http://en.wikipedia.org/wiki/Zeller's_congruence Zeller's congruence].
+
+The benefit of this approach is that it will compute a day of the week for dates outside of the 32-bit signed Unix timestamp range. If all you want is the day of week for today, the first method is simpler and faster.
+
+Caveat: As noted at the top of this page, this only works for Gregorian dates. If you don't know what that means, it means pretty much any date from the 17th century forward.
+
+<source lang="lsl2">
+list    DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday",
+                        "Thursday", "Friday", "Saturday"];
+
+list    MONTHS = ["January", "February", "March", "April", "May", "June",
+                  "July", "August", "September", "October", "November",
+                  "December"];
+
+// Uses "Zeller's congruence" to calculate day of week. Look it up in Wikipedia
+//
+// Month is 1 = January
+//
+// Returns 0 for Sunday, 6 for Saturday
+//
+// ONLY does Gregorian dates.
+//
+integer day_of_week (integer year, integer month, integer day) {
+  
+  // The calculations use the previous year for Jan/Feb, but want January and
+  // February to be months 13 and 14.
+  if (month <= 2) {
+    --year;
+    month += 12;
+  }
+  
+  return
+    ((((day + (((month + 1) * 26) / 10) + year +
+        (year / 4) + (6 * (year / 100)) + (year / 400)) %
+       7) + 6) % 7);
+}
+
+dow_test (integer year, integer month, integer day) {
+
+  llSay(0, llList2String(MONTHS, month - 1) + " " +
+        (string) day + ", " + (string) year + " falls on a " +
+        llList2String(DAYS_OF_WEEK, day_of_week(year, month, day)));
+}
+
+default {
+
+  state_entry () {
+
+    dow_test(2014, 1, 26);
+    dow_test(2014, 3, 31);
+    dow_test(1960, 1, 1);
+    dow_test(2099, 12, 25);
+  }
+}
+</source>
+
+
+{{LSLC|Library|Day of the Week}}{{LSLC|Examples|Day of the Week}}

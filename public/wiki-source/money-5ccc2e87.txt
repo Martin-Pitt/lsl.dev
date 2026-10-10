@@ -1,0 +1,124 @@
+{{LSL_Event
+|inject-1={{LSL_Function/warning|Security|'''When writing a vendor, Always (''ALWAYS!'') check the amount paid in your money() event. Preconfigured payment amounts from [[llSetPayPrice]]() are only a suggestion to the client. The client can still send L$0 or any positive integer. ''Never'' trust the client software to be secure. This is not important, of course, for a simple tipjar.'''}}
+|event_id=20
+|event_delay
+|event=money
+|p1_type=key|p1_name=id|p1_desc=who paid
+|p2_type=integer|p2_name=amount|p2_desc=the amount paid
+|event_desc=Triggered when money is paid to the prim in the {{LSLP|amount}} by {{LSLP|id}}.
+|event_footnote
+|constants
+|spec=When money is paid to the prim, the money is given to the object's owner.<br/>If the object is owned by or deeded to a group it is divvied up amongst the group members immediately (which is why groups can't grant [[PERMISSION_DEBIT]]). Only members of a role that has the "Accounting/Pay group liabilities and receive group dividends" attribute will receive money.<br>
+Don't forget to turn on the pay-behavior of the prims/objects involved.<br/>
+The pay buttons should be configured in most applications where money is being transfered ([[llSetPayPrice]]), it makes paying money to the object easier.
+|caveats=* This event cannot be triggered by a call to [[llGiveMoney]] because [[llGiveMoney]] cannot be used by one object to pay another object.
+* Money cannot be paid to an attachment.
+* '''Money() does not check if it is running on the Testing Grid!''' If you are writing a vendor that does networking, be sure to check that it was not payed aditi grid by doing <code>if(llSubStringIndex(llGetEnv("simulator_hostname"), ".aditi.") == -1)</code> or by checking if [[llHTTPRequest]]'s <code>X-SecondLife-Shard</code> header does not equal "Testing".
+|examples=
+This example shows the simplest tip-jar and shows how little code is needed to receive unverified amounts of money.
+<source lang="lsl2">
+
+default
+{
+    money(key id, integer amount)      // Some money has been received (and has been paid into the owner's account) 
+    {
+        // Thank the giver for their tip
+        llInstantMessage(id, "Thanks for the L$"  + (string) amount + " tip!");
+    }
+}
+</source>
+Next level of tip jar, advising owner, keeping a running total, and with floating text to show status.
+<source lang="lsl2">
+integer Total;
+string  OwnerName;
+
+default
+{
+    on_rez( integer sparam )
+    {
+        llResetScript();
+    }
+    state_entry()
+    {
+        OwnerName = llKey2Name( llGetOwner() );
+        llSetText( OwnerName + "'s Tip Jar.\nAny tips gratefully received!\nL$0 Donated so far", <.2, 1, .6>, 1);
+    }
+
+    money(key id, integer amount)
+    {
+        Total += amount;
+        // Shortcut 'cheat' to avoid multiple casts when constructing a message including non-string items
+        string str = (string) [OwnerName, "'s Tip Jar.\nPlease tip if you are so inclined!\nL$", amount, " Was donated last!\nL$", Total, " Donated so far" ];
+        llSetText(str, <1,1,1>, 1);
+        llInstantMessage(id,"Thanks for the tip!");
+        llInstantMessage(llGetOwner(), llKey2Name(id) + " donated L$" + (string) amount );
+    }
+}
+</source>
+An elementary vendor with money validation and refund capability
+<source lang="lsl2">
+// Give the first item in this object's inventory to anyone who pays the price
+
+integer price = 10;      // The price needed to purchase the item
+
+default
+{
+    state_entry()
+    {
+        // Turn off pay options so no money can be received until we are ready
+        llSetPayPrice(PAY_HIDE, [PAY_HIDE ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+        // Request Debit Permissions from the owner so refunds can be given
+        llRequestPermissions(llGetOwner(), PERMISSION_DEBIT);
+    }
+    on_rez(integer p)
+    {
+        llResetScript();                // Reset script on rezzing. Will thus register any change of owner.
+    }
+    money(key id, integer amount)        // Some money has been received and has gone to this object's owner
+    {
+        if (amount < price)
+        {   // Customer has not paid enough
+            llInstantMessage(id, "That's not enough money.");
+            llGiveMoney(id, amount);   // Refund the money they paid
+            return;
+        }
+        if (amount > price)
+        {   // Customer paid too much. Refund the excess
+            integer change = amount - price;
+            llInstantMessage(id, "You paid more than L$" + (string)price
+                + "  your change is L$" + (string)change );
+            llGiveMoney(id, change);
+        }
+        // Customer has paid at least the right amount. Give them the item.
+        string ItemName = llGetInventoryName(INVENTORY_OBJECT, 0);
+        llGiveInventory(id, ItemName);
+        llInstantMessage(id, "Please accept your purchase worth L$" + (string) price );
+    }
+    run_time_permissions(integer perm)
+    {
+        // If Debit permissions are granted, set up the pay price for this single-price vendor
+        if(perm & PERMISSION_DEBIT)
+            llSetPayPrice(price, [PAY_HIDE ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+
+        // In practice, the following line would be preferable and almost fully guards against a wrong amount being paid
+        // - except in the rare event that the price is changed while a transaction is in progress, or a user with a hacked viewer
+        //  llSetPayPrice(PAY_HIDE, [price ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+    }
+}
+</source>
+|helpers
+|also_header
+|also_events
+|also_functions={{LSL DefineRow||[[llTransferLindenDollars]]|Give money to another avatar with transaction confirmation}}
+{{LSL DefineRow||[[llGiveMoney]]|Give money to another avatar}}
+{{LSL DefineRow||[[llSetPayPrice]]|Configure the pay buttons}}
+|also_articles
+|also_footer
+|notes
+|mode
+|deprecated
+|cat1=Money
+|cat2=Pie Menu
+|cat3
+|cat4
+}}

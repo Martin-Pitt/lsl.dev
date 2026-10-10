@@ -1,0 +1,61 @@
+{{LSL_Function
+|inject-2={{LSL_Function/detected|number|rot|error=[[ZERO_VECTOR|<0.0, 0.0, 0.0, 1.0>]]}}
+|func_id=38|func_sleep=0.0|func_energy=10.0
+|sort=DetectedRot
+|func=llDetectedRot|return_type=rotation|p1_type=integer|p1_name=number
+|func_footnote=Returns {{LSLG|ZERO_ROTATION|<0.0, 0.0, 0.0, 1.0>}} if {{LSLP|number}} is not valid sensed object.
+|func_desc
+|Return_text=of detected object {{LSLP|number}}.
+|spec
+|caveats
+|constants
+|examples=
+<source lang="lsl2">//--// get compass facing of Avatar that touches this object //--//
+
+ //-- list of compass directions starting at East, rotated clockwise
+list gLstCompassPoints = [ "East", "NorthEast", "North", "NorthWest", "West", "SouthWest", "South", "SouthEast" ];
+
+ //-- convert rotation to z-axis compass direction
+string CompassDirection( rotation rRotBase )
+{
+  integer iCountCompassPoints = llGetListLength(gLstCompassPoints);
+   //-- convert rotation to a direction
+  vector vDirection = <0.0, 1.0, 0.0> / rRotBase;
+   //-- take the direction and determine the z rotation
+  float fAngle = llAtan2(vDirection.x, vDirection.y);
+   //-- take the angle and find the compass point
+  integer iCompassPoint = llRound(fAngle * iCountCompassPoints / TWO_PI);
+   //-- convert to string
+  return llList2String( gLstCompassPoints, iCompassPoint );
+}
+
+default{
+  state_entry()
+  {
+    llSay( 0, "Touch me to get your compass facing" );
+  }
+
+  touch_start( integer vIntTouchCount )
+  {
+    integer vIntCounter = 0;
+    do
+    {
+      llSay( 0,
+             llDetectedName( vIntCounter )
+             + " is facing "
+              //-- next line gets avatar rotation and converts to compass direction
+             + CompassDirection( llDetectedRot( vIntCounter ) ) );
+    } while ( ++vIntCounter < vIntTouchCount );
+  }
+}</source>
+|helpers
+|also_functions
+|also_events
+|also_articles
+|notes
+|permission
+|cat1
+|cat2
+|cat3
+|cat4
+}}

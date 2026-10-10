@@ -1,0 +1,39 @@
+{{LSL_Function
+|inject-2={{LSL_Function/inventory|item|uuid=false}}
+|func_id=291|func_sleep=0.0|func_energy=10.0
+|func=llGetInventoryCreator|return_type=key|p1_type=string|p1_name=item
+|sort=GetInventoryCreator
+|func_footnote
+|func_desc
+|return_text=of the creator of the inventory {{LSLP|item}}.
+|spec
+|caveats=
+* If {{LSLP|item}} has multiple creators, then this function will return [[NULL_KEY]]. (e.g. if an object created by Lex contained a script created by Strife). See {{Jira|SVC-6985}} and {{Jira|SVC-6820}} for more information.
+|constants
+|examples=Add an object to a prims inventory, as well as this script, in order to get the name of the creator.
+<source lang="lsl2">default{
+    state_entry(){
+        llRequestAgentData(llGetInventoryCreator(llGetInventoryName( INVENTORY_OBJECT, 0)),DATA_NAME);
+    }
+    
+    dataserver(key qid, string data){
+        llOwnerSay(data);
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetInventoryAcquireTime]]|Returns the time the item was added to the prim's inventory}}
+{{LSL DefineRow||[[llGetInventoryName]]|Returns the inventory item's name}}
+{{LSL DefineRow||[[llGetInventoryType]]|Tests to see if an inventory item exists and returns its type}}
+{{LSL DefineRow||[[llGetInventoryNumber]]|Returns the number of items of a specific type in inventory}}
+{{LSL DefineRow||[[llGetInventoryPermMask]]|Returns the inventory item's permissions}}
+{{LSL DefineRow||[[llGetInventoryKey]]|Returns the inventory item's [[UUID]] (if full perm)}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|cat1=Inventory
+|cat2=Creator
+|cat3=Key
+|cat4
+}}

@@ -1,0 +1,114 @@
+{{LSL_Function|func_id=239|func_sleep=0.0|func_energy=10.0
+|func=llAvatarOnSitTarget
+|return_type=key
+|return_text=that is the [[UUID]] of the user seated on the prim.
+|func_footnote=If the prim lacks a [[llSitTarget|sit target]] or there is no avatar sitting on the prim, then {{LSL Constant/NULL_KEY}} is returned.
+|caveats=*A prim does not have a sit target unless [[llSitTarget]] has been called with a '''nonzero''' vector as the first argument.
+*If the prim lacks a sit target or the avatar is seated upon a different prim, the only way to determine how many and which avatars are seated upon the object is to scan the link set (for an example of this, see [[llGetNumberOfPrims#Useful_Snippets|llGetNumberOfPrims]]).
+|spec
+|examples=<syntaxhighlight lang="lsl2">default
+{
+    state_entry()
+    {
+        // set sit target, otherwise this will not work 
+        llSitTarget(<0.0, 0.0, 0.1>, ZERO_ROTATION);
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        { 
+            key av = llAvatarOnSitTarget();
+            if (av) // evaluated as true if key is valid and not NULL_KEY
+            {
+                llSay(0, "Hello " + llKey2Name(av) + ", thank you for sitting down");
+            }
+        }
+    }
+}</syntaxhighlight>
+|helpers=<syntaxhighlight lang="lsl2">//Gets the link number of a seated avatar
+integer GetAgentLinkNumber(key avatar)
+{
+    integer link_num = llGetNumberOfPrims();
+    while (link_num > 1) // Check only child prims.
+    {
+        if (llGetLinkKey(link_num) == avatar) // If it is the avatar we want
+        {
+            return link_num; // then return the link number
+        }
+        --link_num; // else go on with next child.
+    }
+    // Avatar wasn't found
+    return FALSE; // 0 (zero) for easy testing.
+}</syntaxhighlight>
+<syntaxhighlight lang="lsl2">//It's sometimes useful to use a state change
+//useful when the prim is linked to an other prim
+//and useful with a dialog box
+default
+{
+    state_entry()  
+    {
+        //"Sit target is a prim property."
+        llSitTarget(<0.0, 0.0, 0.1>, ZERO_ROTATION);
+    }
+    
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        { 
+            key av_sit = llAvatarOnSitTarget();
+            if (av_sit) 
+            {
+                //Someone is on the sit target.
+                state sitting;
+            }
+        }
+    }
+}
+
+state sitting
+{
+    state_entry()
+    {
+        //Open a dialog box when an avatar is sitting on the prim
+        key av_menu = llAvatarOnSitTarget();
+        llListen(-99, "", av_menu, "Yes");
+        llDialog(av_menu, "\nDo you like this example?", ["Yes", "No" ] , -99);
+    }
+    
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        { 
+            key av_unsit = llAvatarOnSitTarget();
+            if (av_unsit == NULL_KEY) 
+            {
+                //No one is on the sit target.
+                //"On state change all listens are removed automatically."
+                state default;
+            }
+        }
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        // If the user clicked the "Yes" button
+        llWhisper(0, "Thank you");
+    }
+}</syntaxhighlight>
+|related
+|also_tests
+|also_events={{LSL DefineRow||[[changed]]|}}
+|also_functions=
+{{LSL DefineRow||[[llAvatarOnLinkSitTarget]]|}}
+{{LSL DefineRow||[[llSitTarget]]|}}
+{{LSL DefineRow||[[llLinkSitTarget]]|}}
+{{LSL DefineRow||[[llGetLinkKey]]}}
+|also_articles={{LSL DefineRow||[[CHANGED_LINK]]|}}
+|notes=The position of an avatar on a sit target can be determined with the use of [[llGetObjectDetails]] (see [[llSitTarget#Useful_Snippets|llSitTarget]] for an example).
+|haiku={{Haiku|Glorious sunset|Lazy avatar enjoys|sitting on a prim}}
+|cat1=Avatar
+|cat2=Prim
+|cat3=Sit
+|cat4
+}}

@@ -1,0 +1,47 @@
+{{Enote|It has been suggested that [[Animation Upload Priority]] be merged into this article or section. ([[Talk:Animation_Priority|Discuss]])}}
+[[Animation|Animations]] have a global priority as well as a priority for each bone in the animation which overrides the animation's global priority.
+
+When multiple animations, for the same joint, are played at the same time the animation with the highest priority will be effective.  If there are multiple animations with the highest priority, then the animation which was started most recently will be effective.
+ 
+When animations are [[How to upload an animation|uploaded]] using the standard viewer it is possible to set the animation's global priority to a value from 0 to 4. {{Template:HoverText|There is no interface to set individual bone priorities. They default to the animation's global priority.|Not possible with .bvh animations, but possible with .anim and 3rd party tools.}}
+
+[[Internal Animations]] have priorities ranging from 0 to 5, leading to the conclusion that priority 5 animations are fully supported by both the server and viewer.
+
+A number of unsupported methods of uploading animations with higher priorities exist.  This creates the potential for chaos and confusion if used indiscriminately.  In the past animators could be certain that starting a priority 4 animation would override any current animation for the relevant joints.  This is no longer true.
+
+You can view the UUID and priority of currently playing animations by selecting Advanced -> Character -> Animation Info from the menu, or Develop -> Avatar -> Animation Info on Viewer 2.
+
+__TOC__
+==Guidelines ==
+Content creators are urged to give the overall user experience first priority when determining the appropriate priority for new animations.  Do not select the highest available priority simply because it seems like a good idea.  Consider what users expect to happen when they sit on a chair, join a dance ball or ride in vehicle.  Do they really expect to see your animation to carry on playing?
+
+===Priority 0===
+Used for many of the [[Internal Animations|internal animations]] which are intended to be overridden with an AO.
+
+===Priority 1===
+Used for [[Internal Animations|internal emotes]].
+
+===Priority 2===
+Priority 2 is a good choice for stands in AOs.
+
+===Priority 3===
+Priority 3 should have been the best choice for walks, dances, sits and most other animations.  Unfortunately many of those animations have been given priority 4 leading to unpredictable user experiences for creators who do try to use priority 3.
+
+===Priority 4===
+Priority 4 is used for many walks and most pose ball animations, such as dances, sits and vehicle driving animations.
+
+===Priority 5===
+Priorities higher than 4 should be reserved for situations when the objective is to override only some joints of the existing priority 4 animation.  
+
+For example, a handbag might override an arm and boots might override feet.  In these cases, the alternative to a priority 5 animation is a script which continuously alternates priority 4 animations, generating a lot of unnecessary script events.
+
+If you do not need part of the existing priority 4 animations to continue playing, you do not need, and should not use, priority 5.
+
+The [[Internal Animations|internal]] turn_180 animation, which plays during Edit Appearance, uses priority 5.
+
+===Priority 6===
+As priority 5 animations proliferate, a use for priority 6 is certain to materialize.  However, as with priority 4 and 5.  If your objective is not to allow part of an existing priority 5 animation to continue playing, then you can meet your objective either with a priority 5 or a priority 4 animation.
+
+It is uncertain whether viewer and server support for priorities higher than 5 exists today or will continue to exist in the future.
+ 
+[[Category:LSL_Animation]]

@@ -1,0 +1,36 @@
+{{LSL Constant
+|name=JSON_INVALID
+|type=string
+|value="﷐"
+|dvalue={{HoverText|"﷐"|Special Unicode Character&#x000d;Unicode:&#x0009;U+FDDO&#x000d;HTML:&#x0009;&amp;#xFDD0;&#x000d;llUnescapeUrl({{String|%EF%B7%90}});}}
+|desc=A return value that indicates an invalid 'type' was specified to the [[llList2Json]] function.<br/>Also a return value for [[llJsonValueType]] function indicating the data type of a given address specifier in a given string-serialized JSON object.
+<br/>Also a return value for [[llJsonGetValue]] to signify a specifier list attempting to access a nonexistent location within a Json text (see Examples).
+|constants={{LSL Constants/JSON}}
+|examples=<source lang="lsl2">// Using JSON_INVALID to iterate over a json array
+// of unknown length
+string jsonText = "[1,2,3,5,6]";
+
+default
+{
+    touch_start(integer total_number)
+    {
+        string item;
+        integer iter;
+        while ((item = llJsonGetValue(jsonText,[iter++])) != JSON_INVALID)
+        {
+            llOwnerSay(item); // "1","2","3","5","6"
+        }
+    }
+}</source>
+|caveats=*Do '''not''' use JSON_INVALID with the [[llList2Json]] or [[llJsonSetValue]] functions. Otherwise noncompliant, invalid Json text will result.
+
+|functions=
+{{LSL DefineRow||[[llList2Json]]|}}
+{{LSL DefineRow||[[llJsonValueType]]|}}
+|events
+|cat1=JSON
+|cat2
+|cat3
+|cat4
+|self
+}}

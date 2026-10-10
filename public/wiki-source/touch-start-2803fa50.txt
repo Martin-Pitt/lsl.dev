@@ -1,0 +1,79 @@
+{{LSL_Event|event_id=2|event_delay|event=touch_start
+|p1_type=integer
+|p1_name=num_detected
+|p1_desc=Number of agents detected touching during the last clock cycle
+|event_desc=Triggered by the start of agent clicking on task
+|constants
+|spec
+|caveats=* If a prim [[face]] has [[Navigating Shared Media|Shared Media]] enabled and the avatar's viewer supports this feature, LSL scripts will not detect touches on that face. Touches from older clients will be detected.
+* The default behavior is: If you have a multi-prim object and the root has a [[touch_start]] handler AND one or more child prims has a [[touch_start]] handler, the root prim's handler will be called when it (the root) or a child without a handler is touched. If you touch a child prim that has a [[touch_start]] handler, it will receive the event and the root prim will not.
+** This behavior can be configured with [[llPassTouches]]. After configuring a prim's touch-passing behavior you can delete the script that configured the prim.
+* Rigged mesh attachments do not support touch events, this is because you can steer your avatar/camera by click dragging your avatar body which is what the rigged mesh replaces. The only way to get a touch event on a rigged mesh attachment is via the right click context menu and clicking the "Touch" button.
+* [https://feedback.secondlife.com/scripting-bugs/p/touch-start-only-triggers-on-the-second-touch-if-touch-is-already-active Due to a known issue], if a resident is already touching a scripted object, [[touch_start]] runs only every other time that other residents touch it.
+|examples=You can use index 0 through (<code>num_detected</code>-1) with the various llDetected... functions to handle simultaneous touches at once.
+
+For most purposes, it's usually enough to handle just with the first toucher e.g. [[llDetectedKey]](0). It is rare (but not impossible) for <code>num_detected</code> to be greater than 1.
+<source lang="lsl2">
+default
+{ 
+    touch_start(integer num_detected)
+    {
+        key    avatarKey  = llDetectedKey(0);
+        string avatarName = llDetectedName(0);
+
+        llInstantMessage(avatarKey, "Hello " + avatarName );
+    }
+}
+</source>
+
+This next example demonstrates detecting when the owner of the object clicks-and-holds on the object for 1 second in order perhaps to access a management menu or similar, Normal brief clicks are distinguished.
+<source lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        llResetTime(); // Set llGetTime to 0
+    }
+
+    touch_end(integer num_detected)
+    {
+        // Check how much time elapsed since touch_start
+        if (llGetTime() <= 1.0)
+        {
+            // The user did a normal quick click on the object
+            // Execute actions for normal clicks...
+        }
+        else
+        {
+            // The owner has touched this object for longer than 1 second
+            // Execute some special feature such as issuing a management dialog...
+        }
+    }
+}
+</source>
+|helpers
+|also_header
+|also_events=
+{{LSL DefineRow||[[touch]]|}}
+{{LSL DefineRow||[[touch_end]]|}}
+|also_functions=
+{{LSL DefineRow||[[llSetTouchText]]|}}
+{{LSL DefineRow||[[llPassTouches]]|}}
+{{LSL DefineRow||[[llDetectedTouchFace]]|}}
+{{LSL DefineRow||[[llDetectedTouchST]]|}}
+{{LSL DefineRow||[[llDetectedTouchUV]]|}}
+{{LSL DefineRow||[[llDetectedTouchPos]]|}}
+{{LSL DefineRow||[[llDetectedTouchNormal]]|}}
+{{LSL DefineRow||[[llDetectedTouchBinormal]]|}}
+|also_articles
+|also_footer
+|notes=*If using a touch to change states be careful about the touch event order. '''The best advice is not to do state changes from within touch_start.''' Add a [[touch_end]] handler and do the state change there. Changing state from within [[touch_start]] can cause the next occurrence of THIS [[touch_start]] code to be missed.  
+
+*On clicking a prim with touch event handlers, the following handlers are triggered: [[touch_start]] (on first contact), [[touch]] (during) and [[touch_end]] (as released). 
+|mode
+|deprecated
+|cat1=Touch
+|cat2=Detected
+|cat3=Grab
+|cat4=Passable
+}}

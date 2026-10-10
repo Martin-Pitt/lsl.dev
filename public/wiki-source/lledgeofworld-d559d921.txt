@@ -1,0 +1,57 @@
+{{LSL_Function
+|inject-2={{LSL_Function/position|pos|region=*}}
+|func=llEdgeOfWorld
+|sort=EdgeOfWorld
+|func_id=205|func_sleep=0.0|func_energy=10.0
+|return_type=integer|return_subtype=boolean
+|p1_type=vector|p1_name=pos|p1_desc
+|p2_type=vector|p2_subtype=direction|p2_name=dir|p2_desc=direction
+|func_footnote=The '''z''' component of {{LSLP|dir}} is ignored.
+|func_desc=Checks to see whether the border hit by {{LSLP|dir}} from {{LSLP|pos}} is the edge of the world (has no neighboring simulator).
+|return_text=value. [[FALSE]] indicating there is a simulator in the direction indicated.
+|spec
+|caveats=*If the '''x''' and '''y''' components of {{LSLP|dir}} are zero (like with [[ZERO_VECTOR]]), [[TRUE]] is always returned.
+* {{LSLP|pos}} must be in the region.
+* Can only be used to detect directly adjacent regions, not diagonally adjacent regions
+* This function will also return [[TRUE]] if [[llRequestSimulatorData]]() returns "up" for an adjacent region but that region doesn't visibly show when standing next to its border.
+|constants
+|examples=
+<syntaxhighlight lang="lsl">
+//--// Tells if there are neighboring sims on touch //--//
+
+default{
+  touch_start( integer vIntTouched ){
+    vector vPosObject = llGetPos();
+    if (!llEdgeOfWorld( vPosObject, <0.0, 1.0, 0.0> )){
+      llOwnerSay( "There is a Sim to the North" );
+    }
+    if (!llEdgeOfWorld( vPosObject, <1.0, 0.0, 0.0> )){
+      llOwnerSay( "There is a Sim to the East" );
+    }
+    if (!llEdgeOfWorld( vPosObject, <0.0, -1.0, 0.0> )){
+      llOwnerSay( "There is a Sim to the South" );
+    }
+    if (!llEdgeOfWorld( vPosObject, <-1.0, 0.0, 0.0> )){
+      llOwnerSay( "There is a Sim to the West" );
+    }
+  }
+}
+</syntaxhighlight>
+|helpers
+|also_constants=
+{{LSL DefineRow||[[STATUS_DIE_AT_EDGE]]}}
+{{LSL DefineRow||[[STATUS_RETURN_AT_EDGE]]}}
+|also_functions=
+{{LSL DefineRow||[[llScriptDanger]]}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|haiku={{Haiku|The world once though flat|indeed has come full circle|here there be dragons.}}
+|cat1=Region
+|cat2=World Edge
+|cat3
+|cat4
+}}

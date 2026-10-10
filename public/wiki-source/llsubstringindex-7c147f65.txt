@@ -1,0 +1,185 @@
+{{LSL_Function
+|func_id=181|func_sleep=0.0|func_energy=10.0
+|func=llSubStringIndex
+|return_type=integer
+|p1_type=string|p1_name=source|p1_desc=what to search in (haystack)
+|p2_type=string|p2_name=pattern|p2_desc=what to search for (needle)
+|func_footnote=If {{LSLP|pattern}} is not found in {{LSLP|source}}, -1 (in LSL) or nil (in SLua) is returned.<br/>
+The index of the first character in the string is {{HoverText|0|zero}}
+|func_desc
+|return_text=that is the index of the first instance of {{LSLP|pattern}} in {{LSLP|source}}.
+|spec
+|caveats=* Performs a literal match (case sensitive).
+** Wildcards and RegEx are not supported.
+* If {{LSLP|pattern}} is an {{HoverText|empty string|{{String}}}} the value returned is {{HoverText|0|zero}} rather than -1.
+* There is no function to search the string starting at a specific offset. check [[LlSubStringIndex#See_Also|See Also]] for a function to search from the end.
+|constants
+|examples=
+<source lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        string  name       = llDetectedName(0);
+        integer spaceIndex = llSubStringIndex(name, " ");
+
+//      no conditional check is needed for (spaceIndex == -1)
+//      because we KNOW the legacy name must have a space
+
+//      extract the substring from the first character to the one before the space
+        string  firstName  = llGetSubString(name, 0, spaceIndex - 1);
+
+        llSay(PUBLIC_CHANNEL, firstName + " touched me.");
+    }
+}
+</source>
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", NULL_KEY, AGENT_BY_LEGACY_NAME, PI, 96.0, 20);
+    }
+
+    sensor(integer num_detected)
+    {
+    //  Loop through all the sensor data and match against " Linden", 
+    //  this causes it to match with any last name of Linden (since there can't be spaces before the firstname)
+    //  Alternatively you could match a firstname with "FirstName " or anything else
+
+        integer index;
+        do
+        {
+            key avatarKey = llDetectedKey(index);
+            string avatarLegacyName = llDetectedName(index);
+
+        //  watch out for the bitwise-NOT (~)
+        //  the next line translates to if (indexOfSearchedStringInOtherString != -1)
+            integer isReallyALinden = ~llSubStringIndex(avatarLegacyName, " Linden");
+
+            if (isReallyALinden)
+                llInstantMessage(avatarKey, "Hello, I see you!");
+        }
+        while (++index < num_detected);
+    }
+}
+</source>
+
+'''Basic Example:'''
+<source lang="lsl2">integer index = llSubStringIndex("string data","TEST");
+if(index == -1) {
+    llSay(PUBLIC_CHANNEL,"TEST was not found in the string");
+} else {
+    llSay(PUBLIC_CHANNEL,"TEST was found in the string.");
+}</source>
+=== String Cheese ===
+
+<source lang="lsl2">//This example shows how you can ask if a word or group of words is in a given string.
+//There is a limitation with this function. Your search of the string is for an exact match (case sensitive)
+//so the string_example below would be hard to match.
+
+string string_example = "ThIs serVes As aN exaMplE sTrinG. It ISn't toO coMPleX bUt HaS sOme mIlD vARietY";
+
+//If you chat a question "Search for search_word" within range of the object this script is in
+//it will recognize (by searching the chat msg) the "search for" part and take the word or words following it
+//and check the string_example for those words.
+
+string search_test_a = "seArCh foR";
+
+//The example below works the same way but searches for the word in front of the recognized trigger question.
+
+string search_test_b = "is the word I seek";
+
+//Using this variable provides a way to manipulate the word(s) during the script without damaging the msg.
+                   
+string search_word;
+
+// Provide a mnemonic for the -1 return code that means NOT FOUND
+integer NOT_FOUND = -1;
+
+default
+{
+    on_rez(integer param)//Although reseting the script on_rez provides many benefits
+    { //in some cases it would be a bad idea because stored variables, lists and queued events would be trashed.
+        llResetScript();
+    }
+    state_entry()
+    {   //This is just for fun (but better to know what object is talking to you).
+        llSetObjectName("String Cheese");
+        llListen(PUBLIC_CHANNEL, "", llGetOwner(), "");//Listen to you on the public chat channel for everything you say.
+    }
+    listen(integer chan, string name, key id, string msg)
+    {
+        if(llSubStringIndex(llToUpper(msg), llToUpper(search_test_a)) != NOT_FOUND)
+        {
+            search_word = llStringTrim(llGetSubString(msg, llStringLength(search_test_a), -1), STRING_TRIM);
+            if(llSubStringIndex(llToUpper(string_example), llToUpper(search_word)) != NOT_FOUND)
+            {
+                llSay(PUBLIC_CHANNEL, "I have found the word " + "''" + search_word + "''" + " in the example string");
+            }
+            else                         
+            {
+                llSay(PUBLIC_CHANNEL, "I cannot find the word " + "''" + search_word + "''" + " in the example string.");
+            }
+        }
+        if(llSubStringIndex(msg, search_test_b) != NOT_FOUND)
+        {
+            search_word = llStringTrim(llGetSubString(msg, 0, (llSubStringIndex(msg, search_test_b)-1)), STRING_TRIM);
+            if(llSubStringIndex(string_example, search_word) != NOT_FOUND)
+            {
+                llSay(PUBLIC_CHANNEL, "I have found the word " + "''" + search_word + "''" + " in the example string");
+            }
+            else
+            {
+                llSay(PUBLIC_CHANNEL, "I cannot find the word " + "''" + search_word + "''" + " in the example string.");
+            }
+        }
+    }
+}</source>
+|helpers=
+Tests to see if one string contains a copy of another:
+
+1. Concise & conventional:
+
+<source lang="lsl2">
+integer contains(string haystack, string needle) // http://wiki.secondlife.com/wiki/llSubStringIndex
+{
+    return 0 <= llSubStringIndex(haystack, needle);
+}
+</source>
+
+<source lang="lsl2">integer startswith(string haystack, string needle) // http://wiki.secondlife.com/wiki/llSubStringIndex
+{
+    return llDeleteSubString(haystack, llStringLength(needle), 0x7FFFFFF0) == needle;
+}</source>
+
+<source lang="lsl2">integer endswith(string haystack, string needle) // http://wiki.secondlife.com/wiki/llSubStringIndex
+{
+    return llDeleteSubString(haystack, 0x8000000F, ~llStringLength(needle)) == needle;
+}</source>
+
+Note: Some of the snippets above return a result without ever calling llSubStringIndex.
+
+2. Clever & smaller (calculates contains in ~54 bytes rather than ~60):
+
+<source lang="lsl2">integer contains(string haystack, string needle) // http://wiki.secondlife.com/wiki/llSubStringIndex
+{
+    return ~llSubStringIndex(haystack, needle);
+}</source>
+
+Note: The llSubStringIndex function returns -1 only when not found and the ~ operator returns zero only for -1, so the clever combination ~llSubStringIndex returns zero only for not found, else nonzero for found.
+
+Note: Smaller was not noticeably faster or slower when our [[Code Racer]] and [[Efficiency Tester]] harnesses measured the expression <nowiki>{ contains("wiki.secondlife.com", "wiki"); }</nowiki>.
+|also_functions=
+{{LSL DefineRow||[[llListFindList]]|Find a list in another list}}
+{{LSL DefineRow||[[llGetSubString]]|Copy out part of a string of characters}}
+{{LSL DefineRow||[[SubStringLastIndex|uSubStringLastIndex]]|Returns an integer that is the index of the {{LSLP|last}} pattern in source.}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|cat1=String
+|cat2
+|cat3
+|cat4
+}}

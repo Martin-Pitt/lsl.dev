@@ -1,0 +1,212 @@
+{{LSL_Function
+|func=llHTTPRequest
+|func_id=230
+|func_energy=10.0
+|func_sleep=0.0
+|func_desc=Sends an HTTP request to the specified URL with the body of the request and parameters. When the response is received, a [[http_response]] event is raised.
+|sort=HTTPRequest
+|func_footnote=
+|return_type=key|return_subtype=handle
+|return_text=identifying the HTTP request made.
+|p1_type=string|p1_name=url|p1_desc=A valid HTTP/HTTPS URL.
+|p2_type=list|p2_subtype=instructions|p2_name=parameters|p2_desc=configuration parameters, specified as HTTP_* flag-value pairs
+[ parameter1, value1, parameter2, value2, . . . parameterN, valueN]
+|p3_type=string|p3_name=body|p3_desc=Contents of the request.
+|constants={{LSL_Constants_HTTP}}
+{{LSL_Constants/HTTP_Headers}}
+{{LSL_Extended_Error_HTTP}}
+|spec=
+|caveats=
+*Spaces, control characters, and other characters that are not allowed in URLs will cause a run time error.
+*The corresponding [[http_response]] event will be triggered in all scripts in the [[prim]], not just in the requesting script.
+*Requests must fully complete after 60 seconds, or else the response will be thrown away and the [[http_response]] status code will be 499.
+*The response body is limited to 2048 bytes by default, see [[HTTP_BODY_MAXLENGTH]] above to increase it. If the response is longer, it will be truncated.
+*The request body size (e.g., of POST and PUT requests) is limited only by available script memory. Scripts can hold at most 32k characters in a string, under [[Mono]], as characters are two bytes each, so, scripts cannot upload over 32k UTF-8 characters
+*Cannot be used to load textures or images from the internet, <strike>for more information see [[Web Textures]]</strike>{{Footnote|'''Note:''' Web textures have been made obsolete for many reasons, and the link has been archived; nevertheless, the reference might be interesting for historical reasons.}}.
+*If the accessed site is relying on the LSL script to report [[L$]] transactions, then it '''must''' check the <code>X-SecondLife-Shard</code> header to see if the script is running on the beta grid.
+* Some servers will return a <code>405</code> error if you send POST to a file that can't accept metadata, such as a text or HTML file. Make sure you use the GET method to ensure success in any environment.
+* While the HTTP status code from the server is provided to the script, redirect codes such as <code>302</code> will result in the redirect being automatically and transparently followed ONLY IF the [[HTTP_METHOD]] is GET, with the resulting response being returned.  If the [[HTTP_METHOD]] is anything other than GET then you'll get back an [[http_response]] with a status code of <code>302</code>, but without any way to view the headers, you can't know where you were being redirected to unless that was also included in the body.
+* The following applies when making a request to a script using HTTP-In:
+**When appending a query string to a cap URL there '''MUST''' be a trailing slash between the cap guid and the query string token <code>"?"</code>. For example: [https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322?arg=gra {{HoverTextStyle|style=color:green;|<nowiki>https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322</nowiki>|2={{String|x-script-url}} = {{String|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322}}}}?{{HoverTextStyle|style=color:red;|1=arg=gra|2={{String|x-query-string}} = {{String|1=arg=gra}}}}] will return a 500 HTTP status {{Wikipedia|List_of_HTTP_status_codes#5xx_Server_Error|Server Error code}}, but [https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322/?arg=gra {{HoverTextStyle|style=color:green;|<nowiki>https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322</nowiki>|2={{String|x-script-url}} = {{String|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322}}}}{{HoverTextStyle|style=color:blue;|/|2={{String|x-path-info}} = {{String|/}}}}?{{HoverTextStyle|style=color:red;|1=arg=gra|2={{String|x-query-string}} = {{String|1=arg=gra}}}}] will succeed.
+* <code>X-SecondLife-Owner-Name</code> may return <code>"(Loading...)"</code> instead of owner name (still true, 30th of March, 2022)
+* Requests made at approx 0625 SLT may fail with a <code>503</code> status code, with <code>"ERROR: The requested URL could not be retrieved"</code>, and <code>"(111) Connection refused"</code> in the body of the response.  This has been confirmed as expected behavior by Kelly, due to the nightly maintenance and log rotation.  It does reliably impact object to object HTTP at that time, and quite probably may impact object to/from web around the same time.  The interruption in service is fairly brief, and the precise timing may vary as LL adjust their nightly maintenance processes, or due to server load.
+* Use <code>HTTP_MIMETYPE</code> to set the <code>Content-Type</code> header. Attempts to use <code>HTTP_CUSTOM_HEADER</code> to set it will cause a runtime script error.
+* If the origin server does not include a content-type header in its response, LSL will attempt to treat the incoming data as "text/plain; charset=utf-8". This behavior diverges from [https://datatracker.ietf.org/doc/html/rfc2616#section-7.2.1 RFC 2616].
+
+==== Throttles ====
+
+The LSL function [[llHTTPRequest]] is throttled in three ways:  by object, by owner, and by http error.  All group-owned objects are considered together in the same throttle.
+
+The current limits are:
+* 25 requests in 20 seconds for each object
+* 1000 requests in 20 seconds for each owner with higher limits for some regions
+* Five HTTP errors (500 or higher) in 60 seconds for each script
+These may change in the future if needed to prevent problems in regions.
+
+It is possible for a large collection of objects or scripts to make many calls to [[llHTTPRequest]] and reach one or more throttles.  When a script calls [[llHTTPRequest]] with a throttle blocking the request, it will return [[NULL_KEY]].
+
+The calling script must check for the [[NULL_KEY]] result and react properly for the script and object to function correctly.  Some things to consider:
+
+* Pause further requests until the throttle clears
+* Do not make any additional [[llHTTPRequest]] calls until enough time has passed for the throttle to reset.    They will fail and continue to return [[NULL_KEY]] otherwise.
+* Once reached, the throttles will remain in effect as long as requests continue, but will clear if there is a silent period with no requests at least twice the throttle interval, in the common case 2 * 20 or 40 seconds.‎
+
+:Consider how a group of objects behaves.   Developers must consider how multiple objects will interact and how that will affect clearing the throttle.‎
+
+:The [[llHTTPRequest]] throttle is most likely to be an issue with a large number of objects in a region making requests.  To clear the throttle fastest, when an object encounters the throttle, it should broadcast a region-wide chat message to other objects informing them of the event and stopping their requests. If those objects continue making requests, those requests will fail and just prolong recovery.‎
+
+:If an object waits and still gets a failure, it may be a good idea to increase the time before the next request and/or add a small random value to the wait time. This may help prevent failures caused by large groups of objects acting nearly in unison.
+
+* Object requests are throttled at approximately 25 requests per 20 seconds. This is to support a sustained rate of one per second or a maximum burst of up to 25 every 40 seconds (twice the interval for maximum burst), smaller bursts are recommended. 
+* [[NULL_KEY]] is returned if the request is throttled.
+* See [http://forums-archive.secondlife.com/139/72/108960/1.html this thread] and [http://forums-archive.secondlife.com/139/2c/109571/1.html this thread] for older details.
+----
+|examples=
+
+*[[Writing Headers and HTTP POST Body to a File]]
+
+<syntaxhighlight lang="lsl2">
+key http_request_id;
+
+default
+{
+    state_entry()
+    {
+        http_request_id = llHTTPRequest("url", [], "");
+    }
+
+    http_response(key request_id, integer status, list metadata, string body)
+    {
+        if (request_id != http_request_id) return;// exit if unknown
+
+        vector COLOR_BLUE = <0.0, 0.0, 1.0>;
+        float  OPAQUE     = 1.0;
+
+        llSetText(body, COLOR_BLUE, OPAQUE);
+    }
+}
+</syntaxhighlight>
+
+Example PHP test script:
+<syntaxhighlight lang="php">
+<?php header("content-type: text/plain; charset=utf-8"); ?>
+Headers received:
+<?php
+
+/**
+ * @author Wouter Hobble
+ * @copyright 2008
+ */
+
+foreach ($_SERVER as $k => $v)
+{
+    if( substr($k, 0, 5) == 'HTTP_')
+    {
+        print "\n". $k. "\t". $v;
+    }
+}
+?>
+</syntaxhighlight>
+
+Example PHP wrapper script both capturing Apache headers and global methods
+<syntaxhighlight lang="php">
+<?php
+    // Author Waster Skronski.
+    // General Public License (GPL).
+    // Mind that some headers are not included because they're either useless or unreliable.
+
+    $USE_APACHE_HEADERS = TRUE;// switch to false if you need CGI methods
+
+    if ($USE_APACHE_HEADERS)
+    {
+        $headers    = apache_request_headers();
+        $objectgrid = $headers["X-SecondLife-Shard"];
+        $objectname = $headers["X-SecondLife-Object-Name"];
+        $objectkey  = $headers["X-SecondLife-Object-Key"];
+        $objectpos  = $headers["X-SecondLife-Local-Position"];
+        $ownerkey   = $headers["X-SecondLife-Owner-Key"];
+        $ownername  = $headers["X-SecondLife-Owner-Name"];
+        $regiondata = $headers["X-SecondLife-Region"];
+        $regiontmp  = explode ("(",$regiondata);        // cut coords off
+        $regionpos  = explode (")",$regiontmp[1]);
+        $regionname = substr($regiontmp[0],0,-1);       // cut last space from region name
+    } else {
+        $db         = $GLOBALS;
+        $headers    = $db['$_ENV'];
+        $objectgrid = $headers["HTTP_X_SECONDLIFE_SHARD"];
+        $objectname = $headers["HTTP_X_SECONDLIFE_OBJECT_NAME"];
+        $objectkey  = $headers["HTTP_X_SECONDLIFE_OBJECT_KEY"];
+        $ownerkey   = $headers["HTTP_X_SECONDLIFE_OWNER_KEY"];
+        $objectpos  = $headers["HTTP_X_SECONDLIFE_LOCAL_POSITION"];
+        $ownername  = $headers["HTTP_X_SECONDLIFE_OWNER_NAME"];
+        $regiondata = $headers["HTTP_X_SECONDLIFE_REGION"];
+        $regiontmp  = explode ("(",$regiondata);
+        $regionpos  = explode (")",$regiontmp[1]);
+        $regionname = substr($regiontmp[0],0,-1);
+    }
+?>
+</syntaxhighlight>
+
+Example wrapper script for GoDaddy.com Linux PHP servers (fix made by Thomas Conover):
+<syntaxhighlight lang="php">
+<?php
+// FETCH HEADERS START
+
+if (!function_exists('apache_request_headers'))
+{
+    function apache_request_headers() {
+        foreach($_SERVER as $key=>$value) {
+            if (substr($key,0,5)=="HTTP_") {
+                $key=str_replace(" ","-",ucwords(strtolower(str_replace("_"," ",substr($key,5)))));
+                $out[$key]=$value;
+            }else{
+                $out[$key]=$value;
+            }
+        }
+        return $out;
+    }
+}
+// Mind that some headers are not included because they're either useless or unreliable (e.g. X-Secondlife-Local-Position)
+$headers    = apache_request_headers();
+$objectgrid = $headers["X-Secondlife-Shard"];
+$objectname = $headers["X-Secondlife-Object-Name"];
+$objectkey  = $headers["X-Secondlife-Object-Key"];
+$objectpos  = $headers["X-Secondlife-Local-Position"];
+$ownerkey   = $headers["X-Secondlife-Owner-Key"];
+$ownername  = $headers["X-Secondlife-Owner-Name"];
+$regiondata = $headers["X-Secondlife-Region"];
+$regiontmp  = explode ("(",$regiondata);            // cut coords off
+$regionname = substr($regiontmp[0],0,-1);           // cut last space from region name
+$regiontmp  = explode (")",$regiontmp[1]);
+$regionpos  = $regiontmp[0];
+
+
+// FETCH HEADERS END
+?>
+</syntaxhighlight>
+
+|helpers
+|also_header
+|also_events={{LSL DefineRow||[[http_response]]}}
+|also_functions={{LSL DefineRow||[[llEscapeURL]]}}
+{{LSL DefineRow||[[llHTTPResponse]]}}
+{{LSL DefineRow||[[llUnescapeURL]]}}
+|also_articles={{LSL DefineRow||[[Simulator IP Addresses]]}}
+|also_footer
+|notes=If for some reason while using the function [[llHTTPRequest]] or the event [[http_response]] you are unable to parse a known good RSS feed or some other form of web contents, you will need to work around it outside of Second Life. This is unlikely to change in the near future since checking the headers requires more overhead at the simulator level.
+
+You may find that some web servers return either a null or a nonsensical result when [[llHTTPRequest]] is used, even though the same URL in a PC web browser returns the expected result. This may be due to the fact that the [[llHTTPRequest]] User Agent string is not recognised by some web servers as it does not contain <code>"Mozilla"</code>, which would identify it as a web browser instead of, for example, a [https://www.shoutcast.com/ Shoutcast] or an RSS client. This is also true when the PHP script relies on [https://www.php.net/manual/en/reserved.variables.cookies.php $_COOKIE]. Neither can the function [[llHTTPRequest]] set a cookie nor can the event [[http_request]] retrieve them.
+
+CGI environments may place the headers into variables by capitalizing the entire name, replacing dashes with underscores, and prefixing the name with <code>HTTP_</code>, e.g. <code>HTTP_X_SECONDLIFE_OBJECT_NAME</code>. PHP <code>$_SERVER</code> variables do this as well, and so does PHP running inside PHP-FPM (as opposed to an Apache module), which is the standard way to configure PHP on non-Apache webservers (such as [https://nginx.org/nginx {{code|nginx}}]).
+
+Apache can include the headers in its logs, using the <code>CustomLog</code> and <code>LogFormat</code> directives.  See [https://httpd.apache.org/docs/2.4/mod/mod_log_config.html#formats the docs] for details on the syntax.
+
+|mode
+|deprecated
+|permission
+|cat1=HTTP
+|cat2=XML-RPC
+|cat3=Communications
+|cat4=HTTP/Client
+|haiku={{Haiku|Shining break of day|Lov'ly web, carefully spun|Of bytes and prims}}
+}}

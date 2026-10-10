@@ -1,0 +1,57 @@
+{{LSL_Function
+|inject-2={{LSL_Function/avatar|avatar|sim=*}}{{LSL Function/limits}}{{LSL_Function/chat||message|dialog=dialog box}}
+|func_id=297|func_sleep=0.1|func_energy=10.0
+|func=llLoadURL|sort=LoadURL
+|p1_type=key|p1_name=avatar
+|p2_type=string|p2_name=message
+|p3_type=string|p3_name=url
+|func_footnote=The {{LSLP|url}} is truncated to 255 characters and {{LSLP|message}} is truncated to 254 characters.<br/>The protocol for the {{LSLP|url}} must be specified, currently only "https://" and "http://" are supported.<br/>The URL should be {{RFC|1738}} compliant with proper escapes.
+|func_desc=Shows dialog to {{LSLP|avatar}} offering to load web page at {{LSLP|url}} with {{LSLP|message}}.<br/>If user clicks yes, launches the page in their web browser, starting the browser if required.
+|return_text
+|spec
+|caveats=*This function should not be called from group deeded objects{{Footnote|This was not always the case, see [[#History|History]] for details}}, it will silently fail.
+*This function silently fails for an avatar that has muted itself.{{Footnote|This can be extremely bewildering to debug because there's no easy way for a user to self-mute. Apparently it "just happens."}}
+|constants
+|examples=
+<syntaxhighlight lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        string info = "Visit the Second Life website!";
+        
+        // must start with either "http://..." or "https://..."
+        string url = "http://www.secondlife.com/";
+        
+        integer avatarInSameRegion = (llGetAgentSize(id) != ZERO_VECTOR); // TRUE or FALSE
+
+        if (avatarInSameRegion)
+        {
+            llLoadURL(id, info, url);
+        }
+        else
+        {
+            // if the agent is not in the same region, send a message instead
+            // the viewer will turn the URL clickable
+            llInstantMessage(id, info + " " + url);
+        }
+    }
+}
+</syntaxhighlight>
+|helpers
+|also_functions
+|also_events
+|also_articles
+|also_tests=
+{{LSL DefineRow|[[llLoadURL Test]]|}}
+|notes
+|history=
+*Introduced in version 1.6, no support for group deeded objects.
+*As of version ~1.9, support for group deeded objects was added (possibly by accident).
+*In the server upgrade released on 2007-03-14, support for group deeded objects was removed.
+|cat1=Dialog
+|cat2
+|cat3
+|cat4
+}}

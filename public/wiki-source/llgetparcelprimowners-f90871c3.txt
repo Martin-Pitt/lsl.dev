@@ -1,0 +1,154 @@
+{{LSL_Function
+|inject-2={{LSL Function/position|pos|region=*}}
+|func_id=324|func_sleep=2.0|func_energy=10.0
+|func=llGetParcelPrimOwners|return_type=list|p1_type=vector|p1_name=pos
+|func_desc
+|return_text=of all residents and groups who own objects on the parcel at {{LSLP|pos}} and with individual [http://community.secondlife.com/t5/English-Knowledge-Base/Calculating-land-impact/ta-p/974163 land impact] used. <br/>The list is formatted as <code>[ [[key]] ownerKey1, [[integer]] agentImpact1, [[key]] ownerKey2, [[integer]] agentImpact2, ... ]</code>, and sorted by agent/group [[UUID|key]] with a maximum of 100 strides.
+|func_footnote=Requires owner-like permissions for the parcel.
+|spec=
+====Ownership====
+* If the parcel owner and object owner are the same (including if the object and parcel are both group owned):
+** All object owners are returned.
+* If the parcel is group owned but the object is owned by a member of the group, the function return depends upon what powers they have been granted:
+** If resident has the '{{HoverText|return group owned objects|One of the group member abilities which are set at &quot;Group information&quot; window -&gt; &quot;Members &amp; Roles&quot; tab -&gt; &quot;Abilities&quot; tab -&gt; &quot;Parcel Content&quot; folder.}}' power:
+*** The return list includes the group and the LI of objects it owns on the parcel.
+** If the resident has the 'return group set objects' power:
+*** The return list includes all owners who have objects set to the group on the parcel
+** If the resident has the 'return non-group objects' power
+*** The return list includes all owners of objects that don't fall into the above two categories.
+*If none of the above cases match, an empty list will be returned.
+{{Collapsible_Table|collapsed=*|table-style=width:100%;|title-style=text-align:left;|title=<h5 style="margin-top:0;">Pseudocode</h5>|content={{!}} Pseudocode written in Javascript
+<source lang="javascript">
+if(parcel_owner == object_owner)
+    return all;
+var r = [];
+if((parcel_owner is Group) && (object_owner in parcel_owner.members))
+{
+  if("return group owned objects" in parcel_owner.members[object_owner].powers)
+    r = r.concat(group_owned_stride);
+  if("return group set objects" in parcel_owner.members[object_owner].powers)
+    r = r.concat(group_set_strides);
+  if("return non-group objects" in parcel_owner.members[object_owner].powers)
+    r = r.concat(non_group_strides);
+}
+return r;
+</source>
+}}
+|caveats=
+* Function WILL NOT work on group owned land if the owner of the object where this function resides is not currently online and connected to the sim (although now seems to be working for land owner on privately owned land even when the owner is not around).
+**These limitation can be overcome by [[deed]]ing the object to a group the object owner is one of the owners of.  
+**Remember to take a copy before deeding because you cannot undeed something.
+|constants
+|examples=
+Show a comma separated list of user IDs and their prim counts.
+key1, count1, key2, count2 .... etc.
+<source lang="lsl2">
+
+default
+{
+    state_entry()
+    {
+        list TempList = llGetParcelPrimOwners( llGetPos() );
+        llSay(0, llList2CSV(TempList) );
+    }
+}
+</source>
+
+Use floating text to show prim owner names and counts in count order
+
+<source lang="lsl2">
+// Show a floating text list of prim owners on this parcel,
+// Sorted by prim count per owner. Highest users first.
+// Omei Qunhua
+
+// The object has the same permisions to view prim parcel owners
+// as its owner (In About Land >> Objects >> Object Owners )
+
+// Example: If you can't return group object, you won't see group objects
+// If you can't return any objects, an empty list will be returned.
+// If the prim is deeded to the right group, it should always get a full list
+
+// Note: Only works on group owned land when the object owner is in the Sim
+//       Deeded objects always work (group is always online?)
+
+list    gListCountsAndOwners;       // Sorted list count+owner pairs
+list    gListNamesAndCounts;        // List of owner names + prim counts
+integer gOffset;
+integer gIndex;
+key     gDataserverID;
+integer gListLength;
+
+default
+{
+    state_entry()
+    {
+        llSetText("Parcel Prim Owner List\n", <1,1,1>, 1);
+        list TempList = llGetParcelPrimOwners( llGetPos() );
+        gListLength= llGetListLength(TempList);      
+        if (!gListLength)
+        {
+            llSetText("[ERROR]\n Couldn't get Parcel Prim Owners", <1,0,0>, 1);
+        }
+        else
+        {
+            // Produce a copy of the list suitable for sorting by count, i.e. count then key 
+            integer x;
+            for ( ; x < gListLength; x += 2)
+            {
+                gListCountsAndOwners += llList2Integer(TempList, x+1);
+                gListCountsAndOwners += llList2String(TempList, x);
+            }
+            // Sort the list in descending order of prim count
+            gListCountsAndOwners = llListSort(gListCountsAndOwners, 2, FALSE);
+            // Lookup each owner's name. Start at the beginning of our sorted list
+            gDataserverID = llRequestAgentData( llList2String(gListCountsAndOwners, 1), DATA_NAME );
+        }
+    }
+
+    dataserver( key request_id, string data)
+    {
+        string TempStr = "Parcel Prim Owner List\n";
+        if ( request_id == gDataserverID )
+        {
+            gListNamesAndCounts += data;
+            gListNamesAndCounts += llList2String(gListCountsAndOwners, gIndex);  // process the count as a string
+
+            gIndex += 2;               // bump through the strided list
+            if (gIndex < gListLength )
+            {
+                // lookup name of next owner in our list
+                gDataserverID = llRequestAgentData( llList2String(gListCountsAndOwners, gIndex +1) , DATA_NAME );
+            }
+            integer x;
+            for (; x < 16; x+=2)       // show an 8-name subset of the list, starting at 'gOffset'
+            {
+                // If we run off the end of the list, we just pick up nulls, so no harm done
+                TempStr += llList2String(gListNamesAndCounts, gOffset+x) + " : " + llList2String(gListNamesAndCounts, gOffset+x+1) + "\n";
+            }
+            llSetText(TempStr, <1,1,1>, 1);
+            if ( (gListNamesAndCounts != []) > 14)       // If list is longer than 14 (7 owners + counts) ...
+            {
+                gOffset += 2;   // scroll the list forwards
+                llSleep(2);     // at 2 second intervals
+            }
+        }
+    }
+
+    touch_start(integer total_number)
+    {
+        llResetScript();        // On touch, start the whole process over again
+    }
+}
+</source>
+|helpers
+|also_functions
+|also_events
+|also_tests
+|also_articles
+|notes
+|permission
+|cat1=Parcel
+|cat2=Owner
+|cat3
+|cat4
+}}

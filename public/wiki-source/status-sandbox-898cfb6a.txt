@@ -1,0 +1,37 @@
+{{LSL Constant
+|name={{PAGENAMEE}}
+|type=integer
+|value={{LSL Hex|0x20|32}}
+|desc=This status flag keeps the object from getting away.
+
+It causes the object to be unable to leave the sim or move more than 10 meters from the location where the flag was set.
+
+If the object tries to leave the sim or move more than 10 meters it ceases to be [[STATUS_PHYSICS|physical]] and throws a "Hit Sandbox Limit" {{LSLGC|Error|error}}.
+|examples=A demonstration script. The object containing this script will be stopped from reaching the programed destination. The physics will be removed and the script will error (needing to be reset).
+<source lang="lsl2">
+default
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHYSICS | STATUS_SANDBOX, TRUE); // Switch physical and sandbox on.
+        llMoveToTarget(llGetPos() + <0.0, 0.0, 20.0>, 1.0); // Attempt to move to a point outside the "sandbox".
+    }
+}
+// After being stopped, physics can only be enabled again when the object is moved back to within the "sandbox".
+// If the script is reset (manually or by a call to llResetOtherScript from another script in the same prim)...
+// ...the sandbox center will be reset to the objects position at that time.
+
+// Very handy when developing physical objects that may not behave as expected.
+</source>
+|constants=
+{{!}}
+{{LSL Constants/Status|no_default=*}}
+|functions=
+{{LSL DefineRow||[[llSetStatus]]|}}
+{{LSL DefineRow||[[llGetStatus]]|}}
+|events=
+|cat1=Status
+|cat2=Sandbox
+|cat3=Error
+|cat4
+}}

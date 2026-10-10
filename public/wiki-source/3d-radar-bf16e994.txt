@@ -1,0 +1,155 @@
+{{LSL Header}}
+
+*[[User:Jesse_Barnett|Click Here]]  To see my page and more of my scripts
+
+
+==Scripts have been corrected and working properly now==
+
+Rezzes a ball for each avatar in range. Each ball tracks it's on AV and displays distance.
+
+==Scanner/Rezzer Script==
+Place this script in a prim along with the scan ball. When touched it will scan the surrounding area and rezz a ball for each avatar.
+
+Suggestion: Create a sphere with a diameter of  2 meters. Set transparency about 60. Create another sphere about 0.05 diameter, color a dark color and put it in the center of the large prim. Select small prim 1st and then large prim and link them. This will give you a center point to reference. The scan ball script is set to scan for it's avatar to a range of 96 meters.
+
+This formula: {{mono|1=vector avDivPos = (avPos - rPos) * 0.010417}}; Takes the {{mono|1=(avatars position - position of scanner)}} & multiplies by {{mono|1=(radius of the distance you want the balls to go(2 meter sphere = 1 meter radius)/scan range(96meters))}}:
+
+1/96 = approximately 0.010417.
+
+<syntaxhighlight lang="lsl2">
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                3D Radar 2.5
+//                 "Oct 15 2008", "18:43:28"
+//                 Creator: Jesse Barnett
+//                Released into the Public Domain
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+ 
+integer Scan = TRUE;
+string avKey;
+integer list_pos;
+list key_list;
+integer key_chan;    //Key channel is generated randomly and passed to the scan ball
+integer die_chan = -9423753;    //Hey pick your own channels and be sure to paste them into the scan balls too!
+integer key_rem_chan = -49222879;
+ 
+default 
+{
+ 
+    touch_start(integer total_number) 
+    {
+        if (Scan) 
+        {
+            llSensorRepeat("", "", AGENT, 96, PI, 1);
+            key_list =[];
+            llListen(key_rem_chan, "", "", "");
+            llOwnerSay("on");
+            Scan = FALSE;
+        }
+        else 
+        {
+            llSensorRemove();
+            llRegionSay(die_chan, "die");
+            llOwnerSay("off");
+            Scan = TRUE;
+        }
+    }
+ 
+    sensor(integer iNum) 
+    {
+        integer p = 0;
+        for (p = 0; p < iNum; ++p) 
+        {
+            avKey = llDetectedKey(p);
+            list_pos = llListFindList(key_list, (list)avKey);
+            if (list_pos == -1) 
+            {
+                key_list += (list) avKey;
+                key_chan = (integer) llFrand(-1000000) - 1000000;
+                llRezObject("scan ball", llGetPos(), ZERO_VECTOR, ZERO_ROTATION, key_chan);
+                llSleep(.25);
+                llRegionSay(key_chan, avKey);
+            }
+        }
+    }
+ 
+    listen(integer c, string name, key id, string msg) 
+    {
+        integer r = llListFindList(key_list,[(key)msg]);
+        key_list = llDeleteSubList(key_list, r, r);
+    }
+}
+</syntaxhighlight>
+
+==Scan Ball Script==
+Place this script in a prim and then place the prim into the inventory of the Scanner/Rezzer. It will automatically name itself.
+
+{{Tip|custom=Suggestion:|Create a sphere prim of 0.05 diameter with glow set about .80.}}
+<syntaxhighlight lang="lsl2">
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                3D Radar 2.5
+//                 "Oct 15 2008", "18:44:36"
+//                 Creator: Jesse Barnett
+//                Released into the Public Domain
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+string avName;
+integer avDistance;
+key avKey;
+integer avListen;
+integer key_chan;
+integer die_chan = -9423753;
+integer key_rem_chan = -49222879;
+vector avPos;
+vector rPos;
+key owner;
+ 
+default
+{
+
+    state_entry()
+    {
+        llSetObjectName("scan ball"); //Renames the object to "scan ball"
+        owner = llGetOwner(); // Lets check to see what the key of the owner of the object is and save it for later
+    }
+
+    on_rez(integer start_param)
+    {
+        rPos = llGetPos();
+        key_chan = start_param;
+        llListen(die_chan, "", "", "");
+        avListen = llListen(key_chan, "", "", "");
+    }
+
+    listen(integer c, string n, key id, string msg)
+    {
+        if (c == die_chan && msg == "die" && owner == llDetectedOwner(0)) //Lets check to see if the message we heard matches all the criteria for the kill command
+        {                                                                 //(Right channel, right message and from radar owned by same owner)
+            llDie();
+        }
+        
+        else
+        {
+            avKey = (key) msg;
+            avName = llKey2Name(avKey);
+            llSensorRepeat("", avKey, AGENT, 96, PI, 1.0);
+            llListenRemove(avListen);
+        }
+    }
+    
+    sensor(integer n)
+    {
+        avPos = llDetectedPos(0);
+        vector avDivPos = (avPos - rPos) / (96 / 1);    //Scan range/Radius of large sphere
+        avDistance = (integer) llVecDist(rPos, llDetectedPos(0));
+        llSetPos(rPos + avDivPos);
+        llSetText(avName + "[" + (string) avDistance + "]", <1, 1, 1 >, 1);
+    }
+    
+    no_sensor()
+    {
+        llRegionSay(key_rem_chan, avKey);
+        llDie();
+    }
+}
+</syntaxhighlight>
+{{LSLC|Library|3D Radar}}

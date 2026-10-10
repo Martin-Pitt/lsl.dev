@@ -1,0 +1,66 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-2490}}{{Issues/SVC-8141}}{{Issues/SVC-2996}}{{LSL_Function/boolean|detect|default=false}}
+|func_id=248|func_sleep=0.0|func_energy=10.0
+|func=llVolumeDetect|p1_type=integer|p1_subtype=boolean|p1_name=detect
+|func_footnote=This works much like Phantom, but unlike Phantom, VolumeDetect objects trigger [[collision_start]] and [[collision_end]] events when interpenetrating. Collision events will trigger in any script in the object.
+|func_desc=If {{LSLP|detect}} is [[TRUE]], VolumeDetect is enabled, physical object and avatars can pass through the object.
+|return_text
+|spec=
+{{{!}} {{Prettytable|style=float:left;}}
+{{!}}+ Events queued depending on type
+{{!}}- 
+!
+! {{Hl2}} {{!}} VolumeDetect
+! {{Hl2}} {{!}} Phantom
+{{!}}- align="center"
+! {{Hl2}} {{!}} Events<br/>Supported
+{{!!}} [[collision_start]]<br/><br/>[[collision_end]]
+{{!!}} [[land_collision_start]]<br/>[[land_collision]]<br/>[[land_collision_end]]
+{{!}}- align="center"
+{{!}}}
+
+====Differences====
+There are a couple differences in how Phantom and VolumeDetect handle collisions; specifically which events are supported and how they handle the ground.
+<div style="clear:left;">
+======VolumeDetect======
+*When physical they fall through the ground with the risk of going off-world.
+*[[collision]] events are not triggered
+======Phantom======
+*When physical they collide with the ground but will not pass through (normal physical object behavior), {{LSLGC|Land Collision|land collision}} events are queued.
+</div>
+|caveats=
+*It can only be applied to the root prim (which will make the entire object VolumeDetect).
+*If the volume detecting object is ''not'' physical, it can only detect physical objects and avatars. If the object ''is'' physical, it can detect its collisions with static and [[llSetKeyframedMotion|keyframed motion]] objects as well.
+===Attachments===
+'''Note:''' Attachments are not included in the avatar's bounding box. {{LSLGC|Collision|Collision events}} received by attachments are collisions the avatar is having with the world, not collisions the attachment is having. Nothing actually can collide with an attachment{{Footnote|Even if attachments were included in an avatars bounding box, you would not like the outcome, the avatars bounding box is not deformed by animations.}}. 
+*It is meaningless to enabled on attachments. Attachments cannot collide with anything.
+*Attachments do not receive collision events for avatar collisions with VolumeDetect objects.
+**Attachments do receive collision events for avatar collisions with non-VolumeDetect, non-phantom objects.
+|constants
+|examples=<syntaxhighlight lang="lsl2">default
+{
+    state_entry()
+    {
+        llVolumeDetect(TRUE); // Starts llVolumeDetect
+    }
+    collision_start(integer total_number)
+    {
+        llSay(0, "Detected!"); // Tells you when something penetrates the prim
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llPassCollisions]]|}}
+|also_events=
+{{LSL DefineRow||[[collision_start]]|}}
+{{LSL DefineRow||[[collision]]|}}
+{{LSL DefineRow||[[collision_end]]|}}
+|also_tests
+|also_articles
+|notes
+|sort=VolumeDetect
+|cat1=Collision
+|cat2=Physics
+|cat3=Object
+|cat4=Phantom
+}}

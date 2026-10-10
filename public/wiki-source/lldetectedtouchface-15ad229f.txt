@@ -1,0 +1,95 @@
+{{LSL_Function
+|inject-2={{LSL_Function/detected|index|touchFace|simple=*}}
+|func_id=338|func_sleep=0.0|func_energy=10.0
+|func=llDetectedTouchFace
+|return_type=integer|return_text=that is the index of the face the avatar clicked on.
+|p1_type=integer|p1_name=index
+|func_footnote=For the {{LSLGC|Touch|touch}} category of events only. The prim that was touched may not be the prim receiving the event, use [[llDetectedLinkNumber]] to check for this; likewise you can use [[llDetectedTouchFace]] to determine which face was touched.
+|func_desc
+|spec
+|caveats=
+*{{LSL Const|TOUCH_INVALID_FACE|integer|-1}} is returned when...
+** The avatar's viewer does not support face touch detection.
+** The touch has moved off the surface of the prim.
+** The event triggered is not a {{LSLGC|Touch|touch}} event.
+|examples=
+<source lang="lsl2">
+// This is the essential script to drop in a prim when you need to ascertain the number of a face (or faces)
+// Touch the prim surfaces to learn their face numbers, which you can then use in other scripts for texturing, colouring etc.
+
+say(string message)
+{
+    llSay(PUBLIC_CHANNEL, message);
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        integer face = llDetectedTouchFace(0);
+
+        if (face == TOUCH_INVALID_FACE)
+//      {
+            say("The touched face could not be determined");
+//      }
+        else
+//      {
+            say("You touched face number " + (string) face);
+//      }
+    }
+}
+</source>
+<source lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        integer link = llDetectedLinkNumber(0);
+        integer face = llDetectedTouchFace(0);
+
+        if (face == TOUCH_INVALID_FACE)
+            llSay(PUBLIC_CHANNEL, "Sorry, your viewer doesn't support touched faces.");
+        else
+        {
+            // store the original color
+            list   colorParams   = llGetLinkPrimitiveParams(link, [PRIM_COLOR, face]);
+            vector originalColor = llList2Vector(colorParams, 0);
+
+            // color detected face white
+            llSetLinkColor(link, <1.0, 1.0, 1.0>, face);
+            llSleep(0.2);
+
+            // color detected face black
+            llSetLinkColor(link, ZERO_VECTOR, face);
+            llSleep(0.2);
+
+            // color detected face back to original color
+            llSetLinkColor(link, originalColor, face);
+        }
+    }
+}
+</source>
+|helpers
+|related
+|also_functions=
+{{LSL DefineRow||[[llDetectedLinkNumber]]}}
+{{LSL DefineRow||[[llDetectedTouchST]]}}
+{{LSL DefineRow||[[llDetectedTouchUV]]}}
+{{LSL DefineRow||[[llDetectedTouchPos]]}}
+{{LSL DefineRow||[[llDetectedTouchNormal]]}}
+{{LSL DefineRow||[[llDetectedTouchBinormal]]}}
+|also_events=
+{{LSL DefineRow||[[touch_start]]|}}
+{{LSL DefineRow||[[touch]]|}}
+{{LSL DefineRow||[[touch_end]]|}}
+|also_articles
+|notes
+|history=*Introduced in Viewer {{SVN|870|rev=92872|branch=Release|anchor=file14|date=Wednesday, 23 July 2008}}.
+*Server support available in Second Life Server 1.24.7.98039, client support in Release Candidate viewer 1.21.4 (98167)
+*Date of Release Server [[ Release_Notes/Second_Life_Beta_Server/1.24#Release_Notes_for_Second_Life_Beta_Server_1.24.3_.28August_29th.2C_2008.29 | 29-08-2008 ]]
+*Date of Release Client  [[ Release_Notes/Second_Life_Release/1.21 | 16-10-2008 ]]
+|cat1=Touch
+|cat2=Face
+|cat3
+|cat4
+}}

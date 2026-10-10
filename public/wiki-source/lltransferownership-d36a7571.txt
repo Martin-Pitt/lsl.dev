@@ -1,0 +1,60 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-7631}}{{Issues/BUG-5656}}
+|func_sleep=0.0|func_energy=10.0
+|func=llTransferOwnership
+|return_type=integer
+|p1_type=key|p1_name=agent_id|p1_desc=Agent ID for the avatar to receive ownership of the object
+|p2_type=integer|p2_name=flags|p2_desc=Flags controlling transfer behavior.
+|p3_type=list|p3_name=options|p3_desc=Options applied to the ownership transfer. No options are defined at this time.
+|func_footnote
+|func_desc=Transfer ownership of the object containing this script to {{LSLP|agent_id}}.
+|return_text=indicating the result of the transfer.
+|spec=
+Transfers ownership of an object rezzed in world to {{LSLP|agent_id}}. The object must be transferable by its current owner and must not be an attachment.
+
+Optionally this function may force the object to derez itself into the destination agent's inventory, or make a copy of itself directly into inventory.
+
+|caveats=
+* {{LSLP|agent_id}} must be an agent in the region.
+* There is no way to detect if the receiver ignored, rejected or blocked the transaction (aside from a [[changed]] event never occurring.)
+* The function fails with a return code of [[TRANSFER_NO_PERMS]] if:
+** The object is no-transfer.
+** The object is no-copy and {{LSLP|flags}} includes the [[TRANSFER_FLAG_COPY]] flag.
+* Calling this function from an attachment will fail and return [[TRANSFER_NO_ATTACHMENT]]
+* WARNING: Any no-trans items in the transferred object will be removed from the object received by the target agent. If the transfer is of the object itself, these items are lost.
+* WARNING: If the transfer is a copy, any no-copy inventory items will be present in the object received by the target agent and removed from the original.
+
+|constants=
+{{LSL Constants/Transfer Flags}}
+
+{{LSL Constants/Transfer Errors}}
+|examples=
+<source lang="lsl2">
+default
+{
+
+    touch_start(integer total_number)
+    {
+        llTransferOwnership(llDetectedKey(0), TRANSFER_FLAG_COPY, []);
+    }
+}
+</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGiveInventoryList]]}}
+{{LSL DefineRow||[[llRemoteLoadScriptPin]]}}
+{{LSL DefineRow||[[llSetRemoteScriptAccessPin]]}}
+{{LSL DefineRow||[[llMapDestination]]}}
+|also_events=
+{{LSL DefineRow||[[changed]]}}
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|sort=GiveInventory
+|cat1=Inventory
+|cat2=Avatar
+|cat3
+|cat4
+}}

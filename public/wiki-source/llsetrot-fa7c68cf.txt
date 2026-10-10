@@ -1,0 +1,88 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-93}}
+|func_id=61|func_sleep=0.2|func_energy=10.0
+|func=llSetRot
+|p1_type=rotation|p1_name=rot
+|func_desc=Sets the rotation of the prim to {{LSLP|rot}}.
+|return_text
+|spec=This function is available for nonphysical root prims and all child prims. It has no effect on the root prim if the object is physical. It has no effect for "static objects" as type of [[pathfinding]]
+|caveats=*If the prim is attached, then this function offsets the rotation by the avatar's rotation.
+*If the prim is not the root prim it is offset by the root's rotation.
+**If you are trying to set the rotation of a child prim relative to the root prim then divide the rotation by the root rotation.
+**If you are trying to set the rotation of a child prim to a global rotation then you need to divide the global rotation by the root rotation '''twice'''.
+**It is better to use [[llSetLocalRot]] to set the rotation of child prims, even if you are setting it to a global rotation (just divide by the root rotation in that case).
+**Alternatively see the [[llSetRot#Useful_Snippets|Useful Snippets]] for generalized workarounds that work with [[llSetPrimitiveParams]], [[llSetLinkPrimitiveParams]], and [[llSetLinkPrimitiveParamsFast]]
+*For small rotation changes, there is an update threshold depending on the time duration between changes. It does not appear to be limited to the 6deg rule any longer.
+* For "static objects" (type of [[pathfinding]]), the script fails with the error in debug channel: 
+** "Unable to set prim rotation: object contributes to the navmesh."
+|spec
+|constants
+|examples=Drop this script in the root prim of an object to have it rotate in 1 degree increments. Note that it won't work on child prims if the root is rotated.
+<source lang="lsl2">
+rotation rot_xyzq;
+
+default
+{
+    state_entry()
+    {
+        vector xyz_angles = <0,1.0,0>; // This is to define a 1 degree change
+        vector angles_in_radians = xyz_angles*DEG_TO_RAD; // Change to Radians
+        rot_xyzq = llEuler2Rot(angles_in_radians); // Change to a Rotation
+    }
+
+    touch_start(integer s)
+    {
+        llSetRot(llGetRot()*rot_xyzq); //Do the Rotation...
+    }
+}
+</source>
+
+Drop this one in a child prim to have it rotate around the world's Y axis in 1 degree increments. It won't work in the root if it is rotated.
+
+<source lang="lsl2">
+rotation rot_xyzq;
+
+default
+{
+    state_entry()
+    {
+        vector xyz_angles = <0,1.0,0>; // This is to define a 1 degree change
+        vector angles_in_radians = xyz_angles*DEG_TO_RAD; // Change to Radians
+        rot_xyzq = llEuler2Rot(angles_in_radians); // Change to a Rotation
+    }
+
+    touch_start(integer s)
+    {
+        llSetRot(llGetRot()*rot_xyzq/llGetRootRotation()/llGetRootRotation()); //Do the Rotation...
+    }
+}
+</source>
+
+|helpers=
+<source lang="lsl2">//-- These correctly set a global rotation for the root prim in all scenarios
+llSetLocalRot( rot )
+llSetPrimitiveParams( [PRIM_ROT_LOCAL, rot] )
+
+//-- These correctly set a global rotation for a child prim in all scenarios
+llSetLocalRot( rot / llGetRootRotation() )
+llSetPrimitiveParams( [PRIM_ROT_LOCAL, rot / llGetRootRotation() ] )</source>
+|also_functions=
+{{LSL DefineRow||[[llGetRot]]|}}
+{{LSL DefineRow||[[llGetLocalRot]]|}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llGetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLocalRot]]|}}
+{{LSL DefineRow||[[llSetPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]|}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParamsFast]]|}}
+{{LSL DefineRow||[[llTargetOmega]]|}}
+|also_tests
+|also_events
+|also_articles
+|notes
+|issues
+|cat1=Movement
+|cat2=Rotation
+|cat3
+|cat4
+}}

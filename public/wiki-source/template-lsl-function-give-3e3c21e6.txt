@@ -1,0 +1,76 @@
+<includeonly>{{LSL Injection Test}}{{#if:
+
+{{#vardefine:target-type|~{{#expr:{{#if:{{{avatar|}}}|1|0}}+{{#if:{{{prim|}}}{{{object|}}}|2|0}}+{{#if:{{{link|}}}|4|0}}}}}}
+
+{{#vardefine:pcaveats|{{#var:caveats}}}}
+{{#vardefine:caveats}}
+
+{{LSL Function/{{#switch:{{#var:target-type}}|~1=avatar|~2=prim|~4=link|uuid}}|group=|object={{{object|}}}|sim={{{sim|}}}|{{{1|}}}|}}
+
+{{LSL Function/inventory|{{{2|}}}|type={{{type|}}}|uuid={{{uuid|}}}|full={{{full|}}}|insert={{{insert|}}}|}}
+
+{{#vardefine:caveats|{{#var:pcaveats}}{{#ifeq:{{#var:target-type}}|~4||
+* If '''{{LSL Param|{{{1}}}}}''' is {{#switch:{{#var:target-type}}|~1=not the owner|~2=not owned by the same person|not the owner nor shares the same owner}}, {{#ifeq:{{{uuid|}}}|true|'''{{LSL Param|{{{2}}}}}''' is not a [[UUID]]}} and '''{{LSL Param|{{{2}}}}}''' does not have transfer permissions, an error is shouted on {{#var:DEBUG_CHANNEL}}.
+{{#if:{{{copyok|}}}||
+* If '''{{LSL Param|{{{2}}}}}''' {{#if:{{{full|}}}|is not {{HoverLink|:Category:LSL_Permissions/Asset|copy, mod and transfer|full permissions}}|permissions do not allow copy}}, the transfer fails and an error is shouted on {{#var:DEBUG_CHANNEL}}.{{#switch:{{#var:target-type}}
+|~1=|* If '''{{LSL Param|{{{1}}}}}''' {{#ifeq:{{#var:target-type}}|~2||is a prim that}} is not in the same region an error is shouted on {{#var:DEBUG_CHANNEL}}.}}}}}}
+{{#switch:{{{type|}}}|script|=* When scripts are copied or moved between inventories, their state does not survive the transfer. Memory, event queue and execution position are all discarded.|#default=}}
+{{#var:caveats}}}}
+
+{{#vardefine:pcaveats}}
+
+}}</includeonly><noinclude>
+{{Multi-lang}}
+{{UpdateLink}}
+{{#vardefine:caveats}}{{#vardefine:p_target_desc}}{{#vardefine:p_target_hover}}{{#vardefine:p_item_desc}}{{#vardefine:p_item_hover}}
+{| {{Prettytable}} {{#vardefine:caveats}}
+|+<code><nowiki>{{</nowiki>{{FULLPAGENAMEE}}<nowiki>|target|item|type=sound|uuid=true}}</nowiki></code>{{{{FULLPAGENAMEE}}|target|item|type=sound|uuid=true}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_target_desc}}
+|-
+{{VarPair|p_target_hover}}
+|-
+{{VarPair|p_item_desc}}
+|-
+{{VarPair|p_item_hover}}
+|}
+{{#vardefine:caveats}}{{#vardefine:p_target_desc}}{{#vardefine:p_target_hover}}{{#vardefine:p_item_desc}}{{#vardefine:p_item_hover}}
+{| {{Prettytable}} {{#vardefine:caveats}}
+|+<code><nowiki>{{</nowiki>{{FULLPAGENAMEE}}<nowiki>|target|item|type=sound|uuid=false}}</nowiki></code>{{{{FULLPAGENAMEE}}|target|item|type=sound|uuid=false}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_target_desc}}
+|-
+{{VarPair|p_target_hover}}
+|-
+{{VarPair|p_item_desc}}
+|-
+{{VarPair|p_item_hover}}
+|}
+{{#vardefine:caveats}}{{#vardefine:p_target_desc}}{{#vardefine:p_target_hover}}{{#vardefine:p_item_desc}}{{#vardefine:p_item_hover}}
+{| {{Prettytable}} {{#vardefine:caveats}}
+|+<code><nowiki>{{</nowiki>{{FULLPAGENAMEE}}<nowiki>|target|item|type=script|uuid=true|link=*}}</nowiki></code>{{{{FULLPAGENAMEE}}|target|item|type=script|uuid=true|link=*}}
+|-{{Hl2}}
+! #var
+! value
+|-
+{{VarPair|caveats}}
+|-
+{{VarPair|p_target_desc}}
+|-
+{{VarPair|p_target_hover}}
+|-
+{{VarPair|p_item_desc}}
+|-
+{{VarPair|p_item_hover}}
+|}
+</noinclude>

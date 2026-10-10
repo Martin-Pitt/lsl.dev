@@ -1,0 +1,71 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-3425}}{{LSL_Function/detected|index|touchPos|simple=*}}
+|func_id=339|func_sleep=0.0|func_energy=10.0
+|func=llDetectedTouchPos
+|return_type=vector|Return_text=position where the object was touched in {{HoverLink|Viewer coordinate frames#Region|Origin is the origin of the region which "owns" the object.|region coordinates}}, unless it is [[llGetAttached|attached]] to the HUD, in which case it returns the position in screen space coordinates.
+|p1_type=integer|p1_name=index
+|func_footnote=For the {{LSLGC|Touch|touch}} category of events only. The prim that was touched may not be the prim receiving the event, use [[llDetectedLinkNumber]] to check for this; likewise you can use [[llDetectedTouchFace]] to determine which face was touched.
+|func_desc
+|spec
+|caveats=
+*{{LSL Const|TOUCH_INVALID_VECTOR|vecter|{{LSL_VR|0.0|0.0|0.0}}|c=same as ZERO_VECTOR}} is returned when...
+** The avatar's viewer does not support face touch detection.
+*** To check if face touch detection is supported check the return of [[llDetectedTouchFace]].
+** The touch has moved off the surface of the prim.
+** The event triggered is not a {{LSLGC|Touch|touch}} event.
+|examples=
+<source lang="lsl2">
+default
+{
+    touch_start(integer num_detected)
+    {
+        llWhisper(0, "Pos clicked: " + (string)llDetectedTouchPos(0));
+    }
+}
+</source>
+<source lang="lsl2">
+vector GetRealTouchPos(vector pos)
+{
+//  By Ariu Arai for free use to anyone
+//  Returns a useful HUD Position Vector from the llDetectedTouchPos(); function
+//  USE: vector pos = GetRealTouchPos(llDetectedTouchPos(0)); .. Etc.
+//  This function is intended to be used to move child prims to where the user clicks. This does not work on the root prim.
+
+    integer point = llGetAttached();
+    vector offset;
+
+    if      (point == ATTACH_HUD_TOP_RIGHT)    offset = <1.0, 0.933,-0.5>;
+    else if (point == ATTACH_HUD_TOP_CENTER)   offset = <1.0, 0.000,-0.5>;
+    else if (point == ATTACH_HUD_TOP_LEFT)     offset = <1.0,-0.933,-0.5>;
+    else if (point == ATTACH_HUD_BOTTOM_LEFT)  offset = <1.0,-0.933, 0.5>;
+    else if (point == ATTACH_HUD_BOTTOM)       offset = <1.0, 0.000, 0.5>;
+    else if (point == ATTACH_HUD_BOTTOM_RIGHT) offset = <1.0, 0.933, 0.5>;
+
+    //return (pos - llGetLocalPos()) + (offset * llGetLocalRot());
+    return ((offset - llGetLocalPos()) + pos) / llGetLocalRot();
+}
+</source>
+|helpers
+|related
+|also_functions=
+{{LSL DefineRow||[[llDetectedLinkNumber]]}}
+{{LSL DefineRow||[[llDetectedTouchFace]]}}
+{{LSL DefineRow||[[llDetectedTouchST]]}}
+{{LSL DefineRow||[[llDetectedTouchUV]]}}
+{{LSL DefineRow||[[llDetectedTouchNormal]]}}
+{{LSL DefineRow||[[llDetectedTouchBinormal]]}}
+|also_events=
+{{LSL DefineRow||[[touch_start]]|}}
+{{LSL DefineRow||[[touch]]|}}
+{{LSL DefineRow||[[touch_end]]|}}
+|also_articles
+|notes
+|history=*Introduced in Viewer {{SVN|870|rev=92872|branch=Release|anchor=file14|date=Wednesday, 23 July 2008}}.
+*Server support available in [[Release_Notes/Second_Life_Server/1.24#Release_Notes_for_Second_Life_Server_1.24.7_.2898039.29_.28October_2nd.2C_2008.29:|Second Life Server 1.24.7.98039]], client support in [[Release_Notes/Second_Life_Release_Candidate/1.21#Release_Notes_for_Second_Life_1.21.284.29_Oct_1st.2C_2008|Release Candidate viewer 1.21.4 (98167)]].
+*Date of Release Server [[ Release_Notes/Second_Life_Beta_Server/1.24#Release_Notes_for_Second_Life_Beta_Server_1.24.3_.28August_29th.2C_2008.29 | 29-08-2008 ]]
+*Date of Release Client  [[ Release_Notes/Second_Life_Release/1.21 | 16-10-2008 ]]
+|cat1=Touch
+|cat2
+|cat3
+|cat4
+}}

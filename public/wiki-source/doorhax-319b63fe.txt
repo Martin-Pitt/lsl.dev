@@ -1,0 +1,84 @@
+{{LSL Header}}
+====DoorHax v0.1.0====
+--[[User:BETLOG Hax|BETLOG Hax]] UTC+10: 20091110 2120 [SLT: 20091110 0420]
+
+A smooth swinging door.
+<br>
+It seemed to work. Almost completely untested.
+<syntaxhighlight lang="lsl2">
+//==============================================================
+// BETLOG Hax
+// UTC+10: 20091110 2001 [SLT: 20091110 0301]
+// For Gutterblood Spoonhammer
+//----------------------------------
+//        **** LICENCE START ****
+// http://creativecommons.org/licenses/by-sa/3.0/
+//             Attribution licence:
+// You must:
+//    -Include this unaltered licence information.
+//    -Supply my original script with your modified version.
+//    -Retain the original scripts' SL permissions. [+c/+m/+t]
+// Or:
+//    -Link to the wiki URL from which you copied this script.
+//          https://wiki.secondlife.com/wiki/DoorHax
+//    -Document: "Uses parts of <scriptname> by BETLOG Hax"
+//        **** LICENCE END ****
+//----------------------------------
+// SHARED CONFIGURATION
+//----------------------------------
+// CONFIGURATION
+float       gShutAngle      = 0.0;
+float       gShutTau        = 3.0;
+//
+float       gOpenAngle      = 90.0;
+float       gOpenTau        = 0.75;
+//
+string      gSndOpening     = "cb340647-9680-dd5e-49c0-86edfa01b3ac";
+float       gVolOpening     = 1.0;
+string      gSndOpened      = "2ffd48fb-293c-d8c8-f2c5-c0ca76126baa";
+float       gVolOpened      = 1.0;
+
+string      gSndClosing     = "e7ff1054-003d-d134-66be-207573f2b535";
+float       gVolClosing     = 1.0;
+string      gSndClosed      = "31b0c4db-e126-47c5-ac1c-60edb1c0103a";
+float       gVolClosed      = 1.0;
+//----------------------------------
+// CORE CODE
+integer     gOpen;
+//=========================================================================
+f_toggle()
+{   float f;
+    llResetTime();
+    if(gOpen)
+    {   llTriggerSound(gSndOpening, gVolOpening);//opening
+        do{ f=gShutAngle+(llGetTime()/gOpenTau*llFabs(gShutAngle-gOpenAngle));
+//llSetText((string)f, <.0, 1.0, .0>, 1.0);
+            llRotLookAt(llEuler2Rot(<0.0, 0.0, f>*DEG_TO_RAD),0.05,0.05);
+        }while(f<=gOpenAngle);
+        llTriggerSound(gSndOpened,gVolOpened);//opening end
+    }
+    else
+    {   llTriggerSound(gSndClosing, gVolClosing);//closing
+        do{ f=gOpenAngle-(llGetTime()/gShutTau*llFabs(gShutAngle-gOpenAngle));
+//llSetText((string)f, <1.0, .0, .0>, 1.0);        
+            llRotLookAt(llEuler2Rot(<0.0, 0.0, f>*DEG_TO_RAD),0.05,0.05);
+        }while(f>=gShutAngle);
+        llTriggerSound(gSndClosed, gVolClosed);//closing end
+    }
+//llOwnerSay((string)llGetTime());
+}
+//----------------------------------
+default
+{   state_entry()
+    {   llSetText("", <1.0, 1.0, 1.0>, 1.0);
+        f_toggle();
+    }
+    touch_start(integer num)
+    {   gOpen=!gOpen;
+        f_toggle();
+    }
+}
+//----------------------------------
+</syntaxhighlight>
+
+[[Category:LSL Examples]]

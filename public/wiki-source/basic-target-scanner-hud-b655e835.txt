@@ -1,0 +1,87 @@
+{{LSL Header}}[[Category:LSL Library]]
+
+This single prim HUD is just a button that scrolls through nearby players names, photos and user key.
+Drop it in a prim and touch the prim and you are set to go.  Modify it to suit your particular use in another Hud, weapon, or whatever you want.
+<3
+--[[User:Ackley Bing|Ackley Bing]]
+
+<syntaxhighlight lang="lsl2">
+// Basic Target Scanner HUD
+// by Ackley Bing
+// v.2.0 now using llGetAgentList() instead of sensor().  Added a missing profile photo texture. fixed a lot of issues.
+
+integer index;
+key HUDtarget;
+key photoReq;
+integer HUDattachpoint=ATTACH_HUD_CENTER_1;
+string missingtexture="1a6e02aa-23a8-7a5f-0525-44d724144f89";
+Target()
+{
+    list agents=llGetAgentList(AGENT_LIST_REGION,[]);
+    integer ownerindex=llListFindList( agents, (list)llGetOwner() );
+    integer num_agents;
+    agents=llDeleteSubList( agents, ownerindex, ownerindex );
+    num_agents = llGetListLength(agents);
+    index=((index<0)*(num_agents-1))+((index>=0)*(index*(index!=num_agents)));
+    HUDtarget=llList2Key(agents, index);
+    llSetText(llKey2Name(HUDtarget)+" ("+llGetDisplayName(HUDtarget)+")\n"+(string)HUDtarget, <0.0, 1.0, 0.0>, 1.0);
+    photoReq=llHTTPRequest("http://world.secondlife.com/resident/" + (string)HUDtarget, [], "");
+    llOwnerSay("("+(string)(index+1)+"/"+(string)(num_agents) +") Current Target: secondlife:///app/agent/" + (string)HUDtarget + "/inspect " + (string)HUDtarget );
+}
+default
+{
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(),PERMISSION_ATTACH);
+    }
+    attach(key id)
+    {
+        if (id)
+        {
+            llSetScale(<0.1, 0.15, 0.1>);
+            llSetPrimitiveParams([PRIM_TYPE, PRIM_TYPE_BOX, PRIM_HOLE_DEFAULT, <0.0, 1.0, 0.0>, 0.0, <0.0, 0.0, 0.0>, <2.0, 0.5, 1.0>, <0.0, 0.0, 0.0>, PRIM_ROT_LOCAL, <0.000000, -0.707107, 0.000000, 0.707107>, PRIM_COLOR, 0, <1.0,1.0,1.0>, 1.0, PRIM_COLOR, 1, <0.0,1.0,0.0>, 1.0, PRIM_COLOR, 3, <0.0,1.0,0.0>, 1.0, PRIM_COLOR, 2, <1.0,1.0,1.0>, 0.0, PRIM_COLOR, 4, <1.0,1.0,1.0>, 0.0]);
+            llRotateTexture(270.0*DEG_TO_RAD,0);
+            HUDattachpoint=llGetAttached();
+            Target();
+            llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+        }
+    }
+    on_rez(integer param)
+    {
+        if ( !llGetAttached() )
+        {
+            index=0;
+            HUDtarget=NULL_KEY;
+            llSetText("", <0.0, 1.0, 0.0>, 1.0);
+            llSetTexture(missingtexture, 0);
+            llRequestPermissions(llGetOwner(),PERMISSION_ATTACH);
+        }
+    }
+    touch_start(integer n)
+    {
+        index=index+(llDetectedTouchFace(0)==1)-(llDetectedTouchFace(0)==3);
+        Target();
+    }
+    http_response(key request_id, integer status, list metadata, string body)
+    {
+        if( request_id == photoReq )
+        {
+            string photoID;
+            integer StartIndex=llSubStringIndex(body,"<title>");
+            integer EndIndex=llSubStringIndex(body,"</title>");
+            if( StartIndex!=-1)
+            {
+                integer tempIndex=llSubStringIndex(body,"imageid")+18;
+                if(tempIndex>17)photoID=llGetSubString(body,tempIndex,tempIndex+35);
+            }
+            if ( photoID==NULL_KEY || photoID=="" ) photoID=missingtexture;
+            llSetTexture(photoID, 0);
+        }
+    }
+    run_time_permissions(integer perms)
+    {
+        if ( perms & PERMISSION_ATTACH ) llAttachToAvatar(HUDattachpoint);
+        if ( perms & PERMISSION_TAKE_CONTROLS ) llTakeControls(CONTROL_BACK, FALSE, TRUE);
+    }
+}
+</syntaxhighlight>

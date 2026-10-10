@@ -1,0 +1,48 @@
+{{LSL_Function
+|func=llAxisAngle2Rot
+|func_id=169|func_sleep=0.0|func_energy=10.0
+|return_type=rotation
+|p1_type=vector|p1_name=axis|p1_desc
+|p2_type=float|p2_name=angle|p2_desc=expressed in radians.
+|return_text=that is a generated '''angle''' about '''axis'''
+|func_footnote=
+'''axis''' need not be [[llVecNorm|normalized]], only the direction is important.                       
+
+'''angle''' need to be between the value 0<angle<PI (higher values than PI lead to 2*PI-angle)
+, because a rotation is not really a rotation (it is more of a rigid motion/mirroring) 
+,the final destination is the rotation. 
+(in other words: it doesn't matter wether you rotate left by 90 degrees or right by 270 degrees it will return the same rotation)
+|spec
+|caveats
+|examples=<source lang="lsl2">default
+{
+    state_entry()
+    {
+        vector axis = <0.0, 0.0, 1.0>;
+        float angle = 90.0 * DEG_TO_RAD;
+        rotation rot = llAxisAngle2Rot(axis, angle);
+        vector euler = llRot2Euler(rot) * RAD_TO_DEG;
+
+        llOwnerSay((string) euler);
+        //Says <0.0, 0.0, 90.0> since it is rotating 90 degrees on the Z axis caused by the 1.0 placed in the Z vector spot. 
+    }
+}</source>
+
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llRot2Angle]]|}}
+{{LSL DefineRow||[[llRot2Axis]]|}}
+|also_events
+|also_articles
+|also
+|notes
+|cat1=Math/3D
+|cat2=Rotation
+|cat3
+|cat4
+|deepnotes=<source lang="lsl2">rotation llAxisAngle2Rot( vector axis, float angle )
+{
+    axis = llVecNorm( axis ) * llSin( angle/2 );
+    return <axis.x, axis.y, axis.z, llCos( angle/2 )>;
+}</source>
+}}

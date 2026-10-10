@@ -1,0 +1,77 @@
+{{LSL_Function
+|inject-2={{LSL Function/avatar|avatar|sim=*}}{{Issues/BUG-1731}}
+|func_id=266|func_sleep=0.0|func_energy=10.0
+|func=llGetAnimationList|return_type=list|p1_type=key|p1_name=avatar
+|func_footnote
+|func_desc
+|return_text=of keys of playing animations for {{LSLP|avatar}}.
+|spec
+|caveats=*There is no internal mechanism to get the name of the animations playing.
+*Standard animations can be started and stopped by scripts, so the list returned may not accurately reflect the avatar's state. Use [[llGetAgentInfo]] and [[llGetAnimation]] when this matters.
+*[[Internal_Animations#Viewer-generated_motions|Some motions are local to the viewer]] and cannot be detected by scripts.
+*[[Internal_Animations#User-playable_animations|Animations that are triggered by other animations are local to the viewer]] and cannot be detected by scripts.
+|constants
+|examples=
+This example is a bit involved but there aren't many applications for this function.
+<source lang="lsl2">//Simple Animation Override for Walk
+key old_anim = "6ed24bd8-91aa-4b12-ccc7-c97c857ab4e0";
+string new_anim="yoga_float";
+integer status;
+list check;
+key owner;
+
+default
+{
+    state_entry()
+    {
+        owner = llGetOwner();
+        llRequestPermissions(owner, PERMISSION_TRIGGER_ANIMATION);
+        check = [old_anim];
+    }
+    
+    run_time_permissions(integer p)
+    {
+        if(p & PERMISSION_TRIGGER_ANIMATION)
+        {
+            llSetTimerEvent(0.2);
+        }
+    }
+
+    timer()
+    {
+        if(llGetAgentInfo(owner) & AGENT_WALKING)
+        {
+            list anims = llGetAnimationList(owner);
+            if(~llListFindList(anims, check))
+            {
+                status = 1;
+                llStartAnimation(new_anim);
+                llStopAnimation(old_anim);
+            }
+        }
+        else if(status)
+        {
+            llStopAnimation(new_anim);
+            status = 0;
+        }
+    }
+
+    on_rez(integer p)
+    {
+        llResetScript();
+    }
+}</source>
+|helpers
+|also_functions={{LSL DefineRow||[[llGetAgentInfo]]|Gets the avatar info}}
+{{LSL DefineRow||[[llGetAnimation]]|Get the avatar's base animation state}}
+{{LSL DefineRow||[[llStartAnimation]]|Start an animation on an avatar}}
+{{LSL DefineRow||[[llStopAnimation]]|Stop an animation playing on an avatar}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|cat1=Avatar
+|cat2=Animation
+|cat3
+|cat4
+}}

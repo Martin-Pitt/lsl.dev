@@ -1,0 +1,45 @@
+{{LSL Constant
+|name=AGENT_WALKING
+|type=integer
+|value={{LSL Hex|0x0080}}
+|desc=Used with [[llGetAgentInfo]] to determine if the queried avatar is walking.
+|pa=
+|text=
+|pb=
+|examples=Cause a sound to be played while the wearer of the hud or attachment is walking.
+Place this script in a Hud for the owner only to hear the sound,
+or in an attachment for others to hear your footsteps too.
+You'll need a sound file in the object too, with your choice of footstep sounds.
+<source lang="lsl2">
+// Play a sound whenever the owner is walking
+integer   gWasWalking;             // TRUE when wearer is already walking
+string    gSound = "footsteps";    // name of soundfile in inventory
+default
+{
+    state_entry()
+    {
+        // Start a timer to continuously check if the owner is walking
+        llSetTimerEvent(0.25);
+    }
+    timer()
+    {
+        integer NowWalking = llGetAgentInfo(llGetOwner()) & AGENT_WALKING;
+        if  (NowWalking != gWasWalking)        // walking has stopped or started
+        {
+            llStopSound();
+            if (NowWalking)      llLoopSound(gSound, 1.0);
+        }
+        gWasWalking = NowWalking;
+    }
+}
+</source>
+|constants={{LSL Constants/llGetAgentInfo|no-wrapper=*}}
+|functions=
+{{LSL DefineRow||[[llGetAgentInfo]]|}}
+|events=
+|location
+|cat1
+|cat2
+|cat3
+|cat4
+}}

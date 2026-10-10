@@ -1,0 +1,57 @@
+{{LSL_Function
+|inject-2=
+{{LSL_Function/avatar|avatar|sim=*}}
+|func_id=?
+|func_sleep=0.0
+|func_energy=10.0
+|func=llGetAttachedList
+|func_desc
+|p1_type=key|p1_name=avatar|p1_desc
+|return_type=list|return_text=of object keys corresponding to public attachments worn by an {{LSLPT|avatar}} in the order they were attached.
+|func_footnote=By design HUD attachment keys are not reported by this function.<br/> <br/>
+If avatar is a child agent, ["NOT ON REGION"] is returned.<br/>
+If avatar is not a main agent and not a child agent or not an agent at all, ["NOT FOUND"] is returned.
+|spec
+|caveats=<br>
+When an avatar first arrives in a region, there is a brief period when their attachments are not yet fully rezzed or added.  During this time, those attachments will not appear in the results.
+</br></br>
+|examples=<source lang="lsl2">
+// Touch to list all attachments
+
+default
+{
+    touch_start(integer total_number)
+    {
+        list AttachedNames;
+        list AttachedUUIDs = llGetAttachedList(llDetectedKey(0));
+        integer i;
+        while (i < llGetListLength(AttachedUUIDs) )
+        {
+            list temp = llGetObjectDetails(llList2Key(AttachedUUIDs,i),[OBJECT_NAME]);
+            AttachedNames += [llList2String(temp,0)];
+            ++i;
+        }
+        llSay(PUBLIC_CHANNEL,"\n" + llDumpList2String(AttachedNames,"\n"));
+    }
+}
+</source>
+|spec
+|helpers
+|also_functions={{LSL DefineRow||[[llGetAttached]]}}
+{{LSL DefineRow||[[llGetAttachedListFiltered]]}}
+{{LSL DefineRow||[[llAttachToAvatar]]}}
+{{LSL DefineRow||[[llDetachFromAvatar]]}}
+{{LSL DefineRow||[[llAttachToAvatar]]}}
+{{LSL DefineRow||[[llGetObjectDetails]]|[[OBJECT_ATTACHED_POINT]]}}
+|also_events={{LSL DefineRow||[[attach]]}}
+|also_articles
+|notes
+|history=
+{{LSL DefineRow|20/Dec/08|{{Jira|SVC-3560}}|llQueryAvatarAttachments Suggested}}
+{{LSL DefineRow|30/Apr/13|{{Jira|BUG-2467}}|llGetAttachedList Suggested}}
+{{LSL DefineRow|14/Jul/15|{{Jira|BUG-9683}}|llGetAttachedList Suggested again}}
+|cat1=Attachment
+|cat2=Avatar
+|cat3
+|cat4
+}}

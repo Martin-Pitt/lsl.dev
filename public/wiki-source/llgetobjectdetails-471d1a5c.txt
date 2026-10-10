@@ -1,0 +1,183 @@
+{{LSL_Function
+|inject-2=
+{{LSL_Function/limits}}{{LSL_Function/uuid|id|sim=*|group=}}
+{{Issues/SCR-87}}{{Issues/SVC-7592}}
+|func_id=332|func_sleep=0.0|func_energy=10.0
+|func=llGetObjectDetails
+|p1_type=key|p1_name=id|p1_desc=&#32;or adjacent regions[[#id_Parameter|*]]
+|p2_type=list|p2_name=params|p2_desc=OBJECT_* flags
+|return_type=list|return_text=of the details for {{LSLP|id}}, specifically those requested in {{LSLP|params}}. 
+|func_footnote=An empty list if {{LSLP|id}} is not found.{{PBR}}
+{{LSL Const|OBJECT_UNKNOWN_DETAIL|integer|-1|c=}} is returned when passed an invalid integer parameter.
+|spec=<div style="padding: 1px; float: left;">[[Image:LlGetObjectdetails-avatar-range.png|thumb=LlGetObjectdetails-avatar-range-thumb.jpg|none|250px|Avatar detection range for SL Server 1.34]]</div>
+<h5 style="margin:0;">{{LSLP|id}} Parameter</h5>
+{{LSLP|id}} holds the [[UUID]] of the avatar or prim this function is going to get the details of.
+
+If {{LSLP|id}} is not found in the region, adjacent regions are searched for avatars which match {{LSLP|id}}. An avatar is only considered to have been found if it is inside the region, or within a 34 meter zone outside the region boundaries (see diagram). A single valid result may be returned after the avatar leaves this zone.
+
+<h5 style="margin:0;">{{LSLP|params}} Parameter</h5>
+The {{LSLP|params}} list is used to indicate the object attributes of interest. The order they are supplied in determines the order of the corresponding return values in the return list.
+{{{!}} cellpadding="0" cellspacing="0"
+{{!}}
+*If {{LSLP|params}} contains unsupported integer values, {{LSL Const|OBJECT_UNKNOWN_DETAIL|integer|-1|c=}} is placed in the output list.
+*If {{LSLP|params}} contains non-[[integer]] types, those values will be silently ignored.
+{{!}}}
+<div style="clear:both;"></div>
+|caveats=
+*[[OBJECT_ROT]] will return an accurate facing for Avatars seated or in mouselook, but only a rough direction otherwise.
+*Adjacent regions are not searched for prims which match {{LSLP|id}}.
+*Information for avatars that can no longer be found will still be available for a short period (about 45 seconds) but it is not updated.
+*Items in {{LSLP|params}} that are not integers are silently ignored, {{LSL Const|OBJECT_UNKNOWN_DETAIL|integer|-1|c=}} is not returned.
+*This function does not return information about items in inventory.
+*[[llTargetOmega]] will only effect the return of [[OBJECT_ROT]] if the object is [[STATUS_PHYSICS|physical]]. If the object is not physical then the original start rotation is returned, [[llTargetOmega]] is a {{LSLGC|Effects|client side effect}}.
+*{{LSL Const|OBJECT_SCRIPT_MEMORY|integer|11|c=}} reports the maximum memory that all scripts in an object could use, not the actual amount of real memory currently used.  In particular, [[Mono]] scripts only report the default 64K or what they chose with [[llSetMemoryLimit]], not the current dynamic allocation that is only accessible from within the script. For [[LSO]] scripts, the 16K is real usage in all cases. In practice, this makes the number reported a worst case scenario.
+*{{LSL Const|OBJECT_RUNNING_SCRIPT_COUNT|integer|9|c=}} includes crashed scripts in its count.
+*{{LSL Const|OBJECT_REZZER_KEY|integer|32|c=}} will return [[NULL_KEY]] for objects rezzed prior to server version 16.01.16.310114
+*Objects copied in-world between server versions 16.01.16.310114 & 16.10.14.320687 return the object's creator key for rezzer key.
+*Child prims linked before server version 17.11.11.510664 return the root prim's rezzer key.
+*Child prims delinked before server version 17.11.11.510664 return NULL_KEY for rezzer key.
+*When targeting an agent with {{LSL Const|OBJECT_REZZER_KEY|integer|32|c=}} while they are sitting on an object, the rezzer key of the object's root prim is returned.
+*When targeting an attachment with {{LSL Const|OBJECT_MASS|integer|43|c=}}, the mass of the avatar (or that of the avatar's sat-upon object) is returned.
+*Since {{LSL Const|OBJECT_GROUP|integer|7|c=}} returns [[NULL_KEY]] for avatars, a workaround is required to acquire an avatar's active group. A common approach is to query the avatar's attachments with [[llGetAttachedList]] and if at least one is found, get the OBJECT_GROUP for that attachment as it is likely to match the avatar's group.
+|examples=
+<syntaxhighlight lang="lsl2">
+// Show some basic details for the colliding object/avatar. Note that group will be NULL_KEY for avatars.
+default
+{
+    collision_start(integer num_detected)
+    {
+      key  id      = llDetectedKey(0);
+      list details = llGetObjectDetails(id, ([OBJECT_NAME, OBJECT_DESC,
+                            OBJECT_POS, OBJECT_ROT, OBJECT_VELOCITY,
+                            OBJECT_OWNER, OBJECT_GROUP, OBJECT_CREATOR]));
+      llShout(PUBLIC_CHANNEL, "UUID: " + (string)id
+                    + "\nName: "          + llList2String(details, 0)
+                    + "\nDescription: "  + llList2String(details, 1)
+                    + "\nPosition: "      + llList2String(details, 2)
+                    + "\nRotation: "       + llList2String(details, 3)
+                    + "\nVelocity: "       + llList2String(details, 4)
+                    + "\nOwner: "          + llList2String(details, 5)
+                    + "\nGroup: "          + llList2String(details, 6)
+                    + "\nCreator: "        + llList2String(details, 7));
+    }
+}</syntaxhighlight>
+
+<syntaxhighlight lang="lsl2">
+// group join inviter
+// gets the name of the object's active group from the online group profile
+
+key groupNameRequestId;
+key groupKey;
+string groupName;
+
+init()
+{
+    // WARNING:
+    // different prims can have different active groups!!!
+
+    // get the key of the root prim's group
+    groupKey = llList2Key(llGetObjectDetails(llGetLinkKey(LINK_ROOT), [OBJECT_GROUP]), 0);
+
+    // request the name of the root prim's group
+    groupNameRequestId = llHTTPRequest("http://world.secondlife.com/group/" + (string)groupKey, [], "");
+}
+
+default
+{
+    state_entry()
+    {
+        init();
+    }
+
+    touch_start(integer num_detected)
+    {
+        if (groupKey == NULL_KEY || groupName == "")
+            return;
+
+        key id = llDetectedKey(0);
+        llInstantMessage(id,
+            "Click the link to join the group '" + groupName + "'\n"
+            + "secondlife:///app/group/" + (string)groupKey + "/about");
+    }
+
+    http_response(key request_id, integer status, list metadata, string body)
+    {
+        if (request_id != groupNameRequestId)
+            return;
+
+        list args = llParseString2List(body, ["title"], []);
+        groupName = llList2String(llParseString2List(llList2String(args, 1), [">", "<", "/"], []), 0);
+    }
+}
+</syntaxhighlight>
+<syntaxhighlight lang="lsl2">// aim & shoot
+default
+{   state_entry()
+    {   llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+    }
+    control(key id, integer pressed, integer change) 
+    {   if(change & pressed & CONTROL_ML_LBUTTON)
+            llSensor("", "", AGENT|PASSIVE|ACTIVE, 96.0, PI/16.0);
+    }
+    run_time_permissions(integer perm)
+    {   if(perm&PERMISSION_TAKE_CONTROLS)
+            llTakeControls(CONTROL_ML_LBUTTON, TRUE, TRUE); 
+    }
+    sensor(integer n)
+    {   key uuid=llDetectedKey(0);
+        list a = llGetObjectDetails(uuid, ([
+            OBJECT_NAME, OBJECT_DESC, OBJECT_POS, OBJECT_ROT,
+            OBJECT_VELOCITY,OBJECT_OWNER, OBJECT_GROUP, OBJECT_CREATOR]));
+        llOwnerSay("UUID: " + (string)uuid +
+            "\nName: \"" + llList2String(a,0)+ "\"" +
+            "\nDecription: \"" + llList2String(a,1) + "\"" +
+            "\nPosition: " + llList2String(a,2) +
+            "\nRotation: " + llList2String(a,3) +
+            "\nVelocity: " + llList2String(a,4) +
+            "\nOwner: " + llList2String(a,5) +
+            "\nGroup: " + llList2String(a,6) +
+            "\nCreator: " + llList2String(a,7)
+        );
+    }
+}</syntaxhighlight>
+<syntaxhighlight lang="lsl2">// Object Script Time
+default
+{
+    touch_start(integer num_detected)
+    {
+        llOwnerSay(llGetObjectName()+" Script Time: "+llList2String(llGetObjectDetails(llGetKey(), [OBJECT_SCRIPT_TIME]), 0));
+    }
+}
+</syntaxhighlight>
+|spec
+|constants={{LSL Constants/Object Details}}
+|helpers=See {{LSLGC|Link/Get}} for some {{LSLGC|Link|link}} related helper functions. Also see [[llGetLinkPrimitiveParams]] if you need to get the position and rotation of a linked prim.
+<syntaxhighlight lang="lsl2">
+integer isLindenTreeOrGrass(key id){
+    //Check if it's an OPT_OTHER and not an attachment, which makes it a Linden tree or grass!
+    list out = llGetObjectDetails(id, [OBJECT_PATHFINDING_TYPE, OBJECT_ATTACHED_POINT]);
+    return (llList2Integer(out, 0) == OPT_OTHER) && !llList2Integer(out, 1);
+}
+</syntaxhighlight>
+|also_functions={{LSL DefineRow||[[llKey2Name]]}}
+{{LSL DefineRow||[[llGetPrimitiveParams]]}}
+{{LSL DefineRow||[[llSetLinkPrimitiveParams]]}}
+{{LSL DefineRow||[[llSetPrimitiveParams]]}}
+{{LSL DefineRow||[[llGetParcelDetails]]}}
+|also_tests
+|also_events
+|also_articles={{LSL DefineRow||{{LSLGC|Detected}}}}
+{{LSL DefineRow||[[Prim Attribute Overloading]]}}
+|notes
+|history=
+{{HistoryRow|2007|SL 1.18.3(2)|Introduced}}
+{{HistoryRow|28-09-2007|SL [[Release_Notes/Second_Life_Release/1.18#Release_Notes_for_Second_Life_1.18.3.285.29_September_28.2C_2007 | 1.18.3.285.29]]|Released}}
+|cat1=Object
+|cat2=Prim
+|cat3=Avatar
+|cat4=Owner
+|cat5=Creator
+|cat6=Group
+|cat7=Link
+|cat8=Click Action
+}}

@@ -1,0 +1,178 @@
+==Bartender! v1.0.0==
+Bartender to serve drinks.. and other things.
+<br>
+Drop this script in your bartender prim.
+<br>
+Drop a bunch of 'drink' objects into your bartender prim.
+<br>
+Touch the bartender prim and select a drink.
+<br>
+Some debugging info is transmitted on llOwnerSay, but spam is minimal. Edit the script variable to adjust this.
+<br>
+<b>This script differs from others in that:</b>
+<br>
+It opens a single random negative channel, it does not activate an llListen *every time* someone clicks it.
+<br>
+IF the random channel is being used by something else, and this causes the bartender to get a bunch of garbage inputs, it will automatically change to a new random channel, and optionally inform the owner.
+<br>
+Evidently this script can be used as a kind of object freebie vendor too.
+<br>
+NOTES:
+<br>
+It's been a while since I wrote it, and it was never really extensively tested, so i expect there is some stupid in it. But AFAIK it's fine.
+<br>
+It features a primitive kind of double-touch prevention that i don't use anymore, so I guess the touch functions have been improved.. yeah.. that was it.. i think.. yeah. So there are some redundant bits.
+<div style="padding: 0.5em;">
+<source lang="lsl2">
+//
+// BETLOG Hax
+// for Aley Arai AEST: 20080328 0645 [SLT:  20080327 1345]
+// Written to allow easier use - just dump drink objects into inv and you are done.
+// No more editing script drink lists.
+//=========================================================================
+// ---LICENCE START---
+// http://creativecommons.org/licenses/by-sa/3.0/
+// ie: Attribution licence:
+//   Give me credit by leaving it in the script I created.
+//   Supply my original script with your modified version.
+//   Refer to the wiki URL from which you copied this script.
+//      https://wiki.secondlife.com/wiki/Bartender
+// ---LICENCE END---
+//=========================================================================
+
+//----------------------------------
+// SHARED CONFIGURATION
+//----------------------------------
+// CONFIGURATION
+//
+//OPTIONAL debug feedback - 0=off, 1=Channel & Noise info, 2=all debug
+integer gDebug              = 
+                                //0;
+                                1;
+                                //2;
+//
+//number of invalid messages received before re-randomizing channel
+integer gChannelNoiseMax    = 5; 
+//
+// message that appears on the dialog
+string  gDlgMessage         = "\n\t\n\t\n\t\t\tMay I offer you a drink?";
+//
+// Optional chat responses
+// leave BOTH of these fields blank ( ""; ) to NOT speak a message
+// leave one OR the other blank to alter the form of the message
+//recipient name is auto-inserted between these two
+string  gMsgResponseA       = "Thanks";
+// target name ends up here
+string  gMsgResponseB       = ", enjoy your drink. :)";
+//----------------------------------
+// CORE CODE
+integer gListenHandle       = 0;
+integer gDlgLimiter         = 0;
+integer gDlgChannel         = -5746547; //failsafe only
+list    gDrinksList         = [];
+integer gDrinksCount        = 0;
+integer gChannelNoise       = 0;
+//----------------------------------
+f_dialogMenu(key id, list dlgButtons)
+{   llDialog(id, gDlgMessage, dlgButtons, gDlgChannel);
+    if (gDebug > 1)
+    {   llOwnerSay("***OFFERING DIALOG:***"
+            +"\nname: "+llKey2Name(id)
+            +"\nid: "+(string)id
+            +"\ngDlgMessage: "+gDlgMessage
+            +"\ndlgButtons: "+llList2CSV(dlgButtons)
+            +"\ngDlgChannel: "+(string)gDlgChannel
+            +"\n***************"
+        );
+    }
+}
+//-----------------------
+f_dialogNullify()
+{   gDlgLimiter = 0;    
+}
+//-----------------------
+f_randomChannel()
+{   
+//a static channel is more reliable where many people may request a drink while another is still considering the choices
+//gChannelNoise will trigger auto-re-randomization of this static channel if too much invalid message activity is detected
+    if (gListenHandle)
+        llListenRemove(gListenHandle);
+    gDlgChannel = (integer)(llFrand(-0x7FFFFFFF)-1);
+    gListenHandle = llListen(gDlgChannel, "", "", ""); 
+    if (gDebug)
+        llOwnerSay("gDlgChannel: "+(string)gDlgChannel);
+}
+//-----------------------
+f_assessInventory()
+{   integer    i;
+    integer    n = llGetInventoryNumber(INVENTORY_OBJECT);
+    gDrinksList = [];
+    for(i=0; i<n; i++ )
+        gDrinksList += [ llGetInventoryName(INVENTORY_OBJECT, i) ];
+    gDrinksCount = llGetListLength(gDrinksList);
+    if (gDebug > 1)
+        llOwnerSay("gDrinksCount: "+(string)gDrinksCount+" - gDrinksList: "+llList2CSV(gDrinksList));        
+}
+//-----------------------
+default
+{   on_rez(integer start_param)
+    {   llResetScript();
+    }
+    changed(integer change)
+    {   if (change & CHANGED_INVENTORY)
+        {   llSetText("RE-EVALUATING\ninventory.", <0.0, 1.0, 0.0>,1.0);            
+            //so its not being called too much and slowing down inv changes            
+            llSetTimerEvent(8.0);
+        }
+        if (change & CHANGED_OWNER)
+            llResetScript();
+    }
+    timer()
+    {   llSetTimerEvent(0.0);
+        llSetText("", <1.0, 1.0, 1.0>,1.0);
+        f_assessInventory();        
+    }
+    state_entry()
+    {   f_randomChannel();
+        f_assessInventory();
+    }
+    touch_end(integer num_detected)
+    {   gDlgLimiter += 1;
+        if (gDlgLimiter == 1)
+        {   key av = llDetectedKey(0);
+            f_dialogMenu(av, gDrinksList);            
+        }
+        else if (gDlgLimiter >= 2) //3)
+            f_dialogNullify();
+    }
+    listen(integer channel, string name, key id, string message)
+    {   integer index = llListFindList(gDrinksList, [message]);
+        if (index == -1)
+        {   gChannelNoise++;
+            if (gDebug)
+                llOwnerSay("FYI - INVALID MESSAGE DETECTED ON THIS CHANNEL:\ngDlgChannel: "+(string)gDlgChannel+"\ngChannelNoise/gChannelNoiseMax = "+(string)gChannelNoise+"/"+(string)gChannelNoiseMax+"\nFrom: "+name+" [key: "+(string)id+"]");
+            if (gChannelNoise >= gChannelNoiseMax)
+                f_randomChannel();
+            return;
+        }
+        string drink = llGetInventoryName(INVENTORY_OBJECT, index);
+        if (drink != "")
+        {   f_dialogNullify();            
+            if ( (gMsgResponseA != "") || (gMsgResponseB != "") )
+                llSay(0, gMsgResponseA+" "+name+" "+gMsgResponseB);
+            llGiveInventory(id, drink);
+            if (gDebug > 1)
+                llOwnerSay("drink: "+drink+" was given to: "+name+" [key: "+(string)id+"]");
+        }
+        else
+        {   // SHOULD never happen
+            llOwnerSay("ERROR: The bar has no drinks!!!..or somthing else bad happened..");
+        }
+    }
+}
+
+
+  </source>
+</div>
+
+{{LSLC|Examples|Bartender!}}

@@ -1,0 +1,73 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-1903}}
+{{LSL Function/damping|damping}}
+{{LSL Function/strength|strength}}
+{{LSL Function/rotation|target_direction|region=*}}
+|func_id=127|func_sleep=0.0|func_energy=10.0
+|func=llRotLookAt
+|p1_type=rotation|p1_name=target_direction
+|p2_type=float|p2_name=strength
+|p3_type=float|p3_name=damping
+|func_footnote=To change the position in the same manner, use [[llMoveToTarget]].  For physical objects a range between .2 and 1 is good for both parameters. 
+|func_desc=Causes an object to smoothly rotate to {{LSLP|target_direction}} with {{LSLP|strength}} resistance at {{LSLP|damping}} force.
+
+Maintains rotation {{LSLP|target_direction}} until stopped with [[llStopLookAt]].
+|return_text
+|spec
+|caveats=
+* In Non-Physical objects this function operates effectively the same as [[llSetLocalRot]].
+* {{LSLP|damping}} seems to be capped at 1.0; greater values are reduced to 1.0 ''(Tested 21 October 2010 on server version 10.10.18.212360)''
+* The minimum value for {{LSLP|strength}} seems to be 0.0445 for the function to have any effect.
+|constants
+|examples=
+==== Point the prim's positive y axis (''<0.0, 1.0, 0.0>'') towards a position on the sim ====
+<source lang="lsl2">
+//-- where vPosTarget is the global position of the object you want to "look" at
+llRotLookAt( llRotBetween( <0.0,1.0,0.0>, llVecNorm( vPosTarget - llGetPos() ) ), 1.0, 0.4 ); // Point +Y axis towards vPosTarget
+</source>
+* '''vPosTarget - llGetPos()''' converts the global coordinates of the objects, to a local distance and direction from the object pointing
+* Per [[llRotBetween]] article:
+** '''llRotBetween''' returns a scaled rotation, unless both inputs are equal magnitude (e.g. unit vector).
+** The use of [[llVecNorm]] reduces the magnitude to 1 (so that both are equal magnitude), preventing errors.
+
+==== Constraining the Rotation to One Axis ====
+<source lang="lsl2">
+      vector detected = llDetectedPos( 0 );
+      vector pos = llGetPos();
+      llRotLookAt( llRotBetween( <0.0, 1.0, 0.0>, llVecNorm( <detected.x, detected.y, pos.z> - pos ) ), 1.0, 0.4 );
+</source>
+|helpers=
+* If you want a (mostly) smooth ''constant'' (rather than damped) rate of motion in a non-physical object try this
+<source lang="lsl2">
+//-- Rotates Object to vRotTarget at vFltRate (in radians per second
+//-- vFltRate < ~0.00000003rad/sec, (~0.00002deg/sec) will result in errors (and is just too slow anyway)
+//-- vFltRate >= (PI * 5.0)rad/sec, (900deg/sec) will result in a single snap move to vRotTarget
+uSteppedRotLookAt( rotation vRotTarget, float vFltRate ){
+	if ((integer)(vFltRate = (llAngleBetween( llGetLocalRot(), vRotTarget ) / (vFltRate / 5.0)))){
+		rotation vRotStep = llAxisAngle2Rot( llRot2Axis( vRotTarget / llGetLocalRot() ),
+		                    (1.0 / vFltRate) * llRot2Angle( vRotTarget / llGetLocalRot() ) );
+		vFltRate = (integer)vFltRate;
+		do{
+			llSetLocalRot( vRotStep * llGetLocalRot() );
+		}while (--vFltRate);
+	}
+	llSetLocalRot( vRotTarget );
+} //-- for fixed time on any rotation try llSetKeyframedMotion
+</source>
+|also_functions=
+{{LSL DefineRow||[[llLookAt]]}}
+{{LSL DefineRow||[[llStopLookAt]]}}
+{{LSL DefineRow||[[llSetPhysicsMaterial]]}}
+{{LSL DefineRow||[[llSetKeyframedMotion]]}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|permission
+|negative_index
+|sort=RotLookAt
+|cat1=Physics
+|cat2=Target
+|cat3=Rotation
+|cat4
+}}

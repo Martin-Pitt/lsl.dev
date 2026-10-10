@@ -1,0 +1,53 @@
+{{LSL_Function
+|inject-2={{LSL_Function/inventory|item|uuid=false}}
+|func_sleep=0.0|func_energy=10.0
+|func=llGetInventoryAcquireTime|return_type=string|p1_type=string|p1_name=item
+|sort=GetInventoryAcquireTime
+|func_footnote
+|func_desc
+|return_text=with the timestamp that the item was added to the prim's inventory.
+
+The time is in the UTC time zone in the format "YYYY-MM-DDThh:mm:ssZ"
+
+Appears to be accurate to seconds.
+|spec
+|caveats=
+
+*This function currently returns an ISO timestamp that is missing milliseconds. It is recommended that you code your applications in preparation of millisecond support being added at a later date.
+*Using [[llListSort]] to sort a list of timestamps that both include and exclude milliseconds will have undesired results. ".000000" will first have to be inserted into timestamps missing milliseconds.
+*Changing the contents of a script or notecard (or recompiling a script) does not change its acquire time.
+|constants
+|examples=If there is no other item in the inventory, you get the timestamp from the script itself.
+<source lang="lsl2">default
+{
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+    touch_start(integer total_number)
+    {
+        string item = llGetInventoryName(INVENTORY_ALL, 0); // 0 means the first item in prim's inventory.
+        string timestamp = llGetInventoryAcquireTime(item);
+        
+        llSay(0, "Timestamp for: " + item + " - " + timestamp); // output
+    }
+}</source>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llGetTimestamp]]|Returns the current timestamp using the same format}}
+{{LSL DefineRow||[[llGetInventoryCreator]]|Returns the inventory item's creator}}
+{{LSL DefineRow||[[llGetInventoryName]]|Returns the inventory item's name}}
+{{LSL DefineRow||[[llGetInventoryType]]|Tests to see if an inventory item exists and returns its type}}
+{{LSL DefineRow||[[llGetInventoryNumber]]|Returns the number of items of a specific type in inventory}}
+{{LSL DefineRow||[[llGetInventoryPermMask]]|Returns the inventory item's permissions}}
+{{LSL DefineRow||[[llGetInventoryKey]]|Returns the inventory item's [[UUID]] (if full perm)}}
+|also_events
+|also_tests
+|also_articles
+|notes
+|cat1=Inventory
+|cat2=Creator
+|cat3=Key
+|cat4
+}}

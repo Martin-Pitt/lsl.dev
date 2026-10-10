@@ -1,0 +1,72 @@
+{{LSL_Function
+|inject-2={{Issues/SVC-600}}{{LSL_Function/link|link|nogroup=*}}{{LSL_Function/limits}}
+|func_id=145|func_sleep=0.0|func_energy=10.0
+|func=llGetLinkName
+|return_type=string
+|p1_type=integer|p1_subtype=link|p1_name=link
+|func_footnote=
+|func_desc
+|return_text=that is the name of {{LSLP|link}} in link set
+|spec
+|caveats=*If '''link''' is out of bounds, NULL_KEY is returned.
+*The prim name attribute is limited to 63 bytes, any string longer then that will be truncated. This truncation does not always happen when the attribute is set or read.
+*There is no corresponding '''llSetLinkName''', use <code>llSetLinkPrimitiveParamsFast(link, [PRIM_NAME, name]);</code> instead.
+|constants
+|examples=Listen on channel 10 for a name; check if a prim with that name is part of this object
+<source lang="lsl2">
+integer check_for_prim(string name)
+{
+    integer i = llGetNumberOfPrims();
+    for (; i >= 0; --i)
+    {
+        if (llGetLinkName(i) == name)
+        {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+default
+{
+    state_entry()
+    {
+        llListen(10, "", llGetOwner(), "");
+    }
+    listen(integer chan, string obj, key id, string msg)
+    {
+        if (check_for_prim(msg))
+        {
+            llOwnerSay("found a linked prim named \"" + msg + "\"");
+        }
+        else
+        {
+            llOwnerSay("this object does not have any linked prims named \"" + msg + "\"");
+        }
+    }
+}</source>
+|helpers=
+<source lang="lsl2">integer getLinkWithName(string name) {
+    integer i = llGetLinkNumber() != 0;   // Start at zero (single prim) or 1 (two or more prims)
+    integer x = llGetNumberOfPrims() + i; // [0, 1) or [1, llGetNumberOfPrims()]
+    for (; i < x; ++i)
+        if (llGetLinkName(i) == name) 
+            return i; // Found it! Exit loop early with result
+    return -1; // No prim with that name, return -1.
+}</source>
+|also_functions=
+{{LSL DefineRow||[[llGetLinkKey]]|Gets the instance UUID of the link}}
+{{LSL DefineRow||[[llGetObjectName]]|Get the prims name}}
+{{LSL DefineRow||[[llSetObjectName]]|Set the prims name}}
+{{LSL DefineRow||[[llGetObjectDesc]]|Get the prims description}}
+{{LSL DefineRow||[[llSetObjectDesc]]|Set the prims description}}
+{{LSL DefineRow||[[llGetObjectDetails]]}}
+|also_tests
+|also_events
+|also_articles=
+{{LSL DefineRow||[[Prim Attribute Overloading]]}}
+|notes
+|cat1=Link
+|cat2=Link/Get
+|cat3
+|cat4
+}}

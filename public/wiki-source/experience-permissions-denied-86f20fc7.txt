@@ -1,0 +1,57 @@
+[[Category:Experience Tools]]
+{{LSL_Event
+|inject-2={{LSL_Function/avatar|agent_id}}
+|event=experience_permissions_denied
+|p1_type=key|p1_name=agent_id|p1_desc=&#32;that denied permission.
+|p2_type=integer|p2_subtype=experience_error|p2_name=reason
+|p2_desc=Reason for denial; one of the [[Experience Tools]] <code>[[Template:LSL Constants/Experience Tools Errors|XP_ERROR_*]]</code> errors flags.
+|p2_hover=Reason for denial; one of the experience tools XP_ERROR_* errors flags.
+|event_desc=The agent has denied [[llRequestExperiencePermissions|experience permission]] or generated under other cases.
+|event_footnote=This event may be generated in many cases:
+* In response to a call to [[llRequestExperiencePermissions]] if any of the following is true:
+** The agent does not respond to the experience permission dialog.  This will happen after a long delay if the agent is running a viewer which doesn't understand the request or if the agent has blocked the object.
+** The agent selects "Block Experience" in the experience permission dialog.
+** The agent has previously blocked the experience through another experience permission dialog or through the experience profile.
+** An attachment is asking for permission from an agent other than its owner.
+** The experience cannot run on the region because it is blocked or exceeds the maturity rating of the region.
+* The experience can no longer run:
+** The script has moved to a region where the experience cannot run because it is blocked or it exceeds the maturity rating of the region.
+** The script has moved to a parcel where it is blocked or not allowed.
+** The agent has blocked the experience from the experience profile.
+** The agent has moved to a parcel where the experience cannot run.
+|constants={{LSL Constants/Experience Tools Errors}}
+|also_events=[[experience permissions]]
+|also_functions=
+*[[llRequestExperiencePermissions]]
+*[[llGetExperienceErrorMessage]]
+|examples=<syntaxhighlight lang="lsl2">// Simple experience watcher
+string denied_region = "";
+string experience_name = "";
+
+default{
+    state_entry(){
+        llRequestExperiencePermissions(llGetOwner(), "");
+        experience_name = llList2String(llGetExperienceDetails(NULL_KEY), 0);
+    }
+
+    experience_permissions(key agent){
+        denied_region="";
+        llOwnerSay("in "+ experience_name);
+    }
+    
+    experience_permissions_denied(key agent, integer reason){
+        denied_region = llGetRegionName( );
+        llOwnerSay("out "+ experience_name);
+        
+    }
+    
+    changed(integer what){
+        if(denied_region != "" && denied_region != llGetRegionName()){
+           llRequestExperiencePermissions(llGetOwner(), "");
+        }
+    } 
+}</syntaxhighlight>
+|cat1=Experience
+|cat2=Permissions/Experience
+|haiku={{Haiku|It's a sad moment|When a permission denies|an experience}}
+}}

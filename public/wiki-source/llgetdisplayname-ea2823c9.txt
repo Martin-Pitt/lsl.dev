@@ -1,0 +1,50 @@
+{{LSL_Function
+|inject-1=
+{{LSL_Function/warning|Security|It is a '''terrible''' idea to tie any security measures to display names; they are not unique and can easily be changed.}}
+{{LSL_Function/warning|Data Execution|Display names can contain [[Display_names#Punctuation_characters_allowed_in_your_display_name|quotes and some punctuation]]. While this is ''not'' a problem for LSL, remember to '''escape''' strings being passed to command line scripts, sql queries, etc.<br/>See: [http://xkcd.com/327/ XKCD: Exploits of a Mom]}}
+{{Issues/SVC-6290}}
+|inject-2={{LSL Function/avatar|id|sim=known}}
+|func_id=360|func_sleep=0.0|func_energy=10.0
+|sort=GetDisplayName|func=llGetDisplayName
+|return_type=string|p1_type=key|p1_name=id
+|func_footnote={{LSLP|id}} must specify a valid avatar key, present in or otherwise known to the sim in which the script is running, otherwise an empty string is returned. This function will still return a valid display name if the avatar is a child agent of the sim (i.e., in an adjacent sim, but presently able to see into the one the script is in), or for a short period after the avatar leaves the sim (specifically, when the client completely disconnects from the sim, either as a main or child agent).
+|func_desc
+|return_text=that is the non-unique [[Display names|display name]] of the avatar specified by {{LSLP|id}}.
+|spec
+|caveats=
+* To get around the "avatar must be present" limitation, you can use the [[llRequestDisplayName]] function and the [[dataserver]] event to obtain the avatar's display name from a key (this is slower).
+* There is no opposite function ([[llDisplayName2Key]]) available since display names are non-unique.
+* Either of <code>???</code> or <abbr title="empty string"><code>""</code></abbr> is returned if the region is unable to return display names. This can happen even if display names are enabled on the region, especially the first time a given key is checked. At least one retry may be advisable. Do not rely on this function to verify avatar presence.
+* It is possible for <code>Loading...</code> to be returned if called before the region has had a chance to resolve the agent's display name.
+** Do ''not'' retry failed attempts indefinitely in a loop. In a few cases, a display name or username will not be returned for as long as the avatar is in the region.
+*If you merely wish to show the agent display name in the viewer window, it may be more straightforward to use [[Viewer URI Name Space]], e.g.:<syntaxhighlight lang="lsl2">llSay(0, "secondlife:///app/agent/" + (string)id + "/displayname");</syntaxhighlight>
+|constants
+|examples=<syntaxhighlight lang="lsl2">// Best viewed in Chat History (ctrl-h)
+default
+{
+    collision_start(integer a)//Announce who collided
+    {
+        llSay(0, "llGetDisplayName: " + llGetDisplayName(llDetectedKey(0)) +
+                 "\nllDetectedName: " + llDetectedName(0));
+    }
+    touch_start(integer a)
+    {
+        llSay(0, "llGetDisplayName: " + llGetDisplayName(llDetectedKey(0)) +
+                 "\nllDetectedName: " + llDetectedName(0));
+    }
+}</syntaxhighlight>
+|helpers
+|also_functions=
+{{LSL DefineRow||[[llRequestDisplayName]]|Uses the [[dataserver]] to request avatar information}}
+{{LSL DefineRow||[[llGetUsername]]}}
+{{LSL DefineRow||[[llRequestUsername]]|Uses the [[dataserver]] to request avatar information}}
+|also_events
+|also_articles=
+|also_tests
+|notes=
+|cat1=Avatar
+|cat2=Display Name
+|cat3=Key
+|cat4=Avatar/Name
+|haiku={{Haiku|Hi! My name's Jerome,|But you can call me Alice.|Don't tell my mother.}}
+}}

@@ -1,0 +1,73 @@
+{{LSL Function
+|func_id=273|func_sleep=0.0|func_energy=10.0
+|func=llGetTimestamp|return_type=string
+|func_footnote=Appears to be accurate to milliseconds.
+|func_desc
+|return_text=that is the current date and time in the UTC time zone in the {{Wikipedia|ISO 8601}} format {{code|"YYYY-MM-DDThh:mm:ss.ff..fZ"}}
+|spec
+|caveats
+|constants
+|examples=<syntaxhighlight lang="lsl2">// Reset tracker
+
+string BOOT_TIME;
+
+default
+{
+    state_entry()
+    {
+        BOOT_TIME = llGetTimestamp(); // state_entry is triggered on script reset.
+    }
+    
+    touch_start(integer num)
+    {
+        llSay(PUBLIC_CHANNEL, "The last script was last reset @ " + BOOT_TIME);
+        llSay(PUBLIC_CHANNEL, "Right now it is " + llGetTimestamp());
+    }
+}</syntaxhighlight>
+<syntaxhighlight lang="lsl2">// Greeting
+
+default
+{
+    state_entry()
+    {
+        llSetTouchText("Greet");
+    }
+    touch_start(integer num)
+    {
+        list TimeStamp = llParseString2List(llGetTimestamp(),["-",":"],["T"]); //Get timestamp and split into parts in a list
+        integer Hour = llList2Integer(TimeStamp,4);
+        if(Hour<12)		
+            llSay(PUBLIC_CHANNEL,"Good Morning, Oliver Sintim-Aboagye!");	
+        else if(Hour<17)
+            llSay(PUBLIC_CHANNEL,"Good Afternoon, " + llDetectedName(0));		
+        else
+            llSay(PUBLIC_CHANNEL,"Good Evening, " + llKey2Name(llDetectedKey(0)));
+    }
+}</syntaxhighlight>
+|helpers=
+=== Helper Functions ===
+* [[Stamp2UnixInt]] - List format to Unix timestamp. ex: [2009, 2, 13, 3, 31, 30] to 1234567890
+** compatible with '''''llParseString2List( llGetTimestamp(), ["-", "T", ":", "."], [] )'''''
+* [[Stamp2WeekdayStr]] - Weekday from (Y, M, D) ex: "Friday" from (2009, 2, 13)
+* [[Millisec]] - Converts a timestamp string to integer milliseconds accurate to within a month.
+* [[Unix2PST_PDT]] - Converts a Unix Time stamp to an SLT date/time string with PST or PDT indication as appropriate.
+* [[Unix2GMTorBST]] - Converts a Unix Time stamp to a UK date/time string with GMT or BST indication as appropriate.
+|also_functions=
+{{LSL DefineRow||[[llGetDate]]|Same format but without the time.}}
+{{LSL DefineRow||[[llGetUnixTime]]|Time in seconds since the epoch.}}
+{{LSL DefineRow||[[llGetTime]]|Elapsed script-time.}}
+|also_events
+|also_tests
+|also_articles=
+{{LSL DefineRow||[http://www.cl.cam.ac.uk/~mgk25/iso-time.html ISO 8601]|}}
+{{LSL DefineRow||{{Wikipedia|ISO 8601}}|}}
+{{LSL DefineRow||[[Code Racer]]|}} - useful benchmarks within 100 trials
+{{LSL DefineRow||[[Efficiency Tester]]|}} - more accurate benchmarks within 10,000 trials
+{{LSL DefineRow||[[LSL_Script_Efficiency]]|}} - in-depth discussion of the Efficiency Tester
+|notes
+|haiku={{Haiku|As time ticks away,|Tic-tac, tic-tac, on the clock,|No script ever stops.}}
+|cat1=Time
+|cat2
+|cat3
+|cat4
+}}

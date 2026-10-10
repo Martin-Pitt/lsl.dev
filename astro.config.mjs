@@ -38,7 +38,7 @@ const featureItems = features.map(f => f.subpages.length === 0
 		/** A feature with sub-pages (features/<id>/<topic>.mdx) becomes a collapsed group. */
 		label: f.title,
 		collapsed: true,
-		items: [{ label: 'Overview', link: `/features/${f.id}/` }, ...f.subpages.map(s => ({ label: s.title, link: s.href }))],
+		items: [{ label: 'Overview', link: `/features/${f.id}/`, attrs: { class: 'is-priority' } }, ...f.subpages.map(s => ({ label: s.title, link: s.href }))],
 	});
 
 export default defineConfig({
@@ -78,8 +78,8 @@ export default defineConfig({
 				label: 'Reference',
 				collapsed: true,
 				items: [
-					{ label: 'Overview', link: '/reference/' },
-					{ label: 'Categories', collapsed: true, items: [{ label: 'All categories', link: '/categories/' }, ...referenceCategories] },
+					{ label: 'Overview', link: '/reference/', attrs: { class: 'is-priority' } },
+					{ label: 'Categories', collapsed: true, items: [{ label: 'All categories', link: '/categories/', attrs: { class: 'is-priority' } }, ...referenceCategories] },
 					{ label: 'Functions', link: '/functions/' },
 					{ label: 'Events', link: '/events/' },
 					{
@@ -94,8 +94,8 @@ export default defineConfig({
 					{ label: 'Flow control', collapsed: true, items: [{ autogenerate: { directory: 'controls' } }] },
 				],
 			},
-			{ label: 'Features', collapsed: true, items: [{ label: 'Features Overview', link: '/features/' }, ...featureItems] },
-			{ label: 'Wiki archive', collapsed: true, items: [{ label: 'Archive index', link: '/wiki/' }] },
+			{ label: 'Features', collapsed: true, items: [{ label: 'Features Overview', link: '/features/', attrs: { class: 'is-priority' } }, ...featureItems] },
+			{ label: 'Wiki archive', link: '/wiki/' },
 			{ label: 'About these docs', link: '/about/' },
 		],
 	})],

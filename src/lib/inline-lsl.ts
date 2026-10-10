@@ -99,14 +99,35 @@ export async function enhanceHtml(html: string, opts: InlineOptions = {}): Promi
 }
 
 /** Escape plain text (e.g. a definition tooltip) and highlight the API names in it. */
-export async function enhanceText(text: string, opts: InlineOptions = {}): Promise<string> {
+async function enhanceWords(text: string, opts: InlineOptions & { params?: string[] }): Promise<string> {
 	let out = '', last = 0;
 	for (const m of text.matchAll(/\b[A-Za-z_][A-Za-z0-9_]*\b/g)) {
-		if (m[0] === opts.self || !apiMap.has(m[0]) || !/[A-Z_]|^ll/.test(m[0])) continue;
-		out += escape(text.slice(last, m.index)) + await inlineLsl(m[0], opts);
-		last = m.index! + m[0].length;
+		const word = m[0];
+		let html: string | undefined;
+		if (word !== opts.self && apiMap.has(word) && /[A-Z_]|^ll/.test(word)) html = await inlineLsl(word, opts);
+		// Parameter names are bold, but only identifier-looking ones (experience_id, linkNumber): plain
+		// words like "channel" or "text" are too often ordinary English to mark automatically.
+		else if (opts.params?.includes(word) && /_|[a-z][A-Z]/.test(word)) html = `<strong>${escape(word)}</strong>`;
+		if (!html) continue;
+		out += escape(text.slice(last, m.index)) + html;
+		last = m.index! + word.length;
 	}
 	return out + escape(text.slice(last));
+}
+
+/**
+ * Escape plain text (e.g. a definition description) and enrich it: API names highlighted (and linked
+ * unless `link: false`), list shapes such as `[string name, key id]` highlighted as LSL, and the
+ * entry's own parameter names in bold when given as `params`.
+ */
+export async function enhanceText(text: string, opts: InlineOptions & { params?: string[] } = {}): Promise<string> {
+	const shape = /\[[^\[\]]*\b(?:integer|float|string|key|vector|rotation|list)\b[^\[\]]*\]/g;
+	let out = '', last = 0;
+	for (const m of text.matchAll(shape)) {
+		out += await enhanceWords(text.slice(last, m.index), opts) + await inlineLsl(m[0], opts);
+		last = m.index! + m[0].length;
+	}
+	return out + await enhanceWords(text.slice(last), opts);
 }
 
 /**

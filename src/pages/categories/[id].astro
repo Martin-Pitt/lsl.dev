@@ -16,12 +16,12 @@ const guide=(guides as any)[category.id];
 const items=await Promise.all([...category.functions,...category.events,...category.constants].map(name=>apiMap.get(name)).filter(Boolean).map(async e=>({
 	title:e!.name, description:e!.description, href:apiHref(e!.kind,e!.name), kind:e!.kind,
 	titleHtml: e!.signature ? await inlineLsl(e!.signature,{link:false}) : undefined,
-	descriptionHtml: e!.description ? await enhanceText(e!.description,{self:e!.name}) : undefined,
+	descriptionHtml: e!.description ? await enhanceText(e!.description,{self:e!.name, params:(e!.parameters||[]).map((p:any)=>p.name)}) : undefined,
 })));
 // Task cards are titled with the highlighted call (the task wording is the fallback); the whole card is the link, so the code has no links of its own.
 const tasks=await Promise.all((guide?.tasks || []).map(async (task:any)=>{
 	const entry=task.function ? apiMap.get(task.function) : undefined;
-	return {...task, href: task.href || apiHref('function',task.function), signature: entry?.signature ? await inlineLsl(entry.signature,{link:false}) : undefined, descriptionHtml: task.description ? await enhanceText(task.description,{link:false}) : undefined};
+	return {...task, href: task.href || apiHref('function',task.function), signature: entry?.signature ? await inlineLsl(entry.signature,{link:false}) : undefined, descriptionHtml: task.description ? await enhanceText(task.description,{link:false, self:entry?.name, params:(entry?.parameters||[]).map((p:any)=>p.name)}) : undefined};
 }));
 const feature=featurePageByCategory.get(category.id);
 ---

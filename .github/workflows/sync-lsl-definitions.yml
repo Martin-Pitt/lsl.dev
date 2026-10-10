@@ -1,0 +1,68 @@
+name: Sync LSL Definitions
+
+# Refreshes data/sources/lsl_definitions.yaml from secondlife/lsl-definitions and
+# regenerates the catalog. Only the definitions repo is fetched; the wiki snapshot
+# (data/sources/wiki-English.xml) is never refreshed automatically, because the
+# Second Life Wiki blocks automated requests.
+
+on:
+  workflow_dispatch:
+
+  # Run daily at 2 AM UTC to catch updates
+  #schedule:
+  #  - cron: '0 2 * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-and-generate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install importer requirements
+      run: pip install -r scripts/requirements.txt
+
+    - name: Download LSL definitions
+      run: |
+        curl -fL -o data/sources/lsl_definitions.yaml \
+          https://raw.githubusercontent.com/secondlife/lsl-definitions/main/lsl_definitions.yaml
+        curl -fL -o data/sources/definitions-LICENSE \
+          https://raw.githubusercontent.com/secondlife/lsl-definitions/main/LICENSE
+        echo "LSL definitions file size: $(wc -c < data/sources/lsl_definitions.yaml) bytes"
+
+    - name: Regenerate catalog
+      run: python scripts/import-datasets.py
+
+    - name: Run data tests
+      run: python -m unittest discover -s scripts/lib -p 'test_*.py'
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Update LSL definitions and regenerate catalog
+        title: 'Auto-update: LSL definitions and generated catalog'
+        body: |
+          This PR was automatically created by the LSL definitions sync workflow.
+
+          Changes:
+          - Updated `data/sources/lsl_definitions.yaml` from secondlife/lsl-definitions
+          - Regenerated `src/data/catalog.json`, `public/wiki-source` and `data/reports`
+
+          The wiki snapshot is unchanged. Please review the changes before merging.
+        branch: auto-update-lsl-definitions
+        add-paths: |
+          data/sources
+          src/data
+          public/wiki-source
+          data/reports

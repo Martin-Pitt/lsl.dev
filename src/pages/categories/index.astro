@@ -1,7 +1,9 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { features, categoryMap, categoryHref, featureHref } from '../../lib/catalog';
+import { categoryMap } from '../../lib/catalog';
+import { featurePages as features, featureHref } from '../../lib/features';
+import { categoryLink } from '../../lib/categories';
 ---
 <StarlightPage frontmatter={{ title: 'Categories', description: 'LSL Definitions categories, arranged by feature.', editUrl: false }}>
 	<p>Each category page lists every function and event in that category from LSL Definitions. Categories are arranged under the <a href="/features/">feature</a> they belong to.</p>
@@ -9,7 +11,7 @@ import { features, categoryMap, categoryHref, featureHref } from '../../lib/cata
 		<>
 			<h2 id={c.id}><a href={featureHref(c.id)}>{c.title}</a></h2>
 			<CardGrid>
-				{c.categories.map(id => categoryMap.get(id)!).map(cat => <LinkCard title={cat.label} href={categoryHref(cat.id)} description={`${cat.functions.length} functions · ${cat.events.length} events`} />)}
+				{c.categories.map(id => categoryMap.get(id)!).map(cat => <LinkCard title={categoryLink(cat.id).label} href={categoryLink(cat.id).href} description={`${cat.functions.length} functions · ${cat.events.length} events`} />)}
 			</CardGrid>
 		</>
 	))}

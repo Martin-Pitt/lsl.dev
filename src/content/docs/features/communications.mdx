@@ -1,7 +1,6 @@
 ---
 title: "Communications"
 description: "Communication between scripts, objects, avatars and external systems."
-redirectFrom: ["communication", "http"]
 ---
 import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
 
@@ -15,20 +14,20 @@ Pick the narrowest channel that works. It is cheaper for the region and easier t
 
 - [Owner say](/functions/llOwnerSay/) sends text only to the object's owner
   - It is the usual way to report status and debug output
-  - [llInstantMessage](/functions/llInstantMessage/) sends a message to one avatar
+  - [`llInstantMessage`](/functions/llInstantMessage/) sends a message to one avatar
 - Chat is sent on an integer channel
   - Channel 0 is [public chat](/constants/PUBLIC_CHANNEL/); other channels are invisible to people
-  - Range depends on the function: [whisper](/functions/llWhisper/), [say](/functions/llSay/) and [shout](/functions/llShout/) reach further, [llRegionSay](/functions/llRegionSay/) reaches the whole region, and [llRegionSayTo](/functions/llRegionSayTo/) targets one avatar or object
-  - A [listener](/functions/llListen/) filters by channel, and optionally by name, key and message; matches arrive in [listen](/events/listen/)
+  - Range depends on the function: [whisper](/functions/llWhisper/), [say](/functions/llSay/) and [shout](/functions/llShout/) reach further, [`llRegionSay`](/functions/llRegionSay/) reaches the whole region, and [`llRegionSayTo`](/functions/llRegionSayTo/) targets one avatar or object
+  - A [listener](/functions/llListen/) filters by channel, and optionally by name, key and message; matches arrive in [`listen`](/events/listen/)
   - Each open listener costs the region, so [remove](/functions/llListenRemove/) or [disable](/functions/llListenControl/) listeners you no longer need
 - [Link messages](/functions/llMessageLinked/) send an integer, a string and a key to scripts in one prim, or to all prims, of the same linkset
-  - The [link_message](/events/link_message/) event receives them along with the sender's link number
+  - The [`link_message`](/events/link_message/) event receives them along with the sender's link number
 - [Linkset data](/features/data-storage/) is key-value storage shared by every script in the object
-  - Scripts can pass state to each other by [writing](/functions/llLinksetDataWrite/) and [reading](/functions/llLinksetDataRead/) it; the [linkset_data](/events/linkset_data/) event reports changes
+  - Scripts can pass state to each other by [writing](/functions/llLinksetDataWrite/) and [reading](/functions/llLinksetDataRead/) it; the [`linkset_data`](/events/linkset_data/) event reports changes
 - [HTTP requests](/functions/llHTTPRequest/) call an external web server, or another object's URL
-  - The answer arrives in [http_response](/events/http_response/)
+  - The answer arrives in [`http_response`](/events/http_response/)
   - Requests are throttled, and the response body is truncated to a maximum length
-  - From the [llHTTPRequest wiki page](https://wiki.secondlife.com/wiki/LlHTTPRequest): "Object requests are throttled at approximately 25 requests per 20 seconds." and "[NULL_KEY](/constants/NULL_KEY/) is returned if the request is throttled."
+  - From the [`llHTTPRequest` wiki page](https://wiki.secondlife.com/wiki/LlHTTPRequest): "Object requests are throttled at approximately 25 requests per 20 seconds." and "[`NULL_KEY`](/constants/NULL_KEY/) is returned if the request is throttled."
 - An object can act as a [small web server](#web-server-http-in)
 - Objects can [send email](/functions/llEmail/), and [receive it](/functions/llGetNextEmail/) at their own address by polling
 - Scripts can ask the viewer to show a [dialog](/functions/llDialog/), [open a URL](/functions/llLoadURL/), [show a map location](/functions/llMapDestination/) or [open a floater](/functions/llOpenFloater/)
@@ -47,7 +46,7 @@ Pick the narrowest channel that works. It is cheaper for the region and easier t
 </Box>
 <Box title="Web server (HTTP-in)" href="https://wiki.secondlife.com/wiki/HTTP_Server_URL_Registration">
 
-[Request a URL](/functions/llRequestURL/), and each incoming request arrives in [http_request](/events/http_request/), which you answer with [llHTTPResponse](/functions/llHTTPResponse/). URLs are temporary: they are lost when the object changes region or the region restarts ([CHANGED_REGION_START](/constants/CHANGED_REGION_START/)), so request a new one then.
+[Request a URL](/functions/llRequestURL/), and each incoming request arrives in [`http_request`](/events/http_request/), which you answer with [`llHTTPResponse`](/functions/llHTTPResponse/). URLs are temporary: they are lost when the object changes region or the region restarts ([`CHANGED_REGION_START`](/constants/CHANGED_REGION_START/)), so request a new one then.
 
 </Box>
 <Box title="Talking to the viewer" href="#viewer-interaction">
@@ -97,28 +96,28 @@ Dialogs, [text boxes](/functions/llTextBox/), URLs, [map beacons](/functions/llM
 
 <Box title="Additional">
 
-- [llSay](/functions/llSay/), [llWhisper](/functions/llWhisper/), [llShout](/functions/llShout/) — reserved channels
-  - [PUBLIC_CHANNEL](/constants/PUBLIC_CHANNEL/) — open local chat, heard by nearby users and objects
-  - [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) — script debugging and error messages, shown in the script warning/error window
-  - [COMBAT_CHANNEL](/constants/COMBAT_CHANNEL/) — region-wide combat log (see [combat](/features/combat/))
-- [llMessageLinked](/functions/llMessageLinked/) — link targets
-  - [LINK_SET](/constants/LINK_SET/) — every prim in the linkset
-  - [LINK_ROOT](/constants/LINK_ROOT/) — the root prim
-  - [LINK_THIS](/constants/LINK_THIS/) — the prim containing the script
-  - [LINK_ALL_OTHERS](/constants/LINK_ALL_OTHERS/) — every other prim
-  - [LINK_ALL_CHILDREN](/constants/LINK_ALL_CHILDREN/) — every prim except the root
-- [llHTTPRequest](/functions/llHTTPRequest/) — request parameters, for example
-  - [HTTP_METHOD](/constants/HTTP_METHOD/) — GET, POST, PUT or DELETE
-  - [HTTP_MIMETYPE](/constants/HTTP_MIMETYPE/) — the request Content-Type
-  - [HTTP_BODY_MAXLENGTH](/constants/HTTP_BODY_MAXLENGTH/) — maximum byte length of the response body
-  - [HTTP_CUSTOM_HEADER](/constants/HTTP_CUSTOM_HEADER/) — add custom headers
-  - [HTTP_VERIFY_CERT](/constants/HTTP_VERIFY_CERT/) — require a verifiable SSL certificate
-- [http_request](/events/http_request/) — [HTTP_BODY_TRUNCATED](/constants/HTTP_BODY_TRUNCATED/) gives the truncation point of the body
-- [llSetContentType](/functions/llSetContentType/) — Content-Type of responses sent with llHTTPResponse, such as [CONTENT_TYPE_TEXT](/constants/CONTENT_TYPE_TEXT/), [CONTENT_TYPE_JSON](/constants/CONTENT_TYPE_JSON/) or [CONTENT_TYPE_HTML](/constants/CONTENT_TYPE_HTML/)
-- [llTargetedEmail](/functions/llTargetedEmail/) — recipient
-  - [TARGETED_EMAIL_OBJECT_OWNER](/constants/TARGETED_EMAIL_OBJECT_OWNER/) — the owner of the object
-  - [TARGETED_EMAIL_ROOT_CREATOR](/constants/TARGETED_EMAIL_ROOT_CREATOR/) — the creator of the root object
-- [changed](/events/changed/) — [CHANGED_REGION_START](/constants/CHANGED_REGION_START/) is the cue to request a new URL
+- [`llSay`](/functions/llSay/), [`llWhisper`](/functions/llWhisper/), [`llShout`](/functions/llShout/) — reserved channels
+  - [`PUBLIC_CHANNEL`](/constants/PUBLIC_CHANNEL/) — open local chat, heard by nearby users and objects
+  - [`DEBUG_CHANNEL`](/constants/DEBUG_CHANNEL/) — script debugging and error messages, shown in the script warning/error window
+  - [`COMBAT_CHANNEL`](/constants/COMBAT_CHANNEL/) — region-wide combat log (see [combat](/features/combat/))
+- [`llMessageLinked`](/functions/llMessageLinked/) — link targets
+  - [`LINK_SET`](/constants/LINK_SET/) — every prim in the linkset
+  - [`LINK_ROOT`](/constants/LINK_ROOT/) — the root prim
+  - [`LINK_THIS`](/constants/LINK_THIS/) — the prim containing the script
+  - [`LINK_ALL_OTHERS`](/constants/LINK_ALL_OTHERS/) — every other prim
+  - [`LINK_ALL_CHILDREN`](/constants/LINK_ALL_CHILDREN/) — every prim except the root
+- [`llHTTPRequest`](/functions/llHTTPRequest/) — request parameters, for example
+  - [`HTTP_METHOD`](/constants/HTTP_METHOD/) — GET, POST, PUT or DELETE
+  - [`HTTP_MIMETYPE`](/constants/HTTP_MIMETYPE/) — the request `Content-Type`
+  - [`HTTP_BODY_MAXLENGTH`](/constants/HTTP_BODY_MAXLENGTH/) — maximum byte length of the response body
+  - [`HTTP_CUSTOM_HEADER`](/constants/HTTP_CUSTOM_HEADER/) — add custom headers
+  - [`HTTP_VERIFY_CERT`](/constants/HTTP_VERIFY_CERT/) — require a verifiable SSL certificate
+- [`http_request`](/events/http_request/) — [`HTTP_BODY_TRUNCATED`](/constants/HTTP_BODY_TRUNCATED/) gives the truncation point of the body
+- [`llSetContentType`](/functions/llSetContentType/) — `Content-Type` of responses sent with `llHTTPResponse`, such as [`CONTENT_TYPE_TEXT`](/constants/CONTENT_TYPE_TEXT/), [`CONTENT_TYPE_JSON`](/constants/CONTENT_TYPE_JSON/) or [`CONTENT_TYPE_HTML`](/constants/CONTENT_TYPE_HTML/)
+- [`llTargetedEmail`](/functions/llTargetedEmail/) — recipient
+  - [`TARGETED_EMAIL_OBJECT_OWNER`](/constants/TARGETED_EMAIL_OBJECT_OWNER/) — the owner of the object
+  - [`TARGETED_EMAIL_ROOT_CREATOR`](/constants/TARGETED_EMAIL_ROOT_CREATOR/) — the creator of the root object
+- [`changed`](/events/changed/) — [`CHANGED_REGION_START`](/constants/CHANGED_REGION_START/) is the cue to request a new URL
 
 </Box>
 

@@ -4,7 +4,7 @@ Compares each page in src/content/docs/features/ with the snapshot of the JSON t
 conversion (scripts/lib/fixtures/feature-clusters-pre-mdx.json). Nothing may be lost; adding is fine:
 - every API the old page listed is still linked (by a component or a prose link),
 - every constant group, see-also target (as a <SeeAlso> item or a prose link) and Planned entry is kept,
-- the title, related features, home categories and old-slug redirects are unchanged,
+- the title, related features and home categories are unchanged, and nothing links a retired slug,
 - no feature page links the local /wiki/ archive; every wiki page the old JSON linked is replaced by
   content on the page (LOCAL_REPLACEMENTS) or a link to the live Second Life Wiki page.
 Section prose was rewritten into linked concept text, so paragraphs are not compared word for word.
@@ -89,12 +89,16 @@ def main():
         lost('APIs', sorted(apis_before), set(new['items']))
         lost('constant groups', sorted(groups_before), set(new['groups']))
         rows.append((old['id'], len(apis_before), len(set(new['items'])), apis_before <= set(new['items'])))
-    redirects = dict(sorted((o, f['id']) for f in after.values() for o in f['redirectFrom']))
-    if redirects != dict(sorted(before['redirects'].items())):
-        problems.append(f"redirects differ: {before['redirects']} vs {redirects}")
+    # Retired slugs are no longer redirected (the site was never deployed); nothing may link to them.
+    retired = sorted(before['redirects'])
+    for f in after.values():
+        for old in retired:
+            if f'/features/{old}/' in f['body'] or f'feature:{old}"' in f['body']:
+                problems.append(f"{f['id']}: links retired slug {old}")
     for fid, a, b, ok in rows:
         print(f"{fid:20} APIs before {a:4}  after {b:4}  {'all kept' if ok else 'LOST SOME'}")
-    print(f"{len(rows)} features; API links before {sum(r[1] for r in rows)}, after {sum(r[2] for r in rows)}; redirects {len(redirects)}")
+    print(f"{len(rows)} features; API links before {sum(r[1] for r in rows)}, after {sum(r[2] for r in rows)}; "
+          f"retired slugs (no redirects, unlinked): {len(retired)}")
     for p in problems:
         print('PROBLEM', p)
     print('OK: nothing lost' if not problems else f'{len(problems)} problem(s)')

@@ -10,7 +10,6 @@ this page covers the mechanics. `src/content/docs/features/combat.mdx` is the re
 ---
 title: "Combat"
 description: "One sentence for cards, search and the features index."
-redirectFrom: ["old-slug"]          # optional: old /features/<old-slug>/ URLs redirect here
 ---
 import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signature, Signatures } from '../../../components/features';
 
@@ -77,7 +76,7 @@ the build. Props must be JSON arrays (double quotes, no trailing commas) because
 ## What reads the pages
 
 - `astro.config.mjs` (through `scripts/feature-index.mjs`): Features sidebar order (by slug),
-  Reference sidebar grouping (from `<FeatureFooter categories>`), and `redirectFrom` redirects.
+  Reference sidebar grouping (from `<FeatureFooter categories>`); sub-pages are nested under their feature.
 - `src/lib/features.ts`: `featurePages`, `featurePageMap`, `featurePageByCategory`, `featureHref`
   and `featuresForApi(entry)`, which gives the feature chips for an API page. A page "links" an API
   if any component lists it or the prose links `/functions/<name>/`, `/events/<name>/` or

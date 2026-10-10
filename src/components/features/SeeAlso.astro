@@ -4,7 +4,8 @@
 // </SeeAlso>
 // Items: feature:<slug>, category:<id>, wiki:<wiki page title> (links to the live Second Life Wiki) or a /site/path; "|Label" sets the
 // link text. Unknown targets fail the build. Children (usually <Planned>) follow the links.
-import { categoryMap, categoryHref, wikiByTitle } from '../../lib/catalog';
+import { categoryMap, wikiByTitle } from '../../lib/catalog';
+import { categoryLink } from '../../lib/categories';
 import { featurePageMap, featureHref } from '../../lib/features';
 import { parseSeeAlsoItem } from '../../lib/feature-mdx.mjs';
 interface Props { items?: string[] }
@@ -12,7 +13,7 @@ function need<T>(v: T | undefined, item: string): T { if (!v) throw new Error(`<
 const links = (Astro.props.items ?? []).map(item => {
 	const { kind, target, label } = parseSeeAlsoItem(item);
 	if (kind === 'feature') { const f = need(featurePageMap.get(target), item); return { kind: 'Feature', label: label ?? f.title, href: featureHref(f.id) }; }
-	if (kind === 'category') { const c = need(categoryMap.get(target), item); return { kind: 'Category', label: label ?? c.label, href: categoryHref(c.id) }; }
+	if (kind === 'category') { const c = need(categoryMap.get(target), item); const link = categoryLink(c.id); return { kind: link.single ? 'Page' : 'Category', label: label ?? link.label, href: link.href }; }
 	// The local wiki archive is not a reading destination (templates are only partly rendered), so
 	// wiki: items link to the live Second Life Wiki page as a plain external link (never fetched).
 	if (kind === 'wiki') { const w = need(wikiByTitle.get(target), item); return { kind: 'SL Wiki', label: label ?? w.title.replace(/^Category:/, ''), href: w.source.url, external: true }; }

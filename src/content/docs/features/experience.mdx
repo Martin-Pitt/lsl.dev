@@ -1,7 +1,6 @@
 ---
 title: "Experience"
 description: "Experience tools: permissions granted once per experience, persistent key-value storage and experience-only abilities."
-redirectFrom: ["experiences"]
 ---
 import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
 
@@ -9,7 +8,7 @@ An experience groups scripts under one identity. An avatar accepts the experienc
 
 Scripts join an experience when they are compiled with it selected. Experiences also bring a shared key-value store and abilities that ordinary scripts do not have.
 
-Experience scripts use the same events and permission flow as ordinary scripts: [llRequestExperiencePermissions](/functions/llRequestExperiencePermissions/) takes the place of the per-object prompt.
+Experience scripts use the same events and permission flow as ordinary scripts: [`llRequestExperiencePermissions`](/functions/llRequestExperiencePermissions/) takes the place of the per-object prompt.
 
 <Columns>
 <Column>
@@ -17,21 +16,21 @@ Experience scripts use the same events and permission flow as ordinary scripts: 
 
 - Experience permissions
   - [Ask the avatar to accept the experience](/functions/llRequestExperiencePermissions/), or grant silently if they already have
-  - The answer arrives in [experience_permissions](/events/experience_permissions/) or [experience_permissions_denied](/events/experience_permissions_denied/)
+  - The answer arrives in [`experience_permissions`](/events/experience_permissions/) or [`experience_permissions_denied`](/events/experience_permissions_denied/)
   - [Check whether an avatar is in the experience](/functions/llAgentInExperience/) and it can run here; [read granted permissions](/functions/llGetPermissions/)
 - Experience details and errors
   - [Read the experience a script belongs to](/functions/llGetExperienceDetails/)
   - [Turn error codes into messages](/functions/llGetExperienceErrorMessage/)
 - [Persistent key-value storage](/functions/llCreateKeyValue/)
   - A store shared by all scripts in the experience, across objects and regions
-  - All calls are asynchronous; results arrive in [dataserver](/events/dataserver/)
+  - All calls are asynchronous; results arrive in [`dataserver`](/events/dataserver/)
   - Limits ([Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)):
     - Each key may be a maximum of 1011 bytes
     - Each value may be a maximum of 4095 bytes
     - Total stored data is restricted to 128 MiB
 - Abilities through an experience
   - [Seat an avatar on an object](/functions/llSitOnLink/), [attach temporary items](/functions/llAttachToAvatarTemp/), [teleport the avatar](/functions/llTeleportAgent/) and [set an environment for that avatar alone](/functions/llReplaceAgentEnvironment/)
-  - llSitOnLink and the per-avatar environment functions require an experience
+  - `llSitOnLink` and the per-avatar environment functions require an experience
 
 </Box>
 </Column>
@@ -51,7 +50,7 @@ The archived wiki category for experience tools and the functions that use them.
 </Box>
 <Box title="Key-value store">
 
-Each call returns a query key; match it in [dataserver](/events/dataserver/) to read the result.
+Each call returns a query key; match it in [`dataserver`](/events/dataserver/) to read the result.
 
 </Box>
 </Column>
@@ -71,24 +70,24 @@ Each call returns a query key; match it in [dataserver](/events/dataserver/) to 
 
 <Box title="Additional">
 
-- Key-value store calls — all return a query handle for [dataserver](/events/dataserver/)
-  - [llCreateKeyValue](/functions/llCreateKeyValue/) — create a key-value pair
-  - [llReadKeyValue](/functions/llReadKeyValue/) — read a value
-  - [llUpdateKeyValue](/functions/llUpdateKeyValue/) — update a value; a checked update can fail with [XP_ERROR_RETRY_UPDATE](/constants/XP_ERROR_RETRY_UPDATE/)
-  - [llDeleteKeyValue](/functions/llDeleteKeyValue/) — delete a pair
-  - [llKeysKeyValue](/functions/llKeysKeyValue/) — list keys from an index
-  - [llKeyCountKeyValue](/functions/llKeyCountKeyValue/) — count keys
-  - [llDataSizeKeyValue](/functions/llDataSizeKeyValue/) — used and total storage
-- [llGetExperienceErrorMessage](/functions/llGetExperienceErrorMessage/) — error codes ([all errors](/constants/groups/ExperienceError/))
-  - [XP_ERROR_NONE](/constants/XP_ERROR_NONE/) — no error was detected
-  - [XP_ERROR_NOT_PERMITTED](/constants/XP_ERROR_NOT_PERMITTED/) — not allowed to run for this agent, or permissions were denied
-  - [XP_ERROR_KEY_NOT_FOUND](/constants/XP_ERROR_KEY_NOT_FOUND/) — requested key does not exist
-  - [XP_ERROR_QUOTA_EXCEEDED](/constants/XP_ERROR_QUOTA_EXCEEDED/) — a write failed because the data quota is met
-- [llGetPermissions](/functions/llGetPermissions/) — permissions granted ([ScriptPermission](/constants/groups/ScriptPermission/))
-  - [PERMISSION_TELEPORT](/constants/PERMISSION_TELEPORT/) — teleport the agent with llTeleportAgent
-  - [PERMISSION_ATTACH](/constants/PERMISSION_ATTACH/) — attach to the agent, also required by llAttachToAvatarTemp
-  - [PERMISSION_TRIGGER_ANIMATION](/constants/PERMISSION_TRIGGER_ANIMATION/) — start or stop animations
-  - [PERMISSION_TAKE_CONTROLS](/constants/PERMISSION_TAKE_CONTROLS/) — intercept the agent's controls
+- Key-value store calls — all return a query handle for [`dataserver`](/events/dataserver/)
+  - [`llCreateKeyValue`](/functions/llCreateKeyValue/) — create a key-value pair
+  - [`llReadKeyValue`](/functions/llReadKeyValue/) — read a value
+  - [`llUpdateKeyValue`](/functions/llUpdateKeyValue/) — update a value; a checked update can fail with [`XP_ERROR_RETRY_UPDATE`](/constants/XP_ERROR_RETRY_UPDATE/)
+  - [`llDeleteKeyValue`](/functions/llDeleteKeyValue/) — delete a pair
+  - [`llKeysKeyValue`](/functions/llKeysKeyValue/) — list keys from an index
+  - [`llKeyCountKeyValue`](/functions/llKeyCountKeyValue/) — count keys
+  - [`llDataSizeKeyValue`](/functions/llDataSizeKeyValue/) — used and total storage
+- [`llGetExperienceErrorMessage`](/functions/llGetExperienceErrorMessage/) — error codes ([all errors](/constants/groups/ExperienceError/))
+  - [`XP_ERROR_NONE`](/constants/XP_ERROR_NONE/) — no error was detected
+  - [`XP_ERROR_NOT_PERMITTED`](/constants/XP_ERROR_NOT_PERMITTED/) — not allowed to run for this agent, or permissions were denied
+  - [`XP_ERROR_KEY_NOT_FOUND`](/constants/XP_ERROR_KEY_NOT_FOUND/) — requested key does not exist
+  - [`XP_ERROR_QUOTA_EXCEEDED`](/constants/XP_ERROR_QUOTA_EXCEEDED/) — a write failed because the data quota is met
+- [`llGetPermissions`](/functions/llGetPermissions/) — permissions granted ([`ScriptPermission`](/constants/groups/ScriptPermission/))
+  - [`PERMISSION_TELEPORT`](/constants/PERMISSION_TELEPORT/) — teleport the agent with `llTeleportAgent`
+  - [`PERMISSION_ATTACH`](/constants/PERMISSION_ATTACH/) — attach to the agent, also required by `llAttachToAvatarTemp`
+  - [`PERMISSION_TRIGGER_ANIMATION`](/constants/PERMISSION_TRIGGER_ANIMATION/) — start or stop animations
+  - [`PERMISSION_TAKE_CONTROLS`](/constants/PERMISSION_TAKE_CONTROLS/) — intercept the agent's controls
 
 </Box>
 

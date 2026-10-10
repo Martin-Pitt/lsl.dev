@@ -3,7 +3,8 @@
 // Related feature pages, the definition categories this feature is home to (also read by the
 // sidebar, category and reference pages), and background pages on the live Second Life Wiki
 // (`archive` takes wiki page titles; links are plain external links, never fetched).
-import { categoryMap, categoryHref, wikiByTitle } from '../../lib/catalog';
+import { categoryMap, wikiByTitle } from '../../lib/catalog';
+import { categoryLink } from '../../lib/categories';
 import { featurePageMap, featureHref } from '../../lib/features';
 interface Props { related?: string[]; categories?: string[]; archive?: string[] }
 const { related = [], categories = [], archive = [] } = Astro.props;
@@ -15,7 +16,7 @@ import './features.css';
 ---
 <footer class="feature-footer not-content">
 	{rel.length > 0 && <div><h2 id="related-features">Related features</h2><ul class="inline-links">{rel.map(f => <li><a href={featureHref(f.id)}>{f.title}</a></li>)}</ul></div>}
-	{cats.length > 0 && <div><h2 id="categories">Categories</h2><ul class="inline-links">{cats.map(c => <li><a href={categoryHref(c.id)}>{c.label}</a> <small>({c.functions.length + c.events.length})</small></li>)}</ul></div>}
+	{cats.length > 0 && <div><h2 id="categories">Categories</h2><ul class="inline-links">{cats.map(c => <li><a href={categoryLink(c.id).href}>{categoryLink(c.id).label}</a> <small>({c.functions.length + c.events.length})</small></li>)}</ul></div>}
 	{wiki.length > 0 && <div><h2 id="background">On the Second Life Wiki</h2><ul class="inline-links">{wiki.map(w => <li><a href={w.source.url} rel="external">{w.title.replace(/^Category:/, '')}</a></li>)}</ul></div>}
 </footer>
 <style>

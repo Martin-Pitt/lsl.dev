@@ -76,9 +76,10 @@ src/lib/page-nav.ts      breadcrumbs and chips under the title (PageTitle overri
 src/lib/rehype-inline-lsl.ts  highlights inline `code` and API links in Markdown/MDX as LSL
 src/components/starlight Header, Hero, PageFrame (from slua.dev) and Footer overrides
 src/styles/slua-base.css slua.dev's theme CSS, copied verbatim; custom.css adds lsl.dev rules
-src/content/docs/features/  hand-written feature pages (slua.dev slugs); drive /features/, the sidebar, redirects and API feature chips
+src/content/docs/features/  hand-written feature pages (slua.dev slugs); drive /features/, the sidebar and API feature chips
 src/components/features  feature page components (Columns, Box, Signatures, ApiLinks, SeeAlso, Planned, ...)
 src/lib/features.ts      reads the feature pages: featurePages, featuresForApi (API feature chips)
+src/lib/categories.ts    categoryLink(id): link and label for a category; a single-member category links its member (no page)
 src/data/feature-clusters.json  GENERATED from the feature pages by scripts/feature-index.mjs (for older code)
 src/content/docs/        hand-written MDX: home, guides, types, controls, features
 docs/                    contributor guides (not published)

@@ -8,13 +8,13 @@ Combat (originally the Combat2 Project, an enhancement to the Linden Combat syst
 
 In Second Life there are a host of combat communities scattered across the grid. These communities use a wide variety of combat systems, HUDs and weapon systems. Some are completely custom, relying on scripts to arbitrate health and damage, while others are based on the Linden Lab Combat System (LLCS).
 
-The goal is a coherent set of tools that lets residents create complex and compelling combat systems using a common and easy to use framework. Damage only works where the [parcel allows it](/constants/PARCEL_FLAG_ALLOW_DAMAGE/) (check with [llGetParcelFlags](/functions/llGetParcelFlags/)).
+The goal is a coherent set of tools that lets residents create complex and compelling combat systems using a common and easy to use framework. Damage only works where the [parcel allows it](/constants/PARCEL_FLAG_ALLOW_DAMAGE/) (check with [`llGetParcelFlags`](/functions/llGetParcelFlags/)).
 
 <Columns>
 <Column>
 <Box title="Concepts">
 
-- Can apply damage [directly](/functions/llDamage/), or on collision by giving a prim a [damage amount](/functions/llSetDamage/) ([PRIM_DAMAGE](/constants/PRIM_DAMAGE/))
+- Can apply damage [directly](/functions/llDamage/), or on collision by giving a prim a [damage amount](/functions/llSetDamage/) ([`PRIM_DAMAGE`](/constants/PRIM_DAMAGE/))
 - Damage can have a [damage type](/features/combat/damage-types/) associated to it
 - Damage events
   - If a script (object, vehicle or attachment) has a [damage event](/events/on_damage/) this will be called first before [final damage](/events/final_damage/) is applied
@@ -23,7 +23,7 @@ The goal is a coherent set of tools that lets residents create complex and compe
 - [Objects have a health property](/constants/PRIM_HEALTH/), and any avatar's or object's [health can be read](/functions/llGetHealth/)
   - Scripts have to manage this property themselves; Unlike agents the simulator will not apply damage to the object health and instead only trigger damage and final damage events
   - Sensors can scan for [damageable](/constants/DAMAGEABLE/) objects and avatars that are not on a safe parcel
-  - When an avatar dies, its attachments get an [on_death](/events/on_death/) event
+  - When an avatar dies, its attachments get an [`on_death`](/events/on_death/) event
 - [Combat Log](/features/combat/combat-log/) has been added which allows for auditing and other usecases
   - Records all damage events, damage adjustments and kills in a [combat-specific public channel](/constants/COMBAT_CHANNEL/)
   - System generated messages by a [specific ID](/constants/COMBAT_LOG_ID/) that scripts may filter to
@@ -40,7 +40,7 @@ The goal is a coherent set of tools that lets residents create complex and compe
   - Whether health is reset to 100% on death
   - Tweak the speed of health regeneration per second or disable health regeneration
   - Whether scripts are allowed to adjust damage or write to the combat log
-  - Scripts read these settings with [llGetEnv](/functions/llGetEnv/) (see [Additional](#additional))
+  - Scripts read these settings with [`llGetEnv`](/functions/llGetEnv/) (see [Additional](#additional))
 
 </Box>
 </Column>
@@ -57,12 +57,12 @@ These are the functions and events directly related to combat, as well as relate
 </Box>
 <Box title="Combat Log" href="/features/combat/combat-log/">
 
-System-generated log messages are collected and sent into the [COMBAT_CHANNEL](/constants/COMBAT_CHANNEL/) in a JSON format (see the [message format](/features/combat/combat-log/)). Read them with a [listener](/functions/llListen/) and [llJsonGetValue](/functions/llJsonGetValue/) in the [listen](/events/listen/) event.
+System-generated log messages are collected and sent into the [`COMBAT_CHANNEL`](/constants/COMBAT_CHANNEL/) in a JSON format (see the [message format](/features/combat/combat-log/)). Read them with a [listener](/functions/llListen/) and [`llJsonGetValue`](/functions/llJsonGetValue/) in the [`listen`](/events/listen/) event.
 
 </Box>
 <Box title="Damage types" href="/features/combat/damage-types/">
 
-The damage amount can be supported via a damage type field, which can match a default DAMAGE_TYPE_\* or a custom integer; Additionally the field may be repurposed. See the [standard](/features/combat/damage-types/#standard-damage-types) and [community](/features/combat/damage-types/#community-damage-types) tables on the damage types page.
+The damage amount can be supported via a damage type field, which can match a default `DAMAGE_TYPE_*` or a custom integer; Additionally the field may be repurposed. See the [standard](/features/combat/damage-types/#standard-damage-types) and [community](/features/combat/damage-types/#community-damage-types) tables on the damage types page.
 
 </Box>
 <Box title="Weapons and projectiles">
@@ -79,15 +79,15 @@ Here are the functions and events in detail.
 
 <Signatures>
 <Signature name="llRezObjectWithParams">New function for rezzing objects with a variety of parameters, particularly useful for avoiding the overhead of starting a script for each bullet</Signature>
-<Signature name="llAdjustDamage">Modifies the amount of damage that will be applied by the current [on_damage](/events/on_damage/) event after it has completed processing</Signature>
+<Signature name="llAdjustDamage">Modifies the amount of damage that will be applied by the current [`on_damage`](/events/on_damage/) event after it has completed processing</Signature>
 <Signature name="llDamage">Delivers damage to tasks and agent in the same region with an [integer describing the type of damage](/features/combat/damage-types/). Negative damage can be used to heal instead. You can also go above 100.0 damage unlike collideable damage</Signature>
-<Signature name="llDetectedDamage">Returns a list describing a single damage event within an [on_damage](/events/on_damage/) event</Signature>
+<Signature name="llDetectedDamage">Returns a list describing a single damage event within an [`on_damage`](/events/on_damage/) event</Signature>
 <Signature name="llDetectedRezzer">Returns a key that is the UUID of the object or avatar that rezzed the detected object</Signature>
 <Signature name="llGetHealth">Returns the current health of an avatar or object in the region</Signature>
 <Signature name="on_damage">Triggered when damage has been inflicted on an avatar or task in the world but before damage has been applied or distributed</Signature>
-<Signature name="final_damage">Triggered after after all [on_damage](/events/on_damage/) events in all scripts and attachments have processed and damage has been applied to the avatar or distributed to all seated avatars</Signature>
+<Signature name="final_damage">Triggered after after all [`on_damage`](/events/on_damage/) events in all scripts and attachments have processed and damage has been applied to the avatar or distributed to all seated avatars</Signature>
 <Signature name="on_death">Triggered on all attachments worn by an avatar when that avatar's health reaches 0</Signature>
-<Signature name="llGetStartString">New function to retrieve the string passed with [llRezObjectWithParams](/functions/llRezObjectWithParams/) via [REZ_PARAM_STRING](/constants/REZ_PARAM_STRING/), particularly useful for avoiding overhead and delay when having to communicate any necessary information</Signature>
+<Signature name="llGetStartString">New function to retrieve the string passed with [`llRezObjectWithParams`](/functions/llRezObjectWithParams/) via [`REZ_PARAM_STRING`](/constants/REZ_PARAM_STRING/), particularly useful for avoiding overhead and delay when having to communicate any necessary information</Signature>
 <Signature name="llDerezObject">Derezzes an object previously rezzed from within the object containing the script</Signature>
 </Signatures>
 
@@ -96,34 +96,34 @@ Here are the functions and events in detail.
 <Box title="Additional">
 
 - [Damage types](/features/combat/damage-types/) — Provided for convenience and a suggestion. Scripters can add custom ones or repurpose the damage type fields
-- [llListen](/functions/llListen/)
-  - Channel reserved at [COMBAT_CHANNEL](/constants/COMBAT_CHANNEL/)
-  - System generated combat log messages sent by [COMBAT_LOG_ID](/constants/COMBAT_LOG_ID/)
-  - Scripts may also write to this channel if the region allows it (see "restrict_combat_log" below)
-- [llSensor](/functions/llSensor/) — Scripts may filter by [DAMAGEABLE](/constants/DAMAGEABLE/) for objects in world that process damage (that is if they have a [on_damage](/events/on_damage/) and/or [final_damage](/events/final_damage/) event -- the object's health doesn't matter)
-- [llGetObjectDetails](/functions/llGetObjectDetails/) — Additional values around health, damage and type
-  - [OBJECT_HEALTH](/constants/OBJECT_HEALTH/) — Retrieves the health of an avatar or prim
-  - [OBJECT_DAMAGE](/constants/OBJECT_DAMAGE/) — Retrieves the amount of damage a prim inflicts on collision
-  - [OBJECT_DAMAGE_TYPE](/constants/OBJECT_DAMAGE_TYPE/) — Retrieves the type of damage a prim inflicts on collision
-- [llRezObjectWithParams](/functions/llRezObjectWithParams/) — Apply damage to rezzed objects
-  - [REZ_DAMAGE](/constants/REZ_DAMAGE/) — The amount of damage applied to an agent upon collision with this object
-  - [REZ_DAMAGE_TYPE](/constants/REZ_DAMAGE_TYPE/) — The damage type to apply when this prim collides with another object
-  - [REZ_PARAM_STRING](/constants/REZ_PARAM_STRING/) — String parameter that can be passed into the rezzed object with a maximum string length of 1024 bytes
-- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) — New parameter added to adjust damage amount and damage type for collision damage
-  - [PRIM_DAMAGE](/constants/PRIM_DAMAGE/) — Set damage amount and damage type
-- [llGetEnv](/functions/llGetEnv/) — Several new values are added
-  - "allow_damage_adjust" — Are scripts allowed to adjust damage
-  - "restrict_combat_log" — Are scripts allowed to write to the combat log
-  - "restore_health" — Is health reset to 100% on death
-  - "invulnerability_time" — Invulnerablitiy time applied after avatar death
-  - "damage_throttle" — The maximum number of points of damage a single source may inflict on a target per second. This is a Damage Per Second (DPS) throttle
-  - "damage_limit" — The maximum number of points of damage a single damage collision or call via [llDamage](/functions/llDamage/) may inflict
-  - "health_regen_rate" — The speed of health regeneration in hitpoints per second
-  - "death_action" — Set the action to take when an avatar dies in the region
-- [llSetLinkSitFlags](/functions/llSetLinkSitFlags/) — Flags that can be applied to sit targets
-  - [SIT_FLAG_NO_COLLIDE](/constants/SIT_FLAG_NO_COLLIDE/) — Disable the avatar's collision volume when they are seated on this sit target
-  - [SIT_FLAG_NO_DAMAGE](/constants/SIT_FLAG_NO_DAMAGE/) — Do not distribute damage to agents sitting on this sit target
-- [llGetParcelFlags](/functions/llGetParcelFlags/) — [PARCEL_FLAG_ALLOW_DAMAGE](/constants/PARCEL_FLAG_ALLOW_DAMAGE/) is set where damage is enabled; elsewhere avatars are safe
+- [`llListen`](/functions/llListen/)
+  - Channel reserved at [`COMBAT_CHANNEL`](/constants/COMBAT_CHANNEL/)
+  - System generated combat log messages sent by [`COMBAT_LOG_ID`](/constants/COMBAT_LOG_ID/)
+  - Scripts may also write to this channel if the region allows it (see `"restrict_combat_log"` below)
+- [`llSensor`](/functions/llSensor/) — Scripts may filter by [`DAMAGEABLE`](/constants/DAMAGEABLE/) for objects in world that process damage (that is if they have a [`on_damage`](/events/on_damage/) and/or [`final_damage`](/events/final_damage/) event -- the object's health doesn't matter)
+- [`llGetObjectDetails`](/functions/llGetObjectDetails/) — Additional values around health, damage and type
+  - [`OBJECT_HEALTH`](/constants/OBJECT_HEALTH/) — Retrieves the health of an avatar or prim
+  - [`OBJECT_DAMAGE`](/constants/OBJECT_DAMAGE/) — Retrieves the amount of damage a prim inflicts on collision
+  - [`OBJECT_DAMAGE_TYPE`](/constants/OBJECT_DAMAGE_TYPE/) — Retrieves the type of damage a prim inflicts on collision
+- [`llRezObjectWithParams`](/functions/llRezObjectWithParams/) — Apply damage to rezzed objects
+  - [`REZ_DAMAGE`](/constants/REZ_DAMAGE/) — The amount of damage applied to an agent upon collision with this object
+  - [`REZ_DAMAGE_TYPE`](/constants/REZ_DAMAGE_TYPE/) — The damage type to apply when this prim collides with another object
+  - [`REZ_PARAM_STRING`](/constants/REZ_PARAM_STRING/) — String parameter that can be passed into the rezzed object with a maximum string length of 1024 bytes
+- [`llSetLinkPrimitiveParamsFast`](/functions/llSetLinkPrimitiveParamsFast/) — New parameter added to adjust damage amount and damage type for collision damage
+  - [`PRIM_DAMAGE`](/constants/PRIM_DAMAGE/) — Set damage amount and damage type
+- [`llGetEnv`](/functions/llGetEnv/) — Several new values are added
+  - `"allow_damage_adjust"` — Are scripts allowed to adjust damage
+  - `"restrict_combat_log"` — Are scripts allowed to write to the combat log
+  - `"restore_health"` — Is health reset to 100% on death
+  - `"invulnerability_time"` — Invulnerablitiy time applied after avatar death
+  - `"damage_throttle"` — The maximum number of points of damage a single source may inflict on a target per second. This is a Damage Per Second (DPS) throttle
+  - `"damage_limit"` — The maximum number of points of damage a single damage collision or call via [`llDamage`](/functions/llDamage/) may inflict
+  - `"health_regen_rate"` — The speed of health regeneration in hitpoints per second
+  - `"death_action"` — Set the action to take when an avatar dies in the region
+- [`llSetLinkSitFlags`](/functions/llSetLinkSitFlags/) — Flags that can be applied to sit targets
+  - [`SIT_FLAG_NO_COLLIDE`](/constants/SIT_FLAG_NO_COLLIDE/) — Disable the avatar's collision volume when they are seated on this sit target
+  - [`SIT_FLAG_NO_DAMAGE`](/constants/SIT_FLAG_NO_DAMAGE/) — Do not distribute damage to agents sitting on this sit target
+- [`llGetParcelFlags`](/functions/llGetParcelFlags/) — [`PARCEL_FLAG_ALLOW_DAMAGE`](/constants/PARCEL_FLAG_ALLOW_DAMAGE/) is set where damage is enabled; elsewhere avatars are safe
 
 </Box>
 
@@ -137,7 +137,7 @@ Here are the functions and events in detail.
 
 ## Known Issues
 
-- Sitting Avatars with SIT_FLAGS_NO_DAMAGE may still attempt to process damage which can cause various issues, such as still generating damage logs and affecting objects with [llSetDamage](/functions/llSetDamage/)
+- Sitting Avatars with `SIT_FLAGS_NO_DAMAGE` may still attempt to process damage which can cause various issues, such as still generating damage logs and affecting objects with [`llSetDamage`](/functions/llSetDamage/)
   - [Adjust SIT_FLAG_NO_DAMAGE so combat log reports are not generated](https://feedback.secondlife.com/scripting-features/p/adjust-sit-flag-no-damage-so-combat-log-reports-are-not-generated)
   - [SIT_FLAGS_NO_DAMAGE still attempts to process LLCS damage on sitting avatars](https://feedback.secondlife.com/scripting-bugs/p/sit-flags-no-damage-still-attempts-to-process-llcs-damage-on-sitting-avatars)
 
@@ -145,7 +145,7 @@ Here are the functions and events in detail.
 
 - [Combat2.1 Teams](https://feedback.secondlife.com/scripting-features/p/combat-21-teams)
 - [Combat2.1 Respawns](https://feedback.secondlife.com/scripting-features/p/combat-21-respawns)
-- [PRIM_MAX_HEALTH](https://feedback.secondlife.com/feature-requests/p/combat2-prim-max-health-prim-property-would-be-useful)
+- [`PRIM_MAX_HEALTH`](https://feedback.secondlife.com/feature-requests/p/combat2-prim-max-health-prim-property-would-be-useful)
 
 <Attribution title="Category:LSL Combat2" page="Category:LSL_Combat2" />
 

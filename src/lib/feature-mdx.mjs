@@ -12,7 +12,7 @@
 import { parse as parseYaml } from 'yaml';
 
 /**
- * @typedef {{ id: string, title: string, description: string, redirectFrom: string[], categories: string[], related: string[], archive: string[],
+ * @typedef {{ id: string, title: string, description: string, categories: string[], related: string[], archive: string[],
  *   items: string[], groups: string[], links: string[], hrefs: string[], planned: string[] }} FeatureMdx
  * `items`: every API the page links (component names plus prose links to /functions|events|constants/<name>/).
  * `groups`: constant groups (<ConstantGroups> plus prose links to /constants/groups/<group>/).
@@ -59,7 +59,6 @@ export function parseFeatureMdx(id, source) {
 		id,
 		title: String(data.title ?? id),
 		description: String(data.description ?? ''),
-		redirectFrom: data.redirectFrom ?? [],
 		categories: arrayProps(body, 'FeatureFooter', 'categories'),
 		related: arrayProps(body, 'FeatureFooter', 'related'),
 		archive: arrayProps(body, 'FeatureFooter', 'archive'),

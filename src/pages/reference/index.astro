@@ -1,7 +1,9 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import { catalog, features, categoryMap, categoryHref, featureHref } from '../../lib/catalog';
+import { catalog, categoryMap } from '../../lib/catalog';
+import { featurePages as features, featureHref } from '../../lib/features';
+import { categoryLink } from '../../lib/categories';
 ---
 <StarlightPage frontmatter={{ title: 'Reference', description: 'LSL functions, events, constants, types and flow control.', editUrl: false }}>
 	<p>Signatures, parameters and metadata come from LSL Definitions; descriptions, caveats and examples come from the LSL Wiki. Deprecated and private entries are left out. A definition does not guarantee availability in every region.</p>
@@ -19,7 +21,7 @@ import { catalog, features, categoryMap, categoryHref, featureHref } from '../..
 		{features.filter(c => c.categories.length > 0).map(c => (
 			<div>
 				<dt><a href={featureHref(c.id)}>{c.title}</a></dt>
-				<dd>{c.categories.map((id, i) => <>{i > 0 && ' · '}<a href={categoryHref(id)}>{categoryMap.get(id)!.label}</a></>)}</dd>
+				<dd>{c.categories.map((id, i) => <>{i > 0 && ' · '}<a href={categoryLink(id).href}>{categoryLink(id).label}</a></>)}</dd>
 			</div>
 		))}
 	</dl>

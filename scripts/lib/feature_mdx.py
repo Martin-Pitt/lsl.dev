@@ -46,7 +46,6 @@ def parse_feature(path):
     rows = re.findall(r'<Signature\s+name="([^"]+)"', body)
     return {
         'id': Path(path).stem, 'title': str(data.get('title', '')), 'description': str(data.get('description', '')),
-        'redirectFrom': list(data.get('redirectFrom') or []),
         'categories': _array_props(body, 'FeatureFooter', 'categories'),
         'related': _array_props(body, 'FeatureFooter', 'related'),
         'archive': _array_props(body, 'FeatureFooter', 'archive'),
@@ -86,5 +85,5 @@ def compat_index(features):
                       'categories': f['categories'], 'related': f['related'],
                       'sections': [{'title': f['title'], 'items': f['items'], 'groups': f['groups']}]}
                      for f in features],
-        'redirects': dict(sorted((old, f['id']) for f in features for old in f['redirectFrom'])),
+        'redirects': {},
     }

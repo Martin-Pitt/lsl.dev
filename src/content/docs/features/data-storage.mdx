@@ -1,7 +1,6 @@
 ---
 title: "Data Storage"
 description: "Where scripts can keep data: script memory, linkset data, experience storage, notecards and object properties."
-redirectFrom: ["data"]
 ---
 import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
 
@@ -20,12 +19,12 @@ As a rule: [linkset data](#linkset-data) for an object's own persistent state, [
   - It survives script resets, taking the object into inventory and rezzing it again
   - Keys can be [protected with a password](/functions/llLinksetDataWriteProtected/)
   - Spreading data across many keys is cheaper than reading and rewriting one large value
-  - Changes are reported in the [linkset_data](/events/linkset_data/) event
+  - Changes are reported in the [`linkset_data`](/events/linkset_data/) event
 - [Experience persistent storage](/functions/llCreateKeyValue/): scripts compiled to an [experience](/features/experience/) share a key-value store that any object in that experience can use, anywhere on the grid
-  - Every call is asynchronous and answers in the [dataserver](/events/dataserver/) event
+  - Every call is asynchronous and answers in the [`dataserver`](/events/dataserver/) event
 - Notecards are read-only text in the object's inventory, good for configuration that users edit by hand
-  - Lines can be read [synchronously](/functions/llGetNotecardLineSync/) when the notecard is cached, or [asynchronously](/functions/llGetNotecardLine/) through dataserver
-  - From the [llGetNotecardLineSync wiki page](https://wiki.secondlife.com/wiki/LlGetNotecardLineSync): "Notecards are cached into a fixed-size buffer, with the oldest (least-recently read) notecard getting removed first. It is not safe to assume a notecard has been previously cached."
+  - Lines can be read [synchronously](/functions/llGetNotecardLineSync/) when the notecard is cached, or [asynchronously](/functions/llGetNotecardLine/) through `dataserver`
+  - From the [`llGetNotecardLineSync` wiki page](https://wiki.secondlife.com/wiki/LlGetNotecardLineSync): "Notecards are cached into a fixed-size buffer, with the oldest (least-recently read) notecard getting removed first. It is not safe to assume a notecard has been previously cached."
   - Reload when the inventory [changes](/constants/CHANGED_INVENTORY/)
 - Object properties hold small values
   - In the object's [name](/functions/llSetObjectName/) or [description](/functions/llSetObjectDesc/), or in a prim's hover text or other [prim parameters](/features/prims/)
@@ -103,26 +102,26 @@ Globals live until reset; a script can [lower its own limit](/functions/llSetMem
 
 <Box title="Additional">
 
-- [linkset_data](/events/linkset_data/) — the action that happened
-  - [LINKSETDATA_UPDATE](/constants/LINKSETDATA_UPDATE/) — a key was created or updated
-  - [LINKSETDATA_DELETE](/constants/LINKSETDATA_DELETE/) — a key was removed
-  - [LINKSETDATA_MULTIDELETE](/constants/LINKSETDATA_MULTIDELETE/) — several keys were deleted with [llLinksetDataDeleteFound](/functions/llLinksetDataDeleteFound/)
-  - [LINKSETDATA_RESET](/constants/LINKSETDATA_RESET/) — the store was cleared with [llLinksetDataReset](/functions/llLinksetDataReset/)
-- [llLinksetDataWrite](/functions/llLinksetDataWrite/) — result codes
-  - [LINKSETDATA_OK](/constants/LINKSETDATA_OK/) — success
-  - [LINKSETDATA_EMEMORY](/constants/LINKSETDATA_EMEMORY/) — the pair was too large to write
-  - [LINKSETDATA_ENOKEY](/constants/LINKSETDATA_ENOKEY/) — the key name was empty
-  - [LINKSETDATA_EPROTECTED](/constants/LINKSETDATA_EPROTECTED/) — the pair is protected
-  - [LINKSETDATA_NOTFOUND](/constants/LINKSETDATA_NOTFOUND/) — the key could not be found
-  - [LINKSETDATA_NOUPDATE](/constants/LINKSETDATA_NOUPDATE/) — the value matched the stored value, so nothing changed
-- [dataserver](/events/dataserver/) for key-value calls — errors, for example
-  - [XP_ERROR_NONE](/constants/XP_ERROR_NONE/) — no error
-  - [XP_ERROR_KEY_NOT_FOUND](/constants/XP_ERROR_KEY_NOT_FOUND/) — the key does not exist
-  - [XP_ERROR_QUOTA_EXCEEDED](/constants/XP_ERROR_QUOTA_EXCEEDED/) — the data quota is met
-  - [XP_ERROR_RETRY_UPDATE](/constants/XP_ERROR_RETRY_UPDATE/) — a checked update was out of date
-- [llGetNotecardLineSync](/functions/llGetNotecardLineSync/) — returns [NAK](/constants/NAK/) when the notecard is not cached; [EOF](/constants/EOF/) marks a line past the end
-- [changed](/events/changed/) — [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/) when the notecard may have been edited
-- [llRezObjectWithParams](/functions/llRezObjectWithParams/) — [REZ_PARAM_STRING](/constants/REZ_PARAM_STRING/) passes a string read with llGetStartString
+- [`linkset_data`](/events/linkset_data/) — the action that happened
+  - [`LINKSETDATA_UPDATE`](/constants/LINKSETDATA_UPDATE/) — a key was created or updated
+  - [`LINKSETDATA_DELETE`](/constants/LINKSETDATA_DELETE/) — a key was removed
+  - [`LINKSETDATA_MULTIDELETE`](/constants/LINKSETDATA_MULTIDELETE/) — several keys were deleted with [`llLinksetDataDeleteFound`](/functions/llLinksetDataDeleteFound/)
+  - [`LINKSETDATA_RESET`](/constants/LINKSETDATA_RESET/) — the store was cleared with [`llLinksetDataReset`](/functions/llLinksetDataReset/)
+- [`llLinksetDataWrite`](/functions/llLinksetDataWrite/) — result codes
+  - [`LINKSETDATA_OK`](/constants/LINKSETDATA_OK/) — success
+  - [`LINKSETDATA_EMEMORY`](/constants/LINKSETDATA_EMEMORY/) — the pair was too large to write
+  - [`LINKSETDATA_ENOKEY`](/constants/LINKSETDATA_ENOKEY/) — the key name was empty
+  - [`LINKSETDATA_EPROTECTED`](/constants/LINKSETDATA_EPROTECTED/) — the pair is protected
+  - [`LINKSETDATA_NOTFOUND`](/constants/LINKSETDATA_NOTFOUND/) — the key could not be found
+  - [`LINKSETDATA_NOUPDATE`](/constants/LINKSETDATA_NOUPDATE/) — the value matched the stored value, so nothing changed
+- [`dataserver`](/events/dataserver/) for key-value calls — errors, for example
+  - [`XP_ERROR_NONE`](/constants/XP_ERROR_NONE/) — no error
+  - [`XP_ERROR_KEY_NOT_FOUND`](/constants/XP_ERROR_KEY_NOT_FOUND/) — the key does not exist
+  - [`XP_ERROR_QUOTA_EXCEEDED`](/constants/XP_ERROR_QUOTA_EXCEEDED/) — the data quota is met
+  - [`XP_ERROR_RETRY_UPDATE`](/constants/XP_ERROR_RETRY_UPDATE/) — a checked update was out of date
+- [`llGetNotecardLineSync`](/functions/llGetNotecardLineSync/) — returns [`NAK`](/constants/NAK/) when the notecard is not cached; [`EOF`](/constants/EOF/) marks a line past the end
+- [`changed`](/events/changed/) — [`CHANGED_INVENTORY`](/constants/CHANGED_INVENTORY/) when the notecard may have been edited
+- [`llRezObjectWithParams`](/functions/llRezObjectWithParams/) — [`REZ_PARAM_STRING`](/constants/REZ_PARAM_STRING/) passes a string read with `llGetStartString`
 
 </Box>
 

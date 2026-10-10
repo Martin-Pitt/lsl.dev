@@ -31,7 +31,6 @@ class FeaturePageTests(unittest.TestCase):
         cls.ids = [f['id'] for f in cls.features]
         cls.items = {i for f in cls.features for i in f['items']}
         cls.groups = {g for f in cls.features for g in f['groups']}
-        cls.redirects = {old: f['id'] for f in cls.features for old in f['redirectFrom']}
 
     def test_slugs_titles_and_order_match_slua(self):
         self.assertEqual([(f['id'], f['title']) for f in self.features], self.SLUA_FEATURES)
@@ -94,11 +93,18 @@ class FeaturePageTests(unittest.TestCase):
                     self.assertIn(parts[1], names, f"{f['id']}: {h}")
                 self.assertTrue(h.split('#')[0].endswith('/'), f"{f['id']}: link without trailing slash: {h}")
 
-    def test_old_cluster_slugs_still_resolve(self):
+    def test_retired_slugs_are_gone(self):
+        """Nothing is deployed yet, so retired feature slugs are not redirected; nothing may link to them."""
         for old in self.OLD_CLUSTERS:
-            self.assertIn(self.redirects.get(old, old), self.ids, old)
-        for old in self.redirects:
-            self.assertNotIn(old, self.ids)
+            if old in self.ids:
+                continue
+            for f in self.features:
+                for route, body in f['pages']:
+                    self.assertNotIn(f'/features/{old}/', body, route)
+                    self.assertNotIn(f'feature:{old}"', body, route)
+            self.assertFalse((ROOT / f'src/content/docs/features/{old}.mdx').exists(), old)
+        for f in self.features:
+            self.assertNotIn('redirectFrom:', f['pages'][0][1], f['id'])
 
     def test_page_structure(self):
         """Framing intro, two-column top, signatures and footer (docs/style/feature-pages.md)."""
@@ -154,6 +160,29 @@ class FeaturePageTests(unittest.TestCase):
                     self.assertIn(target, pages, f"{route}: link to missing feature page {target}")
                     if anchor:
                         self.assertIn(anchor, pages[target], f"{route}: {target}#{anchor}")
+
+    def category_members(self):
+        public = {e['name'] for k in ('functions', 'events', 'constants') for e in self.catalog[k]}
+        return {c['id']: [n for k in ('functions', 'events', 'constants') for n in c[k] if n in public]
+                for c in self.catalog['categories']}
+
+    def test_no_category_page_with_fewer_than_two_members(self):
+        """Single-member categories link straight to the member (src/lib/category-members.mjs); with a
+        build present, they have no /categories/<id>/ page and every category page lists 2+ members."""
+        members = self.category_members()
+        self.assertEqual([c for c, m in members.items() if not m], [], 'categories without public members')
+        dist = ROOT / 'dist/categories'
+        if not dist.exists():
+            self.skipTest('no build in dist/')
+        for cid, m in members.items():
+            page = dist / cid / 'index.html'
+            if len(m) < 2:
+                self.assertFalse(page.exists(), f'/categories/{cid}/ should not be built; link {m} directly')
+                continue
+            if page.exists():
+                html = page.read_text(encoding='utf-8')
+                linked = {n for n in m if f'>{n}<' in html}
+                self.assertGreaterEqual(len(linked), 2, f'/categories/{cid}/ lists {sorted(linked)}')
 
     def test_generated_index_is_current(self):
         """src/data/feature-clusters.json is generated; rerun `node scripts/feature-index.mjs` after editing pages."""

@@ -6,27 +6,27 @@ import { Attribution, Signature, Signatures } from '../../../../components/featu
 
 The Combat Log has been added as part of the [Combat2](/features/combat/) update which allows for auditing and useful usecases.
 
-- Combat Log messages are sent region-wide on the channel: [COMBAT_CHANNEL](/constants/COMBAT_CHANNEL/)
+- Combat Log messages are sent region-wide on the channel: [`COMBAT_CHANNEL`](/constants/COMBAT_CHANNEL/)
 - Records all damage events, damage adjustments and kills
-- System generated messages by a specific ID that scripts may filter to: [COMBAT_LOG_ID](/constants/COMBAT_LOG_ID/)
+- System generated messages by a specific ID that scripts may filter to: [`COMBAT_LOG_ID`](/constants/COMBAT_LOG_ID/)
 - Scripts may write to this channel if not restricted by the region, check via: [`llGetEnv("restrict_combat_log")`](/functions/llGetEnv/)
 
 System generated messages can be delayed up to 1 second as the sim collects messages to send them in bulk at a time.
 
-Unless you want to intentionally listen to object generated messages it is recommended to set your listener to filter by [COMBAT_LOG_ID](/constants/COMBAT_LOG_ID/), e.g. `llListen(COMBAT_CHANNEL, "", COMBAT_LOG_ID, "");` This is because your script may end up unnecessarily receiving and processing custom messages that it was not designed to handle and ends up ignoring.
+Unless you want to intentionally listen to object generated messages it is recommended to set your listener to filter by [`COMBAT_LOG_ID`](/constants/COMBAT_LOG_ID/), e.g. `llListen(COMBAT_CHANNEL, "", COMBAT_LOG_ID, "");` This is because your script may end up unnecessarily receiving and processing custom messages that it was not designed to handle and ends up ignoring.
 
 ## Constants
 
 <Signatures>
-<Signature name="COMBAT_CHANNEL">A channel reserved for combat related log events broadcast to the entire region. System generated messages to this channel will be from [COMBAT_LOG_ID](/constants/COMBAT_LOG_ID/). If the region settings allow for it (see [llGetEnv](/functions/llGetEnv/) "restrict_combat_log"), then scripts may write into this channel as well.</Signature>
-<Signature name="COMBAT_LOG_ID">Messages from the region to the combat log will all be from this ID. Scripts may filter [llListen](/functions/llListen/) calls on this ID to receive only system generated combat log messages.</Signature>
+<Signature name="COMBAT_CHANNEL">A channel reserved for combat related log events broadcast to the entire region. System generated messages to this channel will be from [`COMBAT_LOG_ID`](/constants/COMBAT_LOG_ID/). If the region settings allow for it (see [`llGetEnv`](/functions/llGetEnv/) `"restrict_combat_log"`), then scripts may write into this channel as well.</Signature>
+<Signature name="COMBAT_LOG_ID">Messages from the region to the combat log will all be from this ID. Scripts may filter [`llListen`](/functions/llListen/) calls on this ID to receive only system generated combat log messages.</Signature>
 </Signatures>
 
 ## Message format
 
 Combat events are JSON-formatted, and multiple events may be combined into a single chat message (organized in an array).
 
-Each event always has an "event" property to describe the type of the message object, such as `DEATH` or `DAMAGE`.
+Each event always has an `"event"` property to describe the type of the message object, such as `DEATH` or `DAMAGE`.
 
 The schema of the different objects are as follows:
 
@@ -34,35 +34,35 @@ The schema of the different objects are as follows:
 
 | Key | Value | Description |
 | --- | --- | --- |
-| "event" | "DAMAGE" |  |
-| "damage" | [JSON_NUMBER](/constants/JSON_NUMBER/) | Float of final damage applied |
-| "initial" | [JSON_NUMBER](/constants/JSON_NUMBER/) | Float of initial damage before adjustment |
-| "type" | [JSON_NUMBER](/constants/JSON_NUMBER/) | [DAMAGE_TYPE_\*](/features/combat/damage-types/) or any number defined by the scripter of the damage source |
-| "source" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage source |
-| "target" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage target |
-| "owner" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage source owner |
-| "rezzer" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage source rezzer |
-| "modifications" | [JSON_ARRAY](/constants/JSON_ARRAY/) | Array of damage adjustments |
+| `"event"` | `"DAMAGE"` |  |
+| `"damage"` | [`JSON_NUMBER`](/constants/JSON_NUMBER/) | Float of final damage applied |
+| `"initial"` | [`JSON_NUMBER`](/constants/JSON_NUMBER/) | Float of initial damage before adjustment |
+| `"type"` | [`JSON_NUMBER`](/constants/JSON_NUMBER/) | [`DAMAGE_TYPE_*`](/features/combat/damage-types/) or any number defined by the scripter of the damage source |
+| `"source"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage source |
+| `"target"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage target |
+| `"owner"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage source owner |
+| `"rezzer"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage source rezzer |
+| `"modifications"` | [`JSON_ARRAY`](/constants/JSON_ARRAY/) | Array of damage adjustments |
 
-JSON structure of a damage adjustment in the modifications array:
+JSON structure of a damage adjustment in the `"modifications"` array:
 
 | Key | Value | Description |
 | --- | --- | --- |
-| "events" | [JSON_ARRAY](/constants/JSON_ARRAY/) | A json array of json objects. Each object has a "new_damage" number representing the adjusted damage and a "script" string |
-| "task_id" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of the prim that adjusted the damage |
+| `"events"` | [`JSON_ARRAY`](/constants/JSON_ARRAY/) | A json array of json objects. Each object has a `"new_damage"` number representing the adjusted damage and a `"script"` string |
+| `"task_id"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of the prim that adjusted the damage |
 
 ### DEATH event
 
 | Key | Value | Description |
 | --- | --- | --- |
-| "event" | "DEATH" |  |
-| "type" | [JSON_NUMBER](/constants/JSON_NUMBER/) | [DAMAGE_TYPE_\*](/features/combat/damage-types/) or any number defined by the scripter of the damage source |
-| "source" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage source |
-| "source_pos" | [JSON_ARRAY](/constants/JSON_ARRAY/) | Array representing the position of the damage source |
-| "target" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage target |
-| "target_pos" | [JSON_ARRAY](/constants/JSON_ARRAY/) | Array representing the position of the damage target |
-| "owner" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage source owner |
-| "rezzer" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage source rezzer |
+| `"event"` | `"DEATH"` |  |
+| `"type"` | [`JSON_NUMBER`](/constants/JSON_NUMBER/) | [`DAMAGE_TYPE_*`](/features/combat/damage-types/) or any number defined by the scripter of the damage source |
+| `"source"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage source |
+| `"source_pos"` | [`JSON_ARRAY`](/constants/JSON_ARRAY/) | Array representing the position of the damage source |
+| `"target"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage target |
+| `"target_pos"` | [`JSON_ARRAY`](/constants/JSON_ARRAY/) | Array representing the position of the damage target |
+| `"owner"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage source owner |
+| `"rezzer"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage source rezzer |
 
 ## Example messages
 
@@ -129,7 +129,7 @@ A `DAMAGE` event which features a damage adjustment:
 
 ## Parsing messages
 
-You can use JSON functions such as [llJson2List](/functions/llJson2List/) and [llJsonGetValue](/functions/llJsonGetValue/) to help parse the messages:
+You can use JSON functions such as [`llJson2List`](/functions/llJson2List/) and [`llJsonGetValue`](/functions/llJsonGetValue/) to help parse the messages:
 
 ```lsl
 // Script example with a listener and showing how to filter for death events
@@ -209,20 +209,20 @@ If your messages are more auxiliary/extra it might be better to send them on `CO
 
 ### OBJECT_DEATH messages
 
-A useful message to send into the combat log could be an `OBJECT_DEATH` message. [DAMAGEABLE](/constants/DAMAGEABLE/) objects don't generate system messages when their health is reduced to 0 as the health is entirely managed and responsibility of the script with the damage processing events.
+A useful message to send into the combat log could be an `OBJECT_DEATH` message. [`DAMAGEABLE`](/constants/DAMAGEABLE/) objects don't generate system messages when their health is reduced to 0 as the health is entirely managed and responsibility of the script with the damage processing events.
 
 The `OBJECT_DEATH` message should look the same as a `DEATH` message:
 
 | Key | Value | Description |
 | --- | --- | --- |
-| "event" | "OBJECT_DEATH" | Object-generated message written into the [COMBAT_CHANNEL](/constants/COMBAT_CHANNEL/) declaring that the object had died |
-| "type" | [JSON_NUMBER](/constants/JSON_NUMBER/) | [DAMAGE_TYPE_\*](/features/combat/damage-types/) or any number defined by the scripter of the damage source |
-| "source" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage source |
-| "source_pos" | [JSON_ARRAY](/constants/JSON_ARRAY/) | Array representing the position of the damage source |
-| "target" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage target |
-| "target_pos" | [JSON_ARRAY](/constants/JSON_ARRAY/) | Array representing the position of the damage target |
-| "owner" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage source owner |
-| "rezzer" | [JSON_STRING](/constants/JSON_STRING/) | UUID key of damage source rezzer |
+| `"event"` | `"OBJECT_DEATH"` | Object-generated message written into the [`COMBAT_CHANNEL`](/constants/COMBAT_CHANNEL/) declaring that the object had died |
+| `"type"` | [`JSON_NUMBER`](/constants/JSON_NUMBER/) | [`DAMAGE_TYPE_*`](/features/combat/damage-types/) or any number defined by the scripter of the damage source |
+| `"source"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage source |
+| `"source_pos"` | [`JSON_ARRAY`](/constants/JSON_ARRAY/) | Array representing the position of the damage source |
+| `"target"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage target |
+| `"target_pos"` | [`JSON_ARRAY`](/constants/JSON_ARRAY/) | Array representing the position of the damage target |
+| `"owner"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage source owner |
+| `"rezzer"` | [`JSON_STRING`](/constants/JSON_STRING/) | UUID key of damage source rezzer |
 
 Generating and sending the message taken from an [example object-based health script](https://wiki.secondlife.com/wiki/User:Nexii_Malthus/Object-based_health):
 

@@ -3,7 +3,8 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { readFileSync } from 'node:fs';
 import rehypeInlineLsl from './src/lib/rehype-inline-lsl.ts';
-import { loadFeatures, featureRedirects } from './scripts/feature-index.mjs';
+import { loadFeatures } from './scripts/feature-index.mjs';
+import { singleMemberCategories } from './src/lib/category-members.mjs';
 
 /**
  * Navigation mirrors slua.dev: Fundamentals, Reference, Features, Guides, plus the wiki archive.
@@ -16,13 +17,19 @@ const features = loadFeatures();
 /** @type {any} */
 const catalog = JSON.parse(readFileSync('./src/data/catalog.json', 'utf-8'));
 const categoryLabel = new Map(catalog.categories.map((/** @type {any} */ c) => [c.id, c.label]));
+/** A category with one public member stands in for it: it gets no page, and the sidebar links the
+ * member instead (the one allowed sidebar link to an individual API). */
+const singleMember = singleMemberCategories(catalog);
 
 const referenceCategories = features
 	.filter(f => f.categories.length > 0)
 	.map(f => ({
 		label: f.title,
 		collapsed: true,
-		items: f.categories.map(id => ({ label: categoryLabel.get(id) ?? id, link: `/categories/${id}/` })),
+		items: f.categories.map(id => {
+			const one = singleMember.get(id);
+			return one ? { label: `${one.label} → ${one.name}`, link: one.href } : { label: categoryLabel.get(id) ?? id, link: `/categories/${id}/` };
+		}),
 	}));
 /** Flat, in slua.dev order: Features Overview, then one entry per feature page. */
 const featureItems = features.map(f => f.subpages.length === 0
@@ -33,12 +40,9 @@ const featureItems = features.map(f => f.subpages.length === 0
 		collapsed: true,
 		items: [{ label: 'Overview', link: `/features/${f.id}/` }, ...f.subpages.map(s => ({ label: s.title, link: s.href }))],
 	});
-/** Retired feature-cluster slugs keep working (`redirectFrom` in each page's frontmatter). */
-const redirects = Object.fromEntries(Object.entries(featureRedirects(features)).map(([from, to]) => [`/features/${from}/`, `/features/${to}/`]));
 
 export default defineConfig({
 	site: 'https://lsl.dev',
-	redirects,
 	// Inline `code` and links to API pages in Markdown/MDX are highlighted as LSL (see the plugin).
 	markdown: { rehypePlugins: [rehypeInlineLsl] },
 	integrations: [starlight({

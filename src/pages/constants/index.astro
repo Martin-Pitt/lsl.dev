@@ -1,0 +1,10 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import CatalogList from '../../components/reference/CatalogList.astro';
+import { catalog, apiHref } from '../../lib/catalog';
+const items=catalog.constants.map(e=>({title:e.name,description:e.description,href:apiHref(e.kind,e.name),categories:e.categories}));
+---
+<StarlightPage frontmatter={{title:'Constants',description:'Browse the current LSL constants reference.',editUrl:false}}>
+<p>Find LSL constants by name, purpose, or topic. Signatures and descriptions follow the current definitions; deprecated and private entries are excluded.</p>
+<CatalogList items={items} label="constants" filterCategories={catalog.categories}/>
+</StarlightPage>

@@ -1,0 +1,47 @@
+---
+import { Code } from '@astrojs/starlight/components';
+import { readFileSync, existsSync } from 'node:fs';
+const catalogPath = new URL('../../data/catalog.json', import.meta.url);
+const catalog = existsSync(catalogPath) ? JSON.parse(readFileSync(catalogPath, 'utf8')) : {};
+const count = (key: string) => Array.isArray(catalog[key]) ? catalog[key].length : Object.keys(catalog[key] || {}).length;
+const reference = [
+  { title: 'Functions', href: '/functions/', mark: 'ƒ', count: count('functions'), description: 'Make things happen. Move objects, communicate, and shape your world.' },
+  { title: 'Events', href: '/events/', mark: '↳', count: count('events'), description: 'Respond to touches, messages, timers, and everything in between.' },
+  { title: 'Constants', href: '/constants/', mark: '#', count: count('constants'), description: 'Find the named values and options your scripts need.' },
+];
+const sample = `default
+{
+    state_entry()
+    {
+        llSay(0, "Hello, world!");
+    }
+
+    touch_start(integer total_number)
+    {
+        llSay(0, "You touched me!");
+    }
+}`;
+---
+<div class="home not-content">
+  <section class="hero" aria-labelledby="_top">
+    <div class="intro">
+      <p class="eyebrow"><span></span> THE LINDEN SCRIPTING LANGUAGE</p>
+      <h1 id="_top" data-page-title>Give your world<br/>a little <em>logic.</em></h1>
+      <p class="lead">From your first touch event to your next big idea. A modern reference for scripting life into Second Life.</p>
+      <div class="actions"><a class="primary" href="/reference/">Explore the reference <span aria-hidden="true">→</span></a><a class="secondary" href="/guides/">Start learning <span aria-hidden="true">↗</span></a></div>
+      <p class="note">Reviewed API definitions. Community knowledge. One place.</p>
+    </div>
+    <div class="editor"><div class="editor-bar"><span class="editor-dot"></span><span>hello-world.lsl</span><span class="editor-label">LSL</span></div><Code code={sample} lang="lsl" /><div class="editor-footer"><span class="status-dot"></span> A small script. A world of possibilities.</div></div>
+  </section>
+  <section class="reference-section" aria-labelledby="reference-heading">
+    <div class="section-heading"><div><p class="eyebrow">YOUR EVERYDAY TOOLKIT</p><h2 id="reference-heading">Less searching. More scripting.</h2></div><a href="/categories/">Browse by category <span aria-hidden="true">→</span></a></div>
+    <div class="reference-grid">{reference.map(item => <a class="reference-card" href={item.href}><div class="card-top"><span class="symbol" aria-hidden="true">{item.mark}</span>{item.count > 0 && <span class="count">{item.count.toLocaleString()} entries</span>}</div><h3>{item.title}<span aria-hidden="true">↗</span></h3><p>{item.description}</p></a>)}</div>
+  </section>
+  <section class="knowledge" aria-labelledby="knowledge-heading"><div><p class="eyebrow">BUILT ON COMMUNITY KNOWLEDGE</p><h2 id="knowledge-heading">The details make the difference.</h2><p>Explore examples, caveats, and years of scripting knowledge from the Second Life Wiki, alongside structured definitions with reviewed categories and parameter names.</p><a href="/wiki/">Open the wiki library <span aria-hidden="true">→</span></a></div><div class="paths"><a href="/types/"><span><strong>Know your types</strong><small>Integers, strings, vectors, and more</small></span><span aria-hidden="true">→</span></a><a href="/controls/"><span><strong>Find your flow</strong><small>Conditions, loops, and program structure</small></span><span aria-hidden="true">→</span></a><a href="https://slua.dev"><span><strong>Exploring SLua?</strong><small>Meet our sister documentation site</small></span><span aria-hidden="true">↗</span></a></div></section>
+  <footer class="home-footer"><span>Made for Second Life creators.</span><span>Wiki contributions retain their source attribution. <a href="/wiki/">About the archive →</a></span></footer>
+</div>
+<style>
+.home{max-width:76rem;margin:0 auto}.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:5rem;align-items:center;padding:3.5rem 0 5rem}.eyebrow{font:600 .7rem var(--sl-font-mono);letter-spacing:.12em;color:var(--sl-color-text-accent);margin:0 0 1.3rem}.eyebrow span,.status-dot{display:inline-block;width:6px;height:6px;background:var(--sl-color-accent);border-radius:50%;margin-right:.6rem}h1{font-size:clamp(2.6rem,5.6vw,4.6rem);line-height:1.08;letter-spacing:-.065em;font-weight:700;margin:0}h1 em{font-style:normal;color:var(--sl-color-text-accent)}.lead{font-size:1.1rem;line-height:1.7;color:var(--sl-color-gray-2);max-width:31rem;margin:1.6rem 0}.actions{display:flex;gap:1.3rem;align-items:center;flex-wrap:wrap;margin-top:2rem}.actions a{text-decoration:none;font-size:.88rem;font-weight:600}.primary{background:var(--sl-color-accent-high);color:var(--sl-color-black);padding:.85rem 1.15rem;border-radius:.45rem;display:flex;gap:1.2rem;align-items:center}.secondary{color:var(--sl-color-white)}.note{font-size:.75rem;color:var(--sl-color-gray-3);margin-top:1.2rem}.editor{border:1px solid var(--sl-color-gray-5);border-radius:.8rem;overflow:hidden;box-shadow:0 20px 60px #00000018;min-width:0;background:var(--sl-color-bg-sidebar)}.editor-bar{display:flex;align-items:center;gap:.65rem;padding:1rem 1.2rem;font: .74rem var(--sl-font-mono);color:var(--sl-color-gray-2);border-bottom:1px solid var(--sl-color-gray-5)}.editor-dot{width:8px;height:8px;border-radius:50%;background:var(--sl-color-accent)}.editor-label{margin-left:auto;color:var(--sl-color-gray-3);font-size:.65rem}.editor :global(.expressive-code .frame){box-shadow:none;border:0;border-radius:0}.editor :global(.expressive-code pre){border:0;border-radius:0;font-size:.85rem;background:transparent}.editor-footer{font-size:.68rem;color:var(--sl-color-gray-3);padding:.8rem 1.2rem;border-top:1px solid var(--sl-color-gray-5)}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}.section-heading .eyebrow{margin-bottom:.6rem}h2{font-size:1.7rem;line-height:1.2;margin:0;letter-spacing:-.035em}.section-heading>a,.knowledge a{color:var(--sl-color-text-accent);font-size:.85rem;text-decoration:none}.reference-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}.reference-card{padding:1.5rem;border:1px solid var(--sl-color-gray-5);border-radius:.7rem;text-decoration:none;background:var(--sl-color-bg-sidebar);transition:border-color .15s}.reference-card:hover{border-color:var(--sl-color-accent)}.card-top{display:flex;align-items:center;justify-content:space-between;gap:1rem}.symbol{font:1.5rem var(--sl-font-mono);color:var(--sl-color-text-accent)}.count{font: .7rem var(--sl-font-mono);color:var(--sl-color-gray-3)}h3{display:flex;align-items:center;justify-content:space-between;color:var(--sl-color-white);font-size:1.15rem;margin:1.4rem 0 .55rem}h3 span{color:var(--sl-color-gray-3);font-size:1rem}.reference-card p{font-size:.88rem;line-height:1.65;color:var(--sl-color-gray-2);margin:0}.knowledge{display:grid;grid-template-columns:1.1fr 1fr;gap:5rem;margin-top:4rem;padding:3rem 0;border-top:1px solid var(--sl-color-gray-5)}.knowledge .eyebrow{margin-bottom:.8rem}.knowledge p:not(.eyebrow){color:var(--sl-color-gray-2);font-size:.95rem;line-height:1.7}.paths a{display:flex;justify-content:space-between;align-items:center;padding:1rem 0;border-bottom:1px solid var(--sl-color-gray-5)}.paths a:first-child{padding-top:0}.paths strong{display:block;color:var(--sl-color-white);font-size:.95rem;font-weight:550}.paths small{display:block;color:var(--sl-color-gray-3);font-size:.8rem;margin-top:.3rem}.home-footer{display:flex;justify-content:space-between;gap:1rem;padding-top:2rem;border-top:1px solid var(--sl-color-gray-5);font-size:.7rem;color:var(--sl-color-gray-3)}.home-footer a{color:var(--sl-color-gray-2)}
+@media(max-width:65rem){.hero{gap:2rem}.knowledge{gap:2rem}}
+@media(max-width:48rem){.hero{grid-template-columns:1fr;padding:1.5rem 0 3rem}.editor{max-width:35rem;width:100%}.reference-grid{grid-template-columns:1fr}.section-heading{align-items:start;flex-direction:column}.knowledge{grid-template-columns:1fr;margin-top:2rem}.home-footer{flex-direction:column}.reference-card{padding:1.2rem}h3{margin-top:.8rem}}
+</style>

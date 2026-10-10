@@ -1,0 +1,10 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import CatalogList from '../../components/reference/CatalogList.astro';
+import { catalog, apiHref } from '../../lib/catalog';
+const items=catalog.events.map(e=>({title:e.name,description:e.description,href:apiHref(e.kind,e.name),categories:e.categories}));
+---
+<StarlightPage frontmatter={{title:'Events',description:'Browse the current LSL events reference.',editUrl:false}}>
+<p>Find LSL events by name, purpose, or topic. Signatures and descriptions follow the current definitions; deprecated and private entries are excluded.</p>
+<CatalogList items={items} label="events" filterCategories={catalog.categories}/>
+</StarlightPage>

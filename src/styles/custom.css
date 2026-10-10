@@ -1,263 +1,57 @@
+/* The shared documentation shell keeps native Starlight navigation and accessibility. */
 :root {
-	/* Larger page content width with more information density is preferred */
-	--sl-sidebar-width: 15rem;
-	--sl-content-width: 75rem;
-	
-	/* Breadcrumbs */
-	--color-link-breadcrumbs: var(--sl-color-text-accent);
+  --sl-font: 'Segoe UI', Inter, system-ui, sans-serif;
+  --sl-font-mono: 'Cascadia Code', 'SFMono-Regular', Consolas, monospace;
+  --sl-color-accent-low: #123c34;
+  --sl-color-accent: #41b894;
+  --sl-color-accent-high: #a3f0d8;
+  --sl-color-white: #edf7f4;
+  --sl-color-gray-1: #d5e4df;
+  --sl-color-gray-2: #a8bdb5;
+  --sl-color-gray-3: #839a92;
+  --sl-color-gray-4: #40564f;
+  --sl-color-gray-5: #263b34;
+  --sl-color-gray-6: #162820;
+  --sl-color-black: #0c1715;
+  --sl-color-bg-nav: #0e1b18;
+  --sl-color-bg-sidebar: #101e1a;
+  --sl-sidebar-width: 16rem;
+  --sl-content-width: 65rem;
+  --sl-nav-height: 4.5rem;
+  --sl-text-h1: clamp(2rem,4vw,3rem);
 }
-
-
-/* Sidebar padding tweaks; Pad moved into inner elements */
-.sidebar-content {
-	padding: 0;
-	
-	.title-wrapper {
-		padding: 0 var(--sl-sidebar-pad-x);
-	}
-	
-	site-search > button[data-open-modal] {
-		width: calc(100% - var(--sl-sidebar-pad-x)*2);
-		margin: 0 var(--sl-sidebar-pad-x);
-	}
-	
-	.social-icons {
-		padding: 0 var(--sl-sidebar-pad-x);
-	}
-	
-	.starlight-sidebar-topics a {
-		padding-left: var(--sl-sidebar-pad-x);
-	}
+:root[data-theme='light'] {
+  --sl-color-accent-low: #d8f5e9;
+  --sl-color-accent: #168060;
+  --sl-color-accent-high: #0b6247;
+  --sl-color-white: #142b23;
+  --sl-color-gray-1: #263d34;
+  --sl-color-gray-2: #415e51;
+  --sl-color-gray-3: #617a6d;
+  --sl-color-gray-4: #8fa89c;
+  --sl-color-gray-5: #c8dbd0;
+  --sl-color-gray-6: #ecf3ee;
+  --sl-color-gray-7: #f4f8f5;
+  --sl-color-black: #fbfdfa;
+  --sl-color-bg-nav: #fbfdfa;
+  --sl-color-bg-sidebar: #f4f8f5;
 }
-
-
-/* The mobile menu is really hard to see */
-.mobile-header starlight-menu-button :is(.inc-spec, button) {
-	color: var(--sl-color-text-accent);
-}
-
-/* Style the breadcrumbs */
-.c-breadcrumbs {
-	/* --spacing-vertical-separator-breadcrumbs: 0.5rem; */
-	/* padding: 1.5rem var(--sl-content-pad-x) 0rem; */
-	margin-top: 0.5rem;
-	
-	.c-breadcrumbs__link {
-		font-weight: 500;
-		color: var(--sl-color-white);
-		
-		&:hover {
-			/* color: var(--sl-color-orange); */
-			color: var(--sl-color-text-accent);
-		}
-	}
-	
-	/* .c-breadcrumbs__separator,.c-breadcrumbs__truncated-button {
-		color: var(--color-cl1-brand-orange)
-	} */
-}
-
-/* Highlight sidebar items more obviously on hover; Feedback to Fitt's Law */
-a:where(.astro-3ii7xxms):hover:not([aria-current="page"]),
-a:where(.astro-3ii7xxms):focus:not([aria-current="page"]) {
-	background-color: color(from var(--sl-color-text-accent) xyz x y z / 0.1);
-}
-
-/* Sidebar — Prioritise scrolling readability */
-.sidebar-top {
-	position: static;
-}
-
-.sidebar {
-	details[open] summary {
-		position: sticky;
-		top: 0;
-		background-color: var(--sl-color-bg-sidebar);
-	}
-	
-	li:has(> .is-priority) {
-		padding-bottom: 0.6em;
-	}
-}
-
-
-/* For a huge amount of links */
-.category-links {
-	columns: 3 30ch;
-	
-	> .category-links__link {
-		display: block;
-		width: fit-content;
-		color: var(--sl-color-accent-high);
-		text-decoration: none;
-		
-		.category-links__label {
-			text-decoration: underline;
-		}
-		
-		&.is-stub {
-			/* color: color(from var(--sl-color-accent-high) xyz x calc(y - 0.1) calc(z - 0.2)); */
-			.category-links__label {
-				text-decoration: underline wavy;
-				text-decoration-color: color(from var(--sl-color-accent-high) xyz x y z / 0.6);
-			}
-		}
-		
-		&.is-deprecated {
-			
-		}
-		
-		&:visited {
-			color: color(from var(--sl-color-accent-high) xyz x calc(y - 0.15) z);
-		}
-		
-		&:not(:hover, :active) .badge-stub {
-			display: none;
-		}
-	}
-}
-
-/* Expressive Code — Tweak tab indentation width based on screen width; That's right, tab indents are actually just a dynamic reading accessibility */
-.sl-markdown-content .expressive-code {
-	tab-size: 4;
-	
-	@media screen and (max-width: 768px) {
-		tab-size: 2;
-	}
-	
-	@media screen and (min-width: 1480px) {
-		tab-size: 6;
-	}
-}
-
-
-/* Minimal / Inline variants of syntax highlighted code */
-.sl-markdown-content .expressive-code {
-	&.is-minimal {
-		.frame {
-			--ec-brdWd: 0;
-			--code-background: none;
-		}
-		
-		pre {
-			background: none;
-		}
-		
-		pre > code {
-			padding: 0;
-		}
-		
-		.ec-line .code,
-		:nth-child(1 of .ec-line) .code {
-			padding-inline-start: .3rem;
-			padding-inline-end: .3rem;
-		}
-		
-		.copy {
-			display: none;
-		}
-	}
-	
-	&.is-inline {
-		display: contents;
-		figure,
-		pre,
-		code,
-		.ec-line,
-		.code {
-			display: contents;
-		}
-	}
-}
-
-/* Tweak underlines of anchor links */
-.sl-markdown-content {
-	a:not(:where(.not-content *)) {
-		/* text-decoration: none; */
-		/* text-underline-offset: 0.2em; */
-		text-underline-position: from-font;
-		text-decoration-thickness: from-font;
-	}
-}
-
-/* Don't bold definition titles but do increase the padding */
-.sl-markdown-content {
-	dt:not(:where(.not-content *)) {
-		font-weight: inherit;
-	}
-	dd:not(:where(.not-content *)) {
-		padding-inline-start: 3rem;
-	}
-}
-
-/* Tweak params tables for info density and column spacing */
-.params-list {
-	font-size: var(--sl-text-xs);
-	word-break: break-word;
-}
-
-
-.function-syntax {
-	--x-space: 1.5rem;
-	--y-space: 0.125rem;
-	--y-pad: 0;
-	padding: 1rem;
-	font-size: var(--sl-text-xs);
-	font-family: var(--__sl-font-mono);
-	overflow-x: auto;
-	background-color: var(--sl-color-black);
-	border-radius: var(--sl-border-radius-md);
-	
-	.title {
-		display: block;
-		margin-top: -0.5rem;
-		opacity: 0.5;
-		user-select: none;
-	}
-	
-	.type {
-		--0: #C792EA;
-		--1: #8844AE;
-	}
-	
-	.function {
-		margin-top: 0.1rem;
-	}
-	
-	.function .name {
-		--0: #C5E478;
-		--1: #3B61B0;
-	}
-	
-	.arguments {
-		list-style: none;
-	}
-	
-	.argument .name {
-		color: var(--sl-color-white);
-		font-weight: 500;
-	}
-	
-	.description {
-		color: var(--sl-color-gray-3);
-	}
-	
-	& span,
-	:root:not([data-theme='dark']) & span {
-		color: var(--0, inherit);
-		background-color: var(--0bg, transparent);
-		font-style: var(--0fs, inherit);
-		font-weight: var(--0fw, inherit);
-		text-decoration: var(--0td, inherit);
-	}
-
-
-	:root[data-theme='light'] & span {
-		color: var(--1, inherit);
-		background-color: var(--1bg, transparent);
-		font-style: var(--1fs, inherit);
-		font-weight: var(--1fw, inherit);
-		text-decoration: var(--1td, inherit);
-	}
-}
-
+body { -webkit-font-smoothing: antialiased; }
+h1,h2,h3 { letter-spacing: -.035em; }
+.header { border-bottom-color: var(--sl-color-gray-5); }
+a { text-underline-offset: .2em; }
+:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 4px; }
+.sidebar-content a { border-radius: .35rem; }
+.sidebar-content a:hover { background: var(--sl-color-accent-low); }
+.sidebar-content a[aria-current='page'] { color: var(--sl-color-accent-high); background: var(--sl-color-accent-low); }
+.sl-markdown-content :is(pre, table) { max-width: 100%; }
+.sl-markdown-content code { overflow-wrap: anywhere; }
+.sl-markdown-content pre code { overflow-wrap: normal; }
+.sl-markdown-content table { display: block; overflow-x: auto; }
+.sl-markdown-content .expressive-code { tab-size: 4; }
+.category-links { columns: 3 26ch; }
+.category-links__link { display: block; margin-block: .25rem; }
+.params-list { font-size: .9rem; }
+.function-syntax { padding: 1rem; overflow-x: auto; border: 1px solid var(--sl-color-gray-5); border-radius: .6rem; font-family: var(--sl-font-mono); }
+@media (max-width: 50rem) { :root { --sl-nav-height: 4rem; } .sl-markdown-content .expressive-code { tab-size: 2; } }
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; } }

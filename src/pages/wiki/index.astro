@@ -1,0 +1,11 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import CatalogList from '../../components/reference/CatalogList.astro';
+import { catalog, wikiHref } from '../../lib/catalog';
+const items=catalog.wiki.map(w=>({title:w.title,href:wikiHref(w.slug),description:'',kind:w.namespace===10?'template':w.namespace===14?'category':w.namespace===2?'community page':'article',categories:[String(w.namespace)]}));
+const filters=[{id:'0',label:'Articles'},{id:'14',label:'Historical categories'},{id:'10',label:'Supporting templates'},{id:'2',label:'Community pages'}];
+---
+<StarlightPage frontmatter={{title:'Wiki library',description:'Community knowledge, examples, and source material from the Second Life Wiki.',editUrl:false}}>
+<p>Explore {catalog.wiki.length.toLocaleString()} locally collected pages: technical notes, examples, tutorials, and the source material behind the reference. Historical pages may describe older behavior; use the <a href="/reference/">current API reference</a> for signatures and parameter names.</p>
+<CatalogList items={items} label="wiki pages" filterCategories={filters}/>
+</StarlightPage>

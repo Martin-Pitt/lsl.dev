@@ -1,13 +1,13 @@
 ---
-import { FileTree } from "@astrojs/starlight/components";
-import definitions from '../data/lsl_definitions.json';
-
+import catalog from '../../data/catalog.json';
+import { Code } from '@astrojs/starlight/components';
 const { name } = Astro.props;
-const definition = definitions.controls[name];
+const entry = catalog.controls.find(item => item.name === name);
+if (!entry) throw new Error(`Unknown LSL control: ${name}`);
+const syntax = ['do','else','for','if','jump','return','state','while'].includes(name);
+const related: Record<string,string[]> = {default:['state'],state:['default'],if:['else'],else:['if'],do:['while','for'],while:['do','for'],for:['while','do'],jump:['return'],return:['jump']};
 ---
-
-<FileTree>
-	<ul>
-		<li>{name}</li>
-	</ul>
-</FileTree>
+{syntax ? <Code code={entry.description} lang="text" /> : entry.description.split('\n').map(line => <p>{line}</p>)}
+{entry.wiki && <p><a href={`/wiki/${entry.wiki.slug}/`}>Read the community wiki article, examples, and notes</a></p>}
+{related[name] && <><h2 id="related-controls">Related controls</h2><ul>{related[name].map(control => <li><a href={`/controls/${control}/`}>{control}</a></li>)}</ul></>}
+<p><a href="/controls/">All language controls</a> · <a href="/events/">Event reference</a></p>

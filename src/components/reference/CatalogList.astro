@@ -1,0 +1,23 @@
+---
+const { items, label = 'entries', filterCategories = [] } = Astro.props;
+---
+<catalog-list class="catalog-browser">
+<div class="catalog-tools"><label><span>Find {label}</span><input type="search" placeholder={`Search ${label}…`} autocomplete="off" /></label>{filterCategories.length>0 && <label><span>Topic</span><select><option value="">All topics</option>{filterCategories.map((c:any)=><option value={c.id}>{c.label}</option>)}</select></label>}</div>
+<p class="result-count" role="status" aria-live="polite">{items.length} {label}</p>
+<ul class="catalog-list">{items.map((item:any)=><li data-search={`${item.title} ${item.description||''}`.toLowerCase()} data-categories={(item.categories||[]).join(' ')}><a href={item.href}><span class="item-title">{item.title}</span>{item.kind && <span class="item-kind">{item.kind}</span>}</a>{item.description && <p>{item.description}</p>}</li>)}</ul>
+<p class="no-results" hidden>No matching entries. Try a different term or topic.</p>
+</catalog-list>
+<script>
+class CatalogList extends HTMLElement {
+ connectedCallback(){
+  if(this.dataset.ready)return;this.dataset.ready='true';
+  const input=this.querySelector('input')!;const select=this.querySelector('select');const rows=Array.from(this.querySelectorAll<HTMLLIElement>('li'));const status=this.querySelector('[role="status"]')!;const empty=this.querySelector<HTMLElement>('.no-results')!;
+  const update=()=>{const terms=input.value.toLowerCase().trim().split(/\s+/).filter(Boolean);const category=select?.value;let count=0;for(const row of rows){const match=terms.every(t=>row.dataset.search!.includes(t))&&(!category||row.dataset.categories!.split(' ').includes(category));row.hidden=!match;if(match)count++;}status.textContent=`${count} of ${rows.length} entries`;empty.hidden=count>0;};
+  input.addEventListener('input',update);select?.addEventListener('change',update);
+ }
+}
+if(!customElements.get('catalog-list'))customElements.define('catalog-list',CatalogList);
+</script>
+<style>
+.catalog-browser{display:block}.catalog-tools{display:flex;gap:1rem;align-items:end;margin:1.7rem 0 .5rem;flex-wrap:wrap}.catalog-tools label{flex:1;min-width:12rem}.catalog-tools span{display:block;font-size:.8rem;font-weight:600;margin-bottom:.35rem}.catalog-tools input,.catalog-tools select{width:100%;padding:.8rem;border:1px solid var(--sl-color-gray-4);border-radius:.5rem;background:var(--sl-color-bg);color:var(--sl-color-text);font:inherit}.result-count{font-size:.8rem;color:var(--sl-color-gray-3)}.catalog-list{list-style:none!important;padding:0!important}.catalog-list li{padding:1rem 0;border-bottom:1px solid var(--sl-color-hairline);margin:0}.catalog-list li[hidden]{display:none}.catalog-list a{display:flex;gap:1rem;align-items:baseline;text-decoration:none}.item-title{font-family:var(--sl-font-mono);font-size:.95rem}.item-kind{font-size:.7rem;color:var(--sl-color-gray-3);margin-left:auto}.catalog-list p{margin:.25rem 0 0;font-size:.87rem;line-height:1.55;color:var(--sl-color-gray-2)}
+</style>

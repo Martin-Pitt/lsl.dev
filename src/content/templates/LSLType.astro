@@ -1,3 +1,12 @@
 ---
+import catalog from '../../data/catalog.json';
 const { name } = Astro.props;
+const entry = catalog.types.find(item => item.name === name);
+if (!entry) throw new Error(`Unknown LSL type: ${name}`);
+const topics: Record<string, string[]> = {float:['math'],integer:['math'],key:['uuid'],list:['list'],rotation:['quaternion','math_3d'],string:['string','data_conversion'],vector:['vector','math_3d']};
+const related = catalog.categories.filter(item => (topics[name] || []).includes(item.id));
 ---
+{entry.description.split('\n').map(line => <p>{line}</p>)}
+<h2 id="related-reference">Related reference</h2>
+<ul>{related.map(category => <li><a href={`/categories/${category.id}/`}>{category.label}</a></li>)}</ul>
+<p><a href="/types/">All language types</a> · <a href="/functions/">Function reference</a></p>

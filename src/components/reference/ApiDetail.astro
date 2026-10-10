@@ -1,0 +1,21 @@
+---
+import { Code } from '@astrojs/starlight/components';
+import WikiContent from './WikiContent.astro';
+import { catalog, categoryMap, categoryHref, apiHref } from '../../lib/catalog';
+const { entry } = Astro.props;
+const d = entry.definition;
+const memberships: string[] = d['member-of'] || [];
+const flags = [['experience','Requires an experience'],['linden-experience','Linden experience only'],['god-mode','Privileged function']].filter(([key])=>d[key]);
+---
+<div class="api-meta"><span>{entry.kind}</span>{flags.map(([,label])=><span class="notice">{label}</span>)}</div>
+<p class="api-description">{entry.description}</p>
+<Code code={entry.signature + (entry.kind === 'event' ? ' { … }' : ';')} lang="lsl" />
+{entry.categories.length > 0 && <nav class="topic-tags" aria-label="Topics">{entry.categories.map((id:string)=><a href={categoryHref(id)}>{categoryMap.get(id)?.label || id}</a>)}</nav>}
+{entry.kind === 'function' && <dl class="facts"><div><dt>Returns</dt><dd><code>{entry.returnType}</code></dd></div><div><dt>Built-in delay</dt><dd>{d['mono-sleep'] ?? d.sleep ?? 0} seconds</dd></div><div><dt>Energy</dt><dd>{d.energy ?? '—'}</dd></div></dl>}
+{entry.parameters.length > 0 && <section><h2 id="parameters">Parameters</h2><div class="table-scroll"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>{entry.parameters.map((p:any)=><tr><td><code>{p.name}</code></td><td><a href={`/types/${p.type}/`}>{p.type}</a></td><td>{p.description}{p['enum-semantics'] && <small>Values: {p['enum-semantics']}</small>}</td></tr>)}</tbody></table></div></section>}
+{d['requires-permission'] && <p class="permission"><strong>Required permission:</strong> <code>{String(d['requires-permission'])}</code></p>}
+{memberships.length > 0 && <section><h2 id="constant-groups">Constant groups</h2><p>{memberships.join(' · ')}</p>{memberships.map((group:string)=>{const related=catalog.constants.filter(c=>(c.definition as any)['member-of']?.includes(group)&&c.name!==entry.name);return related.length>0 && <details><summary>Other {group} values ({related.length})</summary><ul>{related.map(c=><li><a href={apiHref('constant',c.name)}><code>{c.name}</code></a> <code>{String(c.definition.value)}</code></li>)}</ul></details>})}</section>}
+{entry.wiki ? <WikiContent wiki={entry.wiki}/> : <aside class="coverage"><h2 id="documentation">Documentation</h2><p>This entry is documented in the LSL definitions. No matching wiki article is present in this local collection. Its inclusion here does not establish availability on every simulator.</p></aside>}
+<style>
+.api-meta{display:flex;gap:.5rem;text-transform:uppercase;letter-spacing:.1em;font-size:.7rem;font-weight:700;color:var(--sl-color-text-accent)}.notice{background:var(--sl-color-gray-6);padding:0 .5rem}.api-description{font-size:1.1rem;line-height:1.7;white-space:pre-line}.topic-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}.topic-tags a{font-size:.8rem;text-decoration:none;border:1px solid var(--sl-color-hairline);border-radius:2rem;padding:.2rem .7rem}.facts{display:flex;flex-wrap:wrap;gap:2rem;padding:1rem 0;border-block:1px solid var(--sl-color-hairline)}.facts dt{font-size:.75rem;color:var(--sl-color-gray-3)}.facts dd{margin:0;font-size:.9rem}.table-scroll{overflow:auto}td small{display:block}.coverage{margin-top:2rem;border-inline-start:3px solid var(--sl-color-accent);padding-left:1.2rem}
+</style>

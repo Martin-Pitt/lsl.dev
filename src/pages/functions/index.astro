@@ -1,0 +1,10 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import CatalogList from '../../components/reference/CatalogList.astro';
+import { catalog, apiHref } from '../../lib/catalog';
+const items=catalog.functions.map(e=>({title:e.name,description:e.description,href:apiHref(e.kind,e.name),categories:e.categories}));
+---
+<StarlightPage frontmatter={{title:'Functions',description:'Browse the current LSL functions reference.',editUrl:false}}>
+<p>Find LSL functions by name, purpose, or topic. Signatures and descriptions follow the current definitions; deprecated and private entries are excluded.</p>
+<CatalogList items={items} label="functions" filterCategories={catalog.categories}/>
+</StarlightPage>

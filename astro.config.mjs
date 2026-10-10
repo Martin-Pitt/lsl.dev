@@ -1,112 +1,29 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import starlightSidebarTopics from 'starlight-sidebar-topics';
-import starlightThemeObsidian from 'starlight-theme-obsidian';
-
-
-// https://astro.build/config
 export default defineConfig({
-	integrations: [
-		starlight({
-			title: 'LSL Dev',
-			defaultLocale: 'root',
-			locales: {
-				root: { label: 'English', lang: 'en' },
-			},
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Martin-Pitt/lsl.slua.dev' }],
-			editLink: { baseUrl: 'https://github.com/Martin-Pitt/lsl.dev/edit/main/' },
-			lastUpdated: true,
-			customCss: [
-				'./src/styles/custom.css',
-			],
-			components: {
-				// PageFrame: './src/components/PageFrame.astro',
-				PageTitle: './src/components/PageTitle.astro',
-				Sidebar: './src/components/Sidebar.astro',
-			},
-			plugins: [
-				starlightThemeObsidian(),
-				starlightSidebarTopics([
-					{
-						label: 'Guides',
-						id: 'guides',
-						link: '/guides/',
-						icon: 'right-arrow',
-						items: [],
-						badge: {
-							text: 'WIP',
-							variant: 'danger',
-						}
-					},
-					{
-						label: 'Features',
-						id: 'features',
-						link: '/features/',
-						icon: 'open-book',
-						items: [],
-						badge: {
-							text: 'WIP',
-							variant: 'danger',
-						}
-					},
-					{
-						label: 'Reference',
-						id: 'reference',
-						link: '/reference/',
-						icon: 'list-format',
-						items: [
-							{
-								label: 'Functions',
-								collapsed: true,
-								autogenerate: { directory: 'functions' },
-							},
-							{
-								label: 'Events',
-								collapsed: true,
-								autogenerate: { directory: 'events' },
-							},
-							{
-								label: 'Constants',
-								collapsed: true,
-								autogenerate: { directory: 'constants' },
-							},
-							{
-								label: 'Types',
-								collapsed: true,
-								autogenerate: { directory: 'types' },
-							},
-							{
-								label: 'Flow Control',
-								collapsed: true,
-								autogenerate: { directory: 'controls' },
-							},
-						],
-					},
-					// { Link back to official LSL wiki?
-					// 	label: 'LSL Wiki',
-					// 	link: 'https://wiki.secondlife.com/wiki/LSL_Portal',
-					// 	badge: { text: 'Official', variant: 'success' },
-					// },
-		  		], {
-					topics: {
-						guides: [
-							'/guides/**',
-						],
-						features: [
-							'/features/**',
-						],
-						reference: [
-							'/functions/**',
-							'/events/**',
-							'/constants/**',
-							'/types/**',
-							'/controls/**',
-						],
-					},
-				}),
-			],
-			tableOfContents: false,
-		}),
-	],
+  site: 'https://lsl.dev',
+  integrations: [starlight({
+    title: 'lsl.dev', favicon: '/favicon.svg',
+    description: 'A modern Linden Scripting Language reference for Second Life creators.',
+    defaultLocale: 'root', locales: { root: { label: 'English', lang: 'en' } },
+    social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Martin-Pitt/lsl.dev' }],
+    pagination: false, tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 3 },
+    customCss: ['./src/styles/custom.css'],
+    components: { Header: './src/components/site/Header.astro', Hero: './src/components/site/Hero.astro' },
+    sidebar: [
+      { label: 'Start here', items: [
+        { label: 'Overview', link: '/' }, { label: 'Learning guides', link: '/guides/' },
+        { label: 'Language types', link: '/types/' }, { label: 'Flow control', link: '/controls/' },
+      ] },
+      { label: 'Language reference', items: [
+        { label: 'Reference overview', link: '/reference/' }, { label: 'Functions', link: '/functions/' },
+        { label: 'Events', link: '/events/' }, { label: 'Constants', link: '/constants/' },
+        { label: 'Browse by category', link: '/categories/' },
+      ] },
+      { label: 'Knowledge library', items: [
+        { label: 'Wiki archive', link: '/wiki/' }, { label: 'SLua documentation ↗', link: 'https://slua.dev' },
+      ] },
+    ],
+  })],
 });

@@ -1,6 +1,6 @@
 ---
 title: "Events"
-description: "The event model: states, event handlers, timers and detection."
+description: "The event model: states, event handlers, changes, detection and sensors."
 ---
 import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
 
@@ -18,11 +18,8 @@ There is no runtime subscription to events: a state receives the events it has h
   - Every script starts in the [`default`](/controls/default/) state, and each state has its own handlers
   - Changing state fires [`state_exit`](/events/state_exit/) and then [`state_entry`](/events/state_entry/), and removes listeners and sensors from the old state
   - To stop receiving an event, change to a state without that handler, or remove its source with [`llListenRemove`](/functions/llListenRemove/), [`llSensorRemove`](/functions/llSensorRemove/) or [`llSetTimerEvent(0.0)`](/functions/llSetTimerEvent/)
-  - A script can [reset itself](/functions/llResetScript/) or [another script](/functions/llResetOtherScript/), and [stop or start](/functions/llSetScriptState/) other scripts
-- Timers and time
-  - Each script has [one timer](/functions/llSetTimerEvent/), firing the [`timer`](/events/timer/) event
-  - Delays such as [`llSleep`](/functions/llSleep/) pause the whole script
-  - Time functions read [script time](/functions/llGetTime/), region time and [real-world time](/functions/llGetUnixTime/)
+  - Resetting, running state and memory of scripts are covered under [Scripts](/features/script/)
+- Timers: each script has one timer, firing the [`timer`](/events/timer/) event. Timers, sleeping and clocks are covered under [Time](/features/time/)
 - [Changes](/events/changed/) to the object: inventory, links, owner, region, teleports, shape and more
   - Test the flags with the bitwise AND operator (&)
 - Detection
@@ -30,16 +27,13 @@ There is no runtime subscription to events: a state receives the events it has h
   - The event's number parameter says how many; `llDetected*` functions such as [`llDetectedKey`](/functions/llDetectedKey/) read each one by index, and only inside that event
 - [Sensors](/functions/llSensor/) scan a cone around the object for avatars or objects, [once or repeatedly](/functions/llSensorRepeat/)
   - The nearest results arrive in [`sensor`](/events/sensor/), or [`no_sensor`](/events/no_sensor/) when nothing is found
-- Script health
-  - [Memory](/functions/llGetUsedMemory/), [script time](/functions/llGetSimStats/) and [profiling](/functions/llScriptProfiler/) help find scripts that slow the region
-
 </Box>
 </Column>
 <Column>
 <Box title="Functions and events">
 
 <Signatures names={[
-  "state_entry", "state_exit", "on_rez", "changed", "timer", "llSetTimerEvent",
+  "state_entry", "state_exit", "on_rez", "changed",
   "llSensor", "sensor", "no_sensor", "llDetectedKey"
 ]} />
 
@@ -60,22 +54,23 @@ Most events belong to a feature. Start from the event index, or from the feature
 <Box title="Scripting Details">
 
 <Signatures names={[
-  "state_entry", "state_exit", "on_rez", "llResetScript",
-  "llResetOtherScript", "llSetScriptState", "llGetScriptState",
-  "llGetScriptName", "changed", "llSensor", "llSensorRepeat", "llSensorRemove", "sensor", "no_sensor"
+  "state_entry", "state_exit", "on_rez", "changed", "llSensor", "llSensorRepeat", "llSensorRemove", "sensor", "no_sensor"
 ]} descriptions />
 
 </Box>
 
 <Box title="Additional">
 
-- Timers and time
+- [Time](/features/time/) — timers, delays and clocks
   - [`llSetTimerEvent`](/functions/llSetTimerEvent/) — 0.0 stops further [`timer`](/events/timer/) events
   - [`llSleep`](/functions/llSleep/) — the script is inactive during this time
   - [`llMinEventDelay`](/functions/llMinEventDelay/) — minimum delay between events being handled
   - [`llGetTime`](/functions/llGetTime/), [`llResetTime`](/functions/llResetTime/), [`llGetAndResetTime`](/functions/llGetAndResetTime/) — elapsed script time
-  - [`llGetUnixTime`](/functions/llGetUnixTime/), [`llGetTimestamp`](/functions/llGetTimestamp/), [`llGetDate`](/functions/llGetDate/) — current UTC time and date
-  - [`llGetWallclock`](/functions/llGetWallclock/) — seconds since midnight Pacific Time (SLT); [`llGetGMTclock`](/functions/llGetGMTclock/) — seconds since midnight GMT
+  - [`llGetUnixTime`](/functions/llGetUnixTime/), [`llGetTimestamp`](/functions/llGetTimestamp/), [`llGetDate`](/functions/llGetDate/), [`llGetWallclock`](/functions/llGetWallclock/), [`llGetGMTclock`](/functions/llGetGMTclock/) — real-world clocks
+- [Scripts](/features/script/) — resetting and controlling scripts
+  - [`llResetScript`](/functions/llResetScript/), [`llResetOtherScript`](/functions/llResetOtherScript/) — reset this or another script
+  - [`llSetScriptState`](/functions/llSetScriptState/), [`llGetScriptState`](/functions/llGetScriptState/) — stop, start and check other scripts in the prim
+  - [`llGetScriptName`](/functions/llGetScriptName/) — the script's own name
 - [`changed`](/events/changed/) — the changes bitfield ([all flags](/constants/groups/ChangeType/))
   - [`CHANGED_INVENTORY`](/constants/CHANGED_INVENTORY/) — prim inventory changed by someone with modify rights
   - [`CHANGED_LINK`](/constants/CHANGED_LINK/) — number of prims or seated avatars changed
@@ -93,7 +88,7 @@ Most events belong to a feature. Start from the event index, or from the feature
   - [`listen`](/events/listen/), [`link_message`](/events/link_message/), [`http_request`](/events/http_request/) — [communications](/features/communications/)
   - [`dataserver`](/events/dataserver/) — requested data returned to the script
   - [`run_time_permissions`](/events/run_time_permissions/) — an agent granted or denied permissions
-- Script health
+- Script health (see [Scripts](/features/script/))
   - [`llGetFreeMemory`](/functions/llGetFreeMemory/), [`llGetUsedMemory`](/functions/llGetUsedMemory/) — free and used script memory
   - [`llScriptProfiler`](/functions/llScriptProfiler/) — [`PROFILE_SCRIPT_MEMORY`](/constants/PROFILE_SCRIPT_MEMORY/) tracks peak memory while active
   - [`llGetSimStats`](/functions/llGetSimStats/) — region statistics such as [`SIM_STAT_SCRIPT_MS`](/constants/SIM_STAT_SCRIPT_MS/) (script time per frame) and [`SIM_STAT_SCRIPT_EPS`](/constants/SIM_STAT_SCRIPT_EPS/) (script events per second)
@@ -116,7 +111,7 @@ Most events belong to a feature. Start from the event index, or from the feature
   <Planned>Guide: switching event handlers with states</Planned>
 </SeeAlso>
 
-<SeeAlso items={["category:time", "category:detected", "category:sensor", "category:script"]} />
+<SeeAlso items={["feature:script", "feature:time", "category:detected", "category:sensor", "category:script", "category:time"]} />
 
 <SeeAlso items={[
   "/events/|All events", "feature:input", "feature:communications",
@@ -125,5 +120,5 @@ Most events belong to a feature. Start from the event index, or from the feature
 
 <FeatureFooter
   related={["input", "communications", "physics"]}
-  categories={["script", "time", "detected", "sensor"]}
+  categories={["detected", "sensor"]}
 />

@@ -15,15 +15,15 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 - APIs: 1585
 - With a primary feature: 1553
   - override: 0
-  - main: 537
+  - main: 548
   - subpage: 12
   - group: 924
-  - prose: 61
-  - minor: 18
+  - prose: 57
+  - minor: 11
   - category: 1
 - No feature (breadcrumb falls back to the category or constant group): 32
   - with neither category nor group (breadcrumb is section › name): 32
-- Ambiguous (tied on tier and category ownership, decided by size or id): 157
+- Ambiguous (tied on tier and category ownership, decided by size or id): 162
 
 ## Ambiguous choices
 
@@ -42,14 +42,16 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetObjectMass | linkset | main | physics | smallest |
 | llGetOwner | prims | main | avatar | smallest |
 | llGetOwnerKey | linkset | main | data-transmission | smallest |
-| llGetScriptState | events | main | inventory | smallest |
+| llGetScriptState | script | main | inventory | smallest |
+| llGetStartParameter | script | main | linkset | smallest |
+| llGetStartString | script | main | linkset | smallest |
 | llGetVel | movement | main | physics | smallest |
 | llListStatistics | math | main | data-transmission | smallest |
 | llMapDestination | communications | main | avatar | smallest |
 | llReadKeyValue | experience | main | data-storage | smallest |
-| llRemoteLoadScriptPin | prims | main | inventory | smallest |
+| llRemoteLoadScriptPin | script | main | prims, inventory | smallest |
 | llReplaceAgentEnvironment | experience | main | environments | smallest |
-| llResetOtherScript | events | main | inventory | smallest |
+| llResetOtherScript | script | main | inventory | smallest |
 | llRezAtRoot | linkset | main | inventory | smallest |
 | llRezObject | linkset | main | inventory | smallest |
 | llRezObjectWithParams | linkset | main | combat, inventory | smallest |
@@ -63,8 +65,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSetLinkTextureAnim | effects | main | textures | smallest |
 | llSetPayPrice | money | main | prims | smallest |
 | llSetPos | movement | main | prims | smallest |
+| llSetRemoteScriptAccessPin | script | main | inventory | smallest |
 | llSetRot | movement | main | prims | smallest |
-| llSetScriptState | events | main | inventory | smallest |
+| llSetScriptState | script | main | inventory | smallest |
 | llSetSitText | prims | main | avatar | smallest |
 | llSetText | effects | main | prims | smallest |
 | llSetTextureAnim | effects | main | textures | smallest |
@@ -76,10 +79,10 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llTextBox | dialog | main | communications | smallest |
 | llUpdateKeyValue | experience | main | data-storage | smallest |
 | llWorldPosToHUD | camera | main | avatar | smallest |
-| changed | linkset | main | events, textures, prims, inventory, avatar | smallest |
+| changed | linkset | main | textures, prims, inventory, avatar | smallest |
 | moving_end | pathfinding | main | movement | smallest |
 | moving_start | pathfinding | main | movement | smallest |
-| on_rez | linkset | main | events | smallest |
+| on_rez | script | main | linkset | smallest |
 | touch_start | dialog | main | input | smallest |
 | AGENT_LIST_PARCEL | land | group | avatar | smallest |
 | AGENT_LIST_PARCEL_OWNER | land | group | avatar | smallest |
@@ -131,6 +134,8 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | PERMISSION_TELEPORT | experience | group | camera, avatar | smallest |
 | PERMISSION_TRACK_CAMERA | experience | group | camera, avatar | smallest |
 | PERMISSION_TRIGGER_ANIMATION | experience | group | camera, avatar | smallest |
+| PROFILE_NONE | script | group | events | smallest |
+| PROFILE_SCRIPT_MEMORY | script | group | events | smallest |
 | SIM_STAT_ACTIVE_SCRIPT_COUNT | land | group | events | smallest |
 | SIM_STAT_AGENT_COUNT | land | group | events | smallest |
 | SIM_STAT_AGENT_MS | land | group | events | smallest |
@@ -315,7 +320,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetAgentList | functions | Parcels & Regions (land) | main + smallest |
 | llGetAgentSize | functions | Avatars (avatar) | main |
 | llGetAlpha | functions | Textures & Materials (textures) | main |
-| llGetAndResetTime | functions | Events (events) | minor |
+| llGetAndResetTime | functions | Time (time) | main |
 | llGetAnimation | functions | Avatars (avatar) | main |
 | llGetAnimationList | functions | Avatars (avatar) | main |
 | llGetAnimationOverride | functions | Avatars (avatar) | main |
@@ -331,7 +336,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetClosestNavPoint | functions | Pathfinding (pathfinding) | main |
 | llGetColor | functions | Textures & Materials (textures) | main |
 | llGetCreator | functions | Prims (prims) | main + category |
-| llGetDate | functions | Events (events) | minor |
+| llGetDate | functions | Time (time) | main |
 | llGetDayLength | functions | Environments (environments) | main |
 | llGetDayOffset | functions | Environments (environments) | main |
 | llGetDisplayName | functions | Avatars (avatar) | main |
@@ -341,13 +346,13 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetExperienceDetails | functions | Experience (experience) | main |
 | llGetExperienceErrorMessage | functions | Experience (experience) | main |
 | llGetForce | functions | Physics (physics) | main |
-| llGetFreeMemory | functions | Data Storage (data-storage) | main |
+| llGetFreeMemory | functions | Scripts (script) | main + category |
 | llGetFreeURLs | functions | Communications (communications) | main |
 | llGetGameControlMode | functions | Input (input) | subpage |
 | llGetGameControlModeAxes | functions | Input (input) | subpage |
 | llGetGameControlModeButtons | functions | Input (input) | subpage |
 | llGetGeometricCenter | functions | Linksets (linkset) | main |
-| llGetGMTclock | functions | Events (events) | minor |
+| llGetGMTclock | functions | Time (time) | main |
 | llGetHealth | functions | Combat (combat) | main |
 | llGetHTTPHeader | functions | Communications (communications) | main |
 | llGetInventoryAcquireTime | functions | Inventory (inventory) | main + category |
@@ -374,7 +379,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetMass | functions | Physics (physics) | main |
 | llGetMassMKS | functions | Physics (physics) | main |
 | llGetMaxScaleFactor | functions | Linksets (linkset) | main |
-| llGetMemoryLimit | functions | Data Storage (data-storage) | main |
+| llGetMemoryLimit | functions | Scripts (script) | main + category |
 | llGetMinScaleFactor | functions | Linksets (linkset) | main |
 | llGetMoonDirection | functions | Environments (environments) | main |
 | llGetMoonRotation | functions | Environments (environments) | main |
@@ -419,19 +424,19 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetRegionSunDirection | functions | Environments (environments) | main |
 | llGetRegionSunRotation | functions | Environments (environments) | main |
 | llGetRegionTimeDilation | functions | Parcels & Regions (land) | main + category |
-| llGetRegionTimeOfDay | functions | Environments (environments) | main |
+| llGetRegionTimeOfDay | functions | Time (time) | main + category |
 | llGetRenderMaterial | functions | Textures & Materials (textures) | main |
 | llGetRootPosition | functions | Linksets (linkset) | main |
 | llGetRootRotation | functions | Linksets (linkset) | main |
 | llGetRot | functions | Movement (movement) | main |
 | llGetScale | functions | Prims (prims) | main + category |
-| llGetScriptName | functions | Events (events) | main |
-| llGetScriptState | functions | Events (events) | main + smallest |
+| llGetScriptName | functions | Scripts (script) | main |
+| llGetScriptState | functions | Scripts (script) | main + smallest |
 | llGetSimStats | functions | Parcels & Regions (land) | main + category |
 | llGetSimulatorHostname | functions | Parcels & Regions (land) | main |
-| llGetSPMaxMemory | functions | Data Storage (data-storage) | main |
-| llGetStartParameter | functions | Linksets (linkset) | main + category |
-| llGetStartString | functions | Linksets (linkset) | main + category |
+| llGetSPMaxMemory | functions | Scripts (script) | main + category |
+| llGetStartParameter | functions | Scripts (script) | main + smallest |
+| llGetStartString | functions | Scripts (script) | main + smallest |
 | llGetStaticPath | functions | Pathfinding (pathfinding) | main |
 | llGetStatus | functions | Physics (physics) | main |
 | llGetSubString | functions | Data Transmission (data-transmission) | main |
@@ -441,16 +446,16 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetTextureOffset | functions | Textures & Materials (textures) | main |
 | llGetTextureRot | functions | Textures & Materials (textures) | main |
 | llGetTextureScale | functions | Textures & Materials (textures) | main |
-| llGetTime | functions | Events (events) | prose |
-| llGetTimeOfDay | functions | Environments (environments) | main |
-| llGetTimestamp | functions | Events (events) | minor |
+| llGetTime | functions | Time (time) | main |
+| llGetTimeOfDay | functions | Time (time) | main + category |
+| llGetTimestamp | functions | Time (time) | main |
 | llGetTorque | functions | Physics (physics) | main |
-| llGetUnixTime | functions | Events (events) | prose |
-| llGetUsedMemory | functions | Data Storage (data-storage) | main |
+| llGetUnixTime | functions | Time (time) | main |
+| llGetUsedMemory | functions | Scripts (script) | main + category |
 | llGetUsername | functions | Avatars (avatar) | main |
 | llGetVel | functions | Movement (movement) | main + smallest |
 | llGetVisualParams | functions | Avatars (avatar) | main |
-| llGetWallclock | functions | Events (events) | minor |
+| llGetWallclock | functions | Time (time) | main |
 | llGiveAgentInventory | functions | Inventory (inventory) | main + category |
 | llGiveInventory | functions | Inventory (inventory) | main + category |
 | llGiveInventoryList | functions | Inventory (inventory) | main + category |
@@ -533,7 +538,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llMapDestination | functions | Communications (communications) | main + smallest |
 | llMD5String | functions | Data Transmission (data-transmission) | main |
 | llMessageLinked | functions | Communications (communications) | main + category |
-| llMinEventDelay | functions | Events (events) | minor |
+| llMinEventDelay | functions | Time (time) | main |
 | llModifyLand | functions | Parcels & Regions (land) | main |
 | llModPow | functions | Math (math) | main |
 | llMoveToTarget | functions | Movement (movement) | main |
@@ -563,7 +568,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llRegionSayTo | functions | Communications (communications) | main + category |
 | llReleaseControls | functions | Input (input) | main |
 | llReleaseURL | functions | Communications (communications) | main |
-| llRemoteLoadScriptPin | functions | Prims (prims) | main + smallest |
+| llRemoteLoadScriptPin | functions | Scripts (script) | main + smallest |
 | llRemoveFromLandBanList | functions | Parcels & Regions (land) | main |
 | llRemoveFromLandPassList | functions | Parcels & Regions (land) | main |
 | llRemoveInventory | functions | Inventory (inventory) | main + category |
@@ -584,9 +589,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llResetAnimationOverride | functions | Avatars (avatar) | main |
 | llResetLandBanList | functions | Parcels & Regions (land) | main |
 | llResetLandPassList | functions | Parcels & Regions (land) | main |
-| llResetOtherScript | functions | Events (events) | main + smallest |
-| llResetScript | functions | Events (events) | main |
-| llResetTime | functions | Events (events) | minor |
+| llResetOtherScript | functions | Scripts (script) | main + smallest |
+| llResetScript | functions | Scripts (script) | main |
+| llResetTime | functions | Time (time) | main |
 | llReturnObjectsByID | functions | Parcels & Regions (land) | main |
 | llReturnObjectsByOwner | functions | Parcels & Regions (land) | main |
 | llRezAtRoot | functions | Linksets (linkset) | main + smallest |
@@ -608,8 +613,8 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSay | functions | Communications (communications) | main + category |
 | llScaleByFactor | functions | Linksets (linkset) | main + category |
 | llScaleTexture | functions | Textures & Materials (textures) | main |
-| llScriptDanger | functions | Events (events) | minor |
-| llScriptProfiler | functions | Events (events) | prose |
+| llScriptDanger | functions | Scripts (script) | minor + category |
+| llScriptProfiler | functions | Scripts (script) | main |
 | llSensor | functions | Events (events) | main |
 | llSensorRemove | functions | Events (events) | main |
 | llSensorRepeat | functions | Events (events) | main |
@@ -644,7 +649,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSetLinkTexture | functions | Linksets (linkset) | main + smallest |
 | llSetLinkTextureAnim | functions | Effects (effects) | main + smallest |
 | llSetLocalRot | functions | Movement (movement) | main |
-| llSetMemoryLimit | functions | Data Storage (data-storage) | main |
+| llSetMemoryLimit | functions | Scripts (script) | main + category |
 | llSetObjectDesc | functions | Prims (prims) | main + category |
 | llSetObjectName | functions | Prims (prims) | main + category |
 | llSetObjectPermMask | functions | Prims (prims) | main |
@@ -655,11 +660,11 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSetPos | functions | Movement (movement) | main + smallest |
 | llSetPrimMediaParams | functions | Textures & Materials (textures) | main |
 | llSetRegionPos | functions | Movement (movement) | main |
-| llSetRemoteScriptAccessPin | functions | Inventory (inventory) | main + category |
+| llSetRemoteScriptAccessPin | functions | Scripts (script) | main + smallest |
 | llSetRenderMaterial | functions | Textures & Materials (textures) | main |
 | llSetRot | functions | Movement (movement) | main + smallest |
 | llSetScale | functions | Prims (prims) | main + category |
-| llSetScriptState | functions | Events (events) | main + smallest |
+| llSetScriptState | functions | Scripts (script) | main + smallest |
 | llSetSitText | functions | Prims (prims) | main + smallest |
 | llSetSoundQueueing | functions | Sound (sound) | main |
 | llSetSoundRadius | functions | Sound (sound) | main |
@@ -667,7 +672,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSetText | functions | Effects (effects) | main + smallest |
 | llSetTexture | functions | Textures & Materials (textures) | main |
 | llSetTextureAnim | functions | Effects (effects) | main + smallest |
-| llSetTimerEvent | functions | Events (events) | main + category |
+| llSetTimerEvent | functions | Time (time) | main + category |
 | llSetTorque | functions | Movement (movement) | main + smallest |
 | llSetTouchText | functions | Dialog (dialog) | main + smallest |
 | llSetVehicleFlags | functions | Movement (movement) | main |
@@ -683,7 +688,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSin | functions | Math (math) | main |
 | llSitOnLink | functions | Experience (experience) | main + smallest |
 | llSitTarget | functions | Avatars (avatar) | main + category |
-| llSleep | functions | Events (events) | prose |
+| llSleep | functions | Time (time) | main |
 | llSqrt | functions | Math (math) | main |
 | llsRGB2Linear | functions | Math (math) | main |
 | llStartAnimation | functions | Avatars (avatar) | main |
@@ -760,13 +765,13 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | object_rez | events | Linksets (linkset) | main + category |
 | on_damage | events | Combat (combat) | main |
 | on_death | events | Combat (combat) | main |
-| on_rez | events | Linksets (linkset) | main + smallest |
+| on_rez | events | Scripts (script) | main + smallest |
 | path_update | events | Pathfinding (pathfinding) | main + category |
 | run_time_permissions | events | Avatars (avatar) | main + category |
 | sensor | events | Events (events) | main |
-| state_entry | events | Events (events) | main |
-| state_exit | events | Events (events) | main |
-| timer | events | Events (events) | main + category |
+| state_entry | events | Scripts (script) | main + category |
+| state_exit | events | Scripts (script) | main + category |
+| timer | events | Time (time) | main + category |
 | touch | events | Input (input) | main |
 | touch_end | events | Input (input) | main |
 | touch_start | events | Dialog (dialog) | main + smallest |
@@ -1472,8 +1477,8 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | PRIM_TYPE_SPHERE | constants | Prims (prims) | group |
 | PRIM_TYPE_TORUS | constants | Prims (prims) | group |
 | PRIM_TYPE_TUBE | constants | Prims (prims) | group |
-| PROFILE_NONE | constants | Events (events) | group |
-| PROFILE_SCRIPT_MEMORY | constants | Events (events) | group |
+| PROFILE_NONE | constants | Scripts (script) | group + smallest |
+| PROFILE_SCRIPT_MEMORY | constants | Scripts (script) | group + smallest |
 | PSYS_PART_BF_DEST_COLOR | constants | Effects (effects) | group |
 | PSYS_PART_BF_ONE | constants | Effects (effects) | group |
 | PSYS_PART_BF_ONE_MINUS_DEST_COLOR | constants | Effects (effects) | group |

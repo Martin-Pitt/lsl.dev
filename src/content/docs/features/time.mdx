@@ -1,0 +1,110 @@
+---
+title: "Time"
+description: "Timers, sleeping, script time, real-world clocks, environmental time of day and time dilation."
+---
+import { Attribution, Box, Column, Columns, FeatureFooter, SeeAlso, Signature, Signatures } from '../../../components/features';
+
+A script measures and waits for time in a few distinct ways: a repeating timer that raises an event, a sleep that pauses the script, a script clock that counts how long the script has been running, and real-world clocks in UTC and Second Life Time. Regions also have an environmental time of day that follows the day cycle, which is not the same as the clock. Time interacts with the [event model](/features/events/): a timer is an event like any other and waits its turn in the queue.
+
+<Columns>
+<Column>
+<Box title="Concepts in time">
+
+- Each script has [one timer](/functions/llSetTimerEvent/), which raises the [`timer`](/events/timer/) event at most once every **sec** seconds
+  - Passing `0.0` stops further timer events
+  - Setting a new timer replaces the old one and resets the timer clock, so calling it again more often than **sec** means the timer never fires
+  - The timer survives state changes, but does not survive resets
+  - Timer events can arrive late, because of [time dilation](/functions/llGetRegionTimeDilation/), the default event delay, a long-running event or [`llSleep`](/functions/llSleep/). The `timer` event is not an interrupt; the current event finishes first
+- A script can [sleep](/functions/llSleep/) for a number of seconds, and does nothing during that time
+- [Script time](/functions/llGetTime/) counts how long the script has been running, with subsecond precision
+  - It is unaffected by time dilation, but does not count time while the script is suspended, the object is in inventory, or the wearer is offline
+  - It restarts when the script is reset, or [explicitly](/functions/llResetTime/), or when [read and reset in one call](/functions/llGetAndResetTime/)
+  - In LSL its accuracy falls as the value grows, so reset it whenever practical
+- Real-world time comes from the system clock
+  - [Unix time](/functions/llGetUnixTime/) in whole seconds, an [ISO 8601 timestamp](/functions/llGetTimestamp/) and the [date](/functions/llGetDate/), all in UTC
+  - Seconds since midnight [Pacific Time, which is Second Life Time (SLT)](/functions/llGetWallclock/), or [GMT](/functions/llGetGMTclock/)
+- Environmental time follows the day cycle of the [parcel](/functions/llGetTimeOfDay/) or the [region](/functions/llGetRegionTimeOfDay/), with its [day length](/functions/llGetDayLength/) and [offset](/functions/llGetDayOffset/). See [Environments](/features/environments/) for the sky itself
+- [Time dilation](/functions/llGetRegionTimeDilation/) is how the region copes with lag: it slows script time and execution, from 1.0 (none) down to 0.0, when script execution halts
+- A script can set the [minimum delay between events](/functions/llMinEventDelay/) it handles
+
+</Box>
+</Column>
+<Column>
+<Box title="Timer and clock functions">
+
+<Signatures names={[
+  "llSetTimerEvent", "timer", "llSleep", "llMinEventDelay",
+  "llGetTime", "llResetTime", "llGetAndResetTime",
+  "llGetUnixTime", "llGetTimestamp", "llGetDate", "llGetWallclock", "llGetGMTclock",
+  "llGetTimeOfDay", "llGetRegionTimeOfDay", "llGetRegionTimeDilation"
+]} />
+
+</Box>
+<Box title="Dates after 2038">
+
+[`llGetUnixTime`](/functions/llGetUnixTime/) returns a signed 32-bit integer, so it cannot represent times after 2038-01-19 03:14:08 UTC. [`llGetTimestamp`](/functions/llGetTimestamp/) will correctly report time through 2038.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Time functions in detail">
+
+### Timers and delays
+
+<Signatures>
+<Signature name="llSetTimerEvent">Cause the [`timer`](/events/timer/) event to be triggered a maximum of once every **sec** seconds. Passing in 0.0 stops further timer events</Signature>
+<Signature name="timer">Triggered at the interval set with `llSetTimerEvent`. Only one timer can be active at one time</Signature>
+<Signature name="llSleep">Puts the script to sleep for **sec** seconds. The script will not do anything during this time</Signature>
+<Signature name="llMinEventDelay">Set the minimum time between events being handled. The minimum delay is maintained between state changes</Signature>
+</Signatures>
+
+### Script time
+
+<Signatures>
+<Signature name="llGetTime">Returns script time in seconds with subsecond precision since the script started, was last reset, or call to either [`llResetTime`](/functions/llResetTime/) or [`llGetAndResetTime`](/functions/llGetAndResetTime/)</Signature>
+<Signature name="llResetTime">Resets the script time to zero</Signature>
+<Signature name="llGetAndResetTime">Returns script time in seconds and then resets the script time to zero</Signature>
+</Signatures>
+
+### Clocks
+
+<Signatures>
+<Signature name="llGetUnixTime">Returns the number of seconds elapsed since 00:00 hours, Jan 1, 1970 UTC from the system clock</Signature>
+<Signature name="llGetTimestamp">Returns the current date and time in the UTC time zone in the ISO 8601 format `"YYYY-MM-DDThh:mm:ss.ff..fZ"`. Appears to be accurate to milliseconds</Signature>
+<Signature name="llGetDate">Returns the current date in the UTC time zone as `"YYYY-MM-DD"`</Signature>
+<Signature name="llGetWallclock">Returns the time in seconds since midnight Pacific time (PST/PDT), truncated to whole seconds. That is the same as the time of day in SLT expressed as seconds</Signature>
+<Signature name="llGetGMTclock">Returns the time in seconds since midnight GMT, truncated to whole seconds</Signature>
+</Signatures>
+
+### Environmental time and dilation
+
+<Signatures>
+<Signature name="llGetTimeOfDay">Returns the seconds since parcel environmental midnight, or region uptime if that is smaller or the parcel's sun is fixed</Signature>
+<Signature name="llGetRegionTimeOfDay">Returns the seconds since region environmental midnight, or region uptime if that is smaller or the region's sun is fixed</Signature>
+<Signature name="llGetRegionTimeDilation">Returns the current time dilation, from 0.0 (full dilation) to 1.0 (no dilation). It is used as the ratio between the change of script time to that of real world time</Signature>
+</Signatures>
+
+</Box>
+
+<Box title="Additional">
+
+- [`llGetDayLength`](/functions/llGetDayLength/), [`llGetDayOffset`](/functions/llGetDayOffset/) — Seconds in the parcel's day cycle, and the offset added to compute its environmental time
+  - [`llGetRegionDayLength`](/functions/llGetRegionDayLength/), [`llGetRegionDayOffset`](/functions/llGetRegionDayOffset/) — The same for the whole region
+- [`llGetRegionTimeDilation`](/functions/llGetRegionTimeDilation/) — Region idling lowers a region's framerate when no avatars are on or looking into it, so an idle region may report significant time dilation
+  - [`llGetRegionFPS`](/functions/llGetRegionFPS/) — Average simulator frames per second
+- [`llGetInventoryAcquireTime`](/functions/llGetInventoryAcquireTime/) — When an item was placed in the prim, as a UTC timestamp
+- [`llResetScript`](/functions/llResetScript/) — Clears the timer, along with repeating sensors and listeners. See [Scripts](/features/script/)
+
+</Box>
+
+## Related
+
+<SeeAlso items={["feature:events", "feature:script", "feature:environments", "category:time"]} />
+
+<Attribution pages={["llSetTimerEvent", "timer", "llSleep", "llMinEventDelay", "llGetTime", "llGetAndResetTime", "llGetUnixTime", "llGetTimestamp", "llGetWallclock", "llGetRegionTimeDilation"]} />
+
+<FeatureFooter
+  related={["events", "script", "environments"]}
+  categories={["time"]}
+/>

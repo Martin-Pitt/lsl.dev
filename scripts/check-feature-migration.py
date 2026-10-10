@@ -27,11 +27,13 @@ LOCAL_REPLACEMENTS = {
 
 
 # Feature pages added after the conversion (lsl.dev additions beyond slua.dev's set).
-ADDED_FEATURES = {'inventory', 'viewer-uris'}
+ADDED_FEATURES = {'inventory', 'viewer-uris', 'script', 'time'}
 # Home categories moved to an added feature: category -> (old home, new home).
 MOVED_CATEGORIES = {
     'prim_inventory': ('prims', 'inventory'),
     'avatar_inventory': ('avatar', 'inventory'),
+    'script': ('events', 'script'),
+    'time': ('events', 'time'),
 }
 # Categories added after the conversion (data/overlays/categories.yaml): category -> home feature.
 ADDED_CATEGORIES = {'gamepad': 'input'}

@@ -69,7 +69,7 @@ const rawAZ: Topic[] = [
 	{ label: 'Physics', to: 'f:physics' },
 	{ label: 'Prims', to: 'f:prims', also: ['g:PrimParam'] },
 	{ label: 'Rotation', to: 'c:quaternion', also: ['f:math'] },
-	{ label: 'Scripts', to: 'c:script' },
+	{ label: 'Scripts', to: 'f:script', also: ['c:script'] },
 	{ label: 'Sensor', to: 'c:sensor' },
 	{ label: 'Sound', to: 'f:sound' },
 	{ label: 'Text', to: 'c:string', children: [
@@ -79,7 +79,7 @@ const rawAZ: Topic[] = [
 	] },
 	{ label: 'Teleport', to: 'c:teleport' },
 	{ label: 'Textures & Materials', to: 'f:textures' },
-	{ label: 'Time', to: 'c:time' },
+	{ label: 'Time', to: 'f:time', also: ['c:time'] },
 	{ label: 'Vehicle', to: 'c:vehicles', also: ['g:VehicleType'] },
 	{ label: 'Video', to: 'c:parcel_media', also: ['c:prim_media'] },
 	{ label: 'Viewer URIs', to: 'f:viewer-uris', also: ['c:chat'] },
@@ -150,9 +150,11 @@ const rawTree: Topic[] = [
 		{ label: 'Security', to: 'c:land_moderation' },
 		{ label: 'Time', to: 'c:time' },
 	] },
-	{ label: 'Script', to: 'c:script', children: [
+	{ label: 'Script', to: 'f:script', also: ['c:script'], children: [
 		{ label: 'Error', children: [{ label: 'Math Errors' }] },
 		{ label: 'Events', to: 'f:events' },
+		{ label: 'Scripts', to: 'f:script' },
+		{ label: 'Time', to: 'f:time' },
 		{ label: 'Keywords', to: '/controls/' },
 		{ label: 'Math', to: 'f:math' },
 		{ label: 'Types', to: '/types/' },

@@ -1,0 +1,118 @@
+---
+title: "Scripts"
+description: "A script's own life cycle: resetting, states, start parameters, running state of other scripts, remote loading and memory."
+---
+import { Attribution, Box, Column, Columns, ConstantGroups, FeatureFooter, SeeAlso, Signature, Signatures } from '../../../components/features';
+
+This page is about the script itself rather than what it does in the world: how it starts and resets, how it learns the parameters it was rezzed with, how it controls other scripts in the same prim or loads scripts into other prims, and how much memory it uses. The events that drive a script are covered under [Events](/features/events/), and its timer and clocks under [Time](/features/time/).
+
+<Columns>
+<Column>
+<Box title="Concepts for scripts">
+
+- Every script starts in the [`default`](/controls/default/) state; [`state_entry`](/events/state_entry/) is always the first event handled
+  - Changing [state](/controls/state/) fires [`state_exit`](/events/state_exit/) before the new state's `state_entry`
+- A script can [reset itself](/functions/llResetScript/) or [another script in the prim](/functions/llResetOtherScript/)
+  - On reset, the current event is exited, global variables return to their defaults, timers (including repeating sensors) are cleared, listeners are removed, the event queue is cleared and the `default` state becomes active
+  - `llResetScript` also releases any granted URLs
+  - Resetting another script that is not running has no effect, even after it is set running again
+- An object learns how it was rezzed from [`on_rez`](/events/on_rez/), the [start parameter](/functions/llGetStartParameter/) and, for [`llRezObjectWithParams`](/functions/llRezObjectWithParams/), a [start string](/functions/llGetStartString/)
+  - When an agent rezzed the object, the start parameter is 0 and the start string is empty
+- Other scripts in the same prim can be [stopped and started](/functions/llSetScriptState/) and [checked](/functions/llGetScriptState/). A script can read [its own name](/functions/llGetScriptName/)
+  - A script that hit a run-time error, or was added with [`llGiveInventory`](/functions/llGiveInventory/), cannot be started this way
+- A script can be [copied into another prim](/functions/llRemoteLoadScriptPin/), running or not, if the owner can modify that prim and it has [set a matching PIN](/functions/llSetRemoteScriptAccessPin/)
+- Memory
+  - A script can read its [used](/functions/llGetUsedMemory/) and [free](/functions/llGetFreeMemory/) memory and its [limit](/functions/llGetMemoryLimit/), and [set the limit](/functions/llSetMemoryLimit/) up to 64k, the default for new scripts
+  - The [profiler](/functions/llScriptProfiler/) records the [peak memory](/functions/llGetSPMaxMemory/) used while it is active, with up to a 100x performance penalty to the script
+  - Scripts compiled to LSO always report 16KB used and cannot be profiled for memory
+
+</Box>
+</Column>
+<Column>
+<Box title="Script functions and events">
+
+<Signatures names={[
+  "state_entry", "state_exit", "on_rez", "llResetScript", "llResetOtherScript",
+  "llGetStartParameter", "llGetStartString", "llGetScriptName",
+  "llSetScriptState", "llGetScriptState", "llRemoteLoadScriptPin", "llSetRemoteScriptAccessPin",
+  "llGetUsedMemory", "llGetFreeMemory", "llGetMemoryLimit", "llSetMemoryLimit",
+  "llScriptProfiler", "llGetSPMaxMemory"
+]} />
+
+</Box>
+<Box title="Scripts as inventory items">
+
+Scripts are items in a prim's inventory. Listing, giving and removing them is covered under [Inventory](/features/inventory/).
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Script functions in detail">
+
+### Life cycle
+
+<Signatures>
+<Signature name="state_entry">Triggered whenever a new state is entered, including at script start. It is always the first event handled</Signature>
+<Signature name="state_exit">Triggered when the `state` command moves out of the current state, before the new state's `state_entry`</Signature>
+<Signature name="on_rez">Triggered when the object is rezzed, with **start_param** from the rezzing call. Also triggers on attachments at login or when attached from inventory</Signature>
+<Signature name="llResetScript">Resets the script</Signature>
+<Signature name="llResetOtherScript">Resets script **name** in the prim. If the script is not running, this call has no effect</Signature>
+<Signature name="llGetStartParameter">Returns the start parameter passed to the object when it was rezzed, or 0 if an agent rezzed it</Signature>
+<Signature name="llGetStartString">Returns the string passed to the root prim with [`REZ_PARAM_STRING`](/constants/REZ_PARAM_STRING/) in [`llRezObjectWithParams`](/functions/llRezObjectWithParams/), or an empty string if an agent rezzed it</Signature>
+<Signature name="llGetScriptName">Returns the name of the script that called this function</Signature>
+</Signatures>
+
+### Other scripts
+
+<Signatures>
+<Signature name="llSetScriptState">Set the running state of the script **name**. The script stops when its time slice ends, so a script stopping itself may run a little further</Signature>
+<Signature name="llGetScriptState">Returns `TRUE` if the named script in the prim is running</Signature>
+<Signature name="llRemoteLoadScriptPin">Copy script **name** into **target** and set to **running** with a **start_param** only if **target**'s PIN matches **pin**. Only works if the script owner can modify **target**; a script of the same name there is silently replaced</Signature>
+<Signature name="llSetRemoteScriptAccessPin">Sets this prim's PIN for `llRemoteLoadScriptPin`. A PIN of 0 disables remote loading</Signature>
+</Signatures>
+
+### Memory
+
+<Signatures>
+<Signature name="llGetUsedMemory">Returns the bytes of memory the script uses. Does not require `llScriptProfiler`</Signature>
+<Signature name="llGetFreeMemory">Returns the free bytes between the script's current use and its memory limit</Signature>
+<Signature name="llGetMemoryLimit">Get the maximum memory a script can use</Signature>
+<Signature name="llSetMemoryLimit">Request **limit** bytes to be reserved for this script. The limit cannot be set lower than the memory already in use. Returns `TRUE` on success</Signature>
+<Signature name="llScriptProfiler">Enables or disables the scripts profiling state, with [`PROFILE_SCRIPT_MEMORY`](/constants/PROFILE_SCRIPT_MEMORY/) or [`PROFILE_NONE`](/constants/PROFILE_NONE/)</Signature>
+<Signature name="llGetSPMaxMemory">Returns the peak memory in bytes used while the profiler was last active</Signature>
+</Signatures>
+
+</Box>
+
+<Box title="Additional">
+
+- [`llScriptProfiler`](/functions/llScriptProfiler/) — The profile state resets to `PROFILE_NONE` when the object is rezzed, derezzed or changes regions, when the region restarts, or when the script is reset or taken to or from inventory
+- [`llSetScriptState`](/functions/llSetScriptState/) — A paused script's memory is reset if it is re-rezzed, moved to another region or in a region during a restart
+- [`llRemoteLoadScriptPin`](/functions/llRemoteLoadScriptPin/) — **start_param** only lasts until the script is reset. It silently fails on an attachment worn by another user
+- [`llGetObjectDetails`](/functions/llGetObjectDetails/) — Script statistics for any object or avatar
+  - [`OBJECT_SCRIPT_MEMORY`](/constants/OBJECT_SCRIPT_MEMORY/) — Allocated script memory, or its upper limit, in bytes
+  - [`OBJECT_SCRIPT_TIME`](/constants/OBJECT_SCRIPT_TIME/) — Average script CPU time per frame
+  - [`OBJECT_RUNNING_SCRIPT_COUNT`](/constants/OBJECT_RUNNING_SCRIPT_COUNT/) — Number of running scripts
+- [`llGetSimStats`](/functions/llGetSimStats/) — Region statistics such as [`SIM_STAT_SCRIPT_MS`](/constants/SIM_STAT_SCRIPT_MS/) (script time per frame) and [`SIM_STAT_SCRIPT_EPS`](/constants/SIM_STAT_SCRIPT_EPS/) (script events per second)
+- [`llGetEnergy`](/functions/llGetEnergy/) — Remaining physics energy of the object
+- [`llGetFreeURLs`](/functions/llGetFreeURLs/) — HTTP URLs still available to the owner or region
+- [`llScriptDanger`](/functions/llScriptDanger/) — Whether a position is over public or sandbox land, or land that restricts building or outside scripts
+- [`llSetTimerEvent`](/functions/llSetTimerEvent/), [`llSleep`](/functions/llSleep/), [`llGetTime`](/functions/llGetTime/) — See [Time](/features/time/)
+
+</Box>
+
+## Constant groups
+
+<ConstantGroups names={["ScriptProfileMode"]} />
+
+## Related
+
+<SeeAlso items={["feature:events", "feature:time", "feature:inventory", "category:script", "/controls/state/|state"]} />
+
+<Attribution pages={["llResetScript", "llResetOtherScript", "llSetScriptState", "llRemoteLoadScriptPin", "llSetMemoryLimit", "llGetMemoryLimit", "llScriptProfiler", "llGetUsedMemory", "llGetFreeMemory", "llGetScriptName"]} />
+
+<FeatureFooter
+  related={["events", "time", "inventory"]}
+  categories={["script"]}
+/>

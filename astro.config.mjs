@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { unified } from '@astrojs/markdown-remark';
 import { readFileSync } from 'node:fs';
 import rehypeInlineLsl from './src/lib/rehype-inline-lsl.ts';
 import { loadFeatures } from './scripts/feature-index.mjs';
@@ -91,7 +92,7 @@ const featureItems = features.map(f => f.subpages.length === 0
 export default defineConfig({
 	site: 'https://lsl.dev',
 	// Inline `code` and links to API pages in Markdown/MDX are highlighted as LSL (see the plugin).
-	markdown: { rehypePlugins: [rehypeInlineLsl] },
+	markdown: { processor: unified({ rehypePlugins: [rehypeInlineLsl] }) },
 	integrations: [reloadSidebarOnFeatureChanges(), starlight({
 		title: 'LSL Dev',
 		favicon: '/favicon.svg',

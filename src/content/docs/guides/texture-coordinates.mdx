@@ -1,0 +1,149 @@
+---
+title: "Texture coordinates"
+description: "Texture coordinate maths: turn pixel positions and rectangles in a texture atlas into PRIM_TEXTURE repeats and offsets, and pick cells from a spritesheet grid."
+sidebar:
+  order: 3
+---
+
+Texture atlases and spritesheets pack many images into one texture, and you show one of them on a
+face by setting that face's repeats and offsets. Image editors give you positions in pixels, but
+[`PRIM_TEXTURE`](/constants/PRIM_TEXTURE/) wants repeats as a fraction of the texture and offsets
+measured from the texture's centre, with the vertical axis flipped. These functions do that
+conversion from pixel coordinates.
+
+## Pixels to repeats and offsets
+
+Pixel coordinates start at the top-left corner of the texture, as in image editors.
+
+```lsl
+// Repeats that show a width × height pixel area of a textureWidth × textureHeight texture.
+vector TextureRepeats(float width, float height, float textureWidth, float textureHeight)
+{
+    return <width / textureWidth, height / textureHeight, 0.0>;
+}
+
+// Offsets that centre the face on pixel (x, y).
+vector TextureOffsets(float x, float y, float textureWidth, float textureHeight)
+{
+    return <(x - (textureWidth * 0.5)) / textureWidth, -((y - (textureHeight * 0.5)) / textureHeight), 0.0>;
+}
+
+// [repeats, offsets] for a width × height area centred on pixel (x, y).
+list TextureCoords(float x, float y, float width, float height, float textureWidth, float textureHeight)
+{
+    return [TextureRepeats(width, height, textureWidth, textureHeight),
+            TextureOffsets(x, y, textureWidth, textureHeight)];
+}
+
+// [repeats, offsets] for a width × height area whose top-left corner is pixel (x, y).
+list TextureRect(float x, float y, float width, float height, float textureWidth, float textureHeight)
+{
+    return TextureCoords(x + (width * 0.5), y + (height * 0.5), width, height, textureWidth, textureHeight);
+}
+```
+
+Written out, the offsets are `(x / textureWidth) - 0.5` and `0.5 - (y / textureHeight)`: the distance
+of the chosen point from the texture's centre, with the vertical axis pointing up.
+
+## Spritesheet cells
+
+For icons laid out left to right, top to bottom in an even grid, numbered from 0. The number of
+columns is the texture width divided by the cell width, rounded down with
+[`llFloor`](/functions/llFloor/).
+
+
+```lsl
+// [repeats, offsets] for cell number icon in a grid of iconWidth × iconHeight cells.
+list Spritesheet2(integer icon, float iconWidth, float iconHeight, float textureWidth, float textureHeight)
+{
+    integer columns = llFloor(textureWidth / iconWidth);
+    float x = iconWidth * ((icon % columns) + 0.5);
+    float y = iconHeight * ((icon / columns) + 0.5);
+    return TextureCoords(x, y, iconWidth, iconHeight, textureWidth, textureHeight);
+}
+
+// The same for square cells of size pixels in a square texture of resolution pixels.
+list Spritesheet(integer icon, float size, float resolution)
+{
+    return Spritesheet2(icon, size, size, resolution, resolution);
+}
+```
+
+## Usage
+
+The functions return the repeats and offsets in the order
+[`PRIM_TEXTURE`](/constants/PRIM_TEXTURE/) expects them, so they go straight into a
+[`llSetLinkPrimitiveParamsFast`](/functions/llSetLinkPrimitiveParamsFast/) list between the
+texture and the rotation (`[PRIM_TEXTURE, face, texture, repeats, offsets, rotation_in_radians]`).
+The example uses [`TEXTURE_PLYWOOD`](/constants/TEXTURE_PLYWOOD/) as a placeholder, sets face 4 of
+[`LINK_THIS`](/constants/LINK_THIS/), and in [`touch_start`](/events/touch_start/) uses
+[`llDetectedLinkNumber`](/functions/llDetectedLinkNumber/) and
+[`llDetectedTouchFace`](/functions/llDetectedTouchFace/) to texture the touched face:
+
+```lsl
+string ATLAS = TEXTURE_PLYWOOD; // replace with the key of your 1024 × 1024 atlas
+
+default
+{
+    state_entry()
+    {
+        // A 181.5 × 116.5 pixel label whose top-left corner is at pixel (30, 608), on face 4.
+        llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_TEXTURE, 4, ATLAS]
+            + TextureRect(30.0, 608.0, 181.5, 116.5, 1024.0, 1024.0)
+            + [0.0]);
+    }
+
+    touch_start(integer total_number)
+    {
+        // Icon 9 of a grid of 128 × 128 pixel icons (row 1, column 1), on the touched face.
+        llSetLinkPrimitiveParamsFast(llDetectedLinkNumber(0), [PRIM_TEXTURE, llDetectedTouchFace(0), ATLAS]
+            + Spritesheet(9, 128.0, 1024.0)
+            + [0.0]);
+    }
+}
+```
+
+To keep the image undistorted, give the face the same aspect ratio as the pixel area, for example
+by scaling the prim in proportion to **width** and **height**.
+
+## Notes and limits
+
+- LSL's operator precedence differs from C's (`-` ranks above `+`, and `&&` equals `||`; see
+  [Operators](/fundamentals/operators/)), so the code here brackets every mixed expression.
+
+- `PRIM_TEXTURE` sets the Blinn-Phong diffuse texture settings of a face. The same repeats and
+  offsets can be passed to [`llScaleTexture`](/functions/llScaleTexture/) and
+  [`llOffsetTexture`](/functions/llOffsetTexture/), as the commented example in the original file does.
+- The examples use a texture rotation of 0.0, the last value in the `PRIM_TEXTURE` list.
+- Repeats are per face only in the default texture mapping mode; in planar mapping they are per
+  half metre.
+- Pass the texture's size in pixels as **textureWidth** and **textureHeight**, and measure the
+  positions in the same image.
+- `Spritesheet2` assumes the grid starts at the top-left corner and fills whole rows. Icon numbers
+  past the last row give a position below the bottom of the texture.
+
+## Source and licence
+
+From [`texture.lsl`](https://github.com/Martin-Pitt/NexiiLSL/blob/996fbd7/texture.lsl) in
+[NexiiLSL](https://github.com/Martin-Pitt/NexiiLSL) by Martin Pitt, © 2026, under the
+[MIT licence](https://github.com/Martin-Pitt/NexiiLSL/blob/996fbd7/LICENSE), at commit `996fbd7`.
+
+Changes from the original:
+
+- The preprocessor macros are functions: `TEXTURE_REPEAT` is `TextureRepeats`, `TEXTURE_OFFSET`
+  is `TextureOffsets`, and `TEXTURE_COORDS` and `TEXTURE_RECT`, which expanded to two
+  comma-separated vectors, are `TextureCoords` and `TextureRect` returning a list of
+  [repeats, offsets]. `SPRITESHEET` and `SPRITESHEET2` are `Spritesheet` and `Spritesheet2`.
+- **`SPRITESHEET2` used `digit` instead of `icon`**, so it only compiled where a variable named
+  `digit` happened to exist.
+- **Both spritesheet macros picked the wrong cell.** `size * icon % columns` doesn't say whether
+  the modulus applies to `icon` or to `size * icon`; the intended `size * (icon % columns)` needs
+  brackets. The same goes for `size * icon / columns`. The row term was also subtracted
+  (`size * .5 - size * icon / columns`), which placed rows above the top of the texture. The
+  functions work out the column and row first, in brackets (`(icon % columns)`,
+  `(icon / columns)`), and add half a cell to each.
+- `SPRITESHEET` divided by `resolution/size` without rounding; `Spritesheet` goes through
+  `Spritesheet2`, which uses `llFloor` for the column count as `SPRITESHEET2` did.
+- `TEXTURE_RECT` is written in terms of `TextureCoords`, moving the corner to the centre; the
+  formula is the same.
+- The project-specific `CURSOR` macro and the `TEXTURE_CURSORS` texture key are left out.

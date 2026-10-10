@@ -16,3 +16,5 @@ lockfile). `npm run <script>` still works but `npm install` is not a supported i
   titles, the `.md` endpoints, and why slua.dev's starlight-contextual-menu plugin is not used
 - [sidebar.md](sidebar.md): how the sidebar is configured, nested groups, and split groups whose
   label links to an overview page
+- [open-source-snippets.md](open-source-snippets.md): bringing open-source LSL code into guides:
+  what we accept, no preprocessor, attribution and bug-fix notes

@@ -1,0 +1,412 @@
+---
+title: "Working with link numbers"
+description: "Find prims by name in your own linkset or another object, write your own scan loop, and keep a pool of reusable prims in linkset data."
+sidebar:
+  order: 2
+---
+
+Linking and unlinking renumber prims; avatars sitting and standing renumber the avatar links after
+the last prim (and turn a lone prim's link 0 into link 1). So scripts find the prims they drive by
+name: when they start, and again on [`CHANGED_LINK`](/constants/CHANGED_LINK/). These functions do that lookup with
+[`llGetLinkName`](/functions/llGetLinkName/) for your own linkset, and with
+[`llGetObjectLinkKey`](/functions/llGetObjectLinkKey/) and [`llKey2Name`](/functions/llKey2Name/)
+for another object in the region. For a pool of reusable prims, see
+[Linkset resources](#linkset-resources) below.
+
+## Find links by name
+
+```lsl
+// Returns the link numbers of every prim named needle, in ascending order.
+list LinksByName(string needle)
+{
+    list needles;
+    integer link = 1;
+    integer prims = llGetNumberOfPrims();
+    for (; link <= prims; ++link)
+        if (llGetLinkName(link) == needle) needles += link;
+    return needles;
+}
+
+// Returns the link number of a prim named needle, or FALSE (0) if there is none.
+// With several matches, the highest link number wins.
+integer LinkByName(string needle)
+{
+    integer prims = llGetNumberOfPrims() + 1;
+    while (--prims)
+        if (llGetLinkName(prims) == needle) return prims;
+    return FALSE;
+}
+
+// Replaces each prim name in needles with its link number, in one pass over the linkset.
+// Names that match no prim are left in the list as strings.
+list LinksetList(list needles)
+{
+    integer prims = llGetNumberOfPrims() + 1;
+    while (--prims)
+    {
+        integer pointer = llListFindList(needles, [llGetLinkName(prims)]);
+        if (~pointer) needles = llListReplaceList(needles, [prims], pointer, pointer);
+    }
+    return needles;
+}
+```
+
+### A scan loop of your own
+
+When you want several prims at once, one loop that checks each name is cheaper than calling
+`LinkByName` once per prim. This loop visits every child prim, from the last link down to link 2:
+
+```lsl
+integer Foot;
+integer Leg;
+integer Torso;
+integer Head;
+
+FindLinks()
+{
+    integer link = llGetNumberOfPrims();
+    for (; link > 1; --link)
+    {
+        string linkName = llGetLinkName(link);
+        if (linkName == "Foot") Foot = link;
+        else if (linkName == "Leg") Leg = link;
+        else if (linkName == "Torso") Torso = link;
+        else if (linkName == "Head") Head = link;
+    }
+}
+```
+
+## Another object
+
+These variants take the **object** key of another object in the same region and return prim keys
+instead of link numbers.
+
+```lsl
+// Returns the keys of every prim in object named needle, in link order.
+list ObjectLinksByName(key object, string needle)
+{
+    list needles;
+    integer link = 1;
+    integer prims = llGetObjectPrimCount(object);
+    for (; link <= prims; ++link)
+    {
+        key linkKey = llGetObjectLinkKey(object, link);
+        if (llKey2Name(linkKey) == needle) needles += linkKey;
+    }
+    return needles;
+}
+
+// Returns the key of a prim in object named needle, or NULL_KEY if there is none.
+key ObjectLinkByName(key object, string needle)
+{
+    integer prims = llGetObjectPrimCount(object) + 1;
+    while (--prims)
+    {
+        key linkKey = llGetObjectLinkKey(object, prims);
+        if (llKey2Name(linkKey) == needle) return linkKey;
+    }
+    return NULL_KEY;
+}
+
+// Replaces each prim name in needles with the key of the matching prim in object.
+list ObjectLinksetList(key object, list needles)
+{
+    integer prims = llGetObjectPrimCount(object) + 1;
+    while (--prims)
+    {
+        key linkKey = llGetObjectLinkKey(object, prims);
+        integer pointer = llListFindList(needles, [llKey2Name(linkKey)]);
+        if (~pointer) needles = llListReplaceList(needles, [linkKey], pointer, pointer);
+    }
+    return needles;
+}
+
+// Returns the keys of the avatars sitting on object.
+// Seated avatars take the link numbers after the last prim.
+list ObjectLinksetSittingAvatars(key object)
+{
+    list details = llGetObjectDetails(object, [OBJECT_PRIM_COUNT, OBJECT_SIT_COUNT]);
+    integer prims = llList2Integer(details, 0);
+    integer sitters = llList2Integer(details, 1);
+
+    list agents;
+    integer index = prims + 1;
+    integer count = prims + sitters;
+    for (; index <= count; ++index) agents += llGetObjectLinkKey(object, index);
+    return agents;
+}
+```
+
+The same loop works for another object: count down from
+[`llGetObjectPrimCount`](/functions/llGetObjectPrimCount/) and read each name with
+`llKey2Name(llGetObjectLinkKey(object, link))`.
+
+## Usage
+
+```lsl
+integer Door;
+list Lights;
+
+FindLinks()
+{
+    Door = LinkByName("Door");
+    Lights = LinksByName("Light");
+}
+
+default
+{
+    state_entry()
+    {
+        FindLinks();
+    }
+
+    changed(integer change)
+    {
+        // Linking, unlinking, and avatars sitting or standing all renumber links.
+        if (change & CHANGED_LINK) FindLinks();
+    }
+
+    touch_start(integer total_number)
+    {
+        if (Door) llSetLinkPrimitiveParamsFast(Door, [PRIM_COLOR, ALL_SIDES, <1.0, 0.0, 0.0>, 1.0]);
+    }
+}
+```
+
+`LinksetList` fills several variables from one pass:
+
+```lsl
+integer Turret;
+integer Barrel;
+integer Muzzle;
+
+FindTurret()
+{
+    list links = LinksetList(["Turret", "Barrel", "Muzzle"]);
+    Turret = llList2Integer(links, 0);
+    Barrel = llList2Integer(links, 1);
+    Muzzle = llList2Integer(links, 2);
+}
+```
+
+## Notes and limits
+
+- `LinkByName` returns `FALSE` (0) when nothing matches. Link 0 is never a valid result in a
+  linkset, so test the result with `if (link)` before using it.
+- `LinksetList` leaves unmatched names in the list as strings, and
+  [`llList2Integer`](/functions/llList2Integer/) reads those as 0, so a missing prim also comes back
+  as 0 there. If two prims share a name, list the name twice to get both links.
+- The scan loop stops before link 1, so it never looks at the root prim. In a single-prim object
+  with no one seated it does nothing.
+- [`llGetNumberOfPrims`](/functions/llGetNumberOfPrims/) counts seated avatars too, so the
+  functions for your own linkset also compare avatar names. To exclude avatars, count with
+  `llGetObjectPrimCount(llGetKey())` instead (it does not count seated avatars, and returns 0 in
+  an attachment).
+- Each call reads every name in the linkset. Look links up once, when the script starts and on
+  `CHANGED_LINK`, and keep the numbers in global variables rather than calling these functions
+  in a timer.
+- The remote variants only work for objects in the same region as the script, because
+  `llGetObjectPrimCount`, `llGetObjectLinkKey` and `llKey2Name` only see objects there.
+
+## Linkset resources
+
+A *linkset resource* stores a list of link numbers in [linkset data](/features/data-storage/)
+in a compact format, one character per link. The typical use is reusable prims or meshes in a HUD
+or user interface, for example to render markers, text or a data visualisation: the linkset holds
+a set of spare prims, and the script takes one out of the resource when it needs it and puts it
+back when done.
+
+### The functions
+
+```lsl
+// Creates (or rebuilds) the resource kv from every prim whose name is exactly pattern.
+LinksetResourceSetup(string kv, string pattern)
+{
+    string links;
+    integer link = llGetNumberOfPrims();
+    for (; link > 0; --link)
+        if (llGetLinkName(link) == pattern) links = llChar(link) + links;
+    llLinksetDataWrite(kv, links);
+}
+
+// Takes a link number out of the resource, or returns FALSE (0) if it is empty.
+integer LinksetResourceReserve(string kv)
+{
+    string links = llLinksetDataRead(kv);
+    if (links == "") return FALSE;
+    llLinksetDataWrite(kv, llDeleteSubString(links, 0, 0));
+    return llOrd(links, 0);
+}
+
+// Puts a link number back into the resource.
+LinksetResourceRelease(string kv, integer link)
+{
+    llLinksetDataWrite(kv, llChar(link) + llLinksetDataRead(kv));
+}
+
+// Applies the same prim parameters to every prim in the resource,
+// e.g. to park all the spare prims out of sight in their default state.
+LinksetResourceReset(string kv, list reset)
+{
+    list params;
+    string links = llLinksetDataRead(kv);
+    integer index = llStringLength(links);
+    while (index--)
+    {
+        params += [PRIM_LINK_TARGET, llOrd(links, index)] + reset;
+        // Send in batches of 32 prims so a large pool does not run the script out of memory.
+        if (index % 32 == 0)
+        {
+            llSetLinkPrimitiveParamsFast(LINK_THIS, params);
+            params = [];
+        }
+    }
+}
+
+// Returns the link number at position index in the resource, or FALSE (0) if there is none.
+integer LinksetResourceLookup(string kv, integer index)
+{
+    return llOrd(llLinksetDataRead(kv), index);
+}
+```
+
+### Two resources: free and in use
+
+These build on the same storage to move link numbers between two resources, typically a pool of
+free prims and a list of the prims currently on display, so you can clear the display in one call.
+
+```lsl
+// Moves a link number from kvPool to kvUsed and returns it, or FALSE (0) if kvPool is empty.
+// Swap the arguments to move one back.
+integer LinksetResourceUse(string kvPool, string kvUsed)
+{
+    string links = llLinksetDataRead(kvPool);
+    if (links == "") return FALSE;
+    llLinksetDataWrite(kvPool, llDeleteSubString(links, 0, 0));
+    llLinksetDataWrite(kvUsed, llGetSubString(links, 0, 0) + llLinksetDataRead(kvUsed));
+    return llOrd(links, 0);
+}
+
+// Moves one specific link number from kvUsed back to kvPool.
+LinksetResourceFree(string kvPool, string kvUsed, integer link)
+{
+    string used = llLinksetDataRead(kvUsed);
+    integer at = llSubStringIndex(used, llChar(link));
+    if (~at)
+    {
+        llLinksetDataWrite(kvUsed, llDeleteSubString(used, at, at));
+        llLinksetDataWrite(kvPool, llChar(link) + llLinksetDataRead(kvPool));
+    }
+}
+
+// Moves every link number in kvUsed back to kvPool.
+LinksetResourceFreeAll(string kvPool, string kvUsed)
+{
+    llLinksetDataWrite(kvPool, llLinksetDataRead(kvUsed) + llLinksetDataRead(kvPool));
+    llLinksetDataWrite(kvUsed, "");
+}
+```
+
+### Using a resource
+
+A HUD with spare child prims named `Marker` that shows one marker per nearby avatar. Put the
+functions above at the top of the same script.
+
+```lsl
+list HIDDEN = [PRIM_POS_LOCAL, ZERO_VECTOR, PRIM_COLOR, ALL_SIDES, <1.0, 1.0, 1.0>, 0.0];
+
+ClearMarkers()
+{
+    LinksetResourceReset("markers:used", HIDDEN);
+    LinksetResourceFreeAll("markers:free", "markers:used");
+}
+
+default
+{
+    state_entry()
+    {
+        LinksetResourceSetup("markers:free", "Marker");
+        llLinksetDataWrite("markers:used", "");
+        LinksetResourceReset("markers:free", HIDDEN);
+        llSensorRepeat("", NULL_KEY, AGENT, 96.0, PI, 5.0);
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK) llResetScript();
+    }
+
+    sensor(integer detected)
+    {
+        ClearMarkers();
+        integer i;
+        for (; i < detected; ++i)
+        {
+            integer link = LinksetResourceUse("markers:free", "markers:used");
+            if (!link) return; // out of spare prims
+            // Scale region offsets of up to 96 m down to 0.1 m on the HUD; adjust to your layout.
+            vector offset = ((llDetectedPos(i) - llGetPos()) / 96.0) * 0.1;
+            llSetLinkPrimitiveParamsFast(link, [
+                PRIM_POS_LOCAL, <0.0, offset.x, offset.y>,
+                PRIM_COLOR, ALL_SIDES, <0.0, 1.0, 0.0>, 1.0
+            ]);
+        }
+    }
+
+    no_sensor()
+    {
+        ClearMarkers();
+    }
+}
+```
+
+### Resource notes and limits
+
+- Linking and unlinking renumber prims; avatars sitting and standing renumber the avatar links
+  after the last prim (and turn a lone prim's link 0 into link 1). Call `LinksetResourceSetup`
+  again on [`CHANGED_LINK`](/constants/CHANGED_LINK/), or reset the script as the example does.
+- `LinksetResourceReserve`, `LinksetResourceUse` and `LinksetResourceLookup` return `FALSE` (0)
+  when there is nothing to return, so test the result before using it.
+- Nothing stops you releasing the same link twice, which puts a duplicate in the pool. Release
+  only links you reserved.
+- Each link is one character: one byte of linkset data for links below 128 and two bytes above,
+  so even a pool of the whole linkset costs a few hundred bytes of the 128 KiB store.
+- Every write fires [`linkset_data`](/events/linkset_data/) in all scripts in the linkset. Give
+  the keys a prefix such as `markers:` so scripts that handle that event can ignore them.
+- In a single-prim object with no one seated, the only prim is link 0, which a resource cannot hold. The pattern is
+  meant for linksets with spare child prims.
+
+## Source and licence
+
+From [`linkset.lsl`](https://github.com/Martin-Pitt/NexiiLSL/blob/996fbd7/linkset.lsl) in
+[NexiiLSL](https://github.com/Martin-Pitt/NexiiLSL) by Martin Pitt, © 2026, under the
+[MIT licence](https://github.com/Martin-Pitt/NexiiLSL/blob/996fbd7/LICENSE), at commit `996fbd7`.
+
+Changes from the original, for finding links by name:
+
+- The `LinksetScan` and `ObjectLinksetScan` preprocessor macros are written out as a plain loop.
+  The macro's `do … while (--link > 1)` also visited link 1 in a single-prim object; the plain
+  `for` loop does not.
+- The scan loop is shown inside a `FindLinks` function with global variables.
+- The remote variants call `llKey2Name` inline instead of storing the name in a variable first.
+- Formatting and comments only otherwise; the functions behave as in the original.
+
+Changes for linkset resources:
+
+- **Link 1 could not be stored.** The original stored each link as `llChar(link - 1)`, and
+  [`llChar`](/functions/llChar/) only accepts values from 1, so link 1 (the root) never made it
+  into a resource. Links are now stored as `llChar(link)`.
+- **Lookup past the end returned 1.** [`llOrd`](/functions/llOrd/) returns 0 for an index outside
+  the string, so the original `1 + llOrd(links, index)` returned link 1 instead of `FALSE`. With
+  links stored directly, `LinksetResourceLookup` returns 0.
+- **Reset batches by count.** The original sent its parameter list early when
+  [`llGetFreeMemory`](/functions/llGetFreeMemory/) fell below 1500 bytes. That figure includes
+  memory waiting for garbage collection, so it is not a reliable trigger; the list is now sent
+  every 32 prims; the batch that ends at index 0 is always sent, so the original's final
+  `if (params)` flush is gone. It also passes `LINK_THIS` instead of link 0; each batch starts
+  with `PRIM_LINK_TARGET`, which picks the prim the parameters apply to.
+- `LinksetResourceFree`, which moves one specific link back to the pool, is new; the original
+  listed it as a to-do.
+- Setup counts down link numbers directly instead of an offset counter.
+- `LinksetResourceUse` copies the first character into the used resource instead of decoding and
+  re-encoding it.

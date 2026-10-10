@@ -9,6 +9,19 @@ catalog without requiring Python or access to the original Windows download path
   2,266 pages from the user's 2025/2026 exports. These are **original wiki revisions**,
   not the later XML with rewritten definition fields. Older revisions remain where
   a later export did not return a page. English filtering was heuristic.
+- `wiki-supplement-*.xml`: supplementary MediaWiki exports, kept byte-for-byte as
+  the user downloaded them so their provenance stays separate from `wiki-English.xml`.
+  The importer reads every matching file (sorted by name) after `wiki-English.xml`
+  and merges pages by title with the same rule as the original merge: the newest
+  revision timestamp wins; on a tie the earlier source is kept. Their SHA-256 values
+  are recorded in catalog metadata under `sources.supplements`.
+  - `wiki-supplement-limits.xml`: the user's export of the "Limits" page and the
+    templates it uses, copied from `Second+Life+Wiki-20261010122419.xml` on
+    10 October 2026 (SHA-256
+    `428fcdfaf03bd59c26a85d169e7cbd81de17d2f8bc5e3cb7d764ba3e77ebb359`). Limits is
+    revision 1218965 of 2026-07-26; `Template:References` (revision 1178626) is also
+    new. The other 19 templates have the same revision IDs as `wiki-English.xml`.
+    Hand-edited reference page: `src/content/docs/reference/limits.mdx`.
 - `lsl_definitions.yaml`: snapshot of the user's local `lsl-definitions` checkout.
   Authoritative for public LSL signatures, argument names/descriptions, return types,
   constant values, enum relationships, and topic categories. Its SHA-256 is included

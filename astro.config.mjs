@@ -85,6 +85,7 @@ export default defineConfig({
 				collapsed: true,
 				items: [
 					{ label: 'Overview', link: '/reference/', attrs: { class: 'is-priority' } },
+					{ label: 'Limits', link: '/reference/limits/', attrs: { class: 'is-priority' } },
 					{ label: 'Categories', collapsed: true, items: [{ label: 'All categories', link: '/categories/', attrs: { 'data-sidebar-group-link': '' } }, ...referenceCategories] },
 					{ label: 'Functions', link: '/functions/' },
 					{ label: 'Events', link: '/events/' },

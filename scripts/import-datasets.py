@@ -46,12 +46,20 @@ def write_split(catalog):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--wiki',type=Path,default=ROOT/'data/sources/wiki-English.xml')
+    parser.add_argument('--supplement',type=Path,action='append',help='extra MediaWiki export merged by title; the newest revision wins (default: data/sources/wiki-supplement-*.xml, sorted)')
     parser.add_argument('--definitions',type=Path,default=ROOT/'data/sources/lsl_definitions.yaml')
     args=parser.parse_args()
     defs=yaml.safe_load(args.definitions.read_text(encoding='utf8'))
-    root=ET.parse(args.wiki).getroot(); ns={'m':root.tag.split('}')[0][1:]}
+    supplements=args.supplement if args.supplement is not None else sorted((ROOT/'data/sources').glob('wiki-supplement-*.xml'))
+    pages={}  # exact title (MediaWiki titles are case-sensitive) -> (timestamp, page element, namespaces); insertion order is deterministic
+    for source in [args.wiki,*supplements]:
+        root=ET.parse(source).getroot(); ns={'m':root.tag.split('}')[0][1:]}
+        for p in root.findall('m:page',ns):
+            k=p.findtext('m:title',namespaces=ns).replace('_',' ').strip(); ts=p.find('m:revision',ns).findtext('m:timestamp',default='',namespaces=ns)
+            # Same rule as the original merge: the newest revision wins; ties keep the earlier source.
+            if k not in pages or ts>pages[k][0]: pages[k]=(ts,p,ns)
     records=[]; routes={}; by_title={}
-    for p in root.findall('m:page',ns):
+    for _,p,ns in pages.values():
         title=p.findtext('m:title',namespaces=ns); rev=p.find('m:revision',ns)
         get=lambda name:rev.findtext('m:'+name,default='',namespaces=ns)
         s=slug(title)
@@ -184,7 +192,7 @@ def main():
     catalog['categories']=sorted(cats.values(),key=lambda x:x['label'])
     for plural in ('functions','events','constants','types','controls'): catalog[plural].sort(key=lambda x:x['name'].lower())
     catalog['wiki'].sort(key=lambda x:x['title'].lower())
-    catalog['meta']={'schemaVersion':1,'sourcePolicy':'Definitions are authoritative for signatures, parameter names and categories. Wiki text remains a historical community source; templates are partially rendered and original wikitext is always available.','sources':{'wiki':{'file':args.wiki.name,'sha256':digest(args.wiki)},'definitions':{'file':args.definitions.name,'sha256':digest(args.definitions)}},'counts':{k:len(catalog[k]) for k in ('functions','events','constants','categories','wiki','types','controls')},'wikiLicense':'Creative Commons Attribution-ShareAlike 3.0','wikiLicenseUrl':'https://creativecommons.org/licenses/by-sa/3.0/','definitionsLicense':'MIT','latestWikiRevision':max(w['source']['timestamp'] for w in catalog['wiki'])}
+    catalog['meta']={'schemaVersion':1,'sourcePolicy':'Definitions are authoritative for signatures, parameter names and categories. Wiki text remains a historical community source; templates are partially rendered and original wikitext is always available.','sources':{'wiki':{'file':args.wiki.name,'sha256':digest(args.wiki)},'supplements':[{'file':x.name,'sha256':digest(x)} for x in supplements],'definitions':{'file':args.definitions.name,'sha256':digest(args.definitions)}},'counts':{k:len(catalog[k]) for k in ('functions','events','constants','categories','wiki','types','controls')},'wikiLicense':'Creative Commons Attribution-ShareAlike 3.0','wikiLicenseUrl':'https://creativecommons.org/licenses/by-sa/3.0/','definitionsLicense':'MIT','latestWikiRevision':max(w['source']['timestamp'] for w in catalog['wiki'])}
     write_split(catalog)
     report={'counts':catalog['meta']['counts'],'excluded':excluded,'apiWithoutWiki':{k:[e['name'] for e in catalog[k] if not e['wiki']] for k in ('functions','events','constants')},'unexpandedTemplates':sorted(renderer.unknown),'referencedTitlesWithoutLocalRoute':sorted(renderer.missing),'deprecatedAliasesSkipped':skipped}
     write_json(ROOT/'data/reports/import-report.json',report)

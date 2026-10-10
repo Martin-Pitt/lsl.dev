@@ -21,6 +21,12 @@ class RenderTests(unittest.TestCase):
         result=self.r.render('<img src=x onerror=bad()><script>bad()</script> [[javascript:alert(1)|click]] [javascript:alert(1) click]')
         self.assertNotIn('<img',result); self.assertNotIn('<script',result)
         self.assertNotIn('href="javascript:',result)
+    def test_hand_edited_local_pages_take_wiki_links(self):
+        # Limits has a hand-edited reference page; section anchors must survive.
+        r=Renderer({'limits':'/wiki/limits-dffb64dc/'})
+        self.assertIn('href="/reference/limits/#building"',r.link('Limits#Building','limits'))
+        self.assertIn('href="/reference/limits/"',r.link('Limits'))
+        self.assertNotIn('limits',r.missing)
     def test_local_links_and_escaped_label(self):
         result=self.r.render('[[llSay|<test>]] [[state_entry]]')
         self.assertIn('href="/functions/llSay/"',result)
@@ -121,10 +127,16 @@ class DatasetTests(unittest.TestCase):
                     e['wiki']['sections']=api[e['name']]['sections']
                     e['wiki']['html']='\n'.join('<section><h2 id="'+s['id']+'">'+s['title']+'</h2>'+s['html']+'</section>' for s in e['wiki']['sections'])
     def test_counts_and_exclusions(self):
-        self.assertEqual(len(self.c['wiki']),2266)
+        self.assertEqual(len(self.c['wiki']),2268)  # wiki-English.xml plus new pages from wiki-supplement-*.xml
         self.assertEqual(len(self.c['functions']),501)
         for kind in ('functions','events','constants'):
             self.assertTrue(all(not x['definition'].get('private') and not x['definition'].get('deprecated') for x in self.c[kind]))
+    def test_supplement_pages_are_merged(self):
+        limits=next(w for w in self.c['wiki'] if w['title']=='Limits')
+        self.assertEqual(limits['source']['revisionId'],'1218965')
+        self.assertIn('wiki-supplement-limits.xml',[x['file'] for x in self.c['meta']['sources']['supplements']])
+        titles=[w['title'] for w in self.c['wiki']]
+        self.assertIn('Template:Jira',titles); self.assertIn('Template:JIRA',titles)  # case-distinct titles stay separate
     def test_transcluded_specifications_render(self):
         api={e['name']:e for k in ('functions','events','constants') for e in self.c[k]}
         spec=lambda n:next(s['html'] for s in api[n]['wiki']['sections'] if s['id']=='specification')

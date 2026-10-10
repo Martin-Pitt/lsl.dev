@@ -6,6 +6,8 @@
 /* Larger page content width with more information density is preferred (as on the original
    lsl.dev). Unlayered so it overrides slua-base.css (17rem / 60rem). */
 :root { --sl-sidebar-width: 15rem; --sl-content-width: 75rem; }
+/* Dense reference pages opt in to the wide feature layout with <div class="wide-page" hidden></div>. */
+:root:has(.sl-markdown-content .wide-page) { --sl-content-width: 84rem; }
 
 @layer site {
 	/* Title, breadcrumbs, chips and body read as one block: no rule under the title panel. */
@@ -79,7 +81,8 @@
 	}
 }
 
-/* Pinned entries (overviews, index pages) sit apart from the automatically sorted entries below them */
-.sidebar-content li:has(> .is-priority) {
+/* Pinned entries (overviews, index pages) sit apart from the automatically sorted entries below them;
+   consecutive pinned entries stay together and the gap follows the last one. */
+.sidebar-content li:has(> .is-priority):not(:has(+ li > .is-priority)) {
 	padding-bottom: 0.6em;
 }

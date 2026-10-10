@@ -46,6 +46,13 @@ def conditionals(text):
 def anchor(s):
     return re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-') or 'section'
 
+# Wiki pages that lsl.dev replaces with a hand-edited page. Links to them (including
+# [[Page#Section]]) go to the local page; section anchors use anchor(), so the local
+# page's heading ids must match. Value: (route, route used when a fragment is given).
+LOCAL_PAGES = {
+    'limits': ('/reference/limits/', '/reference/limits/'),
+}
+
 class Renderer:
     def __init__(self, routes, sources=None):
         self.routes = routes
@@ -63,7 +70,8 @@ class Renderer:
         if self.api and not target and sibling.startswith('ll') and sibling in self.routes:
             # On single-function pages a sibling variant's section lives on that function's own page.
             target, fragment, key = fragment, '', sibling
-        route = '#' if not target and fragment else self.routes.get(key)
+        local = LOCAL_PAGES.get(key)
+        route = '#' if not target and fragment else (local[1 if fragment else 0] if local else self.routes.get(key))
         if not route:
             self.missing.add(target)
             route = 'https://wiki.secondlife.com/wiki/' + quote(target.replace(' ', '_'), safe='/:')

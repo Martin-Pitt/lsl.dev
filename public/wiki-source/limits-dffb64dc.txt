@@ -1,0 +1,607 @@
+<noinclude>{{KBmaster}}</noinclude>
+== Summary ==
+{{RightToc}}
+The Second Life Viewer and simulators have a division of labor, keeping track of the data that makes Second Life run. The Viewer's job is to:
+
+* Handle locations of objects.
+* Get velocities and other physics information, and does simple physics to keep track of what is moving where.
+
+The simulator's job is to:
+
+* Run the physics engine.
+* Detect collisions.
+* Keep track of where everything is
+* Send locations of content to the Viewer along with updates when certain changes occur.
+
+Limits are necessary for all of these components to work together. The list below outlines many of the '''Second Life numerical limits that affect your inworld experience'''. Some of these will likely change over time, so if you spot something incorrect/outdated, please take a moment to update it.
+
+{{KBcaution|1=The scope of this page is focused on Linden Lab's official Viewers, keeping in mind [[Third_Party_Viewer_Directory|3rd-party viewers may differ]]. Cite sources and provide substantiation for limits that aren't provided by Linden Lab. Also, unconfirmed speculation [[Talk:Limits|goes on this discussion page]]. Don't add data without a hard limit, and don't add obscure trivia that doesn't practically affect the general inworld experience.|width=80%}}
+
+== [[Avatar]] ==
+
+* '''Max. # of attachments''' - 38 combined [[HUD]] and body attachments.
+** They can be viewed by right-clicking your avatar and choosing '''Edit My Outfit'''.
+** With the formal introduction of [[multiple attachments|multiple attachments to a single point]] in Viewer 2.4, you can attach up to 38 total objects, and they can all be attached to a single point. 
+** With the introduction of the Bento armature, there are 47 attachment points available.
+** With the introduction of Animesh, there is a limit of 1 Animesh attachment for Basic & Plus members, 2 for Premium members, and 3 for Premium Plus members.
+* '''Max. attachment position''' - 3.5m in a sphere around <0, 0, 0>.
+* '''Max. # of clothing layers''' - 60 including alpha, tattoo, shoe base, physics, socks, gloves, undershirt, underpants, shirt, pants, jacket, skirt
+** On viewers before Second Life Release 3.7.29.301305, the potential total was still 60, but limited to 5 items of each type.
+** In any case, only one each of shape, skin, eyes and hair base may be worn. These 4 basic body parts are in addition to the 60 clothing layers.
+* '''Max Clothing Texture''' - 1024x1024 px (except 128x128 px for eyes) - Server Side Appearance (and legacy baking on outside grids) will downsize larger textures*. (Support for 2K textures & Bakes on Mesh is in development but not yet supported)
+* '''Max. unassisted fly height''' - Stable hover at current ground elevation ''plus'' 5020m.
+** You can easily acquire a flight attachment to fly high. Also see [[flight limit]] and [[Limits#Navigation|the Navigation section]] below.
+* '''Common shoe sizes''' - Traditionally, most women's shoes were designed for a size 0 (zero) foot. Men's generally scale up to 14. Newer items (mesh and some sculpted) replace the system feet or conform to the avatar's shape, so adjustments may be necessary.
+** You can check this by going to Edit menu > Appearance and clicking on the Shape > Legs tab.
+<!--Can someone verify the following?
+* '''Min. length of avatar name''' - 2 for the first name, 2 for the last name, 5 in total (including the space).-->
+* '''Max. length of avatar name''' - 31 for first name, 31 for last name, 63 in total (including the space).
+
+* '''Max. length of {{LSLGC|Username}}''' - All lower case and a maximum of 63 including the '.'(eg; firstname.lastname)
+**Older account user names are a combination of the First and last name in lower case separated by a period(.)(eg; lilmix.pixelmaid)
+**Modern user names are a single name(no period)(eg; john1234) - '''Max.''' length is 31 characters
+**The {{LSLGC|Legacy Name}}s for modern user names always shows Resident as the last name. So the Max is 40 characters in total for a new avatar's legacy name(including the space and last name 'Resident')
+*'''Min. length of [[Display_Names]]''' - At least one script character
+*'''Max. length of Display Names''' - 31 characters
+**Display Names can include most Unicode script characters, spaces, and some punctuation.
+
+* '''Max. avatar speed''' - 250m/s (with only attachments to assist)
+* '''Max. teleport speed''' - 6 teleports per minute
+
+== [[Animation]] ==
+
+{| class="sortable" width="100%" {{Prettytable}}
+|- {{Hl2}}
+! '''Limit affects'''
+! '''Lower limit'''
+! '''Upper limit'''
+! '''Comment'''
+! '''More coverage'''
+|-
+||Length of animation
+| n/a
+| {{no|60.0 seconds}}
+| Limited by length or Size, whichever is reached first
+| n/a
+|-
+||Size of Animation
+| n/a
+| {{no|{{HoverText|250,000 bytes|250 KB (decimal), 244 KB (binary)}}}}
+| Limited by length or Size, whichever is reached first. Size is after conversion to [[Internal Animation Format|.anim]]. {{KBtip|custom=Tip for Blender users:|1=You can use a built-in function called "''Decimate''" to simplify your animation. See [https://www.youtube.com/watch?v=lScwEYJZy1M this tutorial]}}
+| [[Internal Animation Format]]
+|-
+||Distance an Animation Can Travel
+| {{no|-5 meters (per axis)}}
+| {{no|+5 meters (per axis)}}
+| 10 meters per axis cumulatively (travelling from -5 to +5).
+| n/a
+
+|-
+||animation priority
+| {{no|0}}
+| {{no|.bvh: 4, [[Internal Animation Format|.anim]]: 6}}
+| [[Internal Animation Format|.anim]] uses per-joint priorities, meaning it's possible to have a mix of joint priorities in the same animation.
+| [[Animation_Priority|Animation Priority]]
+|-
+||Number of unique joints per animation
+| n/a
+| {{no|216}}
+| [[Internal Animation Format|.anim]], unlike .bvh, uses a flat structure, meaning that only the bones animated are stored, and bones which would otherwise be kept by .bvh (to keep hierarchy structure) are deleted.
+| n/a
+|-
+||Number of simultaneous animations playing
+| n/a
+| {{no|30}}
+| n/a
+| n/a
+|}
+
+== [http://community.secondlife.com/t5/English-Knowledge-Base/Build-Tools/ta-p/700039 Building] ==
+
+{| class="sortable" width="100%" {{Prettytable}}
+|- {{Hl2}}
+! '''Limit affects'''
+! '''Lower limit'''
+! '''Upper limit'''
+! '''Comment'''
+! '''More coverage'''
+|-
+||[[Prim]] dimensions
+| {{no|<0.01,&nbsp;0.01,&nbsp;0.01>}}
+| {{no|<64.0, 64.0, 64.0>}}
+| Used to be <10.0, 10.0, 10.0> prior to Second Life Server version 11.08.17.238770
+| [[llSetScale]], [[PRIM_SIZE]] and [[Megaprim]]
+|-
+||Number of prims in a linkset
+| n/a
+| {{no|256 prims}}
+| Used to be 255 prior to Second Life Server version 1.26
+| n/a
+|-
+||Linking distance
+| n/a
+| {{no|64 meters}}
+| distance has changed on [https://community.secondlife.com/blogs/entry/13626-coming-soon-server-release-202306/ 2023.06 update]. The old max distance was 54 meters.
+| n/a
+|-
+||Local offset (avatars)
+| n/a
+| {{no|1000 meters per axis}}
+| Unlike regular [[Linkability_Rules|Linkability Rules]] for linksets, an avatar sitting on an object may be moved significantly further by scripts.
+| [[llSetLinkPrimitiveParams]] with [[PRIM_POS_LOCAL]]
+|-
+||[[Mesh/Mesh_physics#Physics_Resource_Cost|Physics cost]] for a physical object
+| n/a
+| {{no|32.0}}
+||Additional notes:
+* If you try to link more, it'll either say "Can't enable physics for objects with more than 32 primitives" or "Object has too many primitives -- its dynamics have been disabled.".
+* On server versions 1.38 and below, each sitting avatar counted as 1 prim. From 1.40.2 the limit is only on actual prims.
+| [[OBJECT_PHYSICS_COST]]
+|-
+||Build or rez height
+| n/a
+| {{no|4096.0 meters}}
+| 768.0 meters for Viewers prior to version 1.20
+| n/a
+|-
+||Prim name length
+| n/a
+| {{no|63 bytes UTF-8 [[String|string]]}}
+| same limit for {{LSLGC|Avatar/Name|avatar names}}, although the character set for avatar names is significantly limited.
+| n/a
+|-
+||Prim description length
+| n/a
+| {{no|127 bytes UTF-8 [[String|string]]}}
+| n/a
+| n/a
+|-
+||Temporary prims' lifetime
+| n/a
+| {{no|up to around 60 seconds}}
+| depends upon when the next garbage collector cycle is
+| n/a
+|-
+||Number of temporary prims
+| n/a
+| {{no|RegionPrimLimit - NumberOfPrimsInRegion + Minimum(0.5*RegionPrimLimit, 1000)}}
+| n/a
+| n/a
+|-
+||Length of hovertext
+| n/a
+| {{no|254 bytes UTF-8 [[String|string]]}}
+| n/a
+| [[llSetText]] and [[PRIM_TEXT]]
+|}
+
+== [https://community.secondlife.com/knowledgebase/english/lighting-and-shadows-r331/ Lighting] ==
+
+{| class="sortable" width="100%" {{Prettytable}}
+|- {{Hl2}}
+! '''Limit affects'''
+! '''Lower limit'''
+! '''Upper limit'''
+! '''Comment'''
+! '''More coverage'''
+|-
+||Number of active light sources
+| n/a
+| {{yes|no limit}}
+| Advanced Lighting Model (ALM) was developed around 2011-2013 to remove the hard limit on light sources.
+|-
+||Number of projectors rendered at full detail
+| n/a
+| {{no|2}}
+| Only the 2 projectors closest to an object will cause it to cast shadows. Additional projectors still affect color.
+| [https://community.secondlife.com/knowledgebase/english/lighting-and-shadows-r331/#Projectors Knowledge Base > Lighting > Projectors]
+|-
+||Number of lights rendered on Alpha Blended surfaces
+| n/a
+| {{no|8}}
+| 8 including the Sun and Moon. The viewer will attempt to select the "most significant" lights to render, however these blended surfaces will look different as a result of these lighting limitations.
+| [[Alpha Modes Do's and Don'ts#Alpha_blending|Alpha Blending]]
+|}
+
+== [[Communication]] ==
+
+{| class="sortable" width="100%" {{Prettytable}}
+|- {{Hl2}}
+! '''Limit affects'''
+! '''Lower limit'''
+! '''Upper limit'''
+! '''Comment'''
+! '''More coverage'''
+|-
+||Whisper distance
+| n/a
+| {{no|10 meters}}
+| <code>/whisper</code> as the first few characters in a message can be used in viewer-2-code based viewers in local chat.
+| n/a
+|-
+||Chat distance
+| n/a
+| {{no|20 meters}}
+| text spoken as a "chat" step '''within gestures''' cannot be shouted or whispered. /whisper and /shout ''can'' be used in the "Replace with" field.
+| n/a
+|-
+||Shout distance
+| n/a
+| {{no|100 meters}}
+| <code>/shout</code> as the first few characters in a message can be used in viewer-2-code based viewers in local chat.
+| n/a
+|-
+||Length of a chat message and whether or not it is truncated
+| {{no|1 byte or single-byte character}}
+| {{no|1024 bytes or single-byte characters}}
+| Limit does not apply to instant messages via [[llInstantMessage]] and communication between IM and email, the limit there is 1023 bytes or single-byte characters.
+The viewer-to-server communication on ''negative'' channels is truncated to 254 bytes, and on ''positive'' channels, to 1023 bytes. These limits do not affect communication between scripts.
+| [[llInstantMessage]]
+|-
+||Maximum events
+| n/a
+| {{no|64 events}}
+| Events are stored in a 64 bit bitmap. Events happening when the bitmap is full, will get discarded.
+| n/a
+|-
+||Number of offline messages
+| n/a
+| {{no|Capped at 30 messages for Basic members, 40 for Plus members, 120 for Premium members, and 240 for Premium Plus members.}}
+| Number of offline messages (involving [[IM|IMs]], inventory offers, group notices, group invitations) received before messages get capped. Note: If autoAcceptNewInventory (debug setting) is set to TRUE (the default is FALSE), then all inventory offers, even above the cap allowed by membership, go directly to inventory and do not count against the cap on offline messages. 
+| [[IM]] - [https://community.secondlife.com/blogs/entry/2559-group-limits-update-no-changes-for-basic-members/ Blog Post]
+|-
+||Length of a properly delivered email reply to an [[IM]]
+| n/a
+| {{no|1023 bytes or single-byte characters}}
+| n/a
+| n/a
+|-
+||Time after which a reply to an [[IM]] can be sent via email.
+| {{no|when receiving the IM via email.}}
+| {{no|5 days after receiving the offline IM via email.}}
+| n/a
+| [https://blogs.secondlife.com/community/features/blog/2007/02/06/im-to-e-mail-return-addresses-changing Second Life Blogs]
+|-
+||Time period for which [[IM|IMs]] are stored within Second Life.
+| n/a
+| {{no|31 days after receiving the [[IM]]}}
+| [[User:Torley_Linden|Torley Linden]] confirmed this with [[User:Kelly_Linden|Kelly Linden]]
+| n/a
+|-
+||Number of [[IM|IMs]] sent by an object within an hour
+| n/a
+| {{no|5000 per hour}}
+| n/a
+| n/a
+|}
+
+== [[Gesture]]s ==
+
+{| class="sortable" width="100%" {{Prettytable}}
+|- {{Hl2}}
+! '''Limit affects'''
+! '''Lower limit'''
+! '''Upper limit'''
+! '''Comment'''
+! '''More coverage'''
+|-
+||Shortcut key mappings
+| n/a
+| {{no|33 unique combinations, since {{K|F2}}&ndash;{{K|F12}} can be used with the {{K|Ctrl}} or {{K|Shift}} modifiers.}}
+| n/a
+| [[All_keyboard_shortcut_keys]] and [http://community.secondlife.com/t5/English-Knowledge-Base/Keyboard-shortcuts/ta-p/1086557 the knowledge base]
+|-
+||Chat step length
+| n/a
+| {{no|127 bytes or single-byte characters}}
+| n/a
+| n/a
+|-
+||Wait time
+| n/a
+| {{no|3600 seconds (which is one hour)}}
+| n/a
+| n/a
+|-
+| Maximum steps data
+| n/a
+| {{no|1000 bytes}} of packed data; saving with more data returns the message "Gesture save failed. This gesture has too many steps. Try removing some steps, then save again." Shorter text, for example, will allow more steps.
+| n/a
+| n/a
+|-
+||Length of included assets
+| n/a
+| see sections for [[#Animation|animation]], [[#Sound|sound]]
+| n/a
+| n/a
+|}
+
+== [[Group]]s ==
+
+* '''Maximum number of groups you can belong to:''' 50 for Basic members, 55 for Plus members, 80 for Premium members, 150 for Premium Plus members.
+** After downgrading from a higher limit membership to a lower one, you may not join any new groups until you are a member of fewer than your current subscription's group limit. For example, if you downgrade from Premium (80 groups allowed) to Basic (50 groups allowed), you can't join any new groups until you're a member of fewer than 50 groups.
+** Roles within groups are sort of like sub-groups. In many cases, you can use them instead of creating new groups.
+* '''Minimum number of members in a group:''' 2
+** A group with only 1 person for 48 hours will be disbanded (cancelled), unless the group owns land.
+* '''Maximum number of roles allowed in a group:''' 10 (including "Owners" and "Everyone", which cannot be deleted)
+* '''Maximum Group Name:''' 35 single-byte characters.
+* '''Maximum Group Description Length:''' 511 single-byte characters.
+* '''Maximum Group Title:''' 20 single-byte characters.
+* '''Maximum Length of a Group Notice:''' 512 single-byte characters.
+* '''Maximum Age of a Group Notice:''' 14 days.
+
+== [[Inventory]] ==
+
+* '''Maximum number of inventory items that can be sent in a folder:''' 42
+** Folders count as items too. This has more to do with packet size limits than cheeky Douglas Adams references.
+* '''Maximum number of accounts that an inventory item can be shared with at once:''' The limit is unknown, but tests show that it is more than 35. No documentation has been found. One third-party viewer developer says that the code doesn't seem to look for a limit. It just builds the list and sends it to each avatar individually.
+* '''Maximum number of inventory items that can be contained in a prim:''' 10,000
+* '''Maximum characters in an inventory item name (including folder names):''' 63
+* '''Maximum notecard line:''' None, but scripts can only read the first 1024 bytes (was 255 bytes before server version [https://releasenotes.secondlife.com/simulator/2021-10-25.565008.html 2021-10-25.565008]).
+* '''Maximum notecard size:''' 65,536 bytes
+* '''Maximum uncompiled script size:''' 262,144 bytes
+<!--
+* '''Number of items in the Library:''' 1,248 as of 2010-06-17
+* '''Number of items in the Library:''' 2,210 as of 2012-11-04 -->
+* '''Number of items in the Library:''' 3,500 as of 2019-08-10
+** Verified by [[How_does_the_Library_work|hiding the Library]] and counting the difference.
+* '''Maximum number of inventory items displayed in a single inventory folder:''' Several thousand. <!-- not a specific item count, because the data is variable size, but still useful to document that there is a limit. -->
+** This was discussed during [http://wiki.secondlife.com/wiki/Simulator_User_Group/Transcripts/2011.03.08] "the folder will load up to the limit number of items, and remaining ones won't show up in the viewer. you still own them, they aren't lost, but they will be hidden until the folder size is reduced."
+** There is no specified limit for total avatar inventory, very large folders can be split.
+** There was discussion in the Third Party Developers' UG (4/10/2015) meeting about new inventory and login problems from having large numbers of items in a single folder. AISv3 ''removed'' server-side limits on the number of items in a folder. Flat inventories are bad. No one is certain at what number of items in a folder cause a login problem. The fix is to clear the inventory cache (not the viewer cache) and log into a deserted, empty region then move inventory items into folders and sub-folders. - The problem appears at different a number of items depending on your computer and connection speed. Hopefully being on an empty region will give one enough edge to get logged in and do some corrective work before being dropped. If not, you will need to contact support for help. They will divide large folders into smaller groups so you can log in.
+
+== [[Land]] ==
+
+* '''Maximum [[Land#Parcel|parcel]] size:''' 65,536 meters²
+** Covering a whole region, or square on the World Map.
+* '''Minimum parcel size:''' 16 meters²
+* '''Maximum parcel name length:''' 63 single-byte characters
+* '''Maximum parcel description length:''' 255 characters
+* '''Region name length:''' Linden Concierge policy states a minimum of 3 characters, and a maximum of 25 characters (including spaces). See [[Linden Lab Official:Guidelines for Private Region Naming|Guidelines for Private Region Naming]]. However, the technical maximum limit is 35 characters, and exceptions to the concierge policy do exist (e.g [http://maps.secondlife.com/secondlife/Sandbox%20-%20Weapons%20testing%20%28no%20damag/128/128/2 Sandbox - Weapons testing (no damag] and [http://slurl.com/secondlife/X/128/128/24 X])
+* '''Ban line height for "no entry" or "pay to access"''' (in other words, "allow public access" is turned off, or "allow group access" is turned on, in the parcel options) is the parcel's ground elevation ''plus'' 50 meters (except, if the region has been set to "Block Parcel Fly Over" in which case the access controls extend to at least 4096 meters). If a user is '''explicitly banned by name''', the height is the parcel's ground elevation ''plus'' 5000 meters. On current viewers this is visible to the full extent.
+* '''Maximum prims in a [[Land#Region|region]]:'''
+** "Mainland / Full Region" and "Linden Homes / Full Region": 22,500
+** Full Regions in private estates: 20,000 with an [https://community.secondlife.com/t5/Featured-News/Upgrade-Your-Full-Private-Region-to-30-000-Land-Impact-Today/ba-p/3086162 option for 30,000]
+** Homestead: 5,000
+** Openspace : 1,000
+:: To check a region's capacity, use <tt>[[llGetEnv]]("region_max_prims")</tt>.
+::''(Region types are as found in the General tab of World > About Land, or returned by ''<tt>llGetEnv("region_product_name")</tt>'')''
+* '''Maximum auto return value''': Besides {{code|0}} (which means ''never''), {{HoverText|999,999|Almost 23 months}} minutes is the highest auto return value.
+* '''Terraforming limits:'''
+** Most mainland can be raised/lowered by 4 meters (+/-).
+** Some mainland regions cannot be terraformed, including: Bay City regions, Boardman, Brown, De Haro, Horizons, Kama City regions, Nautilus City regions, Nova Albion regions, and Shermerville regions.
+** [http://community.secondlife.com/t5/English-Knowledge-Base/Linden-Homes/ta-p/700103 Linden Homes] do not allow terraforming.
+** A few, very old mainland Regions like Da Boom have a terraform range of 40 meters (+/-).
+** Estate (private island) terraformability is settable to a maximum of 100 meters (+/-) by the estate owner or managers.
+* '''Maximum water height:''' 100 meters using inworld controls, 255 meters by using a {{code|*.raw}} file upload.
+** Region water height is usually 20 meters, and adjacent regions should have the same water height, or else they will look discontinuous.
+* '''Maximum terrain height:''' 255 meters using inworld controls (Region/Estate setting & Edit Terrain tool), 510 meters by using a {{code|*.raw}} file upload.
+* '''Miscellaneous estate limits:''' You can have a maximum of 20 estate managers, 500 allowed Residents, 63 allowed groups, and 750 banned Residents.
+** See World menu > Region/Estate > Estate tab.
+* '''Maximum number of agents'''
+** [https://second.life/eventregions Event Regions]: 175 agents
+** Full region: 100 basic account users plus 10 additional available to premium accounts. (Typically set to 40 on mainland, 55 on Linden Homes regions, but this does vary. Some meeting areas have this set to 60 and higher.)
+*** Recent server performance improvements make regions with 60 agents in them perform quite well.
+** [[Land#Homestead|Homestead]]: 20 (plus 5 additional available to premium accounts)
+** [[Land#Openspace|Openspace]]: 10 (plus 2 additional available to premium accounts)
+* '''Freeze Time:''' Land owners can [[freeze]] other Residents for up to 30 seconds.  Members of land-owning groups can also be granted this ability.
+* '''Minimum parcel that can be listed in Places or All search:''' 144 meters² <!-- 128 and under are disabled -->
+* '''Minimum parcel that can be listed in Events:''' 512 meters²
+* '''Maximum altitude for event listings:''' 768 meters ({{JIRA|WEB-814}})
+* '''Maximum heights that objects can be seen on the [[World Map]]:''' 400.005m
+* '''Maximum height that avatars will be hidden if 'Avatars on other parcels can see and chat with avatars on this parcel' is checked:''' 50m above the ground (see 'Ban line height' above)
+
+== [[Mesh]] ==
+
+{| class="sortable" width="100%" {{Prettytable}}
+|- {{Hl2}}
+! '''Limit affects'''
+! '''Lower limit'''
+! '''Upper limit'''
+! '''Comment'''
+! '''More coverage'''
+|-
+||Number of vertices
+| n/a
+| {{no|65536 vertices per LOD}}
+| per [[mesh]] - See [[Talk:Limits#Mesh_Limits|discussion page]]
+| n/a
+|-
+||COLLADA file size
+| n/a
+| {{no|8 MB}}
+| Maximum mesh asset size after compression, roughly equivalent to a 256 MB Raw COLLADA file.
+| n/a
+|-
+||Bone influence weights per vertex
+| n/a
+| {{no|4}}
+| n/a
+| n/a
+|-
+||Bone influence weights per mesh
+| n/a
+| {{no|110}}
+| some folk have reported needing to go as low as about 99 in rare cases
+| n/a
+|-
+||Number of materials per mesh
+| n/a
+| {{no|8}}
+| n/a
+| n/a
+|-
+||Number of materials per face
+| n/a
+| {{no|1}}
+| n/a
+| n/a
+|-
+||Physics weight for a vehicle
+| n/a
+| {{no|32.0}}
+| n/a
+| n/a
+|-
+||Maximum number of triangles for Animesh
+| n/a
+| {{no|100,000}}
+| Server uses estimated triangles (streaming cost calculated), not visual triangles.
+| [[Animesh User Guide|Animesh_User_Guide]]
+|}
+
+===User Found Temporary Mesh Limits:===
+''Because of an apparent bug in the importer stay within these limits.''
+* 174,752 triangles, beyond which additional triangles will appear as holes.
+* The 64k vertices per material is pre-empted by a limit of 21,844 triangles per material, which is presently reported as {{Jira|BUG-1001}}. (4/2014 - See [[Talk:Limits#Mesh_Limits|discussion page]])
+
+
+:: The import process will continue making new materials beyond 8 x 21,844 (=174,752) triangles, but the extra triangles then get dropped by the limitation to 8 materials, causing holes in the resulting object. Over the 21,844-triangle limit, the vertex count will start to climb steeply, even with smooth shading, because the materials get highly interspersed. So the same vertices have to appear in multiple material lists. So, the moral of the story is to stay below 21,844 triangles per material, for now, if you want to avoid some unexpected effects.
+
+::Since viewer release 3.8.4, processing of meshes in the Collada file that have faces assigned to more than 8 materials has changed. Instead of simply dropping the extra material faces, the uploader now creates a new object to accommodate them. The result is that the single mesh is divided into multiple objects (prims) in a linkset. Thus, the limitation to 8 materials is removed as far as input is concerned, but still applies to each of the resulting linked objects actually uploaded. As a consequence, it is now possible to upload a mesh with more than 174,752 triangles, although it will be divided into multiple objects.
+
+== Misc. ==
+
+*'''[https://secondlife.com/currency/describe-limits.php Billing and Trading Limits]''' - Includes [https://secondlife.com/whatis/economy-market.php LindeX] currency exchange limits.
+
+== Navigation ==
+
+[[File:Max Alt.jpg|thumb|right|435px|'''Height counter error above 2147483647 meters''']]
+* '''Absolute height limit:''' [http://en.wikipedia.org/wiki/2147483647#2147483647_in_computing 2147483647]&nbsp;=&nbsp;2<sup>31</sup>&nbsp;−&nbsp;1 meters, which causes the altitude counter to roll over. Altitudes well below this cause graphics errors probably due to limited floating point number precision.
+* '''Highest z-value of an [[SLurl]], that will still teleport you to a positive altitude:''' 4096
+** This used to be much higher, but is clamped in late model viewers.
+
+== [[Profile]] ==
+
+Each 7-bit ASCII character is encoded in one byte. International characters might need more bytes. When pasting text instead of typing, you can get in one byte more into each of the below.
+
+* '''2nd Life tab's About field''' - 65,000 bytes
+* '''Picks tab''' - 20 picks with 254 bytes title and 1023 bytes text each
+* '''1st Life tab's Info field''' - 65,000 bytes
+* '''Classified tab''' - 100 listings with 30 bytes each
+* '''My Notes''' - 65,530 bytes
+* '''Feed post''' - 1024 bytes
+* '''Feed comment''' - 512 bytes
+
+== [[Lag|Performance]] ==
+
+* '''Healthy Viewer FPS''' - Generally, FPS equal to or above 24 is good. The higher it gets, the smoother'''*'''. You can check via [[Advanced]] menu > Performance Tools > Lag Meter, or for more advanced usage, see Advanced > Performance Tools > Statistics Bar.
+* '''Avatar Rendering Cost scores''' - [[Avatar Rendering Cost|Learn all about it!]]
+
+'''*''' Only until your framerate reaches your monitor's refresh rate, after this point there will be very little benefit.
+
+== [[Scripting]] == <!-- Important scripting limits should be placed here, less important ones should be in the articles Caveats or Specification sections -->
+
+* '''Height at which scripts reactivate on a no-script parcel''' - 50 m above terrain mesh. Scripted objects that take controls will keep running when you fly down or enter a no-script parcel. (If scripts are disabled in the region debug panel, they will not run at any height.)
+* '''Maximum height where scripts can run''' - none, as long as the object remains rezzed or attached.
+* '''Maximum script source code size''' - 65536 single byte characters (that's a viewer limit and can be changed in the config file 'panel_script_ed.xml').
+* '''Maximum script memory size (LSO)''' - 16384 bytes.
+* '''Maximum script memory size ([[Mono]])''' - 65536 bytes (the maximum memory available to Mono scripts can be constrained via [[llSetMemoryLimit]]).
+* '''Maximum memory for [[:Category:LSL LinksetData|Linkset data]]''' key/value pairs - 128 KiB 
+* '''Maximum memory for [[:Category:Experience Tools|Experience]]''' key/value pairs- 128 MiB 
+* '''Maximum active [[llListen|listeners]] per script''' - 65.
+** '''Usable channel for each listener''' - ''min.'' -2147483648, ''max.'' 2147483647, including the following special channels: [[PUBLIC_CHANNEL]] ''and'' [[DEBUG_CHANNEL]].
+* '''Maximum number of scripts that can be rezzed at once''' – 1,000. (Refer to [https://community.secondlife.com/knowledgebase/english/building-tips-r13/ Building Tips, by Jeremy Linden].)
+* For specific scripting limits, look up calls in the '''[[LSL Portal]]'''.
+
+== [[Sound]] ==
+
+<!-- TODO: add link to modemworld.me summary of CCUG from 15/12/22 regarding sound max length -->
+
+{{KBtip|Second Life will accept sounds that are encoded following "[https://en.wikipedia.org/wiki/Compact_Disc_Digital_Audio CD Quality]" encoding presets present in many {{Abbr|DAW|Digital Audio Workstation}}s.}}
+
+{| class="sortable" width="100%" {{Prettytable}}
+|- {{Hl2}}
+! '''Limit affects'''
+! '''Lower limit'''
+! '''Upper limit'''
+! '''Comment'''
+! '''More coverage'''
+|-
+||Sound length
+| n/a
+| {{no|less than 30 seconds or precisely 1,323,000 samples}}
+| The advice is typically to upload sounds less than 30.0 and that 29.99 seconds is fine. However if you do wish to be able upload sounds that are 30 seconds precisely then the .WAV file must have exactly 1,323,000 samples (44,100Hz * 30 seconds). Specifically anything above 1,323,000 samples fails to upload.
+| '''[https://community.secondlife.com/knowledgebase/english/uploading-assets-r75/ Uploading Assets]'''
+|-
+||Bit depth
+| n/a
+| {{no|16 bit}}
+| n/a
+| n/a
+|-
+||Sample rate
+| n/a
+| {{no|44.100 kHz}}
+| n/a
+| n/a
+|-
+||Audio channels
+| n/a
+| {{no|1 channel (mono)}}
+| Channels will be '''merged''' at upload time for dual-channel (stereo) audio.
+| n/a
+|}
+
+== [[Textures]] ==
+* '''[http://en.wikipedia.org/wiki/Aspect_ratio Aspect ratios]''' of profile, place, etc. pictures — all of these were measured at UI size (Edit menu > Preferences > General tab > UI Size) = 1.000:
+
+=== Second Life Viewer 3.6 ===
+
+* '''Search > Classifieds thumbnail''' - ~3:2 (101&times;69 pixels)
+* '''Search > Classifieds expanded''' - ~4:3 (159&times;120 pixels)
+* '''Search > Classifieds expanded > More Info''' - native aspect ratio
+* '''Search > Destination Guide thumbnail''' - ~3:2 (101&times;69 pixels) 
+* '''Search > Destination Guide expanded''' - ~4:3 (159&times;120 pixels)
+* '''Search > People''' - 1:1 (100&times;100 pixels)
+* '''Search > Places expanded''' ~4:3 (159&times;120 pixels)
+* '''Place Profile''' - ~3:2 (290&times;197 pixels)
+* '''About Land > Options tab''' - ~4:3 (195&times;150 pixels)
+* '''Profile > Picture''' - native aspect ratio; thumbnail cropped to 72&times;72 pixels; zoomed uncropped up to 300&times;300 pixels
+* '''Profile > Real world picture''' - native aspect ratio; thumbnail cropped to 45&times;45 pixels; zoomed uncropped up to 300&times;300 pixels
+* '''Profile > Picks thumbnail''' - ~16:9 (~516&times;~270 pixels as measured on screen; the ratio seems closer to 16:8.5)
+* '''Profile > Pick expanded''' - Unknown as of 2022-11-13 (viewer 6.6.7.576223); the Pick image does not expand.
+
+=== 1.x Series Viewers ===
+(official Viewer up to 1.23.5, still used by some [[Alternate viewers|Third Party Viewers]])
+* '''Search > All for "Classifieds", "People", and "Places"''' - 4:3 (256&times;192 pixels)<ref>As of {{#time: r|2024-02-26T18:00:00}}, this seems to be one of the very few sizes supported by the [[Picture Service]].</ref>
+* '''Search > Places and Classified tabs''' - ~7:5 (398&times;282 pixels)
+* '''Search > Land tab''' - ~7:5 (358&times;252 pixels)
+* '''Profile > 2nd Life tab''' - ~4:3 (178&times;133 pixels)
+* '''Profile > Picks tab''' - 16:9 (288&times;162 pixels)
+* '''Profile > 1st Life tab''' - 1:1 (133&times;133 pixels)
+* '''Profile > Classifieds tab''' - ~3:2 (206&times;137 pixels)
+* '''Profile > Web tab''' - 1:1 (400&times;400 pixels)
+** A scrollbar uses 15 pixels on the right-hand side.
+* '''About Land > Options tab''' - ~3:2 (178&times;117 pixels)
+* '''Group Information > General tab's "Group Insignia"''' - 1:1 (126&times;126 pixels)
+** Some of these textures are shared (for example, Search > All place pages, Search > Places, and About Land > Options use the same image), so you should pick a well-balanced ratio and size.
+** [[Texture_aspect_ratios|Learn how to get correct texture aspect ratios when editing images.]]
+
+=== All Viewers ===
+
+* '''Maximum texture size''' - 2048&times;2048 pixels
+** All Second Life textures are constrained to [http://en.wikipedia.org/wiki/Power_of_2 powers of 2] (e.g., 128, 256, 512).
+** We strongly recommend you use as small textures as possible because larger ones consume more memory and take substantially longer to load.
+** Where large textures are being forced by import to only 512&times;512, lower your ...> Preferences >...> UI Size under 1.0, to increase import size to the max 2048&times;2048.
+
+* '''Minimum texture size''' - 4&times;4 pixels
+** This means that there are ten possible image dimensions: 4, 8, 16, 32, 64, 128, 256, 512, 1024 & 2048 pixels, either horizontal or vertical.
+
+* '''Texture resizing'''
+** Uploaded textures will be resized to the dimensions above. 
+** Each dimension is resized independently (for instance, a 1024 x 999 image will be resized to 1024 x 1024).
+** A dimension that is already a power of two will not be resized.
+** The uploader “prefers” to round down rather than up. The threshold for rounding down/up is .75 of the distance between powers of two. 
+*** For example, given a dimension of x, if x / 512 is larger than 1.75, x will be resized to 1024, else 512.
+*** Another example:  If x / 256 is larger than 1.75, x will be resized to 512. 
+
+[[Category:Creation]] [[Category:Tutorials]] [[Category:Lists]]
+
+=== Notes ===
+In general, 1 byte is enough to contain one character.<ref>Except in .NET-based applications, and those related to .NET development — which is the case of the SL viewer — which essentially use UTF-16 everywhere, i.e., every character is encoded in ''two'' bytes, not just one.</ref>
+
+Text using Unicode characters (including, but not limited to, emojis), where supported, will require 1–4 bytes (depending on the encoding).
+
+----
+{{References}}

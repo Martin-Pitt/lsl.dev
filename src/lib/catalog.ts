@@ -13,7 +13,8 @@ export function wikiHref(slug: string) { return `/wiki/${slug}/`; }
 
 // Feature pages: curated dashboards that drive /features/ and the sidebar (slugs match slua.dev).
 import featureData from '../data/feature-clusters.json';
-export type FeatureLink = { feature?: string; category?: string; wiki?: string; href?: string; label?: string };
+// planned: a guide, recipe or sub-page that does not exist yet; rendered as a labelled entry with no link.
+export type FeatureLink = { feature?: string; category?: string; wiki?: string; href?: string; planned?: string; label?: string };
 export type FeatureSection = { title: string; text?: string[]; items?: string[]; groups?: string[]; links?: FeatureLink[] };
 export type Feature = { id: string; title: string; description: string; intro: string[]; sections: FeatureSection[]; categories: string[]; related?: string[]; wiki?: string[] };
 export const features = featureData.features as Feature[];

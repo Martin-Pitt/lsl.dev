@@ -6,7 +6,8 @@ import { apiMap, apiHref, features, featureMap, featureHref, categoryMap, catego
 export function getStaticPaths() { return features.map(feature => ({ params: { id: feature.id }, props: { feature } })); }
 const { feature } = Astro.props as { feature: Feature };
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-function resolve(l: FeatureLink): { label: string; href: string; kind: string } | undefined {
+function resolve(l: FeatureLink): { label: string; href?: string; kind: string } | undefined {
+	if (l.planned) return { label: l.planned, kind: 'Planned' };
 	if (l.feature) { const f = featureMap.get(l.feature); return f && { label: l.label ?? f.title, href: featureHref(f.id), kind: 'Feature' }; }
 	if (l.category) { const c = categoryMap.get(l.category); return c && { label: l.label ?? c.label, href: categoryHref(c.id), kind: 'Category' }; }
 	if (l.wiki) { const w = wikiByTitle.get(l.wiki); return w && { label: l.label ?? w.title.replace(/^Category:/, ''), href: wikiHref(w.slug), kind: w.title.startsWith('Category:') ? 'Wiki category' : 'Wiki' }; }
@@ -16,7 +17,7 @@ const sections = feature.sections.map(s => ({
 	...s,
 	entries: (s.items ?? []).map(n => apiMap.get(n)).filter(Boolean) as any[],
 	groupLinks: (s.groups ?? []).map(g => ({ g, n: constantsInGroup(g).length })).filter(x => x.n > 0),
-	seeAlso: (s.links ?? []).map(resolve).filter(Boolean) as { label: string; href: string; kind: string }[],
+	seeAlso: (s.links ?? []).map(resolve).filter(Boolean) as { label: string; href?: string; kind: string }[],
 }));
 const related = (feature.related ?? []).map(id => featureMap.get(id)).filter(Boolean) as Feature[];
 const homeCategories = feature.categories.map(id => categoryMap.get(id)!).filter(Boolean);
@@ -42,7 +43,7 @@ const archive = (feature.wiki ?? []).map(t => wikiByTitle.get(t)).filter(Boolean
 						<p class="feature-groups"><span class="label">Constant groups</span> {s.groupLinks.map(({ g, n }) => <a href={constantGroupHref(g)}>{g} <small>{n}</small></a>)}</p>
 					)}
 					{s.seeAlso.length > 0 && (
-						<p class="feature-see"><span class="label">See also</span> {s.seeAlso.map(l => <a href={l.href}><small>{l.kind}</small> {l.label}</a>)}</p>
+						<p class="feature-see"><span class="label">See also</span> {s.seeAlso.map(l => l.href ? <a href={l.href}><small>{l.kind}</small> {l.label}</a> : <span class="planned" title="Not written yet"><small>{l.kind}</small> {l.label}</span>)}</p>
 					)}
 				</section>
 			))}
@@ -75,7 +76,8 @@ const archive = (feature.wiki ?? []).map(t => wikiByTitle.get(t)).filter(Boolean
 	.api-grid a { text-decoration: none; overflow-wrap: anywhere; }
 	.api-grid code { font-size: var(--sl-text-xs); }
 	.feature-groups, .feature-see { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .9rem; font-size: var(--sl-text-sm); }
-	.feature-groups a, .feature-see a { overflow-wrap: anywhere; }
+	.feature-groups a, .feature-see a, .feature-see .planned { overflow-wrap: anywhere; }
+	.feature-see .planned { color: var(--sl-color-gray-3); font-style: italic; }
 	.label { font-size: var(--sl-text-2xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; color: var(--sl-color-text-accent); }
 	small { color: var(--sl-color-gray-3); }
 	.feature-footer { margin-top: 1rem; border-top: 1px solid var(--sl-color-hairline); display: grid; gap: 0 2.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }

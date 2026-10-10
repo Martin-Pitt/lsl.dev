@@ -263,6 +263,7 @@ class FeatureClusterTests(unittest.TestCase):
                     if 'wiki' in link: self.assertIn(link['wiki'], titles)
                     elif 'category' in link: self.assertIn(link['category'], cats)
                     elif 'feature' in link: self.assertIn(link['feature'], self.ids)
+                    elif 'planned' in link: self.assertTrue(link['planned'].strip() and set(link) <= {'planned'}, link)
                     else: self.assertTrue(link['href'].startswith('/'), link)
 
     def test_old_cluster_slugs_still_resolve(self):

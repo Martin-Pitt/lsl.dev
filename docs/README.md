@@ -18,3 +18,4 @@ lockfile). `npm run <script>` still works but `npm install` is not a supported i
   label links to an overview page
 - [open-source-snippets.md](open-source-snippets.md): bringing open-source LSL code into guides:
   what we accept, no preprocessor, attribution and bug-fix notes
+- [design/logo-brief.md](design/logo-brief.md): brief for logo and favicon prototypes

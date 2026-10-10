@@ -1,0 +1,543 @@
+---
+title: "llAllowInventoryDrop"
+slug: "functions/llAllowInventoryDrop"
+category: functions
+source:
+  wiki: "LlAllowInventoryDrop"
+  url: https://wiki.secondlife.com/wiki/LlAllowInventoryDrop
+  revision: 1199820
+  date: 2016-04-04
+  contributor: "Wendi Nitely"
+  raw: /wiki-source/llallowinventorydrop-c5e37b0e.txt
+  license: "Content from the Second Life Wiki article LlAllowInventoryDrop (revision 1199820, 2016-04-04), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llAllowInventoryDrop" />
+
+Allows for all users without modify permissions to add inventory items to a prim.
+
+To actually do the dropping, you need to drag an item from your inventory and drop it onto the prim WHILE holding down your `{{Keypress|Ctrl}}` key. If you've got everything right, then just before you release it, you will see the prim framed in red.
+
+Ownership of the dropped inventory item changes to the owner of the prim. Next owner permissions kick in on the item that was dropped in. Non-transfer items cannot be dropped into a prim owned by someone else.
+
+An application might be a public "suggestion box" that you want to let people drop notecards into.
+
+```lsl title="How to use" frame="terminal"
+llAllowInventoryDrop(0);
+```
+
+## Caveats
+
+- In a link set `llAllowInventoryDrop` must be executed from a script within the root prim or it fails silently.
+- Scripts are an exception to what is allowed to be dropped in. If a user without modify permissions to a prim attempts to drop a script into it, the inventory addition is rejected and the prim shouts (sic -- shouts, not says) "Not permitted to edit this!" This is for obvious security reasons. If you own the prim and have mod rights to it, you can drop a script in. Friends who have mod rights to your stuff can also drop scripts in.
+- Will not work if, under the Object tab on the prim, "Locked" is ticked.
+- Bear in mind when dropping a texture into a prim to be sure (a) that you see a red box framing the target prim, and (b) not to release the `{{Keypress|Ctrl}}` button until you are sure that the texture is actually inside the box. If you see a white frame instead, or release `{{Keypress|Ctrl}}` too soon, the texture will instead be applied to the prim face that you were on.
+- There is no way to tell who dropped the item in. If you really need to know, consider making the user touch the prim first to turn the `llAllowInventoryDrop` on, and then grab the user's information from the touch event, and then set it back to [FALSE](/constants/FALSE/) through a timer.
+- Nor is there any way based on just `llAllowInventoryDrop` to tell \*what\* the user dropped in. See [WhoAddedWhat](https://wiki.secondlife.com/wiki/WhoAddedWhat) script to handle that.
+- Ordinary end-users may face challenges when confronted with actually performing the drag and drop. See the section below.
+- People with modify rights to your (modifiable) stuff can do this anyway, as can you, even without the presence of `llAllowInventoryDrop`.
+- Even if you own the prim, but don't have modify rights to it, you cannot drop anything at all into it, ever, unless the creator put in it an `llAllowInventoryDrop(TRUE)` first before passing it to you.
+- If you have a prim that you don't have mod rights to, but that the creator did set an `llAllowInventoryDrop(TRUE)` in, that even though you can drop stuff in, you will never be able to delete it! You can however move it to your inventory.
+
+#### llAllowInventoryDrop and Everyday Users
+
+- If you want someone to drag and drop notecards into a suggestion box, say, or whatever, you have to both invite them to do so, and explain how to do it (the holding down of the `{{Keypress|Ctrl}}` key being essential to communicate.)
+
+- A fair bit of fine motor skill is required to do this. Someone who doesn't have this, either because of failing or unsteady hands, or using a trackpad on a laptop in an awkward seated position, may not be able to perform this operation accurately.
+
+- If you sell a user something such as, say, a gift box, which you instruct them to fill via inventory drag and drop, bear in mind that there is often many a slip betwixt inventory and prim, and the user may by mistake (in this example) drag the gifts in question into a piece of the bow instead, and then panic when s/he doesn't see them in the main part of the giftbox. (Remember: if they have mod rights to the prim, they can drag and drop stuff into any part of the prim, regardless of whether there is an `llAllowInventoryDrop` in it or not.) You may wish to suggest instead that the user right-click the prim, choose open, and drag and drop stuff onto the "Open" Object Contents window -- a much larger, safer target.
+
+## Examples
+
+<details open>
+<summary>When `llAllowInventoryDrop` is set to [TRUE](/constants/TRUE/), and an item is successfully dropped BY SOMEONE WITHOUT MODIFY PERMISSIONS, the event that occurs is [changed](/events/changed/) with the [CHANGED_ALLOWED_DROP](/constants/CHANGED_ALLOWED_DROP/) bit set.</summary>
+
+```lsl
+changed(integer change)
+{
+    if (change & CHANGED_ALLOWED_DROP)
+        llSay(0, "Your contribution is appreciated, o ye non-permitted modifier!");
+}
+```
+
+</details>
+
+<details>
+<summary>When an item is successfully dropped by someone WITH modify permissions, the event that occurs is [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/), regardless of the state of `llAllowInventoryDrop()`</summary>
+
+```lsl
+changed(integer change)
+{
+    if (change & CHANGED_INVENTORY)
+        llSay(0, "Your contribution is appreciated, o ye permitted modifier!");
+}
+```
+
+</details>
+
+<details>
+<summary>Tip! To test for either changed event, the proper syntax is:</summary>
+
+```lsl
+changed(integer change)
+{
+    //PUBLIC_CHANNEL has the integer value 0
+    if (change & (CHANGED_ALLOWED_DROP | CHANGED_INVENTORY))
+        llSay(PUBLIC_CHANNEL, "yeppers, inventory changed somehow.");
+}
+```
+
+</details>
+
+<details>
+<summary>The following example is a bit elaborate. It illustrates alternating AllowInventoryDrop off and on. (This is likely not something you would actually do unless you really wanted to play with users' minds.)</summary>
+
+```lsl collapse={11-18}
+integer allow;
+
+default
+{
+    touch_start(integer num)
+    {
+        llAllowInventoryDrop(allow = !allow);
+        llOwnerSay("llAllowInventoryDrop == " + llList2String(["FALSE","TRUE"], allow));
+    }
+
+    changed(integer change)
+    {
+        //note that it's & and not &&... it's bitwise!
+        if (change & CHANGED_ALLOWED_DROP)
+            llOwnerSay("The inventory has changed as a result of a user without mod permissions dropping
+                        an item on the prim and it being allowed by the script.");
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 5</summary>
+
+### CONFIGURATION NOTECARD FOR DROPBOX (name it dropbox.txt)
+
+```lsl
+//  Floattext (optional setting)
+//
+//  can either be enabled (1, true, on, yes) or disabled (0, false, off, no)
+
+floattext || 1
+
+//  List of admins (optional setting)
+//
+//  You can either add legacy names of avatars (i.e. llKey2Name) or their  avatar key (UUID).
+//  If someone's lastname is Resident, you can add the lastname but don't necessarily have to.
+//  i.e.: John for John Resident would be fine, too
+
+admin || John Doe
+admin || John
+admin || Jane Doe
+admin || Jane
+
+//  Template
+//
+//  the notecard you want people to fill out
+//  for example use this to give people a questionaire
+//  which they can then drop back into your dropbox when
+//  they are done
+
+template || template.txt
+```
+
+</details>
+
+<details>
+<summary>Example 6</summary>
+
+### SCRIPT FOR DROPBOX (name it dropbox.lsl)
+
+```lsl collapse={1-30, 36-56, 62-367}
+string notecardName;
+key notecardQueryId;
+integer currentNotecardLine;
+
+integer dialogChannel;
+integer dialogHandle;
+
+integer hasBeenConfigured;
+
+integer inventoryDropAllowed;
+list admins;
+integer showFloattext;
+string thisScript;
+string template;
+
+init()
+{
+    notecardName = "dropbox.txt";
+    template = "";
+
+    hasBeenConfigured = FALSE;
+
+    admins = [];
+    showFloattext = FALSE;
+    thisScript = llGetScriptName();
+
+    disable_drop();
+}
+
+enable_drop()
+{
+    inventoryDropAllowed = TRUE;
+    llAllowInventoryDrop(inventoryDropAllowed);
+
+    if (showFloattext)
+//  {
+        llSetLinkPrimitiveParamsFast(LINK_THIS,
+            [PRIM_TEXT, "~!~ Drop items here ~!~\n \nHold CTRL while dragging items\n"
+                + "from your inventory onto me", <1.0, 1.0, 1.0>, (float)TRUE,
+            PRIM_FULLBRIGHT, ALL_SIDES, TRUE,
+            PRIM_GLOW, ALL_SIDES, 0.02]);
+//  }
+    else
+//  {
+        llSetLinkPrimitiveParamsFast(LINK_THIS,
+            [PRIM_TEXT, "", ZERO_VECTOR, (float)FALSE,
+            PRIM_FULLBRIGHT, ALL_SIDES, TRUE,
+            PRIM_GLOW, ALL_SIDES, 0.02]);
+//  }
+
+    say("Allowing inventory drop for 30.0 seconds! Hold CTRL while dragging items from your inventory onto me.");
+
+    llSetTimerEvent(30.0);
+}
+
+disable_drop()
+{
+    inventoryDropAllowed = FALSE;
+    llAllowInventoryDrop(inventoryDropAllowed);
+
+    llSetLinkPrimitiveParamsFast(LINK_THIS,
+        [PRIM_TEXT, "", ZERO_VECTOR, (float)FALSE,
+        PRIM_FULLBRIGHT, ALL_SIDES, FALSE,
+        PRIM_GLOW, ALL_SIDES, (float)FALSE]);
+}
+
+attempt_to_start_reading_config_notecard()
+{
+    integer type = llGetInventoryType(notecardName);
+    if (type == INVENTORY_NOTECARD)
+    {
+        ownersay("Configuration notecard found, importing settings...");
+
+        notecardQueryId  = llGetNotecardLine(notecardName, currentNotecardLine);
+        llSetTimerEvent(15.0);
+    }
+    else
+//  {
+        ownersay("Configuration notecard named '" + notecardName + "' could not be "
+            + "found, either because it doesn't exist within the contents or because "
+            + "the inventory item with said name is not a notecard (wrong type).");
+//  }
+}
+
+config_parse(string inputString)
+{
+    inputString = llStringTrim(inputString,STRING_TRIM);
+
+    integer divIndex = llSubStringIndex(inputString, "//");
+
+    if (divIndex == 0) inputString = "";
+    else if (0 < divIndex) inputString = llGetSubString(inputString, 0, divIndex - 1);
+
+    if (inputString != "")
+    {
+        list listOfLineParts  = llParseStringKeepNulls(inputString, ["||"], [""]);
+
+        string variableName  = llStringTrim(llList2String(listOfLineParts, 0), STRING_TRIM);
+        string variableValue  = llStringTrim(llList2String(listOfLineParts, 1), STRING_TRIM);
+
+        if (llToLower(variableName) == "floattext")
+        {
+            string lowerValue = llToLower(variableValue);
+
+            if (lowerValue == "1"
+                ||lowerValue == "yes"
+                ||lowerValue == "on"
+                ||lowerValue =="true")
+//          {
+                showFloattext = TRUE;
+//          }
+            else if (lowerValue == "0"
+                    || lowerValue == "no"
+                    || lowerValue == "off"
+                    || lowerValue == "false")
+//          {
+                showFloattext = FALSE;
+//          }
+        }
+        else if (llToLower(variableName) == "admin")
+//      {
+            admins += [variableValue];
+//      }
+        else if (llToLower(variableName) == "template")
+//      {
+            template = variableValue;
+//      }
+    }
+}
+
+open_menu(key inputKey, string inputString, list inputList)
+{
+    dialogChannel = (integer)llFrand(DEBUG_CHANNEL)*-1;
+    dialogHandle = llListen(dialogChannel, "", inputKey, "");
+    llDialog(inputKey, inputString, inputList, dialogChannel);
+
+    llSetTimerEvent(15.0);
+}
+
+close_menu()
+{
+    llListenRemove(dialogHandle);
+    dialogHandle = FALSE;
+    dialogChannel = (integer)llFrand(DEBUG_CHANNEL)*-1;
+}
+
+give_contents(key inputKey)
+{
+    list items;
+
+    integer type = INVENTORY_ALL;
+    integer numOfItems = llGetInventoryNumber(type);
+
+    integer index;
+    while (index < numOfItems)
+    {
+        string itemName = llGetInventoryName(type, index);
+        integer itemType = llGetInventoryType(itemName);
+
+        if (itemType != INVENTORY_SCRIPT && itemName != thisScript
+            && itemName != notecardName && itemName != template)
+        {
+            items += [itemName];
+        }
+
+        ++index;
+    }
+
+    numOfItems = llGetListLength(items);
+
+    if (!numOfItems)
+//  {
+        say("No items found to give away.");
+//  }
+    else if (numOfItems <= 42)
+//  {
+        llGiveInventoryList(inputKey, llGetObjectName(), items);
+//  }
+    else
+    {
+        index = 0;
+        while (index < numOfItems)
+        {
+            llGiveInventory(inputKey, llList2String(items, index));
+
+            ++index;
+        }
+    }
+}
+
+delete_contents()
+{
+    integer type = INVENTORY_ALL;
+    integer index = llGetInventoryNumber(type);
+
+    while (index)
+    {
+        --index;
+
+        string itemName = llGetInventoryName(type, index);
+        integer itemType = llGetInventoryType(itemName);
+
+        if (itemType != INVENTORY_SCRIPT && itemName != thisScript
+            && itemName != notecardName && itemName != template)
+        {
+            llRemoveInventory(itemName);
+            index = llGetInventoryNumber(type);
+        }
+    }
+
+    say("Inventory items have been removed.");
+}
+
+ownersay(string inputString)
+{
+    llOwnerSay("/me [" + thisScript + "]: " + inputString);
+}
+
+say(string inputString)
+{
+    llSay(PUBLIC_CHANNEL, "/me [" + thisScript + "]: " + inputString);
+}
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_ALLOWED_DROP)
+            disable_drop();
+
+        if (change & (CHANGED_OWNER | CHANGED_INVENTORY))
+            llResetScript();
+    }
+
+    state_entry()
+    {
+        init();
+        attempt_to_start_reading_config_notecard();
+    }
+
+    touch_start(integer total_number)
+    {
+        if (dialogHandle)
+            close_menu();
+
+        key owner = llGetOwner();
+        key id = llDetectedKey(0);
+        string name = llKey2Name(id);
+        integer sameGroup = llDetectedGroup(0);
+
+        integer divIndex = llSubStringIndex(name, " ");
+        string firstName = llGetSubString(name, 0, divIndex - 1);
+        string lastName = llGetSubString(name, divIndex + 1, -1);
+
+        if (!hasBeenConfigured)
+//      {
+            say("ERROR! Template notecard has not been set.");
+//      }
+        else if (id == owner
+                || ~llListFindList(admins, [(string)id])
+                || ~llListFindList(admins, [name])
+                ||(lastName == "Resident" && ~llListFindList(admins, [firstName])))
+        {
+            open_menu(id, "\nGreetings, " + name + "!\nStatus: Admin\nPlease select "
+                + "one of the options below, exit will close the menu.",
+                ["Get All", "Delete All", "Exit", "EnableDrop", "Template"]);
+        }
+        else if (sameGroup)
+//      {
+            open_menu(id, "\nGreetings, " + name + "!\nStatus: Same Group\n"
+                + "Please select one of the options below, exit will close the menu.",
+                ["EnableDrop", "Template", "Exit"]);
+//      }
+        else
+//      {
+            say("Greetings, " + name + "! You have been denied access, please check your grouptag.");
+//      }
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        if(channel != dialogChannel)
+//      {
+            return;
+//      }
+
+        close_menu();
+
+        if (message == "EnableDrop")
+//      {
+            enable_drop();
+//      }
+        else if (message == "Template" && template != "")
+//      {
+            llGiveInventory(id, template);
+//      }
+        else if (message == "Get All")
+//      {
+            give_contents(id);
+//      }
+        else if (message == "Delete All")
+//      {
+            delete_contents();
+//      }
+    }
+
+    dataserver(key requested, string data)
+    {
+        if (requested == notecardQueryId)
+        {
+            notecardQueryId = NULL_KEY;
+
+            if (data == EOF)
+            {
+                integer type = llGetInventoryType(template);
+
+                if (type == INVENTORY_NOTECARD)
+//              {
+                    hasBeenConfigured = TRUE;
+//              }
+
+                if (hasBeenConfigured)
+//              {
+                    ownersay("Setup complete! Template notecard is '" + template + "'.");
+//              }
+                else
+//              {
+                    ownersay("ERROR! Template notecard named '" + template + "' could not "
+                        + "be found. Either because it doesn't exist within the contents "
+                        + "or because the inventory item with said name is not a notecard (wrong type).");
+//              }
+            }
+            else
+            {
+                config_parse(data);
+                ++currentNotecardLine;
+                notecardQueryId = llGetNotecardLine(notecardName, currentNotecardLine);
+            }
+        }
+    }
+
+    timer()
+    {
+        llSetTimerEvent((float)FALSE);
+
+        if (dialogHandle)
+        {
+            say("Menu timed out!");
+            close_menu();
+        }
+
+        if (inventoryDropAllowed)
+//      {
+            disable_drop();
+//      }
+
+        if (!hasBeenConfigured)
+//      {
+            ownersay("ERROR! Template notecard has not been set.");
+//      }
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-4685 (bug): Not possible to drop inventory into objects which are using an full alpha texture (when highlight transparent is disabled)
+
+## See also
+
+### Events
+
+- [changed](/events/changed/) — [CHANGED_ALLOWED_DROP](/constants/CHANGED_ALLOWED_DROP/)
+
+<WikiSource />

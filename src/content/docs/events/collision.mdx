@@ -1,0 +1,81 @@
+---
+title: "collision"
+slug: "events/collision"
+category: events
+source:
+  wiki: "Collision"
+  url: https://wiki.secondlife.com/wiki/Collision
+  revision: 1211066
+  date: 2022-08-24
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/collision-f68a6490.txt
+  license: "Content from the Second Life Wiki article Collision (revision 1211066, 2022-08-24), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="collision" description />
+
+Triggered while task is [colliding](https://wiki.secondlife.com/wiki/colliding) with another task.
+
+```lsl title="How to use" frame="terminal"
+collision(integer num_detected)
+{
+
+}
+```
+
+## Caveats
+
+- Max number detected is 8.
+- Smallest repeat rate is approximatively 0.13 seconds.
+- Will not detect collisions with [ground](https://wiki.secondlife.com/wiki/ground); use [land_collision](/events/land_collision/) instead.
+- Will not detect collisions between an avatar sitting on the task and the task itself (avatars are linked to objects they sit on so there is no collision, use the [changed](/events/changed/) event to detect sits).
+- Phantom objects can never receive trigger collision events.
+- `llVolumeDetect(TRUE)` objects get trigger [collision_start](/events/collision_start/) and [collision_end](/events/collision_end/) but not [collision](/events/collision/)() events.
+- A collision with a hovering avatar does not trigger collisions, unless the avatar turns or moves.
+- A collision with a physical object or avatar resting on object does not continuously trigger collisions but for a few times, unless there is movement.
+- Only a physical object will get collision events from colliding with a non-physical object.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//Will turn phantom when someone bumps into it if on the list
+
+list access_list = ["Governor Linden"];
+
+default
+{
+    collision(integer num_detected)
+    {
+        if(~llListFindList(access_list, (list)llDetectedName(0)))
+        {
+            llSetStatus(STATUS_PHANTOM, TRUE);
+        }
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+`{{Issues/SVC-3306}}`
+
+## See also
+
+### Functions
+
+- [llPassCollisions](/functions/llPassCollisions/)
+- [llCollisionFilter](/functions/llCollisionFilter/)
+- [llCollisionSound](/functions/llCollisionSound/)
+- [llVolumeDetect](/functions/llVolumeDetect/)
+
+### Events
+
+- [collision_start](/events/collision_start/)
+- [collision_end](/events/collision_end/)
+
+<WikiSource />

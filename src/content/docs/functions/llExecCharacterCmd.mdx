@@ -1,0 +1,145 @@
+---
+title: "llExecCharacterCmd"
+slug: "functions/llExecCharacterCmd"
+category: functions
+source:
+  wiki: "LlExecCharacterCmd"
+  url: https://wiki.secondlife.com/wiki/LlExecCharacterCmd
+  revision: 1194127
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llexeccharactercmd-64895201.txt
+  license: "Content from the Second Life Wiki article LlExecCharacterCmd (revision 1194127, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llExecCharacterCmd" description />
+
+Send a command to the pathing system.
+
+Currently only supports stopping the current pathfinding operation or causing the character to jump.
+
+```lsl title="How to use" frame="terminal"
+llExecCharacterCmd(0, []);
+```
+
+## Specification
+
+`{{#if: {{#vardefine:p_height_desc|height to jump, between 0.1m and 2.0m}} }}`
+
+- float — `height` — `{{#var:p_height_desc}}`
+
+<table>
+	<tr>
+		<th>Command</th>
+		<th>Value</th>
+		<th>Description & Required Parameters</th>
+	</tr>
+	<tr>
+		<td>[CHARACTER_CMD_JUMP](/constants/CHARACTER_CMD_JUMP/)</td>
+		<td>0x1</td>
+		<td>
+
+			Makes the character jump.
+
+			The `option` list is required to start with a `height` parameter: \[[float](https://wiki.secondlife.com/wiki/float) `height`\]
+
+			<table>
+			</table>
+
+		</td>
+	</tr>
+	<tr>
+		<td>[CHARACTER_CMD_SMOOTH_STOP](/constants/CHARACTER_CMD_SMOOTH_STOP/)</td>
+		<td>0x2</td>
+		<td>Stops any current pathfinding operation in a smooth like fashion.</td>
+	</tr>
+	<tr>
+		<td>[CHARACTER_CMD_STOP](/constants/CHARACTER_CMD_STOP/)</td>
+		<td>0x0</td>
+		<td>Stops any current pathfinding operation.</td>
+	</tr>
+</table>
+
+## Caveats
+
+- If another script in the same object issues [CHARACTER_CMD_STOP](/constants/CHARACTER_CMD_STOP/) then pathing in all scripts is cancelled.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-30}
+vector patrol;
+
+default
+{
+    state_entry()
+    {
+        patrol = llGetPos();
+        llCreateCharacter([CHARACTER_MAX_SPEED, 25, CHARACTER_DESIRED_SPEED, 15.0]);
+        state awake;
+    }
+}
+
+state awake
+{
+    state_entry()
+    {
+        llSay(0, "I am guarding now");
+        list points = [patrol + <5,0,0>, patrol - <5,0,0>];
+        llPatrolPoints(points, []);
+    }
+
+    touch_start(integer total_number)
+    {
+        state sleep;
+    }
+}
+
+state sleep
+{
+    state_entry()
+    {
+        llSay(0, "Going to sleep");
+        llExecCharacterCmd(CHARACTER_CMD_SMOOTH_STOP, []);
+    }
+
+    touch_start(integer total_number)
+    {
+        patrol = llGetPos();
+        //Jump to attention!
+        llExecCharacterCmd(CHARACTER_CMD_JUMP, [0.5]);
+        state awake;
+    }
+}
+```
+
+</details>
+
+## History
+
+Date of Release [31/07/2012](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-31-262785)
+
+## See also
+
+### Functions
+
+- [llCreateCharacter](/functions/llCreateCharacter/)
+- [llDeleteCharacter](/functions/llDeleteCharacter/)
+- [llEvade](/functions/llEvade/)
+- [llExecCharacterCmd](/functions/llExecCharacterCmd/)
+- [llGetClosestNavPoint](/functions/llGetClosestNavPoint/)
+- [llFleeFrom](/functions/llFleeFrom/)
+- [llNavigateTo](/functions/llNavigateTo/)
+- [llPatrolPoints](/functions/llPatrolPoints/)
+- [llPursue](/functions/llPursue/)
+- [llUpdateCharacter](/functions/llUpdateCharacter/)
+- [llWanderWithin](/functions/llWanderWithin/)
+
+### Events
+
+- [path_update](/events/path_update/)
+
+<WikiSource />

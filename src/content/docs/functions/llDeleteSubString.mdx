@@ -1,0 +1,106 @@
+---
+title: "llDeleteSubString"
+slug: "functions/llDeleteSubString"
+category: functions
+source:
+  wiki: "LlDeleteSubString"
+  url: https://wiki.secondlife.com/wiki/LlDeleteSubString
+  revision: 1213088
+  date: 2023-01-30
+  contributor: "Maestro Linden"
+  raw: /wiki-source/lldeletesubstring-fe1c9261.txt
+  license: "Content from the Second Life Wiki article LlDeleteSubString (revision 1213088, 2023-01-30), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDeleteSubString" description />
+
+Characters at positions **start** and **end** are removed.
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the result of removing characters from **src** from **start** to **end**.
+
+```lsl title="How to use" frame="terminal"
+string result = llDeleteSubString("", 0, 0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        string ex = "abcdefghi";
+        llDeleteSubString(ex, 4, 7); //Incorrect!
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        string ex = "abcdefghi";
+        ex = llDeleteSubString(ex, 4, 7); //Correct
+        llSay(0, ex); //Would say "abcdi"
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl
+//-- special case
+default
+{
+    state_entry()
+    {
+        string ex = "abcdefghi";
+        llSay( 0, llDeleteSubString(ex, 4, 7) ); //Would say "abcdi"
+        //-- acceptable if you do NOT want to change the contents of 'ex', only the output
+    }
+}
+```
+
+</details>
+
+## Notes
+
+Indexes start at zero, the index of the first character is zero. Using 0,0 as start and end positions would delete the first character only. Negative indexes count from the far end of the string towards the beginning, so -1 is short form for the last character in a string. Positive and negative indexes can be mixed so using 0, -1 as start and end positions would delete the entire string.
+
+To ascertain how long a string is, use [llStringLength](/functions/llStringLength/).
+
+Granted, wondering how to use this can be bewildering at times: with random text strings being handled by your script, you may wonder how you can know what positions you should be starting and ending the deletion at. [llSubStringIndex](/functions/llSubStringIndex/) is the preferred method of finding a string in a string but it can be a rather involved process. If the user just wants to remove all occurrences of a string from a string they may wish to consider simply using `{{User|Strife Onizuka}}`'s [str_replace](https://wiki.secondlife.com/wiki/Library_Combined_Library#str-replace) function instead, to looks for a value without having to know where it starts and ends, and replacing it with "".
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SCR-6 (bug): llGetSubString & llDeleteSubString can crash scripts with multi-word characters in Mono.
+
+## See also
+
+### Functions
+
+- [llGetSubString](/functions/llGetSubString/)
+- [llReplaceSubString](/functions/llReplaceSubString/)
+- [llInsertString](/functions/llInsertString/)
+- [llDeleteSubList](/functions/llDeleteSubList/)
+
+### Articles
+
+- [CombinedLibrary: str_replace](https://wiki.secondlife.com/wiki/Library_Combined_Library#str-replace)
+
+<WikiSource />

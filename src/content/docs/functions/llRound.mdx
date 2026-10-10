@@ -1,0 +1,72 @@
+---
+title: "llRound"
+slug: "functions/llRound"
+category: functions
+source:
+  wiki: "LlRound"
+  url: https://wiki.secondlife.com/wiki/LlRound
+  revision: 1214972
+  date: 2023-10-09
+  contributor: "Frionil Fang"
+  raw: /wiki-source/llround-ea8dd67b.txt
+  license: "Content from the Second Life Wiki article LlRound (revision 1214972, 2023-10-09), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRound" />
+
+If the absolute value of the tenths position is 4 or less, **val** is rounded off; otherwise, **val** is rounded towards positive infinity.
+
+```lsl title="How to use" frame="terminal"
+integer result = llRound(0.0);
+```
+
+## Caveats
+
+- The returned value is -2147483648 (0x80000000) if the arithmetic result is outside of the range of valid integers (-2147483648 to 2147483647 inclusive).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+   state_entry()
+   {
+       llSay(0,  "The rounded value of -4.9 is: "+(string)llRound(-4.9) );
+       //Returns "The rounded value of -4.9 is: -5"
+
+       llSay(0,  "The rounded value of -4.1 is: "+(string)llRound(-4.1) );
+       //Returns "The rounded value of -4.1 is: -4"
+
+       llSay(0,  "The rounded value of 4.5 is: "+(string)llRound(4.5) );
+       //Returns "The rounded value of 4.5 is: 5"
+
+       llSay(0,  "The rounded value of 4.9 is: "+(string)llRound(4.9) );
+       //Returns "The rounded value of 4.9 is: 5"
+
+       llSay(0,  "The rounded value of 4.1 is: "+(string)llRound(4.1) );
+       //Returns "The rounded value of 4.1 is: 4"
+
+       llSay(0,  "The rounded value of -4.5 is: "+(string)llRound(-4.5) );
+       //Returns "The rounded value of -4.5 is: -4"
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- For positive values, it is quicker to add 0.5 to the value and cast to an integer. i=(integer)(f+0.5) produces less bytecode than i=`llRound(f)` and is about 5 times faster in execution, while giving the same result.
+
+## See also
+
+### Functions
+
+- [llCeil](/functions/llCeil/) — Rounds the float to an integer towards positive infinity
+- [llFloor](/functions/llFloor/) — Rounds the float to an integer towards negative infinity
+
+<WikiSource />

@@ -1,0 +1,107 @@
+---
+title: "llReturnObjectsByOwner"
+slug: "functions/llReturnObjectsByOwner"
+category: functions
+source:
+  wiki: "LlReturnObjectsByOwner"
+  url: https://wiki.secondlife.com/wiki/LlReturnObjectsByOwner
+  revision: 1200095
+  date: 2016-05-12
+  contributor: "Strife Onizuka"
+  raw: /wiki-source/llreturnobjectsbyowner-a2cd784f.txt
+  license: "Content from the Second Life Wiki article LlReturnObjectsByOwner (revision 1200095, 2016-05-12), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llReturnObjectsByOwner" />
+
+If the script is owned by an agent, [PERMISSION_RETURN_OBJECTS](/constants/PERMISSION_RETURN_OBJECTS/) may be granted by the owner. If the script is owned by a group, this permission may be granted by an agent belonging to the group's "Owners" role.
+
+If the return value is negative, it represents an [error](#0) flag.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is the number of objects successfully returned to their owners or an [ERR\_\*](#0) flag.
+
+```lsl title="How to use" frame="terminal"
+integer result = llReturnObjectsByOwner(NULL_KEY, 0);
+```
+
+## Specification
+
+#### Throttle
+
+Throttled at max parcel land impact capacity region-wide per hour.
+
+&lt;div style="display:inline-block; vertical-align: top;">
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [OBJECT_RETURN_PARCEL](/constants/OBJECT_RETURN_PARCEL/) | integer | `c=return all objects on the same parcel as the script which are owned by 'owner'` | return all objects on the same parcel as the script which are owned by 'owner' |
+| [OBJECT_RETURN_PARCEL_OWNER](/constants/OBJECT_RETURN_PARCEL_OWNER/) | integer | `c=return all objects owned by 'owner' which are over parcels owned by the owner of the script.` | return all objects owned by 'owner' which are over parcels owned by the owner of the script. |
+| [OBJECT_RETURN_REGION](/constants/OBJECT_RETURN_REGION/) | integer | `c=return all objects in the region owned by 'owner'` | return all objects in the region owned by 'owner' |
+
+<table>
+	<tr>
+		<th>**scope** Flag</th>
+		<th></th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>Return all objects on the same parcel as the script which are owned by **owner**. <br /> The script must be owned by an estate manager or over a parcel owned by the owner of the script.</td>
+	</tr>
+	<tr>
+		<td>Return all objects owned by **owner** which are over parcels owned by the owner of the script.</td>
+	</tr>
+	<tr>
+		<td>Return all objects in the region owned by **owner**. <br /> The script must be owned by the estate owner or an estate manager.</td>
+	</tr>
+</table>
+
+&lt;/div>&lt;div style="display:inline-block; vertical-align: top;">
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [ERR_GENERIC](/constants/ERR_GENERIC/) | integer | `-1` | A nebulous and inexplicable error, nothing is known about it. |
+| [ERR_PARCEL_PERMISSIONS](/constants/ERR_PARCEL_PERMISSIONS/) | integer | `-2` | Permission lacked to perform task on specified parcel. |
+| [ERR_MALFORMED_PARAMS](/constants/ERR_MALFORMED_PARAMS/) | integer | `-3` | Parameters are malformed. |
+| [ERR_RUNTIME_PERMISSIONS](/constants/ERR_RUNTIME_PERMISSIONS/) | integer | `-4` | Script lacks the runtime permission to perform the requested task. |
+| [ERR_THROTTLED](/constants/ERR_THROTTLED/) | integer | `-5` | Task has been throttled. Try again later. |
+
+<table>
+	<tr>
+		<th>Error Flags</th>
+		<th></th>
+		<th colspan="6">Description</th>
+	</tr>
+</table>
+
+&lt;/div>
+
+## Caveats
+
+- Parcel owner, estate owner and estate managers can not have their objects returned by this method.
+- Objects which are owned by the group the land is set to will not be returned by this method.
+- Objects owned by other groups will be returned to their previous owner if the object is transferable. If not transferable they are deleted.
+
+## Notes
+
+For group-owned land you may want to explicitly code a group owner's key into the script as there is no way to determine if a user is a group owner.
+
+## History
+
+Date of Release [18/06/2013](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13-06-18-277494)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-6281 (fs): Shared group inventory
+
+## See also
+
+### Functions
+
+- [llReturnObjectsByID](/functions/llReturnObjectsByID/)
+- [llGetParcelPrimOwners](/functions/llGetParcelPrimOwners/)
+- [llDie](/functions/llDie/)
+
+<WikiSource />

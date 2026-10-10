@@ -1,0 +1,90 @@
+---
+title: "no_sensor"
+slug: "events/no_sensor"
+category: events
+source:
+  wiki: "No sensor"
+  url: https://wiki.secondlife.com/wiki/No_sensor
+  revision: 1194116
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/no-sensor-b023c4d6.txt
+  license: "Content from the Second Life Wiki article No sensor (revision 1194116, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="no_sensor" description />
+
+Result of a call to [llSensor](/functions/llSensor/) or [llSensorRepeat](/functions/llSensorRepeat/).
+
+```lsl title="How to use" frame="terminal"
+no_sensor()
+{
+
+}
+```
+
+## Caveats
+
+- sensor/no_sensor are not always the best solution:
+- To determine if something is in/out of range is overkill. For this situation use: [llGetObjectDetails](/functions/llGetObjectDetails/) as you will see in the [Useful&amp;nbsp;Snippets](#useful-snippets) section.
+- To determine if an avatar is in the region, try [llGetAgentSize](/functions/llGetAgentSize/)
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-14}
+//List all avatars in range.
+default
+{
+     on_rez(integer i)
+     {
+          llSensor("", "", AGENT_BY_LEGACY_NAME, 96.0, PI);   // Detect any avatars within a 96 metre radius sphere
+     }
+     sensor(integer number_detected)
+     {
+          integer i = 0;
+          do
+          {
+               llOwnerSay(llDetectedName(i) + " is " + (string) llVecDist(llGetPos(), llDetectedPos(i) ) + "m away.");
+          }
+          while(++i < number_detected);
+     }
+     no_sensor()
+     {
+          llOwnerSay("No avatars in range.");
+     }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+//An alternative solution for find out if a user is not in range
+//No sensor is used so the above caveat doesn't apply.
+
+integer InRange(key uuid, float distance)
+{
+    list data = llGetObjectDetails(uuid, [OBJECT_POS]);
+    if(data == [])
+        return 0;
+    return llVecDist(llList2Vector(data, 0), llGetPos()) <= distance;
+}
+```
+
+## Additional wiki content
+
+`{{Issues/SVC-2409}}`
+
+## See also
+
+### Functions
+
+- [llSensor](/functions/llSensor/)
+- [llSensorRepeat](/functions/llSensorRepeat/)
+
+<WikiSource />

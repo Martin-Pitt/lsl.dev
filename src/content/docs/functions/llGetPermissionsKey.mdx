@@ -1,0 +1,95 @@
+---
+title: "llGetPermissionsKey"
+slug: "functions/llGetPermissionsKey"
+category: functions
+source:
+  wiki: "LlGetPermissionsKey"
+  url: https://wiki.secondlife.com/wiki/LlGetPermissionsKey
+  revision: 1197588
+  date: 2015-09-23
+  contributor: "Strife Onizuka"
+  raw: /wiki-source/llgetpermissionskey-7a8d7eb7.txt
+  license: "Content from the Second Life Wiki article LlGetPermissionsKey (revision 1197588, 2015-09-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetPermissionsKey" description />
+
+Returns [NULL_KEY](/constants/NULL_KEY/) if permissions were neither granted nor declined (e.g., the permissions dialog was cancelled or otherwise ignored).
+
+```lsl title="How to use" frame="terminal"
+key result = llGetPermissionsKey();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-6, 14-25, 31-46}
+// 1. rez a cube
+// 2. create a new script and paste this
+// 3. save script
+// 4. right-click the prim and choose attach
+// 5. touch the prim
+
+announce_permissions_key()
+{
+    key permissionsKey = llGetPermissionsKey();
+
+    llSay(0, "key llGetPermissionsKey() = '" + (string)permissionsKey + "'");
+}
+
+default
+{
+    state_entry()
+    {
+        announce_permissions_key();
+
+        key owner = llGetOwner();
+        llRequestPermissions(owner, PERMISSION_ATTACH);
+    }
+
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        key owner = llGetOwner();
+        key permissionsKey = llGetPermissionsKey();
+
+        if (id == owner)
+        {
+            if (permissionsKey == owner)
+                llDetachFromAvatar();
+            else
+                llSay(0, "Can't detach from you, you have not granted ATTACH perms.");
+        }
+        else
+            llSay(0, "Sorry, you're not the owner!");
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_ATTACH)
+            announce_permissions_key();
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+`{{Issues/SVC-4862}}`
+
+## See also
+
+### Functions
+
+- [llGetPermissions](/functions/llGetPermissions/)
+- [llRequestPermissions](/functions/llRequestPermissions/)
+
+### Events
+
+- [run_time_permissions](/events/run_time_permissions/)
+
+<WikiSource />

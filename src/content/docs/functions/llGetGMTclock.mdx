@@ -1,0 +1,101 @@
+---
+title: "llGetGMTclock"
+slug: "functions/llGetGMTclock"
+category: functions
+source:
+  wiki: "LlGetGMTclock"
+  url: https://wiki.secondlife.com/wiki/LlGetGMTclock
+  revision: 1194178
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetgmtclock-19406de6.txt
+  license: "Content from the Second Life Wiki article LlGetGMTclock (revision 1194178, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetGMTclock" />
+
+For SL time, which is the same as California time, use [llGetWallclock](/functions/llGetWallclock/)
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the time in seconds since midnight GMT. Value appears to be truncated to the second.
+
+```lsl title="How to use" frame="terminal"
+float result = llGetGMTclock();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-7, 13-42}
+//--// GMT function with local offsets in 12hr format //--//
+
+integer gIntMinute = 60;    //-- 1 minute in seconds
+integer gIntHour   = 3600;  //-- 1 hour in seconds
+integer gInt12Hr   = 43200; //-- 12hrs in seconds
+integer gIntDay    = 86400; //-- 1 day in seconds
+
+string fStrGMTwOffset( integer vIntLocalOffset ){
+   //-- get the correct time in seconds for the given offset
+  integer vIntBaseTime = ((integer)llGetGMTclock() + gIntDay + vIntLocalOffset * gIntHour) % gIntDay;
+  string vStrReturn;
+
+   //-- store morning or night and reduce to 12hour format if needed
+  if (vIntBaseTime < gInt12Hr){
+    vStrReturn = " AM";
+  }else{
+    vStrReturn = " PM";
+    vIntBaseTime = vIntBaseTime % gInt12Hr;
+  }
+
+   //-- get and format minutes
+  integer vIntMinutes = (vIntBaseTime % gIntHour) / gIntMinute;
+  vStrReturn = (string)vIntMinutes + vStrReturn;
+  if (10 > vIntMinutes){
+    vStrReturn = "0" + vStrReturn;
+  }
+
+   //-- add in the correct hour, force 0 to 12
+  if (vIntBaseTime < gIntHour){
+    vStrReturn = "12:" + vStrReturn;
+  }else{
+    vStrReturn = (string)(vIntBaseTime / gIntHour) + ":" + vStrReturn;
+  }
+  return vStrReturn;
+}
+
+default{
+  touch_start( integer vIntTouched ){
+     //-- '-8' is california time, no adjustment for DST
+    llSay( 0, "The time is now " + fStrGMTwOffset( -8 ) );
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+// Gets the number of milliseconds since midnight UTC.
+integer GetGMTmsclock()
+{
+    string stamp = llGetTimestamp();
+    return
+        (integer) llGetSubString(stamp, 11, 12) * 3600000 +
+        (integer) llGetSubString(stamp, 14, 15) * 60000 +
+        llRound((float) llGetSubString(stamp, 17, -2) * 1000.0);
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetWallclock](/functions/llGetWallclock/) — Seconds since midnight SLT (i.e. PST or PDT)
+
+<WikiSource />

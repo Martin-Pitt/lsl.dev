@@ -1,0 +1,68 @@
+---
+title: "PRIM_TEXT"
+slug: "constants/PRIM_TEXT"
+category: constants
+source:
+  wiki: "PRIM TEXT"
+  url: https://wiki.secondlife.com/wiki/PRIM_TEXT
+  revision: 1194695
+  date: 2015-01-23
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/prim-text-d33fafb4.txt
+  license: "Content from the Second Life Wiki article PRIM TEXT (revision 1194695, 2015-01-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="PRIM_TEXT" description />
+
+Used to get or set the object's [floating text](https://wiki.secondlife.com/wiki/Category:LSL_Floating_Text).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-12}
+default
+{
+    state_entry()
+    {
+        // a string to display
+        string displayMessage = llGetDisplayName( llGetOwner() ) + ", test number ";
+
+        // just so could test changing the displayMessage
+        integer loopControl;
+        for( loopControl = 1; loopControl < 3; ++loopControl )
+        {
+            // on first iteration set the text
+            if( loopControl == 1 )
+            {
+                llSetPrimitiveParams([PRIM_TEXT, displayMessage + (string)loopControl + ".", <1, 0, 0>, 1.0]);
+            }
+
+            // on second iteration get the text and say it.
+            else if( loopControl == 2 )
+            {
+                llSay(0, llDumpList2String(llGetPrimitiveParams([PRIM_TEXT]), " "));
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+&lt;onlyinclude>`{{#if: {{LSL Function/limits}} {{LSL Function/color|color}} {{LSL Function/alpha|alpha}} {{#vardefine:p_text_set_hover|floating text to display}} {{#vardefine:p_text_get_hover|floating text displayed}} {{#vardefine:p_text_hover|{{#switch:{{{1|}}}|get={{#var:p_text_get_hover}}|set={{#var:p_text_set_hover}}|floating text}}}} {{#vardefine:p_text_set_desc|[[:Category:LSL Floating Text|floating text]] to display}} {{#vardefine:p_text_get_desc|[[:Category:LSL Floating Text|floating text]] displayed}} {{#vardefine:p_text_desc|{{#switch:{{{1|}}}|get={{#var:p_text_get_desc}}|set={{#var:p_text_set_desc}}|[[:Category:LSL Floating Text|floating text]]}}}} {{#vardefine:text_const|{{LSL Const|PRIM_TEXT|integer|26|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the object's floating text}}}} {{#vardefine:caveats|{{#var:caveats}} * Do not rely on [[:Category:LSL Floating Text|Floating Text]] as a storage medium; it is neither secure nor finalized. ** Floating text has been altered in past server updates, breaking existing content; future changes may occur. ** Even "invisible"{{Footnote|1=Floating text with an {{LSLP|alpha}} set to 0.0 is rendered "invisible"|2=Floating text with an alpha set to 0.0 is rendered {{String|invisible}}}} floating text is transmitted to the client. *** It can be viewed by anyone with a client that is capable of rendering text that is supposed to be invisible. *** The network packets that contain the text can be sniffed and the text read.}} }}`&lt;/onlyinclude>
+
+## See also
+
+### Functions
+
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
+- [llSetText](/functions/llSetText/)
+
+<WikiSource />

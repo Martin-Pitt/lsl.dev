@@ -1,0 +1,82 @@
+---
+title: "llJson2List"
+slug: "functions/llJson2List"
+category: functions
+source:
+  wiki: "LlJson2List"
+  url: https://wiki.secondlife.com/wiki/LlJson2List
+  revision: 1217827
+  date: 2024-12-15
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/lljson2list-d78c7e57.txt
+  license: "Content from the Second Life Wiki article LlJson2List (revision 1217827, 2024-12-15), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llJson2List" />
+
+This function takes a string representing [JSON](http://json.org), and returns a list of the top level.
+
+To convert a list into a json formatted string use [llList2Json](/functions/llList2Json/).
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) made by parsing **src**, a string representing json.
+
+```lsl title="How to use" frame="terminal"
+list result = llJson2List("");
+```
+
+## Specification
+
+See [Json_usage_in_LSL](https://wiki.secondlife.com/wiki/Json_usage_in_LSL)
+
+- If the json represents a single item (number, string, true, false or null) then a list with 1 item will be returned.
+- If the json represents an object then a strided list of key, value pairs is returned. All values that are objects or arrays are returned as json strings.
+- If the json represents an array then a list of all items is returned. All values that are objects or arrays are returned as json strings.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5}
+default
+{
+    state_entry()
+    {
+        list items;
+
+        string value = "89556747-24cb-43ed-920b-47caed15465f";
+        items = llJson2List(value);
+        // ["89556747-24cb-43ed-920b-47caed15465f"]
+
+        string object = "{\"pi\": 3.14, \"set\": [1,2,3], \"status\": \"ok\"}";
+        items = llJson2List(object);
+        // ["pi", 3.140000, "set", "[1,2,3]", "status", "ok"]
+
+        string array = "[0, 3.14, [1,2,3], {}]";
+        items = llJson2List(array);
+        // [0, 3.140000, "[1,2,3]", "{}"]
+    }
+}
+```
+
+</details>
+
+## History
+
+Date of Release [20/05/2013](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13-05-20-276191)
+
+## See also
+
+### Functions
+
+- [llList2Json](/functions/llList2Json/)
+- [llJsonGetValue](/functions/llJsonGetValue/)
+- [llJsonSetValue](/functions/llJsonSetValue/)
+- [llJsonValueType](/functions/llJsonValueType/)
+
+### Articles
+
+- [Typecast](https://wiki.secondlife.com/wiki/Typecast)
+
+<WikiSource />

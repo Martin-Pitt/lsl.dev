@@ -1,0 +1,116 @@
+---
+title: "llJsonGetValue"
+slug: "functions/llJsonGetValue"
+category: functions
+source:
+  wiki: "LlJsonGetValue"
+  url: https://wiki.secondlife.com/wiki/LlJsonGetValue
+  revision: 1218886
+  date: 2026-06-05
+  contributor: "SuzannaLinn Resident"
+  raw: /wiki-source/lljsongetvalue-44e7df46.txt
+  license: "Content from the Second Life Wiki article LlJsonGetValue (revision 1218886, 2026-06-05), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llJsonGetValue" />
+
+Gets the value indicated by **specifiers** from the [json](http://json.org) string.
+
+When the input is invalid or no result can be found this function returns [JSON_INVALID](/constants/JSON_INVALID/). If the result is `null` the function returns [JSON_NULL](/constants/JSON_NULL/).
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) made by parsing **json**, a string representing **json** and traversing as specified by **specifiers**.
+
+```lsl title="How to use" frame="terminal"
+string result = llJsonGetValue("", []);
+```
+
+## Specification
+
+See [Json usage in LSL](https://wiki.secondlife.com/wiki/Json_usage_in_LSL)
+
+## Caveats
+
+- Manual definition of JSON syntax within LSL does not always parse in the expected way, so be careful to avoid using syntax characters anywhere other than where needed (for example, inside a string.); alternately escape the syntax character and use [llUnescapeURL](/functions/llUnescapeURL/) on the retrieved string to convert it back - See [bugs](#bugs).
+
+`{{KBwarning|The below comment in regards to speed cannot be assumed to be true on all server versions and in all environments. '''Always test execution speed claims for yourself.'''}}`
+
+- As of Second Life Server 2024-06-11.9458617693, benchmark testing in a 99%+ scripts run environment resulted in the following conclusions with a 3-element array cast to either JSON or CSV:
+- [llJsonGetValue](/functions/llJsonGetValue/) takes approximately 2-3 ms per call to execute regardless of depth, making it a faster option for reading a single element from a dataset.
+- [llParseStringKeepNulls](/functions/llParseStringKeepNulls/) takes approximately 5 ms to execute, while each subsequent [llList2String](/functions/llList2String/) takes approximately 0.5 ms to execute, making it a faster option for reading more than 2 elements from a dataset.
+- This function will convert the occurrence of a `\n` to a line feed and a `\t` to `U+0009`.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default {
+    state_entry() {
+
+     //below is an example of a JSON=string with a key called "key" and a value "val"
+     string json1 = "{\"key\":\"val\"}";
+     llSay(0, llJsonGetValue( json1, ["key"]));//returns "val" in localchat
+
+     string json2 = "{\"mansBestFriend\":\"dog\"}";
+     llSay(0, llJsonGetValue( json2, ["mansBestFriend"]));//returns "dog" in localchat
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+JGetValTest(){
+    string j="[[1,2],[4,5,6]]";            //JSON may be written directly as a string like this in sl.
+    string k;                              //this will change with each command below;
+    k=llJsonGetValue(j,[]);                //returns the whole array of a JSON. It might just be one entry or a whole nested array or whole nested object.
+    //if "j" is a single JSON_STRING, this may return what the string represents as a JSON within a string; a JSON_NUMBER , JSON_TRUE, TRUE ...
+
+    k=llJsonGetValue("\"3.14\"",[]);       //==k="3,14" (float that was stored in a JSON_STRING within a JSON. and not as JSON_NUMBER for no good reason)
+    k=llJsonGetValue("\"TRUE\""     ,[]);  //==k="TRUE" (the value was stored as a JSON_STRING and is thus returned verbatim)
+    k=llJsonGetValue(j,[0]);               //returns only the first entry (at offset 0). An entry can be any JSON type,
+                                           //each entry being separated by a comma from other entries.
+                                           //array and object entries may contain multiple comma separated entries within them.
+    k=llJsonGetValue(j,[1]);//returns only the second entry... (all the above still applies) k="[4,5,6]";
+    k=llJsonGetValue(llJsonGetValue(j,[1]),[2]);
+                                           //instead of getting an entry from "j" we get a sub-entry from llJsonGetValue(j,[1]),
+                                           //assuming the sub-entry is a JSON_ARRAY. It returns the 3rd sub-entry of the second entry,
+                                           //that is an array with 3 entries. it would make k="6".
+                                           //it will return JSON_INVALID if there is no 3rd entry in the 2nd sub-array,
+                                           //or no 2nd sub-array.
+    k=llJsonGetValue(j,[1,2]);             //Shorter way to do the same as in the previous example.
+    k=llJsonGetValue("true",[]);           //Sets k to JSON_TRUE
+    k=llJsonGetValue("True",[]);           //Sets k to JSON_INVALID because the JSON constant for 'true' is all lower case
+    k=llJsonGetValue("TRUE",[]);           //Sets k to JSON_INVALID because the JSON constant for 'true' is all lower case
+    k=llJsonGetValue(JSON_TRUE,[]);        //Sets k to JSON_INVALID. The JSON_xxxx constants are not supposed to be part of
+                                           // a JSON string, just values to test against.
+}
+```
+
+</details>
+
+See also [llJsonValueType](/functions/llJsonValueType/) for examples where the value type is checked before getting the value as that type.
+
+## History
+
+Date of Release [20/05/2013](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13-05-20-276191)
+
+## See also
+
+### Functions
+
+- [llList2Json](/functions/llList2Json/)
+- [llJson2List](/functions/llJson2List/)
+- [llJsonSetValue](/functions/llJsonSetValue/)
+- [llJsonValueType](/functions/llJsonValueType/)
+
+### Articles
+
+- [Typecast](https://wiki.secondlife.com/wiki/Typecast)
+
+<WikiSource />

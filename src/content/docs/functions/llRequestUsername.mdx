@@ -1,0 +1,83 @@
+---
+title: "llRequestUsername"
+slug: "functions/llRequestUsername"
+category: functions
+source:
+  wiki: "LlRequestUsername"
+  url: https://wiki.secondlife.com/wiki/LlRequestUsername
+  revision: 1209132
+  date: 2020-02-27
+  contributor: "Oz Linden"
+  raw: /wiki-source/llrequestusername-160dfad9.txt
+  license: "Content from the Second Life Wiki article LlRequestUsername (revision 1209132, 2020-02-27), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRequestUsername" />
+
+Requests the **[Username](https://wiki.secondlife.com/wiki/Usernames)** of the agent identified by **id**. When the **[Username](https://wiki.secondlife.com/wiki/Usernames)** is available the [dataserver](/events/dataserver/) event will be raised. The agent identified by **id** does not need to be in the same region or online at the time of the request.
+
+If the name has been changed some time in the past, this provides only the current name.
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) that is used to identify the [dataserver](/events/dataserver/) event when it is raised.
+
+If **id** is not the UUID of an avatar, the [dataserver](/events/dataserver/) event is not raised.
+
+```lsl title="How to use" frame="terminal"
+key result = llRequestUsername(NULL_KEY);
+```
+
+## Caveats
+
+- If you merely wish to show the agent username in the viewer window, it may be more straightforward to use [Viewer URI Name Space](https://wiki.secondlife.com/wiki/Viewer_URI_Name_Space) and avoid a dataserver event, e.g.:
+
+  ```lsl
+  llSay(0, "secondlife:///app/agent/" + (string)id + "/username");
+  ```
+- This function is throttled. The throttle is undocumented, but as of October 2018 the function appears to support bursts of up to 20 requests and sustained use at an average rate of 1.9 requests per second per owner, per region. (Meaning the throttle applies to all objects in the region with the same owner.) Once tripped, the function fails and says "Too many `llRequestUsername` requests. Throttled until average falls." on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={10-17}
+key owner_name_query;
+
+default
+{
+    state_entry()
+    {
+        owner_name_query = llRequestUsername(llGetOwner());
+    }
+
+    dataserver(key queryid, string data)
+    {
+        if ( owner_name_query == queryid )
+        {
+            llSay(0, "The username of the owner of this script : " + data);
+        }
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SCR-388: type=bug|llRequestUsername dataserver event returns \{\{String|???\}\} while llGetUsername returns correct value
+
+## See also
+
+### Functions
+
+- [llGetUsername](/functions/llGetUsername/) — works only for avatars that are present
+- [llRequestUserKey](/functions/llRequestUserKey/) — general way to translate a name to a key
+
+### Events
+
+- [dataserver](/events/dataserver/)
+
+<WikiSource />

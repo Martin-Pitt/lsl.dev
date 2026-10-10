@@ -1,0 +1,63 @@
+---
+title: "llGetNumberOfPrims"
+slug: "functions/llGetNumberOfPrims"
+category: functions
+source:
+  wiki: "LlGetNumberOfPrims"
+  url: https://wiki.secondlife.com/wiki/LlGetNumberOfPrims
+  revision: 1194211
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetnumberofprims-04427710.txt
+  license: "Content from the Second Life Wiki article LlGetNumberOfPrims (revision 1194211, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetNumberOfPrims" description />
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is the number of prims in a link set the script is attached to.
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetNumberOfPrims();
+```
+
+## Caveats
+
+- The number of prims returned also includes the number of avatars sitting on the object.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llOwnerSay((string)llGetLinkNumber());
+        llOwnerSay((string)llGetNumberOfPrims());
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+// Returns the number of prims in the object, ignoring seated avatars
+integer getNumberOfPrims(){
+  if (llGetObjectPrimCount(llGetKey()) == 0 ) return llGetNumberOfPrims(); // attachment
+  return llGetObjectPrimCount(llGetKey());   // non-attachment
+}
+```
+
+## See also
+
+### Functions
+
+- [llGetObjectPrimCount](/functions/llGetObjectPrimCount/) — Returns the number of prims in any object.
+- [llGetLinkNumber](/functions/llGetLinkNumber/) — Returns the link number of the prim the script is in.
+
+<WikiSource />

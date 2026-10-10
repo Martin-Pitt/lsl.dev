@@ -1,0 +1,104 @@
+---
+title: "llSetStatus"
+slug: "functions/llSetStatus"
+category: functions
+source:
+  wiki: "LlSetStatus"
+  url: https://wiki.secondlife.com/wiki/LlSetStatus
+  revision: 1204717
+  date: 2016-10-11
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llsetstatus-3179f5b4.txt
+  license: "Content from the Second Life Wiki article LlSetStatus (revision 1204717, 2016-10-11), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetStatus" />
+
+Sets the object status attributes indicated in the **status**\} mask to **value**
+
+```lsl title="How to use" frame="terminal"
+llSetStatus(0, 0);
+```
+
+## Specification
+
+<table>
+	<tr>
+		<td>
+
+			| Constants | Value | Default | Description |
+			| --- | --- | --- | --- |
+			| [STATUS_PHYSICS](/constants/STATUS_PHYSICS/) | 0x001 | [FALSE](/constants/FALSE/) | Object is [physical](https://wiki.secondlife.com/wiki/LSL_Glossary#physical) |
+			| [STATUS_ROTATE_X](/constants/STATUS_ROTATE_X/) | 0x002 | [TRUE](/constants/TRUE/) | Can turn along this axis (physical objects only) |
+			| [STATUS_ROTATE_Y](/constants/STATUS_ROTATE_Y/) | 0x004 | [TRUE](/constants/TRUE/) | Can turn along this axis (physical objects only) |
+			| [STATUS_ROTATE_Z](/constants/STATUS_ROTATE_Z/) | 0x008 | [TRUE](/constants/TRUE/) | Can turn along this axis (physical objects only) |
+			| [STATUS_PHANTOM](/constants/STATUS_PHANTOM/) | 0x010 | [FALSE](/constants/FALSE/) | Object is [phantom](https://wiki.secondlife.com/wiki/LSL_Glossary#phantom) |
+			| [STATUS_SANDBOX](/constants/STATUS_SANDBOX/) | 0x020 | [FALSE](/constants/FALSE/) | Keep object within 10 meters and in the same region |
+			| [STATUS_BLOCK_GRAB](/constants/STATUS_BLOCK_GRAB/) | 0x040 | [FALSE](/constants/FALSE/) | Prevent click-and-drag movement on the root prim |
+
+		</td>
+		<td>
+
+			| Constants | Value | Default | Description |
+			| --- | --- | --- | --- |
+			| [STATUS_DIE_AT_EDGE](/constants/STATUS_DIE_AT_EDGE/) | 0x080 | [FALSE](/constants/FALSE/)&lt;span id="srae-s" class="TablePager_nav" title="If the object is rezzed by a script, the default is [TRUE](/constants/TRUE/)">[\*](#srae-t)&lt;/span> | Delete and do not return object if it goes off world |
+			| [STATUS_RETURN_AT_EDGE](/constants/STATUS_RETURN_AT_EDGE/) | 0x100 | [FALSE](/constants/FALSE/) | Return object to owner if it goes off world |
+			| [STATUS_CAST_SHADOWS](https://wiki.secondlife.com/wiki/STATUS_CAST_SHADOWS) | 0x200 | [TRUE](/constants/TRUE/) | *not currently used* |
+			| [STATUS_BLOCK_GRAB_OBJECT](/constants/STATUS_BLOCK_GRAB_OBJECT/) | 0x400 | [FALSE](/constants/FALSE/) | Prevent click-and-drag movement on all prims in the object |
+			| [STATUS_DIE_AT_NO_ENTRY](/constants/STATUS_DIE_AT_NO_ENTRY/) | 0x800 | [FALSE](/constants/FALSE/)&lt;span id="srae-u" class="TablePager_nav" title="No-copy objects will remain in-world">[†](#srae-v)&lt;/span> | Delete and do not return object if it cannot enter a parcel |
+
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">&lt;sup id="srae-t">&lt;span class="TablePager_nav">[\*](#srae-s)&lt;/span> [STATUS_DIE_AT_EDGE](/constants/STATUS_DIE_AT_EDGE/) - If the object is [rezzed](/categories/rez/) by a script, the default is [TRUE](/constants/TRUE/)</td>
+	</tr>
+	<tr>
+		<td colspan="2">&lt;sup id="srae-v">&lt;span class="TablePager_nav">[†](#srae-u)&lt;/span> [STATUS_DIE_AT_NO_ENTRY](/constants/STATUS_DIE_AT_NO_ENTRY/) - [No-copy](https://wiki.secondlife.com/wiki/Permission#copy) objects ignore this flag and remain in-world</td>
+	</tr>
+</table>
+
+## Caveats
+
+- Status is an object attribute; all prims in an object share the same status.
+- Except for [STATUS_BLOCK_GRAB](/constants/STATUS_BLOCK_GRAB/), this only affects the prim the script is in, child prims in linked objects will not be affected.
+- Use [STATUS_BLOCK_GRAB_OBJECT](/constants/STATUS_BLOCK_GRAB_OBJECT/) to block grabbing of a link_set.
+- Setting [STATUS_PHYSICS](/constants/STATUS_PHYSICS/) fails silently in attached objects. ~ [svc 6549](#svc-6549)
+- The [STATUS_ROTATE_X](/constants/STATUS_ROTATE_X/), [STATUS_ROTATE_Y](/constants/STATUS_ROTATE_Y/) and [STATUS_ROTATE_Z](/constants/STATUS_ROTATE_Z/) flags all require that the object first be made physical to have any effect.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llSetStatus( STATUS_DIE_AT_EDGE | STATUS_PHYSICS, TRUE);
+        llSetStatus( STATUS_ROTATE_X | STATUS_ROTATE_Y, FALSE);
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-6549 (bug): llSetStatus can't change STATUS_PHYSICS of an attachment despite the status being preserved between attach & drop
+- SVC-5531 (bug): llGetStatus(STATUS_ROTATE_Z); will not work on child prims on freshly rezzed objects.
+- SVC-1773 (bug): STATUS_BLOCK_GRAB only affects individual prims in a linkset
+- SVC-4197 (fs): Create STATUS_TRANSLATE\_\* flags for llSetStatus
+- SVC-5723 (fs): New constant STATUS_BLOCK_SIT
+- SCR-203 (nf): &lt;code>STATUS_PARCEL_BOUND&lt;/code> status to prevent a physical object from being able to leave the bounds of the current parcel.
+
+## See also
+
+### Functions
+
+- [llGetStatus](/functions/llGetStatus/) — Gets the object status.
+
+<WikiSource />

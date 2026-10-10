@@ -1,0 +1,92 @@
+---
+title: "llDetectedPos"
+slug: "functions/llDetectedPos"
+category: functions
+source:
+  wiki: "LlDetectedPos"
+  url: https://wiki.secondlife.com/wiki/LlDetectedPos
+  revision: 1198869
+  date: 2016-01-17
+  contributor: "Omei Qunhua"
+  raw: /wiki-source/lldetectedpos-acc1fa55.txt
+  license: "Content from the Second Life Wiki article LlDetectedPos (revision 1198869, 2016-01-17), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDetectedPos" description />
+
+Returns [&lt;0.0, 0.0, 0.0>](/constants/ZERO_VECTOR/) if number is not valid sensed object.
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) that is the position (in [region coordinates](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region)) of [detected](/categories/detected/) object number.
+
+```lsl title="How to use" frame="terminal"
+vector result = llDetectedPos(0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// Get position and distance of toucher
+
+default
+{
+    touch_start(integer total_number)
+    {
+	// get the position of the avatar touching this prim
+	vector pos = llDetectedPos(0);
+
+	// compute how far away they are
+	float dist = llVecDist(pos, llGetPos() );
+
+	llSay(0, "You are " + (string) dist + " metres from me, at coordinates " + (string) pos);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-21, 27-33}
+// get name and sim position of Avatars within "say" range
+
+default
+{
+    state_entry()
+    {
+        llOwnerSay( "Touch me to get the positions of avatars in 'Say' range" );
+    }
+
+    touch_start( integer vIntTouchCount )
+    {
+        // Do a one-off sensor sweep over a 20m radius sphere for avatars
+        llSensor( "", "", AGENT, 20, PI );
+    }
+
+    sensor( integer vIntFound )
+    {
+        integer vIntCounter = 0;
+        //-- loop through all avatars found
+        do
+        {
+            llOwnerSay( llDetectedName( vIntCounter )
+                // get the position of this detected avatar
+                + (string) llDetectedPos( vIntCounter ) );
+        } while (++vIntCounter < vIntFound);
+    }
+
+    // sensor does not detect owner if it's attached
+    no_sensor()
+    {
+        llOwnerSay( "I couldn't find anybody" );
+    }
+}
+```
+
+</details>
+
+<WikiSource />

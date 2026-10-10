@@ -1,0 +1,76 @@
+---
+title: "llGetNextEmail"
+slug: "functions/llGetNextEmail"
+category: functions
+source:
+  wiki: "LlGetNextEmail"
+  url: https://wiki.secondlife.com/wiki/LlGetNextEmail
+  revision: 1194208
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetnextemail-948f397f.txt
+  license: "Content from the Second Life Wiki article LlGetNextEmail (revision 1194208, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetNextEmail" description />
+
+Get the next queued [email](/events/email/) that comes from **address**, with specified **subject**.
+
+If **address** or **subject** an `empty string`, then that parameter will be treated as a `wildcard`.
+
+```lsl title="How to use" frame="terminal"
+llGetNextEmail("", "");
+```
+
+## Specification
+
+The [email](/events/email/) [event](https://wiki.secondlife.com/wiki/event) will be triggered only if **address** and **subject** match
+
+- Neither parameter is case sensitive.
+- If a parameter is an `empty string`, then that parameter will be treated as a wildcard, matches anything.
+- If both parameters are empty strings then the first email in the queue will be matched.
+- The email queue is `FIFO`.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-11, 17-21}
+default
+{
+    state_entry()
+    {
+        llOwnerSay("My email address is: " + (string)llGetKey() + "@lsl.secondlife.com");
+
+        // check every half minute
+        llSetTimerEvent(30.0);
+    }
+
+    timer()
+    {
+        //Check for emails
+        llGetNextEmail("", "");
+    }
+
+    email(string time, string address, string subj, string message, integer num_left)
+    {
+          llOwnerSay("I got an email: " + subj + "\n" + message);
+     }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llEmail](/functions/llEmail/)
+
+### Events
+
+- [email](/events/email/)
+
+<WikiSource />

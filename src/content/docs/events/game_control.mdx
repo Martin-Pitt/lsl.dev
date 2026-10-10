@@ -1,0 +1,184 @@
+---
+title: "game_control"
+slug: "events/game_control"
+category: events
+source:
+  wiki: "Game control"
+  url: https://wiki.secondlife.com/wiki/Game_control
+  revision: 1219055
+  date: 2026-09-15
+  contributor: "Maestro Linden"
+  raw: /wiki-source/game-control-0c7cec70.txt
+  license: "Content from the Second Life Wiki article Game control (revision 1219055, 2026-09-15), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="game_control" />
+
+Triggered when compatible viewer sends fresh **GameControlData** message.
+
+Requires the controlling agent to grant [PERMISSION_GAME_CONTROL](/constants/PERMISSION_GAME_CONTROL/) to the script. This permission is automatically granted if the script is attached or sat upon.
+
+```lsl title="How to use" frame="terminal"
+game_control(key id, integer button_levels, list axes)
+{
+
+}
+```
+
+## Specification
+
+| Constant | Value |
+| --- | --- |
+| [GAME_CONTROL_BUTTON_SOUTH](/constants/GAME_CONTROL_BUTTON_SOUTH/) | 0x00000001 |
+| [GAME_CONTROL_BUTTON_A](https://wiki.secondlife.com/wiki/GAME_CONTROL_BUTTON_A) | 0x00000001 |
+| [GAME_CONTROL_BUTTON_EAST](/constants/GAME_CONTROL_BUTTON_EAST/) | 0x00000002 |
+| [GAME_CONTROL_BUTTON_B](https://wiki.secondlife.com/wiki/GAME_CONTROL_BUTTON_B) | 0x00000002 |
+| [GAME_CONTROL_BUTTON_WEST](/constants/GAME_CONTROL_BUTTON_WEST/) | 0x00000004 |
+| [GAME_CONTROL_BUTTON_X](https://wiki.secondlife.com/wiki/GAME_CONTROL_BUTTON_X) | 0x00000004 |
+| [GAME_CONTROL_BUTTON_NORTH](/constants/GAME_CONTROL_BUTTON_NORTH/) | 0x00000008 |
+| [GAME_CONTROL_BUTTON_Y](https://wiki.secondlife.com/wiki/GAME_CONTROL_BUTTON_Y) | 0x00000008 |
+| [GAME_CONTROL_BUTTON_BACK](https://wiki.secondlife.com/wiki/GAME_CONTROL_BUTTON_BACK) | 0x00000010 |
+| [GAME_CONTROL_BUTTON_GUIDE](https://wiki.secondlife.com/wiki/GAME_CONTROL_BUTTON_GUIDE) | 0x00000020 |
+| [GAME_CONTROL_BUTTON_START](/constants/GAME_CONTROL_BUTTON_START/) | 0x00000040 |
+| [GAME_CONTROL_BUTTON_LEFTSTICK](/constants/GAME_CONTROL_BUTTON_LEFTSTICK/) | 0x00000080 |
+| [GAME_CONTROL_BUTTON_RIGHTSTICK](/constants/GAME_CONTROL_BUTTON_RIGHTSTICK/) | 0x00000100 |
+| [GAME_CONTROL_BUTTON_LEFTSHOULDER](/constants/GAME_CONTROL_BUTTON_LEFTSHOULDER/) | 0x00000200 |
+| [GAME_CONTROL_BUTTON_RIGHTSHOULDER](/constants/GAME_CONTROL_BUTTON_RIGHTSHOULDER/) | 0x00000400 |
+| [GAME_CONTROL_BUTTON_DPAD_UP](/constants/GAME_CONTROL_BUTTON_DPAD_UP/) | 0x00000800 |
+| [GAME_CONTROL_BUTTON_DPAD_DOWN](/constants/GAME_CONTROL_BUTTON_DPAD_DOWN/) | 0x00001000 |
+| [GAME_CONTROL_BUTTON_DPAD_LEFT](/constants/GAME_CONTROL_BUTTON_DPAD_LEFT/) | 0x00002000 |
+| [GAME_CONTROL_BUTTON_DPAD_RIGHT](/constants/GAME_CONTROL_BUTTON_DPAD_RIGHT/) | 0x00004000 |
+| [GAME_CONTROL_BUTTON_MISC1](/constants/GAME_CONTROL_BUTTON_MISC1/) | 0x00008000 |
+| [GAME_CONTROL_BUTTON_PADDLE1](/constants/GAME_CONTROL_BUTTON_PADDLE1/) | 0x00010000 |
+| [GAME_CONTROL_BUTTON_PADDLE2](/constants/GAME_CONTROL_BUTTON_PADDLE2/) | 0x00020000 |
+| [GAME_CONTROL_BUTTON_PADDLE3](/constants/GAME_CONTROL_BUTTON_PADDLE3/) | 0x00040000 |
+| [GAME_CONTROL_BUTTON_PADDLE4](/constants/GAME_CONTROL_BUTTON_PADDLE4/) | 0x00080000 |
+| [GAME_CONTROL_BUTTON_TOUCHPAD](/constants/GAME_CONTROL_BUTTON_TOUCHPAD/) | 0x00100000 |
+
+| Constant | Value |
+| --- | --- |
+| [GAME_CONTROL_AXIS_LEFTX](/constants/GAME_CONTROL_AXIS_LEFTX/) | 0x00000000 |
+| [GAME_CONTROL_AXIS_LEFTY](/constants/GAME_CONTROL_AXIS_LEFTY/) | 0x00000001 |
+| [GAME_CONTROL_AXIS_RIGHTX](/constants/GAME_CONTROL_AXIS_RIGHTX/) | 0x00000002 |
+| [GAME_CONTROL_AXIS_RIGHTY](/constants/GAME_CONTROL_AXIS_RIGHTY/) | 0x00000003 |
+| [GAME_CONTROL_AXIS_TRIGGERLEFT](https://wiki.secondlife.com/wiki/GAME_CONTROL_AXIS_TRIGGERLEFT) | 0x00000004 |
+| [GAME_CONTROL_AXIS_TRIGGERRIGHT](https://wiki.secondlife.com/wiki/GAME_CONTROL_AXIS_TRIGGERRIGHT) | 0x00000005 |
+
+## Caveats
+
+- If enabled at the client: avatar movements may be translated into GameControl input.
+- There is room for 32 buttons \[bits 0 through 31\] however at most only 16 buttons can be simultaneously held down at any one time.
+- There are currently always 6 **axes** values, even when the controller device has more or less
+- **DO NOT** read the axes list from the end, use negative indexes to access it, or assume it's length, the list may gain new axes over time
+- All **axes** elements will be in range \[-1,1\]
+- By default,
+- Left-tilting a thumbstick on **[GAME_CONTROL_AXIS_LEFTX](/constants/GAME_CONTROL_AXIS_LEFTX/)** or **[GAME_CONTROL_AXIS_RIGHTX](/constants/GAME_CONTROL_AXIS_RIGHTX/)** yields a positive value, while right-tilting yields a negative value
+- Up-tilting a thumbstick on **[GAME_CONTROL_AXIS_LEFTY](/constants/GAME_CONTROL_AXIS_LEFTY/)** or **[GAME_CONTROL_AXIS_RIGHTY](/constants/GAME_CONTROL_AXIS_RIGHTY/)** yields a positive value, while down-tilting yields a negative value
+- Pulling a trigger will increase the value of **GAME_CONTROL_AXIS_TRIGGERLEFT** or **GAME_CONTROL_AXIS_TRIGGERRIGHT**, while releasing will decrease the value
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-58}
+integer prev_button_levels = 0;
+integer print_list(string name, integer type, list data)
+{
+    integer data_length = llGetListLength(data);
+    string text = name + " : ";
+    if (data_length > 0)
+    {
+        integer use_comma = FALSE;
+        integer i = 0;
+        for (i = 0; i < data_length; i++)
+        {
+            if (!use_comma)
+            {
+                use_comma = TRUE;
+            }
+            else
+            {
+                text += ",";
+            }
+            if (type == TYPE_INTEGER)
+            {
+                integer b = (llList2Integer(data, i));
+                text += (string)(b);
+                llOwnerSay("pack i=" + (string)(i) + " b=" + (string)(b));
+            }
+            else if (type == TYPE_FLOAT)
+            {
+                text += (string)(llList2Float(data, i));
+            }
+        }
+    }
+    llOwnerSay(text);
+    return data_length;
+}
+
+string bits2nybbles(integer bits)
+{
+    integer lsn; // least significant nybble
+    string nybbles = "";
+    do
+        nybbles = llGetSubString("0123456789ABCDEF", lsn = (bits & 0xF), lsn) + nybbles;
+    while (bits = (0xfffFFFF & (bits >> 4)));
+    return nybbles;
+}
+
+default
+{
+    state_entry()
+    {
+        key agent = llGetOwner();
+        llRequestPermissions(agent, PERMISSION_GAME_CONTROL);
+        llRegionSayTo(agent, 0, "Accept the permissions request to proceed.");
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if(perm & PERMISSION_GAME_CONTROL)
+        {
+            llOwnerSay("Received PERMISSION_GAME_CONTROL from "
+                + llKey2Name(llGetPermissionsKey())
+                + ".  Ready for game_control events");
+        }
+    }
+
+    game_control(key id, integer button_levels, list axes)
+    {
+        integer button_edges = button_levels ^ prev_button_levels;
+        prev_button_levels = button_levels;
+
+        string button_levels_hex = bits2nybbles(button_levels);
+        string button_edges_hex = bits2nybbles(button_edges);
+        llOwnerSay("game_control :");
+        llOwnerSay("  button_levels=0x" + button_levels_hex);
+        llOwnerSay("  button_edges=0x" + button_edges_hex);
+        print_list("  axes", TYPE_FLOAT, axes);
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetGameControlMode](/functions/llGetGameControlMode/)
+- [llGetGameControlModeAxes](/functions/llGetGameControlModeAxes/)
+- [llGetGameControlModeButtons](/functions/llGetGameControlModeButtons/)
+- [llRequestPermissions](/functions/llRequestPermissions/)
+
+### Events
+
+- [control](/events/control/)
+
+### Articles
+
+[LSL Game Control Beta](https://wiki.secondlife.com/wiki/LSL_Game_Control_Beta)
+
+<WikiSource />

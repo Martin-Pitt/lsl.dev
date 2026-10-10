@@ -1,0 +1,116 @@
+---
+title: "llSetRot"
+slug: "functions/llSetRot"
+category: functions
+source:
+  wiki: "LlSetRot"
+  url: https://wiki.secondlife.com/wiki/LlSetRot
+  revision: 1197452
+  date: 2015-09-12
+  contributor: "Strife Onizuka"
+  raw: /wiki-source/llsetrot-fa7c68cf.txt
+  license: "Content from the Second Life Wiki article LlSetRot (revision 1197452, 2015-09-12), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetRot" description />
+
+Sets the rotation of the prim to **rot**.
+
+```lsl title="How to use" frame="terminal"
+llSetRot(ZERO_ROTATION);
+```
+
+## Caveats
+
+- If the prim is attached, then this function offsets the rotation by the avatar's rotation.
+- If the prim is not the root prim it is offset by the root's rotation.
+- If you are trying to set the rotation of a child prim relative to the root prim then divide the rotation by the root rotation.
+- If you are trying to set the rotation of a child prim to a global rotation then you need to divide the global rotation by the root rotation **twice**.
+- It is better to use [llSetLocalRot](/functions/llSetLocalRot/) to set the rotation of child prims, even if you are setting it to a global rotation (just divide by the root rotation in that case).
+- Alternatively see the [Useful Snippets](/functions/llSetRot/#useful-snippets) for generalized workarounds that work with [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams), [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams), and [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+- For small rotation changes, there is an update threshold depending on the time duration between changes. It does not appear to be limited to the 6deg rule any longer.
+- For "static objects" (type of [pathfinding](https://wiki.secondlife.com/wiki/pathfinding)), the script fails with the error in debug channel:
+- "Unable to set prim rotation: object contributes to the navmesh."
+
+## Examples
+
+<details open>
+<summary>Drop this script in the root prim of an object to have it rotate in 1 degree increments. Note that it won't work on child prims if the root is rotated.</summary>
+
+```lsl collapse={1-11}
+rotation rot_xyzq;
+
+default
+{
+    state_entry()
+    {
+        vector xyz_angles = <0,1.0,0>; // This is to define a 1 degree change
+        vector angles_in_radians = xyz_angles*DEG_TO_RAD; // Change to Radians
+        rot_xyzq = llEuler2Rot(angles_in_radians); // Change to a Rotation
+    }
+
+    touch_start(integer s)
+    {
+        llSetRot(llGetRot()*rot_xyzq); //Do the Rotation...
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Drop this one in a child prim to have it rotate around the world's Y axis in 1 degree increments. It won't work in the root if it is rotated.</summary>
+
+```lsl collapse={1-11}
+rotation rot_xyzq;
+
+default
+{
+    state_entry()
+    {
+        vector xyz_angles = <0,1.0,0>; // This is to define a 1 degree change
+        vector angles_in_radians = xyz_angles*DEG_TO_RAD; // Change to Radians
+        rot_xyzq = llEuler2Rot(angles_in_radians); // Change to a Rotation
+    }
+
+    touch_start(integer s)
+    {
+        llSetRot(llGetRot()*rot_xyzq/llGetRootRotation()/llGetRootRotation()); //Do the Rotation...
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+//-- These correctly set a global rotation for the root prim in all scenarios
+llSetLocalRot( rot )
+llSetPrimitiveParams( [PRIM_ROT_LOCAL, rot] )
+
+//-- These correctly set a global rotation for a child prim in all scenarios
+llSetLocalRot( rot / llGetRootRotation() )
+llSetPrimitiveParams( [PRIM_ROT_LOCAL, rot / llGetRootRotation() ] )
+```
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-93 (bug): llSetRot and llSetPrimitiveParams (using PRIM_ROTATION) incorrectly implemented for child prims.
+
+## See also
+
+### Functions
+
+- [llGetRot](/functions/llGetRot/)
+- [llGetLocalRot](/functions/llGetLocalRot/)
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
+- [llSetLocalRot](/functions/llSetLocalRot/)
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+- [llTargetOmega](/functions/llTargetOmega/)
+
+<WikiSource />

@@ -1,0 +1,139 @@
+---
+title: "llListStatistics"
+slug: "functions/llListStatistics"
+category: functions
+source:
+  wiki: "LlListStatistics"
+  url: https://wiki.secondlife.com/wiki/LlListStatistics
+  revision: 1198841
+  date: 2016-01-13
+  contributor: "Omei Qunhua"
+  raw: /wiki-source/llliststatistics-7a0967af.txt
+  license: "Content from the Second Life Wiki article LlListStatistics (revision 1198841, 2016-01-13), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llListStatistics" />
+
+If a list entry type is not a float or an integer it is silently ignored. Returns the numeric result of the statistical aggregate function operation (a LIST_STAT\_\* constant) on the numeric list src.
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the result of performing statistical aggregate function **operation** on **src**.
+
+```lsl title="How to use" frame="terminal"
+float result = llListStatistics(0, []);
+```
+
+## Specification
+
+| Constant |  | Description |
+| --- | --- | --- |
+| [LIST_STAT_RANGE](/constants/LIST_STAT_RANGE/) | 0 | Calculates the range. |
+| [LIST_STAT_MIN](/constants/LIST_STAT_MIN/) | 1 | Calculates the smallest number. |
+| [LIST_STAT_MAX](/constants/LIST_STAT_MAX/) | 2 | Calculates the largest number. |
+| [LIST_STAT_MEAN](/constants/LIST_STAT_MEAN/) | 3 | Calculates the mean (average). |
+| [LIST_STAT_MEDIAN](/constants/LIST_STAT_MEDIAN/) | 4 | Calculates the median number. |
+| [LIST_STAT_STD_DEV](/constants/LIST_STAT_STD_DEV/) | 5 | Calculates the standard deviation. |
+| [LIST_STAT_SUM](/constants/LIST_STAT_SUM/) | 6 | Calculates the sum. |
+| [LIST_STAT_SUM_SQUARES](/constants/LIST_STAT_SUM_SQUARES/) | 7 | Calculates the sum of the squares. |
+| [LIST_STAT_NUM_COUNT](/constants/LIST_STAT_NUM_COUNT/) | 8 | Determines the number of [float](https://wiki.secondlife.com/wiki/float) and [integer](https://wiki.secondlife.com/wiki/integer) elements. |
+| [LIST_STAT_GEOMETRIC_MEAN](/constants/LIST_STAT_GEOMETRIC_MEAN/) | 9 | Calculates the geometric mean. |
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5}
+// Show results for each operation for a sample list
+default
+{
+    state_entry()
+    {
+        list LX = [-1, 3.33, 17, "object", -4.5, 0.8675 ];
+
+        llSay(0, "G.Mean= " + (string) llListStatistics(LIST_STAT_GEOMETRIC_MEAN, LX) );           // 0. 000000
+        llSay(0, "Max= " + (string) llListStatistics(LIST_STAT_MAX, LX) );                         // 17.000000
+        llSay(0, "Min= " + (string) llListStatistics(LIST_STAT_MIN, LX) );                         // -4.500000
+        llSay(0, "Mean= " + (string) llListStatistics(LIST_STAT_MEAN, LX) );                       // 3.139500
+        llSay(0, "Median= " + (string) llListStatistics(LIST_STAT_MEDIAN, LX) );                   // 0.867500
+        llSay(0, "Count= " + (string) llListStatistics(LIST_STAT_NUM_COUNT, LX) );                 // 5.000000
+        llSay(0, "Range= " + (string) llListStatistics(LIST_STAT_RANGE, LX) );                     // 21.500000
+        llSay(0, "Std.Dev= " + (string) llListStatistics(LIST_STAT_STD_DEV, LX) );                 // 8.258468
+        llSay(0, "Sum= " + (string) llListStatistics(LIST_STAT_SUM, LX) );                         // 15.697500
+        llSay(0, "Sum of squares= " + (string) llListStatistics(LIST_STAT_SUM_SQUARES, LX) );      // 322.091500
+
+    }
+}
+// Note that LSLEditor produces "NaN" (Not A Number) for the geometric mean above. Geometric mean applies only to numbers of the same sign.
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={4-22, 35-45}
+// shows just how bad SL is behaving and demonstrates the use of llListStatistics()
+list dil_s;
+list fps_s;
+integer ticks = 0;
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(1.0);
+    }
+
+    on_rez (integer parm)
+    {
+        llResetScript();
+    }
+
+    timer()
+    {
+        dil_s = llList2List(dil_s + llGetRegionTimeDilation(), -60, -1);
+        fps_s = llList2List(fps_s + llGetRegionFPS(), -60, -1);
+        if(3 <= ++ticks)
+        {
+            llSetText(
+                "Dilation: min="+(string) llListStatistics(LIST_STAT_MIN, dil_s) + ", mean=" +
+                    (string) llListStatistics(LIST_STAT_MEAN, dil_s) + ", max=" +
+                    (string) llListStatistics(LIST_STAT_MAX, dil_s) + ", std.dev=" +
+                    (string) llListStatistics(LIST_STAT_STD_DEV, dil_s) + "\n" +
+                    "FPS: min="+(string) llListStatistics(LIST_STAT_MIN, fps_s) + ", mean=" +
+                    (string) llListStatistics(LIST_STAT_MEAN, fps_s) + ", max=" +
+                    (string) llListStatistics(LIST_STAT_MAX, fps_s) + ", std.dev=" +
+                    (string) llListStatistics(LIST_STAT_STD_DEV, fps_s),
+                <1.0, 1.0, 0.0>, //yellow
+                1.0);
+        }
+    }
+
+    changed(integer change)
+    {
+        if(change & CHANGED_REGION)
+        {
+            llResetScript();
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+Given that this operation ignores any non-numbers in a list, it can be used to tell you, in a mixed list, how many of the elements in a list are numbers (when used with the [LIST_STAT_NUM_COUNT](/constants/LIST_STAT_NUM_COUNT/) parameter.)
+
+## Tests
+
+- [llListStatistics Test](https://wiki.secondlife.com/wiki/llListStatistics_Test)
+
+## See also
+
+### Functions
+
+- [llGetListEntryType](/functions/llGetListEntryType/)
+
+<WikiSource />

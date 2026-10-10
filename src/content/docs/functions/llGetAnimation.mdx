@@ -1,0 +1,166 @@
+---
+title: "llGetAnimation"
+slug: "functions/llGetAnimation"
+category: functions
+source:
+  wiki: "LlGetAnimation"
+  url: https://wiki.secondlife.com/wiki/LlGetAnimation
+  revision: 1194149
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetanimation-5ac1e3fd.txt
+  license: "Content from the Second Life Wiki article LlGetAnimation (revision 1194149, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetAnimation" />
+
+[llGetAgentInfo](/functions/llGetAgentInfo/) provides information on some animation states not covered by this function (typing, away, busy). [llGetAnimationList](/functions/llGetAnimationList/) provides more detailed information about the running animations, but may not reflect avatar state as accurately as `llGetAnimation`.
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the name of the currently playing locomotion animation for avatar `id`. See the table below.
+
+```lsl title="How to use" frame="terminal"
+string result = llGetAnimation(NULL_KEY);
+```
+
+## Specification
+
+<table>
+	<caption>**Complete list of return values as of August 15, 2011.**`{{Footnote|With the successful conclusion of {{jira|SCR-26}}, a complete list of values was posted; however no indication was given as to which of the previously undocumented codes are active but just uncommon.|With the successful conclusion of SCR-26, a complete list of values was posted; however no indication was given as to which of the previously undocumented codes are active but just uncommon.}}`</caption>
+	<tr>
+		<td>`{{LSL Animation States|title={{LSLGC|Animation/Override|Overridable}} values}}`</td>
+		<td>
+
+			**Other Common/Active values**
+
+			| Value | Description |
+			| --- | --- |
+			| "" | During logout |
+			| "Init" | At login and after teleports. |
+
+		</td>
+		<td>
+
+			**Uncommon/Inactive return values**
+
+			| Value | Description |
+			| --- | --- |
+			| "Crouch" |  |
+			| "Epsilon" |  |
+			| "Fall Down Land" |  |
+			| "Finish Animation" |  |
+			| "Fly" |  |
+			| "FlySlow" |  |
+			| "Hard Land" |  |
+			| "Hover Down" |  |
+			| "Hover Up" |  |
+			| "Hover" |  |
+			| "Medium Land" |  |
+			| "PreFlying" |  |
+			| "PreJump" |  |
+			| "Prep For Teleport" |  |
+			| "Run" |  |
+			| "Sit on Ground" |  |
+			| "Sit" |  |
+			| "Soft Land" |  |
+			| "Stand" |  |
+			| "Stride" |  |
+			| "Take Off" |  |
+			| "Turn Done" |  |
+			| "Turn Left" |  |
+			| "Turn Right" |  |
+			| "Uncrouch" |  |
+			| "Walk" |  |
+
+		</td>
+	</tr>
+</table>
+
+## Caveats
+
+- This function can return an empty string while the avatar is logging out.
+- New return values could conceivably be added at any time and this list may not in-fact be complete. Scripts should be written under the assumption that they may receive a value they won't recognize.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={8-39, 45-65}
+// A simple animation override example.
+// Make the avatar run in mid-air when jumping.
+
+key gOwner; // the wearer's key
+string gLastAnimation; // last llGetAnimation value seen
+
+// User functions
+
+Initialize(key id) {
+    if (id == NULL_KEY) { // detaching
+        llSetTimerEvent(0.0); // stop the timer
+    }
+    else { // attached, or reset while worn
+        llRequestPermissions(id, PERMISSION_TRIGGER_ANIMATION);
+        gOwner = id;
+    }
+}
+
+
+// Event handlers
+
+default
+{
+    state_entry() {
+        // in case the script was reset while already attached
+        if (llGetAttached() != 0) {
+            Initialize(llGetOwner());
+        }
+    }
+
+    attach(key id) {
+        Initialize(id);
+    }
+
+    run_time_permissions(integer perm) {
+        if (perm & PERMISSION_TRIGGER_ANIMATION) {
+            llSetTimerEvent(0.25); // start polling
+        }
+    }
+
+    timer() {
+        string newAnimation = llGetAnimation(gOwner);
+
+        if (gLastAnimation != newAnimation) { // any change?
+            if (newAnimation == "Jumping") {
+
+                // You can stop the built-in animation if you like, if
+                // it might interfere with your own. Be aware that an
+                // avatar can become stuck, and some llGetAgentInfo results
+                // can be inaccurate, if you stop built-ins indiscriminately.
+                // Always test.
+                //
+                // llStopAnimation("jump");
+
+                llStartAnimation("run");
+            }
+            else if (gLastAnimation == "Jumping")  { // just finished jumping
+                // "run" is looped, so we have to stop it when we are done.
+                llStopAnimation("run");
+            }
+
+            gLastAnimation = newAnimation; // store away for  next time
+        }
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetAgentInfo](/functions/llGetAgentInfo/)
+- [llGetAnimationList](/functions/llGetAnimationList/)
+
+<WikiSource />

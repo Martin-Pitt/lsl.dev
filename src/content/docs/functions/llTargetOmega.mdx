@@ -1,0 +1,168 @@
+---
+title: "llTargetOmega"
+slug: "functions/llTargetOmega"
+category: functions
+source:
+  wiki: "LlTargetOmega"
+  url: https://wiki.secondlife.com/wiki/LlTargetOmega
+  revision: 1218535
+  date: 2025-12-02
+  contributor: "Lucia Nightfire"
+  raw: /wiki-source/lltargetomega-448ec790.txt
+  license: "Content from the Second Life Wiki article LlTargetOmega (revision 1218535, 2025-12-02), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llTargetOmega" description />
+
+Rotates the object/prim around **axis** at a rate of `spinrate * llVecMag(axis)` in radians per second with strength **gain**.
+
+```lsl title="How to use" frame="terminal"
+llTargetOmega(ZERO_VECTOR, 0.0, 0.0);
+```
+
+## Specification
+
+### Physics
+
+- If the [object](https://wiki.secondlife.com/wiki/object) is [physical](https://wiki.secondlife.com/wiki/physical) and the [script](https://wiki.secondlife.com/wiki/Script) is [attached](https://wiki.secondlife.com/wiki/Attachment) to the [root prim](https://wiki.secondlife.com/wiki/Link#root-prim), then the physical representation is updated regularly. The [rotation](https://wiki.secondlife.com/wiki/rotation) experienced by the [user](https://wiki.secondlife.com/wiki/user) **can** be detected or queried by script.
+- If the object is physical and the script attached to the root prim, the axis of rotation is given by the parameter **axis** and contains the center of mass [llGetCenterOfMass](/functions/llGetCenterOfMass/). The **axis** parameter gives the direction of the axis of rotation. If the center of the object is not the center of mass, the center of the object "orbits" around the center of mass.
+- If the object is physical and the script attached to a child prim: the same, but it's the center of mass of the *child* prim which will be used.
+- If the object is not physical or the script is attached to a child prim, then the effect is entirely client-side. Only a script within the object itself can detect this by reading the [PRIM_OMEGA](/constants/PRIM_OMEGA/) parameters.
+- If the object is not physical and the script is attached to a root prim, the axis of rotation is given by the parameter **axis** and contains the center of the object (center of root prim).
+- If the object is not physical and the script is attached to a child prim: the same, but in this case, it will use the center of the child prim.
+
+### Link Sets
+
+- If the script is attached to the root prim, the entire object rotates around the [region](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region) **axis**.
+- If the object is attached, then it rotates around the attachment **axis**.
+- If the script is attached to a child prim, the prim rotates around the [local](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#local) **axis**.
+- A child prim can rotate around its own **axis** while the entire object rotates around another **axis**.
+
+## Caveats
+
+- If the object is not physical, then the rotation is only a client side effect, and it will collide as non-moving geometry.
+- If the function does not appear to be working, make sure that that **Advanced > Network > Velocity Interpolate Objects** (viewer 1.x) or **Develop > Network > Velocity Interpolate Objects** (viewer 2.x) is enabled.
+- As of server version 2025-09-03.17442317385, this prim property is maintained when copying in-world.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//rotates the x axis once per second,
+//  rotates the y axis 3 times per second,
+//  rotates the z axis once every two seconds.
+//  combined the rate is about 3.20156 revolutions per second
+
+llTargetOmega(<1.0,3.0,0.5>,TWO_PI,1.0);
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+ //Rotates very slowly around a sphere's local X axis .... Good for making a globe that rotates around a tilted axis
+
+default
+{
+    state_entry()
+    {
+       llTargetOmega(<1.0,0.0,0.0>*llGetRot(),0.1,0.01);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl
+ //Rotates very slowly around a cylinder's local or global Z axis
+ // .... Good for making a propeller that rotates regardless of initial orientation.
+
+default
+{
+    state_entry()
+    {
+       llTargetOmega(llRot2Up(llGetLocalRot()), PI, 1.0);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 4</summary>
+
+```lsl collapse={5-12}
+//To make an object return to its initial rotation when target omega stops, first make the object
+//   rotate both client side and server side. Then, when you stop llTargetOmega, reset server side rotation.
+//   Here's one way to do it.
+
+integer iOn;
+integer iStep;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        iOn = !iOn;
+        if (iOn)
+        {
+            llTargetOmega(<0.0,0.0,1.0>, PI/8, 1.0); // Start rotating client side with llTargetOmega
+            llSetTimerEvent(1.0);  //Start timer to rotate server side
+        }
+        else
+        {
+            llTargetOmega(<0.0,0.0,1.0>, 0.0, 0.0); //Stop client side rotation
+            llSetTimerEvent(0.0);   //Stop timer and thus server side rotation
+            llSetRot(ZERO_ROTATION);    //Set server side rotation to <0.0,0.0,0.0>
+            iStep = 0;
+        }
+    }
+
+    timer()
+    {
+        llSetRot(llAxisAngle2Rot(<0.0,0.0,1.0> ,++iStep *PI/8));  // Rotate at the same speed as llTargetOmega
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- Use [llVecNorm](/functions/llVecNorm/) on **axis** so that **spinrate** actually represents the rate of rotation.
+- Set the **gain** to zero to disable and remove the rotation behavior, e.g. `llTargetOmega(ZERO_VECTOR, 0, 0)`;
+- When rotating stops, the object will keep its final orientation, which is only a client side effect. The final orientation observed by other viewers will be different, and new viewers (after omega has been stopped) will see the object in its real (pre-omega) orientation.
+- A **spinrate** of 0 with a non-zero **gain** causes the object to try to stop all spin, rather than simply clearing a previous `llTargetOmega()` call.
+- If there are other forces applied to a prim together with `llTargetOmega()` (like using [llSetForce](/functions/llSetForce/) to make the object float), use `llTargetOmega(-llGetOmega(), 0., 1.)` to cancel spin. Note that the **gain** must be non-zero, but not necessarily 1.
+
+## Tests
+
+- [llTargetOmega test](https://wiki.secondlife.com/wiki/llTargetOmega_test)
+
+## History
+
+`{{LSL Added|0.2.0|remote=http://secondlife.wikia.com/wiki/Version_0.2.0}}`
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-4897 (nf): '''llSetSyncTime'''() - a function for synchronising client side effects
+
+## See also
+
+### Functions
+
+- [llRot2Fwd](/functions/llRot2Fwd/) — Gets the orientation of the `local x-axis` relative to [the earth](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#global)
+- [llRot2Left](/functions/llRot2Left/) — Gets the orientation of the `local y-axis` relative to [the earth](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#global)
+- [llRot2Up](/functions/llRot2Up/) — Gets the orientation of the `local z-axis` relative to [the earth](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#global)
+
+<WikiSource />

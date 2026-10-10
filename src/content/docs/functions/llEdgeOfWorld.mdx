@@ -1,0 +1,70 @@
+---
+title: "llEdgeOfWorld"
+slug: "functions/llEdgeOfWorld"
+category: functions
+source:
+  wiki: "LlEdgeOfWorld"
+  url: https://wiki.secondlife.com/wiki/LlEdgeOfWorld
+  revision: 1218564
+  date: 2025-12-23
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/lledgeofworld-d559d921.txt
+  license: "Content from the Second Life Wiki article LlEdgeOfWorld (revision 1218564, 2025-12-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llEdgeOfWorld" />
+
+Checks to see whether the border hit by **dir** from **pos** is the edge of the world (has no neighboring simulator).
+
+The **z** component of **dir** is ignored.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) value. [FALSE](/constants/FALSE/) indicating there is a simulator in the direction indicated.
+
+```lsl title="How to use" frame="terminal"
+integer result = llEdgeOfWorld(ZERO_VECTOR, ZERO_VECTOR);
+```
+
+## Caveats
+
+- If the **x** and **y** components of **dir** are zero (like with [ZERO_VECTOR](/constants/ZERO_VECTOR/)), [TRUE](/constants/TRUE/) is always returned.
+- **pos** must be in the region.
+- Can only be used to detect directly adjacent regions, not diagonally adjacent regions
+- This function will also return [TRUE](/constants/TRUE/) if [llRequestSimulatorData](/functions/llRequestSimulatorData/)() returns "up" for an adjacent region but that region doesn't visibly show when standing next to its border.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//--// Tells if there are neighboring sims on touch //--//
+
+default{
+  touch_start( integer vIntTouched ){
+    vector vPosObject = llGetPos();
+    if (!llEdgeOfWorld( vPosObject, <0.0, 1.0, 0.0> )){
+      llOwnerSay( "There is a Sim to the North" );
+    }
+    if (!llEdgeOfWorld( vPosObject, <1.0, 0.0, 0.0> )){
+      llOwnerSay( "There is a Sim to the East" );
+    }
+    if (!llEdgeOfWorld( vPosObject, <0.0, -1.0, 0.0> )){
+      llOwnerSay( "There is a Sim to the South" );
+    }
+    if (!llEdgeOfWorld( vPosObject, <-1.0, 0.0, 0.0> )){
+      llOwnerSay( "There is a Sim to the West" );
+    }
+  }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llScriptDanger](/functions/llScriptDanger/)
+
+<WikiSource />

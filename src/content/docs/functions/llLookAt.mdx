@@ -1,0 +1,146 @@
+---
+title: "llLookAt"
+slug: "functions/llLookAt"
+category: functions
+source:
+  wiki: "LlLookAt"
+  url: https://wiki.secondlife.com/wiki/LlLookAt
+  revision: 1218706
+  date: 2026-03-19
+  contributor: "Soap Frenzy"
+  raw: /wiki-source/lllookat-cf557139.txt
+  license: "Content from the Second Life Wiki article LlLookAt (revision 1218706, 2026-03-19), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llLookAt" />
+
+Cause object to point its `up` axis (positive z) towards **target**, while keeping its `forward` axis (positive x) below the horizon.
+
+Continues to track **target** until [llStopLookAt](/functions/llStopLookAt/) is called.
+
+To change the position in the same manner use [llMoveToTarget](/functions/llMoveToTarget/).
+
+```lsl title="How to use" frame="terminal"
+llLookAt(ZERO_VECTOR, 0.0, 0.0);
+```
+
+## Specification
+
+Strength is an inverse value meaning lower values cause the object to turn faster. Damping smooths the objects movements out preventing jitter or sharp movements. Object size, mass, and shape do not effect the function other than a large physical object that is resting on or colliding with other objects might not be able to turn correctly or fully.
+
+## Caveats
+
+- Object must be physical or this will do nothing.
+- If the prim is not the root, then **target** will need correction for the root prim's rotation (see example below).
+- If the object is an attachment, then **target** will need correction for the wearer's rotation.
+- Low **strength** values paired with low **damping** can cause the object to wobble and never fully face the **target**.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//Causes Object to look at nearest Avatar.
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", "", AGENT, 20.0, PI, 0.2);
+    }
+
+    sensor(integer total_number)
+    {
+        llLookAt( llDetectedPos(0) + <0.0, 0.0, 1.0>, 3.0, 1.0 );
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-11}
+// Same as above, but for use inside a child prim or the root of an attachment.
+// Make the child or attachment look at nearest Avatar.
+
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", "", AGENT, 20.0, PI, 0.2);
+    }
+
+    sensor(integer total_number)
+    {
+        vector p = llGetPos();
+        llLookAt(p + (llDetectedPos(0) + <0.0, 0.0, 1.0> - p) / llGetRootRotation(), 3.0, 1.0);
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+- If you want a (mostly) smooth, one time, constant rate of motion, (using the `x` axis) in a non-physical object try this instead...
+
+```lsl
+//-- rotate objects x axis toward vPosTarget (local offset), at vFltRate (in radians per second)
+//-- vFltRate < ~0.00000003rad/sec, (~0.00002deg/sec) will result in errors (and is just too slow anyway)
+//-- vFltRate >= (PI * 5.0)rad/sec, (900deg/sec) will result in a single snap move to vRotTarget
+uSteppedLookAt( vector vPosTarget, float vFltRate ){
+	rotation vRotTarget = llRotBetween( <1.0, 0.0, 0.0>,  vPosTarget );
+	if ((integer)(vFltRate = llAcos( (vPosTarget = llVecNorm( vPosTarget )) *
+	                                 (<1.0, 0.0, 0.0> * llGetLocalRot()) ) / (vFltRate / 5.0))){
+		rotation vRotStep = llAxisAngle2Rot( llRot2Axis( vRotTarget / llGetLocalRot() ),
+		                    (1.0 / vFltRate) * llRot2Angle( vRotTarget / llGetLocalRot() ) );
+		vFltRate = (integer)vFltRate;
+		do{
+			llSetLocalRot( vRotStep * llGetLocalRot() );
+		}while( --vFltRate );
+	}
+	llSetLocalRot( vRotTarget );
+} //-- for fixed time on any rotation try llKeyframeMotion
+```
+
+- If you want to use the LookAt function on a linked object...
+
+```lsl
+LinkedLookAt( vector Target){
+    rotation rotvec = llRotBetween(<0,1,0>,llVecNorm((Target - llGetPos())));
+    rotation rotbet = rotvec/llGetRootRotation();
+    llSetRot(rotbet);
+}
+
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", "", AGENT, 20.0, PI, 1.0);
+    }
+
+    sensor(integer total_number)
+    {
+        vector p = llDetectedPos(0);
+        LinkedLookAt(p);
+    }
+}
+```
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-1903: type=bug|llRotLookAt & llLookAt do not update the object's bounding box
+
+## See also
+
+### Functions
+
+- [llRotLookAt](/functions/llRotLookAt/)
+- [llStopLookAt](/functions/llStopLookAt/)
+
+<WikiSource />

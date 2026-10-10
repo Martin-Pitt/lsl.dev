@@ -1,0 +1,112 @@
+---
+title: "llSitOnLink"
+slug: "functions/llSitOnLink"
+category: functions
+source:
+  wiki: "LlSitOnLink"
+  url: https://wiki.secondlife.com/wiki/LlSitOnLink
+  revision: 1218900
+  date: 2026-06-05
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llsitonlink-44d67867.txt
+  license: "Content from the Second Life Wiki article LlSitOnLink (revision 1218900, 2026-06-05), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSitOnLink" />
+
+The avatar specified by **agent_id** is forced to sit on the sit target of the prim indicated by the **link** parameter. If the specified link is already occupied, the simulator searches down the chain of prims in the link set looking for an available sit target.
+
+If successful, this method returns [SIT_OK](/constants/SIT_OK/).
+
+If the function fails, it returns a negative number constant.
+
+Link constants that indicate a single prim may be used for the **link** parameter. These are [LINK_ROOT](/constants/LINK_ROOT/) and [LINK_THIS](/constants/LINK_THIS/). Other constants such as [LINK_SET](/constants/LINK_SET/), LINK_CHILDREN, [LINK_ALL_OTHERS](/constants/LINK_ALL_OTHERS/) will return an INVALID_LINK error.
+
+***This method must be called from an experience enabled script running on land that has enabled the experience key.*** If these conditions are not met this method returns a NOT_EXPERIENCE error.
+
+The targeted avatar must also have accepted the experience. If the user is not participating in the experience this method returns NO_EXPERIENCE_PERMISSION. If the avatar id can not be found or is not over land that has enabled the experience this method returns INVALID_AGENT.
+
+If there are no valid sit targets remaining in the linkset this method returns NO_SIT_TARGET and no action is taken with the avatar.
+
+If the avatar does not have access to the parcel containing the prim running this script, this call fails.
+
+```lsl title="How to use" frame="terminal"
+integer result = llSitOnLink(NULL_KEY, 0);
+```
+
+## Specification
+
+`{{llSitOnLinkConstants}}`
+
+## Caveats
+
+- The [SIT_OK](/constants/SIT_OK/) constant is only present on Lua-enabled sims. On older sims, use it's value of 1 instead
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-9, 15-23}
+integer gLinkId = LINK_THIS;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        llRequestExperiencePermissions(llDetectedKey(0), "");
+    }
+
+    experience_permissions(key agent_id)
+    {
+        integer sitTest = llSitOnLink(agent_id, gLinkId);
+        if (sitTest != 1)
+        {
+            llInstantMessage(agent_id, "Cannot force agent " + (string)agent_id + " to sit due to reason id: " + (string)sitTest);
+        }
+    }
+
+    experience_permissions_denied(key agent_id, integer reason)
+    {
+        llInstantMessage(agent_id, "Denied experience permissions for " + (string)agent_id + " due to reason id: " + (string)reason);
+    }
+}
+```
+
+</details>
+
+## Notes
+
+This function was introduced in conjunction with new [primitive parameter](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) constants: [PRIM_ALLOW_UNSIT](/constants/PRIM_ALLOW_UNSIT/), [PRIM_SCRIPTED_SITS_ONLY](https://wiki.secondlife.com/wiki/PRIM_SCRIPTED_SITS_ONLY), and [PRIM_SIT_TARGET](/constants/PRIM_SIT_TARGET/).
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- BUG-40739 (nf): Redesign llSitOnLink() to use the permissions system
+
+## Additional wiki content
+
+[Category:Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)
+
+[Category:Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)
+
+## See also
+
+### Functions
+
+- [llLinkSitTarget](/functions/llLinkSitTarget/)
+- [llSitTarget](/functions/llSitTarget/)
+- [llSetSitText](/functions/llSetSitText/)
+- [llAvatarOnLinkSitTarget](/functions/llAvatarOnLinkSitTarget/)
+- [llAvatarOnSitTarget](/functions/llAvatarOnSitTarget/)
+- [llUnSit](/functions/llUnSit/)
+
+### Constants
+
+- [PRIM_ALLOW_UNSIT](/constants/PRIM_ALLOW_UNSIT/)
+- [PRIM_SCRIPTED_SIT_ONLY](/constants/PRIM_SCRIPTED_SIT_ONLY/)
+- [PRIM_SIT_TARGET](/constants/PRIM_SIT_TARGET/)
+
+<WikiSource />

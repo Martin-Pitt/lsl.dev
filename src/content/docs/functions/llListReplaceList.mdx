@@ -1,0 +1,114 @@
+---
+title: "llListReplaceList"
+slug: "functions/llListReplaceList"
+category: functions
+source:
+  wiki: "LlListReplaceList"
+  url: https://wiki.secondlife.com/wiki/LlListReplaceList
+  revision: 1194344
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/lllistreplacelist-0dc4f0cf.txt
+  license: "Content from the Second Life Wiki article LlListReplaceList (revision 1194344, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llListReplaceList" description />
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) that is a copy of **dest** with `start` through `end` removed and **src** inserted at `start`.
+
+```lsl title="How to use" frame="terminal"
+list result = llListReplaceList([], [], 0, 0);
+```
+
+## Caveats
+
+- If `start` is past the end of **dest**, then **src** is appended to **dest**, it will not add null entries. To avoid this, create empty elements in the list first. A similar outcome occurs when using [negative indexes](https://wiki.secondlife.com/wiki/Category:LSL_Negative_Index).
+- Just calling the function will not update the variable. You must store it (unless of course you are planning to act on the results straightway.)
+
+:\{|
+
+- **Bad:** — `llListReplaceList(MyList, ["New Item"], 2, 2)`
+- **Good:** — `MyList = llListReplaceList(MyList, ["New Item"], 2, 2)`
+
+|\}
+
+- In [LSO](https://wiki.secondlife.com/wiki/LSO) ONLY (not [Mono](https://wiki.secondlife.com/wiki/Mono)): if you are storing to the same list, it can be more memory effective to clear the list before you store.
+
+:\{|
+
+- **Good:** — `MyList = llListReplaceList(MyList, ["New Item"], 2, 2)`
+- **Better:** — `MyList = llListReplaceList((MyList = []) + MyList, ["New Item"], 2, 2)`
+
+|\}
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        list MyOldList = ["a", "b", "e", "d"];
+        list MyNewList = llListReplaceList(MyOldList, ["c"], 2, 2);//replace the range starting and ending at
+                                                   //index 2 with ["c"] and store it into MyNewList
+
+        llOwnerSay("\""+llList2CSV(MyOldList) + "\"  ->  \"" + llList2CSV(MyNewList)+"\"");//display the change
+        //Will say: "a, b, e, d"  ->  "a, b, c, d"
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+// More commonly, you will be updating an existing list, replacing 1 or more items
+// Here we replace entries 2 and 3 and over-write our original list
+default
+{
+    state_entry()
+    {
+        list MyList = ["a", "b", "x", "y"];
+        MyList = llListReplaceList(MyList, ["c", "d"], 2, 3);   // Over-write MyList, with the modified list (having replaced entries 2 & 3)
+
+
+        llOwnerSay("\"" + llList2CSV(MyList) + "\"");     // display the modified list
+        // Will say: "a, b, c, d"
+    }
+}
+```
+
+</details>
+
+## Notes
+
+To be clear, the list you are replacing in doesn't have to actually be a list of many elements. It can be a single item that you make into a single element list just by placing square brackets around it.
+
+```lsl
+list TargetList = ["a", "b", "c", "z", "e"];
+list InsertList = ["d"];
+```
+
+To act on a single element in a list, just quote its place in the list as both start and end. For instance, 0, 0 would act only on the first element in the list; 7,7 would act only on the 8th element.
+
+For a function that will operate as `llListReplaceList` does, but work on strided lists, see [ListStridedUpdate](https://wiki.secondlife.com/wiki/ListStridedUpdate).
+
+## Tests
+
+- [llListReplaceList Test](https://wiki.secondlife.com/wiki/llListReplaceList_Test)
+
+## See also
+
+### Functions
+
+- [llDeleteSubList](/functions/llDeleteSubList/)
+- [llListInsertList](/functions/llListInsertList/)
+- [llList2List](/functions/llList2List/)
+
+<WikiSource />

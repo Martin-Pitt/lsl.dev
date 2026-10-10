@@ -1,0 +1,77 @@
+---
+title: "DATA_SIM_STATUS"
+slug: "constants/DATA_SIM_STATUS"
+category: constants
+source:
+  wiki: "DATA SIM STATUS"
+  url: https://wiki.secondlife.com/wiki/DATA_SIM_STATUS
+  revision: 1194637
+  date: 2015-01-23
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/data-sim-status-53ab354c.txt
+  license: "Content from the Second Life Wiki article DATA SIM STATUS (revision 1194637, 2015-01-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="DATA_SIM_STATUS" />
+
+Returns one of these strings.
+
+- "up": simulator currently up and running
+- "down": simulator currently down
+- "starting": simulator currently starting
+- "stopping": simulator currently stopping
+- "crashed": simulator has crashed
+- "unknown": simulator status unknown or unknown simulator
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5, 11-34}
+key queryData;
+
+default
+{
+    // querry immediately for simulator data on current status of sim.
+    state_entry()
+    {
+        queryData = llRequestSimulatorData( llGetRegionName(), DATA_SIM_STATUS );
+    }
+
+    // if another owner or the region changes where the script operates in reset script
+    changed( integer isChanged )
+    {
+        if( isChanged & CHANGED_REGION )
+        {
+            llResetScript();
+        }
+
+        if( isChanged & CHANGED_OWNER )
+        {
+            llResetScript();
+        }
+    }
+
+    // how to handle the query information.
+    dataserver( key queryID, string info )
+    {
+        if( queryID == queryData )
+        {
+            // output to upper case characters the current state of the sim.
+            llOwnerSay( "This region is currently: " + llToUpper(info) );
+        }
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llRequestSimulatorData](/functions/llRequestSimulatorData/)
+
+<WikiSource />

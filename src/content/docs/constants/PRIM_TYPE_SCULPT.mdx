@@ -1,0 +1,106 @@
+---
+title: "PRIM_TYPE_SCULPT"
+slug: "constants/PRIM_TYPE_SCULPT"
+category: constants
+source:
+  wiki: "PRIM TYPE SCULPT"
+  url: https://wiki.secondlife.com/wiki/PRIM_TYPE_SCULPT
+  revision: 1194701
+  date: 2015-01-24
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/prim-type-sculpt-f8261c66.txt
+  license: "Content from the Second Life Wiki article PRIM TYPE SCULPT (revision 1194701, 2015-01-24), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="PRIM_TYPE_SCULPT" />
+
+`PRIM_TYPE_SCULPT` is a parameter of [PRIM_TYPE](/constants/PRIM_TYPE/) used to make a prim into a sculpty of specific shape and type.
+
+[Sculpted Prims: FAQ](https://wiki.secondlife.com/wiki/Sculpted_Prims:_FAQ)
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+llSetPrimitiveParams([PRIM_TYPE,
+                        PRIM_TYPE_SCULPT,
+                            "d962089b-2197-993c-9ec9-4993eb0a95f2",  // sculpty texture
+                            PRIM_SCULPT_TYPE_SPHERE                  // type
+                            | PRIM_SCULPT_FLAG_MIRROR     // use pipe | to add each flag
+                      ]);
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+//Rotates between the different sculpt types.
+default
+{
+    touch_start(integer a)
+    {
+        list b = llGetPrimitiveParams([PRIM_TYPE]);
+        integer type = llList2Integer(b,2) % 4;
+        llSetObjectDesc(llList2String([ "Sphere",
+                                        "Torus",
+                                        "Plane",
+                                        "Cylinder"], type));
+        llSetPrimitiveParams(PRIM_TYPE + llList2List(b, 0, 1) + (type + 1));
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl
+//A simple script to setup a prim as a sculpty.
+default
+{
+    state_entry()
+    {
+        llSetPrimitiveParams([
+            PRIM_TYPE, PRIM_TYPE_SCULPT, "your Sculpt map name in the object", PRIM_SCULPT_TYPE_SPHERE
+          , PRIM_TEXTURE, ALL_SIDES, "your texture name in the object", <1.0, 1.0, 0.0>, <0.0, 0.0, 0.0>, 0.0 //comment out if not needed.
+//          , PRIM_SIZE, <0.63,0.199,0.52> // If you need to change the scale (size) of the object, uncomment this line.
+        ]);
+    } // The gray color you see on your sculpt object is the SL no found texture that is gray.
+}
+```
+
+</details>
+
+## History
+
+- `{{SVN|1053|rev=94734|branch=trunk|date=Tuesday, 19 August 2008}}` - PRIM_SCULPT_FLAG\_\* syntax merged into the Trunk. Support for syntax slated for Client 1.21.0
+- `{{SVN|758|rev=91966|branch=featurettes-5|date=Thursday, 10 July 2008}}` - Introduction of PRIM_SCULPT_FLAG\_\* extended syntax.
+
+## Additional wiki content
+
+&lt;onlyinclude>`{{#if: {{#vardefine:type_sculpt_const|{{LSL Const|PRIM_TYPE_SCULPT|integer|7|c=A parameter of PRIM_TYPE used to make prim into a sculpty and to change specific properties that define it's shape and type.}}}} {{#if:{{{child|}}}|| {{#vardefine:caveats-before|{{#var:caveats}}{{#vardefine:caveats}}}} {{LSL_Function/inventory|map|uuid=true|type=texture|full={{{remote|}}}|remote={{#ifeq:{{{1|set}}}|get|*}}}} {{#vardefine:p_type_desc|PRIM_SCULPT_TYPE_* flag with optional additional PRIM_SCULPT_FLAG_* flags OR'ed on}} {{#vardefine:caveats-get|{{#var:caveats-get}} *The value of {{LSLP|map}} is {{LSL Constant/NULL KEY}} when the {{LSLGC|Owner|owner}} does not have {{LSLGC|Permissions/Asset|full permissions}} to the object and the map asset is not in the prim's inventory. {{#var:caveats}}}} {{#vardefine:caveats|{{#var:caveats-before}}{{#vardefine:caveats-before}} {{#var:caveats-{{{1|get}}}}}{{#vardefine:caveats-{{{1|get}}}}}}} {{#vardefine:caveats-set|{{#var:caveats-set}} *While it is possible to use this to animate an object, it is not recommended. For details see: [[Why UUID Flipping is Bad]]}} }} }}`&lt;/onlyinclude>`{{#if: {{#vardefine:caveats|{{#var:caveats}} {{#var:caveats-set}}}} }}`
+
+## See also
+
+### Constants
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [PRIM_TYPE](/constants/PRIM_TYPE/) |  |  |  |
+| [CHANGED_SHAPE](/constants/CHANGED_SHAPE/) |  |  |  |
+
+### Functions
+
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+
+### Events
+
+- [changed](/events/changed/)
+
+<WikiSource />

@@ -1,0 +1,156 @@
+---
+title: "llTransferOwnership"
+slug: "functions/llTransferOwnership"
+category: functions
+source:
+  wiki: "LlTransferOwnership"
+  url: https://wiki.secondlife.com/wiki/LlTransferOwnership
+  revision: 1217994
+  date: 2025-02-25
+  contributor: "Ice12192 Dover"
+  raw: /wiki-source/lltransferownership-d36a7571.txt
+  license: "Content from the Second Life Wiki article LlTransferOwnership (revision 1217994, 2025-02-25), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llTransferOwnership" description />
+
+Transfer ownership of the object containing this script to `agent_id`.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) indicating the result of the transfer.
+
+```lsl title="How to use" frame="terminal"
+integer result = llTransferOwnership(NULL_KEY, 0, []);
+```
+
+## Specification
+
+Transfers ownership of an object rezzed in world to `agent_id`. The object must be transferable by its current owner and must not be an attachment.
+
+Optionally this function may force the object to derez itself into the destination agent's inventory, or make a copy of itself directly into inventory.
+
+#### Transfer Flags
+
+<table>
+	<tr>
+		<th>Constant</th>
+		<th></th>
+		<td>Description</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_FLAG_RESERVED](/constants/TRANSFER_FLAG_RESERVED/)</td>
+		<td>0x0001</td>
+		<td>Reserved, do not use.</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_FLAG_TAKE](/constants/TRANSFER_FLAG_TAKE/)</td>
+		<td>0x0002</td>
+		<td>When transfer is accepted, immediately take the object into inventory.</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_FLAG_COPY](/constants/TRANSFER_FLAG_COPY/)</td>
+		<td>0x0004</td>
+		<td>Give a copy of the object and place it into the destination agent's inventory.</td>
+	</tr>
+</table>
+
+#### Transfer Errors
+
+<table>
+	<tr>
+		<th>Constant</th>
+		<th></th>
+		<td>Description</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_OK](/constants/TRANSFER_OK/)</td>
+		<td>0</td>
+		<td>No error detected, inventory transferred</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_BAD_OPTS](/constants/TRANSFER_BAD_OPTS/)</td>
+		<td>-1</td>
+		<td>A bad option was passed in the options list.</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_NO_TARGET](/constants/TRANSFER_NO_TARGET/)</td>
+		<td>-2</td>
+		<td>Could not find the receiving agent in the current region.</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_THROTTLE](/constants/TRANSFER_THROTTLE/)</td>
+		<td>-3</td>
+		<td>Transfer rate exceeded the inventory transfer throttle.</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_NO_ITEMS](/constants/TRANSFER_NO_ITEMS/)</td>
+		<td>-4</td>
+		<td>The list of items was empty or contained only non-transferable items.</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_BAD_ROOT](/constants/TRANSFER_BAD_ROOT/)</td>
+		<td>-5</td>
+		<td>The root path specified in [TRANSFER_DEST](/constants/TRANSFER_DEST/) contained an invalid directory or was reduced to nothing.</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_NO_PERMS](/constants/TRANSFER_NO_PERMS/)</td>
+		<td>-6</td>
+		<td>The object does not have transfer permissions.</td>
+	</tr>
+	<tr>
+		<td>[TRANSFER_NO_ATTACHMENT](/constants/TRANSFER_NO_ATTACHMENT/)</td>
+		<td>-7</td>
+		<td>Can not transfer ownership of an attached object.</td>
+	</tr>
+</table>
+
+## Caveats
+
+- `agent_id` must be an agent in the region.
+- There is no way to detect if the receiver ignored, rejected or blocked the transaction (aside from a [changed](/events/changed/) event never occurring.)
+- The function fails with a return code of [TRANSFER_NO_PERMS](/constants/TRANSFER_NO_PERMS/) if:
+- The object is no-transfer.
+- The object is no-copy and **flags** includes the [TRANSFER_FLAG_COPY](/constants/TRANSFER_FLAG_COPY/) flag.
+- Calling this function from an attachment will fail and return [TRANSFER_NO_ATTACHMENT](/constants/TRANSFER_NO_ATTACHMENT/)
+- WARNING: Any no-trans items in the transferred object will be removed from the object received by the target agent. If the transfer is of the object itself, these items are lost.
+- WARNING: If the transfer is a copy, any no-copy inventory items will be present in the object received by the target agent and removed from the original.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+
+    touch_start(integer total_number)
+    {
+        llTransferOwnership(llDetectedKey(0), TRANSFER_FLAG_COPY, []);
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-7631 (bug): New rate throttle on llGiveInventory
+- BUG-5656 (bug): llGiveInventory fails when no-copy items are given to attachments (even no-copy ones)
+
+## See also
+
+### Functions
+
+- [llGiveInventoryList](/functions/llGiveInventoryList/)
+- [llRemoteLoadScriptPin](/functions/llRemoteLoadScriptPin/)
+- [llSetRemoteScriptAccessPin](/functions/llSetRemoteScriptAccessPin/)
+- [llMapDestination](/functions/llMapDestination/)
+
+### Events
+
+- [changed](/events/changed/)
+
+<WikiSource />

@@ -1,0 +1,94 @@
+---
+title: "JSON_FALSE"
+slug: "constants/JSON_FALSE"
+category: constants
+source:
+  wiki: "JSON FALSE"
+  url: https://wiki.secondlife.com/wiki/JSON_FALSE
+  revision: 1194655
+  date: 2015-01-23
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/json-false-c6ef4a74.txt
+  license: "Content from the Second Life Wiki article JSON FALSE (revision 1194655, 2015-01-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="JSON_FALSE" />
+
+Return value for [llJsonValueType](/functions/llJsonValueType/) function indicating the data type of a given address specifier in a given string-serialized JSON object.
+
+Also used to set the bare word 'false' as a Value within a Json text using [llJsonSetValue](/functions/llJsonSetValue/) and [llList2Json](/functions/llList2Json/).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={12-30, 36-42}
+//  showing difference between JSON_TRUE & JSON_FALSE
+//  and their LSL equivalents within a JSON text string
+
+run_json_test(string input)
+{
+//  [true,false]
+    say(input);
+
+//  unicode equivalent of JSON_FALSE
+    say(llJsonGetValue(input, [1]));
+
+    input = llList2Json(JSON_ARRAY, [TRUE, FALSE]);
+
+//  [1,0]
+    say(input);
+
+//  0
+    say(llJsonGetValue(input, [1]));
+}
+
+say(string message)
+{
+    llOwnerSay(message);
+//  llRegionSayTo(llGetOwner(), PUBLIC_CHANNEL, message);
+//  llWhisper(PUBLIC_CHANNEL, message);
+}
+
+default
+{
+    touch_end(integer num_detected)
+    {
+        string TEST_STRING_JSON = llList2Json(JSON_ARRAY, [
+                                              JSON_TRUE, JSON_FALSE]);
+
+//      copy 'TEST_STRING_JSON' from the following function call
+//      to the string 'input' in the function declaration
+//      and run a test on 'input' to not (!) modify 'TEST_STRING_JSON'
+//      but its copy instead
+
+        run_json_test(TEST_STRING_JSON);
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Constants
+
+| Type Flags | Value | Unicode | [Integer](/functions/llOrd/) | [URL Encoded](https://wiki.secondlife.com/wiki/Category:LSL_Encoding/URL) | HTML Encoded | Description |
+| --- | --- | --- | --- | --- | --- | --- |
+| [JSON_INVALID](/constants/JSON_INVALID/) |  | U+FDDO | 64976 | "%EF%B7%90" | &amp;#xFDD0; | Value returned when inputs are not well formed. |
+| [JSON_OBJECT](/constants/JSON_OBJECT/) |  | U+FDD1 | 64977 | "%EF%B7%91" | &amp;#xFDD1; |  |
+| [JSON_ARRAY](/constants/JSON_ARRAY/) |  | U+FDD2 | 64978 | "%EF%B7%92" | &amp;#xFDD2; |  |
+| [JSON_NUMBER](/constants/JSON_NUMBER/) |  | U+FDD3 | 64979 | "%EF%B7%93" | &amp;#xFDD3; |  |
+| [JSON_STRING](/constants/JSON_STRING/) |  | U+FDD4 | 64980 | "%EF%B7%94" | &amp;#xFDD4; |  |
+| [JSON_NULL](/constants/JSON_NULL/) |  | U+FDD5 | 64981 | "%EF%B7%95" | &amp;#xFDD5; |  |
+| [JSON_TRUE](/constants/JSON_TRUE/) |  | U+FDD6 | 64982 | "%EF%B7%96" | &amp;#xFDD6; |  |
+| [JSON_FALSE](/constants/JSON_FALSE/) |  | U+FDD7 | 64983 | "%EF%B7%97" | &amp;#xFDD7; |  |
+| [JSON_DELETE](/constants/JSON_DELETE/) |  | U+FDD8 | 64984 | "%EF%B7%98" | &amp;#xFDD8; | Used with [llJsonSetValue](/functions/llJsonSetValue/) to remove a key-value pair. |
+
+### Functions
+
+- [llJsonValueType](/functions/llJsonValueType/)
+
+<WikiSource />

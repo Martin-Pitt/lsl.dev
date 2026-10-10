@@ -1,0 +1,157 @@
+---
+title: "llPursue"
+slug: "functions/llPursue"
+category: functions
+source:
+  wiki: "LlPursue"
+  url: https://wiki.secondlife.com/wiki/LlPursue
+  revision: 1215213
+  date: 2023-10-28
+  contributor: "Frionil Fang"
+  raw: /wiki-source/llpursue-b61d4983.txt
+  license: "Content from the Second Life Wiki article LlPursue (revision 1215213, 2023-10-28), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llPursue" description />
+
+Causes the object to pursue **target**.
+
+```lsl title="How to use" frame="terminal"
+llPursue(NULL_KEY, []);
+```
+
+## Specification
+
+<ConstantGroup name="CharacterPursueParam" />
+
+<table>
+	<tr>
+		<th>Option</th>
+		<th>Value</th>
+		<th>Description</th>
+		<th>Usage</th>
+		<th>Default Value</th>
+	</tr>
+	<tr>
+		<td>[PURSUIT_OFFSET](/constants/PURSUIT_OFFSET/)</td>
+		<td>1</td>
+		<td>Go to a position offset from the target.</td>
+		<td>
+
+			```lsl
+			[PURSUIT_OFFSET, vector offset]
+			```
+
+		</td>
+		<td>[ZERO_VECTOR](/constants/ZERO_VECTOR/)</td>
+	</tr>
+	<tr>
+		<td>[REQUIRE_LINE_OF_SIGHT](/constants/REQUIRE_LINE_OF_SIGHT/)</td>
+		<td>2</td>
+		<td>Define whether the character needs a physical line-of-sight to give chase. When enabled, the character will not pick a new target position while there is a something solid between the character and the target object/agent.</td>
+		<td>
+
+			```lsl
+			[REQUIRE_LINE_OF_SIGHT, integer boolean]
+			```
+
+		</td>
+		<td>[FALSE](/constants/FALSE/)</td>
+	</tr>
+	<tr>
+		<td>[PURSUIT_FUZZ_FACTOR](/constants/PURSUIT_FUZZ_FACTOR/)</td>
+		<td>3</td>
+		<td>Selects a random destination near the [PURSUIT_OFFSET](/constants/PURSUIT_OFFSET/). The valid fuzz factor range is from 0 to 1, where 1 is most random. This option requires a nonzero [PURSUIT_OFFSET](/constants/PURSUIT_OFFSET/).</td>
+		<td>
+
+			```lsl
+			[PURSUIT_FUZZ_FACTOR, float factor]
+			```
+
+		</td>
+		<td>0.0</td>
+	</tr>
+	<tr>
+		<td>[PURSUIT_INTERCEPT](/constants/PURSUIT_INTERCEPT/)</td>
+		<td>4</td>
+		<td>Define whether the character attempts to predict the target's future location.</td>
+		<td>
+
+			```lsl
+			[PURSUIT_INTERCEPT, integer boolean]
+			```
+
+		</td>
+		<td>[FALSE](/constants/FALSE/)</td>
+	</tr>
+	<tr>
+		<td>[PURSUIT_GOAL_TOLERANCE](/constants/PURSUIT_GOAL_TOLERANCE/)</td>
+		<td>5</td>
+		<td>Defines approximately how close the character must be to the current goal to consider itself to be at the desired position. The valid range is from 0.25 to 10m.</td>
+		<td>
+
+			```lsl
+			[PURSUIT_GOAL_TOLERANCE, float tolerance]
+			```
+
+		</td>
+		<td>Default is proportional to character size</td>
+	</tr>
+</table>
+
+## Caveats
+
+- Must use [llCreateCharacter](/functions/llCreateCharacter/) or script crash (script error)
+- Vertical positions specified for any vectors should be chosen to be as close as possible to the actual height of the terrain requested. Large difference between the provided vertical position and the actual terrain/object will result in failure of the behaviour.
+- Z value is unused (erroneous if not 0.0) in parameter for [PURSUIT_OFFSET](/constants/PURSUIT_OFFSET/).
+- [REQUIRE_LINE_OF_SIGHT](/constants/REQUIRE_LINE_OF_SIGHT/) does not require line of sight immediately after `llPursue()` is called - it only affects target position updates after the target object/agent moves.
+- FUZZ_FACTOR picks a point within an area of approximately (scale \* lengthOfOffset) around the offset position. Value must be between 0.0 and 1.0.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llCreateCharacter([CHARACTER_DESIRED_SPEED, 35.0, CHARACTER_MAX_SPEED, 35.0]);
+    }
+
+    touch_start(integer total_number)
+    {
+        llPursue(llDetectedKey(0), [PURSUIT_OFFSET, <-2.0, 0.0, 0.0>, PURSUIT_FUZZ_FACTOR, 0.2]);
+    }
+}
+```
+
+</details>
+
+## History
+
+Date of Release [31/07/2012](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-31-262785)
+
+## See also
+
+### Functions
+
+- [llCreateCharacter](/functions/llCreateCharacter/)
+- [llDeleteCharacter](/functions/llDeleteCharacter/)
+- [llEvade](/functions/llEvade/)
+- [llExecCharacterCmd](/functions/llExecCharacterCmd/)
+- [llGetClosestNavPoint](/functions/llGetClosestNavPoint/)
+- [llFleeFrom](/functions/llFleeFrom/)
+- [llNavigateTo](/functions/llNavigateTo/)
+- [llPatrolPoints](/functions/llPatrolPoints/)
+- [llPursue](/functions/llPursue/)
+- [llUpdateCharacter](/functions/llUpdateCharacter/)
+- [llWanderWithin](/functions/llWanderWithin/)
+
+### Events
+
+- [path_update](/events/path_update/)
+
+<WikiSource />

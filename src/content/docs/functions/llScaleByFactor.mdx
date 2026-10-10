@@ -1,0 +1,84 @@
+---
+title: "llScaleByFactor"
+slug: "functions/llScaleByFactor"
+category: functions
+source:
+  wiki: "LlScaleByFactor"
+  url: https://wiki.secondlife.com/wiki/LlScaleByFactor
+  revision: 1194493
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llscalebyfactor-ddb3d9d3.txt
+  license: "Content from the Second Life Wiki article LlScaleByFactor (revision 1194493, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llScaleByFactor" />
+
+Attempts to resize the entire object by **scaling_factor**, maintaining the size-position ratios of the prims.
+
+Resizing is subject to prim scale limits and linkability limits. This function can not resize the object if the linkset is physical, a pathfinding character, in a keyframed motion, or if resizing would cause the parcel to overflow.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) [TRUE](/constants/TRUE/) if it succeeds, [FALSE](/constants/FALSE/) if it fails.
+
+```lsl title="How to use" frame="terminal"
+integer result = llScaleByFactor(0.0);
+```
+
+## Caveats
+
+- Due to floating point precision issues (often, sqrt(x\*x) != x), avoid rescaling by the values returned by [llGetMinScaleFactor](/functions/llGetMinScaleFactor/) and [llGetMaxScaleFactor](/functions/llGetMaxScaleFactor/). To guarantee successful rescaling, use values slightly within the limits returned by those functions.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-21}
+//  Touching this script causes the object to double or halve in size.
+
+integer growing;
+
+default
+{
+    state_entry()
+    {
+        llSay(PUBLIC_CHANNEL, "Touch to toggle scale.");
+    }
+
+    touch_start(integer num_detected)
+    {
+        growing = !growing;
+
+        float min_factor = llGetMinScaleFactor();
+        float max_factor = llGetMaxScaleFactor();
+
+        llSay(PUBLIC_CHANNEL, "min_scale_factor = " + (string)min_factor
+                            + "\nmax_scale_factor = " + (string)max_factor);
+
+        integer success;
+
+        if (growing) success = llScaleByFactor(2.0);
+        else         success = llScaleByFactor(0.5);
+
+        if (!success) llSay(PUBLIC_CHANNEL, "Scaling failed!");
+    }
+}
+```
+
+</details>
+
+## History
+
+- Mentioned in [Simulator_User_Group/Transcripts/2013.12.10](https://wiki.secondlife.com/wiki/Simulator_User_Group/Transcripts/2013.12.10)
+- Mentioned in [Simulator_User_Group/Transcripts/2013.12.17](https://wiki.secondlife.com/wiki/Simulator_User_Group/Transcripts/2013.12.17)
+
+## See also
+
+### Functions
+
+- [llScaleByFactor](/functions/llScaleByFactor/)
+- [llGetMaxScaleFactor](/functions/llGetMaxScaleFactor/)
+- [llGetMinScaleFactor](/functions/llGetMinScaleFactor/)
+
+<WikiSource />

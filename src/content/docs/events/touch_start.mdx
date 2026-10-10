@@ -1,0 +1,111 @@
+---
+title: "touch_start"
+slug: "events/touch_start"
+category: events
+source:
+  wiki: "Touch start"
+  url: https://wiki.secondlife.com/wiki/Touch_start
+  revision: 1218822
+  date: 2026-04-30
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/touch-start-2803fa50.txt
+  license: "Content from the Second Life Wiki article Touch start (revision 1218822, 2026-04-30), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="touch_start" description />
+
+Triggered by the start of agent clicking on task
+
+```lsl title="How to use" frame="terminal"
+touch_start(integer num_detected)
+{
+
+}
+```
+
+## Caveats
+
+- If a prim [face](https://wiki.secondlife.com/wiki/Face) has [Shared Media](https://wiki.secondlife.com/wiki/Navigating_Shared_Media) enabled and the avatar's viewer supports this feature, LSL scripts will not detect touches on that face. Touches from older clients will be detected.
+- The default behavior is: If you have a multi-prim object and the root has a [touch_start](/events/touch_start/) handler AND one or more child prims has a [touch_start](/events/touch_start/) handler, the root prim's handler will be called when it (the root) or a child without a handler is touched. If you touch a child prim that has a [touch_start](/events/touch_start/) handler, it will receive the event and the root prim will not.
+- This behavior can be configured with [llPassTouches](/functions/llPassTouches/). After configuring a prim's touch-passing behavior you can delete the script that configured the prim.
+- Rigged mesh attachments do not support touch events, this is because you can steer your avatar/camera by click dragging your avatar body which is what the rigged mesh replaces. The only way to get a touch event on a rigged mesh attachment is via the right click context menu and clicking the "Touch" button.
+- [Due to a known issue](https://feedback.secondlife.com/scripting-bugs/p/touch-start-only-triggers-on-the-second-touch-if-touch-is-already-active), if a resident is already touching a scripted object, [touch_start](/events/touch_start/) runs only every other time that other residents touch it.
+
+## Examples
+
+<details open>
+<summary>You can use index 0 through (**num_detected**-1) with the various llDetected... functions to handle simultaneous touches at once.</summary>
+
+For most purposes, it's usually enough to handle just with the first toucher e.g. [llDetectedKey](/functions/llDetectedKey/)(0). It is rare (but not impossible) for **num_detected** to be greater than 1.
+
+```lsl
+default
+{
+    touch_start(integer num_detected)
+    {
+        key    avatarKey  = llDetectedKey(0);
+        string avatarName = llDetectedName(0);
+
+        llInstantMessage(avatarKey, "Hello " + avatarName );
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>This next example demonstrates detecting when the owner of the object clicks-and-holds on the object for 1 second in order perhaps to access a management menu or similar, Normal brief clicks are distinguished.</summary>
+
+```lsl collapse={13-22}
+default
+{
+    touch_start(integer num_detected)
+    {
+        llResetTime(); // Set llGetTime to 0
+    }
+
+    touch_end(integer num_detected)
+    {
+        // Check how much time elapsed since touch_start
+        if (llGetTime() <= 1.0)
+        {
+            // The user did a normal quick click on the object
+            // Execute actions for normal clicks...
+        }
+        else
+        {
+            // The owner has touched this object for longer than 1 second
+            // Execute some special feature such as issuing a management dialog...
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- If using a touch to change states be careful about the touch event order. **The best advice is not to do state changes from within touch_start.** Add a [touch_end](/events/touch_end/) handler and do the state change there. Changing state from within [touch_start](/events/touch_start/) can cause the next occurrence of THIS [touch_start](/events/touch_start/) code to be missed.
+
+- On clicking a prim with touch event handlers, the following handlers are triggered: [touch_start](/events/touch_start/) (on first contact), [touch](/events/touch/) (during) and [touch_end](/events/touch_end/) (as released).
+
+## See also
+
+### Functions
+
+- [llSetTouchText](/functions/llSetTouchText/)
+- [llPassTouches](/functions/llPassTouches/)
+- [llDetectedTouchFace](/functions/llDetectedTouchFace/)
+- [llDetectedTouchST](/functions/llDetectedTouchST/)
+- [llDetectedTouchUV](/functions/llDetectedTouchUV/)
+- [llDetectedTouchPos](/functions/llDetectedTouchPos/)
+- [llDetectedTouchNormal](/functions/llDetectedTouchNormal/)
+- [llDetectedTouchBinormal](/functions/llDetectedTouchBinormal/)
+
+### Events
+
+- [touch](/events/touch/)
+- [touch_end](/events/touch_end/)
+
+<WikiSource />

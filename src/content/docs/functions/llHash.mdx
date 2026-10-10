@@ -1,0 +1,104 @@
+---
+title: "llHash"
+slug: "functions/llHash"
+category: functions
+source:
+  wiki: "LlHash"
+  url: https://wiki.secondlife.com/wiki/LlHash
+  revision: 1210062
+  date: 2021-05-21
+  contributor: "Sei Lisa"
+  raw: /wiki-source/llhash-8c8cbf25.txt
+  license: "Content from the Second Life Wiki article LlHash (revision 1210062, 2021-05-21), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llHash" description />
+
+Returns a 32bit hash for the provided string. Returns 0 if the input string is empty.
+
+```lsl title="How to use" frame="terminal"
+integer result = llHash("");
+```
+
+## Specification
+
+The SDBM algorithm provides a good general purpose hash function with a fairly even distribution across the 32 bit space in the general case.
+
+The characters fed into the hash function are 32bit wide.
+
+```lsl
+U32 SDBMHash(const std::wstring &val)
+{
+    U32 hash(0);
+
+    for(const wchar_t &c: val)
+    {
+        hash = c + (hash << 6) + (hash << 16) - hash;
+    }
+    return hash;
+}
+```
+
+In LSL:
+
+```lsl
+integer llSDBMHash(string value)
+{
+    integer hash = 0;
+    integer index = 0;
+    for (index = 0; index < llStringLength(value); ++index)
+    {
+        hash = llOrd(value, index) + (hash << 6) + (hash << 16) - hash;
+    }
+
+    return hash;
+}
+```
+
+## Caveats
+
+This hash value is not cryptographically secure and should not be used as part of any security protocol.
+
+SDBM provides a good distribution of hash values across its range, however with only
+
+32 bits the chance of a collision is unacceptably high.(with 1000 entries, the odds for a collision are about 1 in 10000.)
+
+## Examples
+
+<details open>
+<summary>Given the combination of the object name and the owner's key generate a unique number. This number could be used for things</summary>
+
+like selecting a chat channel that has a low probability of colliding with another object.
+
+```lsl
+integer pickIDForObject()
+{
+    /* Generate an arbitrary integer ID for the combination of the
+     * object name and the ower's key.  This value could be used
+     * for selecting a chat/listen channel.
+     */
+    string obj_name = llGetObjectName();
+    key obj_owner = llGetOwner();
+
+    integer hash = llHash(obj_name + (string)obj_owner);
+
+    return hash;
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llOrd](/functions/llOrd/) — Convert a character into an ordinal
+- [llChar](/functions/llChar/) — Convert an ordinal into a character
+
+### Articles
+
+- [List of hash functions](https://en.wikipedia.org/wiki/List_of_hash_functions)
+- [Hash Collision Probabilities](https://preshing.com/20110504/hash-collision-probabilities/)
+
+<WikiSource />

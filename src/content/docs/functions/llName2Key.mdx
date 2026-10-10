@@ -1,0 +1,71 @@
+---
+title: "llName2Key"
+slug: "functions/llName2Key"
+category: functions
+source:
+  wiki: "LlName2Key"
+  url: https://wiki.secondlife.com/wiki/LlName2Key
+  revision: 1210595
+  date: 2022-04-07
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llname2key-57cbdffb.txt
+  license: "Content from the Second Life Wiki article LlName2Key (revision 1210595, 2022-04-07), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llName2Key" />
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) the Agent ID for the named agent in the region. If there is no agent with the specified name currently signed onto the region, this function returns the value [NULL_KEY](/constants/NULL_KEY/). Names are always provided in the form "First\[ Last\]" or "first\[.last\]" (first name with an optional last name.) If the last name is omitted a last name of "Resident" is assumed. Case is not considered when resolving agent names.
+
+```lsl title="How to use" frame="terminal"
+key result = llName2Key("");
+```
+
+## Caveats
+
+- This function does not operate on historical names. For historical name lookup use [llRequestUserKey](/functions/llRequestUserKey/).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={6-21}
+tellName2Key(string avatarName)
+{
+    key keyFromName = llName2Key(avatarName);
+    if (keyFromName == NULL_KEY)
+    {
+        llSay(0, "There is no agent with the name '" + avatarName + "' currently signed onto the region.");
+        return;
+    }
+    llSay(0, "Avatar key for name '" + avatarName + "': " + (string)keyFromName);
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        tellName2Key("rider.linden");
+        tellName2Key("Rider Linden");
+        tellName2Key(llDetectedName(0));
+    }
+}
+// If Rider Linden touches the object, the three lines should contain the answer c5a07167-9bbe-4944-a7b0-a9677afa134d
+```
+
+</details>
+
+## Additional wiki content
+
+[Category:LSL_Functions](https://wiki.secondlife.com/wiki/Category:LSL_Functions)
+
+## See also
+
+### Functions
+
+- [llRequestUserKey](/functions/llRequestUserKey/)
+
+to fetch avatar UUID by current or historical username.
+
+<WikiSource />

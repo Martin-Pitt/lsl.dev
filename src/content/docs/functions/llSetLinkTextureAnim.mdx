@@ -1,0 +1,150 @@
+---
+title: "llSetLinkTextureAnim"
+slug: "functions/llSetLinkTextureAnim"
+category: functions
+source:
+  wiki: "LlSetLinkTextureAnim"
+  url: https://wiki.secondlife.com/wiki/LlSetLinkTextureAnim
+  revision: 1218536
+  date: 2025-12-02
+  contributor: "Lucia Nightfire"
+  raw: /wiki-source/llsetlinktextureanim-0a16b63b.txt
+  license: "Content from the Second Life Wiki article LlSetLinkTextureAnim (revision 1218536, 2025-12-02), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetLinkTextureAnim" />
+
+Animate the texture on the specified face/faces of the specified prim/prims by setting the texture scale and offset. Identical to [llSetTextureAnim](/functions/llSetTextureAnim/) except able to modify any prim in the link set.
+
+Frames are numbered from left to right, top to bottom, starting at 0.
+
+If **rate** is negative, it has the same effect as using the [REVERSE](/constants/REVERSE/) flag.`{{Footnote|Though if {{LSLP|rate}} is negative and the [[REVERSE]] flag is used, they cancel each other out.|Though if rate is negative and the REVERSE flag is used, they cancel each other out.}}`
+
+If **length** is 0, it is considered to be **sizex**\***sizey** if both are above 0, otherwise 1.
+
+```lsl title="How to use" frame="terminal"
+llSetLinkTextureAnim(0, 0, 0, 0, 0, 0.0, 0.0, 0.0);
+```
+
+## Specification
+
+### Frames
+
+Frames are sub-rectangles within the texture. A set of frames with 2 horizontal (**sizex**) and 3 vertical (**sizey**) means the overall texture is divided into 3 rows of 2 columns of images, each of which is a frame. `llSetLinkTextureAnim` will animate across these 6 starting with the top left image and going across and down, optionally repeating. If [SMOOTH](/constants/SMOOTH/) is set the frames slide smoothly from one to the next, if off, each frame is displayed in turn centered on the face.
+
+| Modes |  | Description |
+| --- | --- | --- |
+| [ANIM_ON](/constants/ANIM_ON/) | `1` | Texture animation is on. This must be set to start the animation, cleared to stop it. |
+| [LOOP](/constants/LOOP/) | `2` | Loop the texture animation. |
+| [REVERSE](/constants/REVERSE/) | `4` | Play animation in reverse direction. |
+| [PING_PONG](/constants/PING_PONG/) | `8` | Play animation going forwards, then backwards. |
+| [SMOOTH](/constants/SMOOTH/) | `16` | Slide in the X direction, instead of playing separate frames.<br />In both [SCALE](/constants/SCALE/) and [ROTATE](/constants/ROTATE/) modes, causes smooth transitions. |
+| [ROTATE](/constants/ROTATE/) | `32` | Animate texture rotation.<br />Does not work with [SCALE](/constants/SCALE/) |
+| [SCALE](/constants/SCALE/) | `64` | Animate the texture scale.<br />Does not work with [ROTATE](/constants/ROTATE/) |
+
+## Caveats
+
+- You can only have one texture animation on a prim.
+- Calling `llSetLinkTextureAnim` more than once on a prim will reset it.
+- Calling `llSetLinkTextureAnim` again with exact same values will not reset animation (a small difference in rate will suffice).
+- You cannot combine [ROTATE](/constants/ROTATE/) and [SCALE](/constants/SCALE/) flags.
+- **sizex** and **sizey** are both limited to a range of 0 to 255
+- Negative sizes behave as if texture repeats were set to 0, and cannot be used to mirror frames.
+- Different animation modes override some of the prim's texture parameters, but others can still be used:
+- Texture offsets are ignored in frame-based and [SMOOTH](/constants/SMOOTH/) scrolling modes.
+- Repeats are ignored if **sizex** and **sizey** are not 0.
+- With either of the sizes set to 0, [SMOOTH](/constants/SMOOTH/) scrolling will use the prim's texture repeats. In frame-based animation, there is no meaningful effect.
+- The texture rotation is ignored in [ROTATE](/constants/ROTATE/) mode.
+- Texture repeats are ignored in [SCALE](/constants/SCALE/) mode
+- Selecting and un-selecting a prim with animation will reset animation from beginning.
+- While a texture animation is active on any face of a prim, [PRIM_NORMAL](/constants/PRIM_NORMAL/) and [PRIM_SPECULAR](/constants/PRIM_SPECULAR/) are forced to have their repeats, rotations and offsets to match the [PRIM_TEXTURE](/constants/PRIM_TEXTURE/) ones, even on faces that are **not** being animated.
+- As of server version 2025-09-03.17442317385, this prim property is maintained when copying in-world.
+
+## Examples
+
+<details open>
+<summary>This slides a texture smoothly, along the horizontal U-axis, and loops it when it gets to the end.</summary>
+
+For Blinn-Phong materials, the texture's rotation for each side affects the apparent motion. So if the texture is rotated 90 degrees by use of the edit box, the texture may not flow in the direction expected.
+
+For PBR materials, the Blinn-Phong texture rotation for each side affects the apparent motion, and any Blinn-Phong transform component (for example the offsets argument of [PRIM_TEXTURE](/constants/PRIM_TEXTURE/)) which is not animated will be applied to the PBR material as well. Thus, a GLTF material without a GLTF texture transform will animate identically to a Blinn-Phong material. If a GLTF texture transform (for example [PRIM_GLTF_BASE_COLOR](/constants/PRIM_GLTF_BASE_COLOR/)) is applied, it will be in addition to the Blinn-Phong transform and texture animation. This allows for more flexibility, however a more complex GLTF texture transform will not loop as easily.
+
+```lsl
+llSetLinkTextureAnim(LINK_THIS, ANIM_ON | SMOOTH | LOOP , ALL_SIDES, 1, 1, 1, 1, 1);
+```
+
+</details>
+
+<details>
+<summary>This slides a texture smoothly, along the horizontal U-axis, in the opposite direction</summary>
+
+```lsl
+llSetLinkTextureAnim(LINK_THIS, ANIM_ON | SMOOTH | LOOP , ALL_SIDES, 1, 1, 1, 1, -1);
+```
+
+</details>
+
+<details>
+<summary>This divides a texture into 64 "cells", 8 across, and 8 down, and flips through them, left to right, top to bottom. This is useful for cell animation.</summary>
+
+```lsl
+llSetLinkTextureAnim(LINK_THIS, ANIM_ON | LOOP, ALL_SIDES, 8, 8, 0, 64, 6.4 );
+```
+
+</details>
+
+<details>
+<summary>This rotates a texture counter-clockwise at 2 revolutions per second. Change the last value to -2\*[TWO_PI](/constants/TWO_PI/) to rotate clockwise.</summary>
+
+```lsl
+llSetLinkTextureAnim(LINK_THIS, ANIM_ON | SMOOTH | ROTATE | LOOP, ALL_SIDES,1,1,0, TWO_PI, 2*TWO_PI);
+```
+
+</details>
+
+<details>
+<summary>This scales a texture larger and smaller.</summary>
+
+```lsl
+llSetLinkTextureAnim(LINK_THIS, ANIM_ON | SMOOTH | SCALE | PING_PONG | LOOP, ALL_SIDES, 1, 1, 1, 3, 2);
+```
+
+</details>
+
+<details>
+<summary>This turns off all texture animations</summary>
+
+```lsl
+llSetLinkTextureAnim(LINK_THIS, FALSE, ALL_SIDES, 0, 0, 0.0, 0.0, 1.0);
+```
+
+</details>
+
+## Notes
+
+Texture animation is a property of the prim (i.e., you can remove the script that started the animation, and the prim will remember the settings anyway.)
+
+## History
+
+- Date of release [29-03-2010](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/1.38#new-features)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-3925 (bug): Some persistent prim properties lost when duplicated
+- SVC-1242 (bug): Texture Animation is not copied (llSetTextureAnim)
+- VWR-4018 (bug): Texture animations ignore repeats per face
+
+## Additional wiki content
+
+[Category:glTF](https://wiki.secondlife.com/wiki/Category:GlTF)
+
+## See also
+
+### Functions
+
+- [llSetTextureAnim](/functions/llSetTextureAnim/) — Set texture animation for the prim the script is on.
+
+<WikiSource />

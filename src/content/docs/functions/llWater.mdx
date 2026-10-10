@@ -1,0 +1,62 @@
+---
+title: "llWater"
+slug: "functions/llWater"
+category: functions
+source:
+  wiki: "LlWater"
+  url: https://wiki.secondlife.com/wiki/LlWater
+  revision: 1194322
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/llwater-35d5edb5.txt
+  license: "Content from the Second Life Wiki article LlWater (revision 1194322, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llWater" />
+
+Water height is constant across each entire sim and is typically 20 meters but not always.
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the water height below the prim's [position](/functions/llGetPos/) + **offset**
+
+```lsl title="How to use" frame="terminal"
+float result = llWater(ZERO_VECTOR);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={10-19}
+// Makes the object land on ground or on water
+
+FindGroundOrWater()
+{
+    vector vTarget = llGetPos();
+    vTarget.z = llGround( ZERO_VECTOR );
+    float fWaterLevel = llWater( ZERO_VECTOR );
+    if( vTarget.z < fWaterLevel )
+        vTarget.z = fWaterLevel;
+    llSetRegionPos(vTarget);
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        FindGroundOrWater();
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGround](/functions/llGround/) — Gets the ground height
+- [llWind](/functions/llWind/) — Gets the wind velocity
+
+<WikiSource />

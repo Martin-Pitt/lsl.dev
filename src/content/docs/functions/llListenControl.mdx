@@ -1,0 +1,82 @@
+---
+title: "llListenControl"
+slug: "functions/llListenControl"
+category: functions
+source:
+  wiki: "LlListenControl"
+  url: https://wiki.secondlife.com/wiki/LlListenControl
+  revision: 1210683
+  date: 2022-04-23
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/lllistencontrol-e9f77ffe.txt
+  license: "Content from the Second Life Wiki article LlListenControl (revision 1210683, 2022-04-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llListenControl" description />
+
+Makes [listen](/events/listen/) event callback **handle** active or inactive
+
+```lsl title="How to use" frame="terminal"
+llListenControl(0, 0);
+```
+
+## Caveats
+
+- On [state](https://wiki.secondlife.com/wiki/state) change or [script reset](/functions/llResetScript/) all listens are removed automaticaly.
+
+## Examples
+
+<details open>
+<summary>a small example of an on and off switchable listen by use of `llListenControl()`</summary>
+
+```lsl collapse={1-5, 18-33}
+integer handle;
+integer toggle;
+default
+{
+    state_entry()
+    {
+        handle = llListen(5, "", NULL_KEY, "");    // Establish a listener to listen to anything on channel 5 ...
+        llListenControl(handle, FALSE);            // ... but make the listener inactive for now
+        llSetText("not listening", <0.0,0.0,0.0>, 1.0);
+    }
+
+    touch_start(integer total_number)
+    {
+        toggle = !toggle;
+        llListenControl(handle, toggle);           // Make the listener active or inactive as required
+
+        if(toggle)
+        {
+            llSay(0, "now listening on channel 5");
+            llSetText("listening on ch 5", <1.0,0.0,0.0>, 1.0);
+        }
+        else
+        {
+            llSay(0, "not listening any more");
+            llSetText("not listening", <0.0,0.0,0.0>, 1.0);
+        }
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        llSay(0, name + " just said " + message);
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llListen](/functions/llListen/)
+- [llListenRemove](/functions/llListenRemove/)
+
+### Events
+
+- [listen](/events/listen/)
+
+<WikiSource />

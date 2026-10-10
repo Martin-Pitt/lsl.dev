@@ -1,0 +1,64 @@
+---
+title: "llAxisAngle2Rot"
+slug: "functions/llAxisAngle2Rot"
+category: functions
+source:
+  wiki: "LlAxisAngle2Rot"
+  url: https://wiki.secondlife.com/wiki/LlAxisAngle2Rot
+  revision: 1194062
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llaxisangle2rot-734ae996.txt
+  license: "Content from the Second Life Wiki article LlAxisAngle2Rot (revision 1194062, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llAxisAngle2Rot" />
+
+**axis** need not be [normalized](/functions/llVecNorm/), only the direction is important.
+
+**angle** need to be between the value 0&lt;angle&lt;[PI](/constants/PI/) (higher values than [PI](/constants/PI/) lead to 2\*PI-angle)
+
+, because a rotation is not really a rotation (it is more of a rigid motion/mirroring)
+
+,the final destination is the rotation.
+
+(in other words: it doesn't matter wether you rotate left by 90 degrees or right by 270 degrees it will return the same rotation)
+
+Returns a [rotation](https://wiki.secondlife.com/wiki/rotation) that is a generated **angle** about **axis**
+
+```lsl title="How to use" frame="terminal"
+rotation result = llAxisAngle2Rot(ZERO_VECTOR, 0.0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        vector axis = <0.0, 0.0, 1.0>;
+        float angle = 90.0 * DEG_TO_RAD;
+        rotation rot = llAxisAngle2Rot(axis, angle);
+        vector euler = llRot2Euler(rot) * RAD_TO_DEG;
+
+        llOwnerSay((string) euler);
+        //Says <0.0, 0.0, 90.0> since it is rotating 90 degrees on the Z axis caused by the 1.0 placed in the Z vector spot.
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llRot2Angle](/functions/llRot2Angle/)
+- [llRot2Axis](/functions/llRot2Axis/)
+
+<WikiSource />

@@ -1,0 +1,49 @@
+---
+title: "llsRGB2Linear"
+slug: "functions/llsRGB2Linear"
+category: functions
+source:
+  wiki: "LlsRGB2Linear"
+  url: https://wiki.secondlife.com/wiki/LlsRGB2Linear
+  revision: 1217966
+  date: 2025-02-07
+  contributor: "Dyna Mole"
+  raw: /wiki-source/llsrgb2linear-3a99571b.txt
+  license: "Content from the Second Life Wiki article LlsRGB2Linear (revision 1217966, 2025-02-07), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llsRGB2Linear" />
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) Transforms a color specified in the sRGB colorspace to the linear RGB colorspace.
+
+```lsl title="How to use" frame="terminal"
+vector result = llsRGB2Linear(ZERO_VECTOR);
+```
+
+## Specification
+
+Lights in Second Life are specified in LSL as linear red, green blue values in the range (0.0, 1.0). Internally light calculations are performed in the sRGB colorspace.
+
+The sRGB (Standard Red Green Blue) colorspace is defined in [IEC 61966-2-1:1999](https://www.color.org/srgb04.xalter) and was developed as a joint project between Microsoft and HP.
+
+This calculation is known as an Electro-Optical Transfer Function (EOTF).
+
+## Caveats
+
+- The name of this function is actually a misnomer as LSL color is actually in [Rec.709](https://www.color.org/chardata/rgb/BT709.xalter) space, not [sRGB](https://www.color.org/chardata/rgb/srgb.xalter) space. While they are very similar, the gamma value for sRGB is approx. 2.2, whereas the gamma value for Rec.709 is approx. 2.4.
+- Scripting for PBR-enabled viewers: If you enter color vectors manually, using the viewer's color picker, enter them as sRGB values. The color picker automatically converts them internally to Linear RGB, so someone using a PBR-enabled viewer will see them correctly. When you apply color vectors directly with a script, however, you must apply sRGB to Blinn-Phong textured faces and Linear RGB to PBR materials.
+
+## Additional wiki content
+
+[Category:LSL_Functions](https://wiki.secondlife.com/wiki/Category:LSL_Functions)
+
+## See also
+
+### Functions
+
+- [llLinear2sRGB](/functions/llLinear2sRGB/)
+
+To convert from the Linear colorspace to sRGB. (Inverse EOTF)
+
+<WikiSource />

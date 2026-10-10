@@ -1,0 +1,86 @@
+---
+title: "llSleep"
+slug: "functions/llSleep"
+category: functions
+source:
+  wiki: "LlSleep"
+  url: https://wiki.secondlife.com/wiki/LlSleep
+  revision: 1217326
+  date: 2024-09-22
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llsleep-c1fc2db2.txt
+  license: "Content from the Second Life Wiki article LlSleep (revision 1217326, 2024-09-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSleep" />
+
+Puts the script to sleep for **sec** seconds. The script will not do anything during this time.
+
+The script will sleep at least until the next server-frame, which happen every (1/45 = ~0.02222) seconds under normal conditions.
+
+If **sec** is zero or less, the script will not sleep at all.
+
+```lsl title="How to use" frame="terminal"
+llSleep(0.0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llSay(0, "I going to take a nap for 5 seconds.");
+        llSleep(5.0);
+        llSay(0, "I feel so refreshed!");
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-8}
+default
+{
+    state_entry()
+    {
+        llOwnerSay("Time between sleeps:");
+
+        integer loops = 10;
+        float last_time = 0.0;
+
+        llResetTime();
+        llSleep(0.02);
+
+        while (--loops)
+        {
+            float time = llGetTime();
+            llOwnerSay((string)(time - last_time));
+            last_time = time;
+            llSleep(0.0); // Try a value above zero
+        }
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llSetTimerEvent](/functions/llSetTimerEvent/)
+
+### Events
+
+- [timer](/events/timer/)
+
+<WikiSource />

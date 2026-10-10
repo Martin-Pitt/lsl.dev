@@ -1,0 +1,95 @@
+---
+title: "NULL_KEY"
+slug: "constants/NULL_KEY"
+category: constants
+source:
+  wiki: "NULL KEY"
+  url: https://wiki.secondlife.com/wiki/NULL_KEY
+  revision: 1218492
+  date: 2025-10-18
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/null-key-41e142ba.txt
+  license: "Content from the Second Life Wiki article NULL KEY (revision 1218492, 2025-10-18), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="NULL_KEY" />
+
+&lt;span style="color:red;">**`NULL_KEY` is a [string](https://wiki.secondlife.com/wiki/string).**&lt;/span> However it is only really useful as a [key](https://wiki.secondlife.com/wiki/key).
+
+For [Conditional](https://wiki.secondlife.com/wiki/Category:LSL_Conditional) tests, `NULL_KEY` evaluates to **[TRUE](/constants/TRUE/)** like other strings.
+
+For list search (like [llListFindList](/functions/llListFindList/)), `NULL_KEY` won't match null keys whose type is **key** without typecasting.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// Returns 2 for valid keys, 1 for NULL_KEY, 0 for invalid keys.
+integer isKey(key input)
+{
+    if (input) return 2;
+    return (input == NULL_KEY);
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        // NULL_KEY itself is evaluated as FALSE only when typecast to key.
+        if (NULL_KEY) { llOwnerSay("NULL_KEY is TRUE");  } // Correct.
+        else          { llOwnerSay("NULL_KEY is FALSE"); } // Never.
+
+        if ((key) NULL_KEY) { llOwnerSay("Casted NULL_KEY is TRUE");  } // Never.
+        else                { llOwnerSay("Casted NULL_KEY is FALSE"); } // Correct.
+
+        // NULL_KEY won't match keys in lists without typecasting.
+        // The following list contains a null key because avatars don't have creators:
+        list details = llGetObjectDetails(llGetOwner(), [OBJECT_CREATOR]);
+        integer index = llListFindList(details, [NULL_KEY]);
+        if (index >= 0) { llOwnerSay("NULL_KEY was found in list"); } // Never.
+        else             { llOwnerSay("NULL_KEY was NOT found in list"); } // Correct.
+    }
+}
+```
+
+</details>
+
+## Notes
+
+In most situations `NULL_KEY` isn't needed; an empty string ("") will suffice. To take advantage of this certain practices have to be avoided. In many applications keys are checked against `NULL_KEY` to determine if they are valid; this is bad practice.
+
+LSL makes it easy to check if a key is valid. Simply use the key as the parameter for a conditional.
+
+That is, instead of `if(uuid != NULL_KEY)`, use `if(uuid)`. `if(uuid)` will only return [TRUE](/constants/TRUE/) if it is a valid key that is also not a null key.
+
+## Additional wiki content
+
+`{{Issues/SVC-5772}}`
+
+## See also
+
+### Functions
+
+- [llAvatarOnSitTarget](/functions/llAvatarOnSitTarget/)
+- [llDetectedKey](/functions/llDetectedKey/)
+- [llGetNotecardLine](/functions/llGetNotecardLine/)
+- [llGetLandOwnerAt](/functions/llGetLandOwnerAt/)
+- [llGetPermissionsKey](/functions/llGetPermissionsKey/)
+- [llGetTexture](/functions/llGetTexture/)
+- [llListen](/functions/llListen/)
+
+### Events
+
+- [attach](/events/attach/)
+
+<WikiSource />

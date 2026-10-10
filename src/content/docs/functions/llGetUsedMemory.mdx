@@ -1,0 +1,69 @@
+---
+title: "llGetUsedMemory"
+slug: "functions/llGetUsedMemory"
+category: functions
+source:
+  wiki: "LlGetUsedMemory"
+  url: https://wiki.secondlife.com/wiki/LlGetUsedMemory
+  revision: 1218635
+  date: 2026-02-18
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/llgetusedmemory-2bf85b78.txt
+  license: "Content from the Second Life Wiki article LlGetUsedMemory (revision 1218635, 2026-02-18), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetUsedMemory" description />
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetUsedMemory();
+```
+
+## Specification
+
+This function's behavior is dependent upon the VM the script is using. [Mono](#mono) is the new VM, [LSO](#lso) is the old VM. The big difference between Mono and LSO is that Mono scripts run faster and can utilize four times more memory.
+
+### Mono
+
+In Mono the value returned is the amount of memory currently in use by the script. This is achieved by searching the script's stack and counting all reachable resources. In terms of garbage collection, memory that hasn't been GC'd doesn't count against the script's memory limit when it's no longer reachable.`{{Footnote|Explanation given by Harold Linden in the official Discord server.}}`
+
+The reason why Mono/[SLua](https://wiki.secondlife.com/wiki/SLua_Alpha) implements its memory limits this way is because there's a single VM/GC governing their scripts, and you don't want to "stop the world" to run the garbage collector just to see if you can get a single script back under its limit.
+
+### LSO
+
+LSO scripts always use 16KiB of memory.
+
+## Caveats
+
+- Scripts compiled to LSO always report 16KB memory used.
+- This can be called at any time and does **not** require [llScriptProfiler](/functions/llScriptProfiler/)
+
+## Examples
+
+<details open>
+<summary>Calling `llGetUsedMemory` can look like this:</summary>
+
+```lsl
+integer used_memory = llGetUsedMemory();
+llOwnerSay((string)used_memory + " bytes of memory currently used.");
+```
+
+</details>
+
+## Notes
+
+The amount of used memory is updated only at the start of a server frame, meaning the values from this function can fluctuate. To ensure stable values, it's possible to wait until the next frame, e.g. [llSleep](/functions/llSleep/)(0.01) before the call to `llGetUsedMemory`.
+
+## History
+
+Date of Release [17/06/2011](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-06-17-233176)
+
+## See also
+
+### Functions
+
+- [llGetFreeMemory](/functions/llGetFreeMemory/)
+- [llSetMemoryLimit](/functions/llSetMemoryLimit/)
+- [llScriptProfiler](/functions/llScriptProfiler/)
+
+<WikiSource />

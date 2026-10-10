@@ -1,0 +1,82 @@
+---
+title: "on_rez"
+slug: "events/on_rez"
+category: events
+source:
+  wiki: "On rez"
+  url: https://wiki.secondlife.com/wiki/On_rez
+  revision: 1212503
+  date: 2022-10-01
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/on-rez-999c61c8.txt
+  license: "Content from the Second Life Wiki article On rez (revision 1212503, 2022-10-01), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="on_rez" />
+
+**start_param** is always zero when an object is not rezzed by [llRezObject](/functions/llRezObject/) or [llRezAtRoot](/functions/llRezAtRoot/).
+
+When an object is rezzed by [llRezObject](/functions/llRezObject/) or [llRezAtRoot](/functions/llRezAtRoot/), then **start_param** will be the value given as the last parameter of the rezzing command.
+
+**start_param** is available at any subsequent time by calling [llGetStartParameter](/functions/llGetStartParameter/) (unless it has been overridden by [llRemoteLoadScriptPin](/functions/llRemoteLoadScriptPin/)). Passes start_param from the rezzing call (or 0 if rezzed from inventory).
+
+Triggered when an object is rezzed (by script or by user). Also triggered in attachments when a user logs in, or when the object is [attach](/events/attach/)ed from inventory.
+
+```lsl title="How to use" frame="terminal"
+on_rez(integer start_param)
+{
+
+}
+```
+
+## Caveats
+
+- If an object is rezzed by another object then the [object_rez](/events/object_rez/) event in the parent object does not trigger at the same time as the on_rez event in the child object and the order of the events is not guaranteed. See the examples in [object_rez](/events/object_rez/) for how to reliably establish communications between objects when rezzing.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    on_rez(integer start_param)
+    {
+        // Restarts the script every time the object is rezzed
+        llResetScript();
+    }
+}
+```
+
+</details>
+
+## Notes
+
+### [state_entry](/events/state_entry/) & [on_rez](/events/on_rez/)
+
+[state_entry](/events/state_entry/) will be triggered prior to [on_rez](/events/on_rez/) if [state_entry](/events/state_entry/) has not been run prior.
+
+### [on_rez](/events/on_rez/) & [attach](/events/attach/)
+
+[on_rez](/events/on_rez/) will be triggered prior to [attach](/events/attach/) when attaching from inventory or during login.
+
+### [on_rez](/events/on_rez/) & slow events
+
+If the script was already processing an event at rez time, [on_rez](/events/on_rez/) does not **not** trigger until the current event handler is completed. (same with [attach](/events/attach/))
+
+## See also
+
+### Functions
+
+- [llGetStartParameter](/functions/llGetStartParameter/)
+- [llRezObject](/functions/llRezObject/)
+- [llRezAtRoot](/functions/llRezAtRoot/)
+
+### Events
+
+- [object_rez](/events/object_rez/) — triggered when this object rezzes an object from inventory
+- [state_entry](/events/state_entry/) — triggered during script startup, reset and state change
+
+<WikiSource />

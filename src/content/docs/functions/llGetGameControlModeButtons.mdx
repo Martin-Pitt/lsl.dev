@@ -1,0 +1,178 @@
+---
+title: "llGetGameControlModeButtons"
+slug: "functions/llGetGameControlModeButtons"
+category: functions
+source:
+  wiki: "LlGetGameControlModeButtons"
+  url: https://wiki.secondlife.com/wiki/LlGetGameControlModeButtons
+  revision: 1219070
+  date: 2026-09-16
+  contributor: "Leviathan Linden"
+  raw: /wiki-source/llgetgamecontrolmodebuttons-e82d61d9.txt
+  license: "Content from the Second Life Wiki article LlGetGameControlModeButtons (revision 1219070, 2026-09-16), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetGameControlModeButtons" />
+
+Returns the *semantic* (mode-dependent) button bitfield of **id** for the current [game_control](/events/game_control/) input. Bit meanings vary by mode; use the GAME_CONTROL_BUTTON\_\* constants as masks.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) of the buttons held down, interpreted according to the mode returned by [llGetGameControlMode](/functions/llGetGameControlMode/).
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetGameControlModeButtons(NULL_KEY);
+```
+
+## Specification
+
+A bit is set while the corresponding action is being held down. A semantic bit index is always identical to the canonical button index it is mapped to *by default*, no matter how the user has actually remapped their controller. This is the difference between this function and the **button_levels** parameter of the [game_control](/events/game_control/) event: **button_levels** reports the raw physical buttons, while this function reports the actions the viewer derived from them.
+
+Canonical buttons with no action in a given mode still occupy a bit, but that bit is never set for that mode.
+
+For **[GAME_CONTROL_MODE_AVATAR](/constants/GAME_CONTROL_MODE_AVATAR/)** and **[GAME_CONTROL_MODE_CAPTIVE](/constants/GAME_CONTROL_MODE_CAPTIVE/)**:
+
+| Bit | Name |
+| --- | --- |
+| 0 | [GAME_CONTROL_BUTTON_JUMP](/constants/GAME_CONTROL_BUTTON_JUMP/) |
+| 1 | [GAME_CONTROL_BUTTON_CROUCH](/constants/GAME_CONTROL_BUTTON_CROUCH/) |
+| 2 | [GAME_CONTROL_BUTTON_SIT](/constants/GAME_CONTROL_BUTTON_SIT/) |
+| 3 | *(unbound)* |
+| 4 | [GAME_CONTROL_BUTTON_TOGGLE_CURSOR](/constants/GAME_CONTROL_BUTTON_TOGGLE_CURSOR/) |
+| 5 | [GAME_CONTROL_BUTTON_TOGGLE_SPEAK](/constants/GAME_CONTROL_BUTTON_TOGGLE_SPEAK/) |
+| 6 | [GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK](/constants/GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK/) |
+| 7 | *(unbound)* |
+| 8 | [GAME_CONTROL_BUTTON_TOGGLE_FLYCAM](/constants/GAME_CONTROL_BUTTON_TOGGLE_FLYCAM/) |
+| 9 | *(unbound)* |
+| 10 | *(unbound)* |
+| 11 | [GAME_CONTROL_BUTTON_ADVANCE_FORWARD](/constants/GAME_CONTROL_BUTTON_ADVANCE_FORWARD/) |
+| 12 | [GAME_CONTROL_BUTTON_ADVANCE_BACK](/constants/GAME_CONTROL_BUTTON_ADVANCE_BACK/) |
+| 13 | [GAME_CONTROL_BUTTON_STRAFE_LEFT](/constants/GAME_CONTROL_BUTTON_STRAFE_LEFT/) |
+| 14 | [GAME_CONTROL_BUTTON_STRAFE_RIGHT](/constants/GAME_CONTROL_BUTTON_STRAFE_RIGHT/) |
+| 15–31 | *(unbound)* |
+
+For **[GAME_CONTROL_MODE_MOUSELOOK](/constants/GAME_CONTROL_MODE_MOUSELOOK/)**:
+
+| Bit | Name |
+| --- | --- |
+| 0 | [GAME_CONTROL_BUTTON_JUMP](/constants/GAME_CONTROL_BUTTON_JUMP/) |
+| 1 | [GAME_CONTROL_BUTTON_CROUCH](/constants/GAME_CONTROL_BUTTON_CROUCH/) |
+| 2 | [GAME_CONTROL_BUTTON_SIT](/constants/GAME_CONTROL_BUTTON_SIT/) |
+| 3 | *(unbound)* |
+| 4 | [GAME_CONTROL_BUTTON_TOGGLE_CURSOR](/constants/GAME_CONTROL_BUTTON_TOGGLE_CURSOR/) |
+| 5 | [GAME_CONTROL_BUTTON_TOGGLE_SPEAK](/constants/GAME_CONTROL_BUTTON_TOGGLE_SPEAK/) |
+| 6 | [GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK](/constants/GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK/) |
+| 7 | *(unbound)* |
+| 8 | [GAME_CONTROL_BUTTON_TOGGLE_FLYCAM](/constants/GAME_CONTROL_BUTTON_TOGGLE_FLYCAM/) |
+| 9 | [GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT](/constants/GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT/) |
+| 10 | [GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT](/constants/GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT/) |
+| 11 | [GAME_CONTROL_BUTTON_ADVANCE_FORWARD](/constants/GAME_CONTROL_BUTTON_ADVANCE_FORWARD/) |
+| 12 | [GAME_CONTROL_BUTTON_ADVANCE_BACK](/constants/GAME_CONTROL_BUTTON_ADVANCE_BACK/) |
+| 13 | [GAME_CONTROL_BUTTON_STRAFE_LEFT](/constants/GAME_CONTROL_BUTTON_STRAFE_LEFT/) |
+| 14 | [GAME_CONTROL_BUTTON_STRAFE_RIGHT](/constants/GAME_CONTROL_BUTTON_STRAFE_RIGHT/) |
+| 15–31 | *(unbound)* |
+
+For **[GAME_CONTROL_MODE_CURSOR](/constants/GAME_CONTROL_MODE_CURSOR/)**:
+
+| Bit | Name |
+| --- | --- |
+| 0 | [GAME_CONTROL_BUTTON_JUMP](/constants/GAME_CONTROL_BUTTON_JUMP/) |
+| 1 | [GAME_CONTROL_BUTTON_CROUCH](/constants/GAME_CONTROL_BUTTON_CROUCH/) |
+| 2 | [GAME_CONTROL_BUTTON_SIT](/constants/GAME_CONTROL_BUTTON_SIT/) |
+| 3 | *(unbound)* |
+| 4 | [GAME_CONTROL_BUTTON_TOGGLE_CURSOR](/constants/GAME_CONTROL_BUTTON_TOGGLE_CURSOR/) |
+| 5 | [GAME_CONTROL_BUTTON_TOGGLE_SPEAK](/constants/GAME_CONTROL_BUTTON_TOGGLE_SPEAK/) |
+| 6 | [GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK](/constants/GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK/) |
+| 7 | *(unbound)* |
+| 8 | [GAME_CONTROL_BUTTON_TOGGLE_FLYCAM](/constants/GAME_CONTROL_BUTTON_TOGGLE_FLYCAM/) |
+| 9 | [GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT](/constants/GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT/) |
+| 10 | [GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT](/constants/GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT/) |
+| 11 | [GAME_CONTROL_BUTTON_ADVANCE_FORWARD](/constants/GAME_CONTROL_BUTTON_ADVANCE_FORWARD/) |
+| 12 | [GAME_CONTROL_BUTTON_ADVANCE_BACK](/constants/GAME_CONTROL_BUTTON_ADVANCE_BACK/) |
+| 13 | [GAME_CONTROL_BUTTON_STRAFE_LEFT](/constants/GAME_CONTROL_BUTTON_STRAFE_LEFT/) |
+| 14 | [GAME_CONTROL_BUTTON_STRAFE_RIGHT](/constants/GAME_CONTROL_BUTTON_STRAFE_RIGHT/) |
+| 15–31 | *(unbound)* |
+
+For **[GAME_CONTROL_MODE_FLYCAM](/constants/GAME_CONTROL_MODE_FLYCAM/)**:
+
+| Bit | Name |
+| --- | --- |
+| 0 | [GAME_CONTROL_BUTTON_ZOOM_OUT](/constants/GAME_CONTROL_BUTTON_ZOOM_OUT/) |
+| 1 | [GAME_CONTROL_BUTTON_PAN_RIGHT](/constants/GAME_CONTROL_BUTTON_PAN_RIGHT/) |
+| 2 | [GAME_CONTROL_BUTTON_PAN_LEFT](/constants/GAME_CONTROL_BUTTON_PAN_LEFT/) |
+| 3 | [GAME_CONTROL_BUTTON_ZOOM_IN](/constants/GAME_CONTROL_BUTTON_ZOOM_IN/) |
+| 4 | [GAME_CONTROL_BUTTON_TOGGLE_ALT_ZOOM](/constants/GAME_CONTROL_BUTTON_TOGGLE_ALT_ZOOM/) |
+| 5 | *(unbound)* |
+| 6 | [GAME_CONTROL_BUTTON_TOGGLE_FOLLOW](/constants/GAME_CONTROL_BUTTON_TOGGLE_FOLLOW/) |
+| 7 | [GAME_CONTROL_BUTTON_RESET](/constants/GAME_CONTROL_BUTTON_RESET/) |
+| 8 | [GAME_CONTROL_BUTTON_TOGGLE_FLYCAM](/constants/GAME_CONTROL_BUTTON_TOGGLE_FLYCAM/) |
+| 9 | [GAME_CONTROL_BUTTON_ROLL_CCW](/constants/GAME_CONTROL_BUTTON_ROLL_CCW/) |
+| 10 | [GAME_CONTROL_BUTTON_ROLL_CW](/constants/GAME_CONTROL_BUTTON_ROLL_CW/) |
+| 11 | [GAME_CONTROL_BUTTON_DOLLY_FORWARD](/constants/GAME_CONTROL_BUTTON_DOLLY_FORWARD/) |
+| 12 | [GAME_CONTROL_BUTTON_DOLLY_BACK](/constants/GAME_CONTROL_BUTTON_DOLLY_BACK/) |
+| 13 | [GAME_CONTROL_BUTTON_TRUCK_LEFT](/constants/GAME_CONTROL_BUTTON_TRUCK_LEFT/) |
+| 14 | [GAME_CONTROL_BUTTON_TRUCK_RIGHT](/constants/GAME_CONTROL_BUTTON_TRUCK_RIGHT/) |
+| 15–31 | *(unbound)* |
+
+## Caveats
+
+- Only meaningful inside a [game_control](/events/game_control/) event: the value is a snapshot taken when the event was queued, so the mode, buttons and axes read by a script are all consistent with the event being processed.
+- Returns `0` when the script has no game-control snapshot for **id**, for example when called outside of a [game_control](/events/game_control/) event. A return of `0` therefore does not prove that no buttons are held down; check [llGetGameControlMode](/functions/llGetGameControlMode/) for `-1` first.
+- Game-control input is only delivered to scripts which have been granted [PERMISSION_GAME_CONTROL](/constants/PERMISSION_GAME_CONTROL/) by **id**.
+- The meaning of every bit changes when the mode changes, so always pair this with [llGetGameControlMode](/functions/llGetGameControlMode/).
+- In most modes several directional buttons are also folded into the axes returned by [llGetGameControlModeAxes](/functions/llGetGameControlModeAxes/); reacting to both will double-count the input.
+- Bit 31 is the sign bit of an LSL [integer](https://wiki.secondlife.com/wiki/integer). Use the bit-mask constants rather than comparing against a signed value.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-8, 14-24}
+integer prev_buttons = 0;
+
+default
+{
+    game_control(key id, integer button_levels, list axes)
+    {
+        integer mode = llGetGameControlMode(id);
+        if (mode != GAME_CONTROL_MODE_AVATAR)
+            return;
+
+        integer buttons = llGetGameControlModeButtons(id);
+        integer edges = buttons ^ prev_buttons;
+        prev_buttons = buttons;
+
+        // Bit 0 is "Jump" in AVATAR mode, whichever physical button is bound to it.
+        if (edges & GAME_CONTROL_BUTTON_A)
+        {
+            if (buttons & GAME_CONTROL_BUTTON_A)
+                llOwnerSay("jump pressed");
+            else
+                llOwnerSay("jump released");
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+The semantic button mask is supplied by the viewer in the **GameControlData** message. Older viewers that only send the deprecated **GameControlInput** message provide raw buttons through the [game_control](/events/game_control/) event but no semantic mask, so this function returns `0` for them.
+
+## See also
+
+### Functions
+
+- [llGetGameControlMode](/functions/llGetGameControlMode/) — Current game-control mode
+- [llGetGameControlModeAxes](/functions/llGetGameControlModeAxes/) — Semantic axes for the current mode
+
+### Events
+
+- [game_control](/events/game_control/)
+
+### Articles
+
+[LSL Game Control Beta](https://wiki.secondlife.com/wiki/LSL_Game_Control_Beta)
+
+<WikiSource />

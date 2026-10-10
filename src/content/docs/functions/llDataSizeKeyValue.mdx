@@ -1,0 +1,82 @@
+---
+title: "llDataSizeKeyValue"
+slug: "functions/llDataSizeKeyValue"
+category: functions
+source:
+  wiki: "LlDataSizeKeyValue"
+  url: https://wiki.secondlife.com/wiki/LlDataSizeKeyValue
+  revision: 1196391
+  date: 2015-05-05
+  contributor: "Strife Onizuka"
+  raw: /wiki-source/lldatasizekeyvalue-87f602df.txt
+  license: "Content from the Second Life Wiki article LlDataSizeKeyValue (revision 1196391, 2015-05-05), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDataSizeKeyValue" />
+
+Start an asynchronous transaction to request the used and total amount of data allocated for the [Experience](/categories/experience/).
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) that can be used to identify the corresponding [dataserver](/events/dataserver/) event to determine if this command succeeded or failed and the results.
+
+```lsl title="How to use" frame="terminal"
+key result = llDataSizeKeyValue();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={17-29}
+key trans;
+
+default
+{
+    state_entry()
+    {
+        trans = llDataSizeKeyValue();
+    }
+
+    dataserver( key _t, string _value )
+    {
+        if ( _t == trans )
+        {
+            // our llDataSizeKeyValue transaction is done
+            list result = llCSV2List( _value );
+            if ( llList2Integer( result, 0 ) == 1 )
+            {
+                // data size retrieved
+                llSay( 0, "Space in use: " + llList2String( result, 1 ) );
+                llSay( 0, "Total space:  " + llList2String( result, 2 ) );
+            }
+            else
+            {
+                // data size check failed
+                llSay( 0, "Key-value failed to check size: " + llList2String( result, 1 ) );
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+[Category:Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)
+
+## See also
+
+### Functions
+
+- [llGetExperienceErrorMessage](/functions/llGetExperienceErrorMessage/)
+- [llCreateKeyValue](/functions/llCreateKeyValue/)
+- [llReadKeyValue](/functions/llReadKeyValue/)
+- [llUpdateKeyValue](/functions/llUpdateKeyValue/)
+- [llDeleteKeyValue](/functions/llDeleteKeyValue/)
+- [llDataSizeKeyValue](/functions/llDataSizeKeyValue/)
+- [llKeyCountKeyValue](/functions/llKeyCountKeyValue/)
+- [llKeysKeyValue](/functions/llKeysKeyValue/)
+
+<WikiSource />

@@ -1,0 +1,84 @@
+---
+title: "llGetCameraFOV"
+slug: "functions/llGetCameraFOV"
+category: functions
+source:
+  wiki: "LlGetCameraFOV"
+  url: https://wiki.secondlife.com/wiki/LlGetCameraFOV
+  revision: 1216343
+  date: 2024-03-14
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llgetcamerafov-6c0fb3e3.txt
+  license: "Content from the Second Life Wiki article LlGetCameraFOV (revision 1216343, 2024-03-14), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetCameraFOV" description />
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) value for the current camera's field of view (FOV), in radians, of the agent for which the task has permissions.
+
+```lsl title="How to use" frame="terminal"
+float result = llGetCameraFOV();
+```
+
+## Caveats
+
+Returns zero when permissions have not been granted.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-20, 26-31}
+// say the camera aspect ratio and field of view (FOV)
+integer has_perms = FALSE;
+default
+{
+    on_rez(integer a)
+    {
+        llResetScript();
+        has_perms = FALSE;
+    }
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TRACK_CAMERA);
+    }
+    run_time_permissions(integer permission)
+    {
+        has_perms = (permission == PERMISSION_TRACK_CAMERA);
+    }
+    touch_start(integer num_touches)
+    {
+        if (has_perms)
+        {
+            float aspect = llGetCameraAspect();
+            float fov = llGetCameraFOV();
+            llOwnerSay("aspect = " + (string)aspect + "  FOV = " + (string)fov);
+        }
+        else
+        {
+            llRequestPermissions(llGetOwner(), PERMISSION_TRACK_CAMERA);
+        }
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+`{{LSL_Function/permission|PERMISSION_TRACK_CAMERA}}`
+
+## See also
+
+### Functions
+
+- [llGetCameraAspect](/functions/llGetCameraAspect/)
+- [llGetCameraPos](/functions/llGetCameraPos/)
+- [llGetCameraRot](/functions/llGetCameraRot/)
+- [llSetCameraParams](/functions/llSetCameraParams/)
+- [llSetCameraAtOffset](/functions/llSetCameraAtOffset/)
+- [llSetCameraEyeOffset](/functions/llSetCameraEyeOffset/)
+
+<WikiSource />

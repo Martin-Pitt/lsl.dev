@@ -1,0 +1,79 @@
+---
+title: "llSHA1String"
+slug: "functions/llSHA1String"
+category: functions
+source:
+  wiki: "LlSHA1String"
+  url: https://wiki.secondlife.com/wiki/LlSHA1String
+  revision: 1215834
+  date: 2023-12-09
+  contributor: "Garfield Linden"
+  raw: /wiki-source/llsha1string-567137b1.txt
+  license: "Content from the Second Life Wiki article LlSHA1String (revision 1215834, 2023-12-09), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSHA1String" description />
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) of 40 hex characters that is the [SHA-1](https://en.wikipedia.org/wiki/SHA-1) security hash of **src**.
+
+```lsl title="How to use" frame="terminal"
+string result = llSHA1String("");
+```
+
+## Specification
+
+LSL strings are stored in the UTF-8 format.
+
+## Caveats
+
+There's no way to input a zero-byte value into this function, nor any byte value from 128-255, therefore it's currently broken for many purposes (like HMAC-SHA1). The reason is because LSL strings cannot have a unicode null character (U+0000) in them, and LSL has no escape code for the null character (many programming languages use \\0 but LSL does not have this feature). `llEscapeURL("%00")` yields an empty string. As well, inside this function, each character with a Unicode integer value over U+0127 / 007F are dealt with in UTF-8 fashion: in the hex values, 0xC2 is appended to the byte value (hence 0x0080-0x00FF become 0xC280-0xC2FF inside the `llSHA1String()` routine). A JIRA has been filed for this.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+llSay(0, llSHA1String("Hello, Avatar!")); // returns 2E73318E547AF1B28CC0C96F95DDC9B1EE906B8D
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+#### Linux Example
+
+```lsl
+$ echo -n 'Hello, Avatar!' | openssl sha1
+2E73318E547AF1B28CC0C96F95DDC9B1EE906B8D
+```
+
+</details>
+
+## History
+
+- `{{SVN|1291|rev=98903|trunk=*|anchor=file13|ver=1.21.5.97417|ser=1.24.9.98650}}` Initial introduction.
+- `{{SVN|1298|rev=99021|branch=OpenAL|ver=1.21.5.97417|ser=1.24.9.98650|path=branches/openal/indra/lscript/lscript_library/lscript_library.cpp}}`
+
+Integration into OpenAL branch.
+
+- Date of Release [2008-10-31](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Beta_Server/1.25#server-release-notes-2c-second-life-beta-server-1-25-0)
+
+## Additional wiki content
+
+`{{LSLC{{#var:lang}}|Encryption|llSHA1String}}`
+
+## See also
+
+### Functions
+
+- [llMD5String](/functions/llMD5String/)
+- [llSHA256String](/functions/llSHA256String/)
+
+### Articles
+
+- [SHA-1](https://wiki.secondlife.com/wiki/SHA-1) (script implementation)
+
+<WikiSource />

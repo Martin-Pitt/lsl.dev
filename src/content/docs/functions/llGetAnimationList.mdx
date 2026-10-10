@@ -1,0 +1,104 @@
+---
+title: "llGetAnimationList"
+slug: "functions/llGetAnimationList"
+category: functions
+source:
+  wiki: "LlGetAnimationList"
+  url: https://wiki.secondlife.com/wiki/LlGetAnimationList
+  revision: 1204845
+  date: 2016-11-11
+  contributor: "Dan Linden"
+  raw: /wiki-source/llgetanimationlist-e3b14e83.txt
+  license: "Content from the Second Life Wiki article LlGetAnimationList (revision 1204845, 2016-11-11), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetAnimationList" description />
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) of keys of playing animations for **avatar**.
+
+```lsl title="How to use" frame="terminal"
+list result = llGetAnimationList(NULL_KEY);
+```
+
+## Caveats
+
+- There is no internal mechanism to get the name of the animations playing.
+- Standard animations can be started and stopped by scripts, so the list returned may not accurately reflect the avatar's state. Use [llGetAgentInfo](/functions/llGetAgentInfo/) and [llGetAnimation](/functions/llGetAnimation/) when this matters.
+- [Some motions are local to the viewer](https://wiki.secondlife.com/wiki/Internal_Animations#viewer-generated-motions) and cannot be detected by scripts.
+- [Animations that are triggered by other animations are local to the viewer](https://wiki.secondlife.com/wiki/Internal_Animations#user-playable-animations) and cannot be detected by scripts.
+
+## Examples
+
+<details open>
+<summary>This example is a bit involved but there aren't many applications for this function.</summary>
+
+```lsl collapse={1-26, 32-48}
+//Simple Animation Override for Walk
+key old_anim = "6ed24bd8-91aa-4b12-ccc7-c97c857ab4e0";
+string new_anim="yoga_float";
+integer status;
+list check;
+key owner;
+
+default
+{
+    state_entry()
+    {
+        owner = llGetOwner();
+        llRequestPermissions(owner, PERMISSION_TRIGGER_ANIMATION);
+        check = [old_anim];
+    }
+
+    run_time_permissions(integer p)
+    {
+        if(p & PERMISSION_TRIGGER_ANIMATION)
+        {
+            llSetTimerEvent(0.2);
+        }
+    }
+
+    timer()
+    {
+        if(llGetAgentInfo(owner) & AGENT_WALKING)
+        {
+            list anims = llGetAnimationList(owner);
+            if(~llListFindList(anims, check))
+            {
+                status = 1;
+                llStartAnimation(new_anim);
+                llStopAnimation(old_anim);
+            }
+        }
+        else if(status)
+        {
+            llStopAnimation(new_anim);
+            status = 0;
+        }
+    }
+
+    on_rez(integer p)
+    {
+        llResetScript();
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- BUG-1731: type=bug|llGetAnimationList sometimes returns a NULL_KEY
+
+## See also
+
+### Functions
+
+- [llGetAgentInfo](/functions/llGetAgentInfo/) — Gets the avatar info
+- [llGetAnimation](/functions/llGetAnimation/) — Get the avatar's base animation state
+- [llStartAnimation](/functions/llStartAnimation/) — Start an animation on an avatar
+- [llStopAnimation](/functions/llStopAnimation/) — Stop an animation playing on an avatar
+
+<WikiSource />

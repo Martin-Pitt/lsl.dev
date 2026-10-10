@@ -1,0 +1,123 @@
+---
+title: "PRIM_POINT_LIGHT"
+slug: "constants/PRIM_POINT_LIGHT"
+category: constants
+source:
+  wiki: "PRIM POINT LIGHT"
+  url: https://wiki.secondlife.com/wiki/PRIM_POINT_LIGHT
+  revision: 1218793
+  date: 2026-04-18
+  contributor: "Quinn Elara"
+  raw: /wiki-source/prim-point-light-53869ff1.txt
+  license: "Content from the Second Life Wiki article PRIM POINT LIGHT (revision 1218793, 2026-04-18), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="PRIM_POINT_LIGHT" description />
+
+`PRIM_POINT_LIGHT` is used to configure the point light configuration of the prim
+
+## Caveats
+
+- Viewers that do not have advanced lighting enabled can only render 6 lights at a time and projectors will be rendered as omnidirectional light sources. (OpenGL limitations allow for 8 light sources, SL appears to reserve one each for the Sun and Moon.)
+- Viewers that **do** have advanced lighting enabled can render as many lights as their graphics card allows; it is not hard-limited by the viewer.
+- Lights with a high intensity have a wash-out effect when overlapping. Keep this in mind when using multiple lights. ***Never*** create an abundance of lights to get around the 6 light maximum in basic lighting, as viewers with advanced lighting will be washed out and may suffer from client lag.
+- Unlike most color in LSL, which expects a gamma-encoded value (sRGB), this expects a non-gamma-encoded value (linear RGB). This means that the value you set as the light color is not the same value you'd pass to make the source (e.g. filament ) glow the same color. You may wish to implement an [sRGB Electro-Optical Transfer Function (EOTF)](/functions/llsRGB2Linear/) to bypass this.
+- The `falloff` parameter is a bit of a misnomer. Instead of modifying the characteristics of light decay over distance, it instead acts as a modifier to a light's overall intensity value.
+
+## Examples
+
+<details open>
+<summary>Set the prim's color and the color of the light it emits to the same color:-</summary>
+
+```lsl collapse={1-13}
+integer switch;
+
+vector gLampCol = <255,190,121>; //Light colour in regular (0-255) sRGB space. This will be converted to LSL later.
+
+default
+{
+    state_entry()
+    {
+        gLampCol /= 255; //Convert to LSL colour.
+    }
+
+    touch_start(integer total_number)
+    {
+        switch = !switch; //toggle the switch
+        llSetLinkPrimitiveParamsFast(LINK_THIS,[
+            PRIM_POINT_LIGHT,switch,llsRGB2Linear(gLampCol),1,20,0, //Convert colour to linear RGB as PRIM_POINT_LIGHT requires, using llsRGB2Linear
+            PRIM_COLOR,ALL_SIDES,gLampCol,1,
+            PRIM_GLOW,ALL_SIDES,switch,
+            PRIM_FULLBRIGHT,ALL_SIDES,switch]);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Basic light script:-</summary>
+
+```lsl collapse={1-11}
+integer isLightTurnedOn;
+
+default
+{
+    touch_start(integer total_number)
+    {
+//      toggle isLightTurnedOn between TRUE and FALSE
+        isLightTurnedOn = !isLightTurnedOn;
+
+        if (isLightTurnedOn)
+        {
+            llSetPrimitiveParams([
+                PRIM_FULLBRIGHT, ALL_SIDES, FALSE,
+                PRIM_POINT_LIGHT, FALSE, ZERO_VECTOR, 1.0, 10.0, 0.6]);
+        }
+        else
+        {
+            vector COLOR_ORANGE  = <1.000, 0.522, 0.106>;
+
+            llSetPrimitiveParams([
+                PRIM_FULLBRIGHT, ALL_SIDES, TRUE,
+                PRIM_POINT_LIGHT, TRUE, COLOR_ORANGE, 1.0, 10.0, 0.6]);
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>A compact version of the above:-</summary>
+
+```lsl
+integer switch;
+default
+{
+    touch_start(integer total_number)
+    {
+        llSetPrimitiveParams(
+        [       PRIM_FULLBRIGHT, ALL_SIDES, switch = !switch,
+                PRIM_POINT_LIGHT, switch, <1, 0.5, 0.1> *  switch, 1, 10, 0.6 ] );
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+&lt;onlyinclude>`{{#if: {{#vardefine:light_const|{{LSL Const|PRIM_POINT_LIGHT|integer|23|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the prim's point light configuration}}}} {{#vardefine:p_radius_desc|ranges from 0.1 to 20.0}} {{#vardefine:p_falloff_desc|ranges from 0.0 to 2.0}} {{#vardefine:p_intensity_desc|ranges from 0.0 to 1.0}} }}`&lt;/onlyinclude>`{{#if: {{LSL_Function/boolean|boolean}} {{LSL_Function/linear_color|linear_color}} }}`
+
+## See also
+
+### Functions
+
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
+- [llsRGB2Linear](/functions/llsRGB2Linear/)
+
+<WikiSource />

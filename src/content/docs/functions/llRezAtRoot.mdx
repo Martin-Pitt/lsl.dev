@@ -1,0 +1,165 @@
+---
+title: "llRezAtRoot"
+slug: "functions/llRezAtRoot"
+category: functions
+source:
+  wiki: "LlRezAtRoot"
+  url: https://wiki.secondlife.com/wiki/LlRezAtRoot
+  revision: 1218748
+  date: 2026-03-31
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llrezatroot-efec0507.txt
+  license: "Content from the Second Life Wiki article LlRezAtRoot (revision 1218748, 2026-03-31), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRezAtRoot" description />
+
+Instantiate `inventory` object rotated to **rot** with its root at `position`, moving at `velocity`, using `param` as the start parameter
+
+To rez an object so its [center](/functions/llGetGeometricCenter/) is at `position` (instead of the root) use [llRezObject](/functions/llRezObject/) instead.
+
+```lsl title="How to use" frame="terminal"
+llRezAtRoot("", ZERO_VECTOR, ZERO_VECTOR, ZERO_ROTATION, 0);
+```
+
+## Caveats
+
+- Silently fails to rez `inventory` if `position` is more than 10 meters away from the prim trying to rez `inventory`. (Note: the max distance is actually 10.0 + `llVecMag(llGetScale()/2)`)
+- If the object is unattached and the owner of the object does not have copy permission on `inventory`, the object will no longer be present in inventory after it is rezzed (so another attempt to rez (the same object) will fail); if the owner does have copy permission, then a copy is rezzed, and the original `inventory` remains in inventory.
+- If the object is attached and the owner of the object does not have copy permission on `inventory`, an error is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/): "Cannot rez no copy objects from an attached object."
+- Silently fails if you don't have offline building rights on the land. To have the right, your objects needs to *either*:
+- Be on land you own yourself.
+- Be on land where anyone is allowed to build, e.g. a sandbox.
+- Be deeded to the group that owns the land.
+- Be set to the same group that owns the land and the land have the parcel flag 'allow group to build' set.
+- The group role "Always allow 'Create Objects'" will only work to override this when you are online, in the region, or have a child agent in the region. See the issues under Deep Notes for more information.
+- See [object_rez](/events/object_rez/) for examples on how to establish communications between the rezzing object and the new prim.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-13}
+//Rez an object on touch
+string object = "Object";//Object in inventory
+integer start_param = 10;
+rotation rot;
+
+default
+{
+    state_entry()
+    {
+        rot = llEuler2Rot(< 0, 90, 90> * DEG_TO_RAD);
+    }
+    touch_start(integer a)
+    {
+        vector vec = llGetPos() + < 0.0, 0.0, 5.0>; // 5 meter above this
+        vector speed = llGetVel();
+        llRezAtRoot(object, vec, speed, rot, start_param);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-16}
+//Rez an object on touch, with relative position, rotation, and velocity all described in the rezzing prim's coordinate system.
+string object = "Object"; // Name of object in inventory
+vector relativePosOffset = <2.0, 0.0, 1.0>; // "Forward" and a little "above" this prim
+vector relativeVel = <1.0, 0.0, 0.0>; // Traveling in this prim's "forward" direction at 1m/s
+rotation relativeRot = <0.707107, 0.0, 0.0, 0.707107>; // Rotated 90 degrees on the x-axis compared to this prim
+integer startParam = 10;
+
+default
+{
+    touch_start(integer a)
+    {
+        vector myPos = llGetPos();
+        rotation myRot = llGetRot();
+
+        vector rezPos = myPos+relativePosOffset*myRot;
+        vector rezVel = relativeVel*myRot;
+        rotation rezRot = relativeRot*myRot;
+
+        llRezAtRoot(object, rezPos, rezVel, rezRot, startParam);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl collapse={1-32, 38-42}
+/*
+    NO COPY Rezzer Example by Daemonika Nightfire
+    Always rez the first object at touch, removing it from the content,
+    when the first one is removed, the next object automatically moves to the first position.
+
+    Content example:
+    object (no copy)
+    object 1 (no copy)
+    object 2 (no copy)
+    object 3 (no copy)
+    object 4 (no copy)
+    ...
+
+*/
+
+vector relativePosOffset = <2.0, 0.0, 1.0>; // "Forward" and a little "above" this prim
+vector relativeVel = <1.0, 0.0, 0.0>; // Traveling in this prim's "forward" direction at 1m/s
+vector relativeRot = <90, 0, 0>; // Rotated 90 degrees on the x-axis compared to this prim
+integer startParam = 10;
+
+default
+{
+    touch_start(integer a)
+    {
+        if(llGetInventoryNumber(INVENTORY_OBJECT) > 0) // checks if at least 1 object is present.
+        {
+            string object = llGetInventoryName(INVENTORY_OBJECT, 0); // name of the first object in inventory
+            vector myPos = llGetPos();
+            rotation myRot = llGetRot();
+
+            vector rezPos = myPos+relativePosOffset*myRot;
+            vector rezVel = relativeVel*myRot;
+            rotation rezRot = llEuler2Rot(relativeRot*DEG_TO_RAD)*myRot;
+
+            llRezAtRoot(object, rezPos, rezVel, rezRot, startParam);
+        }
+        else
+        {
+            llSay(0, "This rezzer is empty");
+        }
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-3145 (bug): group ROLE permissions only work for scripted rez when owner is online
+
+## See also
+
+### Functions
+
+- [llRezObjectWithParams](/functions/llRezObjectWithParams/) — Modern alternative with more parameters.
+- [llRezObject](/functions/llRezObject/)
+- [llGetStartParameter](/functions/llGetStartParameter/)
+- [llGodLikeRezObject](/functions/llGodLikeRezObject/)
+
+### Events
+
+- [object_rez](/events/object_rez/) — triggered when this object rezzes an object from inventory
+
+<WikiSource />

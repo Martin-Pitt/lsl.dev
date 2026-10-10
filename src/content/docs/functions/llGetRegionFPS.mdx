@@ -1,0 +1,72 @@
+---
+title: "llGetRegionFPS"
+slug: "functions/llGetRegionFPS"
+category: functions
+source:
+  wiki: "LlGetRegionFPS"
+  url: https://wiki.secondlife.com/wiki/LlGetRegionFPS
+  revision: 1194245
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetregionfps-0d4fd2cb.txt
+  license: "Content from the Second Life Wiki article LlGetRegionFPS (revision 1194245, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetRegionFPS" description />
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the mean region frames per second.
+
+```lsl title="How to use" frame="terminal"
+float result = llGetRegionFPS();
+```
+
+## Caveats
+
+- Region FPS is currently capped at 45.0 frames per second, so this function never returns greater than 45.0
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-21}
+// The beginnings of a region-info script.
+string region;
+string sim;
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(1.0);
+    }
+
+    timer()
+    {
+        string here = llGetRegionName();
+        if(region != here)
+        {
+            sim = llGetSimulatorHostname();
+            region = here;
+        }
+        llSetText(
+                "   REGION NAME : " + region +
+              "\n  SIM HOSTNAME : " + sim +
+              "\nTIME DIALATION : " + (string)llGetRegionTimeDilation() +
+              "\n    REGION FPS : " + (string)llGetRegionFPS(),
+            <0,1,0>, 1.0);
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetSimulatorHostname](/functions/llGetSimulatorHostname/) — Gets the hostname of the server
+- [llGetRegionTimeDilation](/functions/llGetRegionTimeDilation/) — Gets the region time dilation
+
+<WikiSource />

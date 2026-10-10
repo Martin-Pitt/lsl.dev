@@ -1,0 +1,90 @@
+---
+title: "llGiveMoney"
+slug: "functions/llGiveMoney"
+category: functions
+source:
+  wiki: "LlGiveMoney"
+  url: https://wiki.secondlife.com/wiki/LlGiveMoney
+  revision: 1194290
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgivemoney-6c4ebde5.txt
+  license: "Content from the Second Life Wiki article LlGiveMoney (revision 1194290, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGiveMoney" />
+
+Transfer **amount** of L$ money from script owner to **destination** avatar.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is always `zero`. In contrast [llTransferLindenDollars](/functions/llTransferLindenDollars/) returns a [key](https://wiki.secondlife.com/wiki/key) that can be used to match the function call to the resulting [transaction_result](/events/transaction_result/) event and the [transaction history](https://secondlife.com/my/account/transactions.php).
+
+```lsl title="How to use" frame="terminal"
+integer result = llGiveMoney(NULL_KEY, 0);
+```
+
+## Caveats
+
+- An object cannot pay another object.
+- It is impossible for a script to tell if an `llGiveMoney` transaction succeeded or failed. Use [llTransferLindenDollars](/functions/llTransferLindenDollars/) instead.
+- Objects deeded to groups cannot give money (the permission cannot be granted).
+- Use is limited to 30 payments in a 30 second interval for all scripts owned by that resident on a region. Sustained overage will produce a script error and halt payments while the rate remains excessive. Historically, faster payments have failed intermittently.
+- Once a script has the [PERMISSION_DEBIT](/constants/PERMISSION_DEBIT/) permission it can empty an account of L$.
+- Fraud & theft are both `{{LL|TOS}}` violations and crimes. Misuse this function and you risk being banned and legal action. In addition LL may freeze the accounts of anyone the money is transferred to and restore it to it's rightful owners. This may involve retrieving it from third party exchanges and accounts on those exchanges being frozen. The system is not designed to be friendly towards fraud.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-27}
+// Pay 100 L$ to Fred Bloggs when he touches this prim, then die
+// Compare this example with that shown under llTransferLindenDollars
+
+string  Recipient = "Fred Bloggs";      // Authorised recipient
+integer Amount = 100;                   // Amount to pay Fred when he touches the prim
+integer DebitPerms;
+
+default
+{
+    state_entry()
+    {
+        // Ask the owner for permission to debit their account
+        llRequestPermissions(llGetOwner(), PERMISSION_DEBIT);
+    }
+
+    run_time_permissions (integer perm)
+    {
+        if  (perm & PERMISSION_DEBIT)
+            DebitPerms = TRUE;
+    }
+
+    touch_start(integer num_detected)
+    {
+        if (!DebitPerms)
+            return;                     // Cannot proceed - debit permissions not granted
+        if (llDetectedName(0) != Recipient)
+            return;                     // unauthorised person is touching - ignore
+
+        key id = llDetectedKey(0);      // Get toucher's (i.e. Fred's) UUID
+        llGiveMoney(id, Amount);        // Give him the money
+        llDie();                        // Die so Fred can't keep taking money
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llTransferLindenDollars](/functions/llTransferLindenDollars/)
+- [llSetPayPrice](/functions/llSetPayPrice/)
+
+### Events
+
+- [money](/events/money/)
+- [transaction_result](/events/transaction_result/)
+
+<WikiSource />

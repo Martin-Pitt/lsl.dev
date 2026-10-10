@@ -1,0 +1,93 @@
+---
+title: "llKeysKeyValue"
+slug: "functions/llKeysKeyValue"
+category: functions
+source:
+  wiki: "LlKeysKeyValue"
+  url: https://wiki.secondlife.com/wiki/LlKeysKeyValue
+  revision: 1218866
+  date: 2026-06-02
+  contributor: "Pazako Karu"
+  raw: /wiki-source/llkeyskeyvalue-150575b3.txt
+  license: "Content from the Second Life Wiki article LlKeysKeyValue (revision 1218866, 2026-06-02), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llKeysKeyValue" />
+
+Start an asynchronous transaction to request a number of keys from the script's [Experience](/categories/experience/).
+
+This function will attempt to retrieve the number of keys requested but may return less if there are not enough to fulfill the full amount requested or if the list is too large. The length of the returned list is limited to 4097 characters (the success flag "1" and 4096 characters). The order keys are returned is not guaranteed but is stable between subsequent calls as long as no keys are added or removed.
+
+The error [XP_ERROR_KEY_NOT_FOUND](/constants/XP_ERROR_KEY_NOT_FOUND/) is returned if there index given is greater than or equal to the number of keys.
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) that can be used to identify the corresponding [dataserver](/events/dataserver/) event to determine if this command succeeded or failed.
+
+```lsl title="How to use" frame="terminal"
+key result = llKeysKeyValue(0, 0);
+```
+
+## Caveats
+
+- It is recommended that keys do not contain commas due to this function returning keys in CSV format.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={17-32}
+key trans;
+default
+{
+    state_entry()
+    {
+        // retrieve the first 10 keys
+        trans = llKeysKeyValue(0, 10);
+    }
+
+    dataserver(key t, string value)
+    {
+        if (t == trans)
+        {
+            // our llKeysKeyValue transaction is done
+            list result = llCSV2List(value);
+            if (llList2Integer(result, 0) == 1)
+            {
+                llSay(0, "Keys retrieved: "+(string)llGetSubString(value, 2, -1));
+            }
+            else if (llList2Integer(result, 1) == XP_ERROR_KEY_NOT_FOUND)
+            {
+                // no more keys
+                llSay(0, "No more keys" );
+            }
+            else
+            {
+                // keys request failed
+                llSay(0, "Key-value failed to request keys: " + llGetExperienceErrorMessage(llList2Integer(result, 1)) );
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+[Category:Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)
+
+## See also
+
+### Functions
+
+- [llGetExperienceErrorMessage](/functions/llGetExperienceErrorMessage/)
+- [llCreateKeyValue](/functions/llCreateKeyValue/)
+- [llReadKeyValue](/functions/llReadKeyValue/)
+- [llUpdateKeyValue](/functions/llUpdateKeyValue/)
+- [llDeleteKeyValue](/functions/llDeleteKeyValue/)
+- [llDataSizeKeyValue](/functions/llDataSizeKeyValue/)
+- [llKeyCountKeyValue](/functions/llKeyCountKeyValue/)
+- [llKeysKeyValue](/functions/llKeysKeyValue/)
+
+<WikiSource />

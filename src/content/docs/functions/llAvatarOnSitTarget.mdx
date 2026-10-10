@@ -1,0 +1,164 @@
+---
+title: "llAvatarOnSitTarget"
+slug: "functions/llAvatarOnSitTarget"
+category: functions
+source:
+  wiki: "LlAvatarOnSitTarget"
+  url: https://wiki.secondlife.com/wiki/LlAvatarOnSitTarget
+  revision: 1210692
+  date: 2022-04-23
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llavataronsittarget-42a70054.txt
+  license: "Content from the Second Life Wiki article LlAvatarOnSitTarget (revision 1210692, 2022-04-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llAvatarOnSitTarget" />
+
+If the prim lacks a [sit target](/functions/llSitTarget/) or there is no avatar sitting on the prim, then
+
+[NULL_KEY](/constants/NULL_KEY/)
+
+is returned.
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) that is the [UUID](https://wiki.secondlife.com/wiki/UUID) of the user seated on the prim.
+
+```lsl title="How to use" frame="terminal"
+key result = llAvatarOnSitTarget();
+```
+
+## Caveats
+
+- A prim does not have a sit target unless [llSitTarget](/functions/llSitTarget/) has been called with a **nonzero** vector as the first argument.
+- If the prim lacks a sit target or the avatar is seated upon a different prim, the only way to determine how many and which avatars are seated upon the object is to scan the link set (for an example of this, see [llGetNumberOfPrims](/functions/llGetNumberOfPrims/#useful-snippets)).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-10, 16-20}
+default
+{
+    state_entry()
+    {
+        // set sit target, otherwise this will not work
+        llSitTarget(<0.0, 0.0, 0.1>, ZERO_ROTATION);
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        {
+            key av = llAvatarOnSitTarget();
+            if (av) // evaluated as true if key is valid and not NULL_KEY
+            {
+                llSay(0, "Hello " + llKey2Name(av) + ", thank you for sitting down");
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+//Gets the link number of a seated avatar
+integer GetAgentLinkNumber(key avatar)
+{
+    integer link_num = llGetNumberOfPrims();
+    while (link_num > 1) // Check only child prims.
+    {
+        if (llGetLinkKey(link_num) == avatar) // If it is the avatar we want
+        {
+            return link_num; // then return the link number
+        }
+        --link_num; // else go on with next child.
+    }
+    // Avatar wasn't found
+    return FALSE; // 0 (zero) for easy testing.
+}
+```
+
+```lsl collapse={1-13, 19-28, 43-55}
+//It's sometimes useful to use a state change
+//useful when the prim is linked to an other prim
+//and useful with a dialog box
+default
+{
+    state_entry()
+    {
+        //"Sit target is a prim property."
+        llSitTarget(<0.0, 0.0, 0.1>, ZERO_ROTATION);
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        {
+            key av_sit = llAvatarOnSitTarget();
+            if (av_sit)
+            {
+                //Someone is on the sit target.
+                state sitting;
+            }
+        }
+    }
+}
+
+state sitting
+{
+    state_entry()
+    {
+        //Open a dialog box when an avatar is sitting on the prim
+        key av_menu = llAvatarOnSitTarget();
+        llListen(-99, "", av_menu, "Yes");
+        llDialog(av_menu, "\nDo you like this example?", ["Yes", "No" ] , -99);
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        {
+            key av_unsit = llAvatarOnSitTarget();
+            if (av_unsit == NULL_KEY)
+            {
+                //No one is on the sit target.
+                //"On state change all listens are removed automatically."
+                state default;
+            }
+        }
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        // If the user clicked the "Yes" button
+        llWhisper(0, "Thank you");
+    }
+}
+```
+
+## Notes
+
+The position of an avatar on a sit target can be determined with the use of [llGetObjectDetails](/functions/llGetObjectDetails/) (see [llSitTarget](/functions/llSitTarget/#useful-snippets) for an example).
+
+## See also
+
+### Functions
+
+- [llAvatarOnLinkSitTarget](/functions/llAvatarOnLinkSitTarget/)
+- [llSitTarget](/functions/llSitTarget/)
+- [llLinkSitTarget](/functions/llLinkSitTarget/)
+- [llGetLinkKey](/functions/llGetLinkKey/)
+
+### Events
+
+- [changed](/events/changed/)
+
+### Articles
+
+- [CHANGED_LINK](/constants/CHANGED_LINK/)
+
+<WikiSource />

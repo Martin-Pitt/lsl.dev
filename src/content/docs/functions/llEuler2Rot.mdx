@@ -1,0 +1,64 @@
+---
+title: "llEuler2Rot"
+slug: "functions/llEuler2Rot"
+category: functions
+source:
+  wiki: "LlEuler2Rot"
+  url: https://wiki.secondlife.com/wiki/LlEuler2Rot
+  revision: 1197169
+  date: 2015-08-08
+  contributor: "Strife Onizuka"
+  raw: /wiki-source/lleuler2rot-cf11e3bf.txt
+  license: "Content from the Second Life Wiki article LlEuler2Rot (revision 1197169, 2015-08-08), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llEuler2Rot" description />
+
+Returns a [rotation](https://wiki.secondlife.com/wiki/rotation) representation of the [Euler Angles](https://en.wikipedia.org/wiki/Euler_Angles) `v`.
+
+```lsl title="How to use" frame="terminal"
+rotation result = llEuler2Rot(ZERO_VECTOR);
+```
+
+## Specification
+
+The [Euler](https://wiki.secondlife.com/wiki/Category:LSL_Euler) angle vector (in radians) is converted to a rotation by doing the rotations around the 3 axes in Z, Y, X order. So `llEuler2Rot(<1.0, 2.0, 3.0> * DEG_TO_RAD)` generates a rotation by first rotating 3 degrees around the global Z axis, then rotating the result around the global Y axis, and finally rotating that 1 degree around the global X axis.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        vector input = <73.0, -63.0, 20.0> * DEG_TO_RAD;
+        rotation rot = llEuler2Rot(input);
+        llSay(0,"The Euler2Rot of "+(string)input+" is: "+(string)rot );
+    }
+}
+```
+
+</details>
+
+## Notes
+
+```lsl
+v/=2;
+rotation k = <0.0, 0.0, llSin(v.z), llCos(v.z)> * <0.0, llSin(v.y), 0.0, llCos(v.y)> * <llSin(v.x), 0.0, 0.0, llCos(v.x)>;
+```
+
+## See also
+
+### Functions
+
+- [llRot2Euler](/functions/llRot2Euler/)
+
+### Articles
+
+- [Euler Angles](https://en.wikipedia.org/wiki/Euler_Angles)
+
+<WikiSource />

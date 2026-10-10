@@ -1,0 +1,335 @@
+---
+title: "llGetEnvironment"
+slug: "functions/llGetEnvironment"
+category: functions
+source:
+  wiki: "LlGetEnvironment"
+  url: https://wiki.secondlife.com/wiki/LlGetEnvironment
+  revision: 1218895
+  date: 2026-06-05
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llgetenvironment-871f5020.txt
+  license: "Content from the Second Life Wiki article LlGetEnvironment (revision 1218895, 2026-06-05), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetEnvironment" />
+
+If an unknown rule is encountered in the parameter list an error is sent to the debug channel.
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) containing the current environment values for the parcel or region as a list of attributes. Takes a list of attributes to retrieve in **params** and returns them in the order requested.
+
+```lsl title="How to use" frame="terminal"
+list result = llGetEnvironment(ZERO_VECTOR, []);
+```
+
+## Specification
+
+`{{LSL_Function/color|color}}`
+
+### Parameters
+
+<table>
+	<tr>
+		<th>parameter</th>
+		<th>integer value</th>
+		<th>return values</th>
+		<th>description</th>
+	</tr>
+	<tr>
+		<td>[SKY_TRACKS](/constants/SKY_TRACKS/)`, float sky2, float sky3, float sky4`</td>
+		<td>15</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) sky2, [float](https://wiki.secondlife.com/wiki/float) sky3, [float](https://wiki.secondlife.com/wiki/float) sky4</td>
+		<td>Altitudes for sky transitions in the region.</td>
+	</tr>
+	<tr>
+		<td>[SKY_AMBIENT](/constants/SKY_AMBIENT/)</td>
+		<td>0</td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) ambient_color</td>
+		<td>The ambient color of the environment.</td>
+	</tr>
+	<tr>
+		<td>[SKY_TEXTURE_DEFAULTS](/constants/SKY_TEXTURE_DEFAULTS/)`, integer bloom_is_default, integer halo_is_default, integer rainbow_is_default`</td>
+		<td>1</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) bloom_is_default, [integer](https://wiki.secondlife.com/wiki/integer) halo_is_default, [integer](https://wiki.secondlife.com/wiki/integer) rainbow_is_default</td>
+		<td>Checks if the textures are currently set to use the default. For default values, the returned integer is 1. If the texture uses something other than the default, the returned value is 0.</td>
+	</tr>
+	<tr>
+		<td>[SKY_CLOUDS](/constants/SKY_CLOUDS/)`, vector color, float coverage, float scale, float variance, vector scroll, vector density, vector detail, integer is_default`</td>
+		<td>2</td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) `color`, [float](https://wiki.secondlife.com/wiki/float) coverage, [float](https://wiki.secondlife.com/wiki/float) scale, [float](https://wiki.secondlife.com/wiki/float) variance, [vector](https://wiki.secondlife.com/wiki/vector) scroll, [vector](https://wiki.secondlife.com/wiki/vector) density, [vector](https://wiki.secondlife.com/wiki/vector) detail, [integer](https://wiki.secondlife.com/wiki/integer) is_default</td>
+		<td>
+
+			Environmental cloud information.
+
+			- color: The color used for the clouds.
+			- coverage: The coverage percentage.
+			- scale: The scaling applied to the cloud textures.
+			- variance: A randomizing factor applied to the main cloud layer
+			- scroll: The scroll speed of the clouds.
+			- X is east/west
+			- Y is north/south
+			- Z is unused
+			- density: The X/Y and D parameter used to generate cloud density
+			- detail: The X/Y and D parameter used to generate cloud details.
+			- is_default: 1 if the clouds are using the default texture.
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_DOME](/constants/SKY_DOME/)`, float offset, float radius, float max_altitude`</td>
+		<td>4</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) offset, [float](https://wiki.secondlife.com/wiki/float) radius, [float](https://wiki.secondlife.com/wiki/float) max_altitude</td>
+		<td>
+
+			Sky dome information.
+
+			- offset
+			- radius
+			- maximum altitude
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_GAMMA](/constants/SKY_GAMMA/)</td>
+		<td>5</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) gamma</td>
+		<td>The gamma value applied to the scene. In viewer versions 7.0+, this value has been repurposed into the "HDR Scale" value in the EEP editor. (Thus, this will return the value of the HDR Scale slider).</td>
+	</tr>
+	<tr>
+		<td>[SKY_GLOW](/constants/SKY_GLOW/)`, float glow_size, float glow_focus`</td>
+		<td>6</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) glow_size, [float](https://wiki.secondlife.com/wiki/float) glow_focus</td>
+		<td>
+
+			Glow applied to the sun and moon.
+
+			- size of glow effect
+			- focus of glow effect
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_MOON](/constants/SKY_MOON/)`, rotation rot, float scale, float brightness, integer is_default_texture, vector direction, vector ambient_color, vector diffuse_color`</td>
+		<td>9</td>
+		<td>[rotation](https://wiki.secondlife.com/wiki/rotation) `rot`, [float](https://wiki.secondlife.com/wiki/float) scale, [float](https://wiki.secondlife.com/wiki/float) brightness, [integer](https://wiki.secondlife.com/wiki/integer) is_default_texture, [vector](https://wiki.secondlife.com/wiki/vector) direction, [vector](https://wiki.secondlife.com/wiki/vector) ambient_color, [vector](https://wiki.secondlife.com/wiki/vector) diffuse_color</td>
+		<td>
+
+			Detailed moon information
+
+			- rot: The current rotation applied to the moon.
+			- scale: The current scale applied to the moon's texture
+			- brightness: The moon's brightness
+			- is_default_texture: 1 if the moon texture is set to the default. 0 otherwise
+			- direction: A unit vector pointing at the moon.
+			- ambient_color: The ambient color of the moon
+			- diffuse_color: The diffuse color applied to the moon.
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_STAR_BRIGHTNESS](/constants/SKY_STAR_BRIGHTNESS/)</td>
+		<td>13</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) brightness</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[SKY_SUN](/constants/SKY_SUN/)`, rotation rot, float scale, vector sun_color, integer is_default_texture, vector direction, vector ambient_color, vector diffuse_color`</td>
+		<td>14</td>
+		<td>[rotation](https://wiki.secondlife.com/wiki/rotation) rot, [float](https://wiki.secondlife.com/wiki/float) scale, [vector](https://wiki.secondlife.com/wiki/vector) sun_color, [integer](https://wiki.secondlife.com/wiki/integer) is_default_texture, [vector](https://wiki.secondlife.com/wiki/vector) direction, [vector](https://wiki.secondlife.com/wiki/vector) ambient_color, [vector](https://wiki.secondlife.com/wiki/vector) diffuse_color</td>
+		<td>
+
+			Detailed sun information
+
+			- rot: The current rotation applied to the sun.
+			- scale: The current scale applied to the sun's texture
+			- sun_color:
+			- is_default_texture: 1 if the sun texture is set to the default. 0 otherwise
+			- direction: A unit vector pointing at the sun.
+			- ambient_color: The ambient color of the sun.
+			- diffuse_color: The diffuse color applied to the sun.
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_PLANET](/constants/SKY_PLANET/)`, float planet_radius, float sky_bottom_radius, float sky_top_radius`</td>
+		<td>10</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) planet_radius, [float](https://wiki.secondlife.com/wiki/float) sky_bottom_radius, [float](https://wiki.secondlife.com/wiki/float) sky_top_radius</td>
+		<td>
+
+			Planet information used in rendering the sky
+
+			- planet_radius
+			- sky_bottom_radius
+			- sky_top_radius
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_REFRACTION](/constants/SKY_REFRACTION/)`, float moisture_level, float droplet_radius, float ice_level`</td>
+		<td>11</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) moisture_level, [float](https://wiki.secondlife.com/wiki/float) droplet_radius, [float](https://wiki.secondlife.com/wiki/float) ice_level</td>
+		<td>
+
+			Sky refraction parameters for rainbows and optical effects.
+
+			- moisture_level
+			- droplet_radius
+			- ice_level
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_LIGHT](/constants/SKY_LIGHT/)`, vector light_direction, vector fade_color, vector total_ambient`</td>
+		<td>8</td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) light_direction, [vector](https://wiki.secondlife.com/wiki/vector) fade_color, [vector](https://wiki.secondlife.com/wiki/vector) total_ambient</td>
+		<td>
+
+			Miscellaneous lighting values
+
+			- light_direction: A unit vector indicating the direction of the dominant light source.
+			- fade_color: A `color` vector representing the current color of the light emitted from the dominant light source (in sRGB space).
+			- total_ambient: A `color` vector representing the current ambient color in use in the scene (in sRGB space).
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_REFLECTION_PROBE_AMBIANCE](/constants/SKY_REFLECTION_PROBE_AMBIANCE/)</td>
+		<td>24</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) ambiance</td>
+		<td>Minimum ambiance value for all [reflection probes](/constants/PRIM_REFLECTION_PROBE/). range = \[0.0, 10.0\] **Caveat:** This parameter will be supported in the upcoming GLTF Materials project. Currently it will only work in supported testing areas with a supported test viewer.</td>
+	</tr>
+	<tr>
+		<td>[WATER_BLUR_MULTIPLIER](/constants/WATER_BLUR_MULTIPLIER/)</td>
+		<td>100</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) multiplier</td>
+		<td>Multiplier applied to blur the scene when under water.</td>
+	</tr>
+	<tr>
+		<td>[WATER_FOG](/constants/WATER_FOG/)`, vector color, float density, float modulation`</td>
+		<td>101</td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) `{{LSL_Function/color|color}}`, [float](https://wiki.secondlife.com/wiki/float) density, [float](https://wiki.secondlife.com/wiki/float) modulation</td>
+		<td>
+
+			Fog parameters applied when underwater
+
+			- color: The color of the underwater fog
+			- density: Density exponent applied to the fog
+			- modulation:
+
+		</td>
+	</tr>
+	<tr>
+		<td>[WATER_FRESNEL](/constants/WATER_FRESNEL/)`, float offset, float scale`</td>
+		<td>102</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) offset, [float](https://wiki.secondlife.com/wiki/float) scale</td>
+		<td>
+
+			Fresnel scattering applied to the surface of the water.
+
+			- offset
+			- scale
+
+		</td>
+	</tr>
+	<tr>
+		<td>[WATER_TEXTURE_DEFAULTS](/constants/WATER_TEXTURE_DEFAULTS/)`, integer normal_is_default, integer transparent_is_default`</td>
+		<td>103</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) normal_is_default, [integer](https://wiki.secondlife.com/wiki/integer) transparent_is_default</td>
+		<td>Checks if the textures are currently set to use the default. For default values the returned integer is 1, if the texture uses something other than the default this value is 0.</td>
+	</tr>
+	<tr>
+		<td>[WATER_NORMAL_SCALE](/constants/WATER_NORMAL_SCALE/)</td>
+		<td>104</td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) scale</td>
+		<td>Scaling applied to the water normal map.</td>
+	</tr>
+	<tr>
+		<td>[WATER_REFRACTION](/constants/WATER_REFRACTION/)`, float scale_above, float scale_below`</td>
+		<td>105</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) scale_above, [float](https://wiki.secondlife.com/wiki/float) scale_below</td>
+		<td>
+
+			Refraction factors when looking through the surface of the water.
+
+			- scale_above
+			- scale_below
+
+		</td>
+	</tr>
+	<tr>
+		<td>[WATER_WAVE_DIRECTION](/constants/WATER_WAVE_DIRECTION/)`, vector large_wave, vector small_wave`</td>
+		<td>106</td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) large_wave, [vector](https://wiki.secondlife.com/wiki/vector) small_wave</td>
+		<td>
+
+			Vector for the directions of the waves Y represents north/south and X represents movement east/west.
+
+			- large_wave: Large wave speed and direction.
+			- small_wave: Small wave speed and direction.
+
+		</td>
+	</tr>
+	<tr>
+		<td>[ENVIRONMENT_DAYINFO](/constants/ENVIRONMENT_DAYINFO/)`, integer day_length, integer day_offset, float secs_since_midnight`</td>
+		<td>200</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) day_length, [integer](https://wiki.secondlife.com/wiki/integer) day_offset, [float](https://wiki.secondlife.com/wiki/float) secs_since_midnight</td>
+		<td>
+
+			Current time and day information
+
+			- day_length: Number of seconds in the environments day cycle.
+			- day_offset: Number of seconds day cycle is offset from GMT.
+			- secs_since_midnight: Number of seconds elapsed since the last day cycle midnight.
+
+		</td>
+	</tr>
+</table>
+
+## Caveats
+
+- If the script can not run in the requested parcel, this function returns an empty list and issues a warning in the debug channel.
+- [SKY_LIGHT](/constants/SKY_LIGHT/)'s param *fade_color* does not return a clamped value, meaning an unusually bright scene will cause it to return an out-of-bounds color. (This can be fixed by clamping the value manually, but this should really return a clamped value).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    touch_start(integer total_number)
+    {
+        list environment = llGetEnvironment(llGetPos(), [SKY_TRACKS, SKY_AMBIENT, SKY_CLOUDS]);
+        llOwnerSay(llDumpList2String(environment, ", "));
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llSetAgentEnvironment](/functions/llSetAgentEnvironment/)
+- [llSetEnvironment](/functions/llSetEnvironment/)
+- [llReplaceAgentEnvironment](/functions/llReplaceAgentEnvironment/)
+- [llReplaceEnvironment](/functions/llReplaceEnvironment/)
+- [llGetSunDirection](/functions/llGetSunDirection/)
+- [llGetRegionSunDirection](/functions/llGetRegionSunDirection/)
+- [llGetMoonDirection](/functions/llGetMoonDirection/)
+- [llGetRegionMoonDirection](/functions/llGetRegionMoonDirection/)
+- [llGetSunRotation](/functions/llGetSunRotation/)
+- [llGetRegionSunRotation](/functions/llGetRegionSunRotation/)
+- [llGetMoonRotation](/functions/llGetMoonRotation/)
+- [llGetRegionMoonRotation](/functions/llGetRegionMoonRotation/)
+- [llGetDayLength](/functions/llGetDayLength/)
+- [llGetRegionDayLength](/functions/llGetRegionDayLength/)
+- [llGetDayOffset](/functions/llGetDayOffset/)
+- [llGetRegionDayOffset](/functions/llGetRegionDayOffset/)
+- [llGetTimeOfDay](/functions/llGetTimeOfDay/)
+- [llGetRegionTimeOfDay](/functions/llGetRegionTimeOfDay/)
+
+<WikiSource />

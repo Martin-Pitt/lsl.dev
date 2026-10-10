@@ -1,0 +1,109 @@
+---
+title: "llUpdateCharacter"
+slug: "functions/llUpdateCharacter"
+category: functions
+source:
+  wiki: "LlUpdateCharacter"
+  url: https://wiki.secondlife.com/wiki/LlUpdateCharacter
+  revision: 1194330
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/llupdatecharacter-3817989c.txt
+  license: "Content from the Second Life Wiki article LlUpdateCharacter (revision 1194330, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llUpdateCharacter" description />
+
+Updates settings for a character
+
+```lsl title="How to use" frame="terminal"
+llUpdateCharacter([]);
+```
+
+## Specification
+
+<ConstantGroup name="CharacterParam" />
+
+| Option |  | Default | Range / Values | Description |
+| --- | --- | --- | --- | --- |
+| [CHARACTER_DESIRED_SPEED](/constants/CHARACTER_DESIRED_SPEED/) | 1 | 6 | \[0.2, 40.0\] | Speed of pursuit in meters per second. |
+| [CHARACTER_RADIUS](/constants/CHARACTER_RADIUS/) | 2 |  | \[0.125, 5.0\] | Set collision capsule radius. |
+| [CHARACTER_LENGTH](/constants/CHARACTER_LENGTH/) | 3 |  | (0.0, 10.0\] | Set collision capsule length If the value is less than twice the **radius** plus 0.1m, it will be set to twice the radius plus 0.1m. |
+| [CHARACTER_ORIENTATION](/constants/CHARACTER_ORIENTATION/) | 4 | [VERTICAL](/constants/VERTICAL/) | [VERTICAL](/constants/VERTICAL/), [HORIZONTAL](/constants/HORIZONTAL/) | Set the character orientation. |
+| [TRAVERSAL_TYPE](/constants/TRAVERSAL_TYPE/) | 7 | [TRAVERSAL_TYPE_SLOW](/constants/TRAVERSAL_TYPE_SLOW/) | [TRAVERSAL_TYPE_FAST](/constants/TRAVERSAL_TYPE_FAST/), [TRAVERSAL_TYPE_SLOW](/constants/TRAVERSAL_TYPE_SLOW/), [TRAVERSAL_TYPE_NONE](/constants/TRAVERSAL_TYPE_NONE/) | Controls the speed at which characters moves on terrain that is less than 100% walkable will move faster (e.g., a cat crossing a street) or slower (e.g., a car driving in a swamp). To use [\_FAST](/constants/TRAVERSAL_TYPE_FAST/) or [\_SLOW](/constants/TRAVERSAL_TYPE_SLOW/), you must specify a [CHARACTER_TYPE](/constants/CHARACTER_TYPE/). |
+| [CHARACTER_TYPE](/constants/CHARACTER_TYPE/) | 6 | [CHARACTER_TYPE_NONE](/constants/CHARACTER_TYPE_NONE/) | [CHARACTER_TYPE_A](/constants/CHARACTER_TYPE_A/), [CHARACTER_TYPE_B](/constants/CHARACTER_TYPE_B/), [CHARACTER_TYPE_C](/constants/CHARACTER_TYPE_C/), [CHARACTER_TYPE_D](/constants/CHARACTER_TYPE_D/), [CHARACTER_TYPE_NONE](/constants/CHARACTER_TYPE_NONE/) | Specifies which walkability coefficient will be used by this character. |
+| [CHARACTER_AVOIDANCE_MODE](/constants/CHARACTER_AVOIDANCE_MODE/) | 5 | [AVOID_CHARACTERS](/constants/AVOID_CHARACTERS/) \| [AVOID_DYNAMIC_OBSTACLES](/constants/AVOID_DYNAMIC_OBSTACLES/) | Combinable Flags: [AVOID_CHARACTERS](/constants/AVOID_CHARACTERS/), [AVOID_DYNAMIC_OBSTACLES](/constants/AVOID_DYNAMIC_OBSTACLES/), [AVOID_NONE](/constants/AVOID_NONE/) | Allows you to specify that a character should not try to avoid other characters, should not try to avoid dynamic obstacles (relatively fast moving objects and avatars), or both. This is framed in the positive sense (`[CHARACTER_AVOIDANCE_MODE, AVOID_CHARACTERS]` would create a character that avoided other characters but not agents or moving vehicles). Setting this parameter to [AVOID_NONE](/constants/AVOID_NONE/) causes the character to not avoid either category. |
+| [CHARACTER_MAX_ACCEL](/constants/CHARACTER_MAX_ACCEL/) | 8 | 20 | \[0.5, 40.0\] | The character's maximum acceleration rate. |
+| [CHARACTER_MAX_DECEL](/constants/CHARACTER_MAX_DECEL/) | 9 | 30 | \[0.5, 60.0\] | The character's maximum deceleration rate. |
+| [CHARACTER_DESIRED_TURN_SPEED](/constants/CHARACTER_DESIRED_TURN_SPEED/) | 12 | 6 | \[0.02, 40.0\] | The character's maximum speed while turning--note that this is only loosely enforced (i.e., a character may turn at higher speeds under certain conditions) |
+| [CHARACTER_MAX_TURN_RADIUS](/constants/CHARACTER_MAX_TURN_RADIUS/) | 10 | 1.25 | \[0.1, 10.0\] | The character's turn radius when traveling at [CHARACTER_DESIRED_TURN_SPEED](/constants/CHARACTER_DESIRED_TURN_SPEED/) |
+| [CHARACTER_MAX_SPEED](/constants/CHARACTER_MAX_SPEED/) | 13 | 20 | \[1, 40.0\] | The character's maximum speed. Affects speed when avoiding dynamic obstacles and when traversing low-walkability objects in [TRAVERSAL_TYPE_FAST](/constants/TRAVERSAL_TYPE_FAST/) mode. |
+| [CHARACTER_ACCOUNT_FOR_SKIPPED_FRAMES](/constants/CHARACTER_ACCOUNT_FOR_SKIPPED_FRAMES/) | 14 | [TRUE](/constants/TRUE/) | [TRUE](/constants/TRUE/) or [FALSE](/constants/FALSE/) | [TRUE](/constants/TRUE/) matches pre-existing behavior. If set to [FALSE](/constants/FALSE/), character will not attempt to catch up on lost time when pathfinding performance is low, potentially providing more reliable movement (albeit while potentially appearing to be more stuttery). |
+| [CHARACTER_STAY_WITHIN_PARCEL](/constants/CHARACTER_STAY_WITHIN_PARCEL/) | 15 | Depends[\*](/functions/llCreateCharacter/#ct-caveat) | [TRUE](/constants/TRUE/) or [FALSE](/constants/FALSE/) | [FALSE](/constants/FALSE/) matches traditional behavior. If set to [TRUE](/constants/TRUE/), treat the parcel boundaries as one-way obstacles (will re-enter but can't leave on it's own). |
+
+## Caveats
+
+(subject to change)
+
+- [CHARACTER_DESIRED_SPEED](/constants/CHARACTER_DESIRED_SPEED/) ranges from 0.2 to 40.0.
+- [CHARACTER_RADIUS](/constants/CHARACTER_RADIUS/) ranges from 0.1 to 5.0.
+- [CHARACTER_LENGTH](/constants/CHARACTER_LENGTH/) ranges from 0.0 to 10.0.
+- [TRAVERSAL_TYPE_SLOW](/constants/TRAVERSAL_TYPE_SLOW/) | [TRAVERSAL_TYPE_FAST](/constants/TRAVERSAL_TYPE_FAST/) | [TRAVERSAL_TYPE_NONE](/constants/TRAVERSAL_TYPE_NONE/) - only use one of these parameters or omit. Defaults to [TRAVERSAL_TYPE_NONE](/constants/TRAVERSAL_TYPE_NONE/) to if omitted. This affects whether a character moving on terrain that is less than 100% walkable will move faster (e.g., a cat crossing a street) or slower (e.g., a car driving in a swamp).
+- [CHARACTER_TYPE_A](/constants/CHARACTER_TYPE_A/) | [CHARACTER_TYPE_B](/constants/CHARACTER_TYPE_B/) | [CHARACTER_TYPE_C](/constants/CHARACTER_TYPE_C/) | [CHARACTER_TYPE_D](/constants/CHARACTER_TYPE_D/) | [CHARACTER_TYPE_NONE](/constants/CHARACTER_TYPE_NONE/) - only use one of these parameters or omit. Defaults to [CHARACTER_TYPE_NONE](/constants/CHARACTER_TYPE_NONE/) if omitted. This determines which of the 4 walkability coefficients the character pays attention to.
+- The character's shape is a capsule (cylinder with spherical ends) with a length (from tip to tip) and a circular cross section of some radius. These two size parameters are what is controlled by the [CHARACTER_LENGTH](/constants/CHARACTER_LENGTH/) and [CHARACTER_RADIUS](/constants/CHARACTER_RADIUS/) params respectively.
+- Note that the characters true "length" cannot be smaller than twice the radius however you're welcome to specify a value lower than that (but more than zero) -- the script shouldn't complain.
+- The capsule is usually oriented vertically. It is possible to make the capsule lie horizontal by using an object that is long in its local X-axis, however these characters might not be able to navigate through gaps that cannot fit them lengthwise.
+- Use a vertical capsule whenever possible; horizontal capsules may become stuck more easily than vertical capsules.
+- Removing the script from a prim will not stop pathing behavior, in the same way that particles and hover text remain. To stop a pathing command use `llExecCharacterCmd(CHARACTER_CMD_STOP, [])`.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llCreateCharacter([CHARACTER_DESIRED_SPEED, 10.0]);
+
+        list points = [llGetPos() + <5,0,0>, llGetPos() - <5,0,0>];
+        llPatrolPoints(points, []);
+    }
+
+    touch_start(integer total_number)
+    {
+        llUpdateCharacter([CHARACTER_DESIRED_SPEED, 50.0]);
+    }
+}
+```
+
+</details>
+
+## History
+
+Date of Release [31/07/2012](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-31-262785)
+
+## See also
+
+### Functions
+
+- [llCreateCharacter](/functions/llCreateCharacter/)
+- [llDeleteCharacter](/functions/llDeleteCharacter/)
+- [llEvade](/functions/llEvade/)
+- [llExecCharacterCmd](/functions/llExecCharacterCmd/)
+- [llGetClosestNavPoint](/functions/llGetClosestNavPoint/)
+- [llFleeFrom](/functions/llFleeFrom/)
+- [llNavigateTo](/functions/llNavigateTo/)
+- [llPatrolPoints](/functions/llPatrolPoints/)
+- [llPursue](/functions/llPursue/)
+- [llUpdateCharacter](/functions/llUpdateCharacter/)
+- [llWanderWithin](/functions/llWanderWithin/)
+
+### Events
+
+- [path_update](/events/path_update/)
+
+<WikiSource />

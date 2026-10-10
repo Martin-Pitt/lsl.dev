@@ -1,0 +1,79 @@
+---
+title: "llOrd"
+slug: "functions/llOrd"
+category: functions
+source:
+  wiki: "LlOrd"
+  url: https://wiki.secondlife.com/wiki/LlOrd
+  revision: 1218695
+  date: 2026-03-13
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llord-2dc589fe.txt
+  license: "Content from the Second Life Wiki article LlOrd (revision 1218695, 2026-03-13), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llOrd" />
+
+Calculate the ordinal value for a character in a string.
+
+The returned value is the UTF-32 value of the character at the specified index. If index is outside the bounds of the string, this function returns 0.
+
+```lsl title="How to use" frame="terminal"
+integer result = llOrd("", 0);
+```
+
+## Caveats
+
+- Characters in the surrogate range (`"\u{D800}"` - `"\u{0xDFFF}"`) will return `0x3F` = `63`. This might not be observable on LSL, only SLua. SLua's equivalent `utf8.codepoint` instead raises an error `"invalid UTF-8 code"` in this situation.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-10, 16-28}
+default
+{
+    touch_start(integer total_number)
+    {
+        string test_string = "The quick brown fox jumped over the lazy dog";
+        list test_list = [];
+        string test_string2 = "";
+
+        integer index;
+        integer ord;
+        for (index = 0; index < llStringLength(test_string); ++index)
+        {
+            ord = llOrd(test_string, index);
+            test_list = test_list + [ ord ];
+        }
+
+        string char;
+        for (index = 0; index < llGetListLength(test_list); ++index)
+        {
+            ord = llList2Integer(test_list, index);
+            char = llChar(ord);
+            test_string2 = test_string2 + char;
+        }
+
+        llSay(0, "\"" + test_string + "\" -> [" +
+            llDumpList2String(test_list, ", ") + "] -> \"" + test_string2 + "\"");
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llChar](/functions/llChar/) — Convert an ordinal into a character
+- [llHash](/functions/llHash/) — Calculate a 32bit hash for a string
+
+### Articles
+
+- [UTF-32](https://en.wikipedia.org/wiki/UTF-32)
+
+<WikiSource />

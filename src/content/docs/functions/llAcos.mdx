@@ -1,0 +1,83 @@
+---
+title: "llAcos"
+slug: "functions/llAcos"
+category: functions
+source:
+  wiki: "LlAcos"
+  url: https://wiki.secondlife.com/wiki/LlAcos
+  revision: 1218950
+  date: 2026-07-15
+  contributor: "Maresmares Resident"
+  raw: /wiki-source/llacos-424a3c17.txt
+  license: "Content from the Second Life Wiki article LlAcos (revision 1218950, 2026-07-15), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llAcos" />
+
+The returned value is in the range \[0.0, [PI](/constants/PI/)\], or `{{abbr|NaN|not a number}}` signifying a complex result when the parameter is out of range.
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the arccosine in radians of **val**
+
+```lsl title="How to use" frame="terminal"
+float result = llAcos(0.0);
+```
+
+## Caveats
+
+- Triggers a [Math Error](https://wiki.secondlife.com/wiki/Category:LSL_Error/Math) for complex results if not compiled in Mono.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//  This example exercises the full valid range of argument from -1.0 to +1.0
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        float random = llFrand(2.0) - 1.0;
+
+        llOwnerSay("The arccosine of " + (string)random + " is " + (string)llAcos(random));
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+// An example for the Law of Cosines to calculate any angle of a triangle from 3 known side lengths.
+default
+{
+    touch_start(integer num_detected)
+    {
+        vector t = <llFrand(9.0)+1.0, llFrand(9.0)+1.0, llFrand(9.0)+1.0>; // The 3 values of this vector are used to set the lengths of 3 sides of a triangle.
+
+        float anglexy = llAcos((t.x*t.x+t.y*t.y-(t.z*t.z)) / ( 2*t.x*t.y)); // Law Of Cosines
+
+        llOwnerSay("Using the Law Of Cosines, the angle of a triangle between side a=" + (string)t.x + "and side b=" + (string)t.y + " is = " + (string)anglexy + " radians=" + (string)(anglexy * RAD_TO_DEG) + "° and that angle is not on side c=" + (string)t.z);
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llSin](/functions/llSin/) — [llAsin](/functions/llAsin/) — sine & inverse Sine
+- [llCos](/functions/llCos/) — cosine
+- [llTan](/functions/llTan/) — [llAtan2](/functions/llAtan2/) — tangent & inverse tangent
+
+### Articles
+
+- [Inverse trigonometric function](https://en.wikipedia.org/wiki/Inverse_trigonometric_function)
+
+<WikiSource />

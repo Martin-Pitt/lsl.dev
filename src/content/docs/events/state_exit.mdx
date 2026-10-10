@@ -1,0 +1,79 @@
+---
+title: "state_exit"
+slug: "events/state_exit"
+category: events
+source:
+  wiki: "State exit"
+  url: https://wiki.secondlife.com/wiki/State_exit
+  revision: 1194109
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/state-exit-ff683262.txt
+  license: "Content from the Second Life Wiki article State exit (revision 1194109, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="state_exit" description />
+
+Triggered on a qualifying [state](https://wiki.secondlife.com/wiki/state) transition.
+
+```lsl title="How to use" frame="terminal"
+state_exit()
+{
+
+}
+```
+
+## Caveats
+
+- Events queued during [state_exit](/events/state_exit/), are dumped before the next state is entered. use [state_entry](/events/state_entry/) to avoid this, when possible. See [state](https://wiki.secondlife.com/wiki/state) for further caveats.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-11, 20-27}
+default
+{
+    state_entry()
+    {
+        llOwnerSay("Entering default state");
+    }
+    touch_end(integer detected)
+    {
+        // Note: NEVER do a state change from a touch_start event -
+        // - this can result in a missed touch_start on re-entering this state
+        // Here we do the state change safely from within touch_end
+        state other;
+    }
+    state_exit()
+    {
+        llOwnerSay("leaving default state");
+    }
+}
+
+state other
+{
+    state_entry()
+    {
+        llOwnerSay("Entering state \"other\"");
+    }
+    touch_end(integer detected)
+    {
+        state default;
+    }
+    state_exit()
+    {
+        llOwnerSay("leaving state \"other\"");
+    }
+}
+```
+
+</details>
+
+## Notes
+
+While the [default](https://wiki.secondlife.com/wiki/default) [state_entry](/events/state_entry/) is triggered on script reset, state_exit is not triggered prior to the reset.
+
+<WikiSource />

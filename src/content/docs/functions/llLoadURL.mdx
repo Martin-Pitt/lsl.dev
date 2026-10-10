@@ -1,0 +1,81 @@
+---
+title: "llLoadURL"
+slug: "functions/llLoadURL"
+category: functions
+source:
+  wiki: "LlLoadURL"
+  url: https://wiki.secondlife.com/wiki/LlLoadURL
+  revision: 1216154
+  date: 2024-01-28
+  contributor: "Peter Stindberg"
+  raw: /wiki-source/llloadurl-25582ee9.txt
+  license: "Content from the Second Life Wiki article LlLoadURL (revision 1216154, 2024-01-28), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llLoadURL" />
+
+Shows dialog to **avatar** offering to load web page at **url** with **message**.
+
+If user clicks yes, launches the page in their web browser, starting the browser if required.
+
+The **url** is truncated to 255 characters and **message** is truncated to 254 characters.
+
+The protocol for the **url** must be specified, currently only "https://" and "http://" are supported.
+
+The URL should be `{{RFC|1738}}` compliant with proper escapes.
+
+```lsl title="How to use" frame="terminal"
+llLoadURL(NULL_KEY, "", "");
+```
+
+## Caveats
+
+- This function should not be called from group deeded objects`{{Footnote|This was not always the case, see [[#History|History]] for details}}`, it will silently fail.
+- This function silently fails for an avatar that has muted itself.`{{Footnote|This can be extremely bewildering to debug because there's no easy way for a user to self-mute. Apparently it "just happens."}}`
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-12, 18-24}
+default
+{
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        string info = "Visit the Second Life website!";
+
+        // must start with either "http://..." or "https://..."
+        string url = "http://www.secondlife.com/";
+
+        integer avatarInSameRegion = (llGetAgentSize(id) != ZERO_VECTOR); // TRUE or FALSE
+
+        if (avatarInSameRegion)
+        {
+            llLoadURL(id, info, url);
+        }
+        else
+        {
+            // if the agent is not in the same region, send a message instead
+            // the viewer will turn the URL clickable
+            llInstantMessage(id, info + " " + url);
+        }
+    }
+}
+```
+
+</details>
+
+## Tests
+
+- [llLoadURL Test](https://wiki.secondlife.com/wiki/llLoadURL_Test)
+
+## History
+
+- Introduced in version 1.6, no support for group deeded objects.
+- As of version ~1.9, support for group deeded objects was added (possibly by accident).
+- In the server upgrade released on 2007-03-14, support for group deeded objects was removed.
+
+<WikiSource />

@@ -1,0 +1,123 @@
+---
+title: "llTakeControls"
+slug: "functions/llTakeControls"
+category: functions
+source:
+  wiki: "LlTakeControls"
+  url: https://wiki.secondlife.com/wiki/LlTakeControls
+  revision: 1218616
+  date: 2026-02-07
+  contributor: "Gloss Doll"
+  raw: /wiki-source/lltakecontrols-a82614e0.txt
+  license: "Content from the Second Life Wiki article LlTakeControls (revision 1218616, 2026-02-07), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llTakeControls" />
+
+Allows for intercepting of keyboard and mouse clicks, specifically those specified by **controls**, from the agent the script has permissions for.
+
+If **accept** is [FALSE](/constants/FALSE/) and **pass_on** is [FALSE](/constants/FALSE/), the behavior is not intuitive. In this case, the complement of the specified controls do not generate events and do not perform their normal functions. They are effectively disabled. Certain control bits (e.g. [CONTROL_ROT_LEFT](/constants/CONTROL_ROT_LEFT/)) are also disabled when specified, in this case.
+
+If **accept** is [FALSE](/constants/FALSE/) and **pass_on** is [TRUE](/constants/TRUE/), then the specified controls do not generate events but perform their normal functions.
+
+If **accept** is [TRUE](/constants/TRUE/) and **pass_on** is [FALSE](/constants/FALSE/), then the specified controls generate events but do not perform their normal functions.
+
+If **accept** is [TRUE](/constants/TRUE/) and **pass_on** is [TRUE](/constants/TRUE/), then the specified controls generate events and perform their normal functions.
+
+```lsl title="How to use" frame="terminal"
+llTakeControls(0, 0, 0);
+```
+
+## Specification
+
+| Constant | Value | Description |
+| --- | --- | --- |
+| [CONTROL_FWD](/constants/CONTROL_FWD/) | 0x00000001 | Move forward control (`{{Keypress\|↑\|title=Up-Arrow key}}` or `{{Keypress\|W}}`) |
+| [CONTROL_BACK](/constants/CONTROL_BACK/) | 0x00000002 | Move back control (`{{Keypress\|↓\|title=Down-Arrow key}}` or `{{Keypress\|S}}`) |
+| [CONTROL_LEFT](/constants/CONTROL_LEFT/) | 0x00000004 | Move left control (`{{KeyCombo\|shift=*\|←\|title=Left-Arrow key}}` or `{{KeyCombo\|shift=*\|A}}` \[`{{Keypress\|←\|title=Left-Arrow key}}` or `{{Keypress\|A}}` in [mouselook](https://wiki.secondlife.com/wiki/mouselook)\]) |
+| [CONTROL_RIGHT](/constants/CONTROL_RIGHT/) | 0x00000008 | Move right control (`{{KeyCombo\|shift=*\|→\|title=Right-Arrow key}}` or `{{KeyCombo\|shift=*\|D}}` \[`{{Keypress\|→\|title=Right-Arrow key}}` or `{{Keypress\|D}}` in [mouselook](https://wiki.secondlife.com/wiki/mouselook)\]) |
+| [CONTROL_ROT_LEFT](/constants/CONTROL_ROT_LEFT/) | 0x00000100 | Rotate left control (`{{Keypress\|←\|title=Left-Arrow key}}` or `{{Keypress\|A}}`) |
+| [CONTROL_ROT_RIGHT](/constants/CONTROL_ROT_RIGHT/) | 0x00000200 | Rotate right control (`{{Keypress\|→\|title=Right-Arrow key}}` or `{{Keypress\|D}}`) |
+| [CONTROL_UP](/constants/CONTROL_UP/) | 0x00000010 | Move up control (`{{Keypress\|PgUp\|title=Page Up}}` or `{{Keypress\|E}}`) |
+| [CONTROL_DOWN](/constants/CONTROL_DOWN/) | 0x00000020 | Move down control (`{{Keypress\|PgDn\|title=Page Down}}` or `{{Keypress\|C}}`) |
+| [CONTROL_LBUTTON](/constants/CONTROL_LBUTTON/) | 0x10000000 | Left mouse button control |
+| [CONTROL_ML_LBUTTON](/constants/CONTROL_ML_LBUTTON/) | 0x40000000 | Left mouse button control while in [mouselook](https://wiki.secondlife.com/wiki/mouselook) |
+| (undocumented) | 0x02000000 | Avatar left rotation detected. Triggers [llGetAnimation](/functions/llGetAnimation/) == "Turning Left" |
+| (undocumented) | 0x04000000 | Avatar right rotation detected. Triggers [llGetAnimation](/functions/llGetAnimation/) == "Turning Right" |
+
+## Caveats
+
+- There appears to be no penalty for using **accept** = [TRUE](/constants/TRUE/), **pass_on** = [TRUE](/constants/TRUE/) when there is no [control](/events/control/) event in the script (such as is used in AO's to ensure they work on no-script land)
+- There is a bug in some permissions that prevents left clicks from working in mouselook if they are set to **accept** = [FALSE](/constants/FALSE/), **pass_on** = [TRUE](/constants/TRUE/)
+- If you sit/are sitting on the object that has taken your controls using **accept** = [TRUE](/constants/TRUE/) and **pass_on** = [TRUE](/constants/TRUE/), then [CONTROL_FWD](/constants/CONTROL_FWD/), [CONTROL_BACK](/constants/CONTROL_BACK/), [CONTROL_ROT_LEFT](/constants/CONTROL_ROT_LEFT/), and [CONTROL_ROT_RIGHT](/constants/CONTROL_ROT_RIGHT/) will never generate events; instead these controls will only perform their normal functions.
+- if the undocumented controls 0x02000000 or 0x04000000 are taken with **pass_on** = [FALSE](/constants/FALSE/), then [llGetAnimation](/functions/llGetAnimation/) will never be "Turning Left" or "Turning Right", respectively, and those animations set by [llSetAnimationOverride](/functions/llSetAnimationOverride/) will never play
+- all control flags documented in [libopenmetaverse](https://github.com/openmetaversefoundation/libopenmetaverse/blob/master/OpenMetaverse/AgentManagerMovement.cs#L42) [secondlife viewer](https://github.com/secondlife/viewer/blob/c7053a6928fd5eafdc935453742e92951ae4e0c1/indra/llcommon/indra_constants.h#L255)
+- If your viewer's 'Single click on land' setting is set to 'Move to clicked point', then [CONTROL_LBUTTON](/constants/CONTROL_LBUTTON/) might not be sent to the server when taken by `llTakeControls()`.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-8, 25-34}
+default
+{
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+    }
+    run_time_permissions(integer perm)
+    {
+        if(PERMISSION_TAKE_CONTROLS & perm)
+        {
+            llTakeControls(
+                            CONTROL_FWD |
+                            CONTROL_BACK |
+                            CONTROL_LEFT |
+                            CONTROL_RIGHT |
+                            CONTROL_ROT_LEFT |
+                            CONTROL_ROT_RIGHT |
+                            CONTROL_UP |
+                            CONTROL_DOWN |
+                            CONTROL_LBUTTON |
+                            CONTROL_ML_LBUTTON ,
+                            TRUE, TRUE);
+
+        }
+    }
+    control(key id, integer level, integer edge)
+    {
+        integer start = level & edge;
+        integer end = ~level & edge;
+        integer held = level & ~edge;
+        integer untouched = ~(level | edge);
+        llOwnerSay(llList2CSV([level, edge, start, end, held, untouched]));
+    }
+}
+```
+
+</details>
+
+## Notes
+
+If a script has taken controls, it and other scripts in the same prim will not be stopped if the Agent enters a "No Outside Scripts" parcel. This is done to keep vehicle control alive and AOs functional. This is an intentional feature. This only applies to the object containing the script - child objects in a linkset (wheels, particle emitters, in vehicles, child objects in huds, etc) will not inherit this immunity. To preserve functionality in child objects, `llTakeControls` must be issued in each scripted child as well.
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-3187 (bug): llTakeControls overrides existing controls
+- SCR-97 (bug): llTakeControls Traps repeating event when contols are changed or permission revoked
+
+## See also
+
+### Functions
+
+- [llReleaseControls](/functions/llReleaseControls/)
+
+### Events
+
+- [control](/events/control/)
+
+<WikiSource />

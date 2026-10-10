@@ -1,0 +1,67 @@
+---
+title: "DEBUG_CHANNEL"
+slug: "constants/DEBUG_CHANNEL"
+category: constants
+source:
+  wiki: "DEBUG CHANNEL"
+  url: https://wiki.secondlife.com/wiki/DEBUG_CHANNEL
+  revision: 1217156
+  date: 2024-08-15
+  contributor: "Nexii Malthus"
+  raw: /wiki-source/debug-channel-ce29ebf7.txt
+  license: "Content from the Second Life Wiki article DEBUG CHANNEL (revision 1217156, 2024-08-15), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="DEBUG_CHANNEL" />
+
+Chat channel reserved for script debugging and error messages. The client will display chat on this channel in the script console if the avatar is within the appropriate distance for the communication type (see [Chat](/categories/chat/) for details).
+
+Server-generated errors are broadcast the same distance as [llSay](/functions/llSay/).
+
+Regardless of the source, most viewers filter out messages received on **`DEBUG_CHANNEL`** from objects owned by others.
+
+## Helper functions
+
+```lsl
+key owner;
+
+default{//little link_message debugging script
+    link_message(integer a, integer b, string c, key d){
+        llSay(DEBUG_CHANNEL, llList2CSV([a,b,c,d]));
+        if(llGetOwner() != owner)
+            llSetScriptState(llGetScriptName(), FALSE);
+    }
+    state_entry(){
+        owner = llGetOwner();
+    }
+}
+```
+
+## Additional wiki content
+
+&lt;onlyinclude>&lt;/onlyinclude>
+
+## See also
+
+### Constants
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [PUBLIC_CHANNEL](/constants/PUBLIC_CHANNEL/) |  |  |  |
+| [COMBAT_CHANNEL](/constants/COMBAT_CHANNEL/) |  |  |  |
+
+### Functions
+
+- [llWhisper](/functions/llWhisper/)
+- [llSay](/functions/llSay/)
+- [llShout](/functions/llShout/)
+- [llRegionSay](/functions/llRegionSay/)
+- [llRegionSayTo](/functions/llRegionSayTo/)
+- [llListen](/functions/llListen/)
+
+### Events
+
+- [listen](/events/listen/)
+
+<WikiSource />

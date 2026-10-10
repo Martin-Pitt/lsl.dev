@@ -1,0 +1,75 @@
+---
+title: "llGetMass"
+slug: "functions/llGetMass"
+category: functions
+source:
+  wiki: "LlGetMass"
+  url: https://wiki.secondlife.com/wiki/LlGetMass
+  revision: 1214523
+  date: 2023-09-04
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llgetmass-e25f795c.txt
+  license: "Content from the Second Life Wiki article LlGetMass (revision 1214523, 2023-09-04), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetMass" description />
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the mass of object (in [lindograms](#lindograms)) that script is attached to.
+
+```lsl title="How to use" frame="terminal"
+float result = llGetMass();
+```
+
+## Caveats
+
+- The mass reported by this function is in [lindograms](#lindograms), which function the same as kilograms within the bounds of Second Life, but not elsewhere. ([See below](#lindograms))
+- Attachments do not affect an avatar's mass, only certain Appearance settings.
+- Avatar mass is reported to either be unexpectedly low (when measured using [llGetMass](/functions/llGetMass/)) or unexpectedly high (when measured using [llGetMassMKS](/functions/llGetMassMKS/)). This is likely due to the weight being calculated based on a fixed value, with a modifier for height. The fixed value being used is incorrect, likely due to an incorrect density value being used.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//A way of making a constant force that returns the same speed visually whatever the object is
+default
+{
+    touch_start()
+    {
+        llApplyImpulse(<0.0, 0.0, 5.0> * llGetMass(), FALSE);
+        // This fires the object up at the same m/s whatever the size (or difference!)
+    }
+}//Written by El Taka
+```
+
+</details>
+
+## Additional wiki content
+
+### Lindograms
+
+"Lindograms" is the name of the primary unit of mass used in Second Life.
+
+While Second Life primarily makes use of the [SI system of units](https://en.wikipedia.org/wiki/International_System_of_Units), mass seems to be an exception.
+
+Some speculate that lindograms were intended to be *kilograms*, but a mistake was made when factoring object density, causing the mass value returned to be 100 times less than the actual kilogram value. As a result, some new functions were implemented (such as [llGetMassMKS](/functions/llGetMassMKS/)) which report the correct kilogram weight of an object.
+
+Functionally speaking, lindograms can be used in the same way kilograms are used&lt;ref>With exception to some functions, such as [llSetPhysicsMaterial](/functions/llSetPhysicsMaterial/), which use kilograms, not lindograms. [llGetMassMKS](/functions/llGetMassMKS/) returns a kilogram value, not a lindogram value.&lt;/ref>, however only within the bounds of Second Life. Trying to export mass values from Second Life will often run into issues, caused by the use of lindograms as a base unit of measurement.
+
+From a technical point-of-view, a lindogram is equivalent to a [\{\{em|metric quintal\}\}](https://en.wikipedia.org/wiki/Quintal), however it is not treated as such.
+
+## See also
+
+### Functions
+
+- [llGetObjectMass](/functions/llGetObjectMass/) — Gets the object mass (in lindograms)
+- [llGetForce](/functions/llGetForce/) — Gets the objects force
+- [llGetOmega](/functions/llGetOmega/)
+- [llGetVel](/functions/llGetVel/)
+- [llGetTorque](/functions/llGetTorque/)
+- [llGetAccel](/functions/llGetAccel/)
+- [llGetMassMKS](/functions/llGetMassMKS/) — Get the mass of an object (in kilograms)
+
+<WikiSource />

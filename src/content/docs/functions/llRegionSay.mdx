@@ -1,0 +1,96 @@
+---
+title: "llRegionSay"
+slug: "functions/llRegionSay"
+category: functions
+source:
+  wiki: "LlRegionSay"
+  url: https://wiki.secondlife.com/wiki/LlRegionSay
+  revision: 1218158
+  date: 2025-04-07
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llregionsay-95ccfaba.txt
+  license: "Content from the Second Life Wiki article LlRegionSay (revision 1218158, 2025-04-07), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRegionSay" />
+
+Says the string **msg** on channel number **channel** that can be heard anywhere in the [region](https://wiki.secondlife.com/wiki/region) by a script [listening](/events/listen/) on **channel**.
+
+Regardless of where the prim is, the message will not travel over region borders.
+
+```lsl title="How to use" frame="terminal"
+llRegionSay(0, "");
+```
+
+## Caveats
+
+- This function cannot transmit on `{{#var:PUBLIC_CHANNEL}}` channel 0, this is a design feature and not a bug.
+- If **msg** is longer than 1024 characters it is truncated to 1024 characters. (Note that in Mono, each character occupies 2 memory bytes).
+- A prim can **not** hear itself, this to prevent problems with recursion. It can however hear other prims within the same object. Use [llMessageLinked](/functions/llMessageLinked/) instead for intra-prim messaging.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llRegionSay(25,"This is an incredibly useless program." );
+    }
+}
+```
+
+</details>
+
+To avoid making your object spam its neighborhood, use [llOwnerSay](/functions/llOwnerSay/) or [llInstantMessage](/functions/llInstantMessage/).
+
+## Notes
+
+If one object 'says' something to another object (e.g., a button that, when touched,
+
+turns on a lamp), consider a very negative channel, e.g.,
+
+```lsl
+    llRegionSay(-5243212,"turn on");
+```
+
+Using negative channels for script communications remains a common practice because, prior to September 2016, the standard SL client was unable to chat on negative channels. The only way to do so prior to [llTextBox](/functions/llTextBox/) was to use [llDialog](/functions/llDialog/) which was limited to 24 bytes. However, since 2016, viewers have been able to chat on negative channels, with messages capped to 254 bytes.
+
+If [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) is used as **channel**, the script will say **msg** to the Script Warning/Error window.
+
+If you wish two objects owned by the same person to communicate within a SIM, one idea is to make both scripts compute the channel based on the owner UUID. e.g. :-
+
+```lsl
+    gChannel = 0x80000000 | (integer) ( "0x" + (string) llGetOwner() );
+```
+
+- As of 1.18.3, using `llRegionSay` on the `{{#var:DEBUG_CHANNEL}}` will wrap around and display on channel 0, with a range of 100m.
+
+## History
+
+- Introduced with SL 1.16.0
+- Date of Release [23-05-2007](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.16)
+
+## See also
+
+### Functions
+
+- [llListen](/functions/llListen/)
+- [llRegionSayTo](/functions/llRegionSayTo/) — Sends chat directly to specified target within region
+- [llOwnerSay](/functions/llOwnerSay/) — Sends chat to the owner only
+- [llWhisper](/functions/llWhisper/) — Sends chat limited to 10 meters
+- [llSay](/functions/llSay/) — Sends chat limited to 20 meters
+- [llShout](/functions/llShout/) — Sends chat limited to 100 meters
+- [llInstantMessage](/functions/llInstantMessage/)
+- [llDialog](/functions/llDialog/)
+- [llTextBox](/functions/llTextBox/)
+
+### Events
+
+- [listen](/events/listen/)
+
+<WikiSource />

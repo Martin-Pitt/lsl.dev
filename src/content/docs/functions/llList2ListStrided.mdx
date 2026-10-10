@@ -1,0 +1,84 @@
+---
+title: "llList2ListStrided"
+slug: "functions/llList2ListStrided"
+category: functions
+source:
+  wiki: "LlList2ListStrided"
+  url: https://wiki.secondlife.com/wiki/LlList2ListStrided
+  revision: 1215161
+  date: 2023-10-25
+  contributor: "MoiraAtropos Resident"
+  raw: /wiki-source/lllist2liststrided-e88ac52b.txt
+  license: "Content from the Second Life Wiki article LlList2ListStrided (revision 1215161, 2023-10-25), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llList2ListStrided" description />
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) of all the entries in the [strided list](https://wiki.secondlife.com/wiki/List#strided-lists) whose index is a multiple of **stride** in the range `start` to `end`.
+
+```lsl title="How to use" frame="terminal"
+list result = llList2ListStrided([], 0, 0, 0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+list mylist = [0,1,2,3,4,5,6];
+list result_a = llList2ListStrided(mylist,0,-1,2); //start at first item in list, go to the end, return every 2nd item
+//result_a == [0,2,4,6]
+
+list result_b = llList2ListStrided(mylist,1,-1,2); //start at second item in list, go to the end, return every 2nd item
+//result_b == [2,4,6]
+
+list result_c = llList2ListStrided(mylist,2,-1,2); //start at third item in list, go to the end, return every 2nd item
+//result_c == [2,4,6]
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-7, 13-21}
+list menu = ["1", "one", "2", "two", "3", "three"];
+default
+{
+    state_entry()
+    {
+        llListen(10, "", llGetOwner(), "");
+    }
+    touch_start(integer detected)
+    {
+        list buttons = llList2ListStrided(menu, 0, -1, 2);
+        llDialog(llDetectedKey(0), "choose a number", buttons, 10);
+    }
+    listen(integer channel, string obj, key id, string message)
+    {
+        integer index = llListFindList(menu, [message]);
+        if (index != -1)
+        {
+            llOwnerSay("you chose " + llList2String(menu, index + 1) + " (" + message + ")");
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+### Starting at an offset
+
+If you want every second (or third, etc.) item in each **stride** returned, rather than the first, use [llList2ListSlice](/functions/llList2ListSlice/) instead.
+
+## See also
+
+### Functions
+
+- [llList2ListSlice](/functions/llList2ListSlice/)
+
+<WikiSource />

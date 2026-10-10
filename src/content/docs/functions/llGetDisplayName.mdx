@@ -1,0 +1,77 @@
+---
+title: "llGetDisplayName"
+slug: "functions/llGetDisplayName"
+category: functions
+source:
+  wiki: "LlGetDisplayName"
+  url: https://wiki.secondlife.com/wiki/LlGetDisplayName
+  revision: 1210705
+  date: 2022-04-27
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llgetdisplayname-ea2823c9.txt
+  license: "Content from the Second Life Wiki article LlGetDisplayName (revision 1210705, 2022-04-27), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetDisplayName" />
+
+**id** must specify a valid avatar key, present in or otherwise known to the sim in which the script is running, otherwise an empty string is returned. This function will still return a valid display name if the avatar is a child agent of the sim (i.e., in an adjacent sim, but presently able to see into the one the script is in), or for a short period after the avatar leaves the sim (specifically, when the client completely disconnects from the sim, either as a main or child agent).
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the non-unique [display name](https://wiki.secondlife.com/wiki/Display_names) of the avatar specified by **id**.
+
+```lsl title="How to use" frame="terminal"
+string result = llGetDisplayName(NULL_KEY);
+```
+
+## Caveats
+
+- To get around the "avatar must be present" limitation, you can use the [llRequestDisplayName](/functions/llRequestDisplayName/) function and the [dataserver](/events/dataserver/) event to obtain the avatar's display name from a key (this is slower).
+- There is no opposite function ([llDisplayName2Key](https://wiki.secondlife.com/wiki/llDisplayName2Key)) available since display names are non-unique.
+- Either of `???` or &lt;abbr title="empty string">`""`&lt;/abbr> is returned if the region is unable to return display names. This can happen even if display names are enabled on the region, especially the first time a given key is checked. At least one retry may be advisable. Do not rely on this function to verify avatar presence.
+- It is possible for `Loading...` to be returned if called before the region has had a chance to resolve the agent's display name.
+- Do *not* retry failed attempts indefinitely in a loop. In a few cases, a display name or username will not be returned for as long as the avatar is in the region.
+- If you merely wish to show the agent display name in the viewer window, it may be more straightforward to use [Viewer URI Name Space](https://wiki.secondlife.com/wiki/Viewer_URI_Name_Space), e.g.:
+
+  ```lsl
+  llSay(0, "secondlife:///app/agent/" + (string)id + "/displayname");
+  ```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// Best viewed in Chat History (ctrl-h)
+default
+{
+    collision_start(integer a)//Announce who collided
+    {
+        llSay(0, "llGetDisplayName: " + llGetDisplayName(llDetectedKey(0)) +
+                 "\nllDetectedName: " + llDetectedName(0));
+    }
+    touch_start(integer a)
+    {
+        llSay(0, "llGetDisplayName: " + llGetDisplayName(llDetectedKey(0)) +
+                 "\nllDetectedName: " + llDetectedName(0));
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-6290 (bug): llGetDisplayName periodically returns an empty string (\{\{String\}\})
+
+## See also
+
+### Functions
+
+- [llRequestDisplayName](/functions/llRequestDisplayName/) — Uses the [dataserver](/events/dataserver/) to request avatar information
+- [llGetUsername](/functions/llGetUsername/)
+- [llRequestUsername](/functions/llRequestUsername/) — Uses the [dataserver](/events/dataserver/) to request avatar information
+
+<WikiSource />

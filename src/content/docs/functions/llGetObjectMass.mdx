@@ -1,0 +1,69 @@
+---
+title: "llGetObjectMass"
+slug: "functions/llGetObjectMass"
+category: functions
+source:
+  wiki: "LlGetObjectMass"
+  url: https://wiki.secondlife.com/wiki/LlGetObjectMass
+  revision: 1214522
+  date: 2023-09-04
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llgetobjectmass-e993c08a.txt
+  license: "Content from the Second Life Wiki article LlGetObjectMass (revision 1214522, 2023-09-04), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetObjectMass" description />
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the mass of **id**
+
+```lsl title="How to use" frame="terminal"
+float result = llGetObjectMass(NULL_KEY);
+```
+
+## Caveats
+
+- Returns zero if **id** is not found in the region.
+- **id** can be any prim in the object.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    touch(integer n)
+    {
+        llSay(0, llDetectedName(0) + " your mass is " + (string)llGetObjectMass(llDetectedKey(0)) + " lindogram.");
+    }
+}
+//Anylyn Hax 15:02, 28 July 2007 (PDT)
+```
+
+</details>
+
+## Notes
+
+- [Mass](http://en.wikipedia.org/wiki/Mass) in SL is expressed as *lindogram*. One lindogram appears to be equal to 100 kilograms.
+- Mass for avatars is relative to shape/size, and unaffected by attachments. However, a survey of masses for avatars shows less variation than one would expect relative to shape/size, and the lindogram masses do not appear in any way realistic.
+- Sitting avatars add their mass to the object.
+- This function returns a mass of 0.01 for child agents.
+- This function is a handy way to determine if an object or avatar still exists on a region. Other methods exist (such as checking that [OBJECT_OWNER](/constants/OBJECT_OWNER/) returned by [llGetObjectDetails](/functions/llGetObjectDetails/) is a valid key), but this has slightly less overhead.
+
+## Tests
+
+- [llGetObjectMass_Test](https://wiki.secondlife.com/wiki/llGetObjectMass_Test)
+
+## History
+
+Prior to server code version 1.18.6.76747 avatar mass was fixed at 1.954922 lindogram. It is now relative to Avatar shape/size.
+
+## See also
+
+### Functions
+
+- [llGetMass](/functions/llGetMass/) — Gets the current object mass.
+
+<WikiSource />

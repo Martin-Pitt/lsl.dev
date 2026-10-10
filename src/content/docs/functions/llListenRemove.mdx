@@ -1,0 +1,70 @@
+---
+title: "llListenRemove"
+slug: "functions/llListenRemove"
+category: functions
+source:
+  wiki: "LlListenRemove"
+  url: https://wiki.secondlife.com/wiki/LlListenRemove
+  revision: 1210682
+  date: 2022-04-23
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/lllistenremove-590e8310.txt
+  license: "Content from the Second Life Wiki article LlListenRemove (revision 1210682, 2022-04-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llListenRemove" description />
+
+Removes listen event callback **handle**
+
+```lsl title="How to use" frame="terminal"
+llListenRemove(0);
+```
+
+## Caveats
+
+- On [state](https://wiki.secondlife.com/wiki/state) change or [script reset](/functions/llResetScript/) all listens are removed automatically.
+- A state change can be used as a shortcut to releasing all listens in the script.
+- No error is thrown if **handle** has already been released or is invalid.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// Listen for one line of chat from the owner, echo it back to them, then stop listening
+integer ListenHandle;
+default
+{
+    state_entry()
+    {
+        // Start listening on channel 0, for text from owner only
+        ListenHandle = llListen(0, "", llGetOwner(), "");
+    }
+    listen(integer channel, string name, key id, string message)
+    {
+        llOwnerSay(message);            // Echo the message back to the owner
+        llListenRemove(ListenHandle);   // Stop listening
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- It is good practice to remove listeners when they are no longer required, or set them inactive via [llListenControl](/functions/llListenControl/)
+
+## See also
+
+### Functions
+
+- [llListen](/functions/llListen/)
+- [llListenControl](/functions/llListenControl/)
+
+### Events
+
+- [listen](/events/listen/)
+
+<WikiSource />

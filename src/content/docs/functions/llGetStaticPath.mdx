@@ -1,0 +1,167 @@
+---
+title: "llGetStaticPath"
+slug: "functions/llGetStaticPath"
+category: functions
+source:
+  wiki: "LlGetStaticPath"
+  url: https://wiki.secondlife.com/wiki/LlGetStaticPath
+  revision: 1215201
+  date: 2023-10-28
+  contributor: "Frionil Fang"
+  raw: /wiki-source/llgetstaticpath-efe39dec.txt
+  license: "Content from the Second Life Wiki article LlGetStaticPath (revision 1215201, 2023-10-28), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetStaticPath" />
+
+The list also always contains an integer in the last element, which is a status code indicating the outcome of the path query:
+
+- If `llGetStaticPath()` finds a path, it will return waypoint vectors and will return a status code of 0, for success
+- If `llGetStaticPath()` cannot find a path for some reason, it only returns the status code, indicating the sort of error. The error codes correspond to the constants in [path_update](/events/path_update/) (e.g. [PU_FAILURE_INVALID_START](/constants/PU_FAILURE_INVALID_START/) is returned if the start vector is not near the nav mesh)
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) of position vectors indicating pathfinding waypoints between positions at `start` and `end`, for a character of a given **radius**. The waypoints this function returns are for the 'static' nav mesh, meaning that objects set to "movable obstacle" or "movable phantom" are ignored.
+
+This function **can** be used from attachments and other non-character objects. It can also be used in any region, even if dynamic pathfinding is disabled.
+
+```lsl title="How to use" frame="terminal"
+list result = llGetStaticPath(ZERO_VECTOR, ZERO_VECTOR, 0.0, []);
+```
+
+## Specification
+
+<ConstantGroup name="GetStaticPathParam" />
+
+##### Return constants
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_SLOWDOWN_DISTANCE_REACHED | `integer` | Character is near current goal. |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_GOAL_REACHED | `integer` | Character has reached the goal and will stop or choose a new goal (if wandering). |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_FAILURE_INVALID_START | `integer` | Character cannot navigate from the current location - e.g., the character is off the navmesh or too high above it. |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_FAILURE_INVALID_GOAL | `integer` | Goal is not on the navmesh and cannot be reached. |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_FAILURE_UNREACHABLE | `integer` | Goal is no longer reachable for some reason - e.g., an obstacle blocks the path. |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_FAILURE_TARGET_GONE | `integer` | Target (for llPursue or llEvade) can no longer be tracked - e.g., it left the region or is an avatar that is now more than about 30m outside the region. |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_FAILURE_NO_VALID_DESTINATION | `integer` | There's no good place for the character to go - e.g., it is patrolling and all the patrol points are now unreachable. |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_EVADE_HIDDEN | `integer` | Triggered when an llEvade character thinks it has hidden from its pursuer. |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_EVADE_SPOTTED | `integer` | Triggered when an llEvade character switches from hiding to running |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_FAILURE_NO_NAVMESH | `integer` | This is a fatal error reported to a character when there is no navmesh for the region. This usually indicates a server failure and users should file a bug report and include the time and region in which they received this message. |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_FAILURE_DYNAMIC_PATHFINDING_DISABLED | `integer` | Triggered when a character enters a region with dynamic pathfinding disabled.  Dynamic pathfinding can be toggled by estate managers via the 'dynamic_pathfinding' option in the Region Debug Console. |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_FAILURE_PARCEL_UNREACHABLE | `integer` | Triggered when a character failed to enter a parcel because it is not allowed to enter, e.g. because the parcel is already full or because object entry was disabled after the navmesh was baked. |
+| [m=3](https://wiki.secondlife.com/wiki/m%3D3) | PU_FAILURE_OTHER | `integer` | Other failure. |
+
+<table>
+	<tr>
+		<th>Constants</th>
+		<th>Value</th>
+		<th>Description</th>
+	</tr>
+</table>
+
+##### Character type options
+
+| Option |  | Default | Range / Values | Description |
+| --- | --- | --- | --- | --- |
+| [CHARACTER_DESIRED_SPEED](/constants/CHARACTER_DESIRED_SPEED/) | 1 | 6 | \[0.2, 40.0\] | Speed of pursuit in meters per second. |
+| [CHARACTER_RADIUS](/constants/CHARACTER_RADIUS/) | 2 |  | \[0.125, 5.0\] | Set collision capsule radius. |
+| [CHARACTER_LENGTH](/constants/CHARACTER_LENGTH/) | 3 |  | (0.0, 10.0\] | Set collision capsule length If the value is less than twice the **radius** plus 0.1m, it will be set to twice the radius plus 0.1m. |
+| [CHARACTER_ORIENTATION](/constants/CHARACTER_ORIENTATION/) | 4 | [VERTICAL](/constants/VERTICAL/) | [VERTICAL](/constants/VERTICAL/), [HORIZONTAL](/constants/HORIZONTAL/) | Set the character orientation. |
+| [TRAVERSAL_TYPE](/constants/TRAVERSAL_TYPE/) | 7 | [TRAVERSAL_TYPE_SLOW](/constants/TRAVERSAL_TYPE_SLOW/) | [TRAVERSAL_TYPE_FAST](/constants/TRAVERSAL_TYPE_FAST/), [TRAVERSAL_TYPE_SLOW](/constants/TRAVERSAL_TYPE_SLOW/), [TRAVERSAL_TYPE_NONE](/constants/TRAVERSAL_TYPE_NONE/) | Controls the speed at which characters moves on terrain that is less than 100% walkable will move faster (e.g., a cat crossing a street) or slower (e.g., a car driving in a swamp). To use [\_FAST](/constants/TRAVERSAL_TYPE_FAST/) or [\_SLOW](/constants/TRAVERSAL_TYPE_SLOW/), you must specify a [CHARACTER_TYPE](/constants/CHARACTER_TYPE/). |
+| [CHARACTER_TYPE](/constants/CHARACTER_TYPE/) | 6 | [CHARACTER_TYPE_NONE](/constants/CHARACTER_TYPE_NONE/) | [CHARACTER_TYPE_A](/constants/CHARACTER_TYPE_A/), [CHARACTER_TYPE_B](/constants/CHARACTER_TYPE_B/), [CHARACTER_TYPE_C](/constants/CHARACTER_TYPE_C/), [CHARACTER_TYPE_D](/constants/CHARACTER_TYPE_D/), [CHARACTER_TYPE_NONE](/constants/CHARACTER_TYPE_NONE/) | Specifies which walkability coefficient will be used by this character. |
+| [CHARACTER_AVOIDANCE_MODE](/constants/CHARACTER_AVOIDANCE_MODE/) | 5 | [AVOID_CHARACTERS](/constants/AVOID_CHARACTERS/) \| [AVOID_DYNAMIC_OBSTACLES](/constants/AVOID_DYNAMIC_OBSTACLES/) | Combinable Flags: [AVOID_CHARACTERS](/constants/AVOID_CHARACTERS/), [AVOID_DYNAMIC_OBSTACLES](/constants/AVOID_DYNAMIC_OBSTACLES/), [AVOID_NONE](/constants/AVOID_NONE/) | Allows you to specify that a character should not try to avoid other characters, should not try to avoid dynamic obstacles (relatively fast moving objects and avatars), or both. This is framed in the positive sense (`[CHARACTER_AVOIDANCE_MODE, AVOID_CHARACTERS]` would create a character that avoided other characters but not agents or moving vehicles). Setting this parameter to [AVOID_NONE](/constants/AVOID_NONE/) causes the character to not avoid either category. |
+| [CHARACTER_MAX_ACCEL](/constants/CHARACTER_MAX_ACCEL/) | 8 | 20 | \[0.5, 40.0\] | The character's maximum acceleration rate. |
+| [CHARACTER_MAX_DECEL](/constants/CHARACTER_MAX_DECEL/) | 9 | 30 | \[0.5, 60.0\] | The character's maximum deceleration rate. |
+| [CHARACTER_DESIRED_TURN_SPEED](/constants/CHARACTER_DESIRED_TURN_SPEED/) | 12 | 6 | \[0.02, 40.0\] | The character's maximum speed while turning--note that this is only loosely enforced (i.e., a character may turn at higher speeds under certain conditions) |
+| [CHARACTER_MAX_TURN_RADIUS](/constants/CHARACTER_MAX_TURN_RADIUS/) | 10 | 1.25 | \[0.1, 10.0\] | The character's turn radius when traveling at [CHARACTER_DESIRED_TURN_SPEED](/constants/CHARACTER_DESIRED_TURN_SPEED/) |
+| [CHARACTER_MAX_SPEED](/constants/CHARACTER_MAX_SPEED/) | 13 | 20 | \[1, 40.0\] | The character's maximum speed. Affects speed when avoiding dynamic obstacles and when traversing low-walkability objects in [TRAVERSAL_TYPE_FAST](/constants/TRAVERSAL_TYPE_FAST/) mode. |
+| [CHARACTER_ACCOUNT_FOR_SKIPPED_FRAMES](/constants/CHARACTER_ACCOUNT_FOR_SKIPPED_FRAMES/) | 14 | [TRUE](/constants/TRUE/) | [TRUE](/constants/TRUE/) or [FALSE](/constants/FALSE/) | [TRUE](/constants/TRUE/) matches pre-existing behavior. If set to [FALSE](/constants/FALSE/), character will not attempt to catch up on lost time when pathfinding performance is low, potentially providing more reliable movement (albeit while potentially appearing to be more stuttery). |
+| [CHARACTER_STAY_WITHIN_PARCEL](/constants/CHARACTER_STAY_WITHIN_PARCEL/) | 15 | Depends[\*](/functions/llCreateCharacter/#ct-caveat) | [TRUE](/constants/TRUE/) or [FALSE](/constants/FALSE/) | [FALSE](/constants/FALSE/) matches traditional behavior. If set to [TRUE](/constants/TRUE/), treat the parcel boundaries as one-way obstacles (will re-enter but can't leave on it's own). |
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={10-43}
+// llGetStaticPath() test script
+// Reports the static path from the object's current position to the object owner's position
+
+// Radius of character to test for
+float character_radius = 1.0;
+
+// All defined path_update codes; note that llGetStaticPath() can only return a few of these.
+list path_update_codes = [
+    "PU_SLOWDOWN_DISTANCE_REACHED ",
+    "PU_GOAL_REACHED",
+    "PU_FAILURE_INVALID_START",
+    "PU_FAILURE_INVALID_GOAL",
+    "PU_FAILURE_UNREACHABLE",
+    "PU_FAILURE_TARGET_GONE",
+    "PU_FAILURE_NO_VALID_DESTINATION",
+    "PU_EVADE_HIDDEN",
+    "PU_EVADE_SPOTTED",
+    "PU_FAILURE_NO_NAVMESH",
+    "PU_FAILURE_DYNAMIC_PATHFINDING_DISABLED",
+    "PU_FAILURE_PARCEL_UNREACHABLE",
+    "PU_FAILURE_OTHER"
+];
+
+default
+{
+    touch_start(integer detected)
+    {
+        vector agent_pos = llList2Vector(llGetObjectDetails(llGetOwner(), [OBJECT_POS]), 0);
+        vector end_pos = llList2Vector(llGetClosestNavPoint(agent_pos, [GCNP_STATIC, TRUE]), 0);
+        vector start_pos = llList2Vector(llGetClosestNavPoint(llGetPos(), [GCNP_STATIC, TRUE]), 0);
+        if(end_pos == ZERO_VECTOR)
+        {
+            llOwnerSay("Error: end position undefined - the object owner is either offline or far away from the nav mesh."
+                + "\nagent pos is " + (string)agent_pos);
+        }
+        else if(start_pos == ZERO_VECTOR)
+        {
+            llOwnerSay("Error: start position undefined - this object is far away from the nav mesh."
+                + "\nobject pos is " + (string)llGetPos());
+        }
+        else
+        {
+            llOwnerSay("Finding path from " + (string)start_pos
+                + " to " + (string)end_pos
+                + " for a character of radius " + (string)character_radius);
+            list result = llGetStaticPath(start_pos, end_pos, character_radius, []);
+            integer result_code = llList2Integer(result, -1);
+            //llOwnerSay("Raw llGetStaticPath() result: " + llList2CSV(result));
+
+            // the last element in the list is just the return code;
+            // the preceding elements should be waypoint vectors
+            if(result_code == 0)
+            {
+                llOwnerSay("llGetStaticPath found a path: " + llList2CSV(llList2List(result, 0, -2)));
+            }
+            else
+            {
+                llOwnerSay("llGetStaticPath failed to find a path, with code " + (string)result_code
+                    + " (" + llList2String(path_update_codes, result_code) + ")");
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## History
+
+Date of Release [31/07/2012](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-31-262785)
+
+## See also
+
+### Functions
+
+- [llCreateCharacter](/functions/llCreateCharacter/)
+
+### Events
+
+- [path_update](/events/path_update/)
+
+<WikiSource />

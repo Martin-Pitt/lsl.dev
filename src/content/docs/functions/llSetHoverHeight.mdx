@@ -1,0 +1,78 @@
+---
+title: "llSetHoverHeight"
+slug: "functions/llSetHoverHeight"
+category: functions
+source:
+  wiki: "LlSetHoverHeight"
+  url: https://wiki.secondlife.com/wiki/LlSetHoverHeight
+  revision: 1216222
+  date: 2024-02-18
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llsethoverheight-b966ed26.txt
+  license: "Content from the Second Life Wiki article LlSetHoverHeight (revision 1216222, 2024-02-18), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetHoverHeight" description />
+
+Critically damps to a **height** above the ground (or water) in **tau** seconds.
+
+Do not use with vehicles.
+
+Use [llStopHover](/functions/llStopHover/) to stop hovering.
+
+```lsl title="How to use" frame="terminal"
+llSetHoverHeight(0.0, 0, 0.0);
+```
+
+## Caveats
+
+- Do not rely on built-in limits. In the past, the difference between the object's initial position and the hover height was limited to 64 meters. Under SL Server 1.26.2 the limit is 4096 meters above the ground level.
+- This is not a prim property; stopping or resetting the script stops `llSetHoverHeight`; same with the similar [llGroundRepel](/functions/llGroundRepel/)
+- If the object tries to go above the height (like, walking up a prim ramp), `llSetHoverHeight` will pull it back down, unlike the similar [llGroundRepel](/functions/llGroundRepel/)
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-19}
+// Put in an attached prim and touch to start floating in air without flying.
+// Touch again to drop to the ground.
+
+integer gHovering = FALSE; // are we supposd to be hovering now?
+
+default {
+    touch_start(integer total_number) {
+        if (!llGetAttached()) {
+            llWhisper(0, "Wear me to play.");
+            return;
+        }
+
+        if (gHovering) {
+            llOwnerSay("Releasing you.");
+            llStopHover();
+        }
+        else {
+            llOwnerSay("Making you float...");
+
+            // Start hovering 5 meters over our current location.
+            vector myPosition = llGetPos();
+            llSetHoverHeight(myPosition.z - llGround(ZERO_VECTOR) + 5.0, FALSE, 1.0);
+        }
+
+        gHovering = !gHovering; // flip the switch
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGroundRepel](/functions/llGroundRepel/) — Same as `llSetHoverHeight` but does not hover all the time
+- [llStopHover](/functions/llStopHover/) — To stop hovering
+
+<WikiSource />

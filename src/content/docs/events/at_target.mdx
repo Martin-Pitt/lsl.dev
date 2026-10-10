@@ -1,0 +1,83 @@
+---
+title: "at_target"
+slug: "events/at_target"
+category: events
+source:
+  wiki: "At target"
+  url: https://wiki.secondlife.com/wiki/At_target
+  revision: 1213267
+  date: 2023-02-04
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/at-target-23c6850f.txt
+  license: "Content from the Second Life Wiki article At target (revision 1213267, 2023-02-04), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="at_target" description />
+
+Result of [llTarget](/functions/llTarget/) library function call
+
+```lsl title="How to use" frame="terminal"
+at_target(integer tnum, vector targetpos, vector ourpos)
+{
+
+}
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-10, 25-31}
+integer target_id;
+vector target_pos;
+
+default
+{
+    state_entry()
+    {
+        target_pos = llGetPos() + <5.0, 0.0, 0.0>;
+        target_id = llTarget(target_pos, 0.5);
+        llSetStatus(STATUS_PHYSICS, TRUE);
+        llMoveToTarget(target_pos, 0.4);
+    }
+    at_target(integer tnum, vector targetpos, vector ourpos)
+    {
+        if (tnum == target_id)
+        {
+            llOwnerSay("object is within range of target");
+            llOwnerSay("target position: " + (string)targetpos + ", object is now at: " + (string)ourpos);
+            llOwnerSay("this is " + (string)llVecDist(targetpos, ourpos) + " meters from the target");
+            llTargetRemove(target_id);
+        }
+    }
+    not_at_target()
+    {
+        llOwnerSay(
+            "not there yet - object is at " + (string)llGetPos() +
+            ", which is " + (string)llVecDist(target_pos, llGetPos()) +
+            " meters from the target (" + (string)target_pos + ")"
+        );
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llTarget](/functions/llTarget/) — Setup a target position
+- [llTargetRemove](/functions/llTargetRemove/) — Stop a target position
+- [llRotTarget](/functions/llRotTarget/) — Setup a target rotation
+- [llRotTargetRemove](/functions/llRotTargetRemove/) — Stop a target rotation
+
+### Events
+
+- [not_at_target](/events/not_at_target/)
+- [at_rot_target](/events/at_rot_target/)
+- [not_at_rot_target](/events/not_at_rot_target/)
+
+<WikiSource />

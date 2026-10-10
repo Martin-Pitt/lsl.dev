@@ -1,0 +1,105 @@
+---
+title: "llDetectedTouchPos"
+slug: "functions/llDetectedTouchPos"
+category: functions
+source:
+  wiki: "LlDetectedTouchPos"
+  url: https://wiki.secondlife.com/wiki/LlDetectedTouchPos
+  revision: 1194096
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/lldetectedtouchpos-daf74a25.txt
+  license: "Content from the Second Life Wiki article LlDetectedTouchPos (revision 1194096, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDetectedTouchPos" />
+
+For the [touch](/categories/touch/) category of events only. The prim that was touched may not be the prim receiving the event, use [llDetectedLinkNumber](/functions/llDetectedLinkNumber/) to check for this; likewise you can use [llDetectedTouchFace](/functions/llDetectedTouchFace/) to determine which face was touched.
+
+```lsl title="How to use" frame="terminal"
+vector result = llDetectedTouchPos(0);
+```
+
+## Caveats
+
+- [TOUCH_INVALID_VECTOR](/constants/TOUCH_INVALID_VECTOR/) is returned when...
+- The avatar's viewer does not support face touch detection.
+- To check if face touch detection is supported check the return of [llDetectedTouchFace](/functions/llDetectedTouchFace/).
+- The touch has moved off the surface of the prim.
+- The event triggered is not a [touch](/categories/touch/) event.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    touch_start(integer num_detected)
+    {
+        llWhisper(0, "Pos clicked: " + (string)llDetectedTouchPos(0));
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={8-20}
+vector GetRealTouchPos(vector pos)
+{
+//  By Ariu Arai for free use to anyone
+//  Returns a useful HUD Position Vector from the llDetectedTouchPos(); function
+//  USE: vector pos = GetRealTouchPos(llDetectedTouchPos(0)); .. Etc.
+//  This function is intended to be used to move child prims to where the user clicks. This does not work on the root prim.
+
+    integer point = llGetAttached();
+    vector offset;
+
+    if      (point == ATTACH_HUD_TOP_RIGHT)    offset = <1.0, 0.933,-0.5>;
+    else if (point == ATTACH_HUD_TOP_CENTER)   offset = <1.0, 0.000,-0.5>;
+    else if (point == ATTACH_HUD_TOP_LEFT)     offset = <1.0,-0.933,-0.5>;
+    else if (point == ATTACH_HUD_BOTTOM_LEFT)  offset = <1.0,-0.933, 0.5>;
+    else if (point == ATTACH_HUD_BOTTOM)       offset = <1.0, 0.000, 0.5>;
+    else if (point == ATTACH_HUD_BOTTOM_RIGHT) offset = <1.0, 0.933, 0.5>;
+
+    //return (pos - llGetLocalPos()) + (offset * llGetLocalRot());
+    return ((offset - llGetLocalPos()) + pos) / llGetLocalRot();
+}
+```
+
+</details>
+
+## History
+
+- Introduced in Viewer `{{SVN|870|rev=92872|branch=Release|anchor=file14|date=Wednesday, 23 July 2008}}`.
+- Server support available in [Second Life Server 1.24.7.98039](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/1.24#release-notes-for-second-life-server-1-24-7-2898039-29-28october-2nd-2c-2008-29), client support in [Release Candidate viewer 1.21.4 (98167)](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release_Candidate/1.21#release-notes-for-second-life-1-21-284-29-oct-1st-2c-2008).
+- Date of Release Server [29-08-2008](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Beta_Server/1.24#release-notes-for-second-life-beta-server-1-24-3-28august-29th-2c-2008-29)
+- Date of Release Client [16-10-2008](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.21)
+
+## Shared wiki templates
+
+The wiki article also includes shared templates whose conditional content is not reproduced here: [Template:Issues/SVC-3425](https://wiki.secondlife.com/wiki/Template:Issues/SVC-3425).
+
+## See also
+
+### Functions
+
+- [llDetectedLinkNumber](/functions/llDetectedLinkNumber/)
+- [llDetectedTouchFace](/functions/llDetectedTouchFace/)
+- [llDetectedTouchST](/functions/llDetectedTouchST/)
+- [llDetectedTouchUV](/functions/llDetectedTouchUV/)
+- [llDetectedTouchNormal](/functions/llDetectedTouchNormal/)
+- [llDetectedTouchBinormal](/functions/llDetectedTouchBinormal/)
+
+### Events
+
+- [touch_start](/events/touch_start/)
+- [touch](/events/touch/)
+- [touch_end](/events/touch_end/)
+
+<WikiSource />

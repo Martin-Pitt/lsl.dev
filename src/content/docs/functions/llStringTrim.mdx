@@ -1,0 +1,144 @@
+---
+title: "llStringTrim"
+slug: "functions/llStringTrim"
+category: functions
+source:
+  wiki: "LlStringTrim"
+  url: https://wiki.secondlife.com/wiki/LlStringTrim
+  revision: 1217878
+  date: 2025-01-13
+  contributor: "Frionil Fang"
+  raw: /wiki-source/llstringtrim-449c4de4.txt
+  license: "Content from the Second Life Wiki article LlStringTrim (revision 1217878, 2025-01-13), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llStringTrim" description />
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is **src** with leading and/or trailing white space (spaces, tabs, and line feeds) trimmed from it.
+
+```lsl title="How to use" frame="terminal"
+string result = llStringTrim("", 0);
+```
+
+## Specification
+
+| Constant |  | Description |
+| --- | --- | --- |
+| [STRING_TRIM_HEAD](/constants/STRING_TRIM_HEAD/) | 0x1 | Trims white space off the beginning. |
+| [STRING_TRIM_TAIL](/constants/STRING_TRIM_TAIL/) | 0x2 | Trims white space off the end. |
+| [STRING_TRIM](/constants/STRING_TRIM/) | 0x3 | Trims white space off the beginning and end. |
+
+## Examples
+
+<details open>
+<summary>Whenever you are accepting unstructured input from a user -- whether via chat or via a notecard -- it is a good idea to always full trim it:</summary>
+
+```lsl
+llStringTrim("User input", STRING_TRIM);
+```
+
+</details>
+
+<details>
+<summary>This example returns the number of leading and trailing 'white space' characters on a string that were removed (not particularly useful but shows how to use the function).</summary>
+
+```lsl collapse={1-16, 24-29}
+default
+{
+    state_entry()
+    {
+        llListen(4, "", llGetOwner(), "");
+    }
+
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        //track the length
+        integer length = llStringLength(message);
+
+        //trim message (not necessary to store these to variables but makes reading easier)
+        string trim_left  = llStringTrim(message, STRING_TRIM_HEAD);
+        string trim_right = llStringTrim(message, STRING_TRIM_TAIL);
+        string trim_both  = llStringTrim(message, STRING_TRIM);
+
+        //output the results
+        llOwnerSay("Initial length  = " + (string)length +
+                 "\nLeading Spaces  = " + (string)(length - llStringLength(trim_left))+
+                 "\nTrailing Spaces = " + (string)(length - llStringLength(trim_right))+
+                 "\nTrimmed Message = \"" + trim_both + "\"");
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- The exact set of characters stripped are 0x09 (tab), line feed (0x0a, "\\n"), vertical tab (0x0b), form feed (0x0c), carriage return (0x0d) and space (0x20, " ").
+- Only line feed and space function as true whitespace within SL, the others will produce some manner of a printable character.
+- The "\\t" escape code doesn't actually represent the tab character, but several spaces instead.
+- Other whitespace characters defined in Unicode, such as non-breaking space (0xa0) or specific-width spaces in the 0x2000 range are not stripped.
+- Aside from white space at the beginning and / or end, the actual string will be unaffected. This means too, though, that extraneous spaces within the string -- for instance, a mistaken double-space type -- will not be corrected.
+- The following will remove all doubled (or further multiplied), leading and trailing spaces with iterated [llReplaceSubString](/functions/llReplaceSubString/):
+
+```lsl
+while(llStringLength(s) != llStringLength(s = llReplaceSubString(s, "  ", " ", 0)));
+s = llStringTrim(s, STRING_TRIM);
+```
+
+- [llReplaceSubString](/functions/llReplaceSubString/) is also the easiest way to remove all spaces from a string:
+
+```lsl
+llReplaceSubString("some words to remove the spaces from", " ", "", 0);
+```
+
+- [llList2Json](/functions/llList2Json/) also trims strings contained in the list. Thus, an easy way to trim an entire list of strings is:
+
+```lsl
+list l = ["  a  ", " b", "c ", " d "];
+list trimmedList = llJson2List(llList2Json(JSON_ARRAY, l));
+```
+
+- Some old, less efficient methods, no longer recommended for use:
+
+:\* Intra-string space trimming:
+
+::
+
+```lsl
+llDumpList2String(llParseString2List(src, [" "], []), " "); //works but can use a large quantity of memory
+```
+
+:\* An method to strip spaces from the sentence:
+
+::
+
+```lsl
+//Added By To-mos Codewarrior
+string str1 = "some words to remove the spaces from";
+integer index;
+while(~index=llSubStringIndex(str1," ")) {
+    data=llDeleteSubString(str1,index,index);
+}
+```
+
+:\* Variant of above:
+
+::
+
+```lsl
+(string)llParseString2List(src, [" "], []); //works but can use a large quantity of memory
+```
+
+## History
+
+- Introduced in 1.13.4
+
+Date of release [25-04-2007](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.15#release-notes-for-second-life-1-15-0-282-29-april-25-2c-2007)
+
+<WikiSource />

@@ -1,0 +1,71 @@
+---
+title: "llTriggerSound"
+slug: "functions/llTriggerSound"
+category: functions
+source:
+  wiki: "LlTriggerSound"
+  url: https://wiki.secondlife.com/wiki/LlTriggerSound
+  revision: 1215119
+  date: 2023-10-18
+  contributor: "Frionil Fang"
+  raw: /wiki-source/lltriggersound-97ac6748.txt
+  license: "Content from the Second Life Wiki article LlTriggerSound (revision 1215119, 2023-10-18), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llTriggerSound" description />
+
+Plays **sound** at **volume**, centered at but not attached to object.
+
+If the object moves the sound does not move with it.
+
+Use [llPlaySound](/functions/llPlaySound/) to play a sound attached to the object.
+
+```lsl title="How to use" frame="terminal"
+llTriggerSound("", 0.0);
+```
+
+## Caveats
+
+- Sounds played from a HUD using `llTriggerSound` are audible inworld. To make sounds from a HUD audible only to the wearer, use [llPlaySound](/functions/llPlaySound/).
+- Playing sounds is throttled. If the average number of played sounds per second exceeds the limit (22 sounds/s), all sounds from the object are suppressed until the average falls sufficiently. The throttle is per object, not per link or per script, so multiple links cannot be used to overcome the throttle.
+- Once the throttle is hit, the following error will be shown in debug channel: "Too many sound requests. Throttled until average falls."
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//When touched, object containing this script will trigger the sound entered.
+//This function allows object to trigger sound even if attached to an avatar (AGENT)
+//Creator: TonyH Wrangler
+
+string sound = "ed124764-705d-d497-167a-182cd9fa2e6c"; //uuid or name of item in inventory
+
+default
+{
+    touch_start(integer total_num)
+    {
+        llTriggerSound(sound, 1.0);
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-4897 (nf): '''llSetSyncTime'''() - a function for synchronising client side effects
+
+## See also
+
+### Functions
+
+- [llPlaySound](/functions/llPlaySound/)
+- [llTriggerSoundLimited](/functions/llTriggerSoundLimited/)
+- [llLinkPlaySound](/functions/llLinkPlaySound/) — 3=Can be used to trigger sounds in other prims in the linkset.
+
+<WikiSource />

@@ -1,0 +1,117 @@
+---
+title: "experience_permissions_denied"
+slug: "events/experience_permissions_denied"
+category: events
+source:
+  wiki: "Experience permissions denied"
+  url: https://wiki.secondlife.com/wiki/Experience_permissions_denied
+  revision: 1218469
+  date: 2025-09-16
+  contributor: "Nexii Malthus"
+  raw: /wiki-source/experience-permissions-denied-86f20fc7.txt
+  license: "Content from the Second Life Wiki article Experience permissions denied (revision 1218469, 2025-09-16), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="experience_permissions_denied" />
+
+This event may be generated in many cases:
+
+- In response to a call to [llRequestExperiencePermissions](/functions/llRequestExperiencePermissions/) if any of the following is true:
+- The agent does not respond to the experience permission dialog. This will happen after a long delay if the agent is running a viewer which doesn't understand the request or if the agent has blocked the object.
+- The agent selects "Block Experience" in the experience permission dialog.
+- The agent has previously blocked the experience through another experience permission dialog or through the experience profile.
+- An attachment is asking for permission from an agent other than its owner.
+- The experience cannot run on the region because it is blocked or exceeds the maturity rating of the region.
+- The experience can no longer run:
+- The script has moved to a region where the experience cannot run because it is blocked or it exceeds the maturity rating of the region.
+- The script has moved to a parcel where it is blocked or not allowed.
+- The agent has blocked the experience from the experience profile.
+- The agent has moved to a parcel where the experience cannot run.
+
+The agent has denied [experience permission](/functions/llRequestExperiencePermissions/) or generated under other cases.
+
+```lsl title="How to use" frame="terminal"
+experience_permissions_denied(key agent_id, integer reason)
+{
+
+}
+```
+
+## Specification
+
+| LSL Constant |  | Message returned via [llGetExperienceErrorMessage](/functions/llGetExperienceErrorMessage/) | Description |
+| --- | --- | --- | --- |
+| [XP_ERROR_NONE](/constants/XP_ERROR_NONE/) | 0 | no error | No error was detected. |
+| [XP_ERROR_THROTTLED](/constants/XP_ERROR_THROTTLED/) | 1 | exceeded throttle | The call failed due to too many recent calls. |
+| [XP_ERROR_EXPERIENCES_DISABLED](/constants/XP_ERROR_EXPERIENCES_DISABLED/) | 2 | experiences are disabled | The region currently has experiences disabled. |
+| [XP_ERROR_INVALID_PARAMETERS](/constants/XP_ERROR_INVALID_PARAMETERS/) | 3 | invalid parameters | One of the string arguments was too big to fit in the key-value store. |
+| [XP_ERROR_NOT_PERMITTED](/constants/XP_ERROR_NOT_PERMITTED/) | 4 | operation not permitted | Experience permissions were denied by the user. |
+| [XP_ERROR_NO_EXPERIENCE](/constants/XP_ERROR_NO_EXPERIENCE/) | 5 | script not associated with an experience | This script is not associated with an experience. |
+| [XP_ERROR_NOT_FOUND](/constants/XP_ERROR_NOT_FOUND/) | 6 | not found | The sim was unable to verify the validity of the experience. Retrying after a short wait is advised. |
+| [XP_ERROR_INVALID_EXPERIENCE](/constants/XP_ERROR_INVALID_EXPERIENCE/) | 7 | invalid experience | The script is associated with an experience that no longer exists. |
+| [XP_ERROR_EXPERIENCE_DISABLED](/constants/XP_ERROR_EXPERIENCE_DISABLED/) | 8 | experience is disabled | The experience owner has temporarily disabled the experience. |
+| [XP_ERROR_EXPERIENCE_SUSPENDED](/constants/XP_ERROR_EXPERIENCE_SUSPENDED/) | 9 | experience is suspended | The experience has been suspended by Linden Lab customer support. |
+| [XP_ERROR_UNKNOWN_ERROR](/constants/XP_ERROR_UNKNOWN_ERROR/) | 10 | unknown error | An unknown error not covered by any of the other predetermined error states. |
+| [XP_ERROR_QUOTA_EXCEEDED](/constants/XP_ERROR_QUOTA_EXCEEDED/) | 11 | experience data quota exceeded | An attempt to write data to the key-value store failed due to the data quota being met. |
+| [XP_ERROR_STORE_DISABLED](/constants/XP_ERROR_STORE_DISABLED/) | 12 | key-value store is disabled | They key-value store is currently disabled on this region. |
+| [XP_ERROR_STORAGE_EXCEPTION](/constants/XP_ERROR_STORAGE_EXCEPTION/) | 13 | key-value store communication failed | Unable to communicate with the key-value store, or attempted to create key that already exists |
+| [XP_ERROR_KEY_NOT_FOUND](/constants/XP_ERROR_KEY_NOT_FOUND/) | 14 | key doesn't exist | They requested key does not exist. |
+| [XP_ERROR_RETRY_UPDATE](/constants/XP_ERROR_RETRY_UPDATE/) | 15 | retry update | A checked update failed due to an out of date request. |
+| [XP_ERROR_MATURITY_EXCEEDED](/constants/XP_ERROR_MATURITY_EXCEEDED/) | 16 | experience content rating too high | The content rating of the experience exceeds that of the region. |
+| [XP_ERROR_NOT_PERMITTED_LAND](/constants/XP_ERROR_NOT_PERMITTED_LAND/) | 17 | not allowed to run on this land | The experience is blocked or not enabled for this land. |
+| [XP_ERROR_REQUEST_PERM_TIMEOUT](/constants/XP_ERROR_REQUEST_PERM_TIMEOUT/) | 18 | experience permissions request timed out | The request for experience permissions was ignored. |
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-13, 23-27}
+// Simple experience watcher
+string denied_region = "";
+string experience_name = "";
+
+default{
+    state_entry(){
+        llRequestExperiencePermissions(llGetOwner(), "");
+        experience_name = llList2String(llGetExperienceDetails(NULL_KEY), 0);
+    }
+
+    experience_permissions(key agent){
+        denied_region="";
+        llOwnerSay("in "+ experience_name);
+    }
+
+    experience_permissions_denied(key agent, integer reason){
+        denied_region = llGetRegionName( );
+        llOwnerSay("out "+ experience_name);
+
+    }
+
+    changed(integer what){
+        if(denied_region != "" && denied_region != llGetRegionName()){
+           llRequestExperiencePermissions(llGetOwner(), "");
+        }
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+[Category:Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)
+
+## See also
+
+### Functions
+
+- [llRequestExperiencePermissions](/functions/llRequestExperiencePermissions/)
+- [llGetExperienceErrorMessage](/functions/llGetExperienceErrorMessage/)
+
+### Events
+
+[experience permissions](/events/experience_permissions/)
+
+<WikiSource />

@@ -1,0 +1,79 @@
+---
+title: "llSetAgentRot"
+slug: "functions/llSetAgentRot"
+category: functions
+source:
+  wiki: "LlSetAgentRot"
+  url: https://wiki.secondlife.com/wiki/LlSetAgentRot
+  revision: 1218451
+  date: 2025-09-09
+  contributor: "Lucia Nightfire"
+  raw: /wiki-source/llsetagentrot-5ef6136b.txt
+  license: "Content from the Second Life Wiki article LlSetAgentRot (revision 1218451, 2025-09-09), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetAgentRot" description />
+
+Sets the rotation the avatar to **rot**.
+
+```lsl title="How to use" frame="terminal"
+llSetAgentRot(ZERO_ROTATION, 0);
+```
+
+## Specification
+
+This function turns the avatar to face the direction indicated by **rot**.
+
+**flags** is a placeholder for future expansion. There are no flags defined at this time, pass a constant value of 0.
+
+## Caveats
+
+- This function requires [PERMISSION_TRIGGER_ANIMATION](/constants/PERMISSION_TRIGGER_ANIMATION/).
+- This function will only rotate an avatar around the yaw angle.
+- More complex rotations may be passed in, but the yaw is extracted and then renormalized.
+- Rotating to [ZERO_ROTATION](/constants/ZERO_ROTATION/) will face an avatar due east.
+- This function will not change the rotation for a seated avatar. Update the agent's sit target instead.
+- Special case: If the agent is seated on a prim WITHOUT a sit target they will be turned to face the set rotation when they stand.
+- Viewers prior to 7.2.1.17108480561 will not show your own avatar's rotation being affected by this function, but others will see your rotation update.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-16}
+// Turn the touching avatar to face the same direction as the prim.
+
+default
+{
+    state_entry()
+    {
+        llSetText("Avatar Rotator", llGetColor(ALL_SIDES), 1.0);
+    }
+
+    touch_start(integer total_number)
+    {
+        llRequestPermissions(llDetectedKey(0), PERMISSION_TRIGGER_ANIMATION);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_TRIGGER_ANIMATION)
+        {
+            llSetAgentRot(llGetRot(), 0);
+        }
+    }
+
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llRequestPermissions](/functions/llRequestPermissions/)
+
+<WikiSource />

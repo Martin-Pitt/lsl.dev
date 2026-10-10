@@ -1,0 +1,111 @@
+---
+title: "link_message"
+slug: "events/link_message"
+category: events
+source:
+  wiki: "Link message"
+  url: https://wiki.secondlife.com/wiki/Link_message
+  revision: 1212926
+  date: 2023-01-06
+  contributor: "Nelson Jenkins"
+  raw: /wiki-source/link-message-16055e9c.txt
+  license: "Content from the Second Life Wiki article Link message (revision 1212926, 2023-01-06), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="link_message" />
+
+**id** is often used as a second string field (in LSL the [key](https://wiki.secondlife.com/wiki/key) type is implemented as a [string](https://wiki.secondlife.com/wiki/string) with just custom operators). [Typecasting](https://wiki.secondlife.com/wiki/typecast) between [string](https://wiki.secondlife.com/wiki/string) and [key](https://wiki.secondlife.com/wiki/key) types has no effect on the data contained. The sizes of **str** and **id** are only limited by available script memory.
+
+Triggered when the script receives a link message that was sent by a call to [llMessageLinked](/functions/llMessageLinked/). [llMessageLinked](/functions/llMessageLinked/) is used to send messages from one script to another.
+
+```lsl title="How to use" frame="terminal"
+link_message(integer sender_num, integer num, string str, key id)
+{
+
+}
+```
+
+## Caveats
+
+- 64 link_message events can queue, past that, they are silently dropped! Don't do too much in the event if they might be coming in fast.
+- **sender_num** does not reflect how a message was sent, there is no way to know if it was sent with a LINK\_\* flag or the [specific link number](/functions/llGetLinkNumber/).
+- If **str** and **id** are bigger than available memory the script will crash with a Stack-Heap Collision.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// This is just an example script, you shouldn't handle touches within a single script this way.
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        llMessageLinked(LINK_THIS, 0, llDetectedName(0), llDetectedKey(0));
+    }
+
+    link_message(integer source, integer num, string str, key id)
+    {
+        llWhisper(0, str + " (" + (string)id + ") touched me!");
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+### Sending Lists
+
+```lsl collapse={1-14}
+// This is just an example script, you shouldn't handle link messages within a single script this way.
+
+default
+{
+    // To propagate an unlimited number of arguments of any type, as long as you don't run out of memory.
+    // For low-latency operations, it is more efficient to concatenate the parameters into a string manually all at once, which avoids the comparatively slower llDumpList2String call but is not as flexible.
+    // The separator string cannot be used in any source string, or the resulting list will be incorrectly parsed.
+    // It is possible to design your own custom escape sequence for any instances of the separator string or use a rarer character, though that is outside the scope of this snippet.
+
+    state_entry()
+    {
+        list my_list = [1, 2.0, "a string", <1, 2, 3>, <1, 2, 3, 4>, llGetOwner()];
+        string list_parameter = llDumpList2String(my_list, "|");	// Produce a | delimited string from the list
+        llMessageLinked(LINK_THIS, 0, list_parameter, NULL_KEY);
+    }
+
+    link_message(integer sender_num, integer num, string list_argument, key id)
+    {
+        if (list_argument != "")
+        {
+            list re_list = llParseStringKeepNulls(list_argument, ["|"], [""]);	// Convert the string back to a list
+            // llParseStringKeepNulls is used here in lieu of llParseString2List to accommodate any elements of my_list that were empty strings, which would otherwise be deleted.
+            // Note that re_list will be a list of strings no matter what my_list contained, so only llList2String can be used on it, not llList2Integer, llList2Vector, etc.
+        }
+        else
+        {
+            // my_list was an empty list (or a list that contained only one empty string), so llParseStringKeepNulls is not necessary because it would potentially incorrectly return a list with a single blank string.
+            // It is not possible to distinguish between the two, so it would be wise to check which is the case before sending if possible.
+        }
+    }
+}
+```
+
+## Notes
+
+:::note
+A script can hear its own link messages.
+:::
+
+- **sender_num** can be compared to [llGetLinkNumber](/functions/llGetLinkNumber/) to determine whether the message was sent by the same prim, regardless of whether the prim is unlinked, a root, or a child.
+
+## See also
+
+### Functions
+
+- [llMessageLinked](/functions/llMessageLinked/)
+
+<WikiSource />

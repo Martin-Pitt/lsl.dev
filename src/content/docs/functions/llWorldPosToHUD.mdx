@@ -1,0 +1,122 @@
+---
+title: "llWorldPosToHUD"
+slug: "functions/llWorldPosToHUD"
+category: functions
+source:
+  wiki: "LlWorldPosToHUD"
+  url: https://wiki.secondlife.com/wiki/LlWorldPosToHUD
+  revision: 1216100
+  date: 2024-01-24
+  contributor: "Garfield Linden"
+  raw: /wiki-source/llworldpostohud-3194d768.txt
+  license: "Content from the Second Life Wiki article LlWorldPosToHUD (revision 1216100, 2024-01-24), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llWorldPosToHUD" description />
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) position in HUD frame that would place the center of the HUD object directly over **world_pos** as viewed by the current camera.
+
+```lsl title="How to use" frame="terminal"
+vector result = llWorldPosToHUD(ZERO_VECTOR);
+```
+
+## Caveats
+
+Only works for HUD attachments. The vector's X component will be 1.0 when **world_pos** is in front of camera and -1.0 when it is behind. Returns zero vector when no permissions have been granted.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={4-53, 59-71}
+// llWorldPosToHUD() example
+//
+// Put this script on a HUD attachment (which attachment point doesn't matter).
+// Touch to toggle 'tracking' on/off.
+// Put an object at world_pos as reference for where the HUD should move when 'tracking'.
+
+vector not_tracking_color = <1.0, 1.0, 1.0>; // white
+vector tracking_front_color = <0.5, 0.0, 0.5>; // magenta
+vector tracking_behind_color = <0.0, 0.5, 0.5>; // cyan
+
+vector world_pos = <32,32,24>; // change this position as necessary, put a ref object here
+integer tracking = FALSE;
+
+default
+{
+    state_entry()
+    {
+        llOwnerSay("Touch HUD to toggle tracking");
+        llRequestPermissions(llGetOwner(), PERMISSION_TRACK_CAMERA);
+        llSetAlpha(0.5, ALL_SIDES); // make object semi transparent
+        llSetColor(not_tracking_color, ALL_SIDES);
+    }
+
+    touch_start(integer total_number)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TRACK_CAMERA);
+        tracking = !tracking;
+        if (tracking)
+        {
+            llSetTimerEvent(0.01);
+            llSetColor(tracking_front_color, ALL_SIDES);
+        }
+        else
+        {
+            llSetTimerEvent(0.0);
+            llSetPos(<0,0,0>);
+            llSetColor(not_tracking_color, ALL_SIDES);
+        }
+    }
+
+    attach(key id)
+    {
+        if (id != NULL_KEY)
+        {
+            llSetPos(<0,0,0>);
+            tracking = FALSE;
+            llSetTimerEvent(0.0);
+        }
+    }
+
+    timer()
+    {
+        integer attachment_point = llGetAttached();
+        if (attachment_point >= ATTACH_HUD_CENTER_2 && attachment_point <= ATTACH_HUD_BOTTOM_RIGHT)
+        {
+            vector hud_pos = llWorldPosToHUD(world_pos);
+            if (hud_pos.x > 0.0)
+            {
+                // world-pos is in front of camera
+                llSetColor(tracking_front_color, ALL_SIDES);
+            }
+            else
+            {
+                // world_pos is behind camera
+                llSetColor(tracking_behind_color, ALL_SIDES);
+            }
+            // update HUD position
+            llSetPos(hud_pos);
+        }
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+`{{LSL_Function/permission|PERMISSION_TRACK_CAMERA}}`
+
+## See also
+
+### Functions
+
+- [llGetCameraAspect](/functions/llGetCameraAspect/)
+- [llGetCameraFOV](/functions/llGetCameraFOV/)
+- [llGetCameraPos](/functions/llGetCameraPos/)
+- [llGetCameraRot](/functions/llGetCameraRot/)
+
+<WikiSource />

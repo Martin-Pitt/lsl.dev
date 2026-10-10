@@ -1,0 +1,99 @@
+---
+title: "llMinEventDelay"
+slug: "functions/llMinEventDelay"
+category: functions
+source:
+  wiki: "LlMinEventDelay"
+  url: https://wiki.secondlife.com/wiki/LlMinEventDelay
+  revision: 1212509
+  date: 2022-10-01
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llmineventdelay-561ce3a8.txt
+  license: "Content from the Second Life Wiki article LlMinEventDelay (revision 1212509, 2022-10-01), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llMinEventDelay" />
+
+Set the minimum time between events being handled.
+
+Defaults and minimums vary by the event type, see [LSL Delay](https://wiki.secondlife.com/wiki/LSL_Delay).
+
+```lsl title="How to use" frame="terminal"
+llMinEventDelay(0.0);
+```
+
+## Caveats
+
+Minimum delay is maintained between state changes.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llMinEventDelay(5.0);
+    }
+    touch(integer detected)
+    {
+        llSay(0, "Touched.");//Without the event delay set touch would cause the screen to fill
+                             //with the word "Touched" in a split second if you held the mouse button down.
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Where as, if in one object you place this script (for the sake of fun call the object "Sandy Powell"). -</summary>
+
+```lsl
+default
+{
+    touch(integer detected)
+    {
+        llSay(0, "Can you hear me mother?"); //Northern English accent. Catch phase of Sandy Powell (comedian).
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>and this in another object called "Mother" -</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llMinEventDelay(5.0);
+        llListen(0, "Sandy Powell", "", "");
+    }
+    listen(integer chan, string name, key id, string msg)
+    {
+        llSay(0, "Eh?");
+    }
+}
+```
+
+</details>
+
+the result in chat is as follows -
+
+`{{Samp|1= [12:51] Sandy Powell: Can you hear me mother? [12:51] Mother: Eh? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Sandy Powell: Can you hear me mother? [12:51] Mother: Eh? [12:51] Mother: Eh? [12:51] Mother: Eh? [12:51] Mother: Eh? [12:51] Mother: Eh? [12:51] Mother: Eh? [12:52] Mother: Eh? [12:52] Mother: Eh? [12:52] Mother: Eh? [12:52] Mother: Eh? [12:52] Mother: Eh? [12:52] Mother: Eh? [12:52] Mother: Eh? }}`
+
+and no more events are triggered. This is an example of lost transferred info because of [llMinEventDelay](/functions/llMinEventDelay/) so be careful with it.
+
+## See also
+
+### Articles
+
+- [LSL Delay](https://wiki.secondlife.com/wiki/LSL_Delay) — for default values
+
+<WikiSource />

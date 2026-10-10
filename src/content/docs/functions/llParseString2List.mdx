@@ -1,0 +1,151 @@
+---
+title: "llParseString2List"
+slug: "functions/llParseString2List"
+category: functions
+source:
+  wiki: "LlParseString2List"
+  url: https://wiki.secondlife.com/wiki/LlParseString2List
+  revision: 1218567
+  date: 2025-12-29
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/llparsestring2list-af9edf9a.txt
+  license: "Content from the Second Life Wiki article LlParseString2List (revision 1218567, 2025-12-29), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llParseString2List" />
+
+In most situations [llParseStringKeepNulls](/functions/llParseStringKeepNulls/) should be used instead. Discarding null values is rarely desired.
+
+When dealing with [vector](https://wiki.secondlife.com/wiki/vector) and [rotation](https://wiki.secondlife.com/wiki/rotation) data, consider using [llCSV2List](/functions/llCSV2List/) instead, since it can correctly parse them.
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) that is **src** broken into a list of strings, discarding **separators**, keeping **spacers**, discards any null (empty string) values generated.
+
+```lsl title="How to use" frame="terminal"
+list result = llParseString2List("", [], []);
+```
+
+## Caveats
+
+- All empty strings (that would arise from a spacer or separator being adjacent to each other or the ends) are removed;
+- If you want them (to keep the order of a list, for example) use [llParseStringKeepNulls](/functions/llParseStringKeepNulls/) instead;
+- Only the first 8 **separators** and first 8 **spacers** supplied will be used. Any beyond that will be ignored. To work around this see [useful snippets](#useful-snippets) section below. The only limit on the number of items in the output is available script memory.
+- All **separators** and **spacers** must be strings. All other types will be ignored;
+- Separators take precedent over **spacers**. The string is parsed from start to finish. Each position is compared against the **separators** then **spacers** before moving onto the next position;
+- Duplicate **separators** and **spacers** have no ill effects;
+- All elements in the list returned by `llParseString2List` are strings, and must be explicitly typecast if they are to be used as other types. Do not rely upon the implicit typecasting of the other llList2\* functions (as they typically return a default value);
+- Remember to capture the result of the operation with a variable, unless you are planning to act directly on the results.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5, 11-16}
+default
+{
+    state_entry()
+    {
+        // This will say:
+        // <A><crazy><fox><.><Saw><the><moon><.><.>
+        string my_string = "A crazy fox.  Saw the moon..";
+        list my_list = llParseString2List(my_string,[" "],["."]);
+        llOwnerSay("<" + llDumpList2String(my_list,"><") + ">");
+
+        // This will say:
+        //  <A><crazy><fox><.><><><Saw><the><moon><.><><.><>
+        my_list = llParseStringKeepNulls(my_string,[" "],["."]);
+        llOwnerSay("<" + llDumpList2String(my_list,"><") + ">");
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>While LSL does not support lists-in-lists, you can emulate lists-in-lists by making successive calls or you could use [JSON](/categories/json/).</summary>
+
+In this example some items have additional information supplied.
+
+```lsl collapse={1-5, 16-23}
+string shoppinglist = "macaroni::pepperoni::bread#wheat::sausage#italian::coffee::syrup::apple::ice cream#strawberry#chocolate#vanilla";
+
+default
+{
+    state_entry()
+    {
+        list items = llParseString2List(shoppinglist, ["::"], []);
+        integer i = 0;
+        integer j = llGetListLength(items);
+        for(;i < j; ++i)
+        {
+            list desc = llParseString2List(llList2String(items, i), ["#"], []);
+            if(llGetListLength(desc) > 1)
+            {
+                list types = llDeleteSubList(desc,0,0);
+                llOwnerSay("Item: "+ llList2String(desc, 0) + "  Type: " + llList2CSV(llDeleteSubList(types,-2,-1) + llDumpList2String(llList2List(types,-2,-1), " & ")));
+            } else {
+                llOwnerSay("Item: "+ (string)desc);
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+**Examples of processing more than 8 **spacers** or **separators**:**
+
+- [ParseString2List](https://wiki.secondlife.com/wiki/ParseString2List) — Functions exactly the same as [llParseString2List](/functions/llParseString2List/) and [llParseStringKeepNulls](/functions/llParseStringKeepNulls/).
+- [separateWords](https://wiki.secondlife.com/wiki/Separate_Words) — Functions exactly the same as [llParseString2List](/functions/llParseString2List/) unless you violate it's additional preconditions. Appears to be correct at a glance.
+
+<table>
+</table>
+
+## Notes
+
+Whenever you need to process the resulting list entries further (eg. typecasting), remember to [llStringTrim](/functions/llStringTrim/) any whitespace characters from the string. This can prevent issues such as unexpected values for vectors and rotations.
+
+---
+
+If you indicate some items as **separators**, it will split the string where it finds the indicated **separators**, and strip out the **separators**.
+
+If instead you indicate some items as **spacers**, it will split the string where it finds the **spacers**, but leave the **spacers** there, including them as separate entries in the result list.
+
+```lsl
+string myString = "What Are You Looking At?";
+
+llSay(0, llList2CSV( llParseString2List(myString,  ["W", "A", "Y", "L"], [] ) ) );
+//returns:  hat , re , ou , ooking , t?
+
+llSay(0, llList2CSV( llParseString2List(myString, [], ["W", "A", "Y", "L"] ) ) );
+//returns: W, hat , A, re , Y, ou , L, ooking , A, t?
+```
+
+Using " " as a separator will parse a sentence into words.
+
+If there is no spacer you care about, just use `[]` as the spacer.
+
+If an empty string is used as a separator or a spacer, it will have no effect.
+
+## History
+
+`{{LSL Added|0.6.0|remote=http://secondlife.wikia.com/wiki/Version_0.6.0}}`
+
+## See also
+
+### Functions
+
+- [llParseStringKeepNulls](/functions/llParseStringKeepNulls/)
+- [llDumpList2String](/functions/llDumpList2String/)
+- [llCSV2List](/functions/llCSV2List/)
+- [llList2CSV](/functions/llList2CSV/)
+
+### Articles
+
+- [Separate Words](https://wiki.secondlife.com/wiki/Separate_Words)
+- [LSL-Editor/Bugs](https://wiki.secondlife.com/wiki/LSL-Editor/Bugs)
+
+<WikiSource />

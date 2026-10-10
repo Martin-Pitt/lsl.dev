@@ -1,0 +1,154 @@
+---
+title: "llSameGroup"
+slug: "functions/llSameGroup"
+category: functions
+source:
+  wiki: "LlSameGroup"
+  url: https://wiki.secondlife.com/wiki/LlSameGroup
+  revision: 1213255
+  date: 2023-02-04
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llsamegroup-2c341a83.txt
+  license: "Content from the Second Life Wiki article LlSameGroup (revision 1213255, 2023-02-04), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSameGroup" />
+
+This function compares the `group-uuid` of the [prim](https://wiki.secondlife.com/wiki/prim) containing the script to that of the `group-uuid` of what **uuid** describes.
+
+It answers these two questions:
+
+- "Is the script's prim in the same [group](https://wiki.secondlife.com/wiki/group) as **uuid**?"
+- "Is the `group-uuid` of the script's prim equal to **uuid**?"
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is [TRUE](/constants/TRUE/) if **uuid** and the [prim](https://wiki.secondlife.com/wiki/prim) the [script](https://wiki.secondlife.com/wiki/Script) is in are of the same [group](https://wiki.secondlife.com/wiki/group), otherwise [FALSE](/constants/FALSE/).
+
+```lsl title="How to use" frame="terminal"
+integer result = llSameGroup(NULL_KEY);
+```
+
+## Specification
+
+The group of the prim the script is in is...
+
+- The group the prim is set-to
+- The group the prim is deeded-to
+- The group the prim is otherwise [owned by](https://wiki.secondlife.com/wiki/Owner)
+- If no group information is set, the `group-uuid` used for this is [NULL_KEY](/constants/NULL_KEY/).
+
+The group of the **uuid** is...
+
+- If **uuid** is a prim (known to the [region](https://wiki.secondlife.com/wiki/region))...
+- and it is an [attachment](https://wiki.secondlife.com/wiki/Attachment), the active group of the owner\*
+- The group the prim is set-to
+- The group the prim is deeded-to
+- The group the prim is otherwise owned by
+- If no group information is set, the `group-uuid` used for this is [NULL_KEY](/constants/NULL_KEY/).
+- If **uuid** is an [avatar](https://wiki.secondlife.com/wiki/Avatar) (known to the [region](https://wiki.secondlife.com/wiki/region))...
+- The active group of the avatar.
+- If no group information is set, the `group-uuid` used for this is [NULL_KEY](/constants/NULL_KEY/).
+- Otherwise, treat **uuid** AS the `group-uuid`.
+- This means that instead of doing "Is the script's prim in the same group as **uuid**?", it becomes "Is the `group-uuid` of the script's prim equal to **uuid**?"
+
+**Note:** No group, prim, or avatar share the same **uuid**.
+
+In pseudocode:
+
+```lsl
+integer llSameGroup(key uuid){
+    key group = getGroupKey(llGetKey());
+    if(uuid == group)
+        return TRUE;
+    if(getGroupKey(uuid) == group)
+        return TRUE;
+    return FALSE;
+}
+```
+
+## Caveats
+
+- Not so obvious is that it returns [TRUE](/constants/TRUE/) if the [object](https://wiki.secondlife.com/wiki/object) is not set to a group (i.e. "(none)") and either the [AV](https://wiki.secondlife.com/wiki/Avatar) with the given [key](https://wiki.secondlife.com/wiki/key) has no group active or the function is called with a [NULL_KEY](/constants/NULL_KEY/).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-6, 12-24}
+// Gives inventory object only to agents with the same active group
+
+default
+{
+    touch_start(integer total_number)
+    {
+        key id = llDetectedKey(0);
+
+        integer sameGroup = llSameGroup(id);
+//      same as llDetectedGroup(i) (with llDetectedGroup, detected does not need to be in the sim)
+
+        if (sameGroup)
+        {
+            integer numberOfObjectsInPrim = llGetInventoryNumber(INVENTORY_OBJECT);
+
+            if (numberOfObjectsInPrim)
+                llGiveInventory(id, llGetInventoryName(INVENTORY_OBJECT, 0));
+        }
+        else
+        {
+            llRegionSayTo(id, 0, "Wrong active group!");
+        }
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+To determine if an avatar is an object's owner when deeded to group, you should use a function similar to that provided for [llGetOwner](/functions/llGetOwner/#useful-snippets)().
+
+The following uses `llSameGroup()` to determine if a [parcel](https://wiki.secondlife.com/wiki/parcel) is [rezzable](https://wiki.secondlife.com/wiki/Rez) based on the object's active group and parcel details. Useful for preventing unnecessary rez failure notices from various types of attached objects (e.g. guns, water/skywalk [HUD](https://wiki.secondlife.com/wiki/HUD)s, etc).
+
+```lsl collapse={1-23}
+/*
+  By Aryn Gellner
+  pos - position (in region coordinates) to check against.
+  * Additional Land Owner Test added by Ruthven Willenov, simplified by Strife
+*/
+
+integer is_rezzable(vector pos)
+{
+    integer parcel_flags = llGetParcelFlags(pos);
+    if (parcel_flags & PARCEL_FLAG_ALLOW_CREATE_OBJECTS)
+    {
+        return true; //Anyone can rez. No further checks are needed.
+    }
+
+    //Ok, not just anyone can rez. Maybe they share an owner or the land allows for group rezzing.
+    //So let's get the parcel owner_id and group_id
+
+    list details = llGetParcelDetails(pos, [PARCEL_DETAILS_OWNER, PARCEL_DETAILS_GROUP]);
+
+    if (llList2Key(details, 0) == llGetOwner())
+    {
+        return TRUE; //Owner can always rez.
+    }
+
+    //Since what we are going to return is a boolean just return the result of the boolean expression.
+    return (parcel_flags & PARCEL_FLAG_ALLOW_CREATE_GROUP_OBJECTS) && llSameGroup(llList2Key(details, 1));
+}
+```
+
+## Tests
+
+- [llSameGroup Test](https://wiki.secondlife.com/wiki/llSameGroup_Test)
+
+## See also
+
+### Functions
+
+- [llDetectedGroup](/functions/llDetectedGroup/) — Used in conjunction with [detection](/categories/detected/) events
+- [llGetAttachedList](/functions/llGetAttachedList/) — Together with [llGetObjectDetails](/functions/llGetObjectDetails/) and [OBJECT_GROUP](/constants/OBJECT_GROUP/), it can be used to determine the active group of an avatar that is wearing at least one non-HUD attachment.
+
+<WikiSource />

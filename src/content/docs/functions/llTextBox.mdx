@@ -1,0 +1,98 @@
+---
+title: "llTextBox"
+slug: "functions/llTextBox"
+category: functions
+source:
+  wiki: "LlTextBox"
+  url: https://wiki.secondlife.com/wiki/LlTextBox
+  revision: 1218360
+  date: 2025-07-13
+  contributor: "Lou Netizen"
+  raw: /wiki-source/lltextbox-5e8e2b16.txt
+  license: "Content from the Second Life Wiki article LlTextBox (revision 1218360, 2025-07-13), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llTextBox" description />
+
+Shows a dialog box on `avatar`'s screen with the text `message`. It contains a text box for input, any text that is entered is [said](/functions/llSay/) by `avatar` on **channel** when the "Submit" button is clicked.
+
+```lsl title="How to use" frame="terminal"
+llTextBox(NULL_KEY, "", 0);
+```
+
+## Caveats
+
+- Not supported in official Linden Lab viewers prior to version 2.4, and some [TPVs](https://wiki.secondlife.com/wiki/Third_Party_Viewer_Directory) may not support it. Unsupported viewers will display a dialog box with a single option of "!!`llTextBox`!!".
+- There is no way by script to kill a text box.
+- There is no way for the script to detect if the user clicked the small "ignore" button (no chat is generated as a result of pressing this button).
+- If the listening prim is out of the 20 meter range of the sending prim when the "Submit" button is pressed, it will not be able to hear the response.
+- This limitation affects attachments too if the wearer moves more than 20 meters from where the listener is located.
+- The textbox input is limited to 250 bytes (characters). This can be a problem for larger text input; if the input can be over 250 characters, you will have to accept it through chat.
+- There is an undocumented throttle on `llTextBox` requests. Exceeding it will shout an error on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) until the "average" falls.
+
+### message limits
+
+- If it exceeds 7 (Viewer 3) or 8 (Viewer 1) lines a scroll bar will appear.
+- `message` must be less than 512 bytes and not empty. Otherwise, it will shout an error on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/). One easy way to create an empty message is to use a line feed, as in
+
+  ```lsl
+  llTextBox(avatar_key," \n",dialog_channel);
+  ```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-7, 13-17}
+integer  gListener;
+default
+{
+    touch_start(integer total_number)
+    {
+        // See 'discussion' page for more comments on choosing a channel and possible left-open listener
+        integer channel = -13572468;
+        // "" saves byte-code over NULL_KEY
+        gListener = llListen( channel, "", "", "");
+        llTextBox(llDetectedKey(0), "Some info text for the top of the window...", channel);
+    }
+    listen(integer channel, string name, key id, string message)
+    {
+        llListenRemove(gListener);
+        llSay(0, "You wrote: " + message);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>If the user hits `{{K|Enter}}` before clicking the `"Submit"` button, there will be a final carriage return in the message. In the rare event that this could be a problem, it is easily removed:</summary>
+
+```lsl
+        message = llStringTrim(message,STRING_TRIM);
+```
+
+</details>
+
+## History
+
+Introduced in `{{SVN|568|rev=88085|trunk=*|anchor=file33|date=Wednesday, 21 May 2008}}`
+
+## See also
+
+### Functions
+
+- [llDialog](/functions/llDialog/)
+- [llListen](/functions/llListen/)
+- [llSay](/functions/llSay/)
+- [llWhisper](/functions/llWhisper/)
+- [llShout](/functions/llShout/)
+- [llRegionSay](/functions/llRegionSay/)
+
+### Events
+
+- [listen](/events/listen/)
+
+<WikiSource />

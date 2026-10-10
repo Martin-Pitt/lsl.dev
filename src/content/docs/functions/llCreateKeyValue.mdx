@@ -1,0 +1,90 @@
+---
+title: "llCreateKeyValue"
+slug: "functions/llCreateKeyValue"
+category: functions
+source:
+  wiki: "LlCreateKeyValue"
+  url: https://wiki.secondlife.com/wiki/LlCreateKeyValue
+  revision: 1210585
+  date: 2022-04-06
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llcreatekeyvalue-2b9f54b4.txt
+  license: "Content from the Second Life Wiki article LlCreateKeyValue (revision 1210585, 2022-04-06), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llCreateKeyValue" />
+
+Start an asynchronous transaction to create a key-value pair associated with the script's [Experience](/categories/experience/) using the given key (**k**) and value (**v**).
+
+If the key already exists the [dataserver](/events/dataserver/) will return a failure along with the error [XP_ERROR_STORAGE_EXCEPTION](/constants/XP_ERROR_STORAGE_EXCEPTION/).
+
+As of Jan 1, 2016 maximum bytes is 1011 for key and 4095 for value for both LSO and Mono scripts.
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) that can be used to identify the corresponding [dataserver](/events/dataserver/) event to determine if this command succeeded or failed.
+
+```lsl title="How to use" frame="terminal"
+key result = llCreateKeyValue("", "");
+```
+
+## Caveats
+
+- It is recommended that keys do not contain commas due to [llKeysKeyValue](/functions/llKeysKeyValue/) returning keys in CSV format.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={18-30}
+key trans;
+default
+{
+    touch_start(integer total_number)
+    {
+        trans = llCreateKeyValue("FOO", "BAR");
+    }
+
+
+
+    dataserver(key t, string value)
+    {
+        if (t == trans)
+        {
+            // our llCreateKeyValue transaction is done
+            integer result = (integer)llGetSubString(value, 0, 0);
+            if (result == 1)
+            {
+                // the key-value pair was successfully created
+                llSay(0, "New key-value pair was created");
+            }
+            else
+            {
+                // the key-value pair was not created
+                integer error = (integer)(llGetSubString(value, 2, -1));
+                llSay(0, "Key-value failed to create: " + llGetExperienceErrorMessage(error));
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+[Category:Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)
+
+## See also
+
+### Functions
+
+- [llGetExperienceErrorMessage](/functions/llGetExperienceErrorMessage/)
+- [llReadKeyValue](/functions/llReadKeyValue/)
+- [llUpdateKeyValue](/functions/llUpdateKeyValue/)
+- [llDeleteKeyValue](/functions/llDeleteKeyValue/)
+- [llDataSizeKeyValue](/functions/llDataSizeKeyValue/)
+- [llKeyCountKeyValue](/functions/llKeyCountKeyValue/)
+- [llKeysKeyValue](/functions/llKeysKeyValue/)
+
+<WikiSource />

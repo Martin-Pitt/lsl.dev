@@ -1,0 +1,85 @@
+---
+title: "llSetDamage"
+slug: "functions/llSetDamage"
+category: functions
+source:
+  wiki: "LlSetDamage"
+  url: https://wiki.secondlife.com/wiki/LlSetDamage
+  revision: 1215041
+  date: 2023-10-13
+  contributor: "Rider Linden"
+  raw: /wiki-source/llsetdamage-3ed4405e.txt
+  license: "Content from the Second Life Wiki article LlSetDamage (revision 1215041, 2023-10-13), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetDamage" description />
+
+Sets the amount of **damage** that will be done when this object hits an avatar.
+
+```lsl title="How to use" frame="terminal"
+llSetDamage(0.0);
+```
+
+## Specification
+
+For an avatar to take damage when the object collides with an avatar...
+
+- The object must not be [phantom](/constants/STATUS_PHANTOM/) or [llVolumeDetect](/functions/llVolumeDetect/)([TRUE](/constants/TRUE/))
+- The avatar must be on the land where "Safe (no damage)" is disabled.
+- The object however does not need to be on or even partially over damage enabled land.
+
+When these preconditions are met, the avatar receives the damage, and the object will [die](/functions/llDie/) without calling the [collision](https://wiki.secondlife.com/wiki/Category:LSL_Collision) events.
+
+## Caveats
+
+- **damage** is a [Prim Property](https://wiki.secondlife.com/wiki/Prim_Properties), and may be applied even if there is no running script.
+- If **damage** is 100.0 or greater, the object will instantly [kill](https://wiki.secondlife.com/wiki/death) even a fully healthy avatar.
+- If **damage** is less than zero, the avatar will he healed for the indicated amount.
+- If a damage enabled object hits a physics enabled object that one or more avatars are sitting on, damage will be distributed to all seated avatars.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5, 11-25}
+//Simple autokiller bullet:
+// This will instantly "kill" on collision if contact is made with avatar on damage enabled land.
+
+default
+{
+    on_rez(integer param) // Becomes active when rezzed.
+    {
+        llSetDamage(100.0); // Set the damage to maximum.
+        llSensor("", "", AGENT, 96.0, PI); // Sweep a 96 meter sphere searching for agents.
+    }
+    sensor(integer num) // If an agent is detected...
+    {
+        llSetStatus(STATUS_PHYSICS, TRUE); // Enable physics to allow physical movement.
+        llSetTimerEvent(10.0); // Set a 10 second timer.
+        llMoveToTarget(llDetectedPos(0), 0.5); // Move to the detected position.
+    }
+    no_sensor() // If no agents are detected...
+    {
+        llDie(); // Auto destruct.
+    }
+    timer() // If we missed our target...
+    {
+        llDie(); // Auto destruct.
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Articles
+
+- [Damage](https://wiki.secondlife.com/wiki/Damage) — How damage works in Second Life
+- [Death](https://wiki.secondlife.com/wiki/Death) — The concept of death in Second Life
+- [Combat](https://wiki.secondlife.com/wiki/Combat) — Combat in Second Life
+- [Weapon](https://wiki.secondlife.com/wiki/Weapon) — Weapons in Second Life
+
+<WikiSource />

@@ -1,0 +1,64 @@
+---
+title: "llMD5String"
+slug: "functions/llMD5String"
+category: functions
+source:
+  wiki: "LlMD5String"
+  url: https://wiki.secondlife.com/wiki/LlMD5String
+  revision: 1211958
+  date: 2022-09-16
+  contributor: "Rider Linden"
+  raw: /wiki-source/llmd5string-e555d36e.txt
+  license: "Content from the Second Life Wiki article LlMD5String (revision 1211958, 2022-09-16), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llMD5String" description />
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) of 32 hex characters that is the [MD5](https://en.wikipedia.org/wiki/MD5) checksum of **src** with a [salt](https://en.wikipedia.org/wiki/salt_%28cryptography%29) of `":"+nonce`.
+
+```lsl title="How to use" frame="terminal"
+string result = llMD5String("", 0);
+```
+
+## Specification
+
+**nonce** is casted to string, then appended to **src** after a colon (`src + ":" + nonce`). This is important to know if you are calculating a hash in another language and wish to compare with one calculated in LSL. It could be written as `MD5Hash(src + ":" + nonce)`
+
+The character encoding used by `llMD5String` is the UTF-8 format.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+llSay(0, llMD5String("Hello, Avatar!", 0)); // returns 112abd47ceaae1c05a826828650434a6
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+#### Linux Example
+
+```lsl
+$ echo -n 'Hello, Avatar!:0' | openssl md5
+112abd47ceaae1c05a826828650434a6
+```
+
+</details>
+
+## Additional wiki content
+
+`{{LSLC{{#var:lang}}|Encryption|llMD5String}}`
+
+## See also
+
+### Functions
+
+- [llSHA1String](/functions/llSHA1String/)
+- [llSHA256String](/functions/llSHA256String/)
+
+<WikiSource />

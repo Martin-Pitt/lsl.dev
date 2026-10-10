@@ -1,0 +1,114 @@
+---
+title: "llGetObjectLinkKey"
+slug: "functions/llGetObjectLinkKey"
+category: functions
+source:
+  wiki: "LlGetLinkKey"
+  url: https://wiki.secondlife.com/wiki/LlGetLinkKey
+  revision: 1212153
+  date: 2022-09-19
+  contributor: "Rider Linden"
+  raw: /wiki-source/llgetlinkkey-208e0558.txt
+  license: "Content from the Second Life Wiki article LlGetLinkKey (revision 1212153, 2022-09-19), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetObjectLinkKey" />
+
+`{{LSL Function/Head |func=llGetLinkKey |func_id=144|func_sleep=0.0|func_energy=10.0 |return_type=key |p1_type=integer|p1_name=link |Return_text=of the [[link]]ed prim {{LSLP|link}} }}`
+
+`{{LSL Function/Head |func=llGetObjectLinkKey |func_sleep=0.0|func_energy=10.0 |return_type=key |p1_type=key|p1_name=object_id |p2_type=integer|p2_subtype=link|p2_name=link |Return_text=of the [[link]]ed prim {{LSLP|link}} in the linkset identified by {{LSLP|object_id}} }}`
+
+```lsl title="How to use" frame="terminal"
+key result = llGetObjectLinkKey(NULL_KEY, 0);
+```
+
+## Examples
+
+<details open>
+<summary>Drag this script on to linked and unlinked prims, with avatars sitting or not, to see how [llGetLinkKey](/functions/llGetLinkKey/) relates to [llGetKey](/functions/llGetKey/), [llGetLinkNumber](/functions/llGetLinkNumber/), [llGetNumberOfPrims](/functions/llGetNumberOfPrims/), [LINK_ROOT](/constants/LINK_ROOT/), etc.</summary>
+
+```lsl
+// Return the name of a link num else the empty string.
+string getLinkNumName(integer link)
+{
+    if (LINK_THIS == link) return "LINK_THIS";
+    if (LINK_ALL_CHILDREN == link) return "LINK_ALL_CHILDREN";
+    if (LINK_ALL_OTHERS == link) return "LINK_ALL_OTHERS";
+    if (LINK_SET == link) return "LINK_SET";
+    if (LINK_ROOT == link) return "LINK_ROOT";
+    return "";
+}
+
+// Say the key of each linked prim.
+default
+{
+    state_entry()
+    {
+        integer theLink = llGetLinkNumber();
+
+        key theLinkKey = llGetKey();
+        key owner = llGetOwner();
+        key creator = llGetCreator();
+
+        // Visit each link num.
+
+        integer link;
+        integer primmed = llGetNumberOfPrims();
+        for (link = -5; link <= (primmed + 5); ++link)
+        {
+            key linkKey = llGetLinkKey(link);
+
+            // Detail the key at the link num.
+
+            string line = (string) linkKey; // large constant width
+
+            if (linkKey == owner) line += " llGetOwner";
+            if (linkKey == creator) line += " llGetCreator";
+            if (linkKey == theLinkKey) line += " llGetKey";
+
+            // Detail the link num.
+
+            line += " @ " + (string) link;
+            line += " " + getLinkNumName(link);
+            if (link == theLink) line += " llGetLinkNumber";
+            if (link == primmed) line += " llGetNumberOfPrims";
+
+            // Say the detail if fun.
+
+            if (linkKey != NULL_KEY)
+            {
+                llOwnerSay(line);
+            }
+        }
+
+        // Always count the linked prims.
+
+        llOwnerSay((string) primmed + " llGetNumberOfPrims");
+        llOwnerSay("OK");
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-600 (bug): llGetLinkKey returns the wrong result when passed LINK_THIS
+
+## Related functions
+
+The original wiki page documents these functions together with this one:
+
+- [llGetLinkKey](/functions/llGetLinkKey/)
+
+## See also
+
+### Functions
+
+- [llGetKey](/functions/llGetKey/)
+- [llGetLinkName](/functions/llGetLinkName/)
+
+<WikiSource />

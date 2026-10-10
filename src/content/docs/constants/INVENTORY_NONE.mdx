@@ -1,0 +1,93 @@
+---
+title: "INVENTORY_NONE"
+slug: "constants/INVENTORY_NONE"
+category: constants
+source:
+  wiki: "INVENTORY NONE"
+  url: https://wiki.secondlife.com/wiki/INVENTORY_NONE
+  revision: 1208002
+  date: 2019-02-01
+  contributor: "Rider Linden"
+  raw: /wiki-source/inventory-none-5f34411c.txt
+  license: "Content from the Second Life Wiki article INVENTORY NONE (revision 1208002, 2019-02-01), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="INVENTORY_NONE" description />
+
+Value returned by [Inventory](https://wiki.secondlife.com/wiki/Category:LSL_Inventory) functions, to indicate that the inventory item doesn't exist.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+string ItemName = "MyTexture";
+default
+{
+    state_entry()
+    {
+        if (llGetInventoryType(ItemName) == INVENTORY_NONE)
+            llOwnerSay( "There is nothing named '" + ItemName + "' in this prim's contents");
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+string InventoryName(string name, integer type)
+{//finds an item in a case insensitive fashion of the given type and returns its true name.
+    integer a = llGetInventoryType(name);
+    if(!~a)//a == INVENTORY_NONE
+    {//it should be noted that INVENTORY_NONE == INVENTORY_ALL == -1; which is why '!~a' works.
+        string lc_name = llToLower(name);
+        a = llGetInventoryNumber(type);
+        while(a)
+        {//(a = ~-a) is equivalent to --a, but runs faster.
+            if(llToLower(name = llGetInventoryName(type, a = ~-a)) == lc_name)
+            {//we found a match ^_^
+                return name;
+            }
+        }
+    }
+    else if((a == type) ^ (!~type))//return name, as long as a == type or type == INVENTORY_ALL
+    {//we already know that a != INVENTORY_NONE, but just in case we use xor instead of or.
+        return name;
+    }
+    return "";//no match ~_~
+}
+
+integer InventoryExists(string name, integer type)
+{//only included to show how this type of check could be done if the value of 'type' is not constant and could be INVENTORY_ALL.
+    return (llGetInventoryType(name) == type) ^ (!~type);
+}//Since INVENTORY_ALL == INVENTORY_NONE, the extra part on the end is required to invert the result.
+```
+
+## See also
+
+### Constants
+
+- [INVENTORY_ALL](/constants/INVENTORY_ALL/)
+- [INVENTORY ANIMATION](/constants/INVENTORY_ANIMATION/)
+- [INVENTORY BODYPART](/constants/INVENTORY_BODYPART/)
+- [INVENTORY CLOTHING](/constants/INVENTORY_CLOTHING/)
+- [INVENTORY GESTURE](/constants/INVENTORY_GESTURE/)
+- [INVENTORY LANDMARK](/constants/INVENTORY_LANDMARK/)
+- [INVENTORY NOTECARD](/constants/INVENTORY_NOTECARD/)
+- [INVENTORY OBJECT](/constants/INVENTORY_OBJECT/)
+- [INVENTORY SCRIPT](/constants/INVENTORY_SCRIPT/)
+- [INVENTORY SETTING](/constants/INVENTORY_SETTING/)
+- [INVENTORY SOUND](/constants/INVENTORY_SOUND/)
+- [INVENTORY TEXTURE](/constants/INVENTORY_TEXTURE/)
+
+### Functions
+
+- [llGetInventoryType](/functions/llGetInventoryType/)
+- [llGetInventoryNumber](/functions/llGetInventoryNumber/)
+- [llGetInventoryName](/functions/llGetInventoryName/)
+
+<WikiSource />

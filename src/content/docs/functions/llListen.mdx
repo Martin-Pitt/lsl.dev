@@ -1,0 +1,229 @@
+---
+title: "llListen"
+slug: "functions/llListen"
+category: functions
+source:
+  wiki: "LlListen"
+  url: https://wiki.secondlife.com/wiki/LlListen
+  revision: 1212945
+  date: 2023-01-06
+  contributor: "Nelson Jenkins"
+  raw: /wiki-source/lllisten-55957ed5.txt
+  license: "Content from the Second Life Wiki article LlListen (revision 1212945, 2023-01-06), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llListen" />
+
+Sets a [handle](http://foldoc.org/index.cgi?query=handle) for **msg** on **channel** from **name** and **id**.
+
+If **msg**, **name** or **id** are blank (i.e. `""`) they are not used to filter incoming messages.
+
+If **id** is an invalid key or assigned the value [NULL_KEY](/constants/NULL_KEY/), it is considered blank as well.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that can be used to [deactivate](/functions/llListenControl/) or [remove](/functions/llListenRemove/) the listen.
+
+```lsl title="How to use" frame="terminal"
+integer result = llListen(0, "", NULL_KEY, "");
+```
+
+## Specification
+
+For the [listen](/events/listen/) [event](https://wiki.secondlife.com/wiki/event) to be triggered it must first match the criteria set forth by the filters; only when all the criteria have been met is a listen event generated. First the message must have been transmitted on **channel**. If **id** is both a [valid](https://wiki.secondlife.com/wiki/key#valid) key and not a [null](https://wiki.secondlife.com/wiki/key#null-key) key, then the speaker's key must be equivalent`{{Footnote|In general terms this means the matching for {{LSLP|id}} is not case sensitive. See [[key#equivalency]] for details on key equivalency.|In general terms this means the matching for id is not case sensitive.}}` to **id**. If **name** is set, then the speaker's [legacy name](https://wiki.secondlife.com/wiki/Category:LSL_Avatar/Name) must match **name** exactly (case sensitive). If **msg** is set, then the spoken message must match **msg** exactly (case sensitive).
+
+## Caveats
+
+- On [state](https://wiki.secondlife.com/wiki/state) change or [script reset](/functions/llResetScript/) all listens are removed automatically.
+- A [state](https://wiki.secondlife.com/wiki/state) change can be used as a shortcut to releasing listens.
+- Only 65 listens can simultaneously be open in any single script.
+- If this number is exceeded *Script run-time error* and *Too Many Listens* errors occur.
+- For some time, the official SL viewer and several third-party viewers can use negative channels from the chat bar directly just as any other non-zero channel. Formerly, the standard SL viewer could only send chat on negative channels through [llDialog](/functions/llDialog/) or [llTextBox](/functions/llTextBox/) responses, meaning negative channels were best suited for applications that did not require direct avatar chat.
+- Be aware that if you mistakenly use an integer literal bigger than the maximum or smaller than the minimum, LSL will treat it as -1, *without* giving any compilation error. This means that all scripts listening to an out-of-range integer will be listening to channel -1 instead, or if the number has a minus sign in front, to channel 1. A safe rule is to never use more than 9 digits. If the channel number comes from a conversion from float (for example from [llFrand](/functions/llFrand/)), if the float is out of range for an integer, it will be converted to the number -2147483648 regardless of its sign or value.
+- Messages sent by script on positive and negative channels are truncated to 1024 bytes. Messages sent by chat on positive channels are truncated to 1023 bytes. Messages sent by chat from negative channels are truncated to 254 bytes.
+- Once a [listen](/events/listen/) is registered its filters cannot be updated, if the listen is registered to [llGetOwner](/functions/llGetOwner/), the listen will remain registered to the previous owner upon owner change.
+- [Owner change](/constants/CHANGED_OWNER/) can be detected with the [changed](/events/changed/) event.
+- To work around this the old listen will need to be closed and a new one opened for the new owner.
+- A prim cannot hear/listen to chat it generates. It can, however, hear a linked prim.
+- Chat indirectly generated (as a result of [llDialog](/functions/llDialog/), [llTextBox](/functions/llTextBox/) or from a [linked prim](https://wiki.secondlife.com/wiki/Link)) can be heard if in range.
+
+## Examples
+
+Trivial example to listen to any chat from the object owner and respond once.
+
+<table>
+	<tr>
+		<th>**Single listen handle**</th>
+	</tr>
+	<tr>
+		<td>
+
+			```lsl collapse={1-16, 28-45}
+			//  Says beep to owner the first-time owner says something in main chat
+			//  and then stops listening
+
+			integer listenHandle;
+
+			remove_listen_handle()
+			{
+			    llListenRemove(listenHandle);
+			}
+
+			default
+			{
+			    state_entry()
+			    {
+			//      Change the channel number to a positive integer
+			//      to listen for '/5 hello' style of chat.
+
+			//      target only the owner's chat on channel 0 (PUBLIC_CHANNEL)
+			        listenHandle = llListen(0, "", llGetOwner(), "");
+			    }
+
+			    listen(integer channel, string name, key id, string message)
+			    {
+			//      we filtered to only listen on channel 0
+			//      to the owner's chat in the llListen call above
+
+			        llOwnerSay("beep");
+
+			//      stop listening until script is reset
+			        remove_listen_handle();
+			    }
+
+			    on_rez(integer start_param)
+			    {
+			        llResetScript();
+			    }
+
+			    changed(integer change)
+			    {
+			        if (change & CHANGED_OWNER)
+			        {
+			            llResetScript();
+			        }
+			    }
+			}
+			```
+
+		</td>
+	</tr>
+</table>
+
+<table>
+	<tr>
+		<th>**Two listen handles**</th>
+	</tr>
+	<tr>
+		<td>
+
+			```lsl collapse={1-17, 24-37}
+			//  Opens two listen handles upon touch_start and
+			//  stops listening whenever something heard passes either filter
+
+			integer listenHandle_a;
+			integer listenHandle_b;
+
+			remove_listen_handles()
+			{
+			    llListenRemove(listenHandle_a);
+			    llListenRemove(listenHandle_b);
+			}
+
+			default
+			{
+			    touch_start(integer num_detected)
+			    {
+			        key    id   = llDetectedKey(0);
+			        string name = llDetectedName(0);
+
+			        listenHandle_a = llListen(5, "", id, "");
+			        listenHandle_b = llListen(6, "", NULL_KEY, "");
+
+			        llSay(0, "Listening now to '" + name + "' on channel 5.");
+			        llSay(0, "Listening now to anybody/anything on channel 6.");
+			    }
+
+			    listen(integer channel, string name, key id, string message)
+			    {
+			        if (channel == 5)
+			            llSay(0, name + " said: '/5 " + message + "'");
+
+			        if (channel == 6)
+			            llSay(0, name + " said: '/6 " + message + "'");
+
+			        remove_listen_handles();
+			    }
+			}
+			```
+
+		</td>
+	</tr>
+</table>
+
+## Notes
+
+- Avoid channel zero ([PUBLIC_CHANNEL](/constants/PUBLIC_CHANNEL/)) and set **name** or **id** where possible to avoid lag. `llListen(0, "", NULL_KEY,"")` can be laggy as it listens to all chat from everyone in chat range and so should be avoided.
+
+- In November 2007, [Kelly Linden](https://wiki.secondlife.com/wiki/User:Kelly_Linden) offered [this explanation](https://lists.secondlife.com/pipermail/secondlifescripters/2007-November/001993.html) to help scripters plan listeners more efficiently:
+
+:#Chat that is said gets added to a history.
+
+:#A script that is running and has a [listen](/events/listen/) [event](https://wiki.secondlife.com/wiki/event) will ask the history for a chat message during its slice of run time.
+
+:# When the script asks the history for a chat message the checks are done in this order:
+
+:#\* **channel**
+
+:#\* self chat (prims can't hear themselves)
+
+:#\* distance/[RegionSay](/functions/llRegionSay/)
+
+:#\* **id**
+
+:#\* **name**
+
+:#\* **msg**
+
+:# If a **msg** is found then a [listen](/events/listen/) [event](https://wiki.secondlife.com/wiki/event) is added to the [event](https://wiki.secondlife.com/wiki/event) queue.
+
+:
+
+:The **id**/**name**/**msg** checks only happen at all if those are specified of course.
+
+:
+
+:So, the most efficient communication method is [llRegionSay](/functions/llRegionSay/) on a rarely used **channel**.
+
+:Nowadays, [llRegionSayTo](/functions/llRegionSayTo/) is to be preferred, where appropriate.
+
+- The integer returned can be assigned to a variable (then called a handle) and used to control the listen via [llListenRemove](/functions/llListenRemove/) or [llListenControl](/functions/llListenControl/). These handles are assigned sequentially starting at `+1` through to `+2,147,483,647`, going beyond which, according to [Simon Linden](https://wiki.secondlife.com/wiki/User:Simon_Linden), will roll the returned integer over to `−2,147,483,648`, when positive incrementation resumes. If an [llListen](/functions/llListen/) is repeated with the exact same filters as a currently active listener, then the same handle number is returned. If an [llListen's](/functions/llListen/) filters do not match any currently active listener, then the next handle in sequence is allocated (it will not re-allocate a recently removed handle).
+- If you are using multiple listens in one script, each listen can be assigned its own handle with which to control it.
+- Scripts can listen to and speak on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/). Script errors generated by the server are broadcast the same distance as [llSay](/functions/llSay/), but any chat command can be used to speak on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/).
+- Messages received on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) in the viewer are hidden unless the message is sent by an object owned by the current user.
+- Users may just see script errors as the hovering 'script error' icon depending on their viewer settings, and in any case will be able to read errors regardless of whether they are errors thrown by the scripting engine or your own debugging messages.
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-3170 (bug): Listeners in child prims get positioned at root prim position first, then switch to child prim position after re-rez (resulting in wrong listener / whisper radius)
+- SVC-92 (nf): '''llTargetSay'''() - region-wide direct communication
+- BUG-3291 (bug): llListen in linked objects is listening at root instead of linked object local position \*after re-rezzing the linkset\*
+
+## See also
+
+### Functions
+
+- [llListenRemove](/functions/llListenRemove/) — Removes a listen
+- [llListenControl](/functions/llListenControl/) — Enables/Disables a listen
+- [llWhisper](/functions/llWhisper/) — Sends chat limited to 10 meters
+- [llSay](/functions/llSay/) — Sends chat limited to 20 meters
+- [llShout](/functions/llShout/) — Sends chat limited to 100 meters
+- [llRegionSay](/functions/llRegionSay/) — Sends chat limited current sim
+- [llRegionSayTo](/functions/llRegionSayTo/) — Sends chat region wide to a specific avatar, or their attachments, or to a rezzed object of known UUID
+
+### Events
+
+- [listen](/events/listen/)
+
+<WikiSource />

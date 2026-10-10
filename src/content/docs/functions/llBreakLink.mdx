@@ -1,0 +1,79 @@
+---
+title: "llBreakLink"
+slug: "functions/llBreakLink"
+category: functions
+source:
+  wiki: "LlBreakLink"
+  url: https://wiki.secondlife.com/wiki/LlBreakLink
+  revision: 1219042
+  date: 2026-09-14
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llbreaklink-18f1cf9f.txt
+  license: "Content from the Second Life Wiki article LlBreakLink (revision 1219042, 2026-09-14), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llBreakLink" description />
+
+Delinks the [prim](https://wiki.secondlife.com/wiki/Primitive) with the given [link](https://wiki.secondlife.com/wiki/link) number in a [linked object set](/constants/LINK_SET/)
+
+```lsl title="How to use" frame="terminal"
+llBreakLink(0);
+```
+
+## Caveats
+
+- This function removes sitting [avatars](https://wiki.secondlife.com/wiki/Avatar) from the [object](https://wiki.secondlife.com/wiki/Object), even if not sitting on the unlinked prim.
+- This function silently fails if the link number refers to a seated avatar. Use [llUnSit](/functions/llUnSit/) instead
+- This function silently fails if called from a [script](https://wiki.secondlife.com/wiki/Script) inside an [attachment](https://wiki.secondlife.com/wiki/Attachment).
+- This function fails if the [owner](https://wiki.secondlife.com/wiki/Owner) does not have edit permissions on the object containing the script, the system message "*Delink failed because you do not have edit permission*" is received by the owner.
+- A prim with [PERMISSION_CHANGE_LINKS](/constants/PERMISSION_CHANGE_LINKS/) can delink any prim in the linked object set even itself or the root
+- The only [LINK\_\*](https://wiki.secondlife.com/wiki/Category:LSL_Link) flag that **link** currently supports is [LINK_ROOT](/constants/LINK_ROOT/). [SVC-3510](#svc-3510)
+- Use [llGetLinkNumber](/functions/llGetLinkNumber/)() as the parameter to unlink the script's prim, not [LINK_THIS](/constants/LINK_THIS/).
+- Use [llBreakAllLinks](/functions/llBreakAllLinks/)() instead of using [LINK_SET](/constants/LINK_SET/), [LINK_ALL_CHILDREN](/constants/LINK_ALL_CHILDREN/), or [LINK_ALL_OTHERS](/constants/LINK_ALL_OTHERS/) as the parameter for [llBreakLink](/functions/llBreakLink/).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-11}
+//-- requests permission to change links, then breaks the link
+//-- between the prim and the rest of the object, on touch.
+default
+{
+    touch_start(integer vIntTouched)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_CHANGE_LINKS);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_CHANGE_LINKS)
+        {
+            llBreakLink(llGetLinkNumber());
+        }
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-3510 (bug): LINK\_\* flags do not work with llBreakLink
+
+## See also
+
+### Functions
+
+- [llBreakAllLinks](/functions/llBreakAllLinks/) — Break all links
+- [llCreateLink](/functions/llCreateLink/) — Link to another object
+
+### Events
+
+- [changed](/events/changed/) — [CHANGED_LINK](/constants/CHANGED_LINK/)
+
+<WikiSource />

@@ -1,0 +1,85 @@
+---
+title: "llReadKeyValue"
+slug: "functions/llReadKeyValue"
+category: functions
+source:
+  wiki: "LlReadKeyValue"
+  url: https://wiki.secondlife.com/wiki/LlReadKeyValue
+  revision: 1216653
+  date: 2024-05-13
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llreadkeyvalue-e8e8a341.txt
+  license: "Content from the Second Life Wiki article LlReadKeyValue (revision 1216653, 2024-05-13), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llReadKeyValue" />
+
+Start an asynchronous transaction to read the value associated with the specified key (**k**) and the script's [Experience](/categories/experience/).
+
+If the key does not exist the [dataserver](/events/dataserver/) will return a failure along with the error [XP_ERROR_KEY_NOT_FOUND](/constants/XP_ERROR_KEY_NOT_FOUND/).
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) that can be used to identify the corresponding [dataserver](/events/dataserver/) event to determine if this command succeeded or failed and the results.
+
+```lsl title="How to use" frame="terminal"
+key result = llReadKeyValue("");
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={15-26}
+key trans;
+default
+{
+    state_entry()
+    {
+        trans = llReadKeyValue("FOO");
+    }
+    dataserver(key t, string value)
+    {
+        if (t == trans)
+        {
+            // our llReadKeyValue transaction is done
+            if (llGetSubString(value, 0, 0) == "1")
+            {
+                // the key-value pair was successfully read
+                llSay(0, "New key-value pair value: " + llGetSubString(value, 2, -1));
+            }
+            else
+            {
+                // the key-value pair failed to read
+                integer error =  (integer)llGetSubString(value, 2, -1);
+                llSay(0, "Key-value failed to read: " + llGetExperienceErrorMessage(error));
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Shared wiki templates
+
+The wiki article also includes shared templates whose conditional content is not reproduced here: [Template:Issues/BUG-8895](https://wiki.secondlife.com/wiki/Template:Issues/BUG-8895).
+
+## Additional wiki content
+
+[Category:Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)
+
+## See also
+
+### Functions
+
+- [llGetExperienceErrorMessage](/functions/llGetExperienceErrorMessage/)
+- [llCreateKeyValue](/functions/llCreateKeyValue/)
+- [llReadKeyValue](/functions/llReadKeyValue/)
+- [llUpdateKeyValue](/functions/llUpdateKeyValue/)
+- [llDeleteKeyValue](/functions/llDeleteKeyValue/)
+- [llDataSizeKeyValue](/functions/llDataSizeKeyValue/)
+- [llKeyCountKeyValue](/functions/llKeyCountKeyValue/)
+- [llKeysKeyValue](/functions/llKeysKeyValue/)
+
+<WikiSource />

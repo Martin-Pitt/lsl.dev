@@ -1,0 +1,66 @@
+---
+title: "llGetObjectPrimCount"
+slug: "functions/llGetObjectPrimCount"
+category: functions
+source:
+  wiki: "LlGetObjectPrimCount"
+  url: https://wiki.secondlife.com/wiki/LlGetObjectPrimCount
+  revision: 1217516
+  date: 2024-10-11
+  contributor: "Nexii Malthus"
+  raw: /wiki-source/llgetobjectprimcount-d0737327.txt
+  license: "Content from the Second Life Wiki article LlGetObjectPrimCount (revision 1217516, 2024-10-11), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetObjectPrimCount" />
+
+Avatars sitting on the object are not counted`{{Footnote|[[llGetNumberOfPrims]] on the other hand does count avatars sitting on the object.|llGetNumberOfPrims on the other hand does count avatars sitting on the object.}}`. Zero is returned if **prim**: `(A)` is not found, `(B)` is part of an attachment`{{Footnote|Whether the attachment exception is a bug or a feature is unclear.|handle=attachment}}`, or `(C)` is not a prim.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is the total number of prims in the object that contains **prim**.
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetObjectPrimCount(NULL_KEY);
+```
+
+## Caveats
+
+- This cannot be used to detect if an avatar is seated (by checking for a non-zero return), use [llGetAgentInfo](/functions/llGetAgentInfo/) instead.
+- The prim count for attachments are not returned`{{Footnote|handle=attachment}}`. If possible use [llGetNumberOfPrims](/functions/llGetNumberOfPrims/) instead.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={11-18}
+default
+{
+    touch_start(integer num)
+    {
+        integer prims = llGetObjectPrimCount(llGetKey());
+        if (prims == 0)
+        {
+            // llGetObjectPrimCount returns zero for attachments.
+            prims = llGetNumberOfPrims();
+            // Avatars can't sit on attachments so this is ok.
+        }
+        llOwnerSay("This object has "
+                    + (string)prims
+                    + " prims and "
+                    + (string)(llGetNumberOfPrims() - prims)
+                    + " avatars.");
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetNumberOfPrims](/functions/llGetNumberOfPrims/) — Returns the number of prims in the current object.
+- [llGetObjectLinkKey](/functions/llGetObjectLinkKey/) — Returns the key of the link in the linkset an object.
+
+<WikiSource />

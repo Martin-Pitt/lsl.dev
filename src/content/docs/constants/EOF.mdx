@@ -1,0 +1,77 @@
+---
+title: "EOF"
+slug: "constants/EOF"
+category: constants
+source:
+  wiki: "EOF"
+  url: https://wiki.secondlife.com/wiki/EOF
+  revision: 1194639
+  date: 2015-01-23
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/eof-abc56510.txt
+  license: "Content from the Second Life Wiki article EOF (revision 1194639, 2015-01-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="EOF" />
+
+EOF is a value returned by the [dataserver](/events/dataserver/) event, as a result of a call to [llGetNotecardLine](/functions/llGetNotecardLine/), specifically when the requested line is past the end of the notecard. The value returned equals "\\n\\n\\n", which is to say, three newline characters (0x0a).
+
+Essentially, it is used to let you know when you have finished reading information (usually user configurable parameters) from a notecard, and are ready to move onto the next stage or state of the script.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-12, 20-31}
+integer iLine;
+string card = "~config";
+key myquery;
+
+default{
+    state_entry() {
+        if(llGetInventoryType(card) != INVENTORY_NONE)
+            myquery = llGetNotecardLine(card, iLine = 0);
+        else
+            llSay(0,"The \"" + card + "\" notecard is missing! Cannot proceed!");
+    }
+
+    dataserver(key request, string sdata){
+        if(request == myquery){
+            if(sdata == EOF){ // no more text in the notecard
+                state ready; //move to the next state
+            }
+            else {
+                //here you would process the data
+                //llOwnerSay(sdata);
+                myquery = llGetNotecardLine(card, ++iLine); // now read in next line, and start the dataserver process all over again
+            }
+        }
+    }
+}
+
+state ready{
+    state_entry(){
+        llOwnerSay("I'm ready for action!");
+    }
+}
+```
+
+</details>
+
+## Notes
+
+EOF is an acronym that stands for "End Of File".
+
+## See also
+
+### Functions
+
+- [llGetNotecardLine](/functions/llGetNotecardLine/)
+
+### Events
+
+- [dataserver](/events/dataserver/)
+
+<WikiSource />

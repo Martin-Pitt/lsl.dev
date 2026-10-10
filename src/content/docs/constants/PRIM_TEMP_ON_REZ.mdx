@@ -1,0 +1,51 @@
+---
+title: "PRIM_TEMP_ON_REZ"
+slug: "constants/PRIM_TEMP_ON_REZ"
+category: constants
+source:
+  wiki: "PRIM TEMP ON REZ"
+  url: https://wiki.secondlife.com/wiki/PRIM_TEMP_ON_REZ
+  revision: 1185550
+  date: 2013-12-23
+  contributor: "Strife Onizuka"
+  raw: /wiki-source/prim-temp-on-rez-5d1481ac.txt
+  license: "Content from the Second Life Wiki article PRIM TEMP ON REZ (revision 1185550, 2013-12-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="PRIM_TEMP_ON_REZ" />
+
+Used to get or set the object's temporary status. It lives until the next garbage collection cycle (about 1 minute). Does not count against normal prim limits. There are limits to the number of temporary objects that can exist in a region and the garbage collector may run sooner than expected.
+
+## Caveats
+
+- The maximum temporary prims allowed are based on the regular prim limit:
+
+  `(regular_prim_limit - current_regular_prims) + minimum(0.5 * regular_prim_limit + 400, 1000)`
+
+  See this [forum post](http://forums.secondlife.com/showthread.php?t=305651) and [SVC-2380](https://jira.secondlife.com/browse/SVC-2380) for details.
+- The garbage collection timer is cumulative and cannot be reset. You can turn TEMP_ON_REZ off which stops the timer running but it will continue from where it left off if TEMP_ON_REZ is restored.
+- Meshes are different than ordinary Prims and Sculpts when set Temporary.
+
+  They still count against the Parcel and Sim Prim Limits. See: http://wiki.secondlife.com/wiki/Mesh_Prim_Equivalence_test#Temporary_meshes
+
+## History
+
+Before SL 1.9 objects would only be recognized by the garbage collector as temporary if they were rezzed with the temporary status already set. Setting the attribute only effected the object the next time it was rezzed. With 1.9 this was changed so that changing this status flag effected the object immediately. The constant name however was not changed to reflect this functionality change.
+
+## Additional wiki content
+
+&lt;onlyinclude>`{{#if: {{#vardefine:temponrez_const|{{LSL Const|PRIM_TEMP_ON_REZ|integer|4|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the objects Temporary status}}}} }}`&lt;/onlyinclude>`{{#if: {{LSL_Function/boolean|boolean}} {{Issues/SVC-2380}} }}`
+
+## See also
+
+### Functions
+
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llRezObject](/functions/llRezObject/)
+
+### Events
+
+- [changed](/events/changed/)
+
+<WikiSource />

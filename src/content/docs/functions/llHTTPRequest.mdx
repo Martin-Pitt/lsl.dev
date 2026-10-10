@@ -1,0 +1,535 @@
+---
+title: "llHTTPRequest"
+slug: "functions/llHTTPRequest"
+category: functions
+source:
+  wiki: "LlHTTPRequest"
+  url: https://wiki.secondlife.com/wiki/LlHTTPRequest
+  revision: 1218362
+  date: 2025-07-23
+  contributor: "Monty Linden"
+  raw: /wiki-source/llhttprequest-f753d34c.txt
+  license: "Content from the Second Life Wiki article LlHTTPRequest (revision 1218362, 2025-07-23), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llHTTPRequest" />
+
+Sends an HTTP request to the specified URL with the body of the request and parameters. When the response is received, a [http_response](/events/http_response/) event is raised.
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) identifying the HTTP request made.
+
+```lsl title="How to use" frame="terminal"
+key result = llHTTPRequest("", [], "");
+```
+
+## Specification
+
+<ConstantGroup name="HTTPRequestParam" />
+
+`{{#if: {{LSL Function/boolean|verify|if=*|td=the server SSL certificate must be verifiable using one of the standard certificate authorities|fd=any server SSL certificate will be accepted.}} {{LSL Function/boolean|noisy|if=*|td=shout error messages to DEBUG_CHANNEL if the outgoing request rate exceeds the server limit|fd=the error messages are suppressed.}} {{LSL Function/boolean|send_header|if=when|td=the {{String|Pragma: no-cache}} header is sent|fd=no {{String|Pragma}} header is sent.}} {{#vardefine:p_method_hover|A valid HTTP method, such as {{String|GET}}, {{String|POST}}, {{String|PUT}} and {{String|DELETE}}}} {{#vardefine:p_name_hover|The name of the header to be set.}} {{#vardefine:p_value_hover|The value of the header to be set.}} {{#vardefine:p_length_hover|The maximum length allowed for an HTTP body, this is also capped by the VM in use.}} {{#vardefine:p_MIME_type_hover|}} }}`\{| class="sortable"
+
+|-
+
+! **Flag**
+
+! title="Value" |
+
+! class="unsortable" | **Parameter(s)**
+
+! class="unsortable" | **Default Parameter Value(s)**
+
+! class="unsortable" | **Description**
+
+|-
+
+| [HTTP_METHOD](/constants/HTTP_METHOD/)
+
+| 0
+
+| \[[string](https://wiki.secondlife.com/wiki/string) `method`\]
+
+| \["GET"\]
+
+| "GET", "POST", "PUT" and "DELETE"
+
+|-
+
+| [HTTP_MIMETYPE](/constants/HTTP_MIMETYPE/)
+
+| 1
+
+| \[[string](https://wiki.secondlife.com/wiki/string) `MIME_type`\]
+
+| \["text/plain;charset=utf-8"\]
+
+| text/\* MIME types should specify a charset. To emulate HTML forms use application/x-www-form-urlencoded. This allows you to set the body to a properly escaped ([llEscapeURL](/functions/llEscapeURL/)) sequence of &lt;name,value> pairs in the form var=value&var2=value2 and have them automatically parsed by web frameworks.
+
+:MIME types must be specified in the format: *type*/*subtype*\[**;***option*=*value*\]
+
+;Some valid examples are:
+
+: "text/html"
+
+: "text/plain;charset=utf-8"
+
+: "application/xhtml+xml"
+
+: "application/json"
+
+: "application/x-www-form-urlencoded"
+
+: "application/rss+xml"
+
+: "multipart/mixed; boundary="---1234567890---""
+
+|-
+
+| [HTTP_BODY_MAXLENGTH](/constants/HTTP_BODY_MAXLENGTH/)
+
+| 2
+
+| \[[integer](https://wiki.secondlife.com/wiki/integer) `length`\]
+
+| \[`{{BytesHover|2048}}`\]
+
+| Sets the maximum (UTF-8 encoded) byte length of the HTTP response body. The maximum that can be set depends upon which VM is used.
+
+- **[Mono](https://wiki.secondlife.com/wiki/Mono) Max:** `{{BytesHover|16384}}`
+- **[LSO](https://wiki.secondlife.com/wiki/LSO) Max:** `{{BytesHover|4096}}`
+
+`{{KBwarning|width=75%|Applies to the [[:Category:LSL HTTP#Understanding_LSL_HTTP_Communications | Outgoing]] pipeline only (HTTP calls invoked by [[llHTTPRequest]],and responses from [[http_response]]).}}`
+
+`{{KBtip|When you only need to request a small amount of data from a remote source, consider using the [https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Range Content-Range header] instead.}}`
+
+|-
+
+| [HTTP_VERIFY_CERT](/constants/HTTP_VERIFY_CERT/)
+
+| 3
+
+| \[[integer](https://wiki.secondlife.com/wiki/integer) `verify`\]
+
+| \[[TRUE](/constants/TRUE/)\]
+
+| If [TRUE](/constants/TRUE/), the server SSL certificate must be verifiable using one of the standard certificate authorities`{{Footnote|A list of acceptable certificate authorities can be found at {{Jira|SCR-473}}.|A list of acceptable certificate authorities can be found at SCR-473.}}` when making HTTPS requests. If [FALSE](/constants/FALSE/), any server SSL certificate will be accepted.
+
+|-
+
+| [HTTP_VERBOSE_THROTTLE](/constants/HTTP_VERBOSE_THROTTLE/)
+
+| 4
+
+| \[[integer](https://wiki.secondlife.com/wiki/integer) `noisy`\]
+
+| \[[TRUE](/constants/TRUE/)\]
+
+| If [TRUE](/constants/TRUE/), shout error messages to [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) if the outgoing request rate exceeds the server limit. If [FALSE](/constants/FALSE/), the error messages are suppressed (`llHTTPRequest` will still return [NULL_KEY](/constants/NULL_KEY/)).
+
+|-
+
+| [HTTP_CUSTOM_HEADER](/constants/HTTP_CUSTOM_HEADER/)
+
+| 5
+
+| \[[string](https://wiki.secondlife.com/wiki/string) `name`, [string](https://wiki.secondlife.com/wiki/string) `value`\]
+
+| NA
+
+| Add an extra custom HTTP header to the request. The first string is the name of the parameter to change, e.g. "Pragma", and the second string is the value, e.g. "no-cache". Multiple custom headers may be configured per request, as long as the combined custom header length is no greater than 4096 characters. Note that certain headers, such as the default headers, are blocked for security reasons.
+
+|-
+
+| [HTTP_PRAGMA_NO_CACHE](/constants/HTTP_PRAGMA_NO_CACHE/)
+
+| 6
+
+| \[[integer](https://wiki.secondlife.com/wiki/integer) `send_header`\]
+
+| \[[TRUE](/constants/TRUE/)\]
+
+| Sends "Pragma: no-cache" header ([TRUE](/constants/TRUE/)), or does not send a "Pragma" header ([FALSE](/constants/FALSE/)).
+
+|-
+
+| [HTTP_USER_AGENT](/constants/HTTP_USER_AGENT/)
+
+| 7
+
+| \[[string](https://wiki.secondlife.com/wiki/string) `user agent value`\]
+
+| \[*(none)*\]
+
+|The user agent value is appended to the one generated by LSL itself. It should follow the syntax from the HTTP standard like: "My-Script-Name/1.0 (Mozilla compatible)".
+
+**Note:** Spaces are not allowed in HTTP User Agent token values, so "My Script Name/1.0" will produce a script error; change the spaces to hyphens ("-")
+
+|-
+
+| [HTTP_ACCEPT](/constants/HTTP_ACCEPT/)
+
+| 8
+
+| \[[string](https://wiki.secondlife.com/wiki/string) `MIME_type`\]
+
+| \["text/plain;charset=utf-8"\]
+
+| [HTTP_ACCEPT](/constants/HTTP_ACCEPT/) parameters can be passed to limit the number of mime types that are sent in the Accept: header of the HTTP request. Specified mime types may include character set and q parameters. This parameter may be specified multiple times.
+
+The specified mime type must be one already recognized by `llHTTPRequest`. These include any text/ mime type, or the following application mime types: “application/xhtml+xml”, “application/atom+xml”, “application/json”, “application/xml”, “application/llsd+xml”, “application/x-javascript”, “application/javascript”, “application/x-www-form-urlencoded”, or “application/rss+xml”.
+
+The Content-Type header in the response is checked against the specified [HTTP_ACCEPT](/constants/HTTP_ACCEPT/) parameters. If the value of the header is not in the list of acceptable mime types, `llHTTPRequest` will return 415 as a result code and the body will be "Unsupported or unknown Content-Type."
+
+|-
+
+| [HTTP_EXTENDED_ERROR](/constants/HTTP_EXTENDED_ERROR/)
+
+| 9
+
+| \[[integer](https://wiki.secondlife.com/wiki/integer) `extended`\]
+
+| \[[FALSE](/constants/FALSE/)\]
+
+| If [TRUE](/constants/TRUE/) `llHTTPRequest` will always return a [key](https://wiki.secondlife.com/wiki/key). If there was an error making the HTTP request. Detailed error information will be returned through the [http_response](/events/http_response/) event using the provided key. Error information is delivered in a JSON block as described in [RFC&amp;nbsp;7807](https://tools.ietf.org/html/rfc7807). Details about extended return codes can be found below.
+
+|\}
+
+<table>
+	<caption>Headers sent by the simulator in the course of calling [llHTTPRequest](/functions/llHTTPRequest/).</caption>
+	<tr>
+		<th>Header</th>
+		<th>Description</th>
+		<th>Example data</th>
+	</tr>
+	<tr>
+		<td>Connection</td>
+		<td>Connection options</td>
+		<td>close</td>
+	</tr>
+	<tr>
+		<td>Cache-Control</td>
+		<td>Maximum response age accepted.</td>
+		<td>max-age=259200</td>
+	</tr>
+	<tr>
+		<td>X-Forwarded-For</td>
+		<td>Used to show the IP address connected to through proxies.</td>
+		<td>127.0.0.1</td>
+	</tr>
+	<tr>
+		<td>Via</td>
+		<td>Shows the recipients and protocols used between the User Agent and the server.</td>
+		<td>1.1 sim10115.agni.lindenlab.com:3128 (squid/2.7.STABLE9)</td>
+	</tr>
+	<tr>
+		<td>Content-Length</td>
+		<td>The size of the entity-body, in decimal number of octets.</td>
+		<td>17</td>
+	</tr>
+	<tr>
+		<td>Pragma</td>
+		<td>The message should be forwarded to the server, even if it has a cached version of the data.</td>
+		<td>no-cache</td>
+	</tr>
+	<tr>
+		<td>X-SecondLife-Shard</td>
+		<td>The environment the object is in. "Production" is the main grid and "Testing" is the preview grid</td>
+		<td>Production</td>
+	</tr>
+	<tr>
+		<td>X-SecondLife-Region</td>
+		<td>The name of the region the object is in, along with the global coordinates of the region's south-west corner</td>
+		<td>Jin Ho (264448, 233984)</td>
+	</tr>
+	<tr>
+		<td>X-SecondLife-Owner-Name</td>
+		<td>[Legacy name](https://wiki.secondlife.com/wiki/Category:LSL_Avatar/Name) of the owner of the object</td>
+		<td>Zeb Wyler</td>
+	</tr>
+	<tr>
+		<td>X-SecondLife-Owner-Key</td>
+		<td>[UUID](https://wiki.secondlife.com/wiki/UUID) of the owner of the object</td>
+		<td>01234567-89ab-cdef-0123-456789abcdef</td>
+	</tr>
+	<tr>
+		<td>X-SecondLife-Object-Name</td>
+		<td>The name of the object containing the script</td>
+		<td>Object</td>
+	</tr>
+	<tr>
+		<td>X-SecondLife-Object-Key</td>
+		<td>The key of the object containing the script</td>
+		<td>01234567-89ab-cdef-0123-456789abcdef</td>
+	</tr>
+	<tr>
+		<td>X-SecondLife-Local-Velocity</td>
+		<td>The velocity of the object</td>
+		<td>0.000000, 0.000000, 0.000000</td>
+	</tr>
+	<tr>
+		<td>X-SecondLife-Local-Rotation</td>
+		<td>The rotation of the object containing the script</td>
+		<td>0.000000, 0.000000, 0.000000, 1.000000</td>
+	</tr>
+	<tr>
+		<td>X-SecondLife-Local-Position</td>
+		<td>The position of the object within the region</td>
+		<td>(173.009827, 75.551231, 60.950001)</td>
+	</tr>
+	<tr>
+		<td>User-Agent</td>
+		<td>The user-agent header sent by LSL Scripts. Contains Server version.</td>
+		<td>Second Life LSL/16.05.24.315768 (http://secondlife.com)</td>
+	</tr>
+	<tr>
+		<td>Content-Type</td>
+		<td>The media type of the entity body.</td>
+		<td>text/plain; charset=utf-8</td>
+	</tr>
+	<tr>
+		<td>Accept-Charset</td>
+		<td>Acceptable character sets from the server. Q being the quality expected when sending the different character sets.</td>
+		<td>utf-8;q=1.0, \*;q=0.5</td>
+	</tr>
+	<tr>
+		<td>Accept</td>
+		<td>Media types the server will accept.</td>
+		<td>text/\*, application/xhtml+xml, application/atom+xml, application/json, application/xml, application/llsd+xml, application/x-javascript, application/javascript, application/x-www-form-urlencoded, application/rss+xml</td>
+	</tr>
+	<tr>
+		<td>Accept-Encoding</td>
+		<td>Acceptable content encodings for the server.</td>
+		<td>deflate, gzip</td>
+	</tr>
+	<tr>
+		<td>Host</td>
+		<td>The internet host being requested.</td>
+		<td>secondlife.com</td>
+	</tr>
+	<tr>
+		<td colspan="3">`{{KBtip|Certain server environments (CGI) place headers into variables by capitalizing the entire name, replacing dashes with underscores, and prefixing the name with "HTTP_", e.g. "X-SecondLife-Object-Name" becomes "HTTP_X_SECONDLIFE_OBJECT_NAME". This depends solely on the HTTP server used to process the request and cannot be controlled via LSL.}}` `{{KBwarning|width=75%|[https://datatracker.ietf.org/doc/html/rfc2616#section-4.2 RFC 2616 § 4.2] defines HTTP header field names as case-insensitive. The capitalization of header field names shown above is not guaranteed; for example, "X-SecondLife-Object-Name" may be received as "X-Secondlife-Object-Name". See {{JIRA|BUG-5094}} for an instance of ISPs recapitalizing headers. This behavior was also observed when testing in 2026.}}`</td>
+		<td></td>
+		<td></td>
+	</tr>
+</table>
+
+`{{LSL_Extended_Error_HTTP}}`
+
+## Caveats
+
+- Spaces, control characters, and other characters that are not allowed in URLs will cause a run time error.
+- The corresponding [http_response](/events/http_response/) event will be triggered in all scripts in the [prim](https://wiki.secondlife.com/wiki/prim), not just in the requesting script.
+- Requests must fully complete after 60 seconds, or else the response will be thrown away and the [http_response](/events/http_response/) status code will be 499.
+- The response body is limited to 2048 bytes by default, see [HTTP_BODY_MAXLENGTH](/constants/HTTP_BODY_MAXLENGTH/) above to increase it. If the response is longer, it will be truncated.
+- The request body size (e.g., of POST and PUT requests) is limited only by available script memory. Scripts can hold at most 32k characters in a string, under [Mono](https://wiki.secondlife.com/wiki/Mono), as characters are two bytes each, so, scripts cannot upload over 32k UTF-8 characters
+- Cannot be used to load textures or images from the internet, &lt;strike>for more information see [Web Textures](https://wiki.secondlife.com/wiki/Web_Textures)&lt;/strike>`{{Footnote|'''Note:''' Web textures have been made obsolete for many reasons, and the link has been archived; nevertheless, the reference might be interesting for historical reasons.}}`.
+- If the accessed site is relying on the LSL script to report [L$](https://wiki.secondlife.com/wiki/L%24) transactions, then it **must** check the `X-SecondLife-Shard` header to see if the script is running on the beta grid.
+- Some servers will return a `405` error if you send POST to a file that can't accept metadata, such as a text or HTML file. Make sure you use the GET method to ensure success in any environment.
+- While the HTTP status code from the server is provided to the script, redirect codes such as `302` will result in the redirect being automatically and transparently followed ONLY IF the [HTTP_METHOD](/constants/HTTP_METHOD/) is GET, with the resulting response being returned. If the [HTTP_METHOD](/constants/HTTP_METHOD/) is anything other than GET then you'll get back an [http_response](/events/http_response/) with a status code of `302`, but without any way to view the headers, you can't know where you were being redirected to unless that was also included in the body.
+- The following applies when making a request to a script using HTTP-In:
+- When appending a query string to a cap URL there **MUST** be a trailing slash between the cap guid and the query string token `"?"`. For example: [`{{HoverTextStyle|style=color:green;|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322|2={{String|x-script-url}} = {{String|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322}}}}`?`{{HoverTextStyle|style=color:red;|1=arg=gra|2={{String|x-query-string}} = {{String|1=arg=gra}}}}`](https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322?arg=gra) will return a 500 HTTP status [Server Error code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes%235xx_Server_Error), but [`{{HoverTextStyle|style=color:green;|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322|2={{String|x-script-url}} = {{String|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322}}}}``{{HoverTextStyle|style=color:blue;|/|2={{String|x-path-info}} = {{String|/}}}}`?`{{HoverTextStyle|style=color:red;|1=arg=gra|2={{String|x-query-string}} = {{String|1=arg=gra}}}}`](https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322/?arg=gra) will succeed.
+- `X-SecondLife-Owner-Name` may return `"(Loading...)"` instead of owner name (still true, 30th of March, 2022)
+- Requests made at approx 0625 SLT may fail with a `503` status code, with `"ERROR: The requested URL could not be retrieved"`, and `"(111) Connection refused"` in the body of the response. This has been confirmed as expected behavior by Kelly, due to the nightly maintenance and log rotation. It does reliably impact object to object HTTP at that time, and quite probably may impact object to/from web around the same time. The interruption in service is fairly brief, and the precise timing may vary as LL adjust their nightly maintenance processes, or due to server load.
+- Use `HTTP_MIMETYPE` to set the `Content-Type` header. Attempts to use `HTTP_CUSTOM_HEADER` to set it will cause a runtime script error.
+- If the origin server does not include a content-type header in its response, LSL will attempt to treat the incoming data as "text/plain; charset=utf-8". This behavior diverges from [RFC 2616](https://datatracker.ietf.org/doc/html/rfc2616#section-7.2.1).
+
+#### Throttles
+
+The LSL function [llHTTPRequest](/functions/llHTTPRequest/) is throttled in three ways: by object, by owner, and by http error. All group-owned objects are considered together in the same throttle.
+
+The current limits are:
+
+- 25 requests in 20 seconds for each object
+- 1000 requests in 20 seconds for each owner with higher limits for some regions
+- Five HTTP errors (500 or higher) in 60 seconds for each script
+
+These may change in the future if needed to prevent problems in regions.
+
+It is possible for a large collection of objects or scripts to make many calls to [llHTTPRequest](/functions/llHTTPRequest/) and reach one or more throttles. When a script calls [llHTTPRequest](/functions/llHTTPRequest/) with a throttle blocking the request, it will return [NULL_KEY](/constants/NULL_KEY/).
+
+The calling script must check for the [NULL_KEY](/constants/NULL_KEY/) result and react properly for the script and object to function correctly. Some things to consider:
+
+- Pause further requests until the throttle clears
+- Do not make any additional [llHTTPRequest](/functions/llHTTPRequest/) calls until enough time has passed for the throttle to reset. They will fail and continue to return [NULL_KEY](/constants/NULL_KEY/) otherwise.
+- Once reached, the throttles will remain in effect as long as requests continue, but will clear if there is a silent period with no requests at least twice the throttle interval, in the common case 2 \* 20 or 40 seconds.‎
+
+:Consider how a group of objects behaves. Developers must consider how multiple objects will interact and how that will affect clearing the throttle.‎
+
+:The [llHTTPRequest](/functions/llHTTPRequest/) throttle is most likely to be an issue with a large number of objects in a region making requests. To clear the throttle fastest, when an object encounters the throttle, it should broadcast a region-wide chat message to other objects informing them of the event and stopping their requests. If those objects continue making requests, those requests will fail and just prolong recovery.‎
+
+:If an object waits and still gets a failure, it may be a good idea to increase the time before the next request and/or add a small random value to the wait time. This may help prevent failures caused by large groups of objects acting nearly in unison.
+
+- Object requests are throttled at approximately 25 requests per 20 seconds. This is to support a sustained rate of one per second or a maximum burst of up to 25 every 40 seconds (twice the interval for maximum burst), smaller bursts are recommended.
+- [NULL_KEY](/constants/NULL_KEY/) is returned if the request is throttled.
+- See [this thread](http://forums-archive.secondlife.com/139/72/108960/1.html) and [this thread](http://forums-archive.secondlife.com/139/2c/109571/1.html) for older details.
+
+---
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+- [Writing Headers and HTTP POST Body to a File](https://wiki.secondlife.com/wiki/Writing_Headers_and_HTTP_POST_Body_to_a_File)
+
+```lsl collapse={10-19}
+key http_request_id;
+
+default
+{
+    state_entry()
+    {
+        http_request_id = llHTTPRequest("url", [], "");
+    }
+
+    http_response(key request_id, integer status, list metadata, string body)
+    {
+        if (request_id != http_request_id) return;// exit if unknown
+
+        vector COLOR_BLUE = <0.0, 0.0, 1.0>;
+        float  OPAQUE     = 1.0;
+
+        llSetText(body, COLOR_BLUE, OPAQUE);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example PHP test script:</summary>
+
+```lsl
+<?php header("content-type: text/plain; charset=utf-8"); ?>
+Headers received:
+<?php
+
+/**
+ * @author Wouter Hobble
+ * @copyright 2008
+ */
+
+foreach ($_SERVER as $k => $v)
+{
+    if( substr($k, 0, 5) == 'HTTP_')
+    {
+        print "\n". $k. "\t". $v;
+    }
+}
+?>
+```
+
+</details>
+
+<details>
+<summary>Example PHP wrapper script both capturing Apache headers and global methods</summary>
+
+```lsl
+<?php
+    // Author Waster Skronski.
+    // General Public License (GPL).
+    // Mind that some headers are not included because they're either useless or unreliable.
+
+    $USE_APACHE_HEADERS = TRUE;// switch to false if you need CGI methods
+
+    if ($USE_APACHE_HEADERS)
+    {
+        $headers    = apache_request_headers();
+        $objectgrid = $headers["X-SecondLife-Shard"];
+        $objectname = $headers["X-SecondLife-Object-Name"];
+        $objectkey  = $headers["X-SecondLife-Object-Key"];
+        $objectpos  = $headers["X-SecondLife-Local-Position"];
+        $ownerkey   = $headers["X-SecondLife-Owner-Key"];
+        $ownername  = $headers["X-SecondLife-Owner-Name"];
+        $regiondata = $headers["X-SecondLife-Region"];
+        $regiontmp  = explode ("(",$regiondata);        // cut coords off
+        $regionpos  = explode (")",$regiontmp[1]);
+        $regionname = substr($regiontmp[0],0,-1);       // cut last space from region name
+    } else {
+        $db         = $GLOBALS;
+        $headers    = $db['$_ENV'];
+        $objectgrid = $headers["HTTP_X_SECONDLIFE_SHARD"];
+        $objectname = $headers["HTTP_X_SECONDLIFE_OBJECT_NAME"];
+        $objectkey  = $headers["HTTP_X_SECONDLIFE_OBJECT_KEY"];
+        $ownerkey   = $headers["HTTP_X_SECONDLIFE_OWNER_KEY"];
+        $objectpos  = $headers["HTTP_X_SECONDLIFE_LOCAL_POSITION"];
+        $ownername  = $headers["HTTP_X_SECONDLIFE_OWNER_NAME"];
+        $regiondata = $headers["HTTP_X_SECONDLIFE_REGION"];
+        $regiontmp  = explode ("(",$regiondata);
+        $regionpos  = explode (")",$regiontmp[1]);
+        $regionname = substr($regiontmp[0],0,-1);
+    }
+?>
+```
+
+</details>
+
+<details>
+<summary>Example wrapper script for GoDaddy.com Linux PHP servers (fix made by Thomas Conover):</summary>
+
+```lsl
+<?php
+// FETCH HEADERS START
+
+if (!function_exists('apache_request_headers'))
+{
+    function apache_request_headers() {
+        foreach($_SERVER as $key=>$value) {
+            if (substr($key,0,5)=="HTTP_") {
+                $key=str_replace(" ","-",ucwords(strtolower(str_replace("_"," ",substr($key,5)))));
+                $out[$key]=$value;
+            }else{
+                $out[$key]=$value;
+            }
+        }
+        return $out;
+    }
+}
+// Mind that some headers are not included because they're either useless or unreliable (e.g. X-Secondlife-Local-Position)
+$headers    = apache_request_headers();
+$objectgrid = $headers["X-Secondlife-Shard"];
+$objectname = $headers["X-Secondlife-Object-Name"];
+$objectkey  = $headers["X-Secondlife-Object-Key"];
+$objectpos  = $headers["X-Secondlife-Local-Position"];
+$ownerkey   = $headers["X-Secondlife-Owner-Key"];
+$ownername  = $headers["X-Secondlife-Owner-Name"];
+$regiondata = $headers["X-Secondlife-Region"];
+$regiontmp  = explode ("(",$regiondata);            // cut coords off
+$regionname = substr($regiontmp[0],0,-1);           // cut last space from region name
+$regiontmp  = explode (")",$regiontmp[1]);
+$regionpos  = $regiontmp[0];
+
+
+// FETCH HEADERS END
+?>
+```
+
+</details>
+
+## Notes
+
+If for some reason while using the function [llHTTPRequest](/functions/llHTTPRequest/) or the event [http_response](/events/http_response/) you are unable to parse a known good RSS feed or some other form of web contents, you will need to work around it outside of Second Life. This is unlikely to change in the near future since checking the headers requires more overhead at the simulator level.
+
+You may find that some web servers return either a null or a nonsensical result when [llHTTPRequest](/functions/llHTTPRequest/) is used, even though the same URL in a PC web browser returns the expected result. This may be due to the fact that the [llHTTPRequest](/functions/llHTTPRequest/) User Agent string is not recognised by some web servers as it does not contain `"Mozilla"`, which would identify it as a web browser instead of, for example, a [Shoutcast](https://www.shoutcast.com/) or an RSS client. This is also true when the PHP script relies on [$\_COOKIE](https://www.php.net/manual/en/reserved.variables.cookies.php). Neither can the function [llHTTPRequest](/functions/llHTTPRequest/) set a cookie nor can the event [http_request](/events/http_request/) retrieve them.
+
+CGI environments may place the headers into variables by capitalizing the entire name, replacing dashes with underscores, and prefixing the name with `HTTP_`, e.g. `HTTP_X_SECONDLIFE_OBJECT_NAME`. PHP `$_SERVER` variables do this as well, and so does PHP running inside PHP-FPM (as opposed to an Apache module), which is the standard way to configure PHP on non-Apache webservers (such as [`nginx`](https://nginx.org/nginx)).
+
+Apache can include the headers in its logs, using the `CustomLog` and `LogFormat` directives. See [the docs](https://httpd.apache.org/docs/2.4/mod/mod_log_config.html#formats) for details on the syntax.
+
+## See also
+
+### Functions
+
+- [llEscapeURL](/functions/llEscapeURL/)
+- [llHTTPResponse](/functions/llHTTPResponse/)
+- [llUnescapeURL](/functions/llUnescapeURL/)
+
+### Events
+
+- [http_response](/events/http_response/)
+
+### Articles
+
+- [Simulator IP Addresses](https://wiki.secondlife.com/wiki/Simulator_IP_Addresses)
+
+<WikiSource />

@@ -1,0 +1,120 @@
+---
+title: "llClearPrimMedia"
+slug: "functions/llClearPrimMedia"
+category: functions
+source:
+  wiki: "LlClearPrimMedia"
+  url: https://wiki.secondlife.com/wiki/LlClearPrimMedia
+  revision: 1194072
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llclearprimmedia-093cae52.txt
+  license: "Content from the Second Life Wiki article LlClearPrimMedia (revision 1194072, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llClearPrimMedia" />
+
+Clears (deletes) the media and all `params` from the given **face**.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is a STATUS\_\* flag which details the success/failure of the operation.
+
+```lsl title="How to use" frame="terminal"
+integer result = llClearPrimMedia(0);
+```
+
+## Specification
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [STATUS_OK](/constants/STATUS_OK/) | integer | `0` | Result of function call was success |
+| [STATUS_MALFORMED_PARAMS](/constants/STATUS_MALFORMED_PARAMS/) | integer | `1000` | Function was called with malformed parameters |
+| [STATUS_TYPE_MISMATCH](/constants/STATUS_TYPE_MISMATCH/) | integer | `1001` | Argument(s) passed to function had a type mismatch |
+| [STATUS_BOUNDS_ERROR](/constants/STATUS_BOUNDS_ERROR/) | integer | `1002` | Argument(s) passed to function had a bounds error |
+| [STATUS_NOT_FOUND](/constants/STATUS_NOT_FOUND/) | integer | `1003` | Object or other item was not found |
+| [STATUS_NOT_SUPPORTED](/constants/STATUS_NOT_SUPPORTED/) | integer | `1004` | Feature not supported |
+| [STATUS_INTERNAL_ERROR](/constants/STATUS_INTERNAL_ERROR/) | integer | `1999` | An internal error occurred |
+| [STATUS_WHITELIST_FAILED](/constants/STATUS_WHITELIST_FAILED/) | integer | `2001` | Whitelist Failed |
+
+<table>
+	<tr>
+		<th>Success/Failure Flags</th>
+		<th></th>
+		<th colspan="6">Description</th>
+	</tr>
+</table>
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-31, 37-44}
+//  when dropping this script into a prim
+//  it will remove all set media-on-a-prim
+//  on all sides of the prim containing the script
+//  and then the script will delete itself
+
+
+
+publish_returned_status_flag(integer inputLink, integer inputFace, integer inputStatus)
+{
+    /* if (inputInteger == 0) */ string outputStatus = "STATUS_OK";
+    if (inputStatus == 1000) outputStatus = "STATUS_MALFORMED_PARAMS";
+    else if (inputStatus == 1001) outputStatus = "STATUS_TYPE_MISMATCH";
+    else if (inputStatus == 1002) outputStatus = "STATUS_BOUNDS_ERROR";
+    else if (inputStatus == 1003) outputStatus = "STATUS_NOT_FOUND";
+    else if (inputStatus == 1004) outputStatus = "STATUS_NOT_SUPPORTED";
+    else if (inputStatus == 1999) outputStatus = "STATUS_INTERNAL_ERROR";
+    else if (inputStatus == 2001) outputStatus = "STATUS_WHITELIST_FAILED";
+
+    // PUBLIC_CHANNEL has the integer value 0
+    llSay(PUBLIC_CHANNEL, "llClearLinkMedia(link " + (string)inputLink
+        + ", face " + (string)inputFace + ") = " + outputStatus + ";");
+}
+
+default
+{
+    state_entry()
+    {
+        integer link = llGetLinkNumber();
+        integer numOfSides = llGetLinkNumberOfSides(link);
+        integer face;
+
+        do
+        {
+            integer clearMediaSucceeded = llClearPrimMedia(face);
+            publish_returned_status_flag(link, face, clearMediaSucceeded);
+
+            ++face;
+        }
+        while (face < numOfSides);
+
+        string thisScript = llGetScriptName();
+        llRemoveInventory(thisScript);
+    }
+}
+```
+
+</details>
+
+## History
+
+- `{{SVN|2816|rev=134947|trunk=*|anchor=|ver=|ser=}}`
+- [SVC-4939](https://jira.secondlife.com/browse/SVC-4939)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-4939 (bug): \[http://svn.secondlife.com/trac/linden/changeset/2816 SVN Changeset 2816 in Trunk\] is immature
+
+## See also
+
+### Functions
+
+- [llClearLinkMedia](/functions/llClearLinkMedia/)
+- [llSetPrimMediaParams](/functions/llSetPrimMediaParams/)
+- [llGetPrimMediaParams](/functions/llGetPrimMediaParams/)
+
+<WikiSource />

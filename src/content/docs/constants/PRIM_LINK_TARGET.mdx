@@ -1,0 +1,102 @@
+---
+title: "PRIM_LINK_TARGET"
+slug: "constants/PRIM_LINK_TARGET"
+category: constants
+source:
+  wiki: "PRIM LINK TARGET"
+  url: https://wiki.secondlife.com/wiki/PRIM_LINK_TARGET
+  revision: 1194681
+  date: 2015-01-23
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/prim-link-target-b64ce37f.txt
+  license: "Content from the Second Life Wiki article PRIM LINK TARGET (revision 1194681, 2015-01-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="PRIM_LINK_TARGET" description />
+
+Used to get or set multiple links with a single PrimParameters call.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5, 11-17}
+default
+{
+    touch_start(integer num_detected)
+    {
+    //  color the root prim red and the first linked-prim green
+        llSetLinkPrimitiveParamsFast(LINK_ROOT,
+                [PRIM_COLOR, ALL_SIDES, <1.0, 0.0, 0.0>, (float)TRUE,
+            PRIM_LINK_TARGET, 2,
+                PRIM_COLOR, ALL_SIDES, <0.0, 1.0, 0.0>, (float)TRUE]);
+
+    //  instead of:
+    //  llSetLinkPrimitiveParamsFast(LINK_ROOT,
+    //          [PRIM_COLOR, ALL_SIDES, <1.0, 0.0, 0.0>, (float)TRUE]);
+    //  llSetLinkPrimitiveParamsFast(2,
+    //          [PRIM_COLOR, ALL_SIDES, <0.0, 1.0, 0.0>, (float)TRUE]);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-21}
+//  assume that you have a global list "gPanels" loaded with the link numbers of prims
+//  named "panel" and that the global integer parameter "gON" has been defined ....
+
+    touch_start(integer num)
+    {
+    //  basic on/off switch
+        gON = !gON;
+
+    //  conditions which will change on touch
+    //  white panel
+        list WhichWay = [PRIM_COLOR, ALL_SIDES, <1.0, 1.0, 1.0>, (float)TRUE];
+
+        if (gON)//  red panel
+            WhichWay = [PRIM_COLOR, ALL_SIDES, <1.0, 0.0, 0.0>, (float)TRUE];
+
+    //  to accumulate the parameter list that will be affected by SLPPF in this event
+        list params;
+        integer numberOfPrims = llGetNumberOfPrims();
+
+    //  Links in a linkset start numbering with 1
+        integer index = 1;
+        do
+        {
+        //  build the parameters list, in the format PRIM_LINK_TARGET, link number, parameters
+            params += [PRIM_LINK_TARGET, llList2Integer(gPanels, index)] + WhichWay;
+        }
+        while (++index < numberOfPrims);
+
+    //  apply the parameters to all "panel" prims
+        llSetLinkPrimitiveParamsFast(LINK_SET, params);
+    }
+```
+
+</details>
+
+## Additional wiki content
+
+&lt;noinclude>`{{#if: HACK! {{:PRIM_NAME|{{{1|}}}}} {{:PRIM_DESC|{{{1|}}}}} {{:PRIM_SLICE|{{{1|}}}}} {{:PRIM_COLOR|{{{1|}}}}} {{:PRIM_GLOW|{{{1|}}}}} {{:PRIM_TEXGEN|{{{1|}}}}} {{:PRIM_TEXTURE|{{{1|}}}}} {{:PRIM_TEXT|{{{1|}}}}} {{:PRIM_FULLBRIGHT|{{{1|}}}}} {{:PRIM_BUMP_SHINY|{{{1|}}}}} {{:PRIM_MATERIAL|{{{1|}}}}} {{:PRIM_TYPE|{{{1|}}}}} {{:PRIM_TYPE_BOX|{{{1|}}}}} {{:PRIM_TYPE_SCULPT|{{{1|}}}}} {{:PRIM_PHANTOM|{{{1|}}}}} {{:PRIM_TEMP_ON_REZ|{{{1|}}}}} {{:PRIM_PHYSICS|{{{1|}}}}} {{:PRIM_SIZE|{{{1|}}}}} {{:PRIM_POSITION|{{{1|}}}}} {{:PRIM_POS_LOCAL|{{{1|}}}}} {{:PRIM_ROTATION|{{{1|}}}}} {{:PRIM_ROT_LOCAL|{{{1|}}}}} {{:PRIM_FLEXIBLE|{{{1|}}}}} {{:PRIM_POINT_LIGHT|{{{1|}}}}} {{:PRIM_OMEGA|{{{1|}}}}} {{:PRIM_PHYSICS_SHAPE_TYPE|{{{1|}}}}} }}`&lt;onlyinclude>`{{#if: I don't know what the restrictions should be so I'm going to silently emit the group flags (via nogroup and nocaveats). {{LSL Function/link|link_target|nogroup=*|nocaveats=*}} {{#vardefine:link_target_const|{{LSL Const|PRIM_LINK_TARGET|integer|34|c=Used to set the link target of {{GetSet|{{{1|}}}|llGetPrimitiveParams|llSetPrimitiveParams}}}}}} {{#ifeq:{{{1|}}}|set|| Only run this if it's a get. {{#vardefine:caveats|{{#var:caveats}} *If {{#ifeq:{{{2}}}|link|{{LSLP|link}} (or}} {{#var:link_target_const}}'s {{LSLP|link_target}}{{#ifeq:{{{2}}}|link|)}} describes a seated avatar... ** Flags not explicitly mentioned have obvious values. ** {{#var:name_const}} will return the avatar's {{LSLGC|Legacy Name|legacy name}}. ** {{#var:desc_const}} will return <code>{{HoverText|{{String}}|An empty string}}</code>. ** {{#var:type_const}} will return <code>[[[PRIM_TYPE_BOX]], [[PRIM_HOLE_DEFAULT]], <0., 1., 0.>, 0., [[ZERO_VECTOR]], <1., 1., 0.>, [[ZERO_VECTOR]]]</code> ** {{#var:slice_const}} will return <code>[<0., 1., 0.>]</code> ** {{#var:material_const}} will return <code>[[PRIM_MATERIAL_FLESH]]</code>. ** {{#var:temponrez_const}} will return <code>[[FALSE]]</code>. ** {{#var:phantom_const}} will return <code>[[FALSE]]</code>. ** {{#var:size_const}} will return <code>[[llGetAgentSize]]([[llGetLinkKey]]({{LSLP|link}}))</code>. ** {{#var:text_const}} will return <code>["", [[ZERO_VECTOR]], 1.]</code>. ** {{#var:light_const}} will return <code>[[[FALSE]], [[ZERO_VECTOR]], 0., 0., 0.]</code>. ** {{#var:flexible_const}} will return <code>[[[FALSE]], 0, 0., 0., 0., 0., [[ZERO_VECTOR]]]</code>. ** {{#var:color_const}}, {{#var:texture_const}}, {{#var:glow_const}}, {{#var:fullbright_const}}, {{#var:bumpshiny_const}}, {{#var:texgen_const}} *** will return <code>[]</code> and report a script error to the owner: "texture info cannot be accessed for avatars." }} }} }}`&lt;/onlyinclude>
+
+## See also
+
+### Constants
+
+`{{#var:constants_nb}}`
+
+### Functions
+
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+
+<WikiSource />

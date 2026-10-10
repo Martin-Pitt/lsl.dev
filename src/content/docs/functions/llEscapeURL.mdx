@@ -1,0 +1,91 @@
+---
+title: "llEscapeURL"
+slug: "functions/llEscapeURL"
+category: functions
+source:
+  wiki: "LlEscapeURL"
+  url: https://wiki.secondlife.com/wiki/LlEscapeURL
+  revision: 1212842
+  date: 2022-11-22
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llescapeurl-118c1496.txt
+  license: "Content from the Second Life Wiki article LlEscapeURL (revision 1212842, 2022-11-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llEscapeURL" />
+
+To clarify, numbers and ASCII7 alphabetical characters are NOT escaped. If a character requires more then one byte in [UTF-8](https://en.wikipedia.org/wiki/UTF-8) [byte](https://en.wikipedia.org/wiki/Byte) form then it returns multiple `"%xx"` sequences chained together.
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the escaped/encoded version of **url**, replacing spaces with `"%20"` etc. The function will escape any character not in `[a-zA-Z0-9]` to `"%xx"` where `"xx"` is the [hexadecimal](https://en.wikipedia.org/wiki/Hexadecimal) value of the character in [UTF-8](https://en.wikipedia.org/wiki/UTF-8) [byte](https://en.wikipedia.org/wiki/Byte) form.
+
+```lsl title="How to use" frame="terminal"
+string result = llEscapeURL("");
+```
+
+## Caveats
+
+The function is not appropriate for escaping a **url** all at once, because the `":"` after the protocol, and all of the `"/"` characters delimiting the various parts, will be escaped. Instead, build the **url** in parts; escaping parts of the path and query string arguments as needed.
+
+Sample URL: [`{{HoverTextStyle|style=color:green;|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322|2={{String|x-script-url}} = {{String|https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322}}}}``{{HoverTextStyle|style=color:blue;|/foo/bar|2={{String|x-path-info}} = {{String|/foo/bar}}}}`?`{{HoverTextStyle|style=color:red;|1=arg=gra|2={{String|x-query-string}} = {{String|1=arg=gra}}}}`](https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322/foo/bar?arg=gra)
+
+| URL part | example |
+| --- | --- |
+| base URL | &lt;font color="green">https://sim3015.aditi.lindenlab.com:12043/cap/a7717681-2c04-e4ac-35e3-1f01c9861322&lt;/font> |
+| trailing path | &lt;font color="blue">/foo/bar&lt;/font> |
+| query string past the first "?" in the URL | &lt;font color="red">arg=gra&lt;/font> |
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-7}
+string str = "http://wiki.secondlife.com/wiki/LSL Portal";
+
+default
+{
+    state_entry()
+    {
+        llOwnerSay("Plain string:\n\t" + str);
+        // output: "http://wiki.secondlife.com/wiki/LSL Portal"
+
+        llOwnerSay("Escaped string:\n\t" + llEscapeURL(str));
+        // output: "http%3A%2F%2Fwiki%2Esecondlife%2Ecom%2Fwiki%2FLSL%20Portal"
+
+        llOwnerSay("Escaped string unescaped again:\n\t" + llUnescapeURL( llEscapeURL(str) ));
+        // output: "http://wiki.secondlife.com/wiki/LSL Portal"
+
+        // because escaping and unescaping are exact opposite
+        // and unescaping an escaped string returns the original
+
+
+        //  For readability's sake it would make more sense to do:
+        llOwnerSay("For readability's sake:\n\t" + "http://wiki.secondlife.com/wiki/" + llEscapeURL("LSL Portal"));
+        // output: "http://wiki.secondlife.com/wiki/LSL%20Portal"
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- The SL viewer pretty prints URLs when converting them to clickable links in chat and dialogs. To confirm that a URL was escaped as intended, right-click the URL and copy, then paste to inspect it in the chat bar; or wrap it between "&lt;nolink>...&lt;/nolink>"; or examine your chat log in an external editor; or display the string with an alternative function like [llSetText](/functions/llSetText/).
+
+## History
+
+- Prior to SL versions 1.19.1.81992, this function was limited to returning a maximum of 254 characters. [SVC-470](https://jira.secondlife.com/browse/SVC-470)
+
+## See also
+
+### Functions
+
+- [llUnescapeURL](/functions/llUnescapeURL/)
+
+### Articles
+
+- [UTF-8](https://wiki.secondlife.com/wiki/UTF-8)
+- [Base64](https://wiki.secondlife.com/wiki/Category:LSL_Base64)
+
+<WikiSource />

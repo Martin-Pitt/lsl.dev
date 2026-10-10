@@ -1,0 +1,67 @@
+---
+title: "llGroundRepel"
+slug: "functions/llGroundRepel"
+category: functions
+source:
+  wiki: "LlGroundRepel"
+  url: https://wiki.secondlife.com/wiki/LlGroundRepel
+  revision: 1216224
+  date: 2024-02-18
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llgroundrepel-cd149986.txt
+  license: "Content from the Second Life Wiki article LlGroundRepel (revision 1216224, 2024-02-18), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGroundRepel" description />
+
+Critically damps to **height** if within `height * 0.5` of ground or water level (which ever is higher).
+
+Do not use with vehicles.
+
+```lsl title="How to use" frame="terminal"
+llGroundRepel(0.0, 0, 0.0);
+```
+
+## Specification
+
+Does not pull the object down if it is stuck higher than that, unlike the similar [llSetHoverHeight](/functions/llSetHoverHeight/).
+
+To stop `llGroundRepel`, this seems to work: `llGroundRepel(0.0, FALSE, 0.0)`
+
+## Caveats
+
+- This is not a prim property; stopping or resetting the script stops `llGroundRepel`; same with the similar [llSetHoverHeight](/functions/llSetHoverHeight/)
+- Crossing a sim border will cancel `llGroundRepel`, unlike [llSetHoverHeight](/functions/llSetHoverHeight/)
+- A negative height value allows you to hover underwater, same as [llSetHoverHeight](/functions/llSetHoverHeight/)
+- A previous version of this page suggested that [llStopHover](/functions/llStopHover/) will stop `llGroundRepel`, but it does not
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHYSICS, TRUE);
+        llGroundRepel(0.5, TRUE, 0.2); // In a 1/2 meter cube this is roughly the minimum height for any noticeable effect.
+        // to
+        llGroundRepel(4096.0, TRUE, 0.2); // There is no restrictive maximum.
+        // However as the prim reaches 4096 meters (bear in mind the prim height will be (float height + ground height))
+        // it will be too high to be allowed to exist.
+    }
+}// This is actually a remarkably fast way to go straight up!!
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llSetHoverHeight](/functions/llSetHoverHeight/) — Similar to `llGroundRepel`, but also pulls down
+
+<WikiSource />

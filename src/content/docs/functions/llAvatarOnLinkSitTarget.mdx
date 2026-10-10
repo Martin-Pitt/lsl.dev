@@ -1,0 +1,104 @@
+---
+title: "llAvatarOnLinkSitTarget"
+slug: "functions/llAvatarOnLinkSitTarget"
+category: functions
+source:
+  wiki: "LlAvatarOnLinkSitTarget"
+  url: https://wiki.secondlife.com/wiki/LlAvatarOnLinkSitTarget
+  revision: 1210690
+  date: 2022-04-23
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llavataronlinksittarget-631ab9b4.txt
+  license: "Content from the Second Life Wiki article LlAvatarOnLinkSitTarget (revision 1210690, 2022-04-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llAvatarOnLinkSitTarget" />
+
+If the prim lacks a [sit target](/functions/llLinkSitTarget/) or there is no avatar sitting on the prim, then [NULL_KEY](/constants/NULL_KEY/) is returned.
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) that is the [UUID](https://wiki.secondlife.com/wiki/UUID) of the user seated on the prim.
+
+```lsl title="How to use" frame="terminal"
+key result = llAvatarOnLinkSitTarget(0);
+```
+
+## Caveats
+
+- A prim does not have a sit target unless [llSitTarget](/functions/llSitTarget/)/[llLinkSitTarget](/functions/llLinkSitTarget/) has been called with a **nonzero** vector as the first argument.
+- The root link number changes from zero to one when someone sits on an unlinked prim.
+- So `(llAvatarOnLinkSitTarget( 0) == NULL_KEY)` is always true. Nobody ever sits on link number 0
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-17, 29-33}
+// Unseat a second avatar on this object
+
+string one_sitter_message = "Hey!  I don't take passengers.";
+
+default
+{
+    state_entry()
+    {
+        // Sit target 1 is your sit target on the root prim
+        llLinkSitTarget(1,<0.0,0.0,0.5>,ZERO_ROTATION);
+        // Sit target 2 is the target on child prim 2, a small transparent prim inside the object
+        llLinkSitTarget(2, <0.0,0.0,0.1>,ZERO_ROTATION);
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        {
+            // An avatar on child prim 2, whether seated by choice or by redirection after sit target 1 is occupied, will be unseated.
+            if (llAvatarOnLinkSitTarget(2))
+            {
+                llRegionSayTo(llAvatarOnLinkSitTarget(2),PUBLIC_CHANNEL, one_sitter_message);
+                llUnSit(llAvatarOnLinkSitTarget(2));
+            }
+            // Now pay attention to the avatar on the root prim.
+            key agent = llAvatarOnLinkSitTarget(1);
+            if (agent)
+            {
+                llRegionSayTo(agent,PUBLIC_CHANNEL,"Hello!");
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+The position of an avatar on a sit target can be determined with the use of [llGetObjectDetails](/functions/llGetObjectDetails/) (see [llSitTarget](/functions/llSitTarget/#useful-snippets) for an example).
+
+If an object has multiple seats (each seat has a script that sets a sit target with [llSitTarget](/functions/llSitTarget/), or the linkset has a script that assigns several *[llLinkSitTarget](/functions/llLinkSitTarget/)*s), the following method determines which sit target an avatar ends up at:
+
+- If the prim that is clicked on *has* a sit target and that sit target is not full, that sit target is used.
+- If the prim that is clicked on *has no sit target*, and one or more other linked prims have sit targets that are not full, the sit target of the prim with the lowest link number will be used.
+
+## History
+
+Date of Release [10/08/2011](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-08-10-238207)
+
+## See also
+
+### Functions
+
+- [llAvatarOnSitTarget](/functions/llAvatarOnSitTarget/)
+- [llLinkSitTarget](/functions/llLinkSitTarget/)
+- [llGetLinkKey](/functions/llGetLinkKey/)
+
+### Events
+
+- [changed](/events/changed/)
+
+### Articles
+
+- [CHANGED_LINK](/constants/CHANGED_LINK/)
+
+<WikiSource />

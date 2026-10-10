@@ -1,0 +1,210 @@
+---
+title: "llLinksetDataDelete"
+slug: "functions/llLinksetDataDelete"
+category: functions
+source:
+  wiki: "LlLinksetDataDelete"
+  url: https://wiki.secondlife.com/wiki/LlLinksetDataDelete
+  revision: 1219031
+  date: 2026-09-10
+  contributor: "Tapple Gao"
+  raw: /wiki-source/lllinksetdatadelete-7e42e167.txt
+  license: "Content from the Second Life Wiki article LlLinksetDataDelete (revision 1219031, 2026-09-10), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llLinksetDataDelete" />
+
+The **`llLinksetDataDelete`** and **[llLinksetDataDeleteProtected](/functions/llLinksetDataDeleteProtected/)** functions erases a **name:value** pair from the linkset's datastore.
+
+When this function successfully removes a **name:value** pair a [linkset_data](/events/linkset_data/) event is triggered in all scripts running in the linkset with an action of [LINKSETDATA_DELETE](https://wiki.secondlife.com/wiki/Template:LSL_Constants_Linkset_Data) and the **name** parameter set to the **name** that was removed. The **value** parameter in the event is set to an empty string.
+
+Removes an unprotected **name:value** pair from the linkset's datastore. If the pair was created
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) success or failure code.
+
+```lsl title="How to use" frame="terminal"
+integer result = llLinksetDataDelete("");
+```
+
+## Specification
+
+| Constant |  | Description |
+| --- | --- | --- |
+| [LINKSETDATA_OK](/constants/LINKSETDATA_OK/) | 0 | The **name:value** pair was written to the datastore. |
+| [LINKSETDATA_EMEMORY](/constants/LINKSETDATA_EMEMORY/) | 1 | A **name:value** pair was too large to write to the linkset datastore. |
+| [LINKSETDATA_ENOKEY](/constants/LINKSETDATA_ENOKEY/) | 2 | The name supplied to [llLinksetDataWrite](/functions/llLinksetDataWrite/) was empty. |
+| [LINKSETDATA_EPROTECTED](/constants/LINKSETDATA_EPROTECTED/) | 3 | The **name:value** pair has been protected from overwrite in the linkset's datastore. |
+| [LINKSETDATA_NOTFOUND](/constants/LINKSETDATA_NOTFOUND/) | 4 | The named key could not be found in the linkset's datastore when attempting to delete it. |
+| [LINKSETDATA_NOUPDATE](/constants/LINKSETDATA_NOUPDATE/) | 5 | The **name:value** stored in the linkset was not changed by the write operation because the value stored matches the value written. |
+
+## Caveats
+
+- If the **name** does not exist or the `pass` does not match, no event is triggered.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-70, 76-131}
+// Simple blacklist management.
+
+integer gDialogChannel;
+integer gDialogHandle;
+integer gManagingBlocks;
+
+startDialog(key person)
+{
+    gManagingBlocks = 0;
+    gDialogHandle = llListen(gDialogChannel, "", person, "");
+    llDialog(person, "\nSelect action", ["List blocks", "Add block", "Remove block"], gDialogChannel);
+    llSetTimerEvent(60);
+}
+
+stopDialog()
+{
+    llSetTimerEvent(0);
+    llListenRemove(gDialogHandle);
+}
+
+default
+{
+
+    on_rez(integer sp)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        gDialogChannel = (integer)(llFrand(-10000000)-10000000);
+        llListen(PUBLIC_CHANNEL, "", NULL_KEY, "");;
+    }
+
+    timer()
+    {
+        stopDialog();
+    }
+
+    touch_start(integer nd)
+    {
+        key toucherKey = llDetectedKey(0);
+        if (toucherKey == llGetOwner())
+        {
+            startDialog(toucherKey);
+        }
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+
+        if (llGetAgentSize(id) == ZERO_VECTOR)
+        {
+            return;
+        }
+
+        if (channel == gDialogChannel)
+        {
+            stopDialog();
+            if (gManagingBlocks)
+            {
+                message = llStringTrim(message, STRING_TRIM);
+                if ((key)message)
+                {
+                    if (gManagingBlocks == 1)
+                    {
+                        llOwnerSay("Addition request has been sent to the blacklist storage");
+                        llLinksetDataWrite("blocklist:" + message, "1");
+                    }
+                    else
+                    {
+                        llOwnerSay("Removal request has been sent to the blacklist storage.");
+                        llLinksetDataDelete("blocklist:" + message);
+                    }
+                }
+                else
+                {
+                    llOwnerSay("The UUID '" + message + "' appears to be invalid.");
+                }
+                startDialog(id);
+            }
+            else if (message == "List blocks")
+            {
+                list blocks = llLinksetDataFindKeys("^blocklist:", 0, 0);
+                integer listLength = llGetListLength(blocks);
+                llOwnerSay("Blacklist items: " + (string)listLength);
+                integer i;
+                while (i < listLength)
+                {
+                    string record = llGetSubString(llList2String(blocks, i), 10, -1);
+                    llOwnerSay("- secondlife:///app/agent/" + record + "/about" + " - " + record);
+                    ++i;
+                }
+                blocks = [];
+                startDialog(id);
+            }
+            else if (message == "Add block" || message == "Remove block")
+            {
+                string label = "add to";
+                gManagingBlocks = 1;
+                if (message == "Remove block")
+                {
+                    gManagingBlocks = 2;
+                    label = "remove from";
+                }
+                gDialogHandle = llListen(gDialogChannel, "", id, "");
+                llTextBox(id, "\nPlease specify one single avatar UUID you'd like to " + label + " the blacklist storage.", gDialogChannel);
+                llSetTimerEvent(60);
+            }
+            return;
+        }
+
+        if (llGetListLength(llLinksetDataFindKeys("blocklist:" + (string)id, 0, 1)) > 0)
+        {
+            llRegionSayTo(id, 0, "You're blacklisted.");
+            return;
+        }
+
+        llRegionSayTo(id, 0, "Hello there, secondlife:///app/agent/" + (string)id + "/about - your message: " + message);
+
+    }
+
+    linkset_data(integer action, string name, string value)
+    {
+        if (action == LINKSETDATA_RESET || action == LINKSETDATA_DELETE || action == LINKSETDATA_UPDATE)
+        {
+            llOwnerSay("Blacklist storage modified.");
+        }
+    }
+
+}
+```
+
+</details>
+
+## Related functions
+
+The original wiki page documents these functions together with this one:
+
+- [llLinksetDataDeleteProtected](/functions/llLinksetDataDeleteProtected/)
+
+## See also
+
+### Functions
+
+- [llLinksetDataAvailable](/functions/llLinksetDataAvailable/)
+- [llLinksetDataCountFound](/functions/llLinksetDataCountFound/)
+- [llLinksetDataCountKeys](/functions/llLinksetDataCountKeys/)
+- [llLinksetDataFindKeys](/functions/llLinksetDataFindKeys/)
+- [llLinksetDataListKeys](/functions/llLinksetDataListKeys/)
+- [llLinksetDataDeleteFound](/functions/llLinksetDataDeleteFound/)
+- [llLinksetDataRead](/functions/llLinksetDataRead/)
+- [llLinksetDataReset](/functions/llLinksetDataReset/)
+- [llLinksetDataWrite](/functions/llLinksetDataWrite/)
+
+### Events
+
+- [linkset_data](/events/linkset_data/)
+
+<WikiSource />

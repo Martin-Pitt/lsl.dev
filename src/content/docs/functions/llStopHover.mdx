@@ -1,0 +1,68 @@
+---
+title: "llStopHover"
+slug: "functions/llStopHover"
+category: functions
+source:
+  wiki: "LlStopHover"
+  url: https://wiki.secondlife.com/wiki/LlStopHover
+  revision: 1194369
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/llstophover-0be72c72.txt
+  license: "Content from the Second Life Wiki article LlStopHover (revision 1194369, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llStopHover" description />
+
+Stop hovering to a height
+
+```lsl title="How to use" frame="terminal"
+llStopHover();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-12, 18-27}
+// Put in an attached prim and touch to start floating in air without flying.
+// Touch again to drop to the ground.
+
+integer gHovering = FALSE; // are we supposd to be hovering now?
+
+default {
+    touch_start(integer total_number) {
+        if (!llGetAttached()) {
+            llWhisper(0, "Wear me to play.");
+            return;
+        }
+
+        if (gHovering) {
+            llOwnerSay("Releasing you.");
+            llStopHover();
+        }
+        else {
+            llOwnerSay("Making you float...");
+
+            // Start hovering 5 meters over our current location.
+            vector myPosition = llGetPos();
+            llSetHoverHeight(myPosition.z - llGround(ZERO_VECTOR) + 5.0, FALSE, 1.0);
+        }
+
+        gHovering = !gHovering; // flip the switch
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGroundRepel](/functions/llGroundRepel/)
+- [llSetHoverHeight](/functions/llSetHoverHeight/)
+
+<WikiSource />

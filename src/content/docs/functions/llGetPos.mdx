@@ -1,0 +1,78 @@
+---
+title: "llGetPos"
+slug: "functions/llGetPos"
+category: functions
+source:
+  wiki: "LlGetPos"
+  url: https://wiki.secondlife.com/wiki/LlGetPos
+  revision: 1210639
+  date: 2022-04-17
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llgetpos-7b1731c2.txt
+  license: "Content from the Second Life Wiki article LlGetPos (revision 1210639, 2022-04-17), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetPos" description />
+
+```lsl title="How to use" frame="terminal"
+vector result = llGetPos();
+```
+
+## Caveats
+
+- When called from the root of an attachment, returns the wearer's region position. To see the position used, enable **Develop>Avatar>Display Agent Target** and use the red crosshair. If the avatar is sitting on an object, the red crosshair may be hidden by the white one, in the same position.
+
+- When called in an attachment's child prim, the position given is again relative to the *avatar's* root position and rotation, but with the offset from the root prim added. Visually, the reported position will only be correct if the object's root is attached to [ATTACH_AVATAR_CENTER](/constants/ATTACH_AVATAR_CENTER/), at [ZERO_ROTATION](/constants/ZERO_ROTATION/) and [ZERO_VECTOR](/constants/ZERO_VECTOR/). Moving the attachment's root or changing the attachment point will not affect the reported position. Avatar animation is invisible to the simulator, so it also does not affect the reported position.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    touch_start(integer total_number)
+    {
+        // When touched, check the position of
+        // the object, save it to "position",
+        // then convert it into a string and
+        // say it.
+        vector position = llGetPos();
+        llSay(0, (string)position);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+default
+{
+    on_rez(integer param)
+    {
+        // Adding .x .y or .z after the vector name can be used to get the float value of just that axis.
+        vector pos = llGetPos();
+        float Z = pos.z; // <--- Like this.
+        if(Z > 500.0)
+        llOwnerSay("Oooh! I'm up high!");
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetLocalPos](/functions/llGetLocalPos/) — Gets the prim [local](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#local) position
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/) — Gets prim properties
+- [llGetRootPosition](/functions/llGetRootPosition/) — Gets the root prims position
+- [llSetPos](/functions/llSetPos/) — Sets the prim position
+
+<WikiSource />

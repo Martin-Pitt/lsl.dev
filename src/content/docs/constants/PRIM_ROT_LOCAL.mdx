@@ -1,0 +1,77 @@
+---
+title: "PRIM_ROT_LOCAL"
+slug: "constants/PRIM_ROT_LOCAL"
+category: constants
+source:
+  wiki: "PRIM ROT LOCAL"
+  url: https://wiki.secondlife.com/wiki/PRIM_ROT_LOCAL
+  revision: 1214869
+  date: 2023-10-08
+  contributor: "Misaki Vanilla"
+  raw: /wiki-source/prim-rot-local-f3826045.txt
+  license: "Content from the Second Life Wiki article PRIM ROT LOCAL (revision 1214869, 2023-10-08), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="PRIM_ROT_LOCAL" description />
+
+`PRIM_ROT_LOCAL` is used to get or set the prim's local rotation.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-15}
+integer isRotated = FALSE;
+vector rotated = <25, 25, 0>;
+rotation notRotated = ZERO_ROTATION;
+rotation rot;
+
+default
+{
+    state_entry()
+    {
+        rotated *= DEG_TO_RAD;
+        rot = llEuler2Rot( rotated );
+    }
+
+    touch_start(integer total_number)
+    {
+        if( isRotated )
+        {
+            llSetLinkPrimitiveParams( 2, [PRIM_ROT_LOCAL, notRotated] );
+            isRotated = FALSE;
+        }
+
+        else if( !isRotated )
+        {
+            isRotated = TRUE;
+            llSetLinkPrimitiveParams( 2, [PRIM_ROT_LOCAL, rot] );
+        }
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+&lt;onlyinclude>`{{#if: {{#vardefine:rot_local_const|{{LSL Const/ja|PRIM_ROT_LOCAL|integer|29|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the prim's local rotation}}}} {{#vardefine:p_rot_local_desc|Any valid rotation}} {{#switch:{{{1|}}} |get={{#vardefine:caveats|{{#var:caveats}} {{#var:caveats-get}}}} |set={{#vardefine:caveats|{{#var:caveats}} {{#var:caveats-set}}}} }} }}`&lt;/onlyinclude>
+
+## See also
+
+### Functions
+
+- [llGetPrimitiveParams/ja](https://wiki.secondlife.com/wiki/llGetPrimitiveParams/ja)
+- [llGetLinkPrimitiveParams/ja](https://wiki.secondlife.com/wiki/llGetLinkPrimitiveParams/ja)
+- [llSetPrimitiveParams/ja](https://wiki.secondlife.com/wiki/llSetPrimitiveParams/ja)
+- [llSetLinkPrimitiveParams/ja](https://wiki.secondlife.com/wiki/llSetLinkPrimitiveParams/ja)
+- [llGetRot/ja](https://wiki.secondlife.com/wiki/llGetRot/ja)
+- [llSetRot/ja](https://wiki.secondlife.com/wiki/llSetRot/ja)
+- [llSetLocalRot/ja](https://wiki.secondlife.com/wiki/llSetLocalRot/ja)
+- [llGetLocalRot/ja](https://wiki.secondlife.com/wiki/llGetLocalRot/ja)
+- [llGetRootRotation/ja](https://wiki.secondlife.com/wiki/llGetRootRotation/ja)
+- [llGetObjectDetails/ja](https://wiki.secondlife.com/wiki/llGetObjectDetails/ja)
+
+<WikiSource />

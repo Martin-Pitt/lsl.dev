@@ -1,0 +1,86 @@
+---
+title: "PRIM_REFLECTION_PROBE"
+slug: "constants/PRIM_REFLECTION_PROBE"
+category: constants
+source:
+  wiki: "PRIM REFLECTION PROBE"
+  url: https://wiki.secondlife.com/wiki/PRIM_REFLECTION_PROBE
+  revision: 1218999
+  date: 2026-08-24
+  contributor: "Nexii Malthus"
+  raw: /wiki-source/prim-reflection-probe-cfc6d81b.txt
+  license: "Content from the Second Life Wiki article PRIM REFLECTION PROBE (revision 1218999, 2026-08-24), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="PRIM_REFLECTION_PROBE" />
+
+`PRIM_REFLECTION_PROBE` is used to change the reflection probe configuration of the prim.
+
+A reflection probe is a volume used for image-based lighting (IBL). It takes an image of its surroundings and uses it as the basis for reflection effects (shiny surfaces) and ambiance effects (light bouncing).
+
+Typically, the viewer automatically places reflection probes. Prim-based probes enable artists to provide hints to the render engine to improve the quality of image based lighting. Only objects in the probe's influence volume are affected.
+
+Lighting is most accurate when the edges of a probe volume are near the geometry that appears in reflections. For example, objects inside a room with a box shaped reflection probe that hugs the walls, floor, and ceiling would show accurate reflections and ambient lighting from the walls of the room.
+
+## Caveats
+
+- A viewer must have reflections enabled to see the effects of reflection probes.
+- By default, the viewer auto-places reflection probes with 0.0 ambiance. Environment settings for the region or parcel can be adjusted to increase reflection probe ambiance for these auto-placed probes.
+- Automatically-placed reflection probes do not image avatars. Imaging avatars in probes has a performance cost.
+
+## Examples
+
+<details open>
+<summary>Increase the prim's reflection probe ambiance when an agent is detected in the sensor range of the prim. Decrease the probe ambiance when an agent is no longer detected.</summary>
+
+```lsl collapse={1-16}
+integer probe_enabled = TRUE;
+float probe_no_agent_ambiance = 0.0;
+float probe_agent_ambiance = 1.0;
+float probe_clip_distance = 0.0;
+integer probe_flags = 0;
+
+default
+{
+    state_entry()
+    {
+        integer sensor_type = AGENT;
+        float sensor_range = 3.0;
+        float sensor_rate = 5.0;
+        llSensorRepeat("", "", sensor_type, sensor_range, PI, sensor_rate);
+    }
+
+    sensor(integer num_detected)
+    {
+        llSetPrimitiveParams([PRIM_REFLECTION_PROBE, probe_enabled, probe_agent_ambiance, probe_clip_distance, probe_flags]);
+    }
+
+    no_sensor()
+    {
+        llSetPrimitiveParams([PRIM_REFLECTION_PROBE, probe_enabled, probe_no_agent_ambiance, probe_clip_distance, probe_flags]);
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+&lt;onlyinclude>`{{#if: {{LSL_Function/boolean|boolean}} {{#vardefine:reflection_probe_const|{{LSL Const|PRIM_REFLECTION_PROBE|integer|44|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the prim's reflection probe configuration}}}} {{#vardefine:p_ambiance_desc|Ranges from 0.0 to 100.0. Is the brightness of lighting effects from the probe, but not reflection effects. If the environment settings has nonzero reflection probe ambiance, the effective probe ambiance is the greater of the two. }} {{#vardefine:p_clip_distance_desc|Ranges from 0.0 to 1024.0. Is the minimum distance from the probe's center where the surroundings are included for imaging.}} {{#vardefine:p_flags_desc|PRIM_REFLECTION_PROBE_* flags}} }}`
+
+&lt;/onlyinclude>
+
+[Category:glTF](https://wiki.secondlife.com/wiki/Category:GlTF)
+
+## See also
+
+### Functions
+
+- [LlSetEnvironment](/functions/llSetEnvironment/)
+- [LlReplaceEnvironment](/functions/llReplaceEnvironment/)
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
+
+<WikiSource />

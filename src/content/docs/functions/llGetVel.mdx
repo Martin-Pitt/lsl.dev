@@ -1,0 +1,76 @@
+---
+title: "llGetVel"
+slug: "functions/llGetVel"
+category: functions
+source:
+  wiki: "LlGetVel"
+  url: https://wiki.secondlife.com/wiki/LlGetVel
+  revision: 1194277
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetvel-e685d4ed.txt
+  license: "Content from the Second Life Wiki article LlGetVel (revision 1194277, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetVel" />
+
+Speed is the magnitude of the velocity. Speed is measured in meter per second.
+
+Velocity reported is relative to the [global coordinate frame](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#global) (the object rotation has no affect on this functions output).
+
+For physic objects , velocity is the velocity of its center of mass [llGetCenterOfMass](/functions/llGetCenterOfMass/) . ( When the object has some torque and has not force , position of the object moves ( it turns ) , but its center of mass is unchanged , so the velocity is null )
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) that is the velocity of the object.
+
+```lsl title="How to use" frame="terminal"
+vector result = llGetVel();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-8}
+//A very simple (and not very effective) way of keeping a physical object in place.
+//If you ever want to actually stop an object, use llMoveToTarget(llGetPos(), .1)
+
+default
+{
+    state_entry()
+    {
+        vector spd;
+        {
+            @loop;
+            if (llVecMag(spd = llGetVel()) > .001)
+            { //We're accelerating...
+                llApplyImpulse(-spd, 0); //Slow us down.
+            }
+        jump loop;
+        }
+    }
+}//Written by Xaviar Czervik
+```
+
+</details>
+
+## Notes
+
+To get the velocity relative the local frame (the direction the object is pointing), divide the output of this function by that of its rotation.
+
+```lsl
+vector local_vel = llGetVel() / llGetRot()
+```
+
+## See also
+
+### Functions
+
+- [llGetAccel](/functions/llGetAccel/)
+- [llGetOmega](/functions/llGetOmega/)
+- [llGetForce](/functions/llGetForce/) — Gets the objects force
+- [llGetTorque](/functions/llGetTorque/)
+- [llGetMass](/functions/llGetMass/)
+
+<WikiSource />

@@ -1,0 +1,82 @@
+---
+title: "llGetSPMaxMemory"
+slug: "functions/llGetSPMaxMemory"
+category: functions
+source:
+  wiki: "LlGetSPMaxMemory"
+  url: https://wiki.secondlife.com/wiki/LlGetSPMaxMemory
+  revision: 1194259
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetspmaxmemory-277d7437.txt
+  license: "Content from the Second Life Wiki article LlGetSPMaxMemory (revision 1194259, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetSPMaxMemory" description />
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetSPMaxMemory();
+```
+
+## Specification
+
+This function's behavior is dependent upon the VM the script is using. [Mono](#mono) is the new VM, [LSO](#lso) is the old VM. The big difference between between Mono and LSO is that Mono scripts run faster and can utilize four times more memory.
+
+### Mono
+
+During and after a [LlScriptProfiler](/functions/llScriptProfiler/) profiling run, `llGetSPMaxMemory` will return the most memory used during profiling.
+
+### LSO
+
+This function has no effect for scripts not compiled to Mono. It will always return 16384, the fixed LSO memory size.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-16}
+// need to run something for the profile to register...
+ScriptRotate()
+{
+    llTargetOmega(<0.5, 0.7, 0.2>, 0.75, 0.75);
+}
+
+default
+{
+    state_entry()
+    {
+        llSetMemoryLimit( 5000 ); // set the memory limit
+
+        // call up the profiler, execute a method, stop profiler
+        llScriptProfiler( PROFILE_SCRIPT_MEMORY );
+        ScriptRotate();
+        llScriptProfiler( PROFILE_NONE );
+
+        // display memory usage...
+        llSay(0, "Memory used: " + (string)llGetSPMaxMemory() + " bytes, total memory: " +
+            (string)llGetMemoryLimit() + " bytes." );
+    }
+}
+
+// outputs
+// Object: Memory used: 4448 bytes, total memory: 5000 bytes.
+```
+
+</details>
+
+## History
+
+Date of Release [17/06/2011](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-06-17-233176)
+
+## See also
+
+### Functions
+
+- [llGetFreeMemory](/functions/llGetFreeMemory/)
+- [llGetUsedMemory](/functions/llGetUsedMemory/)
+- [llGetMemoryLimit](/functions/llGetMemoryLimit/)
+- [llSetMemoryLimit](/functions/llSetMemoryLimit/)
+
+<WikiSource />

@@ -1,0 +1,70 @@
+---
+title: "llGetUsername"
+slug: "functions/llGetUsername"
+category: functions
+source:
+  wiki: "LlGetUsername"
+  url: https://wiki.secondlife.com/wiki/LlGetUsername
+  revision: 1219164
+  date: 2026-10-03
+  contributor: "Bambi Bubbles"
+  raw: /wiki-source/llgetusername-e5d3a7a3.txt
+  license: "Content from the Second Life Wiki article LlGetUsername (revision 1219164, 2026-10-03), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetUsername" />
+
+**id** must specify a valid avatar key, present in or otherwise known to the sim in which the script is running, otherwise an empty string is returned. This function will still return a valid username if the avatar is a child agent of the sim (i.e., in an adjacent sim, but presently able to see into the one the script is in), or for a short period after the avatar leaves the sim (specifically, when the client completely disconnects from the sim, either as a main or child agent).
+
+**Note:** If the avatar's lastname is "Resident", only the firstname will be returned. "joe" not "joe.resident".
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the unique [username](https://wiki.secondlife.com/wiki/Usernames) of the avatar specified by **id**.
+
+```lsl title="How to use" frame="terminal"
+string result = llGetUsername(NULL_KEY);
+```
+
+## Caveats
+
+- To get around the "avatar must be present" limitation, you can use the [llRequestUsername](/functions/llRequestUsername/) function and the [dataserver](/events/dataserver/) event to obtain the avatar's username from a key.
+- There is no opposite function ([llUsername2Key](https://wiki.secondlife.com/wiki/llUsername2Key)) available. For Name2Key services see [llKey2Name](/functions/llKey2Name/).
+- "" can be returned if the region is unable to resolve the username. This can happen even if the avatar is present and display names are enabled on the region. Do not rely on this function to verify avatar presence.
+- If you merely wish to show the agent username in the viewer window, it may be more straightforward to use [Viewer URI Name Space](https://wiki.secondlife.com/wiki/Viewer_URI_Name_Space), e.g.:
+
+  ```lsl
+  llSay(0, "secondlife:///app/agent/" + (string)id + "/username");
+  ```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// Best viewed in Chat History (ctrl-h)
+default
+{
+    collision_start(integer a)//Announce who collided
+    {
+        llSay(0, "llGetDisplayName: " + llGetDisplayName(llDetectedKey(0)) +
+               "\nllGetUsername: " + llGetUsername(llDetectedKey(0)));
+    }
+    touch_start(integer a)
+    {
+        llSay(0,"llGetDisplayName: " + llGetDisplayName(llDetectedKey(0)) +
+               "\nllGetUsername: " + llGetUsername(llDetectedKey(0)));
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetDisplayName](/functions/llGetDisplayName/)
+- [llRequestUsername](/functions/llRequestUsername/) — Uses the [dataserver](/events/dataserver/) to request avatar information
+
+<WikiSource />

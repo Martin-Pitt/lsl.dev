@@ -1,0 +1,73 @@
+---
+title: "llSetParcelMusicURL"
+slug: "functions/llSetParcelMusicURL"
+category: functions
+source:
+  wiki: "LlSetParcelMusicURL"
+  url: https://wiki.secondlife.com/wiki/LlSetParcelMusicURL
+  revision: 1194451
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/llsetparcelmusicurl-446767f2.txt
+  license: "Content from the Second Life Wiki article LlSetParcelMusicURL (revision 1194451, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetParcelMusicURL" />
+
+Sets the [streaming audio](https://wiki.secondlife.com/wiki/Streaming_Music) URL for the parcel object is on
+
+The object owner must also be the land owner. If the land is deeded to a group the object will need to be deeded to the same group for this function to work.
+
+```lsl title="How to use" frame="terminal"
+llSetParcelMusicURL("");
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-20}
+// This script changes the music URL based on time of day.
+
+integer night = FALSE;
+string nighturl = "http://205.188.215.228:8006";
+string dayurl = "http://208.122.59.30:7156";
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(10);
+    }
+
+    timer()
+    {
+        vector pos = llGetSunDirection();
+
+        if ((pos.z < -.75) != night)
+        {
+            night = !night;
+            if (night)
+            {
+                llSetParcelMusicURL(nighturl);
+            }
+            else
+            {
+                llSetParcelMusicURL(dayurl);
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetParcelMusicURL](/functions/llGetParcelMusicURL/) — Gets the music stream URL for the parcel object is on
+
+<WikiSource />

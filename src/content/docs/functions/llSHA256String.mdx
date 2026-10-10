@@ -1,0 +1,70 @@
+---
+title: "llSHA256String"
+slug: "functions/llSHA256String"
+category: functions
+source:
+  wiki: "LlSHA256String"
+  url: https://wiki.secondlife.com/wiki/LlSHA256String
+  revision: 1211956
+  date: 2022-09-16
+  contributor: "Rider Linden"
+  raw: /wiki-source/llsha256string-d0aacbed.txt
+  license: "Content from the Second Life Wiki article LlSHA256String (revision 1211956, 2022-09-16), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSHA256String" description />
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) of 64 hex characters that is the [SHA-256](https://en.wikipedia.org/wiki/SHA-2) security hash of **src**.
+
+```lsl title="How to use" frame="terminal"
+string result = llSHA256String("");
+```
+
+## Specification
+
+LSL strings are stored in the UTF-8 format.
+
+## Caveats
+
+There's no way to input a zero-byte value into this function, nor any byte value from 128-255, therefore it's currently broken for many purposes (like HMAC-SHA1). The reason is because LSL strings cannot have a unicode null character (U+0000) in them, and LSL has no escape code for the null character (many programming languages use \\0 but LSL does not have this feature). `llEscapeURL("%00")` yields an empty string. As well, inside this function, each character with a Unicode integer value over U+0127 / 007F are dealt with in UTF-8 fashion: in the hex values, 0xC2 is prepended to the byte value (hence 0x0080-0x00FF become 0xC280-0xC2FF inside the `llSHA256String()` routine).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+llSay(0, llSHA256String("Hello, Avatar!")); // returns 3a9f9d2e4360319a62139d19bd425c16fb8439b832d74d5221ca75b54c35b4f2
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+#### Linux Example
+
+```lsl
+$ echo -n 'Hello, Avatar!' | openssl sha256
+3a9f9d2e4360319a62139d19bd425c16fb8439b832d74d5221ca75b54c35b4f2
+```
+
+</details>
+
+## Additional wiki content
+
+`{{LSLC{{#var:lang}}|Encryption|llSHA1String}}`
+
+## See also
+
+### Functions
+
+- [llMD5String](/functions/llMD5String/)
+- [llSHA1String](/functions/llSHA1String/)
+
+### Articles
+
+- [SHA-2](https://wiki.secondlife.com/wiki/SHA-2)
+
+<WikiSource />

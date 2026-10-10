@@ -1,0 +1,87 @@
+---
+title: "VEHICLE_TYPE_SLED"
+slug: "constants/VEHICLE_TYPE_SLED"
+category: constants
+source:
+  wiki: "VEHICLE TYPE SLED"
+  url: https://wiki.secondlife.com/wiki/VEHICLE_TYPE_SLED
+  revision: 1194634
+  date: 2015-01-23
+  contributor: "Bellimora Resident"
+  raw: /wiki-source/vehicle-type-sled-009f8c8b.txt
+  license: "Content from the Second Life Wiki article VEHICLE TYPE SLED (revision 1194634, 2015-01-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="VEHICLE_TYPE_SLED" />
+
+Simple vehicle that bumps along the ground, and likes to move along it’s local x-axis.
+
+### Effects
+
+Setting the vehicle type to sled enables the vehicle system and additionally has the same effect of executing the following:
+
+```lsl
+// most friction for left-right, least for up-down
+llSetVehicleVectorParam( VEHICLE_LINEAR_FRICTION_TIMESCALE, <30.0, 1.0, 1000.0> );
+// no angular friction
+llSetVehicleVectorParam( VEHICLE_ANGULAR_FRICTION_TIMESCALE, <1000.0, 1000.0, 1000.0> );
+// no linear motor
+llSetVehicleVectorParam( VEHICLE_LINEAR_MOTOR_DIRECTION, <0.0, 0.0, 0.0> );
+llSetVehicleFloatParam( VEHICLE_LINEAR_MOTOR_TIMESCALE, 1000.0 );
+llSetVehicleFloatParam( VEHICLE_LINEAR_MOTOR_DECAY_TIMESCALE, 120.0 );
+// no agular motor
+llSetVehicleVectorParam( VEHICLE_ANGULAR_MOTOR_DIRECTION, <0.0, 0.0, 0.0> );
+llSetVehicleFloatParam( VEHICLE_ANGULAR_MOTOR_TIMESCALE, 1000.0 );
+llSetVehicleFloatParam( VEHICLE_ANGULAR_MOTOR_DECAY_TIMESCALE, 120.0 );
+// no hover (but with timescale of 10 sec if enabled)
+llSetVehicleFloatParam( VEHICLE_HOVER_HEIGHT, 0.0 );
+llSetVehicleFloatParam( VEHICLE_HOVER_EFFICIENCY, 10.0 );
+llSetVehicleFloatParam( VEHICLE_HOVER_TIMESCALE, 10.0 );
+llSetVehicleFloatParam( VEHICLE_BUOYANCY, 0.0 );
+// maximum linear deflection with timescale of 1 second
+llSetVehicleFloatParam( VEHICLE_LINEAR_DEFLECTION_EFFICIENCY, 1.0 );
+llSetVehicleFloatParam( VEHICLE_LINEAR_DEFLECTION_TIMESCALE, 1.0 );
+// no angular deflection
+llSetVehicleFloatParam( VEHICLE_ANGULAR_DEFLECTION_EFFICIENCY, 0.0 );
+llSetVehicleFloatParam( VEHICLE_ANGULAR_DEFLECTION_TIMESCALE, 10.0 );
+// no vertical attractor (doesn’t mind flipping over)
+llSetVehicleFloatParam( VEHICLE_VERTICAL_ATTRACTION_EFFICIENCY, 1.0 );
+llSetVehicleFloatParam( VEHICLE_VERTICAL_ATTRACTION_TIMESCALE, 1000.0 );
+// no banking
+llSetVehicleFloatParam( VEHICLE_BANKING_EFFICIENCY, 0.0 );
+llSetVehicleFloatParam( VEHICLE_BANKING_MIX, 1.0 );
+llSetVehicleFloatParam( VEHICLE_BANKING_TIMESCALE, 10.0 );
+// default rotation of local frame
+llSetVehicleRotationParam( VEHICLE_REFERENCE_FRAME, <0.0, 0.0, 0.0, 1.0> );
+// remove these flags
+llRemoveVehicleFlags( VEHICLE_FLAG_HOVER_WATER_ONLY
+    | VEHICLE_FLAG_HOVER_TERRAIN_ONLY
+    | VEHICLE_FLAG_HOVER_GLOBAL_HEIGHT
+    | VEHICLE_FLAG_HOVER_UP_ONLY );
+// until banking is enabled, if ever)
+llSetVehicleFlags( VEHICLE_FLAG_NO_DEFLECTION_UP
+    | VEHICLE_FLAG_LIMIT_ROLL_ONLY
+    | VEHICLE_FLAG_LIMIT_MOTOR_UP );
+```
+
+## See also
+
+### Constants
+
+|
+
+| Flags |  | Description |
+| --- | --- | --- |
+| [VEHICLE_TYPE_NONE](/constants/VEHICLE_TYPE_NONE/) | 0 | Turns off vehicle support |
+| [VEHICLE_TYPE_SLED](/constants/VEHICLE_TYPE_SLED/) | 1 | Simple vehicle that bumps along the ground, and likes to move along its local x-axis |
+| [VEHICLE_TYPE_CAR](/constants/VEHICLE_TYPE_CAR/) | 2 | Vehicle that bounces along the ground but needs the motors to be driven from external controls or [timer](/events/timer/) events |
+| [VEHICLE_TYPE_BOAT](/constants/VEHICLE_TYPE_BOAT/) | 3 | Hovers over water with lots of friction and some angular deflection |
+| [VEHICLE_TYPE_AIRPLANE](/constants/VEHICLE_TYPE_AIRPLANE/) | 4 | Uses linear deflection for lift, no hover, and banking to turn |
+| [VEHICLE_TYPE_BALLOON](/constants/VEHICLE_TYPE_BALLOON/) | 5 | Hover, and friction, but no deflection |
+
+### Functions
+
+- [llSetVehicleType](/functions/llSetVehicleType/)
+
+<WikiSource />

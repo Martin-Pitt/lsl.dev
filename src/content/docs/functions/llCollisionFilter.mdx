@@ -1,0 +1,118 @@
+---
+title: "llCollisionFilter"
+slug: "functions/llCollisionFilter"
+category: functions
+source:
+  wiki: "LlCollisionFilter"
+  url: https://wiki.secondlife.com/wiki/LlCollisionFilter
+  revision: 1218612
+  date: 2026-02-03
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llcollisionfilter-0a1e7988.txt
+  license: "Content from the Second Life Wiki article LlCollisionFilter (revision 1218612, 2026-02-03), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llCollisionFilter" />
+
+Sets the collision filter, exclusively or inclusively.
+
+If **accept** == [TRUE](/constants/TRUE/), only accept collisions with objects **name** AND **id** (either is optional), otherwise with objects not **name** AND **id**
+
+If **name** or **id** are blank they are not used to filter incoming messages (or you could say they match everything).
+
+If **id** is an invalid key or a [null key](/constants/NULL_KEY/), it is considered blank.
+
+```lsl title="How to use" frame="terminal"
+llCollisionFilter("", NULL_KEY, 0);
+```
+
+## Caveats
+
+- Any call of `llCollisionFilter` in the same event as [llVolumeDetect](/functions/llVolumeDetect/) changing (not just being called, but actually moving from [FALSE](/constants/FALSE/) to [TRUE](/constants/TRUE/) or vice versa) will be disregarded (before or after), **if** the event handler previously called a user-defined function. See [svc 2490](#svc-2490)
+- You can get around this by calling them in separate events, such as [touch_start](/events/touch_start/) and [touch_end](/events/touch_end/).
+- Damage caused by [llSetDamage](/functions/llSetDamage/) will still apply to a filtered avatar.
+- Consequently, the object will immediately die on collision with the avatar. (And kill the avatar their health reaches 0.)
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+- Stop filtering:
+
+```lsl
+llCollisionFilter("", NULL_KEY, TRUE);
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+- Filter out all collisions:
+
+```lsl
+llCollisionFilter("", NULL_KEY, FALSE);
+```
+
+</details>
+
+<details>
+<summary>This script, placed in a wearable object, detects a collision when the person wearing it collides with an object named "Post":</summary>
+
+- 1st instance :
+
+an object named "Post" has several child prims named "Object" .
+
+The prim named "Post" hits the scripted object or scripted prim , the collision will be detected
+
+- 2nd instance :
+
+an object named "Post" has several child prims named "Object" .
+
+A child prim named "Object" hits the scripted object or scripted prim, the collision will be detected
+
+- 3rd instance :
+
+an object named "Object" has several child prims named "Post" .
+
+A prim named "Post" hits the scripted object or scripted prim, the collision will not be detected
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llCollisionFilter("Post","",TRUE);
+    }
+
+    collision_start(integer total_number)
+    {
+        llSay(0, "OUCH!");
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-2490 (bug): llCollisionFilter completely ignored after call to user-defined function and then a call to llVolumeDetect(TRUE)
+
+## See also
+
+### Functions
+
+- [llPassCollisions](/functions/llPassCollisions/)
+- [llVolumeDetect](/functions/llVolumeDetect/)
+
+### Events
+
+- [collision_start](/events/collision_start/)
+- [collision](/events/collision/)
+- [collision_end](/events/collision_end/)
+
+<WikiSource />

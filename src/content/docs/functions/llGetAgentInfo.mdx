@@ -1,0 +1,120 @@
+---
+title: "llGetAgentInfo"
+slug: "functions/llGetAgentInfo"
+category: functions
+source:
+  wiki: "LlGetAgentInfo"
+  url: https://wiki.secondlife.com/wiki/LlGetAgentInfo
+  revision: 1216173
+  date: 2024-02-07
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/llgetagentinfo-d498681f.txt
+  license: "Content from the Second Life Wiki article LlGetAgentInfo (revision 1216173, 2024-02-07), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetAgentInfo" description />
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) containing the agent information about **id**.
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetAgentInfo(NULL_KEY);
+```
+
+## Specification
+
+| Constant | `Val` | Returned if agent... |
+| --- | --- | --- |
+| [4096](/constants/AGENT_ALWAYS_RUN/) | 0x1000 | has running (`{{String\|Always Run}}`) enabled, or is using tap-tap-hold |
+| [2](/constants/AGENT_ATTACHMENTS/) | 0x0002 | has attachments |
+| [16384](/constants/AGENT_AUTOMATED/) | 0x4000 | is marked as a scripted agent/bot |
+| [8192](/constants/AGENT_AUTOPILOT/) | 0x2000 | is in `{{String\|autopilot}}` mode |
+| [64](/constants/AGENT_AWAY/) | 0x0040 | is in `{{String\|away}}` mode |
+| [2048](/constants/AGENT_BUSY/) | 0x0800 | is in `{{String\|busy}}` mode |
+| [1024](/constants/AGENT_CROUCHING/) | 0x0400 | is crouching |
+| [32768](/constants/AGENT_FLOATING_VIA_SCRIPTED_ATTACHMENT/) | 0x8000 | is floating or hovering because of a scripted attachment |
+| [1](/constants/AGENT_FLYING/) | 0x0001 | is flying or hovering |
+| [256](/constants/AGENT_IN_AIR/) | 0x0100 | is in the air (jumping, flying or falling) |
+| [8](/constants/AGENT_MOUSELOOK/) | 0x0008 | is in mouselook |
+| [32](/constants/AGENT_ON_OBJECT/) | 0x0020 | is sitting on an object (and linked to it) |
+| [4](/constants/AGENT_SCRIPTED/) | 0x0004 | has scripted attachments |
+| [16](/constants/AGENT_SITTING/) | 0x0010 | is sitting`{{Footnote\|1="Sit down" on the avatar context menu allows ground sits anywhere: atop the terrain, on objects or even in the air, so it is possible to sit "on" an object without linking.}}` |
+| [512](/constants/AGENT_TYPING/) | 0x0200 | is typing |
+| [128](/constants/AGENT_WALKING/) | 0x0080 | is walking, running or crouch walking |
+
+## Caveats
+
+- [AGENT_BUSY](/constants/AGENT_BUSY/) indicates that the "busy" [internal animation](https://wiki.secondlife.com/wiki/Internal_Animations) is playing, even if the user is not truly in busy mode.
+- **On server 1.40 and below**, [AGENT_TYPING](/constants/AGENT_TYPING/) indicated that the "type" internal animation is playing, it would not be set if the user disabled [PlayTypingAnim](https://wiki.secondlife.com/wiki/Debug_Settings). **On server 1.42 and up**, it reflects [typing start/stop messages](https://wiki.secondlife.com/wiki/ChatFromViewer) from the client and does not depend on the animation. If the old behavior is desired, use [llGetAnimationList](/functions/llGetAnimationList/) and look for `{{NoWrap|{{String|c541c47f-e0c0-058b-ad1a-d6ae3a4584d9}}}}` — [SVC-787](https://jira.secondlife.com/browse/SVC-787)
+- `AGENT_ALWAYS_RUN | AGENT_WALKING` indicates that the user requested to run using standard viewer controls. Use [llGetAnimation](/functions/llGetAnimation/) to also detect running caused by physics.
+- This function does not return reliable information immediately after a border crossing. Use [llGetAnimation](/functions/llGetAnimation/) instead, if you can. — [SVC-3177](https://jira.secondlife.com/browse/SVC-3177)
+- [AGENT_AUTOMATED](/constants/AGENT_AUTOMATED/) may unexpectedly be enabled, see [its caveats](/constants/AGENT_AUTOMATED/) for more detail.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={8-28}
+default
+{
+    touch_start(integer buf)
+    {
+        buf = llGetAgentInfo(llDetectedKey(0));
+        string out;
+        if(buf & AGENT_FLYING)
+            out += "The agent is flying.\n";
+        else
+            out += "The agent is not flying.\n";
+
+        if(buf & AGENT_ATTACHMENTS)
+        {
+            if(buf & AGENT_SCRIPTED)
+                out += "The agent has scripted attachments.\n";
+            else
+                out += "The agent's attachments are unscripted.\n";
+        }
+        else
+            out += "The agent does not have attachments.\n";
+
+        if(buf & AGENT_MOUSELOOK)
+            out += "the agent is in mouselook.";
+        else
+            out += "the agent is in normal camera mode.";
+        llWhisper(0, out);
+    }
+}
+```
+
+</details>
+
+## Notes
+
+This is not a good way of testing if an avatar is in the region, use [llGetAgentSize](/functions/llGetAgentSize/) instead.
+
+## Tests
+
+- [llGetAgentInfo_Test](https://wiki.secondlife.com/wiki/llGetAgentInfo_Test)
+
+## History
+
+`{{LSL Added|0.4.0|remote=http://secondlife.wikia.com/wiki/Version_0.4.0#Scripting}}` along with these flags [AGENT_FLYING](/constants/AGENT_FLYING/), [AGENT_ATTACHMENTS](/constants/AGENT_ATTACHMENTS/), & [AGENT_SCRIPTED](/constants/AGENT_SCRIPTED/).
+
+- [AGENT_AUTOPILOT](/constants/AGENT_AUTOPILOT/) was added in `{{SVN|2900|rev=136439|trunk=*|ser=1.33.0|anchor=file21}}`
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-91 (nf): '''agent_info'''() event
+- SVC-3177 (bug): llGetAgentInfo() returns unreliable info after a sim border crossing
+
+## See also
+
+### Functions
+
+- [llRequestAgentData](/functions/llRequestAgentData/)
+- [llGetAnimation](/functions/llGetAnimation/)
+- [llGetAnimationList](/functions/llGetAnimationList/)
+
+<WikiSource />

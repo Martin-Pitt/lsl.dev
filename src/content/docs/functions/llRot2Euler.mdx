@@ -1,0 +1,96 @@
+---
+title: "llRot2Euler"
+slug: "functions/llRot2Euler"
+category: functions
+source:
+  wiki: "LlRot2Euler"
+  url: https://wiki.secondlife.com/wiki/LlRot2Euler
+  revision: 1216627
+  date: 2024-05-05
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llrot2euler-e07f8b0b.txt
+  license: "Content from the Second Life Wiki article LlRot2Euler (revision 1216627, 2024-05-05), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRot2Euler" />
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) that is the Euler representation (roll, pitch, yaw) of `quat`, with each component expressed in radians.
+
+```lsl title="How to use" frame="terminal"
+vector result = llRot2Euler(ZERO_ROTATION);
+```
+
+## Specification
+
+The [Euler](https://wiki.secondlife.com/wiki/Category:LSL_Euler) angle vector (in radians) is converted from a rotation by doing the rotations around the 3 axes in Z, Y, X order.
+
+## Caveats
+
+- Angles greater than [PI](/constants/PI/) radians (180 degrees) are returned as negative angles.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        rotation input = llGetRot();
+        llSay(0, "The Rot2Euler of " + (string)input + " is: " + (string) llRot2Euler(input) );
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={7-11, 17-28}
+// This script rotates a prim by 15 degrees each time the prim is touched
+
+// While not the best way of achieving the result,
+// this script demonstrates the use of llRot2Euler and llEuler2Rot
+// and the use of more human-friendly degrees rather than radians
+
+default
+{
+    touch_start(integer total_number)
+    {
+        // Get the object's current rotation as a quarternion
+        rotation rot = llGetRot();
+        // Convert the rotation to a euler with roll, pitch, and yaw in radians
+        vector euler = llRot2Euler(rot);
+        // convert the angles from radians to degrees
+        euler *= RAD_TO_DEG;
+        // Add 15 degrees on the Z axis
+        euler += <0, 0, 15>;
+        // Say the current euler values in degrees
+        llSay(0, (string) euler);
+        // convert degrees back to radians
+        euler *= DEG_TO_RAD;
+        // Convert the euler back to a rotation quarternion
+        rot =  llEuler2Rot (euler);
+        // Apply the updated rotation to the prim
+        llSetRot( rot );
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llEuler2Rot](/functions/llEuler2Rot/)
+
+### Articles
+
+- [Euler Angles](https://en.wikipedia.org/wiki/Euler_Angles)
+
+<WikiSource />

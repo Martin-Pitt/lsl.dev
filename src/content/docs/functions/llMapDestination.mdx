@@ -1,0 +1,95 @@
+---
+title: "llMapDestination"
+slug: "functions/llMapDestination"
+category: functions
+source:
+  wiki: "LlMapDestination"
+  url: https://wiki.secondlife.com/wiki/LlMapDestination
+  revision: 1217527
+  date: 2024-10-14
+  contributor: "Rider Linden"
+  raw: /wiki-source/llmapdestination-2638bb51.txt
+  license: "Content from the Second Life Wiki article LlMapDestination (revision 1217527, 2024-10-14), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llMapDestination" description />
+
+Opens world map centered on **simname** with **pos** highlighted.
+
+Only works for scripts [attach](/events/attach/)ed to avatar, or during [touch](/categories/touch/) events.
+
+(NOTE: **look_at** currently does nothing)
+
+```lsl title="How to use" frame="terminal"
+llMapDestination("", ZERO_VECTOR, ZERO_VECTOR);
+```
+
+## Caveats
+
+- if **simname** is `omitted` or invalid, the map will open centered on object, but **pos** will not be highlighted. Since this function requests the client to perform a task, there is no way for script to know if it has failed.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-24}
+string simName = "Help Island Public";
+vector tpDest = <128.0, 128.0, 24.0>;
+vector lookAt = ZERO_VECTOR;
+
+default
+{
+    state_entry()
+    {
+        // set white, opaque floattext with teleport destination
+        llSetText("click to teleport\nto '" + simName + "'", <1.0, 1.0, 1.0>, (float)TRUE);
+    }
+
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+
+        string oldSlurlPrefix = "http://slurl.com/secondlife/";
+        string newSlurlPrefix = "http://maps.secondlife.com/secondlife/";
+        string slurlSuffix = llEscapeURL(simName)
+            + "/" + (string)llRound(tpDest.x)
+            + "/" + (string)llRound(tpDest.y)
+            + "/" + (string)llRound(tpDest.z);
+
+        llInstantMessage(id, oldSlurlPrefix + slurlSuffix);
+        llInstantMessage(id, newSlurlPrefix + slurlSuffix);
+
+        llMapDestination(simName, tpDest, lookAt);
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- **pos** will work with [Region](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region) coordinates not inside **simname**. (like those returned by [llRequestInventoryData](/functions/llRequestInventoryData/))
+- if called from non [touch](/categories/touch/) events, it only works for the [owner](https://wiki.secondlife.com/wiki/Category:LSL_Owner).
+- if called from touch, it may only work for the first or last touch in the event queue (example: `num_touched > 1`)
+- if called inside an [attachment](https://wiki.secondlife.com/wiki/Attachment), it only works for the owner.
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-3455 (bug): llMapDestination ignores &lt;code>look_at&lt;/code> parameter
+- SVC-1038 (fs): Throttle llMapDestination to prevent "map bombing".
+- SVC-1795 (bug): llMapDestination in attachments opens a map on owner's screen even when touched by someone else
+- VWR-2060: type=bug|llMapDestination '''pos''' parameter is sometimes replaced with incorrect data (workaround included)
+- VWR-7331: type=bug|status=fixp|height in '''pos''' is capped to 1000m (code patch included)
+
+## See also
+
+### Functions
+
+- [llRequestInventoryData](/functions/llRequestInventoryData/)
+- [llMapBeacon](/functions/llMapBeacon/)
+
+<WikiSource />

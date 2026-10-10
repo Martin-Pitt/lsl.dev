@@ -1,0 +1,121 @@
+---
+title: "llUnSit"
+slug: "functions/llUnSit"
+category: functions
+source:
+  wiki: "LlUnSit"
+  url: https://wiki.secondlife.com/wiki/LlUnSit
+  revision: 1213467
+  date: 2023-02-13
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llunsit-e9697cc2.txt
+  license: "Content from the Second Life Wiki article LlUnSit (revision 1213467, 2023-02-13), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llUnSit" />
+
+The agent identified by **id** is forced to stand up if any of the following apply:
+
+- The agent is sitting on the scripted object
+- The agent is over land owned by the scripted object's owner and/or a group the owner has land rights for.
+
+```lsl title="How to use" frame="terminal"
+llUnSit(NULL_KEY);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-11}
+// UnSit on Sit, Using a sit target
+default
+{
+    state_entry()
+    {
+        llSitTarget(<0.0, 0.0, 0.1>, ZERO_ROTATION); // Needed for llAvatarOnSitTarget to work. The vectors components must not all be set to 0.0
+    }
+    changed(integer change) // Triggered when various changes are sensed.
+    {
+        if(change & CHANGED_LINK) // When an agent sits on an object they become a new link.
+        {
+            key user = llAvatarOnSitTarget(); // Store the UUID of any agent sitting on the sit target.
+            if(user) // An avatar is on the sit target.
+                llUnSit(user); // Un-Sit the avatar.
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-9}
+// UnSit on Sit, NOT using a sit target
+
+default
+{
+    changed(integer change) // Triggered when various changes are sensed.
+    {
+        if(change & CHANGED_LINK) // When an agent sits on an object they become a new link.
+        {
+            integer links = 0; // Create an integer type variable.
+            if(llGetObjectPrimCount(llGetKey()) < (links = llGetNumberOfPrims())) // During the check store the number of links.
+            // If the number of prims is fewer than the number of links, the last must be an avatar.
+                llUnSit(llGetLinkKey(links)); // Use the key of the last link to be added (the avatar) to call llUnSit().
+            else
+                llOwnerSay("Some kind of linking or unlinking has changed me but, I am not being sat on.");
+            // llUnSit() triggers the changed event too (the number of links is reduced by 1).
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl collapse={10-16}
+unsit_all_avatars()
+{
+    integer objectPrimCount = llGetObjectPrimCount(llGetKey());
+    integer currentLinkNumber = llGetNumberOfPrims();
+
+    for (; objectPrimCount < currentLinkNumber; --currentLinkNumber)
+        llUnSit(llGetLinkKey(currentLinkNumber));
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        unsit_all_avatars();
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-924 (nf): '''llSit'''() - scriptable ability to force an avatar to sit on an object
+
+## See also
+
+### Functions
+
+- [llAvatarOnSitTarget](/functions/llAvatarOnSitTarget/)
+- [llSitTarget](/functions/llSitTarget/)
+
+### Events
+
+- [changed](/events/changed/)
+
+<WikiSource />

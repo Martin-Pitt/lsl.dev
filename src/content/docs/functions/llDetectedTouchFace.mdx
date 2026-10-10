@@ -1,0 +1,127 @@
+---
+title: "llDetectedTouchFace"
+slug: "functions/llDetectedTouchFace"
+category: functions
+source:
+  wiki: "LlDetectedTouchFace"
+  url: https://wiki.secondlife.com/wiki/LlDetectedTouchFace
+  revision: 1194094
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/lldetectedtouchface-15ad229f.txt
+  license: "Content from the Second Life Wiki article LlDetectedTouchFace (revision 1194094, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDetectedTouchFace" />
+
+For the [touch](/categories/touch/) category of events only. The prim that was touched may not be the prim receiving the event, use [llDetectedLinkNumber](/functions/llDetectedLinkNumber/) to check for this; likewise you can use [llDetectedTouchFace](/functions/llDetectedTouchFace/) to determine which face was touched.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is the index of the face the avatar clicked on.
+
+```lsl title="How to use" frame="terminal"
+integer result = llDetectedTouchFace(0);
+```
+
+## Caveats
+
+- [TOUCH_INVALID_FACE](/constants/TOUCH_INVALID_FACE/) is returned when...
+- The avatar's viewer does not support face touch detection.
+- The touch has moved off the surface of the prim.
+- The event triggered is not a [touch](/categories/touch/) event.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-10, 16-24}
+// This is the essential script to drop in a prim when you need to ascertain the number of a face (or faces)
+// Touch the prim surfaces to learn their face numbers, which you can then use in other scripts for texturing, colouring etc.
+
+say(string message)
+{
+    llSay(PUBLIC_CHANNEL, message);
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        integer face = llDetectedTouchFace(0);
+
+        if (face == TOUCH_INVALID_FACE)
+//      {
+            say("The touched face could not be determined");
+//      }
+        else
+//      {
+            say("You touched face number " + (string) face);
+//      }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={9-28}
+default
+{
+    touch_start(integer num_detected)
+    {
+        integer link = llDetectedLinkNumber(0);
+        integer face = llDetectedTouchFace(0);
+
+        if (face == TOUCH_INVALID_FACE)
+            llSay(PUBLIC_CHANNEL, "Sorry, your viewer doesn't support touched faces.");
+        else
+        {
+            // store the original color
+            list   colorParams   = llGetLinkPrimitiveParams(link, [PRIM_COLOR, face]);
+            vector originalColor = llList2Vector(colorParams, 0);
+
+            // color detected face white
+            llSetLinkColor(link, <1.0, 1.0, 1.0>, face);
+            llSleep(0.2);
+
+            // color detected face black
+            llSetLinkColor(link, ZERO_VECTOR, face);
+            llSleep(0.2);
+
+            // color detected face back to original color
+            llSetLinkColor(link, originalColor, face);
+        }
+    }
+}
+```
+
+</details>
+
+## History
+
+- Introduced in Viewer `{{SVN|870|rev=92872|branch=Release|anchor=file14|date=Wednesday, 23 July 2008}}`.
+- Server support available in Second Life Server 1.24.7.98039, client support in Release Candidate viewer 1.21.4 (98167)
+- Date of Release Server [29-08-2008](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Beta_Server/1.24#release-notes-for-second-life-beta-server-1-24-3-28august-29th-2c-2008-29)
+- Date of Release Client [16-10-2008](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.21)
+
+## See also
+
+### Functions
+
+- [llDetectedLinkNumber](/functions/llDetectedLinkNumber/)
+- [llDetectedTouchST](/functions/llDetectedTouchST/)
+- [llDetectedTouchUV](/functions/llDetectedTouchUV/)
+- [llDetectedTouchPos](/functions/llDetectedTouchPos/)
+- [llDetectedTouchNormal](/functions/llDetectedTouchNormal/)
+- [llDetectedTouchBinormal](/functions/llDetectedTouchBinormal/)
+
+### Events
+
+- [touch_start](/events/touch_start/)
+- [touch](/events/touch/)
+- [touch_end](/events/touch_end/)
+
+<WikiSource />

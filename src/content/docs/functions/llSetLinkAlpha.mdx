@@ -1,0 +1,177 @@
+---
+title: "llSetLinkAlpha"
+slug: "functions/llSetLinkAlpha"
+category: functions
+source:
+  wiki: "LlSetLinkAlpha"
+  url: https://wiki.secondlife.com/wiki/LlSetLinkAlpha
+  revision: 1218726
+  date: 2026-03-22
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llsetlinkalpha-deb233b4.txt
+  license: "Content from the Second Life Wiki article LlSetLinkAlpha (revision 1218726, 2026-03-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetLinkAlpha" />
+
+If a prim exists in the link set at **link**, set the [Blinn-Phong](https://wiki.secondlife.com/wiki/PBR_Materials#nomenclature-changes) **alpha** on **face** of that prim.
+
+```lsl title="How to use" frame="terminal"
+llSetLinkAlpha(0, 0.0, 0);
+```
+
+## Caveats
+
+- `llSetLinkAlpha` will have no visible effect on faces with a PBR material. To work on faces both with and without a PBR material, use one of these snippets:
+- invisible
+
+  ```lsl
+  if (llIsLinkGLTFMaterial(LINK_THIS, ALL_SIDES)) {
+      llSetLinkGLTFOverrides(LINK_THIS, ALL_SIDES, [OVERRIDE_GLTF_BASE_ALPHA_MODE, PRIM_GLTF_ALPHA_MODE_BLEND, OVERRIDE_GLTF_BASE_ALPHA, 0.0)]);
+  } else {
+      llSetLinkAlpha(LINK_THIS, 0.0, ALL_SIDES);
+  }
+  ```
+- visible
+
+  ```lsl
+  if (llIsLinkGLTFMaterial(LINK_THIS, ALL_SIDES)) {
+      llSetLinkGLTFOverrides(LINK_THIS, ALL_SIDES, [OVERRIDE_GLTF_BASE_ALPHA_MODE, "", OVERRIDE_GLTF_BASE_ALPHA, "")]);
+  } else {
+      llSetLinkAlpha(LINK_THIS, 1.0, ALL_SIDES);
+  }
+  ```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5}
+// Make the entire object disappear for 5 seconds
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        // transparent
+        llSetLinkAlpha(LINK_SET, 0.0, ALL_SIDES);
+        llSetTimerEvent(5.0);
+    }
+
+    timer()
+    {
+        // opaque
+        llSetLinkAlpha(LINK_SET, 1.0, ALL_SIDES);
+        llSetTimerEvent(0.0);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-9}
+// when the object is touched,
+// fade it out and back in again
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        // fade out
+        float alpha = 1.0;
+        while (alpha >= 0.0)
+        {
+            llSetLinkAlpha(LINK_SET, alpha, ALL_SIDES);
+            alpha -= 0.001;
+        }
+
+        // fade in
+        while (alpha < 1.0)
+        {
+            alpha += 0.001;
+            llSetLinkAlpha(LINK_SET, alpha, ALL_SIDES);
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl collapse={1-40}
+// Makes selected prims in a linkset become transparent or visible on chat command. Give each prim a unique name.
+
+list PrimList = ["ALL"];
+// Start our prim list with a dummy entry, so that the index into this list will correspond directly to the link number
+// By making the dummy entry 'ALL' we provide a match for that option too
+
+default
+{
+    changed (integer change)
+    {
+	if (change & CHANGED_LINK)
+	    llResetScript();
+    }
+
+    state_entry()
+    {
+	integer PrimCount = llGetNumberOfPrims();
+	llListen(37, "", NULL_KEY, "");  		    //  listen to chat commands from anyone on channel 37
+	integer i;
+	for (i = 1; i <= PrimCount; ++i)
+	    PrimList += llToUpper(llGetLinkName(i) );  	    // Build a list of upper-case link names, where list position equals link number
+    }
+
+    listen(integer channel, string name, key id, string msg)
+    {
+	list    TempList = llCSV2List( llToUpper(msg) );    // make a list from upper-case version of user command line
+	integer ListLen  = llGetListLength (TempList);
+	integer alpha    = (llList2String(TempList, 0) == "SHOW");
+	// 'SHOW' sets selected prims visible, otherwise set them transparent
+	// e.g.  HIDE,PLATE,SPOON,NAPKIN	            <---- makes named prims invisible
+	// e.g.  SHOW,ALL                                   <---- makes all prims visible
+
+	integer i;
+	for (i = 1; i < ListLen; ++i)
+	{
+	    string  ThisPrim   = llStringTrim(llList2String(TempList, i), STRING_TRIM);
+	    integer LinkNumber = llListFindList(PrimList, [ThisPrim]);
+	    if (~LinkNumber)    // i.e. if LinkNumber != -1
+	    {
+		if (!LinkNumber)
+		    LinkNumber = LINK_SET;   	// list position 0 is 'ALL'
+
+		llSetLinkAlpha(LinkNumber, alpha, ALL_SIDES);
+	    }
+	}
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetAlpha](/functions/llGetAlpha/) — Gets the prim's alpha
+- [llSetAlpha](/functions/llSetAlpha/) — Sets the prim's alpha
+- [llGetColor](/functions/llGetColor/) — Gets the prim's color
+- [llSetColor](/functions/llSetColor/) — Sets the prim's color
+- [llSetLinkColor](/functions/llSetLinkColor/)
+- [llSetLinkTexture](/functions/llSetLinkTexture/)
+- [PRIM_COLOR](/constants/PRIM_COLOR/) — The equivilant parameter for [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams)
+- [PRIM_GLTF_BASE_COLOR](/constants/PRIM_GLTF_BASE_COLOR/) — The equivilant PBR parameter for [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams)
+
+### Events
+
+- [changed](/events/changed/) — [CHANGED_COLOR](/constants/CHANGED_COLOR/)
+
+<WikiSource />

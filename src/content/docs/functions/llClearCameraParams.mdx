@@ -1,0 +1,96 @@
+---
+title: "llClearCameraParams"
+slug: "functions/llClearCameraParams"
+category: functions
+source:
+  wiki: "LlClearCameraParams"
+  url: https://wiki.secondlife.com/wiki/LlClearCameraParams
+  revision: 1214304
+  date: 2023-08-12
+  contributor: "Panterapolnocy Resident"
+  raw: /wiki-source/llclearcameraparams-dcbcaab4.txt
+  license: "Content from the Second Life Wiki article LlClearCameraParams (revision 1214304, 2023-08-12), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llClearCameraParams" description />
+
+Resets all camera parameters to default values and turns off scripted camera control.
+
+```lsl title="How to use" frame="terminal"
+llClearCameraParams();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-44}
+integer gEnabled;
+
+askForPermissions()
+{
+    llRequestPermissions(llGetOwner(), PERMISSION_CONTROL_CAMERA);
+}
+
+default
+{
+
+    on_rez(integer sp)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        askForPermissions();
+    }
+
+    touch_start(integer total_number)
+    {
+
+        if (llDetectedKey(0) != llGetOwner())
+        {
+            return;
+        }
+        else if (!llGetPermissions() & PERMISSION_CONTROL_CAMERA)
+        {
+            llOwnerSay("I need permissions to control your camera.");
+            askForPermissions();
+            return;
+        }
+
+        gEnabled = !gEnabled;
+        if (gEnabled)
+        {
+            llOwnerSay("Enabled.");
+            llSetCameraParams([
+                CAMERA_ACTIVE, 1,
+                CAMERA_DISTANCE, 50.0
+            ]);
+        }
+        else
+        {
+            llOwnerSay("Disabled.");
+            llClearCameraParams();
+        }
+
+    }
+
+}
+```
+
+</details>
+
+## Additional wiki content
+
+`{{LSL_Function/permission|PERMISSION_CONTROL_CAMERA}}`
+
+## See also
+
+### Functions
+
+- [llSetCameraParams](/functions/llSetCameraParams/)
+
+<WikiSource />

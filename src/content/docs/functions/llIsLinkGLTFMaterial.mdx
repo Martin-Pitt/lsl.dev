@@ -1,0 +1,72 @@
+---
+title: "llIsLinkGLTFMaterial"
+slug: "functions/llIsLinkGLTFMaterial"
+category: functions
+source:
+  wiki: "LlIsLinkGLTFMaterial"
+  url: https://wiki.secondlife.com/wiki/LlIsLinkGLTFMaterial
+  revision: 1219007
+  date: 2026-08-24
+  contributor: "Nexii Malthus"
+  raw: /wiki-source/llislinkgltfmaterial-302bcb1e.txt
+  license: "Content from the Second Life Wiki article LlIsLinkGLTFMaterial (revision 1219007, 2026-08-24), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llIsLinkGLTFMaterial" description />
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is [TRUE](/constants/TRUE/) if the material is PBR and [FALSE](/constants/FALSE/) if it is [Blinn-Phong](https://wiki.secondlife.com/wiki/PBR_Materials#nomenclature-changes) diffuse texture on **face**
+
+```lsl title="How to use" frame="terminal"
+integer result = llIsLinkGLTFMaterial(0, 0);
+```
+
+## Caveats
+
+- Returns [FALSE](/constants/FALSE/) if link does not exist or refers to a multi-link target (such as [LINK_SET](/constants/LINK_SET/)).
+- Returns [FALSE](/constants/FALSE/) if face does not exist.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-8}
+//Tells (on chat) if the materials are PBR
+default
+{
+    state_entry()
+    {
+        integer link = LINK_THIS;
+        integer i;
+        for(; i < llGetLinkNumberOfSides(link); ++i)
+        {
+            string message = "Side " + (string)i + " material is ";
+            if (llIsLinkGLTFMaterial(link, i))
+                message += "glTF/PBR";
+            else
+                message += "Blinn-Phong";
+            llSay(0, message);
+        }
+
+        if (llIsLinkGLTFMaterial(link, ALL_SIDES))
+            llSay(0, "All sides are PBR.");
+        else
+            llSay(0, "Some sides are Blinn-Phong (not PBR).");
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+[Category:glTF](https://wiki.secondlife.com/wiki/Category:GlTF)
+
+## See also
+
+### Functions
+
+- [llGetNumberOfSides](/functions/llGetNumberOfSides/) — Gets the number of faces on the prim
+
+<WikiSource />

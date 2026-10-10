@@ -1,0 +1,224 @@
+---
+title: "llGetInventoryPermMask"
+slug: "functions/llGetInventoryPermMask"
+category: functions
+source:
+  wiki: "LlGetInventoryPermMask"
+  url: https://wiki.secondlife.com/wiki/LlGetInventoryPermMask
+  revision: 1217906
+  date: 2025-01-23
+  contributor: "Maestro Linden"
+  raw: /wiki-source/llgetinventorypermmask-31abc77b.txt
+  license: "Content from the Second Life Wiki article LlGetInventoryPermMask (revision 1217906, 2025-01-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetInventoryPermMask" />
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) of the requested permission `category` for the inventory **item**
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetInventoryPermMask("", 0);
+```
+
+## Specification
+
+<table>
+	<tr>
+		<td>
+
+			| `category` |  | Description |
+			| --- | --- | --- |
+			| [MASK_BASE](/constants/MASK_BASE/) | 0 | The base permissions. |
+			| [MASK_OWNER](/constants/MASK_OWNER/) | 1 | Current owner permissions. |
+			| [MASK_GROUP](/constants/MASK_GROUP/) | 2 | Active group permissions. |
+			| [MASK_EVERYONE](/constants/MASK_EVERYONE/) | 3 | Permissions everyone has. |
+			| [MASK_NEXT](/constants/MASK_NEXT/) | 4 | Permissions the next owner will have. |
+			| [MASK_COMBINED](/constants/MASK_COMBINED/) | 16 | Include object inventory contents when calculating perms.<br /> Combine with other mask flags, for instance [MASK_OWNER](/constants/MASK_OWNER/)\|[MASK_COMBINED](/constants/MASK_COMBINED/) |
+
+		</td>
+		<td>
+
+			| Permissions | Value | Description |
+			| --- | --- | --- |
+			| [PERM_ALL](/constants/PERM_ALL/) | 0x7FFFFFFF | Move/Modify/Copy/Transfer permissions |
+			| [PERM_COPY](/constants/PERM_COPY/) | 0x00008000 | Copy permission |
+			| [PERM_MODIFY](/constants/PERM_MODIFY/) | 0x00004000 | Modify permission |
+			| [PERM_MOVE](/constants/PERM_MOVE/) | 0x00080000 | Move permission |
+			| [PERM_TRANSFER](/constants/PERM_TRANSFER/) | 0x00002000 | Transfer permission |
+
+		</td>
+	</tr>
+</table>
+
+## Caveats
+
+- Note that including the [MASK_COMBINED](/constants/MASK_COMBINED/) bit does not impact the output of this function, as the combined permissions are the only accessible permissions for inventory items.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+if ((permsYouHave & permsYouWant) == permsYouWant)
+    llSay(PUBLIC_CHANNEL, "You have the perms you want.");
+else
+    llSay(PUBLIC_CHANNEL, "You don't have the perms you want.");
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+integer ownerPerms = llGetInventoryPermMask("inventory item name goes here", MASK_OWNER);
+integer copyAndModPerms = PERM_COPY | PERM_MODIFY;
+
+if ((ownerPerms & copyAndModPerms) == copyAndModPerms)
+    llSay(PUBLIC_CHANNEL, "Owner has copy & modify perms.");
+else
+    llSay(PUBLIC_CHANNEL, "Owner does not have copy & modify perms.");
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl collapse={1-35, 45-55}
+string getPermsAsReadableString(integer perm)
+{
+    integer fullPerms = PERM_COPY | PERM_MODIFY | PERM_TRANSFER;
+    integer copyModPerms = PERM_COPY | PERM_MODIFY;
+    integer copyTransPerms = PERM_COPY | PERM_TRANSFER;
+    integer modTransPerms = PERM_MODIFY | PERM_TRANSFER;
+
+    string output = " perms: ";
+
+    if ((perm & fullPerms) == fullPerms)
+        output += "full";
+    else if ((perm & copyModPerms) == copyModPerms)
+        output += "copy & modify";
+    else if ((perm & copyTransPerms) == copyTransPerms)
+        output += "copy & transfer";
+    else if ((perm & modTransPerms) == modTransPerms)
+        output += "modify & transfer";
+    else if ((perm & PERM_COPY) == PERM_COPY)
+        output += "copy";
+    else if ((perm & PERM_TRANSFER) == PERM_TRANSFER)
+        output += "transfer";
+    else
+        output += "none";
+
+    //  Remember, items in Second Life must have either
+    //  PERM_COPY or PERM_TRANSFER when "talking about"
+    //  owner perms or perms for next owner.
+
+    return  output;
+}
+
+default
+{
+    state_entry()
+    {
+        string inventoryItemName = "inventory item name goes here";
+
+        integer basePerms      = llGetInventoryPermMask(inventoryItemName, MASK_BASE);
+        integer ownerPerms     = llGetInventoryPermMask(inventoryItemName, MASK_OWNER);
+        integer nextOwnerPerms = llGetInventoryPermMask(inventoryItemName, MASK_NEXT);
+        integer groupPerms     = llGetInventoryPermMask(inventoryItemName, MASK_GROUP);
+        integer everyonePerms  = llGetInventoryPermMask(inventoryItemName, MASK_EVERYONE);
+
+        llSay(0, "/me [" + inventoryItemName
+            + "]: base" + getPermsAsReadableString(basePerms));
+        llSay(0, "/me [" + inventoryItemName
+            + "]: owner" + getPermsAsReadableString(ownerPerms));
+        llSay(0, "/me [" + inventoryItemName
+            + "]: next owner" + getPermsAsReadableString(nextOwnerPerms));
+        llSay(0, "/me [" + inventoryItemName
+            + "]: group" + getPermsAsReadableString(groupPerms));
+        llSay(0, "/me [" + inventoryItemName
+            + "]: everyone" + getPermsAsReadableString(everyonePerms));
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>To test for the opposite (e.g. to see if something is NOT copy):</summary>
+
+```lsl
+    if (!(PERM_COPY & llGetInventoryPermMask(myitem, MASK_OWNER)))
+        llSay(PUBLIC_CHANNEL, "/me [" + myitem + "]: owner doesn't have copy perms.");
+```
+
+</details>
+
+<details>
+<summary>To remind the next owner what permissions to set before selling on</summary>
+
+choose which need to be set;
+
+```lsl collapse={7-28}
+CheckPerms()
+{
+    string item = llGetScriptName();
+    integer nextOwnerPerms = llGetInventoryPermMask(item, MASK_NEXT);
+
+    if(PERM_COPY & nextOwnerPerms)
+        llOwnerSay("Set no copy");
+
+    if(PERM_MODIFY & nextOwnerPerms)
+        llOwnerSay("Set no mod");
+
+    if(PERM_TRANSFER & nextOwnerPerms)
+        llOwnerSay("Set no transfer");
+}
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        if(llGetOwner() != llGetInventoryCreator(llGetScriptName()))
+            CheckPerms();
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- In effect, the perms for articles published on this Wiki are [PERM_COPY](/constants/PERM_COPY/) and [PERM_TRANSFER](/constants/PERM_TRANSFER/) until you log in, then [PERM_MODIFY](/constants/PERM_MODIFY/), [PERM_MOVE](/constants/PERM_MOVE/), [PERM_COPY](/constants/PERM_COPY/) and [PERM_TRANSFER](/constants/PERM_TRANSFER/).
+- The default perms of a newly created script are: Base = [PERM_ALL](/constants/PERM_ALL/), Owner = [PERM_ALL](/constants/PERM_ALL/), Next = [PERM_MOVE](/constants/PERM_MOVE/) or [PERM_TRANSFER](/constants/PERM_TRANSFER/), Group = 0 (none), Everyone = 0 (none). These perms are the same, no matter if the script is created in user inventory or in an object.
+- However, an option in the *[Preferences](https://wiki.secondlife.com/wiki/Preferences_window) > Advanced* menu allows to set the **Default Creation Permissions** of all items that can be created or uploaded in-world.
+
+## Tests
+
+- [llGetInventoryPermMask Test](https://wiki.secondlife.com/wiki/llGetInventoryPermMask_Test)
+
+## See also
+
+### Functions
+
+- [llGetObjectPermMask](/functions/llGetObjectPermMask/)
+- [llGetInventoryAcquireTime](/functions/llGetInventoryAcquireTime/) — Returns the time the item was added to the prim's inventory
+- [llGetInventoryName](/functions/llGetInventoryName/) — Returns the inventory item's name
+- [llGetInventoryType](/functions/llGetInventoryType/) — Tests to see if an inventory item exists and returns its type
+- [llGetInventoryNumber](/functions/llGetInventoryNumber/) — Returns the number of items of a specific type in inventory
+- [llGetInventoryKey](/functions/llGetInventoryKey/) — Returns the inventory item's [UUID](https://wiki.secondlife.com/wiki/UUID) (if full perm)
+- [llGetInventoryCreator](/functions/llGetInventoryCreator/) — Returns the inventory item's creator
+
+### Articles
+
+- [hex](https://wiki.secondlife.com/wiki/hex)
+
+<WikiSource />

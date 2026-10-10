@@ -1,0 +1,76 @@
+---
+title: "llGetFreeMemory"
+slug: "functions/llGetFreeMemory"
+category: functions
+source:
+  wiki: "LlGetFreeMemory"
+  url: https://wiki.secondlife.com/wiki/LlGetFreeMemory
+  revision: 1218634
+  date: 2026-02-18
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/llgetfreememory-8a22b02d.txt
+  license: "Content from the Second Life Wiki article LlGetFreeMemory (revision 1218634, 2026-02-18), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetFreeMemory" description />
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetFreeMemory();
+```
+
+## Specification
+
+This function's behavior is dependent upon the VM the script is using. [Mono](#mono) is the new VM, [LSO](#lso) is the old VM. The big difference between Mono and LSO is that Mono scripts run faster and can utilize four times more memory.
+
+### Mono
+
+In Mono the value returned is the amount of free memory available to the script prior to garbage collection being run. This means that memory that is awaiting garbage collection counts against the scripts 64KiB allotment. `{{Cn}}`
+
+In addition to this, Mono does not enforce the memory restrictions as strictly as the LSO VM did`{{Footnote|http://www.langnetsymposium.com/2009/talks/17-JimPurbrick-SecondLife.html}}``{{Footnote|In LSO, all types are immutable, every operation results in Heap values being duplicated}}`. (With LSO it was &lt;u>impossible&lt;/u> to exceed the 16KiB memory cap.)
+
+### LSO
+
+In LSO, the value returned by this function is the amount of memory that the Stack can use of the Heap has yet to allocate for itself.
+
+The LSL memory space is divided into four sections: Byte-code, Stack, Free Memory, Heap. Free Memory isn't an allocated block of memory, it's just the space between Stack and Heap. The size of all four sections combined is 16384 bytes (16KiB).
+
+[String](https://wiki.secondlife.com/wiki/String)s, [list](https://wiki.secondlife.com/wiki/list)s and [key](https://wiki.secondlife.com/wiki/key)s are stored in the Heap. Heap pointers (for [string](https://wiki.secondlife.com/wiki/string)s, [list](https://wiki.secondlife.com/wiki/list)s & [key](https://wiki.secondlife.com/wiki/key)s), [integer](https://wiki.secondlife.com/wiki/integer)s, [float](https://wiki.secondlife.com/wiki/float)s, [vector](https://wiki.secondlife.com/wiki/vector)s and [rotation](https://wiki.secondlife.com/wiki/rotation)s are all temporarily stored in the stack as the script executes.
+
+As the script executes the Stack grows and shrinks in size depending upon the complexity of the expressions being executed. Likewise the Heap grows as the script executes but unlike the Stack, it never shrinks in size. When there is no free memory left for Stack or Heap to use they collide and a Stack-Heap Collision error is thrown causing the script to crash.
+
+The Heap can become fragmented and blocks of memory in it can become unusable (due to their size). There is no defragment function`{{Footnote|Due to the design of the LSO VM, a defragment function is impossible.}}` but there are scripting techniques that can be used to reduce fragmentation.
+
+## Caveats
+
+- The number of free bytes the Heap can use may be greater but not less.
+- "*the number of free bytes of memory the script can use*" means that if a memory limit is set (via [llSetMemoryLimit](/functions/llSetMemoryLimit/)), this function will report the free space between the script's current memory usage and the defined memory limit, **not** the uncapped memory limit.
+
+## Examples
+
+<details open>
+<summary>Calling [llGetFreeMemory](/functions/llGetFreeMemory/) can look like this:</summary>
+
+```lsl
+llOwnerSay((string)llGetFreeMemory() + " bytes of free memory available for allocation.");
+```
+
+</details>
+
+## Notes
+
+The amount of free memory is updated only at the start of a server frame, meaning the values from this function can fluctuate. To ensure stable values, use a single-frame sleep, e.g. [llSleep](/functions/llSleep/)(0.01) before the call to `llGetFreeMemory`.
+
+## See also
+
+### Functions
+
+- [llGetUsedMemory](/functions/llGetUsedMemory/)
+- [llScriptProfiler](/functions/llScriptProfiler/) — A more advanced function for analyzing script performance, and can also measure memory usage over time.
+- [llSetMemoryLimit](/functions/llSetMemoryLimit/) — Define a memory limit (lower than the maximum for the appropriate VM).
+
+### Articles
+
+- [Stack-Heap Collision](https://wiki.secondlife.com/wiki/LSL_Errors#script-run-time-error-stack-heap-collision) — [LSL Error](https://wiki.secondlife.com/wiki/LSL_Errors) caused by the script running out of memory.
+
+<WikiSource />

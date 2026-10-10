@@ -1,0 +1,90 @@
+---
+title: "llTarget"
+slug: "functions/llTarget"
+category: functions
+source:
+  wiki: "LlTarget"
+  url: https://wiki.secondlife.com/wiki/LlTarget
+  revision: 1194360
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/lltarget-9de93bf1.txt
+  license: "Content from the Second Life Wiki article LlTarget (revision 1194360, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llTarget" />
+
+This function is to have the script know when it has reached a position.
+
+It registers a **position** with a **range** that triggers [at_target](/events/at_target/) and [not_at_target](/events/not_at_target/) events continuously until unregistered.
+
+A similar function exists for rotations: [llRotTarget](/functions/llRotTarget/)
+
+This function does not move the object, to do that use [llSetPos](/functions/llSetPos/) or [llMoveToTarget](/functions/llMoveToTarget/).
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) to unregister the target with [llTargetRemove](/functions/llTargetRemove/).
+
+```lsl title="How to use" frame="terminal"
+integer result = llTarget(ZERO_VECTOR, 0.0);
+```
+
+## Caveats
+
+- The position always references the current region. If you set `llTarget` to `<100, 100, 100>` while in Region A and then move the object to region B, the target automatically becomes `<100, 100, 100>` in Region B.
+- The position can be set outside the region boundaries, but [at_target](/events/at_target/) can only happen if the range extends into the current region. The part of the range outside the current region will not activate [at_target](/events/at_target/).
+- Only 8 targets can be active to a script. Additional `llTarget` will remove the oldest target set.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-6, 12-29}
+integer target_id;
+vector target_pos;
+
+default
+{
+    state_entry()
+    {
+        target_pos = llGetPos() + <1.0, 0.0, 0.0>;
+        target_id = llTarget(target_pos, 0.5);
+    }
+    at_target(integer tnum, vector targetpos, vector ourpos)
+    {
+        if (tnum == target_id)
+        {
+            llOwnerSay("object is within range of target");
+            llOwnerSay("target position: " + (string)targetpos + ", object is now at: " + (string)ourpos);
+            llOwnerSay("this is " + (string)llVecDist(targetpos, ourpos) + " meters from the target");
+            llTargetRemove(target_id);
+        }
+    }
+    not_at_target()
+    {
+        llOwnerSay(
+            "not there yet - object is at " + (string)llGetPos() +
+            ", which is " + (string)llVecDist(target_pos, llGetPos()) +
+            " meters from the target (" + (string)target_pos + ")"
+        );
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llTargetRemove](/functions/llTargetRemove/) — Cancel a target position
+- [llRotTarget](/functions/llRotTarget/) — Register a target rotation
+- [llRotTargetRemove](/functions/llRotTargetRemove/) — Cancel a target rotation
+
+### Events
+
+- [at_target](/events/at_target/) — [not_at_target](/events/not_at_target/) — positional target events
+- [at_rot_target](/events/at_rot_target/) — [not_at_rot_target](/events/not_at_rot_target/) — rotational target events
+
+<WikiSource />

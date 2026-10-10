@@ -1,0 +1,76 @@
+---
+title: "llGetAlpha"
+slug: "functions/llGetAlpha"
+category: functions
+source:
+  wiki: "LlGetAlpha"
+  url: https://wiki.secondlife.com/wiki/LlGetAlpha
+  revision: 1215692
+  date: 2023-12-01
+  contributor: "Jenna Huntsman"
+  raw: /wiki-source/llgetalpha-7cd73a29.txt
+  license: "Content from the Second Life Wiki article LlGetAlpha (revision 1215692, 2023-12-01), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetAlpha" />
+
+Otherwise the return is in the range \[0, 1\], with 0.0 being fully transparent and 1.0 being fully solid.
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the [Blinn-Phong](https://wiki.secondlife.com/wiki/PBR_Materials#nomenclature-changes) alpha of **face**.
+
+```lsl title="How to use" frame="terminal"
+float result = llGetAlpha(0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//Tells the owner the alpha on all sides
+default
+{
+    state_entry()
+    {
+        integer i = 0;
+        integer max = llGetNumberOfSides();
+        while(i < max)
+        {
+            llSay(0,"Face "+(string)i+" alpha is " + (string)llGetAlpha(i));
+            ++i;
+        }
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+float AveragePrimAlpha()
+{//Since this is so simple you may just want to inline it instead of including the function.
+    return (llGetAlpha(ALL_SIDES) / llGetNumberOfSides());
+}
+```
+
+```lsl
+//if face 0 is "transparent" then make the prim "visible"
+if (llGetAlpha(0))  ;
+else llSetAlpha(1.0, ALL_SIDES);
+```
+
+## See also
+
+### Functions
+
+- [llSetAlpha](/functions/llSetAlpha/) — Sets the prim's alpha
+- [llGetColor](/functions/llGetColor/) — Gets the prim's color
+- [llSetColor](/functions/llSetColor/) — Sets the prim's color
+- [llSetLinkColor](/functions/llSetLinkColor/) — Sets link's color
+- [llSetLinkAlpha](/functions/llSetLinkAlpha/) — Sets link's alpha
+- [llGetNumberOfSides](/functions/llGetNumberOfSides/) — Gets the number of faces on the prim
+
+<WikiSource />

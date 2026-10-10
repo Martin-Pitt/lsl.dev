@@ -1,0 +1,117 @@
+---
+title: "attach"
+slug: "events/attach"
+category: events
+source:
+  wiki: "Attach"
+  url: https://wiki.secondlife.com/wiki/Attach
+  revision: 1215019
+  date: 2023-10-12
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/attach-d406ade2.txt
+  license: "Content from the Second Life Wiki article Attach (revision 1215019, 2023-10-12), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="attach" description />
+
+Triggered in an object when the object [attaches](https://wiki.secondlife.com/wiki/Attachment) or detaches from agent.
+
+```lsl title="How to use" frame="terminal"
+attach(key avatar)
+{
+
+}
+```
+
+## Specification
+
+#### Triggered
+
+- When the object is attached to an avatar
+- From the ground
+- From inventory
+- When the avatar wearing the object logs in
+- When object is detached (**id** ==
+
+[NULL_KEY](/constants/NULL_KEY/)
+
+)
+
+- Dropped to the ground
+- Derezzed to inventory
+- &lt;s>When the avatar wearing the object logs out&lt;/s> *(does not occur with current versions, but scripters should anticipate the possibility)*
+
+#### Not Triggered
+
+- When the avatar wearing the object teleports
+- Use [CHANGED_TELEPORT](/constants/CHANGED_TELEPORT/) to detect when the avatar teleports
+- When the avatar wearing the object moves from one region to another
+- Use [CHANGED_REGION](/constants/CHANGED_REGION/) to detect when the avatar changes region
+- When the attachment is detached after being attached with [llAttachToAvatarTemp](/functions/llAttachToAvatarTemp/).
+- There is no way to detect this at this moment.
+
+## Caveats
+
+- When detached to inventory, an object is only given limited time to execute its attach events. If these events are active when the script derezzes but have not completed, execution will finish when the object is next rezzed. <sup>[http://forums-archive.secondlife.com/54/8b/65518/1.html#post689314](http://forums-archive.secondlife.com/54/8b/65518/1.html#post689314)</sup> If the script is busy handling a *different* event at detach time, an attach event with id=[NULL_KEY](/constants/NULL_KEY/) can happen on the next rez, followed by one with the wearer's key. To verify a real detach, check that id == [NULL_KEY](/constants/NULL_KEY/) *AND* `llGetAttached()` == 0.
+- If the script is busy with a complex event handler before it is taken to inventory, the [event queue](https://wiki.secondlife.com/wiki/Category:LSL_Events) can overflow, leaving no room to capture new events. The queue is preserved, so attach and on_rez may not be triggered the next time the object is rezzed. To guard against this possibility, [llGetAttached](/functions/llGetAttached/) can be checked in other events.
+- When detaching an object, [llGetAttached](/functions/llGetAttached/)() returns 0, but the same happens when dropping an object from an attachment point to the ground. No other indicative event is triggered in the latter case; in particular, the [on_rez](/events/on_rez/) event is not triggered for attachment drops. If you need to distinguish a drop from a detach, a possible hack is to check [llGetObjectPrimCount](/functions/llGetObjectPrimCount/)([llGetKey](/functions/llGetKey/)()). If it's zero, it can be assumed that the object is being detached; otherwise, that it is being dropped.
+- There is a bug when an attach event is in a script in a child prim. When the object is attached, a detached event is first triggered, and then an attached event is triggered. When the object is detached, no event is triggered.
+
+## Examples
+
+<details open>
+<summary>The following is a simplified example of the attach event. The variable id will be the key of the avatar the scripted object is attached to otherwise it will take on the value of</summary>
+
+[NULL_KEY](/constants/NULL_KEY/)
+
+. The conditional [if](https://wiki.secondlife.com/wiki/if) statement is used to determine the value of the variable id.
+
+```lsl
+default
+{
+    attach(key id)
+    {
+        if (id)     // is a valid key and not NULL_KEY
+        {
+            llSay(0, "I have been attached!");
+        }
+        else
+        {
+            llSay(0, "I have been detached!");
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+### [on_rez](/events/on_rez/) & [attach](/events/attach/)
+
+[on_rez](/events/on_rez/) will be triggered prior to [attach](/events/attach/) when attaching from inventory or during login.
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-6687 (bug): Attach event doesn't trigger in a child-prim when detaching the object
+
+## See also
+
+### Functions
+
+- [llAttachToAvatar](/functions/llAttachToAvatar/)
+- [llDetachFromAvatar](/functions/llDetachFromAvatar/)
+- [llGetAttached](/functions/llGetAttached/)
+
+### Events
+
+- [on_rez](/events/on_rez/)
+
+### Articles
+
+- [Attachment](https://wiki.secondlife.com/wiki/Category:LSL_Attachment)
+
+<WikiSource />

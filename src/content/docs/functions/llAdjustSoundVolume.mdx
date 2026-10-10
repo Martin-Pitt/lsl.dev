@@ -1,0 +1,107 @@
+---
+title: "llAdjustSoundVolume"
+slug: "functions/llAdjustSoundVolume"
+category: functions
+source:
+  wiki: "LlAdjustSoundVolume"
+  url: https://wiki.secondlife.com/wiki/LlAdjustSoundVolume
+  revision: 1216420
+  date: 2024-03-27
+  contributor: "Rolig Loon"
+  raw: /wiki-source/lladjustsoundvolume-3d6c7bbf.txt
+  license: "Content from the Second Life Wiki article LlAdjustSoundVolume (revision 1216420, 2024-03-27), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llAdjustSoundVolume" />
+
+Adjusts **volume** of attached sound.
+
+`{{LSL Function/Head |func=llAdjustSoundVolume |sort=AdjustSoundVolume |func_id=207|func_sleep=0.1|func_energy=10.0 |p1_type=float|p1_name=volume}}`
+
+`{{LSL Function/Head |func=llLinkAdjustSoundVolume |sort=LinkAdjustSoundVolume |func_id=|func_sleep=0.1|func_energy=10.0 |p1_type=integer|p1_subtype=link|p1_name=link |p2_type=float|p2_name=volume}}`
+
+```lsl title="How to use" frame="terminal"
+llAdjustSoundVolume(0.0);
+```
+
+## Caveats
+
+Not work [llTriggerSound](/functions/llTriggerSound/) and [llCollisionSound](/functions/llCollisionSound/)
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llListen(42, "", llGetOwner(), "");
+    }
+
+    listen(integer chan, string name, key id, string msg)
+    {
+        float value = (float)msg;
+        llAdjustSoundVolume(value);
+        llOwnerSay("Volume set to: " + (string)value + " of 1.0");
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+default
+{
+    collision_start(integer p)
+    {
+        llPlaySound("5df2e97f-d3ab-9a80-7063-69007470a182", 1.0);
+        llAdjustSoundVolume(1.0);
+        llSetTimerEvent(0.2); //In 0.2 seconds, will reduce the volume of the currently playing audio.
+    }
+    timer(){
+        llAdjustSoundVolume(0.1);
+        llSetTimerEvent(0.0);
+    }
+}
+```
+
+</details>
+
+## History
+
+`{{LSL Added|0.2.0|remote=http://secondlife.wikia.com/wiki/Version_0.2.0}}`
+
+## Related functions
+
+The original wiki page documents these functions together with this one:
+
+- [llLinkAdjustSoundVolume](/functions/llLinkAdjustSoundVolume/)
+
+## See also
+
+### Functions
+
+- [llLinkPlaySound](/functions/llLinkPlaySound/)
+- [llLinkSetSoundQueueing](/functions/llLinkSetSoundQueueing/)
+- [llLinkSetSoundRadius](/functions/llLinkSetSoundRadius/)
+- [llLinkStopSound](/functions/llLinkStopSound/)
+- [llLoopSound](/functions/llLoopSound/)
+- [llLoopSoundMaster](/functions/llLoopSoundMaster/)
+- [llLoopSoundSlave](/functions/llLoopSoundSlave/)
+- [llPlaySound](/functions/llPlaySound/)
+- [llPlaySoundSlave](/functions/llPlaySoundSlave/)
+- [llPreloadSound](/functions/llPreloadSound/)
+- [llSetSoundQueueing](/functions/llSetSoundQueueing/)
+- [llSetSoundRadius](/functions/llSetSoundRadius/)
+- [llStopSound](/functions/llStopSound/)
+- [llTriggerSound](/functions/llTriggerSound/)
+- [llTriggerSoundLimited](/functions/llTriggerSoundLimited/)
+
+<WikiSource />

@@ -1,0 +1,73 @@
+---
+title: "llBreakAllLinks"
+slug: "functions/llBreakAllLinks"
+category: functions
+source:
+  wiki: "LlBreakAllLinks"
+  url: https://wiki.secondlife.com/wiki/LlBreakAllLinks
+  revision: 1194065
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llbreakalllinks-b86e5d28.txt
+  license: "Content from the Second Life Wiki article LlBreakAllLinks (revision 1194065, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llBreakAllLinks" description />
+
+Delinks all prims in the link set.
+
+```lsl title="How to use" frame="terminal"
+llBreakAllLinks();
+```
+
+## Caveats
+
+- This function fails if the owner does not have edit permissions on the object containing the script, the system message "*Delink failed because you do not have edit permission*" is received by the owner.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-15}
+//-- requests permission to change linkes, then breaks all links on touch.
+default{
+  state_entry(){
+    llRequestPermissions( llGetOwner(), PERMISSION_CHANGE_LINKS );
+  }
+
+  run_time_permissions( integer vBitPermissions ){
+    if (PERMISSION_CHANGE_LINKS & vBitPermissions){
+      state sMain;
+    }else{
+      llResetScript();
+    }
+  }
+}
+
+state sMain{
+  touch_start( integer vIntTouched ){
+    llBreakAllLinks();
+  }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+`{{LSL_Function/permission|PERMISSION_CHANGE_LINKS|grant=the owner}}`
+
+## See also
+
+### Functions
+
+- [llBreakLink](/functions/llBreakLink/) — Break a link
+- [llCreateLink](/functions/llCreateLink/) — Link to another object
+
+### Events
+
+- [changed](/events/changed/) — [CHANGED_LINK](/constants/CHANGED_LINK/)
+
+<WikiSource />

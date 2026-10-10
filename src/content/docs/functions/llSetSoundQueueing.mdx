@@ -1,0 +1,93 @@
+---
+title: "llSetSoundQueueing"
+slug: "functions/llSetSoundQueueing"
+category: functions
+source:
+  wiki: "LlSetSoundQueueing"
+  url: https://wiki.secondlife.com/wiki/LlSetSoundQueueing
+  revision: 1213226
+  date: 2023-02-03
+  contributor: "Sei Lisa"
+  raw: /wiki-source/llsetsoundqueueing-9f1f4bab.txt
+  license: "Content from the Second Life Wiki article LlSetSoundQueueing (revision 1213226, 2023-02-03), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetSoundQueueing" />
+
+Set whether attached sounds wait for the current sound to finish. If **queue** is [TRUE](/constants/TRUE/), queuing is enabled, if [FALSE](/constants/FALSE/) queuing is disabled. Sound queuing is disabled by default.
+
+`{{LSL Function/Head |func=llSetSoundQueueing |p1_type=integer|p1_subtype=boolean|p1_name=queue |func_id=208|func_sleep=0.0|func_energy=10.0 |func_footnote |func_desc |return_text }}`
+
+`{{LSL Function/Head |func=llLinkSetSoundQueueing |p1_type=integer|p1_subtype=link|p1_name=link |p2_type=integer|p2_subtype=boolean|p2_name=queue |func_id=|func_sleep=0.0|func_energy=10.0 |func_footnote |func_desc |return_text }}`
+
+```lsl title="How to use" frame="terminal"
+llSetSoundQueueing(0);
+```
+
+## Caveats
+
+- The sound queue is only 1 level deep - this means that beside the sound that is currently playing, there can only be 1 sound in reserve. The sound queue is first-come, first-serve.\* [SVC-4260](#svc-4260)
+- Further to the above, the queue order is reversed when using [llPlaySoundSlave](/functions/llPlaySoundSlave/) - using the below example, the default behaviour would be to play SoundName1 and SoundName2, however when using the aforementioned function the order would be to play SoundName2 and SoundName3.
+- Sound queuing is a property of the prim, not the script. It can be activated and deactivated by any script in the prim and survives script reset, re-rez and script removal.
+- If used to make smooth transitions using slave/master sounds the sounds tend to go out of sync.
+- Although sounds are queued, the volume of all sounds in the queue is set by the last item in the queue. If your application requires the use of differing volume values, you may wish to implement [llAdjustSoundVolume](/functions/llAdjustSoundVolume/) alongside the sound queue
+- There is a very small (but audible) gap of silence between sounds due to network latency and processing time.
+- The queued sound must be fully loaded in the viewer, or else it will not play. [llPreloadSound](/functions/llPreloadSound/) is not always reliable in doing its job.
+- Queueing a sound that is identical to the one currently playing will fail. Use [llLoopSound](/functions/llLoopSound/) instead.
+- While this function does not have a delay, enabling or disabling the sound queue is not instant. It seems to take approx ~0.1 seconds to set the queueing flag.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-8, 14-18}
+default
+{
+    state_entry()
+    {
+        llPreloadSound("SoundName1");//This loads the sounds into all in range viewers and cuts delay between sounds.
+        llPreloadSound("SoundName2");//All sound parameters can be the name of a sound in the prim's inventory or a UUID of a sound");
+        llPreloadSound("SoundName3"); //This sound will be skipped, as the queue is only 1 level deep.
+    }
+    touch_start(integer detected)
+    {
+        llSetSoundQueueing(TRUE);//Set to TRUE for queueing and SoundName2 plays after the SoundName1 has ended.
+        //Set to FALSE only the second will be played since the prim has only one sound emitter and the second was called last.
+        //Can be set anywhere within the script (if within an event it will activate when the event is triggered.
+        llPlaySound("SoundName1", 1.0);
+        llPlaySound("SoundName2", 1.0);
+        llPlaySound("SoundName3", 1.0); //This sound isn't played as the queue is already full, so this is discarded.
+    }
+}
+```
+
+</details>
+
+## History
+
+`{{LSL Added|0.2.0|remote=http://secondlife.wikia.com/wiki/Version_0.2.0}}`, the queue is only one level deep.
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-4260 (fs): Since llSetSoundQueueing only allows two sounds to be played in queue can it be changed to allow more?
+
+## Related functions
+
+The original wiki page documents these functions together with this one:
+
+- [llLinkSetSoundQueueing](/functions/llLinkSetSoundQueueing/)
+
+## See also
+
+### Functions
+
+- [llLoopSound](/functions/llLoopSound/)
+- [llLoopSoundSlave](/functions/llLoopSoundSlave/) — 3=Plays a looped sound `attached`, synced with the master.
+- [llPlaySoundSlave](/functions/llPlaySoundSlave/) — 3=Plays a sound once `attached`, synced with the master.
+- [llAdjustSoundVolume](/functions/llAdjustSoundVolume/) — 3=Adjusts the volume of playing sound(s).
+
+<WikiSource />

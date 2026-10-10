@@ -1,0 +1,63 @@
+---
+title: "CHANGED_REGION_START"
+slug: "constants/CHANGED_REGION_START"
+category: constants
+source:
+  wiki: "CHANGED REGION START"
+  url: https://wiki.secondlife.com/wiki/CHANGED_REGION_START
+  revision: 1214097
+  date: 2023-06-17
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/changed-region-start-7fdf217e.txt
+  license: "Content from the Second Life Wiki article CHANGED REGION START (revision 1214097, 2023-06-17), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="CHANGED_REGION_START" />
+
+The region containing the object has just come online.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    changed(integer change)
+    {
+    //  note that it's & and not &&... it's bitwise!
+        if (change & CHANGED_REGION_START)
+        {
+            key owner = llGetOwner();
+            string region = llGetRegionName();
+            llInstantMessage(owner, "Region '" + region + "' has restarted.");
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+When a region is (re)started all [HTTP server](/events/http_request/) URLs are automatically released and invalidated.
+
+## History
+
+- Suggestion: [SVC-1086](https://jira.secondlife.com/browse/SVC-1086) - LSL http_server
+- Suggestion: [SVC-3773](https://jira.secondlife.com/browse/SVC-3773) - Change CHANGED_REGION_RESTART to `CHANGED_REGION_START`
+- Implementation: `{{SVN|1836|rev=112899 |trunk=*|anchor=file15|ver=1.23.0.0|ser=1.27.0.112940}}` ~ Client [1.23](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.23) ~ Server [1.27](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/1.27)
+
+## See also
+
+### Functions
+
+- [llRequestSimulatorData](/functions/llRequestSimulatorData/)
+
+### Events
+
+- [changed](/events/changed/)
+
+<WikiSource />

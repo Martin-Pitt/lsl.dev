@@ -1,0 +1,102 @@
+---
+title: "llGetAgentSize"
+slug: "functions/llGetAgentSize"
+category: functions
+source:
+  wiki: "LlGetAgentSize"
+  url: https://wiki.secondlife.com/wiki/LlGetAgentSize
+  revision: 1212795
+  date: 2022-11-17
+  contributor: "Signal Linden"
+  raw: /wiki-source/llgetagentsize-c48668da.txt
+  license: "Content from the Second Life Wiki article LlGetAgentSize (revision 1212795, 2022-11-17), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetAgentSize" />
+
+[ZERO_VECTOR](/constants/ZERO_VECTOR/) is returned if **avatar** is not in the region or if it is not an avatar.
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) that is an estimated size of the requested **avatar**.
+
+```lsl title="How to use" frame="terminal"
+vector result = llGetAgentSize(NULL_KEY);
+```
+
+## Caveats
+
+- The returned vector is an estimate calculated from the avatar's current shape including shoes. x is a constant 0.45`{{Footnote|1={{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=88|text=const F32 DEFAULT_AGENT_DEPTH = 0.45f;}}|2=const F32 DEFAULT_AGENT_DEPTH = 0.45f;}}`, y is a constant 0.60`{{Footnote|1={{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=92|text=const F32 DEFAULT_AGENT_WIDTH = 0.60f;}}|2=const F32 DEFAULT_AGENT_WIDTH = 0.60f;}}`, z is the approximate total height of all avatar's bones, with an arbitrary amount added or subtracted based on the current shape's "Hover" setting. Reported height is constrained to the range 1.1 to 2.45 meters, and does not include animation or mesh bone offsets. `{{Footnote|2=llGetAgentSize returns the same value as LLVOAvatar::computeBodySize(). See llcommon/indra_constants.h for defaults and limits.|1=llGetAgentSize returns the same value as {{SourceLink/github|viewer|indra/llappearance/llavatarappearance.cpp|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=433|text=LLVOAvatar::computeBodySize()}}. See {{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=bc61d5ad9162bd461c17d77728090fe5d8ead59e|line=86|text=indra/llcommon/indra_constants.h}} for defaults and limits.}}`
+- Due to the shape Hover setting, and mesh and animation offsets, it is not possible to use this function to determine the rendered height of an avatar with any degree of confidence.
+- As of Second Life Server 13.11.19.284082, the return value is the avatar's reported [bounding box](/functions/llGetBoundingBox/) - `<0.1, 0.1, 0.2>` when standing. (Avatar bounding boxes have historically been redefined with major physics upgrades.) An avatar's bounding box changes when an avatar sits, while [llGetAgentSize](/functions/llGetAgentSize/) is constant for as long as the shape does not change.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5, 11-22}
+//A simple script that makes a box hover above the owner's head.
+default
+{
+    state_entry()
+    {
+        key    owner = llGetOwner();
+        vector pos   = llList2Vector(llGetObjectDetails(owner, [OBJECT_POS]), 0);
+        vector agent = llGetAgentSize(owner);
+
+    //  "pos" needs to be adjusted so it appears above the owner.
+        pos.z += 0.5 + agent.z / 2;
+
+    //  makes sure it found the owner, a zero vector evaluates as false
+        if(agent)
+            llSetPos(pos);
+    }
+
+    touch_start(integer num)
+    {
+        llResetScript();
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- This function is a good way to quickly test...
+- if an avatar is in the same region.
+- if a UUID known to be in the region is an avatar.
+
+To use this function to test either case use as follows
+
+```lsl
+if(llGetAgentSize(uuid)) {
+    //uuid is an avatar in the region
+} else {
+    //uuid is not an avatar in the region
+}
+```
+
+- `DEFAULT_AGENT_HEIGHT` in `{{SourceLink/github|viewer|indra/llcommon/indra_constants.h|rev=0ca239e469b3|line=96|text=indra/llcommon/indra_constants.h}}` is 1.9. This will be the z value if an avatar's shape has [not loaded yet](https://wiki.secondlife.com/wiki/Ruth). It is possible but extremely rare to see a fully loaded avatar with this exact size, so:
+
+```lsl
+vector agentSize = llGetAgentSize(uuid);
+if (agentSize.z == 1.9) {
+    // avatar is probably Ruthed
+}
+```
+
+## See also
+
+### Functions
+
+- [llGetObjectDetails](/functions/llGetObjectDetails/)
+- [llGetBoundingBox](/functions/llGetBoundingBox/)
+- [llGetAgentInfo](/functions/llGetAgentInfo/)
+- [llRequestAgentData](/functions/llRequestAgentData/)
+
+### Articles
+
+- [Avatar body size](https://wiki.secondlife.com/wiki/Avatar_body_size)
+
+<WikiSource />

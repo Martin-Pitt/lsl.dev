@@ -1,0 +1,74 @@
+---
+title: "llGetCenterOfMass"
+slug: "functions/llGetCenterOfMass"
+category: functions
+source:
+  wiki: "LlGetCenterOfMass"
+  url: https://wiki.secondlife.com/wiki/LlGetCenterOfMass
+  revision: 1194160
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetcenterofmass-67493d83.txt
+  license: "Content from the Second Life Wiki article LlGetCenterOfMass (revision 1194160, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetCenterOfMass" description />
+
+If called from a child prim, the child's center of mass is returned instead (but still in region coordinates).
+
+```lsl title="How to use" frame="terminal"
+vector result = llGetCenterOfMass();
+```
+
+## Specification
+
+The Center Of Mass for a prim is only computed when an object is physical. When a value is computed it is cached as a prim attribute. If the object is non-physical and there is a cached value, that is the value returned, otherwise [llGetPos](/functions/llGetPos/)() is returned (this value is not cached).
+
+## Caveats
+
+- Works in **physical objects only**.
+- The value is stored as a prim property and will only change when Center Of Mass is computed.
+- If called from within a non-physical object it will return the stored `COM` value or in the absence of a stored COM value it will return [llGetPos](/functions/llGetPos/)().
+- It will not compute or recompute the COM if the object is non-physical.
+- The stored value can only be updated when the object is physical. Neither moving or changing the objects shape will update, invalidate or remove the stored COM value when it is non-physical.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5, 11-21}
+//  this example script will not check for physical status
+//  you'll usually need it though to get a correct vector
+
+default
+{
+    state_entry()
+    {
+        vector massCenter = llGetCenterOfMass();
+        integer link = llGetLinkNumber();
+
+        if (link == 0 || link == 1) llSay(PUBLIC_CHANNEL,
+            "The center of the mass of the object is " + (string)massCenter);
+
+        else if (1 < link) llSay(PUBLIC_CHANNEL,
+            "The center of the mass of link no. " + (string)link + " is " + (string)massCenter);
+
+        //  this script was just a test, remove it again
+        string thisScript = llGetScriptName();
+        llRemoveInventory(thisScript);
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetPos](/functions/llGetPos/)
+- [llGetGeometricCenter](/functions/llGetGeometricCenter/)
+
+<WikiSource />

@@ -1,0 +1,62 @@
+---
+title: "llGetRegionCorner"
+slug: "functions/llGetRegionCorner"
+category: functions
+source:
+  wiki: "LlGetRegionCorner"
+  url: https://wiki.secondlife.com/wiki/LlGetRegionCorner
+  revision: 1216102
+  date: 2024-01-24
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llgetregioncorner-6cd65b45.txt
+  license: "Content from the Second Life Wiki article LlGetRegionCorner (revision 1216102, 2024-01-24), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetRegionCorner" />
+
+Divide the returned value by 256 to get the region offset.
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) in meters that is the global location of the south-west corner of the region the object is in. The z component is 0.0
+
+```lsl title="How to use" frame="terminal"
+vector result = llGetRegionCorner();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-10, 17-22}
+// Calculates your position relative to <0,0,0> of 'Da Boom' in meters when you touch it
+vector vecrel; //a sum of llgetpos and llgetregioncorner (and another vector). Saving time doing vector math.
+
+default
+{
+    state_entry()
+    {
+        llSetText("Touch me to get your position", <1.0,1.0,1.0>, 1.0);
+    }
+
+    touch_start(integer total_number)
+    {
+        vecrel = llGetRegionCorner() + llDetectedPos(0);
+        llWhisper(0, "llGetRegionCorner() is:"+(string)vecrel); //for debugging before vector addition
+
+        vecrel -= <256000.0, 256000.0, 0.0>;//Da Boom's region corner is at <256000.0, 256000.0, 0.0>
+        llWhisper (0, "Position relative to <0,0,0> of 'Da Boom': " +
+        (string)llRound(vecrel.x) + ", " + (string)llRound(vecrel.y) + ", " + (string)llRound(vecrel.z) + ".");
+
+        llWhisper(0, "Position relative to <0,0,0> of 'Da Boom':" +(string)vecrel); //faster but unformatted output
+    }
+}
+```
+
+</details>
+
+## Notes
+
+The great zero is at region offset &lt;1000,1000>, `{{SLurl|region=Da Boom|x=0|y=0|title=Great Zero}}`
+
+<WikiSource />

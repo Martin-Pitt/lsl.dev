@@ -1,0 +1,73 @@
+---
+title: "llList2String"
+slug: "functions/llList2String"
+category: functions
+source:
+  wiki: "LlList2String"
+  url: https://wiki.secondlife.com/wiki/LlList2String
+  revision: 1194317
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/lllist2string-ecd52729.txt
+  license: "Content from the Second Life Wiki article LlList2String (revision 1194317, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llList2String" description />
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is at **index** in **src**.
+
+```lsl title="How to use" frame="terminal"
+string result = llList2String([], 0);
+```
+
+## Caveats
+
+- When using this function to typecast a list element to a string it will truncated float based types to 6 decimal places.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-9}
+//This code demonstrates the differences in typecasting in LSL (and demonstrates how to use the llList2* functions).
+// Best viewed in Chat History (ctrl-h)
+default
+{
+    state_entry()
+    {
+        list my_list = ["a", "0xFF", "0xFF.FF", "1.0e3", 1, 2.0, <1,2,3>, <1,2,3,4>, llGetOwner()];
+        integer i = 0;
+        integer end = llGetListLength(my_list);
+        for (; i<end; ++i)
+        {
+            llOwnerSay("string=" + llList2String(my_list,i)
+                        + "\n   integer=" + (string)llList2Integer(my_list,i) + " OR " +(string)((integer)llList2String(my_list,i))
+                        + "\n   float=" + (string)llList2Float(my_list,i) + " OR " +(string)((float)llList2String(my_list,i))
+                        + "\n   vector=" + (string)llList2Vector(my_list,i) + " OR " +(string)((vector)llList2String(my_list,i))
+                        + "\n   rot=" + (string)llList2Rot(my_list,i) + " OR " +(string)((rotation)llList2String(my_list,i))
+                        + "\n   key=" + (string)llList2Key(my_list,i) + " OR " +(string)((key)llList2String(my_list,i)) );
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- If you wish to extract a string from a list that you know will contain only a single item (for example if you extract a single entry from a list using [llList2List()](/functions/llList2List/)), then instead of using `llList2String(myList, 0)` you may wish to considering using the more efficient `(string)myList` as it will produce the same result for single-entry lists with less memory usage due to eliminating a function-call.
+- To convert a string of hexadecimal notation to integer, call [llList2Integer](/functions/llList2Integer/) and it will automatically cast the value as decimal integer. To convert that integer back to a string of hexadecimal notation, use a user function like [hex](https://wiki.secondlife.com/wiki/hex).
+
+## See also
+
+### Functions
+
+- [llDumpList2String](/functions/llDumpList2String/)
+- [llGetListEntryType](/functions/llGetListEntryType/)
+- [llList2Float](/functions/llList2Float/)
+- [llList2Integer](/functions/llList2Integer/)
+- [llList2Key](/functions/llList2Key/)
+
+<WikiSource />

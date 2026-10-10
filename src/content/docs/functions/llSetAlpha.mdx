@@ -1,0 +1,109 @@
+---
+title: "llSetAlpha"
+slug: "functions/llSetAlpha"
+category: functions
+source:
+  wiki: "LlSetAlpha"
+  url: https://wiki.secondlife.com/wiki/LlSetAlpha
+  revision: 1218794
+  date: 2026-04-19
+  contributor: "Galaxy Littlepaws"
+  raw: /wiki-source/llsetalpha-e43af10f.txt
+  license: "Content from the Second Life Wiki article LlSetAlpha (revision 1218794, 2026-04-19), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetAlpha" description />
+
+Sets the [Blinn-Phong](https://wiki.secondlife.com/wiki/PBR_Materials#nomenclature-changes) **alpha** on **face**
+
+```lsl title="How to use" frame="terminal"
+llSetAlpha(0.0, 0);
+```
+
+## Caveats
+
+- `llSetAlpha` will have no visible effect on faces with a PBR material. To work on faces both with and without a PBR material, use one of these snippets:
+- invisible
+
+  ```lsl
+  if (llIsLinkGLTFMaterial(LINK_THIS, ALL_SIDES)) {
+      llSetLinkGLTFOverrides(LINK_THIS, ALL_SIDES, [OVERRIDE_GLTF_BASE_ALPHA_MODE, PRIM_GLTF_ALPHA_MODE_BLEND, OVERRIDE_GLTF_BASE_ALPHA, 0.0]);
+  } else {
+      llSetAlpha(0.0, ALL_SIDES);
+  }
+  ```
+- visible
+
+  ```lsl
+  if (llIsLinkGLTFMaterial(LINK_THIS, ALL_SIDES)) {
+      llSetLinkGLTFOverrides(LINK_THIS, ALL_SIDES, [OVERRIDE_GLTF_BASE_ALPHA_MODE, "", OVERRIDE_GLTF_BASE_ALPHA, ""]);
+  } else {
+      llSetAlpha(1.0, ALL_SIDES);
+  }
+  ```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-8, 14-23}
+float cloakSpeed = 0.1;
+
+default
+{
+    touch_end(integer total_number)
+    {
+        float alpha = 1.0;
+        while(alpha > 0.0)
+        {
+            alpha -= 0.1;
+            llSetAlpha(alpha, ALL_SIDES);
+            llSleep(cloakSpeed);
+        }
+        state cloaked;
+    }
+}
+
+state cloaked
+{
+    touch_end(integer total_number)
+    {
+        float alpha;
+        while (alpha < 1.0)
+        {
+            alpha += 0.1;
+            llSetAlpha(alpha, ALL_SIDES);
+            llSleep(cloakSpeed);
+        }
+        state default;
+    }
+}
+```
+
+</details>
+
+## Notes
+
+In practical terms, "alpha" means "transparency" or "visibility".
+
+To be clear, `llSetAlpha` will only affect the prim that the script it is in. It will not affect any linked prims. To set the alpha state for those, use [llSetLinkAlpha](/functions/llSetLinkAlpha/)
+
+## See also
+
+### Functions
+
+- [llGetAlpha](/functions/llGetAlpha/) — Gets the prim's alpha
+- [llGetColor](/functions/llGetColor/) — Gets the prim's color
+- [llSetColor](/functions/llSetColor/) — Sets the prim's color
+- [llSetLinkColor](/functions/llSetLinkColor/) — Sets link's color
+- [llSetLinkAlpha](/functions/llSetLinkAlpha/) — Sets link's alpha
+- [PRIM_COLOR](/constants/PRIM_COLOR/) — The equivilant parameter for [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams)
+- [PRIM_GLTF_BASE_COLOR](/constants/PRIM_GLTF_BASE_COLOR/) — The equivilant PBR parameter for [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams)
+
+### Events
+
+- [changed](/events/changed/) — [CHANGED_COLOR](/constants/CHANGED_COLOR/)
+
+<WikiSource />

@@ -1,0 +1,347 @@
+---
+title: "llSetEnvironment"
+slug: "functions/llSetEnvironment"
+category: functions
+source:
+  wiki: "LlSetEnvironment"
+  url: https://wiki.secondlife.com/wiki/LlSetEnvironment
+  revision: 1218894
+  date: 2026-06-05
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llsetenvironment-cb475d22.txt
+  license: "Content from the Second Life Wiki article LlSetEnvironment (revision 1218894, 2026-06-05), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetEnvironment" />
+
+This function overrides the environmental settings for a region or a parcel. The owner of the script must have permission to modify the environment on the parcel or be an estate manager to change the entire region.
+
+An override for a given parameter can be set at the region scope or parcel scope. It can also be set for a single sky track, all sky tracks, or both. If an override of a given parameter is specified for both an individual track and all tracks, the individual track's override takes priority.
+
+Note that the list of valid parameters differs from those available for [llGetEnvironment](/functions/llGetEnvironment/).
+
+```lsl title="How to use" frame="terminal"
+integer result = llSetEnvironment(ZERO_VECTOR, []);
+```
+
+## Specification
+
+<ConstantGroup name="EnvironmentParam" />
+
+****Return Values****
+
+| Value | Constant | Description |
+| --- | --- | --- |
+| [ENV_OK](/constants/ENV_OK/) | 1 | The parcel or region will attempt to change the applied environment. |
+| [ENV_NO_ENVIRONMENT](/constants/ENV_NO_ENVIRONMENT/) | -3 | There is no environment on this parcel to modify. |
+| [ENV_INVALID_RULE](/constants/ENV_INVALID_RULE/) | -5 | There was an issue with one of the rules. |
+| [ENV_VALIDATION_FAIL](/constants/ENV_VALIDATION_FAIL/) | -6 | Unable to validate values passed. |
+| [ENV_THROTTLE](/constants/ENV_THROTTLE/) | -8 | The scripts have exceeded the throttle. Wait and retry the request. |
+| [ENV_NO_PERMISSIONS](/constants/ENV_NO_PERMISSIONS/) | -9 | The script does not have rights to modify this parcel or region. |
+
+### Parameters
+
+<table>
+	<tr>
+		<th>parameter</th>
+		<th>integer value</th>
+		<th>values to set</th>
+		<th>description</th>
+	</tr>
+	<tr>
+		<td>[SKY_CLOUDS](/constants/SKY_CLOUDS/)`, vector color, float coverage, float scale, float variance, vector scroll, vector density, vector detail, integer is_default`</td>
+		<td>2</td>
+		<td>vector color, float coverage, float scale, float variance, vector scroll, vector density, vector detail</td>
+		<td>
+
+			Environmental cloud information:
+
+			- color: The color used for the clouds.
+
+			  range = \[`<0,0,0>`, `<1,1,1>`\]
+			- coverage: The coverage percentage.
+
+			  range = \[0, 1\]
+			- scale: The scaling applied to the cloud textures.
+
+			  range = (0 - 3\]
+			- variance: A randomizing factor applied to the main cloud layer.
+
+			  range = \[0, 1\]
+			- scroll: The scroll speed of the clouds. X is east/west, Y is north/south, and Z is unused.
+
+			  range = \[&lt;-50,-50>, &lt;50,50>\]
+			- density: The X/Y and D parameter used to generate cloud density.
+
+			  range = \[`<0,0,0>`, `<1,1,3>`\]
+			- detail: The X/Y and D parameter used to generate cloud details.
+
+			  range = \[`<0,0,0>`, `<1,1,1>`\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_CLOUD_TEXTURE](/constants/SKY_CLOUD_TEXTURE/)</td>
+		<td>19</td>
+		<td>string texture_ident</td>
+		<td>Name of item in inventory or UUID for texture to be used for the clouds.</td>
+	</tr>
+	<tr>
+		<td>[SKY_DOME](/constants/SKY_DOME/)`, float offset, float radius, float max_altitude`</td>
+		<td>4</td>
+		<td>float offset, float radius, float max_altitude</td>
+		<td>
+
+			Sky dome information.
+
+			- offset: offset applied to the sky dome.
+
+			  range = \[0,1\]
+			- radius: radius of the sky dome.
+
+			  range = \[1000,2000\]
+			- max_altitude: altitude of the sky dome.
+
+			  range = \[0,10000\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_GAMMA](/constants/SKY_GAMMA/)</td>
+		<td>5</td>
+		<td>float gamma</td>
+		<td>The gamma value applied to the scene. <br />range = \[0,20\]</td>
+	</tr>
+	<tr>
+		<td>[SKY_GLOW](/constants/SKY_GLOW/)`, float glow_size, float glow_focus`</td>
+		<td>6</td>
+		<td>float glow_size, float glow_focus</td>
+		<td>
+
+			Glow applied to the sun and moon.
+
+			- glow_size: size of glow effect.
+
+			  range = \[0.2, 40\]
+			- glow_focus: focus of glow effect.
+
+			  Range \[-10, 10\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_MOON](/constants/SKY_MOON/)`, rotation rot, float scale, float brightness, integer is_default_texture, vector direction, vector ambient_color, vector diffuse_color`</td>
+		<td>9</td>
+		<td>rotation rot, float scale, float brightness</td>
+		<td>
+
+			Detailed moon information:
+
+			- rot: The current rotation applied to the moon.
+
+			  Normalized rotation.
+			- scale: The current scale applied to the moon's texture.
+
+			  range = \[0.25, 20\]
+			- brightness: The moon's brightness.
+
+			  range = \[0,1\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_MOON_TEXTURE](/constants/SKY_MOON_TEXTURE/)</td>
+		<td>20</td>
+		<td>string texture_ident</td>
+		<td>Name of texture in inventory or UUID for texture to be used for the moon.</td>
+	</tr>
+	<tr>
+		<td>[SKY_STAR_BRIGHTNESS](/constants/SKY_STAR_BRIGHTNESS/)</td>
+		<td>13</td>
+		<td>float brightness</td>
+		<td>Brightness value applied to stars. <br />range = \[0,500\]</td>
+	</tr>
+	<tr>
+		<td>[SKY_SUN](/constants/SKY_SUN/)`, rotation rot, float scale, vector sun_color, integer is_default_texture, vector direction, vector ambient_color, vector diffuse_color`</td>
+		<td>14</td>
+		<td>rotation rot, float scale, vector sun_color</td>
+		<td>
+
+			Detailed sun information:
+
+			- rot: The current rotation applied to the sun.
+
+			  Normalized rotation.
+			- scale: The current scale applied to the sun's texture.
+
+			  range = \[0.25, 20\]
+			- sun_color: The sun's color.
+
+			  range = \[`<0,0,0>`, `<1,1,1>`\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_SUN_TEXTURE](/constants/SKY_SUN_TEXTURE/)</td>
+		<td>21</td>
+		<td>string texture_ident</td>
+		<td>Name of texture in inventory or UUID for texture to be used for the sun.</td>
+	</tr>
+	<tr>
+		<td>[SKY_PLANET](/constants/SKY_PLANET/)`, float planet_radius, float sky_bottom_radius, float sky_top_radius`</td>
+		<td>10</td>
+		<td>float planet_radius, float sky_bottom_radius, float sky_top_radius</td>
+		<td>
+
+			Planet information used in rendering the sky.
+
+			- planet_radius: range = \[1000, 32768\]
+			- sky_bottom_radius: range = \[1000, 32768\]
+			- sky_top_radius: range = \[1000, 32768\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_REFRACTION](/constants/SKY_REFRACTION/)`, float moisture_level, float droplet_radius, float ice_level`</td>
+		<td>11</td>
+		<td>float moisture_level, float droplet_radius, float ice_level</td>
+		<td>
+
+			Sky refraction parameters for rainbows and optical effects.
+
+			- moisture_level: range = \[0, 1\]
+			- droplet_radius: range = \[5, 1000\]
+			- ice_level: range = \[0, 1\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[WATER_BLUR_MULTIPLIER](/constants/WATER_BLUR_MULTIPLIER/)</td>
+		<td>100</td>
+		<td>float multiplier</td>
+		<td>Multiplier applied to blur the scene when under water. range = \[-0.5, 0.5\]</td>
+	</tr>
+	<tr>
+		<td>[WATER_FOG](/constants/WATER_FOG/)`, vector color, float density, float modulation`</td>
+		<td>101</td>
+		<td>vector color, float density, fload modulation</td>
+		<td>
+
+			Fog parameters applied when underwater:
+
+			- color: The color of the underwater fog.
+
+			  range = \[`<0,0,0>`, `<1,1,1>`\]
+			- density: Density exponent applied to the fog.
+
+			  range = \[-10, 10\]
+			- modulation:
+
+			  range = \[0, 20\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[WATER_FRESNEL](/constants/WATER_FRESNEL/)`, float offset, float scale`</td>
+		<td>102</td>
+		<td>float offset, float scale</td>
+		<td>
+
+			Fresnel scattering applied to the surface of the water.
+
+			- offset: range = \[0,1\]
+
+			scale: range = \[0,1\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[WATER_NORMAL_TEXTURE](/constants/WATER_NORMAL_TEXTURE/)</td>
+		<td>107</td>
+		<td>string texture_ident</td>
+		<td>Name of texture in inventory or UUID of texture to be used for the water normal.</td>
+	</tr>
+	<tr>
+		<td>[WATER_NORMAL_SCALE](/constants/WATER_NORMAL_SCALE/)</td>
+		<td>104</td>
+		<td>vector scale</td>
+		<td>Scaling applied to the water normal map. range = \[`<0,0,0>`, `<10,10,10>`\]</td>
+	</tr>
+	<tr>
+		<td>[WATER_REFRACTION](/constants/WATER_REFRACTION/)`, float scale_above, float scale_below`</td>
+		<td>105</td>
+		<td>float scale_above, float scale_below</td>
+		<td>
+
+			Refraction factors when looking through the surface of the water.
+
+			- scale_above: range = \[0, 3\]
+			- scale_below: range = \[0, 3\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[WATER_WAVE_DIRECTION](/constants/WATER_WAVE_DIRECTION/)`, vector large_wave, vector small_wave`</td>
+		<td>106</td>
+		<td>vector large_wave, vector small_wave</td>
+		<td>
+
+			Vector for the directions of the waves Y represents north/south and X represents movement east/west.
+
+			- large_wave: Large wave speed and direction.
+
+			  range = \[&lt;-20, -20>, &lt;20, 20>\]
+			- small_wave: Small wave speed and direction.
+
+			  range = \[&lt;-20, -20>, &lt;20, 20>\]
+
+		</td>
+	</tr>
+	<tr>
+		<td>[SKY_AMBIENT](/constants/SKY_AMBIENT/)</td>
+		<td>0</td>
+		<td>vector color</td>
+		<td>Ambient color used in the scene.</td>
+	</tr>
+	<tr>
+		<td>[SKY_BLUE](/constants/SKY_BLUE/)`, vector blue_density, vector blue_horizon`</td>
+		<td>22</td>
+		<td>vector blue_density, vector blue_horizon</td>
+		<td>Change the colors used to calculate blue density and blue horizon in the environment.</td>
+	</tr>
+	<tr>
+		<td>[SKY_HAZE](/constants/SKY_HAZE/)`, float density, float horizon, float density_multiplier, float distance_multiplier`</td>
+		<td>23</td>
+		<td>float density, float horizon, float density_multiplier, float distance_multiplier</td>
+		<td>Values used to calculate the impact of blue_density and blue_horizon on the scene lighting.</td>
+	</tr>
+	<tr>
+		<td>[SKY_REFLECTION_PROBE_AMBIANCE](/constants/SKY_REFLECTION_PROBE_AMBIANCE/)</td>
+		<td>24</td>
+		<td>float ambiance</td>
+		<td>Minimum ambiance value for all [reflection probes](/constants/PRIM_REFLECTION_PROBE/). range = \[0.0, 10.0\] **Caveat:** This feature will be supported in the upcoming GLTF Materials project. Currently it will only work in supported testing areas with a supported test viewer.</td>
+	</tr>
+</table>
+
+## Caveats
+
+- An environment set locally on the viewer will override any environment set from this function.
+- When changing a parcel's environment it must first have had an environment set.
+- If the parcel is group-owned, the script must either be deeded to the group, or the script owner must have "Modify environment settings and day cycle" group ability **and** have an active agent in the sim.
+- The [ENV_OK](/constants/ENV_OK/) constant is only present on Lua-enabled sims. On older sims, use it's value of 1 instead
+
+## History
+
+Date of Release [12/08/2022](https://releasenotes.secondlife.com/simulator/2022-08-12.574216.html)
+
+## See also
+
+### Functions
+
+- [llGetEnvironment](/functions/llGetEnvironment/)
+- [llSetAgentEnvironment](/functions/llSetAgentEnvironment/)
+- [llReplaceAgentEnvironment](/functions/llReplaceAgentEnvironment/)
+- [llReplaceEnvironment](/functions/llReplaceEnvironment/)
+
+<WikiSource />

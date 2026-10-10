@@ -1,0 +1,116 @@
+---
+title: "llGetTimestamp"
+slug: "functions/llGetTimestamp"
+category: functions
+source:
+  wiki: "LlGetTimestamp"
+  url: https://wiki.secondlife.com/wiki/LlGetTimestamp
+  revision: 1217942
+  date: 2025-02-01
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llgettimestamp-df38bbab.txt
+  license: "Content from the Second Life Wiki article LlGetTimestamp (revision 1217942, 2025-02-01), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetTimestamp" />
+
+Appears to be accurate to milliseconds.
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the current date and time in the UTC time zone in the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format `"YYYY-MM-DDThh:mm:ss.ff..fZ"`
+
+```lsl title="How to use" frame="terminal"
+string result = llGetTimestamp();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-6}
+// Reset tracker
+
+string BOOT_TIME;
+
+default
+{
+    state_entry()
+    {
+        BOOT_TIME = llGetTimestamp(); // state_entry is triggered on script reset.
+    }
+
+    touch_start(integer num)
+    {
+        llSay(PUBLIC_CHANNEL, "The last script was last reset @ " + BOOT_TIME);
+        llSay(PUBLIC_CHANNEL, "Right now it is " + llGetTimestamp());
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-8, 14-20}
+// Greeting
+
+default
+{
+    state_entry()
+    {
+        llSetTouchText("Greet");
+    }
+    touch_start(integer num)
+    {
+        list TimeStamp = llParseString2List(llGetTimestamp(),["-",":"],["T"]); //Get timestamp and split into parts in a list
+        integer Hour = llList2Integer(TimeStamp,4);
+        if(Hour<12)
+            llSay(PUBLIC_CHANNEL,"Good Morning, Oliver Sintim-Aboagye!");
+        else if(Hour<17)
+            llSay(PUBLIC_CHANNEL,"Good Afternoon, " + llDetectedName(0));
+        else
+            llSay(PUBLIC_CHANNEL,"Good Evening, " + llKey2Name(llDetectedKey(0)));
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+### Helper Functions
+
+- [Stamp2UnixInt](https://wiki.secondlife.com/wiki/Stamp2UnixInt) - List format to Unix timestamp. ex: \[2009, 2, 13, 3, 31, 30\] to 1234567890
+- compatible with ***`llParseString2List( llGetTimestamp(), ["-", "T", ":", "."], [] )`***
+- [Stamp2WeekdayStr](https://wiki.secondlife.com/wiki/Stamp2WeekdayStr) - Weekday from (Y, M, D) ex: "Friday" from (2009, 2, 13)
+- [Millisec](https://wiki.secondlife.com/wiki/Millisec) - Converts a timestamp string to integer milliseconds accurate to within a month.
+- [Unix2PST_PDT](https://wiki.secondlife.com/wiki/Unix2PST_PDT) - Converts a Unix Time stamp to an SLT date/time string with PST or PDT indication as appropriate.
+- [Unix2GMTorBST](https://wiki.secondlife.com/wiki/Unix2GMTorBST) - Converts a Unix Time stamp to a UK date/time string with GMT or BST indication as appropriate.
+
+## See also
+
+### Functions
+
+- [llGetDate](/functions/llGetDate/) — Same format but without the time.
+- [llGetUnixTime](/functions/llGetUnixTime/) — Time in seconds since the epoch.
+- [llGetTime](/functions/llGetTime/) — Elapsed script-time.
+
+### Articles
+
+- [ISO 8601](http://www.cl.cam.ac.uk/~mgk25/iso-time.html)
+- [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+- [Code Racer](https://wiki.secondlife.com/wiki/Code_Racer)
+
+\- useful benchmarks within 100 trials
+
+- [Efficiency Tester](https://wiki.secondlife.com/wiki/Efficiency_Tester)
+
+\- more accurate benchmarks within 10,000 trials
+
+- [LSL_Script_Efficiency](https://wiki.secondlife.com/wiki/LSL_Script_Efficiency)
+
+\- in-depth discussion of the Efficiency Tester
+
+<WikiSource />

@@ -1,0 +1,302 @@
+---
+title: "llSetText"
+slug: "functions/llSetText"
+category: functions
+source:
+  wiki: "LlSetText"
+  url: https://wiki.secondlife.com/wiki/LlSetText
+  revision: 1216730
+  date: 2024-05-26
+  contributor: "Frionil Fang"
+  raw: /wiki-source/llsettext-3de12646.txt
+  license: "Content from the Second Life Wiki article LlSetText (revision 1216730, 2024-05-26), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetText" />
+
+Displays **text** that hovers over the prim with specific **color** and translucency (specified with **alpha**).
+
+```lsl title="How to use" frame="terminal"
+llSetText("", ZERO_VECTOR, 0.0);
+```
+
+## Caveats
+
+- If more than one [llSetText](/functions/llSetText/) is called (By reset,interaction or script state) within a prim the latest call will take priority over the previous.
+- **text** is limited to 254 [bytes](https://wiki.secondlife.com/wiki/Bytes) (compare [Limits](https://wiki.secondlife.com/wiki/Limits#building)) in UTF-8 encoding. If the [string](https://wiki.secondlife.com/wiki/string) is longer it will be truncated to 254 [bytes](https://wiki.secondlife.com/wiki/Bytes), and any multibyte characters getting split will be removed entirely.
+- An unbroken line of text of a great length may be broken automatically into two lines (one above the other).
+- **text** can be seen through walls and other object. Be considerate of neighbors in malls and apartment buildings.
+- Visibility distance increases with prim size.
+- Removing the script or deactivating it **will not remove** a prim's **text** property. Floating **text** is not dependent on a script for its continued existence but only when wanting to change it.
+- To remove a prim's **text**, use the following:
+
+<table>
+	<tr>
+		<th>**Preferred method to remove a prim's floating **text****</th>
+		<th>**Second method does the same effect-wise.**</th>
+	</tr>
+	<tr>
+		<td>
+
+			```lsl
+			//  empty string & black & transparent
+			    llSetText("", ZERO_VECTOR, 0);
+			```
+
+		</td>
+		<td>
+
+			```lsl
+			//  empty string & black & transparent
+			    llSetText("", <0.0, 0.0, 0.0>, 0.0);
+			```
+
+		</td>
+	</tr>
+</table>
+
+- Vertical whitespace is removed from the end of the **text** string, so if you want vertical whitespace put any character (like a space) on the last line.
+- Multiple linebreaks with empty lines are converted to a single linebreak, so add a whitespace character on every line you want to skip:
+
+<table>
+	<tr>
+		<th>**Good**</th>
+		<th>**Bad**</th>
+	</tr>
+	<tr>
+		<td>
+
+			```lsl
+			    vector COLOR_WHITE = <1.0, 1.0, 1.0>;
+			    float  OPAQUE      = 1.0;
+
+			    llSetText("Monkeys\n \n \n \n \n ", COLOR_WHITE, OPAQUE);
+			```
+
+		</td>
+		<td>
+
+			```lsl
+			    vector COLOR_WHITE = <1.0, 1.0, 1.0>;
+			    float  OPAQUE      = 1.0;
+
+			    llSetText("Monkeys\n\n\n\n\n", COLOR_WHITE, OPAQUE);
+			```
+
+		</td>
+	</tr>
+</table>
+
+- **Measurements showed a high impact of process time when doing numerous iterations in a while loop**. For approx. 65 thousand iterations the process times are ca. 5 seconds without floating text, 24 seconds with [llSetText](/functions/llSetText/) and 96 seconds when using [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) in combination with [PRIM_TEXT](/constants/PRIM_TEXT/). Thats why you are **not advised** to make excessive use of changing a prim's **text** within such iterations.
+
+## Examples
+
+<details open>
+<summary>Example of how [llSetText](/functions/llSetText/) could be used to show prim's name in green **text**:</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        vector COLOR_GREEN = <0.0, 1.0, 0.0>;
+        float  OPAQUE      = 1.0;
+
+//      prim's name (not necessarily object's)
+        llSetText(llGetObjectName(), COLOR_GREEN, OPAQUE );
+
+//      delete the script as we only needed it to change the floating text property
+        llRemoveInventory(llGetScriptName());
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>By default the floating **text** will appear on a single line. However, it can be spread over multiple lines by using a line break `"\n"` (read [SplitLine](https://wiki.secondlife.com/wiki/SplitLine) in section 'See Also').</summary>
+
+### String escape codes:
+
+LSL has four [string escape codes](https://wiki.secondlife.com/wiki/String#escape-codes):
+
+- `\n` for a new line
+- `\\` for a backslash
+- `\t` for a tab
+- `\"` for a double-quote
+
+### Color & Alpha
+
+| Color | Code |
+| --- | --- |
+| NAVY | `<0.000, 0.122, 0.247>` |
+| BLUE | `<0.000, 0.455, 0.851>` |
+| AQUA | `<0.498, 0.859, 1.000>` |
+| TEAL | `<0.224, 0.800, 0.800>` |
+| OLIVE | `<0.239, 0.600, 0.439>` |
+| GREEN | `<0.180, 0.800, 0.251>` |
+| LIME | `<0.004, 1.000, 0.439>` |
+| YELLOW | `<1.000, 0.863, 0.000>` |
+| ORANGE | `<1.000, 0.522, 0.106>` |
+| RED | `<1.000, 0.255, 0.212>` |
+| MAROON | `<0.522, 0.078, 0.294>` |
+| FUCHSIA | `<0.941, 0.071, 0.745>` |
+| PURPLE | `<0.694, 0.051, 0.788>` |
+| WHITE | `<1.000, 1.000, 1.000>` |
+| SILVER | `<0.867, 0.867, 0.867>` |
+| GRAY | `<0.667, 0.667, 0.667>` |
+| BLACK | `<0.000, 0.000, 0.000>` |
+
+The x, y & z [components of the vector](https://wiki.secondlife.com/wiki/Vector#components) are used to represent red, green, and blue respectively. The range is &lt;span style="background-color: yellow">different from traditional RGB&lt;/span>, instead of being 0 -> 255, LSL uses 0 -> 1. `<1.0, 1.0, 1.0>` represents "white" and `<0.0, 0.0, 0.0>` represents "black":
+
+```lsl
+//  white & opaque
+    llSetText("I am white", <1.0, 1.0, 1.0>, 1.0);
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl
+    vector myColor;// defaults to ZERO_VECTOR or <0.0, 0.0, 0.0> which is black
+
+    llSetText("I am black and 30% transparent.", myColor, 0.7);
+
+    llSleep(7.5);   // before: <0.0, 0.0, 0.0> black
+    myColor.x = 1.0;// now:    <1.0, 0.0, 0.0> red
+
+    llSetText("I am now red and 10% transparent.", myColor, 0.9);
+```
+
+</details>
+
+<details>
+<summary>If **alpha** is 1.0 it means the **text** is fully opaque (alpha), 0.0 would make it completely transparent (invisible):</summary>
+
+```lsl
+    llSetText("green text with alpha 0.7", <0.0, 1.0, 0.0>, 0.7);
+
+    llSetText("white text with alpha 0.4\n60% transparent", <1.0, 1.0, 1.0>, 0.4);
+    llSetText("white text with alpha 1.0\nfully opaque", <1.0, 1.0, 1.0>, 1.0);
+
+//  next to lines have the same effect
+    llSetText("invisible black text with alpha 0.0\nfully transparent", ZERO_VECTOR, 0);
+    llSetText("invisible black text with alpha 0.0\nfully transparent", <0.0, 0.0, 0.0>, 0.0);
+```
+
+</details>
+
+<details>
+<summary>Example 5</summary>
+
+### Multiple lines
+
+```lsl
+//  two lines of orange text
+
+    llSetText("I am\non two lines!", <1.0, 0.4, 0.0>, 1.0);
+```
+
+</details>
+
+## Helper functions
+
+Drag this script out of inventory onto an object to erase its set text:
+
+```lsl
+// http://wiki.secondlife.com/wiki/llSetText
+
+default
+{
+    state_entry()
+    {
+//      remove floating text (empty string & black & 100% transparent)
+        llSetText("", ZERO_VECTOR, 0.0);
+
+//      delete the script as we only needed it to change the floating text property
+        llRemoveInventory(llGetScriptName());
+    }
+}
+```
+
+Code to easily specify appearance of hovertext:
+
+```lsl collapse={1-24}
+vector NAVY    = <0,     0.122, 0.247>;
+vector BLUE    = <0,     0.455, 0.851>;
+vector AQUA    = <0.498, 0.859, 1    >;
+vector TEAL    = <0.224, 0.8,   0.8  >;
+vector OLIVE   = <0.239, 0.6,   0.439>;
+vector GREEN   = <0.18,  0.8,   0.251>;
+vector LIME    = <0.004, 1    , 0.439>;
+vector YELLOW  = <1    , 0.863, 0    >;
+vector ORANGE  = <1    , 0.522, 0.106>;
+vector RED     = <1    , 0.255, 0.212>;
+vector MAROON  = <0.522, 0.078, 0.294>;
+vector FUCHSIA = <0.941, 0.071, 0.745>;
+vector PURPLE  = <0.694, 0.051, 0.788>;
+vector WHITE   = <1    , 1    , 1    >;
+vector SILVER  = <0.867, 0.867, 0.867>;
+vector GRAY    = <0.667, 0.667, 0.667>;
+vector BLACK   = <0.000, 0.000, 0.000>;
+
+string  hoverText   = "TEXT GOES HERE";
+vector  hoverColor  = LIME;//  set predefined color or any RGB color vector in float form
+float   hoverAlpha  = 1.0; // Sets the text's transparency, 1.0 being opaque, while 0.0 would be transparent
+
+default
+{
+    state_entry()
+    {
+        llSetText(hoverText, hoverColor, hoverAlpha);
+    }
+}
+```
+
+To make hovertext when using linked prims you can use this simple function:
+
+```lsl
+mySetLinkText(integer linknum, string text, vector color, float alpha) {
+    llSetLinkPrimitiveParamsFast(linknum, [PRIM_TEXT, text, color, alpha]);
+}
+
+// For example:
+
+default
+{
+    touch_start(integer total_number)
+    {
+        mySetLinkText(LINK_SET, "TEST", <0, 1, 0>, 0.5);
+    }
+}
+```
+
+## Notes
+
+To actually display text on a prim, see [XyzzyText](https://wiki.secondlife.com/wiki/XyzzyText), or consider using parcel prim [Media](/categories/media/) options (useful only if you have control over the land's media settings.)
+
+---
+
+The function displays **text** that hover over the prim's center, the prim position. The height over the center is proportional to the prim's Z-dimension exclusively
+
+- It doesn't matter how the prim is rotated, so if Z is smaller than X and Y the **text** may be seen `on` the prim
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-4539 (bug): llSetText is not working with special characters.
+- BUG-11077 (nf): Set Floating Text Colour and Alpha Only
+
+## See also
+
+### Articles
+
+- [Examples](https://wiki.secondlife.com/wiki/Category:LSL_Examples): [SplitLine](https://wiki.secondlife.com/wiki/SplitLine) — Insert 'new line' escape codes at certain positions of a string
+- Useful snippet: [llGetObjectPermMask](/functions/llGetObjectPermMask/) — Label an object with text and newlines to give away or sell
+- [escape codes](https://wiki.secondlife.com/wiki/escape_codes) — for details on how and when they work
+
+<WikiSource />

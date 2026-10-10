@@ -1,0 +1,181 @@
+---
+title: "llSetPayPrice"
+slug: "functions/llSetPayPrice"
+category: functions
+source:
+  wiki: "LlSetPayPrice"
+  url: https://wiki.secondlife.com/wiki/LlSetPayPrice
+  revision: 1218555
+  date: 2025-12-14
+  contributor: "Thunder Rahja"
+  raw: /wiki-source/llsetpayprice-a58d8ee5.txt
+  license: "Content from the Second Life Wiki article LlSetPayPrice (revision 1218555, 2025-12-14), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetPayPrice" description />
+
+Suggest default amounts for the pay text field and pay buttons of the appearing dialog when someone chooses to pay this object.
+
+```lsl title="How to use" frame="terminal"
+llSetPayPrice(0, []);
+```
+
+## Specification
+
+<ConstantGroup name="PayButton" />
+
+<table>
+	<tr>
+		<td>
+
+			<table>
+				<tr>
+					<th colspan="2">Constant</th>
+					<th>`Alt`</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>[PAY_HIDE](/constants/PAY_HIDE/)</td>
+					<td>-1</td>
+					<td>&lt;center>0&lt;/center></td>
+					<td>Hides this quick pay button.</td>
+				</tr>
+				<tr>
+					<td>[PAY_DEFAULT](/constants/PAY_DEFAULT/)</td>
+					<td>-2</td>
+					<td></td>
+					<td>Use the default value for this quick pay button.</td>
+				</tr>
+			</table>
+
+		</td>
+		<td>
+
+			<table>
+				<tr>
+					<th colspan="2">Button Order</th>
+				</tr>
+				<tr>
+					<td>&lt;center>1&lt;/center></td>
+					<td>&lt;center>2&lt;/center></td>
+				</tr>
+				<tr>
+					<td>&lt;center>3&lt;/center></td>
+					<td>&lt;center>4&lt;/center></td>
+				</tr>
+			</table>
+
+		</td>
+		<td>
+
+			<table>
+				<tr>
+					<th colspan="2">Defaults</th>
+				</tr>
+				<tr>
+					<td>$1</td>
+					<td>$5</td>
+				</tr>
+				<tr>
+					<td>$10</td>
+					<td>$20</td>
+				</tr>
+			</table>
+
+		</td>
+	</tr>
+</table>
+
+## Caveats
+
+- This function should not be trusted to limit the values of money payable to the object; *always* verify the amount paid is the amount expected.
+- Use only one call to this function in all the scripts on an object to prevent confusion about which values are used. You still need to check in the money event that the amount is as expected.
+- This function only works when called from the root prim of an object. Its effect applies to all the prims in the object. Calling it from a child prim has no effect.
+- There is currently a [viewer bug](https://feedback.secondlife.com/slua-alpha/p/child-prim-in-linkset-cannot-be-paid-if-previously-a-root-prim-with-llsetpaypric) where calls from child prims will **prevent** payment to the object.
+- Payment to a prim can be blocked by the `llSetPayPrice()` setting in the prim, which persists even if the script with `llSetPayPrice()` is removed.
+- **Caution:** Calling this function will enable payment on the prim (or the whole object if it is the root prim) for the current state, even when this state has no money event.
+- Otherwise, the pay option will only be shown in prims having a running script with a [money](/events/money/) event (or in all the prims of the object if the root has a running script with a money event).
+- The effect seems to persist even if the script is recompiled with out the [llSetPayPrice](/functions/llSetPayPrice/) function, even if the script is replaced with another one which includes a [money](/events/money/) event, but not [llSetPayPrice](/functions/llSetPayPrice/).
+- Money cannot be paid to an attachment; "Pay" will go directly to the wearer instead.
+- If **quick_pay_buttons** contains a negative value or zero, the button will not be shown at all.
+- However, zero is allowed for **price**, which is used to set the custom text field's value within the Pay window.
+- If **price** is [PAY_HIDE](/constants/PAY_HIDE/) and a payment is made that does not match any value in **quick_pay_buttons**, then the simulator will block the payment and the payer will receive an error message.
+
+## Examples
+
+<details open>
+<summary>This will give the user a dialog box without the **price** field and only one button with a value of 150.</summary>
+
+```lsl
+llSetPayPrice(PAY_HIDE, [150,PAY_HIDE,PAY_HIDE,PAY_HIDE])
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={10-18, 24-36}
+integer price = 10;
+
+default
+{
+    state_entry()
+    {
+        llSetPayPrice(PAY_HIDE, [PAY_HIDE ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+        llRequestPermissions(llGetOwner(), PERMISSION_DEBIT);
+    }
+    run_time_permissions(integer perm)
+    {
+        if(perm & PERMISSION_DEBIT)
+            state cash;
+    }
+}
+
+state cash
+{
+    state_entry()
+    {
+        llSetPayPrice(price, [price ,PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+    }
+    money(key id, integer amount)
+    {
+        if(amount != price)
+        {
+            llGiveMoney(id, amount);
+            llInstantMessage(id, "You paid "+(string)amount+", which is the wrong price, the price is: "+(string)price);
+        }
+        else
+        {
+            //insert your give code here.
+            llInstantMessage(id, "You paid the right price");
+        }
+    }
+}
+```
+
+</details>
+
+## Tests
+
+- [llSetPayPrice Test](https://wiki.secondlife.com/wiki/llSetPayPrice_Test)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- VWR-3048: type=bug|llSetPayPrice doesn't work on Child Prims, default box used instead.
+- VWR-8744: type=bug|llSetPayPrice causes "When Left Clicked: Pay Object" to break
+
+## See also
+
+### Functions
+
+- [llGiveMoney](/functions/llGiveMoney/)
+
+### Events
+
+- [money](/events/money/)
+
+<WikiSource />

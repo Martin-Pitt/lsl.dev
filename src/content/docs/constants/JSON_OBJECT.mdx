@@ -1,0 +1,108 @@
+---
+title: "JSON_OBJECT"
+slug: "constants/JSON_OBJECT"
+category: constants
+source:
+  wiki: "JSON OBJECT"
+  url: https://wiki.secondlife.com/wiki/JSON_OBJECT
+  revision: 1194658
+  date: 2015-01-23
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/json-object-4717633b.txt
+  license: "Content from the Second Life Wiki article JSON OBJECT (revision 1194658, 2015-01-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="JSON_OBJECT" />
+
+Used with the [llList2Json](/functions/llList2Json/) function to indicate that the list provided is a strided list of "Key", Value pairs (which may be empty), and that a string representing a Json object will be returned.
+
+Also a possible return value for the [llJsonValueType](/functions/llJsonValueType/) function that indicates the Json data type of at the specifier location within a given Json text is, in fact, a `JSON_OBJECT`.
+
+## Examples
+
+<details open>
+<summary>Showing use to form a Json object:</summary>
+
+```lsl collapse={1-5, 11-16}
+string jsonText;
+
+default
+{
+	state_entry()
+	{
+		// NOTE: All even numbered elements in the supplied list MUST be strings or JSON_INVALID will be returned!
+		jsonText = llList2Json(JSON_OBJECT, ["A", 3, "B", <1.0,1.0,1.0>, "C", "A phrase", "D", PI]);
+	}
+	touch_start(integer total_number)
+	{
+		// In the resulting Json object, "Keys" are separarted from Values by a colon (:)
+		// and "Key":Value pairs by a comma (,).
+		llOwnerSay(jsonText); //  {"A":3,"B":"<1.000000, 1.000000, 1.000000>","C":"A phrase","D":3.141593}
+	}
+}
+```
+
+</details>
+
+<details>
+<summary>Showing usage to determine if a Value within a Json text is an object:</summary>
+
+```lsl collapse={1-13}
+string jsonText;
+
+default
+{
+	state_entry()
+	{
+		// Set jsonText to [3,{"A":77,"B":66},"A phrase"]
+		// A Json array whose second element is a Json object
+		jsonText = "[3,{\"A\":77,\"B\":66},\"A phrase\"]";
+		llOwnerSay(jsonText);
+	}
+	touch_start(integer total_number)
+	{
+		// Test the entirety of the Json text to see if it's an object
+		// Note use of the empty list for this
+		if (llJsonValueType(jsonText, []) == JSON_OBJECT)
+		{
+			llOwnerSay("The supplied string is a Json object.");
+		} else {
+			llOwnerSay("The supplied string is not a Json object."); // TRUE
+		}
+
+		// Test second element of the array
+		if (llJsonValueType(jsonText, [1]) == JSON_OBJECT)
+		{
+			llOwnerSay("The second element of the array is a Json object."); // TRUE
+		} else {
+			llOwnerSay("The second element of the array is not a Json object.");
+		}
+	}
+}
+```
+
+</details>
+
+## See also
+
+### Constants
+
+| Type Flags | Value | Unicode | [Integer](/functions/llOrd/) | [URL Encoded](https://wiki.secondlife.com/wiki/Category:LSL_Encoding/URL) | HTML Encoded | Description |
+| --- | --- | --- | --- | --- | --- | --- |
+| [JSON_INVALID](/constants/JSON_INVALID/) |  | U+FDDO | 64976 | "%EF%B7%90" | &amp;#xFDD0; | Value returned when inputs are not well formed. |
+| [JSON_OBJECT](/constants/JSON_OBJECT/) |  | U+FDD1 | 64977 | "%EF%B7%91" | &amp;#xFDD1; |  |
+| [JSON_ARRAY](/constants/JSON_ARRAY/) |  | U+FDD2 | 64978 | "%EF%B7%92" | &amp;#xFDD2; |  |
+| [JSON_NUMBER](/constants/JSON_NUMBER/) |  | U+FDD3 | 64979 | "%EF%B7%93" | &amp;#xFDD3; |  |
+| [JSON_STRING](/constants/JSON_STRING/) |  | U+FDD4 | 64980 | "%EF%B7%94" | &amp;#xFDD4; |  |
+| [JSON_NULL](/constants/JSON_NULL/) |  | U+FDD5 | 64981 | "%EF%B7%95" | &amp;#xFDD5; |  |
+| [JSON_TRUE](/constants/JSON_TRUE/) |  | U+FDD6 | 64982 | "%EF%B7%96" | &amp;#xFDD6; |  |
+| [JSON_FALSE](/constants/JSON_FALSE/) |  | U+FDD7 | 64983 | "%EF%B7%97" | &amp;#xFDD7; |  |
+| [JSON_DELETE](/constants/JSON_DELETE/) |  | U+FDD8 | 64984 | "%EF%B7%98" | &amp;#xFDD8; | Used with [llJsonSetValue](/functions/llJsonSetValue/) to remove a key-value pair. |
+
+### Functions
+
+- [llList2Json](/functions/llList2Json/)
+- [llJsonValueType](/functions/llJsonValueType/)
+
+<WikiSource />

@@ -1,0 +1,299 @@
+---
+title: "llRezObjectWithParams"
+slug: "functions/llRezObjectWithParams"
+category: functions
+source:
+  wiki: "LlRezObjectWithParams"
+  url: https://wiki.secondlife.com/wiki/LlRezObjectWithParams
+  revision: 1218833
+  date: 2026-05-06
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llrezobjectwithparams-9ef67146.txt
+  license: "Content from the Second Life Wiki article LlRezObjectWithParams (revision 1218833, 2026-05-06), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, InlineSyntax, WikiSource } from '~/components/lsl';
+
+{/* Hand-written page (editorial base: src/legacy/docs/functions/llRezObjectWithParams.mdx), completed from the wiki revision above. */}
+
+<LSLFunction name="llRezObjectWithParams" />
+
+Instantiate the **item** object from the prim's inventory with an initial set of parameters specified in **options**.
+
+By default rezzes at the position of the object containing the script, unless [REZ_POS](/constants/REZ_POS/) is specified.
+
+Returns a key which will be the key of the object when it is successfully rezzed in the world. On failure, returns `(key)""` (in LSL), or `NULL_KEY` (in Lua).
+
+```lsl title="How to use" frame="terminal"
+llRezObjectWithParams("Object", []);
+```
+
+```lsl title="Example" frame="terminal" collapse={1-4, 8-9}
+default {
+	touch_start(integer detected)
+	{
+		// When touched the script tries to rez an item named "Object" from object inventory at region position <128, 128, 32>
+		key object = llRezObjectWithParams("Object", [
+			REZ_POS, <128.0, 128.0, 32.0>, FALSE, TRUE
+		]);
+	}
+}
+```
+
+## Specification
+
+<ConstantGroup name="RezParam" />
+
+### Params list
+
+<table class="params-list">
+	<tr>
+		<th>Parameter</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>[REZ_PARAM](/constants/REZ_PARAM/)<InlineSyntax code=", integer param" /></td>
+		<td>Start parameter passed into the rezzed object's [on_rez](/events/on_rez/) event. May also be read with [llGetStartParameter](/functions/llGetStartParameter/).</td>
+	</tr>
+	<tr>
+		<td>[REZ_PARAM_STRING](/constants/REZ_PARAM_STRING/)<InlineSyntax code=", string param" /></td>
+		<td>Pass an initialization string to the root prim of the newly rezzed object that may be read with [llGetStartString](/functions/llGetStartString/) from within the rezzed object. Maximum string length is 1024 bytes.</td>
+	</tr>
+	<tr>
+		<td>[REZ_FLAGS](/constants/REZ_FLAGS/)<InlineSyntax code=", integer flags" /></td>
+		<td>
+
+			Flags applied to rezzed object when it is created in the world.
+
+			<details>
+			<summary>REZ_FLAG_*</summary>
+
+			| Flag | Value | Description |
+			| --- | --- | --- |
+			| [REZ_FLAG_TEMP](/constants/REZ_FLAG_TEMP/) | `0x0001` | Object is rezzed as temporary. |
+			| [REZ_FLAG_PHYSICAL](/constants/REZ_FLAG_PHYSICAL/) | `0x0002` | Object is rezzed as physical. |
+			| [REZ_FLAG_PHANTOM](/constants/REZ_FLAG_PHANTOM/) | `0x0004` | Object is rezzed as phantom. |
+			| [REZ_FLAG_DIE_ON_COLLIDE](/constants/REZ_FLAG_DIE_ON_COLLIDE/) | `0x0008` | The object will die after its first collision. |
+			| [REZ_FLAG_DIE_ON_NOENTRY](/constants/REZ_FLAG_DIE_ON_NOENTRY/) | `0x0010` | Object will die if it attempts to enter a parcel that it can't. |
+			| [REZ_FLAG_NO_COLLIDE_OWNER](/constants/REZ_FLAG_NO_COLLIDE_OWNER/) | `0x0020` | Object will not trigger a collision event if colliding with its owner.† |
+			| [REZ_FLAG_NO_COLLIDE_FAMILY](/constants/REZ_FLAG_NO_COLLIDE_FAMILY/) | `0x0040` | Object will not trigger collision events when colliding with other object rezzed by the same rezzer.† |
+			| [REZ_FLAG_BLOCK_GRAB_OBJECT](/constants/REZ_FLAG_BLOCK_GRAB_OBJECT/) | `0x0080` | Grabbing is disabled for this object. |
+
+			<small>† Disabling collisions only disables collision events and damage. The object will still cause a physics collision and may push the objects.</small>
+
+			</details>
+
+		</td>
+	</tr>
+	<tr>
+		<td>[REZ_POS](/constants/REZ_POS/)<InlineSyntax code=", vector position, integer relative, integer at_root" /></td>
+		<td>
+
+			Position to rez the new object in the world.
+
+			If **relative** is [TRUE](/constants/TRUE/) the **position** will be relative to the rezzer, otherwise in absolute region coordinates.
+
+			If **at_root** is [TRUE](/constants/TRUE/) the root prim of the rezzed object will be placed at **position** (like [llRezAtRoot](/functions/llRezAtRoot/)), otherwise the center of the object will be placed at **position** (like [llRezObject](/functions/llRezObject/)).
+
+		</td>
+	</tr>
+	<tr>
+		<td>[REZ_ROT](/constants/REZ_ROT/)<InlineSyntax code=", rotation rot, integer relative" /></td>
+		<td>The initial rotation to apply to the object. If **relative** is [TRUE](/constants/TRUE/), the rotation is relative to the rezzing object, otherwise it is absolute.</td>
+	</tr>
+	<tr>
+		<td>[REZ_VEL](/constants/REZ_VEL/)<InlineSyntax code=", vector velocity, integer local, integer inherit" /></td>
+		<td>
+
+			The initial velocity to apply to the object.
+
+			If **local** is [TRUE](/constants/TRUE/) the velocity is in the local object coordinate frame, otherwise it is in world coordinates.
+
+			If **inherit** is [TRUE](/constants/TRUE/) the object also inherits it's rezzer's velocity.
+
+		</td>
+	</tr>
+	<tr>
+		<td>[REZ_ACCEL](/constants/REZ_ACCEL/)<InlineSyntax code=", vector force, integer local" /></td>
+		<td>
+
+			A constant force to apply to the object.
+
+			If **local** is [TRUE](/constants/TRUE/), the force vector is in local coordinates, otherwise it is in world coordinates.
+
+		</td>
+	</tr>
+	<tr>
+		<td>[REZ_OMEGA](/constants/REZ_OMEGA/)<InlineSyntax code=", vector axis, integer local, float spin, float gain" /></td>
+		<td>
+
+			Spin the object around the specified axis.
+
+			If **local** is [TRUE](/constants/TRUE/) that axis is in local coordinates, otherwise they are global.
+
+		</td>
+	</tr>
+	<tr>
+		<td>[REZ_LOCK_AXES](/constants/REZ_LOCK_AXES/)<InlineSyntax code=", vector locks" /></td>
+		<td>Prevent the object from spinning on certain axes. Setting the vector's coordinate to non-zero will prevent the object from spinning on that axis. For instance <InlineSyntax code="REZ_LOCK_AXES, <1.0, 1.0, 0.0>" /> will allow the object to only rotate around its Z-axis.</td>
+	</tr>
+	<tr>
+		<td>[REZ_DAMAGE](/constants/REZ_DAMAGE/)<InlineSyntax code=", float damage" /></td>
+		<td>The amount of damage applied to an agent upon collision with this object.</td>
+	</tr>
+	<tr>
+		<td>[REZ_DAMAGE_TYPE](/constants/REZ_DAMAGE_TYPE/)<InlineSyntax code=", integer damage_type" /></td>
+		<td>The damage type to apply when this prim collides with another object. Can match one of the [DAMAGE_TYPE_*](/constants/groups/DamageType/) constants, be a custom damage type or repurpose the damage field.</td>
+	</tr>
+	<tr>
+		<td>[REZ_SOUND](/constants/REZ_SOUND/)<InlineSyntax code=", string sound, float volume, integer loop" /></td>
+		<td>
+
+			A sound to attach to this object. It will be played at the specified **volume**. The **sound** parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset.
+
+			If **loop** is [TRUE](/constants/TRUE/) the sound will loop continuously for the life of the object.
+
+		</td>
+	</tr>
+	<tr>
+		<td>[REZ_SOUND_COLLIDE](/constants/REZ_SOUND_COLLIDE/)<InlineSyntax code=", string sound, float volume" /></td>
+		<td>A sound to play upon collision with another object, the ground or an avatar. The **sound** parameter may be either a sound file in the rezzer's inventory or the UUID of a sound asset.</td>
+	</tr>
+</table>
+
+## Caveats
+
+- This function causes the script to sleep for the delay shown above and uses the energy shown above. This energy deficiency can cause scripts across the entire linkset to skip for two sim frames (`0.022` s).
+  - In practice, using multiple scripts, it is possible to reach a maximum object creation speed of ~900 objects per minute per object, however with an active `control` event (user is constantly giving control input) this can be exceeded to double that amount.
+  - Mind that there are some dynamic limits in place that are designed to prevent griefing.
+- If **item** is missing from the prim's inventory or it is not an object then an error is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/).
+- Silently fails to rez **item** if [REZ_POS](/constants/REZ_POS/) is too far from the geometric center of the object trying to rez **item**: at least 10 meters or up to `10.0-0.00001 + (llVecMag(llGetScale()) * 0.5)`. See [Maximum rez distance](#maximum-rez-distance).
+- When scripting attachments meant to rez objects, remember that when used in the root of an attachment [llGetPos](/functions/llGetPos/) doesn't return the position of the attachment but instead returns the position of the avatar's bounding box geometric center. Read [llGetPos](/functions/llGetPos/) and [llParticleSystem Caveats](/functions/llParticleSystem/#caveats) for more information.
+- If the object is unattached and the owner of the object does not have copy permission on **item**, the object will no longer be present in inventory after it is rezzed (so another attempt to rez (the same object) will fail); if the owner does have copy permission, then a copy is rezzed, and the original **item** remains in inventory.
+- If the object is attached and the owner of the object does not have copy permission on **item**, an error is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/): "Cannot rez no copy objects from an attached object."
+- Silently fails if you don't have offline building rights on the land. To have the right, your objects needs to *either*:
+  - Be on land you own yourself
+  - Be on land where anyone is allowed to build, e.g. a sandbox
+  - Be deeded to the group that owns the land
+  - Be set to the same group that owns the land and the land have the parcel flag 'allow group to build' set
+  - The group role "Always allow 'Create Objects'" will only work to override this when you are online, in the region, or have a child agent in the region
+- See [object_rez](/events/object_rez/) for examples on how to establish communications between the rezzing object and the new prim.
+
+## Examples
+
+<details open>
+<summary>The list of parameters is entirely optional. If you want to rez an object exactly where the rezzer is, you may call the function with an empty list.</summary>
+
+```lsl
+default
+{
+    touch_start(integer total_number)
+    {
+        llRezObjectWithParams("Object", []);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>The below example rezzes an object slightly above the rezzer, slowly spinning and with automatic cleanup.</summary>
+
+```lsl
+default
+{
+    touch_start(integer total_number)
+    {
+        llRezObjectWithParams("Object", [
+            REZ_FLAGS, REZ_FLAG_TEMP | REZ_FLAG_PHANTOM,
+            REZ_POS, <0,0,1>, TRUE, TRUE,
+            REZ_OMEGA, <0,0,1>, TRUE, 0.5, PI
+        ]);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>The below is a basic example of firing a typical bullet from a worn attachment. The bullet is fired with a left-click during mouselook.</summary>
+
+```lsl collapse={1-5, 25-46}
+default
+{
+    control(key id, integer level, integer edge)
+    {
+        integer click = level & edge;
+
+        if (click & CONTROL_ML_LBUTTON) {
+            llRezObjectWithParams("Bullet", [
+                REZ_POS, <2,0,0>, TRUE, TRUE, // Relative offset 2 meters forward
+                REZ_ROT, ZERO_ROTATION, TRUE, // Relative rotation
+                REZ_VEL, <100,0,0>, TRUE, FALSE, // Relative velocity 100m/s forward
+                REZ_DAMAGE, 40,
+                REZ_LOCK_AXES, <1,1,1>, // Disable all rotation
+                REZ_FLAGS, 0
+                | REZ_FLAG_PHYSICAL
+                | REZ_FLAG_TEMP
+                | REZ_FLAG_DIE_ON_COLLIDE
+                | REZ_FLAG_DIE_ON_NOENTRY
+                | REZ_FLAG_NO_COLLIDE_OWNER
+                | REZ_FLAG_NO_COLLIDE_FAMILY
+                | REZ_FLAG_BLOCK_GRAB_OBJECT
+            ]);
+        }
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm) {
+            llTakeControls(CONTROL_ML_LBUTTON, TRUE, FALSE);
+        }
+    }
+
+    attach(key id)
+    {
+        if (id) {
+            llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+        }
+    }
+
+    state_entry()
+    {
+        if (llGetAttached()) {
+            llRequestPermissions(llGetOwner(), PERMISSION_TAKE_CONTROLS);
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+### Maximum rez distance
+
+- The distance scales with the size of the object the script is in.
+- The formula is `10 + llVecMag(llGetScale()) * 0.5`
+- The distance measured is between the [center](/functions/llGetPos/) of the rezzing prim and the [center](/functions/llGetPos/) of the prim that is rezzed.
+- The tests did not include rezzing from or the rezzing of link_set objects.
+  - A `0.01` meter cube could rez just beyond `10.0` meters away.
+  - A `10.0` meter cube could rez just beyond `18.66` meters away.
+  - A `32.0` meter cube could rez just beyond `37.71` meters away.
+  - A `64.0` meter cube could rez just beyond `65.42` meters away.
+
+## See also
+
+### Functions
+
+- [llRezAtRoot](/functions/llRezAtRoot/) — Rezzes the object at the requested position
+- [llRezObject](/functions/llRezObject/) — Rezzes the object at the requested position
+- [llGetStartString](/functions/llGetStartString/)
+- [llGetStartParameter](/functions/llGetStartParameter/)
+- [llGodLikeRezObject](/functions/llGodLikeRezObject/)
+- [llGetParcelFlags](/functions/llGetParcelFlags/#examples) — Test if the parcel allows this script to rez
+
+### Events
+
+- [object_rez](/events/object_rez/) — triggered when this object rezzes an object from inventory
+
+<WikiSource />

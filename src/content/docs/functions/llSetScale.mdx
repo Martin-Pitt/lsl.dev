@@ -1,0 +1,73 @@
+---
+title: "llSetScale"
+slug: "functions/llSetScale"
+category: functions
+source:
+  wiki: "LlSetScale"
+  url: https://wiki.secondlife.com/wiki/LlSetScale
+  revision: 1194426
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/llsetscale-c1151275.txt
+  license: "Content from the Second Life Wiki article LlSetScale (revision 1194426, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetScale" />
+
+Sets the size of the prim according to **size**
+
+The components of **size** (`x`, `y` & `z`) each need to be in the range \[0.01, 64.0\]`{{Footnote|handle=interval}}`, if they are out of the range they are rounded to the nearest endpoint.
+
+```lsl title="How to use" frame="terminal"
+llSetScale(ZERO_VECTOR);
+```
+
+## Caveats
+
+- This function only changes the size of the *prim* that the script is in. **Not** the entire object.
+- If the prim is part of a link set, rescaling will fail if the new size is too large or small to satisfy the [linkability rules](https://wiki.secondlife.com/wiki/Linkability_Rules).
+- Does not work on [physical](/constants/STATUS_PHYSICS/) prims.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-7}
+//A basic door that opens and closes when an avatar collides with it.
+//Not very effective, as it would be better to use llSetStatus(STATUS_PHANTOM, 1)...
+//But, it works.
+vector startingSize;
+default {
+     state_entry() {
+          startingSize = llGetScale();
+     }
+     collision_start(integer i) {
+          llSetScale(<0.1, 0.1, 0.1>); //Shrink
+          llSetPos(llGetPos() + <0.0,0.0,10.0>); //Hide us
+          llSetTimerEvent(3.0);
+     }
+     timer() {
+          llSetTimerEvent(0.0);
+          llSetScale(startingSize); //Go back to normal size
+          llSetPos(llGetPos() - <0.0,0.0,10.0>); //And where we started
+     }
+} //Code by Xaviar Czervik.
+```
+
+</details>
+
+**Curtain/Door script**
+
+For a flexible curtain or door script using `llSetScale()`, see [http://wiki.secondlife.com/wiki/Curtain_script](https://wiki.secondlife.com/wiki/http://wiki.secondlife.com/wiki/Curtain_script)
+
+## See also
+
+### Functions
+
+- [llGetScale](/functions/llGetScale/) — Gets the prims size
+- [llScaleByFactor](/functions/llScaleByFactor/) — Uniformly rescale a linkset
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/) — Gets prims attributes
+
+<WikiSource />

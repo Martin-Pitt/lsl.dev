@@ -1,0 +1,106 @@
+---
+title: "AGENT_AUTOMATED"
+slug: "constants/AGENT_AUTOMATED"
+category: constants
+source:
+  wiki: "AGENT AUTOMATED"
+  url: https://wiki.secondlife.com/wiki/AGENT_AUTOMATED
+  revision: 1215030
+  date: 2023-10-12
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/agent-automated-030da2d2.txt
+  license: "Content from the Second Life Wiki article AGENT AUTOMATED (revision 1215030, 2023-10-12), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="AGENT_AUTOMATED" />
+
+Identifies an avatar as having been registered with Linden Lab as an automated/scripted agent, i.e. a `'bot`.
+
+Registration is (currently) done via the user's control panel on the [Scripted Agent Status](https://secondlife.com/my/account/sisa.php) tab.
+
+'Bots are *not* illegal in Second Life *per se*, but, according to the [new scripted agent privacy policy](https://wiki.secondlife.com/wiki/Linden_Lab_Official:Scripted_Agent_Policy), failing to register a 'bot as such is indeed forbidden.
+
+Also note that from the perspective of the grid, it matters not *how* the 'bot is implemented; do not assume any technology behind it, just because an avatar has been flagged as an 'automated agent'. The flag essentially reflects the user's (voluntary) self-identification as a 'bot, without the requirement of giving any explanation, and there are a handful of different ways to "automate" an agent.
+
+Linden Lab, at their discretion, and based on abuse reports or direct observation, *may* also flag an avatar as being an automated agent, which *will* set the [AGENT_AUTOMATED](/constants/AGENT_AUTOMATED/) bit as well. False positives can happen; feel free to file a ticket with Linden Lab's support if your avatar was erroneously flagged as an automated agent and you cannot change it from the SL control panel.
+
+## Caveats
+
+In certain unusual circumstances, some old avatars, which have a "special" status due to some kind of promotional package available during a period of time, *might* have bit `0x4000` set by mistake — possibly because such a flag hadn't been documented before and was inadvertently reused in April 2023 to flag automated agents. These perfectly regular *human* avatars are thus flagged as 'bots by LSL, as well as by the land management tools. This was reported as [BUG-234283](https://jira.secondlife.com/browse/BUG-234283) and the solution seems to be to contact Linden Lab's support team.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-28, 37-48}
+// Simple bot detector.
+// Place the script in a prim, Attach it as a HUD,
+// touch to identify which avatars in the parcel are bots.
+//
+// 🅭 2023 by Gwyneth Llewelyn. Some rights reserved.
+// Licensed under a MIT license (https://gwyneth-llewelyn.mit-license.org/)
+//
+// Based on the LSL Wiki example at https://wiki.secondlife.com/wiki/LlGetAgentList
+//
+default
+{
+    touch_start(integer total_number)
+    {
+        list avatarsInParcel = llGetAgentList(AGENT_LIST_PARCEL, []);
+        integer numOfAvatars = llGetListLength(avatarsInParcel);
+
+        // If no avatars are present in the parcel, abort avatar listing process and give a short notice.
+        // Note that at least one avatar will be present, namely, the one running this script!
+        if (numOfAvatars < 2)
+        {
+            llOwnerSay("Neither avatars nor 'bots found in the current parcel.");
+            return;
+        }
+        integer numOfBots;  // counts #bots
+        integer index;
+        while (index < numOfAvatars)
+        {
+            key id = llList2Key(avatarsInParcel, index);
+            string name = llKey2Name(id);
+
+            if (llGetAgentInfo(id) & AGENT_AUTOMATED) {
+                ++numOfBots;
+                llOwnerSay((string)numOfBots + ": " + name + " [" + (string)id + "] ('bot)");
+            }
+            ++index;
+        }
+        if (numOfBots == 0) {
+            llOwnerSay("No 'bots found in parcel,");
+            if (numOfAvatars > 1) {
+                llOwnerSay("only other humans (including yourself).");
+            } else {
+                llOwnerSay("you're the only human around.");
+            }
+        } else {
+            llOwnerSay("--------\nTotal # of humans: " + (string)(numOfAvatars - numOfBots)+ " (counting yourself)\nTotal # of 'bots: " + (string)numOfBots);
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- Flag added on the SL Wiki by Rider Linden on 13 April 2023‎, following the Linden Lab announcement on their [new Scripted Agent Privacy Policy](https://wiki.secondlife.com/wiki/Linden_Lab_Official:Scripted_Agent_Policy).
+- For those OpenSimulator fans out there: use [osIsNpc()](http://opensimulator.org/wiki/OsIsNpc) instead ('bots are handled *very* differently!).
+
+## See also
+
+### Constants
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [AGENT_FLYING](/constants/AGENT_FLYING/) |  |  |  |
+| [AGENT_IN_AIR](/constants/AGENT_IN_AIR/) |  |  |  |
+| [AGENT_WALKING](/constants/AGENT_WALKING/) |  |  |  |
+| [AGENT_ALWAYS_RUN](/constants/AGENT_ALWAYS_RUN/) |  |  |  |
+
+<WikiSource />

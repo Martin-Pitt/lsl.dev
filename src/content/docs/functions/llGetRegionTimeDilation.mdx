@@ -1,0 +1,82 @@
+---
+title: "llGetRegionTimeDilation"
+slug: "functions/llGetRegionTimeDilation"
+category: functions
+source:
+  wiki: "LlGetRegionTimeDilation"
+  url: https://wiki.secondlife.com/wiki/LlGetRegionTimeDilation
+  revision: 1218444
+  date: 2025-08-30
+  contributor: "Nexii Malthus"
+  raw: /wiki-source/llgetregiontimedilation-4cd79559.txt
+  license: "Content from the Second Life Wiki article LlGetRegionTimeDilation (revision 1218444, 2025-08-30), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetRegionTimeDilation" />
+
+It is used as the ratio between the change of script time to that of real world time.
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the current time dilation, the value range is \[0.0, 1.0\], 0.0 (full dilation) and 1.0 (no dilation).
+
+```lsl title="How to use" frame="terminal"
+float result = llGetRegionTimeDilation();
+```
+
+## Specification
+
+Time dilation is a method the server uses to cope with simulator lag. Physics and script generated lag can result in time dilation. Time dilation slows script time & execution. When time dilation is zero script execution halts.
+
+##### Affects
+
+- Intervals of [sensor](/events/sensor/) events queued as a result of [llSensorRepeat](/functions/llSensorRepeat/).
+
+## Caveats
+
+- [Region idling](http://community.secondlife.com/t5/Second-Life-Server/Region-Idling-FAQ/m-p/1535497) lowers a region's framerate when no avatars are currently on or looking into the region. Scripts measuring time dilation with `llGetRegionTimeDilation` may report significant time dilation if the region is [idle](/functions/llGetEnv/).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-19}
+// The beginnings of a region-info script.
+string region;
+string sim;
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(1.0);
+    }
+    timer()
+    {
+        string here = llGetRegionName();
+        if(region != here)
+        {
+            sim = llGetSimulatorHostname();
+            region = here;
+        }
+        llSetText(
+                "   REGION NAME : " + region +
+              "\n  SIM HOSTNAME : " + sim +
+              "\n TIME DILATION : " + (string)llGetRegionTimeDilation() +
+              "\n    REGION FPS : " + (string)llGetRegionFPS(),
+            <0,1,0>, 1.0);
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetRegionFPS](/functions/llGetRegionFPS/)
+- [llGetTime](/functions/llGetTime/)
+- [llGetAndResetTime](/functions/llGetAndResetTime/)
+
+<WikiSource />

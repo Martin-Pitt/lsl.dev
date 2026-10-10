@@ -1,0 +1,62 @@
+---
+title: "llDie"
+slug: "functions/llDie"
+category: functions
+source:
+  wiki: "LlDie"
+  url: https://wiki.secondlife.com/wiki/LlDie
+  revision: 1218595
+  date: 2026-01-25
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/lldie-1b877ae6.txt
+  license: "Content from the Second Life Wiki article LlDie (revision 1218595, 2026-01-25), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDie" />
+
+Deletes the object. The object does **not** go to the owner's Inventory [🗑 Trash](https://wiki.secondlife.com/wiki/Trash).
+
+If called in any prim in the [link set](/constants/LINK_SET/) the result will be the deletion of the entire object.To remove a single prim from an object, use [llBreakLink](/functions/llBreakLink/) first.
+
+```lsl title="How to use" frame="terminal"
+llDie();
+```
+
+## Caveats
+
+- The script may not stop executing immediately after this function is called ([SVC-7421](https://jira.secondlife.com/browse/SVC-7421)).
+- After this function is called, there is no way to undo the deletion of the object.
+- Has no effect if called from within an [attachment](https://wiki.secondlife.com/wiki/Category:LSL_Attachment); there is no way to delete an attachment.
+- To detach an object from the avatar, call [llDetachFromAvatar](/functions/llDetachFromAvatar/).
+- [Detaching](/functions/llDetachFromAvatar/) a [temporary attachment](/functions/llAttachToAvatarTemp/) will cause the attachment to be deleted.
+
+## Helper functions
+
+[llRemoveInventory](/functions/llRemoveInventory/) of [llGetScriptName](/functions/llGetScriptName/) deletes just the calling script, rather than all of the objects that the calling script contains. For instance, you can write a script that chats a little when dragged onto an object from inventory and then politely disappears itself, such as:
+
+```lsl
+// http://wiki.secondlife.com/wiki/llDie
+default
+{
+    state_entry()
+    {
+        llOwnerSay("llGetRegionTimeDilation()");
+        llOwnerSay((string) llGetRegionTimeDilation());
+        llRemoveInventory(llGetScriptName());
+    }
+}
+```
+
+## See also
+
+### Functions
+
+- [llDetachFromAvatar](/functions/llDetachFromAvatar/)
+- [llBreakLink](/functions/llBreakLink/)
+
+### Articles
+
+- [Attachment](https://wiki.secondlife.com/wiki/Category:LSL_Attachment)
+
+<WikiSource />

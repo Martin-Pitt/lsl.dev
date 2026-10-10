@@ -1,0 +1,167 @@
+---
+title: "llSensorRepeat"
+slug: "functions/llSensorRepeat"
+category: functions
+source:
+  wiki: "LlSensorRepeat"
+  url: https://wiki.secondlife.com/wiki/LlSensorRepeat
+  revision: 1212832
+  date: 2022-11-18
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/llsensorrepeat-6efcd880.txt
+  license: "Content from the Second Life Wiki article LlSensorRepeat (revision 1212832, 2022-11-18), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSensorRepeat" />
+
+Performs a scan for **name** and **id** with **type** within `range` meters and **arc** radians of forward vector and repeats every **rate** seconds. The first scan is not performed until **rate** seconds have passed.
+
+Script execution continues immediately. Whenever a scan is completed, a [sensor](/events/sensor/) or [no_sensor](/events/no_sensor/) event is put in the event queue.
+
+If **name**, **id**, and/or **type** are empty or 0, they are ignored.
+
+If **id** is an invalid key or [NULL_KEY](/constants/NULL_KEY/) it is treated as empty.&lt;br id="NameFormat"/>Depending upon which AGENT\* flag is used determines the format requirements for **name**
+
+See: [llSensor](http://www.lslwiki.net/lslwiki/wakka.php?wakka=llSensor) for an excellent explanation of **arc**.
+
+```lsl title="How to use" frame="terminal"
+llSensorRepeat("", NULL_KEY, 0, 0.0, 0.0, 0.0);
+```
+
+## Caveats
+
+- The repeat of the sensor event is adversely affected by [time dilation](/functions/llGetRegionTimeDilation/) (lag).
+- Sensors placed in the root prim of attachments will use the direction the avatar is facing as their forward vector. In mouselook, this means that it will be wherever the avatar is looking, while out of mouselook, this means whichever way the avatar is pointing. This does not include where the avatar's head is pointing, or what animation the avatar is doing, just the direction the avatar would move in if you walked forward. This is the case, regardless of where the object is attached.
+- Sensors placed in prims other than the root prim of an attachment will have their forward direction offset relative to the root prim's forward direction, e.g. a sensor in a prim whose +X direction is the reverse of the root +X will look backward.
+- Only the most recent [sensor](/events/sensor/) event is queued. Previous sensor events are replaced.
+- A repeating sensor does not persist across a state change.
+- [llSensorRepeat](/functions/llSensorRepeat/) can occasionally detect outside of it's specified range every few cycles when used near sim borders. [llSensor](/functions/llSensor/) in a [timer](/events/timer/) does not.
+- Only one or zero llSensorRepeats can be active per script. If `llSensorRepeat` is called a second time without calling [llSensorRemove](/functions/llSensorRemove/), the first `llSensorRepeat` is deactivated and the second one replaces it
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-10, 16-36}
+// Written by Steamy Latte.
+// Scans every 30 seconds for visitors within 10 meters.
+// Reports new visitors to object owner when she is in range.
+
+string AllAgents;
+
+default
+{
+    state_entry()
+    {
+        // arc=PI is a sphere, you could look more narrowly in the direction object is facing with PI/2, PI/4 etc.
+        // don't repeat this too often to avoid lag.
+        llSensorRepeat("", "", AGENT_BY_LEGACY_NAME, 10.0, PI, 30.0);
+    }
+    sensor(integer num_detected)
+    {
+        string thisAgent;
+        integer agentNum;
+        for (agentNum=0; agentNum<num_detected; agentNum++)
+        {
+            thisAgent = llDetectedName(agentNum);
+            if (llDetectedKey(agentNum) == llGetOwner())
+            {
+                if (AllAgents != "")
+                {
+                    llOwnerSay("We've had the following visitors:" + AllAgents);
+                    AllAgents = "";
+                }
+            }
+            else if (llSubStringIndex(AllAgents+"\n", "\n"+thisAgent+"\n") < 0)
+            {
+                AllAgents = AllAgents + "\n" + thisAgent;
+            }
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-12, 18-42}
+// Written by Evans Love.
+// (Limited to most recent 200 names by Void Singer to prevent eventual Stack/Heap Collision + clean up)
+// Continuously scans for visitors within 10 meters and reports new visitors to object owner.
+//-------------------------------------------------------------------------------------
+
+integer RESPONSE_CHANNEL = -100;
+float   SCAN_RANGE       = 10.0;
+float   SCAN_INTERVAL    = 20.0;
+list    VISITOR_LIST;
+
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", NULL_KEY, AGENT_BY_LEGACY_NAME, SCAN_RANGE, PI, SCAN_INTERVAL);
+    }
+
+    sensor(integer number_detected)
+    {
+        integer agent_number;
+
+//      iterate through all detected agents
+        for (; agent_number < number_detected; agent_number++)
+        {
+            string  this_agent_name = llDetectedName(agent_number);
+            key     this_agent_key  = llDetectedKey(agent_number);
+
+//          if the agent is not found on the list
+            if (llListFindList(VISITOR_LIST, [this_agent_name]) == -1)
+            {
+//              add her/him and make the list hold the last 200 visitors
+                VISITOR_LIST = [this_agent_name] + llList2List(VISITOR_LIST, 0, 198);
+
+                llDialog(this_agent_key, "Welcome!", ["Ok"], RESPONSE_CHANNEL);
+
+                llOwnerSay(this_agent_name);
+            }
+//          else agent is already on the list
+        }
+
+    }
+}
+```
+
+</details>
+
+## Notes
+
+:::note
+You might want to use [llGetAgentList](/functions/llGetAgentList/) instead of using sensors to get a list of all avatars within the same parcel or region.
+:::
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-4301 (bug): llSensorRepeat randomly returns unexpected results if &lt;code>\{\{LSLPT|arc\}\}>PI&lt;/code>
+- SVC-6662: type=bug|status=ack|resolution=unres|llSensorRepeat sometimes detects Avatars in adjacent sims, even though they are beyond the specified sensor range
+- BUG-2366 (bug): llSensor removes the sensor repeat if called AFTER llSensorRepeat
+
+The wiki article also includes shared templates whose conditional content is not reproduced here: [Template:Issues/SVC-2409](https://wiki.secondlife.com/wiki/Template:Issues/SVC-2409).
+
+## See also
+
+### Functions
+
+- [llSensor](/functions/llSensor/) — Runs a sensor once
+- [llSensorRemove](/functions/llSensorRemove/) — Stops the `llSensorRepeat` timer
+- [llOverMyLand](/functions/llOverMyLand/) — What happens over owners land
+
+### Events
+
+- [sensor](/events/sensor/) — Triggered when a sensor detects something
+- [no_sensor](/events/no_sensor/) — Triggered when a sensor detects nothing
+
+<WikiSource />

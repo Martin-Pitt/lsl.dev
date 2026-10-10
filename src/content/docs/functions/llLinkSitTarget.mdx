@@ -1,0 +1,79 @@
+---
+title: "llLinkSitTarget"
+slug: "functions/llLinkSitTarget"
+category: functions
+source:
+  wiki: "LlLinkSitTarget"
+  url: https://wiki.secondlife.com/wiki/LlLinkSitTarget
+  revision: 1213290
+  date: 2023-02-05
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/lllinksittarget-f9c30fbc.txt
+  license: "Content from the Second Life Wiki article LlLinkSitTarget (revision 1213290, 2023-02-05), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llLinkSitTarget" description />
+
+Set the sit location for the linked prim(s). The sit location is relative to the prim's position and rotation.
+
+If **offset** == [`{{LSL VR|0.0|0.0|0.0}}`](/constants/ZERO_VECTOR/) then the sit target is removed.
+
+```lsl title="How to use" frame="terminal"
+llLinkSitTarget(0, ZERO_VECTOR, ZERO_ROTATION);
+```
+
+## Specification
+
+`llLinkSitTarget` sets the position for the Agent Target (Develop -> Avatar -> Display Agent Target in the version 3.x viewer, Develop -> Character -> View Agent Target in older viewers). The position of the target is based on **rot** and the **offset**`{{Footnote|It is widely considered that the '''rot''' should not affect the position, unfortunately the sit target code is a {{Wikipedia|Lava_flow_(programming)|lava-flow}}. ~ {{JIRA|SVC-2277}}|It is widely considered that the '''rot''' should not affect the position, unfortunately the sit target code is a lava-flow. - SVC-2277|handle=rot-offset}}`.
+
+## Caveats
+
+- **link** needs to be [LINK_THIS](/constants/LINK_THIS/) for an unlinked prim. Specifying [LINK_ROOT](/constants/LINK_ROOT/) ([integer](https://wiki.secondlife.com/wiki/integer) value 1) will not work.
+- Once a sit target is removed [llAvatarOnLinkSitTarget](/functions/llAvatarOnLinkSitTarget/) will only return
+
+[NULL_KEY](/constants/NULL_KEY/)
+
+.
+
+- Removing or deactivating the script that sets the sit target will not remove the prim's sit target.
+- Sit target is a prim property and not dependent on a script for its continued existence.
+- To remove sit target, use the following:
+
+:
+
+```lsl
+llLinkSitTarget(linkNum, ZERO_VECTOR, ZERO_ROTATION);
+```
+
+- There is no way to remove the Sit option from the pie menu. It will appear to be removed if the [llSetSitText](/functions/llSetSitText/) is set to a space " " or similar transparent string.
+- Attachments cannot be sat upon (see [SVC-6100](https://jira.secondlife.com/browse/SVC-6100) to vote for such a feature).
+- **rot** affects the position of the sit-target in a buggy way. To correct for the **rot** bug, subtract `{{LSL VR|0.0|0.0|0.4}}` from the position when **rot** is zero. See example in [llSitTarget](/functions/llSitTarget/). This offset is `{{LSL VR|0.0|0.0|0.418}}` on [OpenSimulator](https://wiki.secondlife.com/wiki/OpenSimulator) 0.7.6 (it's 0.4 on version 0.8), but there is more to it than just this offset (opensim and SL remain incompatible). You can find the gory details and an example [here](https://wiki.secondlife.com/wiki/User:Timmy_Foxclaw/About_Coordinate_Systems_and_Rotations).
+- [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams) is a more difficult workaround.
+- Animations are relative to the Agent Target, but the Agent Target isn't described by the animation.
+- [llSitTarget](/functions/llSitTarget/) does not update position of an already seated avatar. See [UpdateSitTarget](/functions/llSitTarget/#updatesittarget) for a way to do this.
+- **offset** is limited to 300.0 meters on each axis. The `x`, `y` and `z` components must be in the range \[-300, 300.0\]`{{Footnote|handle=interval}}`.
+- If they are outside the acceptable range they are rounded to the closest limit.
+- If an object has multiple seats (each seat has a script that sets a sit target with [llSitTarget](/functions/llSitTarget/), or the [link set](/constants/LINK_SET/) has a script that assigns several *`llLinkSitTarget`*s), the following method determines which sit target an avatar ends up at:
+- If the prim that is clicked on *has* a sit target and that sit target is not full, that sit target is used.
+- If the prim that is clicked on *has no sit target*, and one or more other linked prims have sit targets that are not full, the sit target of the prim with the lowest link number will be used.
+
+## History
+
+Date of Release [10/08/2011](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-08-10-238207)
+
+## See also
+
+### Functions
+
+- [llSitTarget](/functions/llSitTarget/)
+- [llSetSitText](/functions/llSetSitText/)
+- [llAvatarOnSitTarget](/functions/llAvatarOnSitTarget/)
+- [llAvatarOnLinkSitTarget](/functions/llAvatarOnLinkSitTarget/)
+- [llUnSit](/functions/llUnSit/)
+
+### Events
+
+- [changed](/events/changed/)
+
+<WikiSource />

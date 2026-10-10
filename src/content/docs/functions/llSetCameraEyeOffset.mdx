@@ -1,0 +1,73 @@
+---
+title: "llSetCameraEyeOffset"
+slug: "functions/llSetCameraEyeOffset"
+category: functions
+source:
+  wiki: "LlSetCameraEyeOffset"
+  url: https://wiki.secondlife.com/wiki/LlSetCameraEyeOffset
+  revision: 1194509
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/llsetcameraeyeoffset-efe5b86c.txt
+  license: "Content from the Second Life Wiki article LlSetCameraEyeOffset (revision 1194509, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetCameraEyeOffset" />
+
+Sets the camera eye **offset** for avatars that sit on the object.
+
+This is the position of the camera's eye, not the [point it looks at](/functions/llSetCameraAtOffset/).
+
+```lsl title="How to use" frame="terminal"
+llSetCameraEyeOffset(ZERO_VECTOR);
+```
+
+## Caveats
+
+- Setting this will not update the cameras of seated avatars, it will only effect avatars that subsequently sit down. The camera settings have to be prepared in advance.
+- The **offset** is [locally relative](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#local) to the object, if you want it relative to the seated [avatar](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#agent) (which likely has a custom sit rotation and offset) or the [region](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region), you must do the computation yourself.
+- [ZERO_VECTOR](/constants/ZERO_VECTOR/) **offset** will cancel any eye offset.
+- Camera position set by this function is a **Prim Property**. **It will survive the script** and it will survive prim taking and prim rezzing
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-7, 13-21}
+// Sit the avatar looking at an arbitrary direction
+// Look over the avatar's shoulders from behind once it sits down
+
+back_view(float degrees)
+{
+     rotation sitRot = llAxisAngle2Rot(<0, 0, 1>, degrees * DEG_TO_RAD);
+
+     llSitTarget(<0, 0, 0.1>, sitRot);
+
+     llSetCameraEyeOffset(<-2, 0, 1> * sitRot);
+     llSetCameraAtOffset(<2, 0, 1> * sitRot);
+}
+
+default
+{
+    state_entry()
+    {
+        back_view( 208 );
+        llSay(0, "Please sit down");
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llSetLinkCamera](/functions/llSetLinkCamera/)
+- [llSetCameraAtOffset](/functions/llSetCameraAtOffset/)
+- [llForceMouselook](/functions/llForceMouselook/)
+- [llSetCameraParams](/functions/llSetCameraParams/)
+
+<WikiSource />

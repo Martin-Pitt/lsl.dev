@@ -1,0 +1,75 @@
+---
+title: "llList2Rot"
+slug: "functions/llList2Rot"
+category: functions
+source:
+  wiki: "LlList2Rot"
+  url: https://wiki.secondlife.com/wiki/LlList2Rot
+  revision: 1194316
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/lllist2rot-0402747f.txt
+  license: "Content from the Second Life Wiki article LlList2Rot (revision 1194316, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llList2Rot" description />
+
+:::note
+Please read [this intro of how to iterate over a list in LSL](https://wiki.secondlife.com/wiki/User:Kireji_Haiku/How_to_deal_with_lists_in_LSL).
+:::
+
+Returns a [rotation](https://wiki.secondlife.com/wiki/rotation) that is at **index** in **src**.
+
+```lsl title="How to use" frame="terminal"
+rotation result = llList2Rot([], 0);
+```
+
+## Caveats
+
+- When used to typecast from a string it will result in a [ZERO_ROTATION](/constants/ZERO_ROTATION/)
+- A true typecast will solve this: ([rotation](https://wiki.secondlife.com/wiki/rotation))[llList2String](/functions/llList2String/)(**src**, index);
+- Unfortunately, if it was already a rotation type, using [llList2String](/functions/llList2String/) will cause the decimal values to be truncated to six decimal places.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-11}
+// Best viewed in Chat History (ctrl-h)
+default
+{
+    state_entry()
+    {
+        list my_list = ["a", 1, 2.0, <1,2,3>, <1,2,3,4>, llGetOwner()];
+        integer i = ~llGetListLength(my_list);
+        while (++i)
+        {
+            llOwnerSay("string=" + llList2String(my_list,i)
+                        + "\n   integer=" + (string)llList2Integer(my_list,i)
+                        + "\n   float=" + (string)llList2Float(my_list,i)
+                        + "\n   vector=" + (string)llList2Vector(my_list,i)
+                        + "\n   rot=" + (string)llList2Rot(my_list,i)
+                        + "\n   key=" + (string)llList2Key(my_list,i) );
+        }
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-798 (nf): Perform typecasting with all \{\{LSLGC|List/Read Element|llList2\*\}\} functions
+
+## See also
+
+### Functions
+
+- [llGetListEntryType](/functions/llGetListEntryType/)
+- [llList2String](/functions/llList2String/)
+
+<WikiSource />

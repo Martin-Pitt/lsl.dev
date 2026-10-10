@@ -1,0 +1,110 @@
+---
+title: "state_entry"
+slug: "events/state_entry"
+category: events
+source:
+  wiki: "State entry"
+  url: https://wiki.secondlife.com/wiki/State_entry
+  revision: 1194110
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/state-entry-1d035f03.txt
+  license: "Content from the Second Life Wiki article State entry (revision 1194110, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="state_entry" description />
+
+Triggered on any state transition and startup
+
+```lsl title="How to use" frame="terminal"
+state_entry()
+{
+
+}
+```
+
+## Specification
+
+### Triggered
+
+- Script save or adding to object
+- State change
+- A [state_exit](/events/state_exit/) is triggered in the old state and the [state_entry](/events/state_entry/) is triggered in the new state. All other events in the queue are lost as a result of the state change.
+- On script reset, either by client or [llResetScript](/functions/llResetScript/)/[llResetOtherScript](/functions/llResetOtherScript/)
+- When the object is rezzed *without* a saved script status
+- If it was a copy taken from inworld
+- If the event had not been triggered due to no-script land.
+
+### Not Triggered
+
+- When the object is rezzed *with* saved script status, not even on change of owner
+- Use [on_rez](/events/on_rez/) event in this situation
+- When the task moves to another SIM, nor on SIM restart
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={13-25}
+default
+{
+    state_entry()
+    {
+        llSay(0,
+            "You either just saved the script after editing it"
+            + "\nand/or the script (re)entered the default state.");
+
+        llSetText("Click to change states", <1.0, 1.0, 1.0>, 1.0);
+    }
+
+    touch_end(integer num_detected)
+    {
+        // Note: NEVER do a state change from within a touch_start event -
+        // - that can lead to the next touch_start on return to this state to be missed.
+        // Here we do the state change safely, from within touch_end
+        state two;
+    }
+
+    state_exit()
+    {
+        llSay(0, "The script leaves the default state.");
+    }
+}
+
+state two
+{
+    state_entry()
+    {
+        llSay(0, "The script entered state 'two'");
+        state default;
+    }
+
+    state_exit()
+    {
+        llSay(0, "The script leaves state 'two'");
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+`{{Issues/SVC-3379}}`
+
+## See also
+
+### Functions
+
+- [llResetScript](/functions/llResetScript/) — Resets the script
+- [llResetOtherScript](/functions/llResetOtherScript/) — Resets another script in the prim
+- [llGetStartParameter](/functions/llGetStartParameter/) — The [on_rez](/events/on_rez/) parameter (or [llRemoteLoadScriptPin](/functions/llRemoteLoadScriptPin/) parameter)
+
+### Events
+
+- [on_rez](/events/on_rez/) — Triggered when the object is rezzed
+- [state_exit](/events/state_exit/) — Triggered when the state is exited at state change
+
+<WikiSource />

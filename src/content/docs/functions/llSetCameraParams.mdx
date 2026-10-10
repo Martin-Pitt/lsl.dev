@@ -1,0 +1,145 @@
+---
+title: "llSetCameraParams"
+slug: "functions/llSetCameraParams"
+category: functions
+source:
+  wiki: "LlSetCameraParams"
+  url: https://wiki.secondlife.com/wiki/LlSetCameraParams
+  revision: 1217653
+  date: 2024-11-16
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/llsetcameraparams-5ad79d77.txt
+  license: "Content from the Second Life Wiki article LlSetCameraParams (revision 1217653, 2024-11-16), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetCameraParams" description />
+
+Sets multiple camera parameters at once.
+
+```lsl title="How to use" frame="terminal"
+llSetCameraParams([]);
+```
+
+## Specification
+
+<ConstantGroup name="CameraParam" />
+
+| Rule |  | Parameter | Default | Value Range | Description |
+| --- | --- | --- | --- | --- | --- |
+| [CAMERA_ACTIVE](/constants/CAMERA_ACTIVE/)`, integer isActive` | 12 | [integer](https://wiki.secondlife.com/wiki/integer) isActive | [FALSE](/constants/FALSE/) | [TRUE](/constants/TRUE/) or [FALSE](/constants/FALSE/) | Turns on or off [scripted](https://wiki.secondlife.com/wiki/Script) control of the camera. |
+| [CAMERA_BEHINDNESS_ANGLE](/constants/CAMERA_BEHINDNESS_ANGLE/)`, float degrees` | 8 | [float](https://wiki.secondlife.com/wiki/float) degrees | 10.0 | 0 to 180 | Sets the angle in degrees within which the camera is not constrained by changes in target rotation. |
+| [CAMERA_BEHINDNESS_LAG](/constants/CAMERA_BEHINDNESS_LAG/)`, float seconds` | 9 | [float](https://wiki.secondlife.com/wiki/float) seconds | 0.0 | 0 to 3 | Sets how strongly the camera is forced to stay behind the target if outside of behindness angle. |
+| [CAMERA_DISTANCE](/constants/CAMERA_DISTANCE/)`, float meters` | 7 | [float](https://wiki.secondlife.com/wiki/float) meters | 3.0 | 0.5 to 50 | Sets how far away the camera wants to be from its target. |
+| [CAMERA_FOCUS](/constants/CAMERA_FOCUS/)`, vector position` | 17 | [vector](https://wiki.secondlife.com/wiki/vector) position | n/a | n/a | Sets camera focus (target position) in [region coordinates](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region). |
+| [CAMERA_FOCUS_LAG](/constants/CAMERA_FOCUS_LAG/)`, float seconds` | 6 | [float](https://wiki.secondlife.com/wiki/float) seconds | 0.1 | 0 to 3 | How much the camera lags as it tries to aim towards the target. |
+| [CAMERA_FOCUS_LOCKED](/constants/CAMERA_FOCUS_LOCKED/)`, integer isLocked` | 22 | [integer](https://wiki.secondlife.com/wiki/integer) isLocked | [FALSE](/constants/FALSE/) | [TRUE](/constants/TRUE/) or [FALSE](/constants/FALSE/) | Locks the camera focus so it will not move. |
+| [CAMERA_FOCUS_OFFSET](/constants/CAMERA_FOCUS_OFFSET/)`, vector meters` | 1 | [vector](https://wiki.secondlife.com/wiki/vector) [meters](https://wiki.secondlife.com/wiki/meter) | `<0.0,0.0,0.0>` | `<-10,-10,-10>` to `<10,10,10>` | Adjusts the camera focus [position](https://wiki.secondlife.com/wiki/position) relative to the target. |
+| [CAMERA_FOCUS_THRESHOLD](/constants/CAMERA_FOCUS_THRESHOLD/)`, float meters` | 11 | [float](https://wiki.secondlife.com/wiki/float) meters | 1.0 | 0 to 4 | Sets the radius of a sphere around the camera's target position within which its focus is not affected by target motion. |
+| [CAMERA_PITCH](/constants/CAMERA_PITCH/)`, float degrees` | 0 | [float](https://wiki.secondlife.com/wiki/float) degrees | 0.0 | -45 to 80 | Adjusts the angular amount that the camera aims straight ahead vs. straight down, maintaining the same distance; analogous to 'incidence'." |
+| [CAMERA_POSITION](/constants/CAMERA_POSITION/)`, vector position` | 13 | [vector](https://wiki.secondlife.com/wiki/vector) position | n/a | n/a | Sets camera position in [region coordinates](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region). |
+| [CAMERA_POSITION_LAG](/constants/CAMERA_POSITION_LAG/)`, float seconds` | 5 | [float](https://wiki.secondlife.com/wiki/float) seconds | 0.1 | 0 to 3 | How much the camera lags as it tries to move towards its 'ideal' position. |
+| [CAMERA_POSITION_LOCKED](/constants/CAMERA_POSITION_LOCKED/)`, integer isLocked` | 21 | [integer](https://wiki.secondlife.com/wiki/integer) isLocked | [FALSE](/constants/FALSE/) | [TRUE](/constants/TRUE/) or [FALSE](/constants/FALSE/) | Locks the camera position so it will not move. |
+| [CAMERA_POSITION_THRESHOLD](/constants/CAMERA_POSITION_THRESHOLD/)`, float meters` | 10 | [float](https://wiki.secondlife.com/wiki/float) meters | 1.0 | 0 to 4 | Sets the radius of a sphere around the camera's ideal position within which it is not affected by target motion. |
+
+## Caveats
+
+- Camera control currently (server 1.38) only supported for attachments and objects on which you are sitting. An attempt otherwise will result in an error being shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/).
+- Scripted camera parameters are overriden for agents who are in [Free Camera mode](https://wiki.secondlife.com/wiki/Flycam) *(Alt + Click)*. **No error is returned if this is the case**; however when the agent returns to regular camera mode, their camera will go to the scripted camera position.
+- When [CAMERA_FOCUS](/constants/CAMERA_FOCUS/) is not defined, it is advised that [CAMERA_FOCUS_THRESHOLD](/constants/CAMERA_FOCUS_THRESHOLD/) is set to 0.0 - this is because when left at it's default value, it may prevent the camera from focusing on the correct point, instead focusing just to the side of the intended point.
+- A [CAMERA_FOCUS_OFFSET](/constants/CAMERA_FOCUS_OFFSET/) of [ZERO_VECTOR](/constants/ZERO_VECTOR/) will always look at the same position as returned by `llGetPos()` for the avatar
+- When seated, this is also the position of "Avatar Center" when hover height is 0
+- When standing, this has a shape-dependent z-offset from "Avatar Center". (currently investigating [Tapple Gao](https://wiki.secondlife.com/wiki/User:Tapple_Gao) ([talk](https://wiki.secondlife.com/wiki/User_talk:Tapple_Gao)))
+- Cannot be used to control the camera in Mouselook.
+
+## Examples
+
+<details open>
+<summary>You can either set the camera in region relative coordinates or you can make the camera follow your avatar.</summary>
+
+**Region relative coordinates, an example:**
+
+```lsl collapse={1-5}
+lookAtMe( integer perms )
+{
+    if ( perms & PERMISSION_CONTROL_CAMERA )
+    {
+        vector camPos = llGetPos() + (relCamP * llGetRot() * turnOnChair) ;
+        vector camFocus = llGetPos() ;
+        llClearCameraParams(); // reset camera to default
+        llSetCameraParams([
+            CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+            CAMERA_FOCUS, camFocus, // region relative position
+            CAMERA_FOCUS_LOCKED, TRUE, // (TRUE or FALSE)
+            CAMERA_POSITION, camPos, // region relative position
+            CAMERA_POSITION_LOCKED, TRUE // (TRUE or FALSE)
+        ]);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Note that Focus and Position are both locked. This first example makes the camera look at *camFocus* from *camPos*.</summary>
+
+**Camera follow avatar, an example:**
+
+```lsl
+lookAtMe( integer perms )
+{
+    if ( perms & PERMISSION_CONTROL_CAMERA )
+    {
+        llClearCameraParams(); // reset camera to default
+        llSetCameraParams([
+            CAMERA_ACTIVE, 1, // 1 is active, 0 is inactive
+            CAMERA_BEHINDNESS_ANGLE, 30.0, // (0 to 180) degrees
+            CAMERA_BEHINDNESS_LAG, 0.0, // (0 to 3) seconds
+            CAMERA_DISTANCE, 10.0, // ( 0.5 to 10) meters
+          //CAMERA_FOCUS, <0,0,5>, // region relative position
+            CAMERA_FOCUS_LAG, 0.05 , // (0 to 3) seconds
+            CAMERA_FOCUS_LOCKED, FALSE, // (TRUE or FALSE)
+            CAMERA_FOCUS_THRESHOLD, 0.0, // (0 to 4) meters
+            CAMERA_PITCH, 10.0, // (-45 to 80) degrees
+          //CAMERA_POSITION, <0,0,0>, // region relative position
+            CAMERA_POSITION_LAG, 0.0, // (0 to 3) seconds
+            CAMERA_POSITION_LOCKED, FALSE, // (TRUE or FALSE)
+            CAMERA_POSITION_THRESHOLD, 0.0, // (0 to 4) meters
+            CAMERA_FOCUS_OFFSET, <2.0, 0.0, 0.0> // <-10,-10,-10> to <10,10,10> meters
+        ]);
+    }
+}
+```
+
+</details>
+
+Note that in this second example Focus and Position are NOT locked and not even set. This is appropriate for making the camera follow a pilot on a vehicle.
+
+## Tests
+
+- [llSetCameraParams Test](https://wiki.secondlife.com/wiki/llSetCameraParams_Test)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SCR-325 (nf): Damping Parameters for llSetCameraParams()
+- SCR-326 (nf): &lt;code>CAMERA_FOCUS_TARGET&lt;/code> and &lt;code>CAMERA_POSITION_TARGET&lt;/code> parameters for llSetCameraParams()
+- SCR-327 (meta): Improvements to llSetCameraParams()
+
+## See also
+
+### Functions
+
+- [llClearCameraParams](/functions/llClearCameraParams/)
+- [llGetCameraPos](/functions/llGetCameraPos/)
+- [llGetCameraRot](/functions/llGetCameraRot/)
+- [llSetLinkCamera](/functions/llSetLinkCamera/)
+- [llSetCameraEyeOffset](/functions/llSetCameraEyeOffset/)
+- [llSetCameraAtOffset](/functions/llSetCameraAtOffset/)
+
+### Articles
+
+- [FollowCam](https://wiki.secondlife.com/wiki/FollowCam)
+
+<WikiSource />

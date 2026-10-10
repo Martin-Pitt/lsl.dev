@@ -1,0 +1,97 @@
+---
+title: "llList2ListSlice"
+slug: "functions/llList2ListSlice"
+category: functions
+source:
+  wiki: "LlList2ListSlice"
+  url: https://wiki.secondlife.com/wiki/LlList2ListSlice
+  revision: 1216496
+  date: 2024-04-18
+  contributor: "Sei Lisa"
+  raw: /wiki-source/lllist2listslice-bb5c8c29.txt
+  license: "Content from the Second Life Wiki article LlList2ListSlice (revision 1216496, 2024-04-18), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llList2ListSlice" />
+
+The index of the first entry in the list is `0`
+
+The index of the first entry in a slice is `0`
+
+If `start`, `end`, or **slice_index** are negative they are indexed from end of list. -1 is last element in the list. -list_length is the 1st element of the list.
+
+If **slice_index** is negative it is counted from the end of its **stride** regardless of whether or not the **stride** exceeds the end of the list. e.g: -1 is the last element in a **stride**.
+
+If `start` > `end` the range from start to end is treated as an exclusion range.
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) of the **slice_index**'th element of every **stride** in [strided list](https://wiki.secondlife.com/wiki/List#strided-lists) whose index is a multiple of **stride** in the range `start` to `end`.
+
+```lsl title="How to use" frame="terminal"
+list result = llList2ListSlice([], 0, 0, 0, 0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+list mylist = [0,1,2,3,4,5,6];
+list result_a = llList2ListSlice(mylist,0,-1,3,0); //start at first item in list, go to the end, return 1st slice of every stride of 3
+//result_a == [0,3,6]
+
+list result_b = llList2ListSlice(mylist,0,-1,3,1); //start at first item in list, go to the end, return 2nd slice of every stride of 3
+//result_b == [1,4]
+
+list result_c = llList2ListSlice(mylist,1,-1,3,1); //start at second item in list, go to the end, return 2nd slice of every stride of 3
+//result_c == [2,5]
+
+list result_d = llList2ListSlice(mylist,2,-1,3,-1); //start at third item in list, go to the end, return last slice of every stride of 3
+//result_d == [4]
+
+list result_e = llList2ListSlice(mylist,4,2,1,0); //4>2 so this is an exclusion. slice indices count from 0 and first element after exclusion. Return every element not in range with a stride of 1
+//result_e == [0,1,2,4,5,6]
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-7}
+list menu = ["1", "one", "2", "two", "3", "three"];
+default
+{
+    state_entry()
+    {
+        llListen(10, "", llGetOwner(), "");
+    }
+    touch_start(integer detected)
+    {
+        list buttons = llList2ListSlice(menu, 0, -1, 2, 0);
+        llDialog(llDetectedKey(0), "choose a number", buttons, 10); //display the digits
+    }
+    listen(integer channel, string obj, key id, string message)
+    {
+        integer index = llListFindList(menu, [message]);
+        if (index != -1)
+        {
+            list names = llList2ListSlice(menu, 0, -1, 2, 1);
+            llOwnerSay("you chose " + llList2String(names, index/2) + " (" + message + ")");
+        }
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+- [StrideOfList](https://wiki.secondlife.com/wiki/User:Fred_Gandt/Scripts/Functions#strideoflist) - Starting from **start** and stopping before **end** exceeded it skips every **stride**-1 items. returns the **slice_index** element of the **stride** if its position is less than list length.
+
+## Notes
+
+If the list is not modulo the **stride**, elements up to the length of the list will be returned in the final slice matching conditions. e.g. a list of 5 elements with a **stride** of 2 will return 3 elements for a 0,5 range on slice index 0 but only 2 if the **slice_index** is 1.
+
+<WikiSource />

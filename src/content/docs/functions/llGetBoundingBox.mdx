@@ -1,0 +1,183 @@
+---
+title: "llGetBoundingBox"
+slug: "functions/llGetBoundingBox"
+category: functions
+source:
+  wiki: "LlGetBoundingBox"
+  url: https://wiki.secondlife.com/wiki/LlGetBoundingBox
+  revision: 1217504
+  date: 2024-10-09
+  contributor: "Frionil Fang"
+  raw: /wiki-source/llgetboundingbox-15eed385.txt
+  license: "Content from the Second Life Wiki article LlGetBoundingBox (revision 1217504, 2024-10-09), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetBoundingBox" />
+
+The bounding box is for the entire link set, not just the requested prim.
+
+Returns an empty list (`[]`) if **object** is not found.
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) that is the bounding box of **object** relative to its root prim, in [local coordinates](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#local).
+
+Format: `[ (vector) min_corner, (vector) max_corner ]`
+
+```lsl title="How to use" frame="terminal"
+list result = llGetBoundingBox(NULL_KEY);
+```
+
+## Specification
+
+The physical representation of an object is made up of the shape of the prims and avatars seated upon it. The bounding box is the smallest possible cuboid which can contain the physical representation of the object and have its faces aligned to the object's local axes.
+
+## Caveats
+
+- Regardless if **object** is a non-root prim, the bounding box of the object is returned. This also applies if **object** is an agent sitting on an object - the bounding box of the sat-upon object (including the agent's shape) is returned.
+- The bounding box is determined by the physics models, not the visual representation.
+- A child prim with its physics mode set to none will not affect the bounding box.
+- [Phantom](https://wiki.secondlife.com/wiki/Phantom) and [volume detect](/functions/llVolumeDetect/) objects do have physics interactions, which is why they still have bounding boxes.
+- Attachments have no bounding boxes of their own as they have no physics interaction, instead the bounding box of the avatar is returned.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-8, 14-18}
+default//An avatar bounding box ruler thingy
+{
+    state_entry()
+    {
+        llSetStatus(STATUS_PHANTOM, TRUE);
+    }
+
+    touch_start(integer total_number)
+    {
+        key target = llDetectedKey(0);
+        list box = llGetBoundingBox(target);
+        vector center = llDetectedPos(0) + (llList2Vector(box, 0) + llList2Vector(box, 1)) * 0.5;
+        vector size = llList2Vector(box, 1) - llList2Vector(box, 0);
+        llSetPrimitiveParams([PRIM_POSITION, center, PRIM_SIZE, size]);
+        llSetText("Name: " + llDetectedName(0) + ", UUID: " + (string)target +
+                "\nBounding Box Size: " + (string)size, <1.0, 1.0, 1.0>, 1.0);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-21, 27-35}
+// Enclose a named object in the tightest possible box
+// that is aligned with the object's root prim axes.
+// Drop this script in a box near the object to enclose
+// (must be in a 10m range)
+
+string ObjectNameToEnclose = "SearchMe";
+key UUID;
+
+default
+{
+    state_entry()
+    {
+        llSensor(ObjectNameToEnclose, "", ACTIVE | PASSIVE, 10, PI);
+    }
+
+    sensor(integer n)
+    {
+        UUID = llDetectedKey(0);
+        llSetTimerEvent(1);
+    }
+
+    timer()
+    {
+        list info = llGetObjectDetails(UUID, [OBJECT_POS, OBJECT_ROT]) + llGetBoundingBox(UUID);
+        vector pos = llList2Vector(info, 0);
+        rotation rot = llList2Rot(info, 1);
+        vector corner1 = llList2Vector(info, 2) * rot + pos;
+        vector corner2 = llList2Vector(info, 3) * rot + pos;
+        vector size = llList2Vector(info, 3) - llList2Vector(info, 2);
+
+        llSetPos((corner1 + corner2) * 0.5); // Set position to the midpoint (average) of the corners
+        llSetRot(rot);
+        llSetScale(size);
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl collapse={8-53}
+//(bool) isInPrim - determines whether a given vector position in the region is within the borders of a cuboid,
+// respecting the cuboid's rotation.
+integer isInPrim(vector vPos)
+{
+    list bb = llGetBoundingBox(llGetKey());
+    vector min = llList2Vector(bb, 0);
+    vector max = llList2Vector(bb, 1);
+    vPos = (vPos - llGetPos()) / llGetRot();
+    float fTemp;
+    if (min.x > max.x)
+    {
+        fTemp = max.x;
+        max.x = min.x;
+        min.x = fTemp;
+    }
+    if (min.y > max.y)
+    {
+        fTemp = max.y;
+        max.y = min.y;
+        min.y = fTemp;
+    }
+    if (min.z > max.z)
+    {
+        fTemp = max.z;
+        max.z = min.z;
+        min.z = fTemp;
+    }
+    if (vPos.x < min.x)
+    {
+        return FALSE;
+    }
+    if (vPos.y < min.y)
+    {
+        return FALSE;
+    }
+    if (vPos.z < min.z)
+    {
+        return FALSE;
+    }
+    if (vPos.x > max.x)
+    {
+        return FALSE;
+    }
+    if (vPos.y > max.y)
+    {
+        return FALSE;
+    }
+    if (vPos.z > max.z)
+    {
+        return FALSE;
+    }
+    return TRUE;
+}
+```
+
+## History
+
+##### Sitting in 1.36
+
+Avatars historically when they sit upon an object have been treated as part of the object, like a prim, even being assigned a link number (which can be used to detect and manipulate them to some extent). Unrelated to this, requesting the bounding box for a child prim of an object would return the bounding box for the entire object (unless it was an attachment, which point it would return the bounding box for the avatar). The first is something of a misfeature, the latter is an honest to goodness feature; the combination of these two lead to something interesting: Prior to 1.36 requesting the bounding box of an attachment while seated returned the bounding box for the object sat upon. It got reported as a bug [SVC-1174](https://jira.secondlife.com/browse/SVC-1174), and the behavior was changed in 1.36. The bounding box for the object sat upon is unchanged by 1.36, the avatar still counts. However when the bounding box for the seated avatar is requested it does not fall through to the object being sat upon.
+
+## See also
+
+### Functions
+
+- [llGetAgentSize](/functions/llGetAgentSize/)
+
+<WikiSource />

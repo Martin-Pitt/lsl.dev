@@ -1,0 +1,74 @@
+---
+title: "llGetDayLength"
+slug: "functions/llGetDayLength"
+category: functions
+source:
+  wiki: "LlGetDayLength"
+  url: https://wiki.secondlife.com/wiki/LlGetDayLength
+  revision: 1211037
+  date: 2022-08-23
+  contributor: "Jenna Huntsman"
+  raw: /wiki-source/llgetdaylength-69b46f82.txt
+  license: "Content from the Second Life Wiki article LlGetDayLength (revision 1211037, 2022-08-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetDayLength" />
+
+Return the number of seconds in the day cycle applied to the current parcel. [llGetDayLength](/functions/llGetDayLength/) returns the number of seconds for the current parcel, [llGetRegionDayLength](/functions/llGetRegionDayLength/) is the number of seconds in the day cycle applied to the entire region.
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetDayLength();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-13}
+// print the apparent time of day as HH:MM (%), just like the environment window in the viewer.
+// Time of day is a fraction between 0 and 1, 0 is midnight, 0.5 is noon
+string printTimeOfDay(float dayFraction) {
+    integer hours = (integer)(dayFraction * 24);
+    integer minutes = (integer)(dayFraction * 24 * 60) % 60;
+    integer percent = (integer)(dayFraction * 100);
+    return (string)hours + ":" + llGetSubString((string)(100+minutes), 1, 2) + " (" + (string)percent + "%)";
+}
+
+default {
+    state_entry() {
+        llSetTimerEvent(5);
+    }
+
+    timer() {
+        float timeOfDay = (llGetUnixTime() + llGetDayOffset()) % llGetDayLength() * 1.0 / llGetDayLength();
+        llSetText(printTimeOfDay(timeOfDay), <1,1,0>, 1);
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetEnvironment](/functions/llGetEnvironment/)
+
+Newer function that consolidates many environment-based settings.
+
+- [llGetDayLength](/functions/llGetDayLength/)
+- [llGetDayOffset](/functions/llGetDayOffset/)
+- [llGetMoonDirection](/functions/llGetMoonDirection/)
+- [llGetMoonRotation](/functions/llGetMoonRotation/)
+- [llGetSunDirection](/functions/llGetSunDirection/)
+- [llGetSunRotation](/functions/llGetSunRotation/)
+- [llGetRegionDayLength](/functions/llGetRegionDayLength/)
+- [llGetRegionDayOffset](/functions/llGetRegionDayOffset/)
+- [llGetRegionMoonDirection](/functions/llGetRegionMoonDirection/)
+- [llGetRegionMoonRotation](/functions/llGetRegionMoonRotation/)
+- [llGetRegionSunDirection](/functions/llGetRegionSunDirection/)
+- [llGetRegionSunRotation](/functions/llGetRegionSunRotation/)
+
+<WikiSource />

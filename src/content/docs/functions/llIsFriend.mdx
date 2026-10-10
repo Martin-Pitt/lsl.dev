@@ -1,0 +1,73 @@
+---
+title: "llIsFriend"
+slug: "functions/llIsFriend"
+category: functions
+source:
+  wiki: "LlIsFriend"
+  url: https://wiki.secondlife.com/wiki/LlIsFriend
+  revision: 1218389
+  date: 2025-08-02
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/llisfriend-ca557dbf.txt
+  license: "Content from the Second Life Wiki article LlIsFriend (revision 1218389, 2025-08-02), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llIsFriend" />
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is [TRUE](/constants/TRUE/) if **agent_id** and the owner of the [prim](https://wiki.secondlife.com/wiki/prim) the [script](https://wiki.secondlife.com/wiki/Script) is in are friends, otherwise [FALSE](/constants/FALSE/).
+
+```lsl title="How to use" frame="terminal"
+integer result = llIsFriend(NULL_KEY);
+```
+
+## Specification
+
+- If the prim is owned by a group this function behaves identically to [llSameGroup](/functions/llSameGroup/)
+- This function will return [FALSE](/constants/FALSE/) under the following edge cases:
+- If neither the owner, nor the target agent are in the region.
+- If the **agent_id** does not specify an agent.
+
+## Caveats
+
+- You are not your own friend.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-11}
+default
+{
+    state_entry()
+    {
+        llSensorRepeat("", NULL_KEY, AGENT, 95, PI, 10);
+    }
+
+    sensor(integer count)
+    {
+        integer index;
+        for (index = 0; index < count; ++index)
+        {
+            string is_is_not = " is NOT ";
+            if (llIsFriend(llDetectedKey(index)))
+            {
+                is_is_not = " is ";
+            }
+            llSay(0, llDetectedName(index) + is_is_not + "a friend.");
+        }
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llDetectedGroup](/functions/llDetectedGroup/)
+- [llSameGroup](/functions/llSameGroup/)
+
+<WikiSource />

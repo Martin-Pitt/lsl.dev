@@ -1,0 +1,112 @@
+---
+title: "llGetScriptState"
+slug: "functions/llGetScriptState"
+category: functions
+source:
+  wiki: "LlGetScriptState"
+  url: https://wiki.secondlife.com/wiki/LlGetScriptState
+  revision: 1215122
+  date: 2023-10-18
+  contributor: "Frionil Fang"
+  raw: /wiki-source/llgetscriptstate-d6594ef1.txt
+  license: "Content from the Second Life Wiki article LlGetScriptState (revision 1215122, 2023-10-18), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetScriptState" description />
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is [TRUE](/constants/TRUE/) if the **script** is running.
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetScriptState("");
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-8, 14-24}
+default
+{
+    touch_start(integer num_detected)
+    {
+        integer numberOfScripts = llGetInventoryNumber(INVENTORY_SCRIPT);
+
+        integer index;
+        do
+        {
+            string scriptName = llGetInventoryName(INVENTORY_SCRIPT, index);
+            integer scriptState = llGetScriptState(scriptName);
+
+        //  default value
+            string output = "FALSE";
+        //  else
+            if (scriptState) output = "TRUE";
+
+            // PUBLIC_CHANNEL has the integer value 0
+            llSay(PUBLIC_CHANNEL,
+                "Script named '" + scriptName + "' has current script state '" + output + "'.");
+        }
+        while (++index < numberOfScripts);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-18, 29-35}
+// Monitor other scripts in the object, then report, restart or both if some have crashed
+// NB: cannot distinguish a manually stopped script or restart one
+integer TRY_RESTART = FALSE;
+integer REPORT = TRUE;
+
+default
+{
+    state_entry() {
+        // monitoring rate = once per minute
+        llSetTimerEvent(60);
+    }
+
+    timer() {
+        integer i = llGetInventoryNumber(INVENTORY_SCRIPT);
+        string script_name;
+        list stopped;
+
+        while(--i >= 0) {
+            // the script will also monitor itself, but there is little reason to specifically skip
+            script_name = llGetInventoryName(INVENTORY_SCRIPT, i);
+            if(!llGetScriptState(script_name)) {
+                if(TRY_RESTART)
+                    llResetOtherScript(script_name);
+                if(REPORT)
+                    stopped += script_name;
+            }
+        }
+        if(stopped) {
+            string message = "The following scripts were crashed/stopped: " + llList2CSV(stopped) + ".";
+            if(TRY_RESTART)
+                message += " A restart was attempted.";
+            llInstantMessage(llGetOwner(), message);
+        }
+    }
+}
+```
+
+</details>
+
+## History
+
+- There was a time when [llGetScriptState](/functions/llGetScriptState/) would return [TRUE](/constants/TRUE/) even if the script had encountered a [run-time error](https://wiki.secondlife.com/wiki/Category:LSL_Error). This is no longer the case.
+
+## See also
+
+### Functions
+
+- [llSetScriptState](/functions/llSetScriptState/)
+- [llResetOtherScript](/functions/llResetOtherScript/)
+
+<WikiSource />

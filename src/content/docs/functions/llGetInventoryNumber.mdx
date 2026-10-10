@@ -1,0 +1,267 @@
+---
+title: "llGetInventoryNumber"
+slug: "functions/llGetInventoryNumber"
+category: functions
+source:
+  wiki: "LlGetInventoryNumber"
+  url: https://wiki.secondlife.com/wiki/LlGetInventoryNumber
+  revision: 1214985
+  date: 2023-10-11
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llgetinventorynumber-e144fea5.txt
+  license: "Content from the Second Life Wiki article LlGetInventoryNumber (revision 1214985, 2023-10-11), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetInventoryNumber" description />
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is the number of items of a given **type** in the prims inventory.
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetInventoryNumber(0);
+```
+
+## Specification
+
+<table>
+	<tr>
+		<td>
+
+			<table>
+				<tr>
+					<th colspan="2">**Flag**</th>
+					<th>**Inventory Type**</th>
+				</tr>
+				<tr>
+					<td>[INVENTORY_NONE](/constants/INVENTORY_NONE/)</td>
+					<td rowspan="2">-1</td>
+					<td>Item does not exist.</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_ALL](/constants/INVENTORY_ALL/)</td>
+					<td>Any inventory type.</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_TEXTURE](/constants/INVENTORY_TEXTURE/)</td>
+					<td>0</td>
+					<td>[texture](https://wiki.secondlife.com/wiki/texture)</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_SOUND](/constants/INVENTORY_SOUND/)</td>
+					<td>1</td>
+					<td>[sound](https://wiki.secondlife.com/wiki/sound)</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_LANDMARK](/constants/INVENTORY_LANDMARK/)</td>
+					<td>3</td>
+					<td>[landmark](https://wiki.secondlife.com/wiki/landmark)</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_CLOTHING](/constants/INVENTORY_CLOTHING/)</td>
+					<td>5</td>
+					<td>[clothing](https://wiki.secondlife.com/wiki/clothing)</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_OBJECT](/constants/INVENTORY_OBJECT/)</td>
+					<td>6</td>
+					<td>[object](https://wiki.secondlife.com/wiki/object)</td>
+				</tr>
+			</table>
+
+		</td>
+		<td>
+
+			<table>
+				<tr>
+					<th colspan="2">**Flag**</th>
+					<th>**Inventory Type**</th>
+				</tr>
+				<tr>
+					<td>[INVENTORY_NOTECARD](/constants/INVENTORY_NOTECARD/)</td>
+					<td>7</td>
+					<td>[notecard](https://wiki.secondlife.com/wiki/notecard)</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_SCRIPT](/constants/INVENTORY_SCRIPT/)</td>
+					<td>10</td>
+					<td>[script](https://wiki.secondlife.com/wiki/Script)</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_BODYPART](/constants/INVENTORY_BODYPART/)</td>
+					<td>13</td>
+					<td>[body part](https://wiki.secondlife.com/wiki/Body_part)</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_ANIMATION](/constants/INVENTORY_ANIMATION/)</td>
+					<td>20</td>
+					<td>[animation](https://wiki.secondlife.com/wiki/Animation)</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_GESTURE](/constants/INVENTORY_GESTURE/)</td>
+					<td>21</td>
+					<td>[gesture](https://wiki.secondlife.com/wiki/gesture)</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_SETTING](/constants/INVENTORY_SETTING/)</td>
+					<td>56</td>
+					<td>[setting](https://wiki.secondlife.com/wiki/Environmental_Enhancement_Project)</td>
+				</tr>
+				<tr>
+					<td>[INVENTORY_MATERIAL](/constants/INVENTORY_MATERIAL/)</td>
+					<td>57</td>
+					<td>[material](https://wiki.secondlife.com/wiki/PBR_Materials)</td>
+				</tr>
+			</table>
+
+		</td>
+	</tr>
+</table>
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-21, 27-49}
+//                             Item Counter
+//                       By Apollia Pirandello
+//                              9/19/2007
+//
+// Public domain.  Free to use and/or modify for any purpose,
+// including commercial purposes.
+//
+// Once you drop this script in any prim, it will immediately
+// tell you in an OwnerSay how many items are in that prim,
+// minus 1, so the script itself isn't counted.
+//
+// It will also do that whenever the prim is touched.
+//**********SCRIPT BEGINS BELOW**********
+
+//****VARIABLE
+
+integer items_contained;
+
+//****END OF VARIABLE SECTION
+//****FUNCTIONS****
+
+CountItems()
+{
+  items_contained = llGetInventoryNumber( INVENTORY_ALL );
+  --items_contained; //minus 1, the script itself isn't counted, since its used with the INVENTORY_ALL flag
+}
+
+SayCount()
+{
+  llOwnerSay( "This prim contains " + (string)items_contained + " items." );
+}
+
+//****END OF FUNCTIONS****
+//****DEFAULT STATE****
+
+default
+{
+  state_entry()
+  {
+    CountItems();
+    SayCount();
+  }
+
+  touch_start(integer total_number)
+  {
+    CountItems();
+    SayCount();
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+objects = llGetInventoryNumber(INVENTORY_OBJECT);
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl collapse={5-24, 38-56}
+// Inventory Statistic By Zep Palen.
+// Here is another use of llGetInventoryNumber to show a statistic in a hovertext
+// For this script to work you must add a showlist and an excludelist to the Description of the item this script is in.
+// The description field must be filled like follows: [showlist];[Excludelist]
+// Example: 0,1,3,5,6,7,10,13,20,21;3,7,10
+// in the example all types are shown, but only types 3,7 and 10 are counted as total. You can see in the 2 lists below which number means which type
+// -----------------
+// This script is free to use and modify as you wish - Zep Palen
+// --------------------------
+
+list inv_types = [0, 1, 3, 5, 6, 7, 10, 13, 20, 21];
+list inv_names = ["Textures", "Sounds", "Landmarks", "Clothings", "Objects", "Notecards", "Scripts", "Bodyparts", "Animations", "Gestures"];
+
+processCountInventory()
+{
+    list objDesc = llParseString2List(llGetObjectDesc(), [";"], []);
+    list showList = llParseString2List(llList2String(objDesc, 0), [","], []);
+    list excludeFromCount = llParseString2List(llList2String(objDesc, 1), [","], []);
+
+    string counted = "ITEM COUNTER";
+    integer i = ~llGetListLength(showList);
+    while (++i)
+    {
+        integer showItem = (integer)llList2String(showList, i);
+        integer sIndex = llListFindList(inv_types, [showItem]);
+        if (~sIndex)
+            counted += "\n" + llList2String(inv_names, sIndex) + ": " + (string)llGetInventoryNumber(showItem);
+    }
+    integer totalCount = llGetInventoryNumber(INVENTORY_ALL);
+    for (i = ~llGetListLength(excludeFromCount); ++i;)
+    {
+        integer exclItem = (integer)llList2String(excludeFromCount, i);
+        integer cIndex = llListFindList(inv_types, [(string)exclItem]);
+        if (~cIndex)
+            totalCount = totalCount - llGetInventoryNumber(exclItem);
+    }
+
+    counted += "\n \n" + "Total: " + (string)totalCount;
+    llSetText(counted, <1,1,0>, 1);
+}
+
+default
+{
+    state_entry()
+    {
+        processCountInventory();
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_INVENTORY)
+        {
+            processCountInventory();
+        }
+    }
+}
+```
+
+</details>
+
+## Tests
+
+- [llGiveInventory_All_Test](https://wiki.secondlife.com/wiki/llGiveInventory_All_Test)
+
+## See also
+
+### Functions
+
+- [llGetInventoryAcquireTime](/functions/llGetInventoryAcquireTime/) — Returns the time the item was added to the prim's inventory
+- [llGetInventoryName](/functions/llGetInventoryName/) — Returns the inventory item's name
+- [llGetInventoryType](/functions/llGetInventoryType/) — Tests to see if an inventory item exists and returns its type.
+- [llGetInventoryCreator](/functions/llGetInventoryCreator/) — Returns the inventory item's creator
+- [llGetInventoryPermMask](/functions/llGetInventoryPermMask/) — Returns the inventory item's permissions
+- [llGetInventoryKey](/functions/llGetInventoryKey/) — Returns the inventory item's [UUID](https://wiki.secondlife.com/wiki/UUID) (if full perm)
+
+<WikiSource />

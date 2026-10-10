@@ -1,0 +1,79 @@
+---
+title: "llGetTexture"
+slug: "functions/llGetTexture"
+category: functions
+source:
+  wiki: "LlGetTexture"
+  url: https://wiki.secondlife.com/wiki/LlGetTexture
+  revision: 1215657
+  date: 2023-11-30
+  contributor: "Jenna Huntsman"
+  raw: /wiki-source/llgettexture-36a88bd8.txt
+  license: "Content from the Second Life Wiki article LlGetTexture (revision 1215657, 2023-11-30), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetTexture" />
+
+If the texture is in the prim's inventory, the return value is the inventory name, otherwise the returned value is the texture [UUID](https://wiki.secondlife.com/wiki/UUID).
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the [Blinn-Phong](https://wiki.secondlife.com/wiki/PBR_Materials#nomenclature-changes) diffuse texture on **face**
+
+```lsl title="How to use" frame="terminal"
+string result = llGetTexture(0);
+```
+
+## Caveats
+
+[NULL_KEY](/constants/NULL_KEY/)
+
+is returned when the [owner](https://wiki.secondlife.com/wiki/Category:LSL_Owner) does not have [full permissions](https://wiki.secondlife.com/wiki/Category:LSL_Permissions/Asset) to the object and the texture is not in the prim's inventory.
+
+- The white texture from the texture picker is "[5748decc-f629-461c-9a36-a35a221fe21f](/constants/TEXTURE_BLANK/)"
+- The default texture (plywood) is "[89556747-24cb-43ed-920b-47caed15465f](/constants/TEXTURE_PLYWOOD/)"
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//Tells (on chat) the texture keys / texture names on 6 sides
+default
+{
+    state_entry()
+    {
+        integer i = 0;
+        integer max = llGetNumberOfSides();
+        while(i < max)
+        {
+            llSay(0,"Side " + (string)i + " texture is: " + (string)llGetTexture(i));
+            ++i;
+        }
+    }
+}
+```
+
+</details>
+
+## History
+
+- On 5/15/2005 (give or take a day) `llGetTexture` was changed to check the host object's permissions and if inadequate return
+
+[NULL_KEY](/constants/NULL_KEY/)
+
+.
+
+- http://forums-archive.secondlife.com/54/a1/47066/1.html
+- http://forums-archive.secondlife.com/54/09/33388/1.html
+
+## See also
+
+### Functions
+
+- [PrimitiveParams](https://wiki.secondlife.com/wiki/Category:LSL_PrimitiveParams) — [PRIM_TEXTURE](/constants/PRIM_TEXTURE/)
+- [llSetTexture](/functions/llSetTexture/)
+- [llSetLinkTexture](/functions/llSetLinkTexture/) — Sets link's texture
+- [llGetNumberOfSides](/functions/llGetNumberOfSides/) — Gets the number of faces on the prim
+
+<WikiSource />

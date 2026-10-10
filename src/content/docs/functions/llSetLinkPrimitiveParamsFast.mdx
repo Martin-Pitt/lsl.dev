@@ -1,0 +1,359 @@
+---
+title: "llSetLinkPrimitiveParamsFast"
+slug: "functions/llSetLinkPrimitiveParamsFast"
+category: functions
+source:
+  wiki: "LlSetLinkPrimitiveParamsFast"
+  url: https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParamsFast
+  revision: 1181598
+  date: 2013-09-12
+  contributor: "Strife Onizuka"
+  raw: /wiki-source/llsetlinkprimitiveparamsfast-65325523.txt
+  license: "Content from the Second Life Wiki article LlSetLinkPrimitiveParamsFast (revision 1181598, 2013-09-12), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetLinkPrimitiveParamsFast" />
+
+These functions are almost entirely identical. For almost all situations we recommend you use [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/).
+
+These are very `powerful` & `sharp` functions. Each PRIM\_\* rule takes at least one parameter and has its own quirks and its own dedicated article with specific information.
+
+There are two differences:
+
+- How long does it force the script to sleep?
+- : **Zero**: [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+- : **200 milliseconds**: [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams)
+- Does it have a **link** parameter?
+- : **No**: [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams)
+- : **Yes**: [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams) [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+
+Sets the prims parameters according to **rules**.
+
+This function is fast compared to the above variations, not other LSL functions.
+
+### Caveats
+
+- Sometimes `llSetLinkPrimitiveParamsFast` is *too fast*, i.e. the function returns and the next line of code executes & returns before the update has been processed, resulting in the updates being out of order. In most situations, there is no difference in behavior but sometimes there is. In those cases, you need to use [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) or [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams).
+- This occurs because the [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) payload is being executed asynchronously, while [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) and [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams) payloads are executed synchronously (or the delay makes it appear synchronous).
+
+```lsl title="How to use" frame="terminal"
+llSetLinkPrimitiveParamsFast(0, []);
+```
+
+## Specification
+
+<ConstantGroup name="PrimParam" />
+
+The set rules table is shared by several functions and is not repeated here. See [Template:LSL Constants/PrimitiveParams](https://wiki.secondlife.com/wiki/Template:LSL_Constants/PrimitiveParams) on the wiki.
+
+## Shared wiki article
+
+This page transcludes [LlSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams). The following text is from that archived revision.
+
+## Caveats
+
+- [PRIM_SIZE](/constants/PRIM_SIZE/) has similar constraints to [llSetScale](/functions/llSetScale/) and fails silently on physical prims/links. One workaround is to set items to non-physical before changing their size, then changing them back to physical; this can be accomplished in a single [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) command using [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/).
+- [PRIM_PHANTOM](/constants/PRIM_PHANTOM/), [PRIM_PHYSICS](/constants/PRIM_PHYSICS/) and [PRIM_TEMP_ON_REZ](/constants/PRIM_TEMP_ON_REZ/) applies to the entire object ([linkset](https://wiki.secondlife.com/wiki/Link#link-set)).
+- Values may drift, become truncated or be range-limited. Some limits are applied by the client during deserialization and before rendering, others are applied by the simulator before storing the values.
+- When testing [vector](https://wiki.secondlife.com/wiki/vector)s and [rotation](https://wiki.secondlife.com/wiki/rotation)s use [llVecDist](/functions/llVecDist/) and [llAngleBetween](/functions/llAngleBetween/) (respectively) to perform fuzzy tests.
+- [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/) is a special parameter which can be inserted to perform actions on multiple prims on the [linkset](https://wiki.secondlife.com/wiki/Link#link-set) with one call.
+- Scripts written before September 2004 that use [PRIM_TYPE](/constants/PRIM_TYPE/) depend on [PRIM_TYPE](/constants/PRIM_TYPE/) to have the value 1; if these scripts are recompiled, the new value of `PRIM_TYPE` will be used, causing errors at runtime.
+- To fix this, replace the [PRIM_TYPE](/constants/PRIM_TYPE/) flag with the value 1 or update to the newer [PRIM_TYPE](/constants/PRIM_TYPE/) syntax.
+- [PRIM_ROTATION](/constants/PRIM_ROTATION/) is bugged in child prims. See [Useful Snippets](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) for a workaround, or the linked SVC-93 issue below.
+- This function will return an error if given data of the wrong type. This is problematic when providing data from user input or notecard. To remedy this, see [List Cast](https://wiki.secondlife.com/wiki/list_cast) function.
+- Applying an operation to [LINK_SET](/constants/LINK_SET/) will apply it first to the root prim, then to each child prim.
+- The sim will clamp attributes before storing them.
+- The client will clamp attributes before rendering.
+- **Some prim properties are reset** by this function
+- A flexible prim will become not flexible
+- A sliced prim will become unsliced
+- : In order to preserve properties they must be saved and explicitly set in the function call
+
+:::note
+When wanting to change the alpha value of a face, please consider using [llSetLinkAlpha](/functions/llSetLinkAlpha/)(integer link, float alpha, integer face); instead of [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)(integer link, \[ [PRIM_COLOR](/constants/PRIM_COLOR/), integer face, vector color, float alpha \]);, that way you don't have to mess with the color settings. Also don't expect [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) being faster than [llSetText](/functions/llSetText/) when setting a float text property within a loop like at "% loading" status bars. Measurements showed [llSetText](/functions/llSetText/) being 3-4 times faster. That also might applies for similar functions.
+:::
+
+- Attempting to change [PRIM_TYPE](/constants/PRIM_TYPE/) of a [mesh](https://wiki.secondlife.com/wiki/mesh) object has no effect.
+- Keeping the [PRIM_TYPE](/constants/PRIM_TYPE/) as [PRIM_TYPE_SCULPT](/constants/PRIM_TYPE_SCULPT/) and trying to set a different sculpt map or sculpt flags on a mesh also does nothing. Additionally, a script residing inside a mesh type prim cannot change the sculpt parameters of *any* prim in the linkset.
+- The caveats described at [llSetClickAction](/functions/llSetClickAction/#caveats) all apply to [PRIM_CLICK_ACTION](/constants/PRIM_CLICK_ACTION/).
+
+## Examples
+
+<details open>
+<summary>A simple script to light up a prim in a [linkset](https://wiki.secondlife.com/wiki/Link#link-set) when touched, and unlight the others using llSetLinkPrimitiveParams, when script is installed in the root prim of the linkset.</summary>
+
+```lsl
+// Turn all prims off and the one touched turn on
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        llSetLinkPrimitiveParamsFast(LINK_SET, [
+                PRIM_FULLBRIGHT, ALL_SIDES, FALSE,
+            PRIM_LINK_TARGET, llDetectedLinkNumber(0),
+                PRIM_FULLBRIGHT, ALL_SIDES, TRUE]);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>A simple script which moves all child prims .25m forward on the root's Z axis, when touched.</summary>
+
+```lsl collapse={1-27}
+default
+{
+    touch_start(integer total_number)
+    {
+        integer numberOfPrims = llGetNumberOfPrims();
+
+        if (numberOfPrims < 2) return;
+
+        vector  link_pos;
+        list    params;
+
+        integer link = 2;// start with first child prim
+        do
+        {
+//          get a child prim's local position (i.e, relative to the root prim)
+            link_pos = llList2Vector(llGetLinkPrimitiveParams(link, [PRIM_POS_LOCAL]), 0);
+
+            link_pos.z += 0.25;// relative to root's local z-axis !!!
+
+            params += [PRIM_LINK_TARGET, link,
+                            PRIM_POS_LOCAL, link_pos];
+        }
+        while (++link <= numberOfPrims);
+
+        if (!llGetListLength(params)) return;
+
+//      the params list starts with a PRIM_LINK_TARGET (a hack so we can start
+//      with the first child prim), so it doesn't really matter which number you
+//      put as first parameter in this function call
+        llSetLinkPrimitiveParamsFast(2, params);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+:::note
+You can use one function call instead of two when making use of [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/).
+:::
+
+<table>
+	<tr>
+		<th>**Preferred method using [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/)**</th>
+		<th>**Second method does the same effect-wise.**</th>
+	</tr>
+	<tr>
+		<td>
+
+			```lsl
+			//  color the root prim red and the first linked-prim green
+
+			default
+			{
+			    touch_start(integer num_detected)
+			    {
+			        llSetLinkPrimitiveParamsFast(LINK_ROOT, [
+			                PRIM_COLOR, ALL_SIDES, <1.0, 0.0, 0.0>, 1.0,
+			            PRIM_LINK_TARGET, 2,
+			                PRIM_COLOR, ALL_SIDES, <0.0, 1.0, 0.0>, 1.0]);
+			    }
+			}
+			```
+
+		</td>
+		<td>
+
+			```lsl
+			//  color the root prim red and the first linked-prim green
+
+			default
+			{
+			    touch_start(integer num_detected)
+			    {
+			        llSetLinkPrimitiveParamsFast(LINK_ROOT, [
+			                PRIM_COLOR, ALL_SIDES, <1.0, 0.0, 0.0>, 1.0]);
+			        llSetLinkPrimitiveParamsFast(2, [
+			                PRIM_COLOR, ALL_SIDES, <0.0, 1.0, 0.0>, 1.0]);
+			    }
+			}
+			```
+
+		</td>
+	</tr>
+</table>
+
+<table>
+	<tr>
+		<th>**Combining function calls**</th>
+	</tr>
+	<tr>
+		<td>
+
+			```lsl
+			// Combined function calls
+
+			default
+			{
+			    touch_start(integer num_detected)
+			    {
+			        // color prim faces, set texture and set fullbright
+			        llSetPrimitiveParams([
+			            PRIM_COLOR, ALL_SIDES, ZERO_VECTOR, 1.0,
+			            PRIM_COLOR, 3, <1.0, 1.0, 1.0>, 1.0,
+			            PRIM_TEXTURE, 3, "4d304955-2b01-c6c6-f545-c1ae1e618288", <1.0, 1.0, 0.0>, ZERO_VECTOR, 0.0,
+			            PRIM_FULLBRIGHT, 3, TRUE]);
+			    }
+			}
+			```
+
+		</td>
+	</tr>
+	<tr>
+		<td>
+
+			```lsl
+			// Single function calls
+
+			default
+			{
+			    touch_start(integer num_detected)
+			    {
+			        // color prim faces
+			        llSetPrimitiveParams([
+			            PRIM_COLOR, ALL_SIDES, ZERO_VECTOR, 1,
+			            PRIM_COLOR, 3, <1.0, 1.0, 1.0>, 1.0]);
+
+			        // set texture
+			        llSetPrimitiveParams([
+			            PRIM_TEXTURE, 3, "4d304955-2b01-c6c6-f545-c1ae1e618288", <1.0, 1.0, 0.0>, ZERO_VECTOR, 0.0]);
+
+			        // set fullbright
+			        llSetPrimitiveParams([
+			            PRIM_FULLBRIGHT, 3, TRUE]);
+			    }
+			}
+			```
+
+		</td>
+	</tr>
+</table>
+
+```lsl
+// And if you want to place it above your bed, to make you sleep well, and the coords
+// of that place are, for example, <x, y, z>
+llSetPrimitiveParams([
+    PRIM_COLOR, ALL_SIDES, ZERO_VECTOR, 1.0,
+    PRIM_COLOR, 3, <1.0,1.0,1.0>, 1.0,
+    PRIM_TEXTURE, 3, "4d304955-2b01-c6c6-f545-c1ae1e618288", <1.0, 1.0, 0.0>, ZERO_VECTOR,0.0,
+    PRIM_FULLBRIGHT, 3, TRUE,
+    PRIM_POSITION, <x, y, z>]);
+
+// You can set the texture of several sides at once, with no time penalty,
+// just by repeating the param for that:
+llSetPrimitiveParams([
+    PRIM_TEXTURE, 3, "4d304955-2b01-c6c6-f545-c1ae1e618288", <1.0, 1.0, 0.0>, ZERO_VECTOR, 0.0,
+    PRIM_TEXTURE, 4, "4d304955-2b01-c6c6-f545-c1ae1e618288", <1.0, 1.0, 0.0>, ZERO_VECTOR, 0.0]);
+```
+
+</details>
+
+<details>
+<summary>Example 4</summary>
+
+### Top-size (taper)
+
+```lsl
+default
+{
+    state_entry()
+    {
+        vector scale = llGetScale();
+        float  X     = scale.x;
+        float  Y     = scale.y;
+
+        llSetPrimitiveParams([
+            PRIM_SIZE, <X, Y, 0.1>, // keep the prim thin
+            PRIM_TYPE, PRIM_TYPE_BOX, 0, <0.0,1.0,0.0>, 0.0, ZERO_VECTOR,
+                <1.0 - (0.4 / X), 1.0 - (0.4 / Y), 0.0>, ZERO_VECTOR]);
+        // We used the equation "answer = 1 - desired_taper"
+
+        // The proportions of the top-size (taper) will be maintained (as close as possible)
+        // whenever the prim is resized. The proportion above will produce a reasonably
+        // pleasing picture frame kinda thing.
+    }
+
+    changed(integer change)
+    {
+        if(change & CHANGED_SCALE)
+        {
+            llResetScript();
+        }
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+//-- PRIM_ROTATION workaround for child prims (works in unattached objects only)
+llSetLinkPrimitiveParamsFast(linknumber, [
+    PRIM_ROT_LOCAL, rot*llGetRootRotation()]);
+
+//-- PRIM_ROTATION workaround for child prims (works in linked objects only)
+llSetLinkPrimitiveParamsFast(linknumber, [
+    PRIM_ROT_LOCAL, rot*llList2Rot(llGetLinkPrimitiveParams(LINK_ROOT, [PRIM_ROT_LOCAL]), 0)]);
+
+//-- PRIM_ROTATION workaround for child prims (works in all scenarios)
+llSetLinkPrimitiveParamsFast(linknumber, [
+    PRIM_ROT_LOCAL, rot*llList2Rot(llGetLinkPrimitiveParams(!!llGetLinkNumber(), [PRIM_ROT_LOCAL]), 0)]);
+```
+
+## Notes
+
+The old [PRIM_TYPE](/constants/PRIM_TYPE/) interface (labeled PRIM_TYPE_LEGACY), while technically retired, can still be used.
+
+### [PRIM_POSITION](/constants/PRIM_POSITION/)
+
+`{{#var:PRIM_POSITION/SLPP&A}}`
+
+## History
+
+- Date of release llSetLinkPrimitiveParams [21-02-2007](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.13#release-notes-for-second-life-1-13-4-281-29-february-21-2c-2007) or [14-03-2007](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.14)
+- Date of release `llSetLinkPrimitiveParamsFast` [29-03-2010](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/1.38#new-features)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-2105 (nf): '''llSetLinkListPrimitiveParams'''() for setting multiple, specific linked items
+
+## See also
+
+### Functions
+
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/) — Get many primitive parameters
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/) — Get many primitive parameters of other prims in likset
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) — Set parameters on other prims in linkset without sleep
+- [llSetAlpha](/functions/llSetAlpha/) — Simpler way to set alpha (transparency) without (re-)setting color.
+- [llSetTexture](/functions/llSetTexture/) — Simpler way to set texture
+- [llSetColor](/functions/llSetColor/) — Simpler way to set color
+- [llSetScale](/functions/llSetScale/) — Simpler way to set scale
+- [llSetStatus](/functions/llSetStatus/) — Simpler way to set physics and phantom
+
+### Articles
+
+- [Internal Textures](https://wiki.secondlife.com/wiki/Internal_Textures)
+
+<WikiSource />

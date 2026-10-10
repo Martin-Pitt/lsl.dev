@@ -1,0 +1,259 @@
+---
+title: "transaction_result"
+slug: "events/transaction_result"
+category: events
+source:
+  wiki: "Transaction result"
+  url: https://wiki.secondlife.com/wiki/Transaction_result
+  revision: 1215776
+  date: 2023-12-07
+  contributor: "Signal Linden"
+  raw: /wiki-source/transaction-result-679e270a.txt
+  license: "Content from the Second Life Wiki article Transaction result (revision 1215776, 2023-12-07), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="transaction_result" description />
+
+Triggered when task receives asynchronous data
+
+```lsl title="How to use" frame="terminal"
+transaction_result(key id, integer success, string data)
+{
+
+}
+```
+
+## Specification
+
+<table>
+	<tr>
+		<th>[llTransfer\*](https://wiki.secondlife.com/wiki/Category:LSL_Transfer) Function ---- **data** CSV Contents</th>
+		<th>Error Tag (Returned from data)</th>
+		<th>Error Tag Description</th>
+	</tr>
+	<tr>
+		<td rowspan="12">`key llTransferLindenDollars( key destination, integer amount )` ---- `[ key destination, integer amount ]`</td>
+		<td>LINDENDOLLAR_INSUFFICIENTFUNDS</td>
+		<td>The source agent does not have enough L$ for the transfer</td>
+	</tr>
+	<tr>
+		<td>LINDENDOLLAR_ENTITYDOESNOTEXIST</td>
+		<td>The destination UUID is not a valid agent.</td>
+	</tr>
+	<tr>
+		<td>LINDENDOLLAR_BADCLOCKSKEW</td>
+		<td>There is bad clock skew between the sim host and the L$ service</td>
+	</tr>
+	<tr>
+		<td>INVALID_DESTINATION</td>
+		<td>Destination agent is not a valid UUID</td>
+	</tr>
+	<tr>
+		<td>INVALID_AMOUNT</td>
+		<td>Amount is &lt;= 0</td>
+	</tr>
+	<tr>
+		<td>THROTTLED</td>
+		<td>The scripted L$ throttle was hit for this object owner.</td>
+	</tr>
+	<tr>
+		<td>MISSING_PERMISSION_DEBIT</td>
+		<td>The script does not have [debit permission](/constants/PERMISSION_DEBIT/)</td>
+	</tr>
+	<tr>
+		<td>GROUP_OWNED</td>
+		<td>The object is group owned and thus can't give money</td>
+	</tr>
+	<tr>
+		<td>TRANSFERS_DISABLED</td>
+		<td>L$ transfers are disabled in the region</td>
+	</tr>
+	<tr>
+		<td>EXPIRED</td>
+		<td>The simulator timed out waiting for a response from the back-end service.</td>
+	</tr>
+	<tr>
+		<td>SERVICE_ERROR</td>
+		<td>There was an error connecting to the back-end service</td>
+	</tr>
+	<tr>
+		<td>LINDENDOLLAR_TRANSACTIONTIMEOUT</td>
+		<td>The transaction timed out.</td>
+	</tr>
+</table>
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-116, 152-159}
+/*
+* A simple piggy bank, anyone can pay in money and anyone can click it to get money out.
+*
+* TO DO:
+*  - handle different errors differently based upon CSV output
+*
+* original by Strife Onizuka
+*
+* modified by Kireji Haiku:
+*  - because weird things happen in LSL when using more than one state
+*  - one should say thanks when being payed
+*  - added 0 L$ payment when bank is empty, to show failed payment notifications
+*  - added target UUID and L$ amount into transaction history, too
+*
+* Note from Traven Sachs (VWR-28201):
+* In testing this script using an account with no funds - it has been noted that when the INSUFFICIENT FUNDS
+* error occurs on Transaction Results that the Display of L$ on the account attempting to transfer funds will
+* read as -1 on some viewers, even if the account has funds less than the transaction amount available to it.
+* (i.e. if account has 7L and attempts to pay 10L the viewer display will read -1 L until the next L$ transaction
+* occurs that is actually valid.  Don't know if this is a viewer glitch or back end glitch but felt it should
+* be mentioned.)
+*/
+
+integer hasBeenGrantedDebitPerms;
+
+integer amountGivenAwayOnClick;
+integer totalLindenDollarsInBank;
+
+list listOfTransactionRecords;
+
+update_floattext()
+{
+    string floattext = "I have no L$ to give away :(";
+
+    if (amountGivenAwayOnClick <= totalLindenDollarsInBank
+        && hasBeenGrantedDebitPerms)
+    {
+        floattext = "I have L$ "+ (string)totalLindenDollarsInBank + " to give away!";
+    }
+
+    llSetText(floattext, <1.0, 1.0, 1.0>, (float)TRUE);
+}
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+
+    changed(integer change)
+    {
+        if (change & CHANGED_OWNER)
+            llResetScript();
+    }
+
+    state_entry()
+    {
+        // how much money to give away each time?
+
+        amountGivenAwayOnClick = 10;
+
+        // how much money do we initially "have" in the bank?
+
+        totalLindenDollarsInBank = 50;
+
+        update_floattext();
+
+        // request permissions to give away money, otherwise this won't work
+
+        key owner = llGetOwner();
+        llRequestPermissions(owner, PERMISSION_DEBIT);
+    }
+
+    touch_start(integer num_detected)
+    {
+        // if the script has been granted debit permissions
+        if (hasBeenGrantedDebitPerms)
+        {
+            key id = llDetectedKey(0);
+
+            // if we have at least as much money in the bank as we would be giving away
+            if (amountGivenAwayOnClick <= totalLindenDollarsInBank)
+            {
+                // we add the transaction ID, the target avatar UUID and the L$ amount to a list
+                listOfTransactionRecords += [llTransferLindenDollars(id, amountGivenAwayOnClick), id, amountGivenAwayOnClick];
+
+                // we take the money from the bank
+                totalLindenDollarsInBank -= amountGivenAwayOnClick;
+            }
+            else
+            {
+                // will not work, cause paying 0 L$!
+                // will send a "failed payment" notification!
+                // only for DEMO purposes, usually you should do something like:
+                // llSay(PUBLIC_CHANNEL, "Sorry, no money in the bank!");
+                // instead !!!
+
+                listOfTransactionRecords += [llTransferLindenDollars(id, 0), id, 0];
+            }
+        }
+
+        update_floattext();
+    }
+
+    money(key id, integer amount)
+    {
+        // someone payed the bank!
+
+        totalLindenDollarsInBank += amount;
+
+        // be nice, say thanks
+        llInstantMessage(id, "Thanks a bunch!");
+
+        update_floattext();
+    }
+
+    transaction_result(key id, integer success, string data)
+    {
+        integer index = llListFindList(listOfTransactionRecords, [id]);
+
+        //if the ID was found in our list
+        if (~index)
+        {
+            // if payment failed, give notice
+            if (!success)
+            {
+                key targetUUID = llList2Key(listOfTransactionRecords, index + 1);
+                integer amountNotPayed = llList2Integer(listOfTransactionRecords, index + 2);
+
+                llSay(PUBLIC_CHANNEL, "\n \nSorry, somehow the transaction has failed!"
+                    + "\ntransaction ID: " + (string)id
+                    + "\ntarget UUID: " + (string)targetUUID
+                    + "\namount not payed: " + (string)amountNotPayed
+                    + "\nfailure reason: " + data);
+
+                // if the amount that wasn't payed is more than 0 L$, put the money back into the bank
+                if (amountNotPayed)
+                    totalLindenDollarsInBank += amountNotPayed;
+            }
+
+            // remove the entry again [transaction ID, target UUID, L$ amount]
+            listOfTransactionRecords = llDeleteSubList(listOfTransactionRecords, index, index + 2);
+        }
+
+        // total amount could have changed again...
+        update_floattext();
+    }
+
+    run_time_permissions (integer perm)
+    {
+        // when owner granted debit perms, enable piggy bank functionality
+        if(perm & PERMISSION_DEBIT)
+            hasBeenGrantedDebitPerms = TRUE;
+
+        update_floattext();
+    }
+}
+```
+
+</details>
+
+## History
+
+Date of Release [03/12/2011](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-12-03-246118)
+
+<WikiSource />

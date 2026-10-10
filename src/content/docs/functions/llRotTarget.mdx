@@ -1,0 +1,104 @@
+---
+title: "llRotTarget"
+slug: "functions/llRotTarget"
+category: functions
+source:
+  wiki: "LlRotTarget"
+  url: https://wiki.secondlife.com/wiki/LlRotTarget
+  revision: 1194486
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llrottarget-2cf6d293.txt
+  license: "Content from the Second Life Wiki article LlRotTarget (revision 1194486, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRotTarget" />
+
+This function is to have the script know when it has reached a rotation.
+
+It registers a **rot** with a **error** that triggers [at_rot_target](/events/at_rot_target/) and [not_at_rot_target](/events/not_at_rot_target/) events continuously until unregistered.
+
+A similar function exists for positions: [llTarget](/functions/llTarget/)
+
+This function does not rotate the object, to do that use [llSetRot](/functions/llSetRot/), [llRotLookAt](/functions/llRotLookAt/) or [llLookAt](/functions/llLookAt/).
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) to unregister the target with [llRotTargetRemove](/functions/llRotTargetRemove/)
+
+```lsl title="How to use" frame="terminal"
+integer result = llRotTarget(ZERO_ROTATION, 0.0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={18-32, 38-49}
+vector standrot = <0.0, 0.0, 0.0>;
+vector fliprot = <45.0, 0.0, 0.0>;
+
+// simple two-state rot target detection and rotation by Hypatia Callisto
+// works, to detect a rotation target. An example I wrote
+// since there is almost zilch for clean examples for
+// at_rot_target, not_at_rot_target, llRotTarget, llRotTargetRemove
+
+integer rottarget;
+
+default
+{
+
+    state_entry(){
+        rottarget = llRotTarget(llEuler2Rot(fliprot*DEG_TO_RAD), 0.1);
+        llSetPrimitiveParams ([PRIM_ROTATION, llEuler2Rot(standrot*DEG_TO_RAD)]); // rotate to starting point
+    }
+
+    not_at_rot_target()
+    {
+        llRotTargetRemove( rottarget );
+        llOwnerSay("not there"); //not at target
+    }
+
+    touch_start (integer total_number)
+    {
+        state rotatestate; // change to state for new position
+    }
+}
+
+
+state rotatestate
+{
+    state_entry(){
+        rottarget = llRotTarget(llEuler2Rot(fliprot*DEG_TO_RAD), 0.1);
+        llSetPrimitiveParams ([PRIM_ROTATION, llEuler2Rot(fliprot*DEG_TO_RAD)]); // rotate to new point
+    }
+
+    at_rot_target(integer tnum, rotation targetrot, rotation ourrot)
+    {
+        llRotTargetRemove( rottarget );
+        llOwnerSay("there"); //reached the target
+    }
+
+    touch_start(integer touched){
+        state default;
+    }
+
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llRotTargetRemove](/functions/llRotTargetRemove/) — Cancel a target rotation
+- [llTarget](/functions/llTarget/) — Register a target position
+- [llTargetRemove](/functions/llTargetRemove/) — Cancel a target position
+
+### Events
+
+- [at_rot_target](/events/at_rot_target/) — [not_at_rot_target](/events/not_at_rot_target/) — rotational target events
+- [at_target](/events/at_target/) — [not_at_target](/events/not_at_target/) — positional target events
+
+<WikiSource />

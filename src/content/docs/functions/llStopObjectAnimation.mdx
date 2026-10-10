@@ -1,0 +1,64 @@
+---
+title: "llStopObjectAnimation"
+slug: "functions/llStopObjectAnimation"
+category: functions
+source:
+  wiki: "LlStopObjectAnimation"
+  url: https://wiki.secondlife.com/wiki/LlStopObjectAnimation
+  revision: 1207850
+  date: 2018-12-05
+  contributor: "Vir Linden"
+  raw: /wiki-source/llstopobjectanimation-f5253f5e.txt
+  license: "Content from the Second Life Wiki article LlStopObjectAnimation (revision 1207850, 2018-12-05), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llStopObjectAnimation" description />
+
+Stop an animation for the current object.
+
+```lsl title="How to use" frame="terminal"
+llStopObjectAnimation("");
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-14}
+default
+{
+    state_entry()
+    {
+    }
+
+    // This assumes that an animation called "MyFancyWalk" is present in the inventory of the current object.
+    touch_start(integer total_number)
+    {
+        llSay(0, "Starting animation");
+        llStartObjectAnimation("MyFancyWalk");
+    }
+
+    touch_end(integer total_number)
+    {
+        llSay(0, "Stopping animation");
+        llStopObjectAnimation("MyFancyWalk");
+    }
+}
+```
+
+</details>
+
+## Notes
+
+Animated objects work by associating a skeleton with a linkset containing one or more rigged mesh primitives. When animations are played by a script in any of the prims in the linkset, the skeleton will animate and any rigged meshes in the linkset will move accordingly. A script running in any prim of the linkset can start, stop or query animations using the new commands. The typical usage of these functions is to do all object animation scripting in the root prim of the linkset; in this scenario, the animations and scripts would all be part of the inventory of this prim, and so of the object as a whole. However, if scripts and animations are present in multiple prims of a linkset, it is important to understand that animations are started, stopped and tracked independently in each prim.
+
+## See also
+
+### Functions
+
+- [llStartObjectAnimation](/functions/llStartObjectAnimation/) — Start playing an animation in the current object
+- [llGetObjectAnimationNames](/functions/llGetObjectAnimationNames/) — List currently playing animations in the current object
+
+<WikiSource />

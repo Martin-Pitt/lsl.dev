@@ -1,0 +1,104 @@
+---
+title: "llGetCameraAspect"
+slug: "functions/llGetCameraAspect"
+category: functions
+source:
+  wiki: "LlGetCameraAspect"
+  url: https://wiki.secondlife.com/wiki/LlGetCameraAspect
+  revision: 1217840
+  date: 2024-12-28
+  contributor: "Dantia Gothly"
+  raw: /wiki-source/llgetcameraaspect-c5bda63b.txt
+  license: "Content from the Second Life Wiki article LlGetCameraAspect (revision 1217840, 2024-12-28), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetCameraAspect" description />
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) value for the current camera's aspect ratio (e.g. width/height) of the agent for which the task has permissions.
+
+```lsl title="How to use" frame="terminal"
+float result = llGetCameraAspect();
+```
+
+## Caveats
+
+Returns zero when permissions have not been granted.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-18, 24-30}
+// say the camera aspect ratio and field of view (FOV)
+integer has_perms = FALSE;
+default
+{
+    on_rez(integer a)
+    {
+        llResetScript();
+    }
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TRACK_CAMERA);
+    }
+    run_time_permissions(integer permission)
+    {
+        has_perms = (permission == PERMISSION_TRACK_CAMERA);
+    }
+    touch_start(integer num_touches)
+    {
+        if (has_perms)
+        {
+            float aspect = llGetCameraAspect();
+            float fov = llGetCameraFOV();
+            llOwnerSay("aspect = " + (string)aspect + "  FOV = " + (string)fov);
+        }
+        else
+        {
+            llRequestPermissions(llGetOwner(), PERMISSION_TRACK_CAMERA);
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+// Scale an object to fit the aspect ratio of the viewer.
+fit_to_screen()
+{
+    // The X axis from the left to  the right edge of the screen is 0.0 to width value.
+    // The Y axis is always 1.
+    float x = llGetCameraAspect();
+    float y = 1;
+    llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_SIZE, <0, x, y>]);
+}
+```
+
+</details>
+
+## Notes
+
+The reported aspect ratio is based on values provided by the viewer to the simulator. This may cause visual oddities if there's a discrepancy between the viewer's reported camera and what the viewer actually displays to the user. For example: entering mouselook may cause portions of the viewer interface to disappear, which alters the amount of space available to the HUD, which can lead to misaligned positioning or slightly-off aspect ratio. (This is currently considered a viewer-bug.)
+
+## Additional wiki content
+
+`{{LSL_Function/permission|PERMISSION_TRACK_CAMERA}}`
+
+## See also
+
+### Functions
+
+- [llGetCameraFOV](/functions/llGetCameraFOV/)
+- [llGetCameraPos](/functions/llGetCameraPos/)
+- [llGetCameraRot](/functions/llGetCameraRot/)
+- [llSetCameraParams](/functions/llSetCameraParams/)
+- [llSetCameraAtOffset](/functions/llSetCameraAtOffset/)
+- [llSetCameraEyeOffset](/functions/llSetCameraEyeOffset/)
+
+<WikiSource />

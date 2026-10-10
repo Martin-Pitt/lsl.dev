@@ -1,0 +1,125 @@
+---
+title: "moving_end"
+slug: "events/moving_end"
+category: events
+source:
+  wiki: "Moving end"
+  url: https://wiki.secondlife.com/wiki/Moving_end
+  revision: 1194121
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/moving-end-fdc7581e.txt
+  license: "Content from the Second Life Wiki article Moving end (revision 1194121, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="moving_end" description />
+
+Triggered when task stops moving
+
+```lsl title="How to use" frame="terminal"
+moving_end()
+{
+
+}
+```
+
+## Caveats
+
+- The [moving_start](/events/moving_start/) and [moving_end](/events/moving_end/) events require special handling when scripting attachments.
+- After adding or editing a script you must take off the attachment and then wear the attachment again.
+- This event's behavior is undefined for non-physical movement ([llSetPos](/functions/llSetPos/), movement via [build tool](https://wiki.secondlife.com/wiki/Building_Tools), etc.) although these movements will often trigger it.
+- This event is triggered when an object finishes its [keyframed motion](/functions/llSetKeyframedMotion/), or when motion ceases via [KFM_CMD_PAUSE](/constants/KFM_CMD_PAUSE/) or [KFM_CMD_STOP](/constants/KFM_CMD_STOP/).
+- This event is also triggered when an object is rezzed (unless, presumably, you happen to rez it in precisely the same spot it was before.)
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-43, 52-63}
+//Physical Prim Movement Script
+//By Nika Rugani
+//With spam work around
+
+vector pos;
+float move_time = 5; //Move every 5 seconds
+float increment = 5;
+
+float power = 0.5; //The TAU
+
+integer trigger_multiple = FALSE; // This bad boy will prevent spam of moving start event
+integer trigger_slave = 1;
+
+setPhysical(integer status_physics)
+{
+    llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_PHYSICS, status_physics]);
+}
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        if(llGetStatus(STATUS_PHYSICS) == FALSE)
+        {
+            pos = llGetPos(); //Set the objects default position
+            setPhysical(TRUE);
+            llSetTimerEvent(move_time);
+        }
+        else
+        {
+            setPhysical(FALSE);
+            llSetPos(pos);
+        }
+    }
+    moving_start()
+    {
+        if(trigger_slave == 0)
+        {
+            llOwnerSay("YEY!! I'm Moving!");
+            if(trigger_multiple == FALSE)
+            {
+                trigger_slave = 1;
+            }
+        }
+    }
+    moving_end()
+    {
+        llSetTimerEvent(move_time);
+    }
+    timer()
+    {
+        llSetTimerEvent(0);
+        if(llVecDist(pos, llGetPos()) > (increment-2))
+        {
+            llMoveToTarget(pos, power);
+        }
+        else
+        {
+            llMoveToTarget(pos+<0.0,0.0,increment>, power);
+        }
+        trigger_slave = 0;
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-1004 (bug): Behavior of moving_start() and moving_end() is inconsistent.
+
+## See also
+
+### Functions
+
+- [llTarget](/functions/llTarget/)
+- [llRotTarget](/functions/llRotTarget/)
+
+### Events
+
+- [moving_start](/events/moving_start/)
+
+<WikiSource />

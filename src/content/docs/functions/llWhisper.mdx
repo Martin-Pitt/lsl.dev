@@ -1,0 +1,64 @@
+---
+title: "llWhisper"
+slug: "functions/llWhisper"
+category: functions
+source:
+  wiki: "LlWhisper"
+  url: https://wiki.secondlife.com/wiki/LlWhisper
+  revision: 1218157
+  date: 2025-04-07
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llwhisper-7d89bba9.txt
+  license: "Content from the Second Life Wiki article LlWhisper (revision 1218157, 2025-04-07), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llWhisper" description />
+
+Whispers the text supplied in string **msg** on channel supplied in integer **channel**.
+
+```lsl title="How to use" frame="terminal"
+llWhisper(0, "");
+```
+
+## Caveats
+
+- Text can be a maximum of 1024 bytes. This can convey 1024 ASCII characters, or 512 UTF-8 characters such as á
+- Whispers can only be heard within 10 meters of the speaking prim (rather than the root). This is contrary to how [listen](/events/listen/)s work, where a message can only be heard by any prim in the object if and only if the root prim is capable of hearing it.
+- A prim can **not** hear itself, this to prevent problems with recursion. It can however hear other prims within the same object. Use [llMessageLinked](/functions/llMessageLinked/) instead for intra-prim messaging.
+
+## Examples
+
+<details open>
+<summary>If you prefer, you can make use of certain mnemonic constants such as [PUBLIC_CHANNEL](/constants/PUBLIC_CHANNEL/) instead of channel 0 and [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) instead of channel +2,147,483,647.</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llWhisper(0, "This is an incredibly useless program.");
+    }
+}
+```
+
+</details>
+
+For communicating with the user or owner it is preferable to use [llOwnerSay](/functions/llOwnerSay/) or [llInstantMessage](/functions/llInstantMessage/) or [llRegionSayTo](/functions/llRegionSayTo/) as they won't spam other users.
+
+## See also
+
+### Functions
+
+- [llListen](/functions/llListen/)
+- [llOwnerSay](/functions/llOwnerSay/)
+- [llRegionSay](/functions/llRegionSay/) — Sends chat region wide
+- [llSay](/functions/llSay/) — Sends chat limited to 20 meters
+- [llShout](/functions/llShout/) — Sends chat limited to 100 meters
+- [llInstantMessage](/functions/llInstantMessage/)
+
+### Events
+
+- [listen](/events/listen/)
+
+<WikiSource />

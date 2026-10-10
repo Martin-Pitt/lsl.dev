@@ -1,0 +1,86 @@
+---
+title: "llScaleTexture"
+slug: "functions/llScaleTexture"
+category: functions
+source:
+  wiki: "LlScaleTexture"
+  url: https://wiki.secondlife.com/wiki/LlScaleTexture
+  revision: 1199707
+  date: 2016-03-11
+  contributor: "Strife Onizuka"
+  raw: /wiki-source/llscaletexture-f5f4f23d.txt
+  license: "Content from the Second Life Wiki article LlScaleTexture (revision 1199707, 2016-03-11), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llScaleTexture" description />
+
+Sets the texture **u** & **v** scales for the chosen **face**.
+
+```lsl title="How to use" frame="terminal"
+llScaleTexture(0.0, 0.0, 0);
+```
+
+## Specification
+
+In the default texture mapping mode the scale units are in texture repeats per face. In the planar texture mapping mode the scale units are in texture repeats per half meter. This is in contrast to the in-world editing tool, in which the planar texture scaling units are repeats per meter.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={5-25, 31-42}
+// WARNING:
+//      llScaleTexture has a delay of 200 miliseconds
+//      that means every time the function is called within a script it'll take 0.2 seconds
+//      for example the script below would take about 1.2 seconds....that's REALLY SLOW !!!
+//
+//      To work around that delay use the following instead:
+//
+//
+//      llSetLinkPrimitiveParamsFast(integer link,
+//          [PRIM_TEXTURE, integer face, string texture, vector repeats, vector offsets, float rotation_in_radians]);
+
+
+// *******************************************************************************************************************
+
+
+
+//Scales the textures on 6 sides
+float scale;
+
+default
+{
+    state_entry()
+    {
+        integer index;
+        while (index < 7)
+        {
+            scale += 0.1;
+            llScaleTexture((float)scale, (float)scale, index);
+
+            ++index;
+        }
+    }
+}
+
+// output:
+//      face 0 >> 0.1
+//      face 1 >> 0.2
+//      face 2 >> 0.3
+//      face 3 >> 0.4
+//      face 4 >> 0.5
+//      face 5 >> 0.6
+//      face 6 >> 0.7
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetTextureScale](/functions/llGetTextureScale/)
+
+<WikiSource />

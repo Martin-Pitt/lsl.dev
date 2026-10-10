@@ -1,0 +1,127 @@
+---
+title: "llGetDate"
+slug: "functions/llGetDate"
+category: functions
+source:
+  wiki: "LlGetDate"
+  url: https://wiki.secondlife.com/wiki/LlGetDate
+  revision: 1194166
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetdate-042c44de.txt
+  license: "Content from the Second Life Wiki article LlGetDate (revision 1194166, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetDate" />
+
+If you wish to know the time as well use: [llGetTimestamp](/functions/llGetTimestamp/) which uses the format `{{NoWrap|"YYYY-MM-DDThh:mm:ss.ff..fZ"}}`
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the current date in the UTC time zone in the format `{{NoWrap|"YYYY-MM-DD"}}`.
+
+```lsl title="How to use" frame="terminal"
+string result = llGetDate();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-8, 14-18}
+// Birthday surprise
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(0.1);
+    }
+
+    timer()
+    {
+        if(llGetDate() == "2009-02-15")
+            llSetText("HAPPY BIRTHDAY!", <0,1,0>, 1.0);
+        else
+            llSetText("A surprise is coming...", <0,1,0>, 1.0);
+
+        llSetTimerEvent(3600.0);  // check every hour.
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-9}
+// Function to calculate the numeric day of year
+integer dayOfYear(integer year, integer month, integer day)
+{
+    return day + (month - 1) * 30 + (((month > 8) + month) / 2)
+        - ((1 + (((!(year % 4)) ^ (!(year % 100)) ^ (!(year % 400))) | (year <= 1582))) && (month > 2));
+}
+
+default
+{
+    touch_end(integer count)
+    {
+        list dateComponents = llParseString2List(llGetDate(), ["-"], []);
+        integer year  = (integer) llList2String(dateComponents, 0);
+        integer month = (integer) llList2String(dateComponents, 1);
+        integer day   = (integer) llList2String(dateComponents, 2);
+        llSay(0, "The current day of the year is " + (string) dayOfYear(year, month, day));
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl
+// Function to calculate whether a current year is a leap year
+
+integer is_leap_year( integer year )
+{
+    if( year % 4 )         return FALSE;   // Not a leap year under any circumstances
+    if( year <= 1582 )     return TRUE;    // In the Julian calender before 24 February 1582, every fourth year was a leap year
+    if( !( year % 400 ))   return TRUE;    // A leap century is a leap year if divisible by 400
+    if( !( year % 100 ))   return FALSE;   // Any other century is not a leap year
+    return TRUE;                           // It is divisible by 4 and not a century and not Julian, therefore it is a leap year
+}
+```
+
+</details>
+
+<details>
+<summary>The previous script is way unnecessary for Avatar age, SL sales history etc. Here is all that is needed for 99% of SL applications.</summary>
+
+This code is in fact valid for all years from 1901 to 2099, as 2000 was a leap year.
+
+```lsl
+    if (year % 4)          //  TRUE if NOT a leap year
+```
+
+</details>
+
+## Helper functions
+
+### Helper Functions
+
+- [Timestamp: list format to Unix timestamp](https://wiki.secondlife.com/wiki/Stamp2UnixInt) - ex: \[2009, 2, 13, 3, 31, 30\] to 1234567890
+- compatible with [llParseString2List](/functions/llParseString2List/)( [llGetDate](/functions/llGetDate/)(), \["-"\], \[\] ) (reports as first second of given day)
+- [Timestamp: Weekday from (Y, M, D)](https://wiki.secondlife.com/wiki/Stamp2WeekdayStr) - ex: "Friday" from (Y, M, D)
+
+## See also
+
+### Functions
+
+- [llGetTimestamp](/functions/llGetTimestamp/) — Same format but with the time.
+
+### Articles
+
+- [ISO 8601](http://www.cl.cam.ac.uk/~mgk25/iso-time.html)
+
+<WikiSource />

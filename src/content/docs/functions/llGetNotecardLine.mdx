@@ -1,0 +1,313 @@
+---
+title: "llGetNotecardLine"
+slug: "functions/llGetNotecardLine"
+category: functions
+source:
+  wiki: "LlGetNotecardLine"
+  url: https://wiki.secondlife.com/wiki/LlGetNotecardLine
+  revision: 1218423
+  date: 2025-08-21
+  contributor: "Nelson Jenkins"
+  raw: /wiki-source/llgetnotecardline-990e4ac1.txt
+  license: "Content from the Second Life Wiki article LlGetNotecardLine (revision 1218423, 2025-08-21), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetNotecardLine" description />
+
+Requests the line **line** of the notecard **name** from the dataserver.
+
+If **line** is past the end of the notecard [EOF](/constants/EOF/) is returned by the [dataserver](/events/dataserver/).
+
+```lsl title="How to use" frame="terminal"
+key result = llGetNotecardLine("", 0);
+```
+
+## Caveats
+
+- If notecard contains embedded inventory items (such as textures and landmarks), [EOF](/constants/EOF/) will be returned, regardless of the line requested.
+- If the requested line is longer than 1024 bytes (*not* characters), [dataserver](/events/dataserver/) will only return the first 1024 *bytes* of the line.
+- To check that the returned line has not been truncated, use the example snippet on [llStringToBase64](/functions/llStringToBase64/) to check the number of bytes returned in the [dataserver](/events/dataserver/) event. If the string is exactly 1024 bytes, it *may* have been truncated.
+- Do not use [llStringLength](/functions/llStringLength/) for this, because strings in LSL support multi-byte characters (UTF-8 for LSL-2, UTF-16 for Mono).
+- The maximum bytes returned by this function was increased from 255 bytes to 1024 bytes with server version [2021-10-25.565008](https://releasenotes.secondlife.com/simulator/2021-10-25.565008.html).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-21, 27-53}
+key notecardQueryId; //Identifier for the dataserver event
+
+string notecardName = "MyNotecard"; //Name of a notecard in the object's inventory. Needs to be Full Perm for key checking for changed contents to work
+
+integer notecardLine; //Initialize the counter value at 0
+
+key notecardKey; //Store the notecard's key, so we don't read it again by accident.
+
+list notecardData; //List to store data read from the notecard.
+
+ReadNotecard()
+{
+    if (llGetInventoryKey(notecardName) == NULL_KEY)
+    { //Check if the notecard exists in inventory, and is has been saved since it's creation (newly created notecards that are yet to be saved are assigned NULL_KEY).
+        llOwnerSay( "Notecard '" + notecardName + "' is missing, unwritten, or not full permission."); //Notify user.
+        return; //Don't do anything else.
+    }
+    else if (llGetInventoryKey(notecardName) == notecardKey) return;
+    //This notecard has already been read - call to read was made in error, so don't do anything. (Notecards are assigned a new key each time they are saved.)
+
+    llOwnerSay("Began reading notecard: " + notecardName); //Notify user that read has started.
+    notecardData = []; //Clear the memory of the previous notecard.
+    notecardKey = llGetInventoryKey(notecardName); //Remember the key of this iteration of the notecard, so we don't read it again by accident.
+    notecardQueryId = llGetNotecardLine(notecardName, notecardLine);
+}
+
+default
+{
+    state_entry()
+    {
+        ReadNotecard(); //Pass off to the read function.
+    }
+
+    changed(integer change)
+    {
+        if(change & CHANGED_INVENTORY)
+        { //The object's inventory just changed - the notecard could have been modified!
+            ReadNotecard();
+        }
+    }
+
+    dataserver(key query_id, string data)
+    {
+        if (query_id == notecardQueryId)
+        {
+            if (data == EOF) //Reached end of notecard (End Of File).
+            {
+                llOwnerSay("Done reading notecard, read " + (string) notecardLine + " notecard lines."); //Notify user.
+                llSay(DEBUG_CHANNEL,"=== READ FROM NOTECARD: " + notecardName + " ===\n" + llDumpList2String(notecardData,"\n"));
+                //Dump the contents of the notecard (for testing purposes).
+            }
+            else
+            {
+                notecardData += data; //Add the line being read to a new entry on the list.
+                ++notecardLine; //Increment line number (read next line).
+                notecardQueryId = llGetNotecardLine(notecardName, notecardLine); //Query the dataserver for the next notecard line.
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl collapse={1-55, 61-92, 98-103}
+/////
+//  Generic Multi Notecard reader by Brangus Weir
+//  Given freely and published on wiki.secondlife.com
+//
+//  This script will read three note cards and store the results into three lists.
+//  It can be modified and extended to as many (or few) cards as you'd like to read.
+//
+
+list gOneCard;    // All the lines from from the first card
+list gTwoCard;    // All the lines from from the second card
+list gThreeCard;  // All the lines from from the third card
+
+string gsCardOneName = "One";  //Set these to the name of the invetory item.
+string gsCardTwoName = "Two";
+string gsCardThreeName = "Three";
+
+//Temporary variables for processing
+string g_sNoteCardName; // Name of the card to be read.
+list g_lTempLines;      // The resulting data pushed into a list
+integer g_iLine;        // The line count for the card reader
+key g_kQuery;           // The key of the card being read
+
+
+initialize(string _action) {
+    // Due to the execution order when using dataserver, this function sets the first card to
+    // be read, and the excetuion finishes when called again with the _action set to "finish".
+    if (_action == "") {
+        loadNoteCard(gsCardOneName);
+    } else if (_action == "finish") {
+        // All cards have been read into the lists... now you can do any kind of string
+        // manipulations to get the data you need to set your script.
+        // But here we will prove that the cards have been read with a loop
+
+        g_lTempLines = []; // lets not forget to delete this global, or it will be dead weight.
+
+        integer len = llGetListLength(gOneCard);  //Always evaluate this once, don't do it
+                                                  //INSIDE the for loop like noob programers will.
+                                                  //Reduce lag, THINK ABOUT MACHINE CYCLES!
+        integer i = 0;
+        for (; i< len; ++i)
+            llSay(0, llList2String(gOneCard,i));
+
+        len = llGetListLength(gTwoCard);
+        for (i = 0; i< len; ++i)
+            llSay(0, llList2String(gTwoCard,i));
+
+        len = llGetListLength(gThreeCard);
+        for (i = 0; i< len; ++i)
+            llSay(0, llList2String(gThreeCard,i));
+    }
+
+}
+
+loadNoteCard( string _notecard ) {
+    g_lTempLines = []; //clear the temp lines
+    g_sNoteCardName = _notecard;
+    g_iLine = 0;
+    g_kQuery = llGetNotecardLine(g_sNoteCardName, g_iLine);
+
+}
+
+notecardFinished(string _notecard){
+    // Called at the end of each notecard as it is read. The temp results are stored
+    // and the next card is commanded to be read.
+    if (_notecard == gsCardOneName) {
+        gOneCard = g_lTempLines;
+        loadNoteCard(gsCardTwoName);
+    } else if (_notecard == gsCardTwoName) {
+        gTwoCard = g_lTempLines;
+        loadNoteCard(gsCardThreeName);
+    } else if (_notecard == gsCardThreeName) {
+        gThreeCard = g_lTempLines;
+        initialize("finish");  // Finally pass execution to finish the initialization.
+    }
+}
+
+default
+{
+    state_entry()
+    {
+    }
+
+    touch_start(integer _num_det){
+        initialize("");
+    }
+
+    dataserver(key _query_id, string _data)
+    {
+        if (_query_id == g_kQuery) {
+            // this is a line of our notecard
+            if (_data != EOF) {
+                g_lTempLines += _data;
+                //request a next line
+                ++g_iLine;   // increment line count
+                g_kQuery = llGetNotecardLine(g_sNoteCardName, g_iLine);
+            } else {
+                //The notecard has been read
+                //notify end of read
+                notecardFinished(g_sNoteCardName);
+            }
+        }
+    }
+}
+```
+
+```lsl collapse={1-31, 37-83}
+/////
+//  Generic Multi Notecard reader by Randur Source
+//  Given freely and published on wiki.secondlife.com
+//
+//  This script will read all note cards in sequence and dump the results into chat as an example.
+//  It can be modified and extended to do other things to the data.
+//
+
+integer inventorycnt;
+integer notecardlinecnt;
+integer notecardlinenumber;
+string notecardname;
+key linenumberid;
+key lineid;
+
+getnextnotecardlinenumber()
+{
+    // first get the number of lines from the notecard
+    inventorycnt++;
+    if (inventorycnt < llGetInventoryNumber(INVENTORY_NOTECARD))
+    {
+        notecardname = llGetInventoryName(INVENTORY_NOTECARD,inventorycnt);
+        linenumberid = llGetNumberOfNotecardLines(notecardname);
+    }
+    else
+        llOwnerSay("Done.");
+}
+
+getnextnotecardline()
+{
+     // get the next line from the notecard or skip to the next notecard
+    notecardlinecnt++;
+    if (notecardlinecnt < notecardlinenumber)
+        lineid = llGetNotecardLine(notecardname,notecardlinecnt);
+    else
+        getnextnotecardlinenumber();
+}
+
+default
+{
+    touch_start(integer total_number)
+    {
+        if (llDetectedKey(0) != llGetOwner()) return; // allow owner only
+
+        inventorycnt = -1;
+        getnextnotecardlinenumber();
+    }
+
+    dataserver(key queryid,string data)
+    {
+        if (queryid == linenumberid) // this was a line number lookup
+        {
+            linenumberid = NULL_KEY;
+            notecardlinenumber = (integer)data;
+            if (notecardlinenumber == 0)
+                getnextnotecardlinenumber();
+            else
+            {
+                notecardlinecnt = -1;
+                getnextnotecardline();
+            }
+        }
+        else if (queryid == lineid) // this was a data line lookup
+        {
+            lineid = NULL_KEY;
+
+            // Example of what to do with the data:
+            // Test for valid avatar names, possibly multiple names on each line, separated by ,
+            // and say them in chat to the owner
+            list names = llParseString2List(data,[","],[]); // split lines on ,
+            integer len = llGetListLength(names); // I wouldn't dare to put this inside the for loop
+            integer cnt;
+            for (cnt = 0; cnt < len; cnt++)
+            {
+                string name = llDumpList2String(llParseString2List(llList2String(names,cnt),[" "],[])," "); // remove extra spaces
+                if (llGetListLength(llParseString2List(name,[" "],[])) == 2) // check for first + lastname
+                    llOwnerSay(notecardname + ": " + name);
+            }
+
+            getnextnotecardline();
+        }
+    }
+}
+```
+
+## History
+
+`{{LSL Added|0.6.0|remote=http://secondlife.wikia.com/wiki/Version_0.6.0}}`
+
+## See also
+
+### Functions
+
+- [llGetNumberOfNotecardLines](/functions/llGetNumberOfNotecardLines/)
+- [llGetNotecardLineSync](/functions/llGetNotecardLineSync/)
+
+### Events
+
+- [dataserver](/events/dataserver/)
+
+<WikiSource />

@@ -1,0 +1,72 @@
+---
+title: "llDetectedRot"
+slug: "functions/llDetectedRot"
+category: functions
+source:
+  wiki: "LlDetectedRot"
+  url: https://wiki.secondlife.com/wiki/LlDetectedRot
+  revision: 1194092
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/lldetectedrot-e9719379.txt
+  license: "Content from the Second Life Wiki article LlDetectedRot (revision 1194092, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDetectedRot" description />
+
+Returns [&lt;0.0, 0.0, 0.0, 1.0>](/constants/ZERO_ROTATION/) if **number** is not valid sensed object.
+
+```lsl title="How to use" frame="terminal"
+rotation result = llDetectedRot(0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-32}
+//--// get compass facing of Avatar that touches this object //--//
+
+ //-- list of compass directions starting at East, rotated clockwise
+list gLstCompassPoints = [ "East", "NorthEast", "North", "NorthWest", "West", "SouthWest", "South", "SouthEast" ];
+
+ //-- convert rotation to z-axis compass direction
+string CompassDirection( rotation rRotBase )
+{
+  integer iCountCompassPoints = llGetListLength(gLstCompassPoints);
+   //-- convert rotation to a direction
+  vector vDirection = <0.0, 1.0, 0.0> / rRotBase;
+   //-- take the direction and determine the z rotation
+  float fAngle = llAtan2(vDirection.x, vDirection.y);
+   //-- take the angle and find the compass point
+  integer iCompassPoint = llRound(fAngle * iCountCompassPoints / TWO_PI);
+   //-- convert to string
+  return llList2String( gLstCompassPoints, iCompassPoint );
+}
+
+default{
+  state_entry()
+  {
+    llSay( 0, "Touch me to get your compass facing" );
+  }
+
+  touch_start( integer vIntTouchCount )
+  {
+    integer vIntCounter = 0;
+    do
+    {
+      llSay( 0,
+             llDetectedName( vIntCounter )
+             + " is facing "
+              //-- next line gets avatar rotation and converts to compass direction
+             + CompassDirection( llDetectedRot( vIntCounter ) ) );
+    } while ( ++vIntCounter < vIntTouchCount );
+  }
+}
+```
+
+</details>
+
+<WikiSource />

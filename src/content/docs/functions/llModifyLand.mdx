@@ -1,0 +1,139 @@
+---
+title: "llModifyLand"
+slug: "functions/llModifyLand"
+category: functions
+source:
+  wiki: "LlModifyLand"
+  url: https://wiki.secondlife.com/wiki/LlModifyLand
+  revision: 1218890
+  date: 2026-06-05
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llmodifyland-5c74108d.txt
+  license: "Content from the Second Life Wiki article LlModifyLand (revision 1218890, 2026-06-05), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llModifyLand" description />
+
+Modify land with **action** on **brush**
+
+The position of the prim is used to determine the input for various flags.
+
+```lsl title="How to use" frame="terminal"
+llModifyLand(0, 0);
+```
+
+## Specification
+
+&lt;div>
+
+&lt;div style="width:auto; height:auto; display:inline; vertical-align:top;">
+
+&lt;div style="display:table-cell; vertical-align:top;" valign="top">
+
+| Action |  | Description |
+| --- | --- | --- |
+| [LAND_LEVEL](/constants/LAND_LEVEL/) | 0 | Levels on prim center |
+| [LAND_RAISE](/constants/LAND_RAISE/) | 1 | Raises the land |
+| [LAND_LOWER](/constants/LAND_LOWER/) | 2 | Lowers the land |
+| [LAND_SMOOTH](/constants/LAND_SMOOTH/) | 3 | Smooths the land |
+| [LAND_NOISE](/constants/LAND_NOISE/) | 4 | Makes the land rough |
+| [LAND_REVERT](/constants/LAND_REVERT/) | 5 | Restores to baked value |
+
+&lt;/div>
+
+&lt;/div>
+
+&lt;div style="width:auto; height:auto; display:inline; vertical-align:top;">
+
+&lt;div style="display:table-cell; vertical-align:top;" valign="top">
+
+<table>
+	<tr>
+		<th>Brush</th>
+		<th>`Value`</th>
+		<th>Size</th>
+	</tr>
+	<tr>
+		<td>[LAND_BRUSH_SMALL](/constants/LAND_BRUSH_SMALL/)</td>
+		<td>0</td>
+		<td>2m x 2m</td>
+	</tr>
+	<tr>
+		<td>[LAND_BRUSH_MEDIUM](/constants/LAND_BRUSH_MEDIUM/)</td>
+		<td>1</td>
+		<td>4m x 4m</td>
+	</tr>
+	<tr>
+		<td>[LAND_BRUSH_LARGE](/constants/LAND_BRUSH_LARGE/)</td>
+		<td>2</td>
+		<td>8m x 8m</td>
+	</tr>
+	<tr>
+		<td>&lt;s>[LAND_SMALL_BRUSH](https://wiki.secondlife.com/wiki/LAND_SMALL_BRUSH)&lt;/s></td>
+		<td>1</td>
+		<td>4m x 4m</td>
+	</tr>
+	<tr>
+		<td>&lt;s>[LAND_MEDIUM_BRUSH](https://wiki.secondlife.com/wiki/LAND_MEDIUM_BRUSH)&lt;/s></td>
+		<td>2</td>
+		<td>8m x 8m</td>
+	</tr>
+	<tr>
+		<td>&lt;s>[LAND_LARGE_BRUSH](https://wiki.secondlife.com/wiki/LAND_LARGE_BRUSH)&lt;/s></td>
+		<td>3</td>
+		<td>8m x 8m</td>
+	</tr>
+	<tr>
+		<td colspan="3">&lt;small>The "LAND\_\*\_BRUSH constants are wrong.<br />Use the "LAND_BRUSH\_\*" constants instead.&lt;/small></td>
+		<td></td>
+		<td></td>
+	</tr>
+</table>
+
+&lt;/div>
+
+&lt;/div>
+
+&lt;/div>
+
+## Caveats
+
+- This function has no effect if the script's owner is offline or not in the same sim as the scripted object.
+- Uncontrolled use of `llModifyLand` in scripted objects may force the region's navmesh to rebake continually and cause Memory Allocated for the region to exceed its limit, making it impossible to rez objects. ([BUG-9047](https://jira.secondlife.com/browse/BUG-9047))
+- This function has no effect if the scripted object is deeded to a group.
+- "LAND_BRUSH\_\*" constants are only present on Lua-enabled sims. On older sims, use their values 0, 1, and 2 instead. The "LAND\_\*\_BRUSH" constants have incorrect values and are not recommended
+- If the script is in a prim that is attached to an avatar or is in the child prim of a linkset, then the local position relative to it's attachment point or root prim is used rather than the position within the region. ([BUG-4929](https://jira.secondlife.com/browse/BUG-4929))
+- If land is not owned by script owner or the owner doesn't have terraform permissions, the script will silently fail.
+- You cannot change altitude beyond land terraform limits for the specified parcel..
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(0.1);
+    }
+
+    timer()
+    {
+        llModifyLand(LAND_LEVEL, LAND_BRUSH_SMALL);
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-3272 (fs): LSL: llModifyLandStrength
+- STORM-2006: type=bug|Brush constants are all off-by-one.
+
+<WikiSource />

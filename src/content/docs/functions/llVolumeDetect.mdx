@@ -1,0 +1,107 @@
+---
+title: "llVolumeDetect"
+slug: "functions/llVolumeDetect"
+category: functions
+source:
+  wiki: "LlVolumeDetect"
+  url: https://wiki.secondlife.com/wiki/LlVolumeDetect
+  revision: 1217514
+  date: 2024-10-11
+  contributor: "Frionil Fang"
+  raw: /wiki-source/llvolumedetect-85f145ed.txt
+  license: "Content from the Second Life Wiki article LlVolumeDetect (revision 1217514, 2024-10-11), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llVolumeDetect" />
+
+If **detect** is [TRUE](/constants/TRUE/), VolumeDetect is enabled, physical object and avatars can pass through the object.
+
+This works much like Phantom, but unlike Phantom, VolumeDetect objects trigger [collision_start](/events/collision_start/) and [collision_end](/events/collision_end/) events when interpenetrating. Collision events will trigger in any script in the object.
+
+```lsl title="How to use" frame="terminal"
+llVolumeDetect(0);
+```
+
+## Specification
+
+**Events queued depending on type**
+
+|  | VolumeDetect | Phantom |
+| --- | --- | --- |
+| Events<br />Supported | [collision_start](/events/collision_start/)<br /><br />[collision_end](/events/collision_end/) | [land_collision_start](/events/land_collision_start/)<br />[land_collision](/events/land_collision/)<br />[land_collision_end](/events/land_collision_end/) |
+
+#### Differences
+
+There are a couple differences in how Phantom and VolumeDetect handle collisions; specifically which events are supported and how they handle the ground.
+
+&lt;div style="clear:left;">
+
+###### VolumeDetect
+
+- When physical they fall through the ground with the risk of going off-world.
+- [collision](/events/collision/) events are not triggered
+
+###### Phantom
+
+- When physical they collide with the ground but will not pass through (normal physical object behavior), [land collision](https://wiki.secondlife.com/wiki/Category:LSL_Land_Collision) events are queued.
+
+&lt;/div>
+
+## Caveats
+
+- It can only be applied to the root prim (which will make the entire object VolumeDetect).
+- If the volume detecting object is *not* physical, it can only detect physical objects and avatars. If the object *is* physical, it can detect its collisions with static and [keyframed motion](/functions/llSetKeyframedMotion/) objects as well.
+
+### Attachments
+
+**Note:** Attachments are not included in the avatar's bounding box. [Collision events](https://wiki.secondlife.com/wiki/Category:LSL_Collision) received by attachments are collisions the avatar is having with the world, not collisions the attachment is having. Nothing actually can collide with an attachment`{{Footnote|Even if attachments were included in an avatars bounding box, you would not like the outcome, the avatars bounding box is not deformed by animations.}}`.
+
+- It is meaningless to enabled on attachments. Attachments cannot collide with anything.
+- Attachments do not receive collision events for avatar collisions with VolumeDetect objects.
+- Attachments do receive collision events for avatar collisions with non-VolumeDetect, non-phantom objects.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llVolumeDetect(TRUE); // Starts llVolumeDetect
+    }
+    collision_start(integer total_number)
+    {
+        llSay(0, "Detected!"); // Tells you when something penetrates the prim
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-2490 (bug): llCollisionFilter completely ignored after call to user-defined function and then a call to llVolumeDetect(TRUE)
+- SVC-8141 (bug): Volume Detect objects are not always allowing objects to pass through.
+- SVC-2996: llDetectedLinkNumber returns 0 with llVolumeDetect(TRUE)|type=fs\}\}\{\{#if:
+
+\{\{#vardefine:caveats|\*llDetectedLinkNumber will return 0 in collision_start and collision_end events of VolumeDetect objects (SVC-2996).\}\}
+
+## See also
+
+### Functions
+
+- [llPassCollisions](/functions/llPassCollisions/)
+
+### Events
+
+- [collision_start](/events/collision_start/)
+- [collision](/events/collision/)
+- [collision_end](/events/collision_end/)
+
+<WikiSource />

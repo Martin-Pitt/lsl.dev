@@ -1,0 +1,51 @@
+---
+title: "llDerezObject"
+slug: "functions/llDerezObject"
+category: functions
+source:
+  wiki: "LlDerezObject"
+  url: https://wiki.secondlife.com/wiki/LlDerezObject
+  revision: 1218192
+  date: 2025-04-22
+  contributor: "Nexii Malthus"
+  raw: /wiki-source/llderezobject-1cd20ace.txt
+  license: "Content from the Second Life Wiki article LlDerezObject (revision 1218192, 2025-04-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDerezObject" description />
+
+Derezzes an object previously rezzed from within the object containing the script.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) which is [TRUE](/constants/TRUE/) for success or [FALSE](/constants/FALSE/) for failure.
+
+```lsl title="How to use" frame="terminal"
+integer result = llDerezObject(NULL_KEY, 0);
+```
+
+## Specification
+
+Deletes, or marks temp, an object that was previously rezzed by this script. The object's root prim must have been previously rezzed from a script within this object.
+
+If the object is successfully deleted this function returns [TRUE](/constants/TRUE/), if it fails for any reason it returns [FALSE](/constants/FALSE/).
+
+| Constant | Value | Description |
+| --- | --- | --- |
+| [DEREZ_DIE](/constants/DEREZ_DIE/) | 0 | Immediately delete the object. |
+| [DEREZ_MAKE_TEMP](/constants/DEREZ_MAKE_TEMP/) | 1 | Mark the object as temporary so that the simulator will remove the object at a later time. |
+| [DEREZ_TO_INVENTORY](/constants/DEREZ_TO_INVENTORY/) | 2 | Returns the targeted object to derezzer's inventory and saves its current state. |
+
+## Caveats
+
+- The targeted object's rezzer must be the same as the object hosting this script
+- The target must not be an attachment
+- The target must be copyable
+- The target's owner must be the same as the script's owner.
+- When marking an object as temporary, the object must not contribute to the navmesh.
+- When using [DEREZ_TO_INVENTORY](/constants/DEREZ_TO_INVENTORY/) there are a few other restrictions:
+- The derezzer must not be an attachment.
+- The derezzer must be modifiable.
+- The object in the derezzer's inventory must still exist.
+- The object in the derezzer's inventory must not be a coalesced object.
+
+<WikiSource />

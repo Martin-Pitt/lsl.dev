@@ -1,0 +1,89 @@
+---
+title: "llGetUnixTime"
+slug: "functions/llGetUnixTime"
+category: functions
+source:
+  wiki: "LlGetUnixTime"
+  url: https://wiki.secondlife.com/wiki/LlGetUnixTime
+  revision: 1218796
+  date: 2026-04-20
+  contributor: "Nelson Jenkins"
+  raw: /wiki-source/llgetunixtime-e2814b02.txt
+  license: "Content from the Second Life Wiki article LlGetUnixTime (revision 1218796, 2026-04-20), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetUnixTime" />
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is the number of seconds elapsed since 00:00 hours, Jan 1, 1970 [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) from the system clock ([Unix time](https://en.wikipedia.org/wiki/Unix_time)).
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetUnixTime();
+```
+
+## Caveats
+
+- Time codes outside 1901-12-13 20:45:52 UTC and 2038-01-19 03:14:08 UTC cannot be represented in LSL due to its use of signed 32-bit integers for Unix times. Scripts that rely on this function after January 19, 2038 may have logical errors.
+- Consider [llGetTimestamp](/functions/llGetTimestamp/) instead, which will correctly report time through 2038.
+- Lua scripts (not including LSL scripts compiled for the Luau VM) do not have this limitation with `os.time()`, since it returns a 64-bit number and will correctly represent time through the likely heat death of the universe.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// Reset tracker
+integer BOOT_TIME;
+default
+{
+    state_entry()
+    {
+        BOOT_TIME = llGetUnixTime();
+        llSetTimerEvent(0.1);
+    }
+
+    timer()
+    {
+        llSetText((string)(llGetUnixTime() - BOOT_TIME) + " Seconds since boot.\n\n ", <1,0,0>, 1.0);
+        llSetTimerEvent(1);
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+### Helper Functions:
+
+- [Unix2StampLst](https://wiki.secondlife.com/wiki/Unix2StampLst) — Converts Unix Time stamp to a list. ex: 1234567890 to \[2009, 2, 13, 23, 31, 30\]
+- [Stamp2UnixInt](https://wiki.secondlife.com/wiki/Stamp2UnixInt) — Converts date to Unix Time stamp. ex: \[2009, 2, 13, 23, 31, 30\] to 1234567890
+- [uuLinuxTime](https://wiki.secondlife.com/wiki/uuLinuxTime) — Converts date to Unix Time stamp (from Linux kernel's sources)
+- [Unix2WeekdayStr](https://wiki.secondlife.com/wiki/Unix2WeekdayStr) — Gets the weekday from a Unix Time stamp. ex: "Friday" from 1234567890
+- [Unix2PST_PDT](https://wiki.secondlife.com/wiki/Unix2PST_PDT) — Converts Unix Time stamp to an SLT date/time string with PST or PDT indication as appropriate
+- [Unix2GMTorBST](https://wiki.secondlife.com/wiki/Unix2GMTorBST) — Converts Unix Time stamp to a UK date/time string with GMT or BST indication as appropriate
+
+<table>
+</table>
+
+## Tests
+
+- [llGetUnixTime Conformance Test](https://wiki.secondlife.com/wiki/llGetUnixTime/test)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- BUG-4703 (bug): \{\{Wikipedia|Year 2038 problem\}\}
+- SVC-6357 (nf): '''llGetUnixTimeNanos'''() - greater precision timing mechanism
+
+## See also
+
+### Functions
+
+- [llGetTimestamp](/functions/llGetTimestamp/) — Human Readable UTC Date and time
+- [llGetDate](/functions/llGetDate/) — Human Readable UTC Date
+- [llGetTime](/functions/llGetTime/) — Elapsed script-time.
+
+<WikiSource />

@@ -1,0 +1,79 @@
+---
+title: "llStopAnimation"
+slug: "functions/llStopAnimation"
+category: functions
+source:
+  wiki: "LlStopAnimation"
+  url: https://wiki.secondlife.com/wiki/LlStopAnimation
+  revision: 1194370
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/llstopanimation-c16a7070.txt
+  license: "Content from the Second Life Wiki article LlStopAnimation (revision 1194370, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llStopAnimation" description />
+
+Stop animation **anim** for agent that granted [PERMISSION_TRIGGER_ANIMATION](/constants/PERMISSION_TRIGGER_ANIMATION/) if the permission has not been revoked.
+
+```lsl title="How to use" frame="terminal"
+llStopAnimation("");
+```
+
+## Caveats
+
+- If the animation to be stopped is the only playing animation (as found via [llGetAnimationList](/functions/llGetAnimationList/)), it will continue to play to its end (if looped it will continue indefinitely)
+- if you must stop a looped animation, playing a single frame non-looped one immediately after stopping it, at low priority, will clear the list.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-16}
+default
+{
+    touch_start(integer detected)
+    {
+        llRequestPermissions(llDetectedKey(0), PERMISSION_TRIGGER_ANIMATION);
+    }
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_TRIGGER_ANIMATION)
+        {
+            llStartAnimation("sit");
+            llOwnerSay("animation will end in 5 seconds");
+            llSetTimerEvent(5.0);
+        }
+    }
+    timer()
+    {
+        llSetTimerEvent(0.0);
+        llStopAnimation("sit");
+    }
+}
+```
+
+</details>
+
+## Notes
+
+```lsl
+llStopAnimation(llGetAnimationOverride("Sitting"))
+```
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-3860: type=bug|llStopAnimation("prejump") freezes avatar
+
+## See also
+
+### Functions
+
+- [llGetAnimationList](/functions/llGetAnimationList/) — Gets a list of playing animations
+- [llStartAnimation](/functions/llStartAnimation/) — Starts playing an animation
+
+<WikiSource />

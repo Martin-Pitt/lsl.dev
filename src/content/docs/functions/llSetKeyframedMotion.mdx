@@ -1,0 +1,340 @@
+---
+title: "llSetKeyframedMotion"
+slug: "functions/llSetKeyframedMotion"
+category: functions
+source:
+  wiki: "LlSetKeyframedMotion"
+  url: https://wiki.secondlife.com/wiki/LlSetKeyframedMotion
+  revision: 1218850
+  date: 2026-05-19
+  contributor: "Frio Belmonte"
+  raw: /wiki-source/llsetkeyframedmotion-6a7dfeff.txt
+  license: "Content from the Second Life Wiki article LlSetKeyframedMotion (revision 1218850, 2026-05-19), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetKeyframedMotion" />
+
+Specify a list of positions, orientations, and timings to be followed by an object. The object will be smoothly moved between those **keyframes** by the simulator.
+
+Collisions with other nonphysical or keyframed objects will be ignored (no script events will fire and collision processing will not occur). Collisions with physical objects will be computed and reported, but the keyframed object will be unaffected by those collisions. (The physical object will be affected, however.)
+
+```lsl title="How to use" frame="terminal"
+llSetKeyframedMotion([], []);
+```
+
+## Specification
+
+<ConstantGroup name="KeyframedMotionParam" />
+
+The following flags will be supported within the **options** list:
+
+- [KFM_MODE](/constants/KFM_MODE/) followed by one of: [KFM_LOOP](/constants/KFM_LOOP/), [KFM_REVERSE](/constants/KFM_REVERSE/), [KFM_FORWARD](/constants/KFM_FORWARD/), or [KFM_PING_PONG](/constants/KFM_PING_PONG/) will specify the playback mode. Defaults to [KFM_FORWARD](/constants/KFM_FORWARD/). Must be specified when the keyframe list is provided.
+- [KFM_DATA](/constants/KFM_DATA/) followed by a bitwise combination of: [KFM_TRANSLATION](/constants/KFM_TRANSLATION/) and [KFM_ROTATION](/constants/KFM_ROTATION/). By default both rotations and translations must be provided. If you specify one or the other, you should only include translations or rotations in your keyframe list. Must be specified at the time the keyframe list is provided.
+- [KFM_COMMAND](/constants/KFM_COMMAND/) followed by one of: [KFM_CMD_STOP](/constants/KFM_CMD_STOP/), [KFM_CMD_PLAY](/constants/KFM_CMD_PLAY/), [KFM_CMD_PAUSE](/constants/KFM_CMD_PAUSE/). STOP will pause the animation AND reset it to the beginning. PAUSE will pause the animation without resetting. PLAY will resume a paused or stopped animation.
+
+Note that if [KFM_COMMAND](/constants/KFM_COMMAND/) is provided in the options list, it must be the only option in the list, and cannot be specified in the same function call that sets the **keyframes** list.
+
+Inter-region movement is supported; simply specify a target keyframe that would place the object outside the sim boundaries and it will cross over. This seems to provide the same effect as pausing the animation when it is in limbo between the two regions, but the viewer continues to interpolate its movement. It will jump back to the sim border and continue on the same speed, although the time between waypoints will be increased due to the sim crossing. Make sure you factor this into your system.
+
+Since keyframed motion is a prim property rather than restricted to the script that called it, you can use multiple scripts to control, pause, or restart the same keyframed motion without passing the original keyframe list provided. Just pass an empty list for **keyframes** list, and the [KFM_COMMAND](/constants/KFM_COMMAND/) followed by the command in the options list.
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [KFM_COMMAND](/constants/KFM_COMMAND/) | integer | `0` | Sets the command |
+| [KFM_CMD_PLAY](/constants/KFM_CMD_PLAY/) | integer | `0` | ? |
+| [KFM_CMD_STOP](/constants/KFM_CMD_STOP/) | integer | `1` | ? |
+| [KFM_CMD_PAUSE](/constants/KFM_CMD_PAUSE/) | integer | `2` | ? |
+| [KFM_MODE](/constants/KFM_MODE/) | integer | `1` | Sets the playback mode |
+| [KFM_FORWARD](/constants/KFM_FORWARD/) | integer | `0` | ? |
+| [KFM_LOOP](/constants/KFM_LOOP/) | integer | `1` | ? |
+| [KFM_PING_PONG](/constants/KFM_PING_PONG/) | integer | `2` | ? |
+| [KFM_REVERSE](/constants/KFM_REVERSE/) | integer | `3` | ? |
+| [KFM_DATA](/constants/KFM_DATA/) | integer | `2` | Sets what data the keyframes contain |
+| [KFM_ROTATION](/constants/KFM_ROTATION/) | integer | `0x1` | ? |
+| [KFM_TRANSLATION](/constants/KFM_TRANSLATION/) | integer | `0x2` | ? |
+
+<table>
+	<tr>
+		<th colspan="2">**options** flags</th>
+		<th colspan="2">Additional Parameters</th>
+		<th colspan="6">Description</th>
+	</tr>
+	<tr>
+		<td colspan="2" rowspan="4">\[ [integer](https://wiki.secondlife.com/wiki/integer) `command` \]</td>
+		<td colspan="6">`{{#var:comment}}`</td>
+	</tr>
+	<tr>
+		<td colspan="2" rowspan="5">\[ [integer](https://wiki.secondlife.com/wiki/integer) `mode` \]</td>
+		<td colspan="6">`{{#var:comment}}`Defaults to [KFM_FORWARD](/constants/KFM_FORWARD/)</td>
+	</tr>
+	<tr>
+		<td colspan="2" rowspan="3">\[ [integer](https://wiki.secondlife.com/wiki/integer) `fields` \]</td>
+		<td colspan="6">Defaults to ([KFM_ROTATION](/constants/KFM_ROTATION/) | [KFM_TRANSLATION](/constants/KFM_TRANSLATION/))</td>
+	</tr>
+</table>
+
+## Caveats
+
+- This function does not work in attachments.
+- This function can only be called on NON-physical objects. In the future it could be extended to support physical objects, but this is more complicated as collisions could prevent the object from reaching its goal positions on time.
+- You cannot use scripts to move any prim in the linkset while the keyframed motion is active. If you must, first pause and restart it with [KFM_CMD_PLAY](/constants/KFM_CMD_PLAY/) when done. [#Example](#pause-play)
+- Collisions with avatars affect the angular movement of the object and it may not reach the final rotation.
+- This function can only be called on the root prim of a linkset.
+- This function requires the linkset to use the Prim Equivalency system. However, it keyframed objects will not receive the dynamics penalty and can have a physics weight of up to 64.
+- Linear velocity greater than Second Life's maximum of 250 meters per second will produce an error on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/).
+- `llSetKeyframedMotion` is implemented in terms of frames and not real time. To avoid a drift from the expected positions and rotations, use times which are integer multiples of 1/45, e.g. 20.0/45.0, 40.0/45.0, 90.0/45.0, etc. [Forum Thread](http://community.secondlife.com/t5/LSL-Scripting/llSetKeyframedMotion-turning-a-corner/td-p/1225219) KFM claims delta times must be larger than 0.1 seconds; in practice, however, delta times slightly over 0.1 will produce an error on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/). Testing shows a minimum delta time is about 6/45 (.13333) seconds.
+- Natural drift can still occur; for best results use [moving_end](/events/moving_end/) to determine when the animation has ended and confirm the target position with [llSetPos](/functions/llSetPos/). Or you can use [at_target](/events/at_target/) or [at_rot_target](/events/at_rot_target/).
+- There are a few bugs in the avatar animation system that may cause strange looking animations to play when standing on a moving platform (e.g., walking in place, feet-at-pelvis). We hope to fix these in the future, but doing so is out of scope for this feature.
+- As with dynamic objects, objects moving using this function are paused when they are selected by an avatar with adequate permissions (object owner, passenger, etc). When such an avatar deselects the object, motion resumes, even if the object had been paused using [KFM_CMD_PAUSE](/constants/KFM_CMD_PAUSE/).
+- A Keyframed motion is a **prim property** in some respect. When a [KFM_LOOP](/constants/KFM_LOOP/) or [KFM_PING_PONG](/constants/KFM_PING_PONG/) is initiated the **the motion** is **preserved after the script is removed**. I.E. The prim will continue what motion it had. It will survive take and copy. It will survive server restart.
+- Interregion movement is far from perfect. Crossing from sim 1 to sim 2 using a Key Frame list with numerous frames on a curved path will pick up conspicuous errors on the crossing and when reversed by \[ [KFM_MODE](/constants/KFM_MODE/), [KFM_REVERSE](/constants/KFM_REVERSE/) \] the object will stay in sim 2 and never return to sim 1
+- Unlike [llSetPos](/functions/llSetPos/), [PRIM_POSITION](/constants/PRIM_POSITION/) and related functions, keyframed motion **can** move objects below the region ground level, but the behavior becomes increasingly unstable beyond a short distance. Attempting to correct position drift after keyframed motion with calls to such functions will cause the object to snap to the ground level instead, which may be unexpected.
+
+## Examples
+
+<details open>
+<summary>A KFM object must use the new Prim Equivalency system in order to work. One of many ways to achieve this is to make sure the object uses Convex Hull for its physics shape. (Mainly new prims need a workaround like this. Mesh objects always use the new Prim Equivalency system.)</summary>
+
+```lsl
+llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_PHYSICS_SHAPE_TYPE, PRIM_PHYSICS_SHAPE_CONVEX]);
+```
+
+</details>
+
+<details>
+<summary>This is a simple example of back-and-forth or "ping pong" motion, using only positions and time.</summary>
+
+```lsl
+llSetKeyframedMotion([<0.0, 0.0, 10.0>, 5, <0.0, 0.0, -10.0>, 5], [KFM_DATA, KFM_TRANSLATION, KFM_MODE, KFM_PING_PONG]);
+```
+
+</details>
+
+<details>
+<summary>This example includes position, rotation, and time.</summary>
+
+```lsl
+llSetKeyframedMotion(
+    [<0.0, 0.0, 10.0>, llEuler2Rot(<90, 45, 180> * DEG_TO_RAD), 5,
+     <0.0, 0.0, -10.0>, llEuler2Rot(<270, 225, 360> * DEG_TO_RAD), 5],
+    [KFM_MODE, KFM_REVERSE]);
+```
+
+</details>
+
+<details>
+<summary>Example 4</summary>
+
+### Pause-Play
+
+If you need to update a KFM object's position, you will need to pause KFM and continue it afterwards.
+
+```lsl
+llSetKeyframedMotion([],[KFM_COMMAND, KFM_CMD_PAUSE]);
+// Modify prim positions here
+llSetKeyframedMotion([],[KFM_COMMAND, KFM_CMD_PLAY]);
+```
+
+</details>
+
+<details>
+<summary>Example 5</summary>
+
+### Sample Script - Key Framed Follower
+
+Under some circumstances, rotations will generate a run-time error unless they are normalized. This script illustrates a way to use llKeyframedMotion to create a follower -- think, for example, of a cart behind a vehicle -- using normalized target rotation.
+
+```lsl collapse={1-42}
+key scriptedObjectToFollow = "daf4847b-967d-bff6-69c0-fd7022241be7";
+integer isSensorRepeatOn;
+
+rotation NormalizeRotation(rotation Q)
+{
+    float MagQ = llSqrt(Q.x*Q.x + Q.y*Q.y +Q.z*Q.z + Q.s*Q.s);
+    return <Q.x/MagQ, Q.y/MagQ, Q.z/MagQ, Q.s/MagQ>;
+}
+
+default
+{
+    state_entry()
+    {
+        llSetLinkPrimitiveParamsFast(LINK_ROOT, [
+            PRIM_PHYSICS_SHAPE_TYPE, PRIM_PHYSICS_SHAPE_CONVEX,
+            PRIM_LINK_TARGET, LINK_ALL_CHILDREN,
+            PRIM_PHYSICS_SHAPE_TYPE, PRIM_PHYSICS_SHAPE_NONE
+        ]);
+    }
+
+    touch_start(integer total_number)
+    {
+        isSensorRepeatOn = !isSensorRepeatOn;
+
+        if (isSensorRepeatOn)
+        {
+            llSay(PUBLIC_CHANNEL, "Sensor repeat switched on!");
+            llSensorRepeat("", scriptedObjectToFollow, SCRIPTED, 10.0, PI, 0.3);
+        }
+        else
+        {
+            llSensorRemove();
+        }
+    }
+
+    sensor(integer num_detected)
+    {
+        vector ownPosition = llGetPos();
+        rotation ownRotation = llGetRot();
+        vector detectedPosition = llDetectedPos(0);
+        rotation detectedRotation = llDetectedRot(0);
+
+        vector kfmPosition = (detectedPosition - ownPosition) + <-1.0, 0.0, 0.2> * detectedRotation;
+        rotation kfmRotation = NormalizeRotation(detectedRotation / ownRotation);
+        llSetKeyframedMotion([kfmPosition, kfmRotation, 0.15], []);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 6</summary>
+
+### Universal Hinged Motion in 8 Key Frames
+
+The script will turn a box prim around one edge parallel to the prim's Y-axis
+
+The script will work for any prim orientation
+
+Note that the smallest accepted time per frame is 1/9S=0.11111111S and NOT 0.1S
+
+```lsl collapse={1-35}
+float angleEnd=PI_BY_TWO;
+float speed=0.2; // m/S
+float steps=8.0; // number of Key Frames
+float step=0.0;
+list KFMlist=[];
+vector V;
+integer open=TRUE;
+vector basePos;
+rotation baseRot;
+
+float motion_time( float mt)
+{
+    mt = llRound(45.0*mt)/45.0;
+    if ( mt > 0.11111111 ) return mt;
+    else return 0.11111111;
+}
+
+default
+{
+    state_entry()
+    {
+        llSetMemoryLimit(0x2000);
+        llSetPrimitiveParams([PRIM_PHYSICS_SHAPE_TYPE, PRIM_PHYSICS_SHAPE_CONVEX]);
+        basePos = llGetPos();
+        baseRot = llGetRot();
+        vector v1 = 0.5*llGetScale()*llGetRot();
+        rotation deltaRot = llEuler2Rot(< 0.0, angleEnd/steps, 0.0>);
+        while ( step < steps )
+        {
+            V = v1*llAxisAngle2Rot(llRot2Left(llGetRot()), angleEnd*step/steps);
+            V = v1*llAxisAngle2Rot(llRot2Left(llGetRot()), angleEnd*(step+1.0)/steps) - V;
+            KFMlist += [V, deltaRot, motion_time(llVecMag(V)/speed)];
+            step += 1.0;
+        }
+    }
+    touch_end( integer n)
+    {
+        llSetKeyframedMotion( [], []);
+        if ( open )
+        {
+            llSetPrimitiveParams([PRIM_POSITION, basePos, PRIM_ROTATION, baseRot]);
+            llSetKeyframedMotion( KFMlist, []);
+        }
+        else
+        {
+            llSetKeyframedMotion( KFMlist, [KFM_MODE, KFM_REVERSE]);
+        }
+        open = !open;
+    }
+    on_rez( integer n) { llResetScript(); }
+}
+```
+
+</details>
+
+<details>
+<summary>After editing prim position, rotation and/or size the script should be reset in order to update the motion</summary>
+
+### Continuous Spin
+
+The following example does the same thing as using `llTargetOmega(<0.0,0.0,1.0>,PI,1.0)` to make a prim rotate continuously around its Z-axis, assuming that the prim is set to convex hull and is non-physical.
+
+```lsl collapse={1-8}
+integer gON;
+
+default
+{
+    touch_end(integer total_number)
+    {
+        if (gON = !gON)
+        {
+            // Make repeated rotations of PI radians, each taking 1 seconds
+            rotation r = llEuler2Rot(<0.0, 0.0, PI>);
+            llSetKeyframedMotion(
+                [
+                    r, 1,
+                    r, 1
+                ],
+                [KFM_DATA, KFM_ROTATION, KFM_MODE, KFM_LOOP]
+            );
+            return;
+        }
+
+        llSetKeyframedMotion([], []);
+    }
+}
+```
+
+</details>
+
+### More Examples
+
+- [3D Spinning Pendulum Motion](https://wiki.secondlife.com/wiki/User:Tapple_Gao/3D_Spinning_Pendulum_Motion), Suitable for spinning tops, swings, tire swings. Highly configurable
+- [Oscillator Motion in 12 Key Frames](https://wiki.secondlife.com/wiki/User:Dora_Gustafson/Harmonic_Oscillator_motion)
+- [Simple Pendulum Motion in 24 Key Frames](https://wiki.secondlife.com/wiki/User:Dora_Gustafson/Pendulum_motion), a good motion for a swing
+
+## Notes
+
+Potential Use Cases:
+
+- Elevators
+- Moving platforms
+- Trains/Fixed-Track Vehicles
+- Moving doors/walls/gates
+- Windmills and other machines
+
+Targeted coordinate systems: The Translation is in Global coordinates, the Rotation in Local coordinates
+
+- Say: a move on the X-axis will move the object along the global, region X-axis no matter how the object is rotated
+- Say: a rotate around the X-axis will rotate the object around it's local, prim X-axis no matter the object's rotation
+- When the object is not rotated in the global system you won't notice the difference
+
+## History
+
+Date of Release [09/11/2011](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-11-09-244706)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SCR-345 (bug): llSetKeyframedMotion() does not support inter-region motion
+- SCR-346 (nf): Option for viewer-only llSetKeyframedMotion() functionality
+- SVC-7796 (nf): Curve Interpolation for llSetKeyframedMotion()
+- BUG-7743 (nf): Bezier Curve Support for llSetKeyframedMotion()
+- BUG-7767 (nf): '''KFM_STRICT_TIMING''' for llSetKeyframedMotion()
+
+The wiki article also includes shared templates whose conditional content is not reproduced here: [Template:Issues/BUG-7882](https://wiki.secondlife.com/wiki/Template:Issues/BUG-7882).
+
+<WikiSource />

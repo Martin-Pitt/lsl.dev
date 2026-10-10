@@ -1,0 +1,93 @@
+---
+title: "AGENT_BY_USERNAME"
+slug: "constants/AGENT_BY_USERNAME"
+category: constants
+source:
+  wiki: "AGENT BY USERNAME"
+  url: https://wiki.secondlife.com/wiki/AGENT_BY_USERNAME
+  revision: 1161277
+  date: 2012-01-12
+  contributor: "Strife Onizuka"
+  raw: /wiki-source/agent-by-username-0761f55a.txt
+  license: "Content from the Second Life Wiki article AGENT BY USERNAME (revision 1161277, 2012-01-12), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="AGENT_BY_USERNAME" description />
+
+See [Avatar Names](https://wiki.secondlife.com/wiki/Category:LSL_Avatar/Name)
+
+## See also
+
+### Constants
+
+|- valign="top"
+
+| &lt;div style="display:inline-block;">
+
+<table>
+	<tr>
+		<th colspan="2">**Flag Mask**</th>
+		<th>**Description ([llDetectedType](/functions/llDetectedType/)())**</th>
+		<th>**Description ([llSensor](/functions/llSensor/)() and [llSensorRepeat](/functions/llSensorRepeat/)() mask)**</th>
+	</tr>
+	<tr>
+		<td>`{{#var:AGENT_BY_LEGACY_NAME}}`</td>
+		<td>0x1</td>
+		<td>Agents</td>
+		<td>This is used to find agents by [legacy name](https://wiki.secondlife.com/wiki/Category:LSL_Avatar/Name).</td>
+	</tr>
+	<tr>
+		<td>[AGENT](/constants/AGENT/)</td>
+		<td>0x1</td>
+		<td>Agents</td>
+		<td>This is also used to find agents by [legacy name](https://wiki.secondlife.com/wiki/Category:LSL_Avatar/Name), and is functionally identical to [AGENT_BY_LEGACY_NAME](/constants/AGENT_BY_LEGACY_NAME/)</td>
+	</tr>
+	<tr>
+		<td>`{{#var:AGENT_BY_USERNAME}}`</td>
+		<td>0x10</td>
+		<td>*`Reserved`*</td>
+		<td>This is used to find agents by [username](https://wiki.secondlife.com/wiki/Category:LSL_Avatar/Name).</td>
+	</tr>
+	<tr>
+		<td>[ACTIVE](/constants/ACTIVE/)</td>
+		<td>0x2</td>
+		<td>Physical tasks. (Physical objects & agents)</td>
+		<td>Physical objects that are moving or objects containing an active script. Thus, it is using SL server resources now.</td>
+	</tr>
+	<tr>
+		<td>[PASSIVE](/constants/PASSIVE/)</td>
+		<td>0x4</td>
+		<td>Non-physical objects.</td>
+		<td>Non-scripted or script is inactive and non-physical or, if physical, not moving. Thus, it is not using SL server resources now.</td>
+	</tr>
+	<tr>
+		<td>[SCRIPTED](/constants/SCRIPTED/)</td>
+		<td>0x8</td>
+		<td>Objects containing any active script.</td>
+		<td>Objects that has any script, which is doing anything in simulator just now.</td>
+	</tr>
+	<tr>
+		<td>[DAMAGEABLE](/constants/DAMAGEABLE/)</td>
+		<td>0x20</td>
+		<td>Objects & agents that are able to process damage.</td>
+		<td>Filter for objects in world that have a script with [on_damage](/events/on_damage/) or a [final_damage](/events/final_damage/) event (able to process damage)</td>
+	</tr>
+</table>
+
+&lt;/div>&lt;div style="display:inline-block;">
+
+| [llDetectedType](/functions/llDetectedType/)() | Scripted | Not Scripted | Agent Standing | Agent Sitting |
+| --- | --- | --- | --- | --- |
+| Physical Movement | [SCRIPTED](/constants/SCRIPTED/)) | 2 ([ACTIVE](/constants/ACTIVE/)) | [AGENT](/constants/AGENT/)) | [AGENT](/constants/AGENT/)) |
+| Non-Physical | [SCRIPTED](/constants/SCRIPTED/)) | 4 ([PASSIVE](/constants/PASSIVE/)) | 1 ([AGENT](/constants/AGENT/)) | [AGENT](/constants/AGENT/)) |
+
+`{{#if: {{#vardefine:examples|{{#var:examples}} '''Using [[llDetectedType]] in [[collision]] event:''' integer type; default { state_entry() { llVolumeDetect(TRUE); } collision_start(integer detected) { type = llDetectedType(0); if (type == AGENT)// = 1 { llSay(0, "This is impossible. Since there is no avatar who doesn't require the physical calculation."); } else if (type == ACTIVE)// = 2 { llSay(0, "I have been struck by a physical object not containing any script."); } else if (type == PASSIVE)// = 4 { llSay(0, "This is impossible. Non-physical objects cannot trigger this event."); } else if (type == SCRIPTED)// = 8 { llSay(0, "This is impossible. Since there is no object which isn't physical nor non-physical."); } else if (type == (AGENT | ACTIVE) ) // 1 + 2 { llSay(0, "I have been struck by an avatar."); } else if (type == (SCRIPTED | ACTIVE) ) // = 8 + 2 { llSay(0, "I have been struck by a physical object containing any script."); } else if (type == (SCRIPTED | PASSIVE) ) // = 8 + 4 { llSay(0, "This is impossible. Non-physical objects cannot trigger this event."); } } } '''Using [[llDetectedType]] in [[sensor]] event:''' default { touch_start(integer numberDetected) { llSensor("", "", ACTIVE | PASSIVE | AGENT, 20.0, PI); // activates the sensor. } sensor (integer numberDetected) { integer i; while(i < numberDetected) { integer type = llDetectedType(i); string message; message += (string)i + ", " + llDetectedName(i) + ", "; list typeList; if (type & AGENT) { typeList += "AGENT"; } if (type & ACTIVE) { typeList += "ACTIVE"; } if (type & PASSIVE) { typeList += "PASSIVE"; } if (type & SCRIPTED) { typeList += "SCRIPTED"; } message += llDumpList2String(typeList, "|"); llWhisper(0, message); ++i; } } no_sensor() { // This is impossible if range = 20.0 and you are standing within 10m! llWhisper(0, "Nothing is near me at present."); } } '''Using filter in {{LSLGC|Sensor|llSensor*}} functions:''' // Report nearby sensed objects and avatars under sundry categories list SenseTypes; integer gIndex; SenseNextType() { string text = llList2String( SenseTypes, gIndex); integer tipe = llList2Integer(SenseTypes, gIndex + 1); if (tipe) { llWhisper(0, text); llSensor("", NULL_KEY, tipe, 20.0, PI); gIndex += 2; // increment by stride } else llWhisper(0, "--- Finished ---"); } default { touch_start(integer detected) { // Make a Strided list of text and sensor type combinations // (Can't use '|' in Global, unfortunately) SenseTypes = [ "AGENT_BY_LEGACY_NAME", AGENT_BY_LEGACY_NAME, "ACTIVE", ACTIVE, "AGENT_BY_LEGACY_NAME|ACTIVE", AGENT_BY_LEGACY_NAME|ACTIVE, "PASSIVE", PASSIVE, "AGENT_BY_LEGACY_NAME|PASSIVE", AGENT_BY_LEGACY_NAME|PASSIVE, "ACTIVE|PASSIVE", ACTIVE|PASSIVE, "AGENT_BY_LEGACY_NAME|ACTIVE|PASSIVE", AGENT_BY_LEGACY_NAME|ACTIVE|PASSIVE, "SCRIPTED", SCRIPTED, "AGENT|SCRIPTED", AGENT|SCRIPTED, "ACTIVE|SCRIPTED", ACTIVE|SCRIPTED, "AGENT_BY_LEGACY_NAME|ACTIVE|SCRIPTED", AGENT_BY_LEGACY_NAME|ACTIVE|SCRIPTED, "PASSIVE|SCRIPTED", PASSIVE|SCRIPTED, "", 0 ]; gIndex = 0; SenseNextType(); // Kick off the sensing sequence } sensor(integer detected) { integer x; while (x < detected) { llWhisper(0, (string) (x+1) + ": " + llDetectedName(x) ); ++x; } SenseNextType(); } no_sensor() { llWhisper(0, "none"); SenseNextType(); } } '''Detecting [[DAMAGEABLE|damageable]] things with sensors:''' default { state_entry() { llSensor("", "", SCRIPTED|AGENT|DAMAGEABLE, 20, PI); } no_sensor() { llOwnerSay("Nothing detected"); } sensor(integer num_detected) { llOwnerSay("Detected " + (string)num_detected + " damageable thing(s)"); integer i; for (i = 0; i < num_detected; ++i) { string name = llDetectedName(i); integer isAgent = llDetectedType(i) & AGENT; list types = ["Object", "Agent"]; llOwnerSay(llList2String(types, isAgent) + ": " + name); } } } }} }}`
+
+### Functions
+
+- [llDetectedType](/functions/llDetectedType/)
+- [llSensor](/functions/llSensor/)
+- [llSensorRepeat](/functions/llSensorRepeat/)
+
+<WikiSource />

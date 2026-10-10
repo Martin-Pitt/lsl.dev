@@ -1,0 +1,84 @@
+---
+title: "llDetachFromAvatar"
+slug: "functions/llDetachFromAvatar"
+category: functions
+source:
+  wiki: "LlDetachFromAvatar"
+  url: https://wiki.secondlife.com/wiki/LlDetachFromAvatar
+  revision: 1213754
+  date: 2023-03-16
+  contributor: "Tapple Gao"
+  raw: /wiki-source/lldetachfromavatar-91a1f88e.txt
+  license: "Content from the Second Life Wiki article LlDetachFromAvatar (revision 1213754, 2023-03-16), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDetachFromAvatar" description />
+
+Detach object from avatar.
+
+The detached object is no longer present in the sim. There is no lsl equivilent of the "Drop" command that moves an attachment onto the ground. Use [llRezObject](/functions/llRezObject/) if you need similar behavior
+
+```lsl title="How to use" frame="terminal"
+llDetachFromAvatar();
+```
+
+## Caveats
+
+- Only works in the root prim of the attachment; calling it from a script in a child prim will cause it to fail silently.
+- If the attachment was attached using [llAttachToAvatarTemp](/functions/llAttachToAvatarTemp/), the [attach](/events/attach/)() [event](https://wiki.secondlife.com/wiki/event) will *not* be called because the object will be destroyed before the event gets processed.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-18}
+default
+{
+    attach(key AvatarKey)
+    {//give instructions for use and prevent item from being attached to avatar
+        if(AvatarKey)
+        {//event is called on both attach and detatch, but Key is only valid on attach
+            llOwnerSay ("
+            We hope you will enjoy your purchase,
+            but if you really want to use this item properly, you should:
+            1) drag it from your inventory to the ground
+            2) Right click on it and select \"open\"
+            3) copy its contents to inventory.");
+
+            llRequestPermissions(AvatarKey, PERMISSION_ATTACH );
+        }
+    }
+    run_time_permissions(integer perm)
+    {
+        if(perm & PERMISSION_ATTACH)
+        {
+            llDetachFromAvatar( );
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+There is no way to delete an attachment with a script or to drop it to the ground.
+
+## Additional wiki content
+
+`{{Issues/VWR-12525}}``{{Issues/VWR-16294}}``{{LSL_Function/permission|PERMISSION_ATTACH|grant=the owner}}`
+
+## See also
+
+### Functions
+
+- [llAttachToAvatar](/functions/llAttachToAvatar/)
+- [llGetAttached](/functions/llGetAttached/)
+
+### Events
+
+- [attach](/events/attach/)
+
+<WikiSource />

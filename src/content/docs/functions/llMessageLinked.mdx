@@ -1,0 +1,137 @@
+---
+title: "llMessageLinked"
+slug: "functions/llMessageLinked"
+category: functions
+source:
+  wiki: "LlMessageLinked"
+  url: https://wiki.secondlife.com/wiki/LlMessageLinked
+  revision: 1194413
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llmessagelinked-b6b91c1e.txt
+  license: "Content from the Second Life Wiki article LlMessageLinked (revision 1194413, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llMessageLinked" />
+
+The purpose of this function is to allow scripts in the same object to communicate. It triggers a [link_message](/events/link_message/) [event](https://wiki.secondlife.com/wiki/event) with the same parameters **num**, **str**, and **id** in all scripts in the prim(s) described by **link**.
+
+You can use **id** as a second string field`{{Footnote|In LSL the [[key]] type is implemented as a [[string]] (but with different operators and restrictions). [[typecast|Typecasting]] between string and key types has no effect on the data contained.}}`. The sizes of **str** and **id** are only limited by available script memory.
+
+```lsl title="How to use" frame="terminal"
+llMessageLinked(0, 0, "", NULL_KEY);
+```
+
+## Caveats
+
+- A script can hear its own linked messages if **link** targets the prim it is in`{{Footnote|There are four ways for a script to target itself: by [[llGetLinkNumber|precise link number]], [[LINK_THIS]], [[LINK_SET]] and [[LINK_ALL_CHILDREN]] (if the prim is a child prim).}}`. This creates the possibility of an infinite loop (a bad thing); be very careful about how messages are handled and passed along.
+- Messages sent via [llMessageLinked](/functions/llMessageLinked/) to a script that is [sleeping](/functions/llSleep/), [delayed](https://wiki.secondlife.com/wiki/LSL_Delay), or [lagged](https://wiki.secondlife.com/wiki/lag), are queued until the end of the delay. The [event](https://wiki.secondlife.com/wiki/event) queue can hold 64 [events](https://wiki.secondlife.com/wiki/event).
+- If an [event](https://wiki.secondlife.com/wiki/event) is received and the queue is full the [event](https://wiki.secondlife.com/wiki/event) is silently dropped.
+- Avoid sending link_messages to large numbers of scripts simultaneously as it can cause lag spike. This most often happens when using the multi-prim `LINK_*` flags and can cause script execution to slow or halts.
+- Avoid sending link_messages to a target faster than they can be handled. Doing so risks filling the [event](https://wiki.secondlife.com/wiki/event) queue and subsequent messages being silently discarded.
+- When a script [state](https://wiki.secondlife.com/wiki/state) changes, all pending [events](https://wiki.secondlife.com/wiki/event) are deleted, including queued link_messages.
+- If **link** is an invalid link number then the function silently fails.
+- If **str** & **id** exceed the available memory of a script that catches the resulting [link_message](/events/link_message/) [event](https://wiki.secondlife.com/wiki/event), that script will crash with a [Stack-Heap Collision](https://wiki.secondlife.com/wiki/LSL_Errors#script-run-time-error-stack-heap-collision).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    // assumptions  // object name: LSLWiki // script name: _lslwiki
+    state_entry()
+    {
+        llMessageLinked(LINK_THIS, 0, llGetScriptName(), "");
+    }
+
+    link_message(integer sender_num, integer num, string msg, key id)
+    {
+        llOwnerSay(msg);
+        // the owner of object LSLWiki will hear
+        // LSLWiki:_lslwiki
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+### Infinite Loop
+
+```lsl collapse={7-18}
+Message_Control(integer l, integer n) // Message_Total_Lack_Of_Control
+{
+    integer r = (++n); // Increment the value of n.
+    llMessageLinked( l, r, "", ""); // Send the result to l
+}
+
+default
+{
+    state_entry()
+    {
+        Message_Control(LINK_SET, 0); // Tell all the scripts in the object that we have state_entered.
+    }
+    link_message(integer Sender, integer Number, string String, key Key) // This script is in the object too.
+    {
+        Message_Control(Sender, Number); // No filtering condition exists.
+        llOwnerSay(((string)Number)); // Look at all the pretty numbers!
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+default
+{
+    // Quick and dirty debugging link_messages
+    link_message(integer sender_num, integer num, string msg, key id)
+    {
+        llSay(DEBUG_CHANNEL, llList2CSV([sender_num, num, msg, id]));
+    }
+}
+```
+
+```lsl collapse={1-8, 14-18}
+// This is just an example script, you shouldn't handle link message within single script this way.
+
+default
+{
+    // To propagate an unlimted number of arguments of any type.
+    // Presumed, the separator string isn't used in any source string!
+    state_entry()
+    {
+        list my_list = [1, 2.0, "a string", <1, 2, 3>, <1, 2, 3, 4>, llGetOwner()];
+        string list_parameter = llDumpList2String(my_list, "|");    // Convert the list to a string
+        llMessageLinked(LINK_THIS, 0, list_parameter, "");
+    }
+
+    link_message(integer sender_num, integer num, string list_argument, key id)
+    {
+        list re_list = llParseString2List(list_argument, ["|"], []);    // Parse the string back to a list
+    }
+}
+```
+
+## Notes
+
+- Using [llMessageLinked](/functions/llMessageLinked/) in a single prim object allows developers to mitigate some [LSL limits](https://wiki.secondlife.com/wiki/Limits#scripting) by breaking up functionality between cooperating scripts and synchronizing actions. When you do this, be extremely careful not to create infinite loops as mentioned above.
+- Estimated `.25` to `.50` delay between receiving and sending of [llMessageLinked](/functions/llMessageLinked/) has been observed by some users
+- Some users have noted occasional failures of linked messages when sending a message to a large number of receiving scripts in different prims using [LINK_SET](/constants/LINK_SET/), [LINK_ALL_OTHERS](/constants/LINK_ALL_OTHERS/), & [LINK_ALL_CHILDREN](/constants/LINK_ALL_CHILDREN/). If you encounter this problem, a workaround is to place all child prim scripts in a single prim, using targeted functions like [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetLinkPrimitiveParams) to modify the prim in which the script previously resided. -- [Void Singer](https://wiki.secondlife.com/wiki/User:Void_Singer)
+- This function seems to create a lower lag level then [llListen](/functions/llListen/) since it does not need a listener.
+
+## See also
+
+### Events
+
+- [link_message](/events/link_message/)
+
+<WikiSource />

@@ -1,0 +1,100 @@
+---
+title: "collision_start"
+slug: "events/collision_start"
+category: events
+source:
+  wiki: "Collision start"
+  url: https://wiki.secondlife.com/wiki/Collision_start
+  revision: 1218613
+  date: 2026-02-03
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/collision-start-8bb094ad.txt
+  license: "Content from the Second Life Wiki article Collision start (revision 1218613, 2026-02-03), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="collision_start" description />
+
+Triggered when task starts colliding with another task
+
+```lsl title="How to use" frame="terminal"
+collision_start(integer num_detected)
+{
+
+}
+```
+
+## Caveats
+
+- Will not detect collisions with ground. Use [land_collision_start](/events/land_collision_start/) instead.
+- Phantom objects can never receive trigger collision events.
+- `llVolumeDetect(TRUE)` objects get trigger [collision_start](/events/collision_start/) and [collision_end](/events/collision_end/) but not [collision](/events/collision/)() events.
+- A collision with a hovering avatar does not trigger collisions, unless the avatar turns or moves.
+- Only a physical object will get collision events from colliding with a non-physical object.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    collision_start(integer num)
+    {
+        llSay(0,"No pushing.");
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-5}
+list DetectedAvatars = [];
+default
+{
+    state_entry()
+    {
+        llVolumeDetect(TRUE); // Enable detection of people colliding with object....
+    }
+    collision_start(integer detected)
+    {
+        integer index = llListFindList(DetectedAvatars, [llDetectedKey(0)]);
+        if (index == -1)
+        {
+            llInstantMessage(llDetectedKey(0), " Welcome to the Community");
+            DetectedAvatars = llListInsertList(DetectedAvatars, [llDetectedKey(0)], -1);
+
+            if (llGetListLength(DetectedAvatars) == 2)
+            {
+                DetectedAvatars = llDeleteSubList(DetectedAvatars, 1, 2);
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+`{{Issues/SVC-3306}}`
+
+## See also
+
+### Functions
+
+- [llPassCollisions](/functions/llPassCollisions/)
+- [llCollisionFilter](/functions/llCollisionFilter/)
+- [llCollisionSound](/functions/llCollisionSound/)
+- [llVolumeDetect](/functions/llVolumeDetect/)
+
+### Events
+
+- [collision](/events/collision/)
+- [collision_end](/events/collision_end/)
+
+<WikiSource />

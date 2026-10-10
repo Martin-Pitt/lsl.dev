@@ -1,0 +1,270 @@
+---
+title: "llRemoteLoadScriptPin"
+slug: "functions/llRemoteLoadScriptPin"
+category: functions
+source:
+  wiki: "LlRemoteLoadScriptPin"
+  url: https://wiki.secondlife.com/wiki/LlRemoteLoadScriptPin
+  revision: 1208255
+  date: 2019-04-02
+  contributor: "Pazako Karu"
+  raw: /wiki-source/llremoteloadscriptpin-3e78cb47.txt
+  license: "Content from the Second Life Wiki article LlRemoteLoadScriptPin (revision 1208255, 2019-04-02), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRemoteLoadScriptPin" description />
+
+Copy script `name` into **target** and set to **running** with a **start_param** only if **target**'s [pin](/functions/llSetRemoteScriptAccessPin/) matches **pin**
+
+Only works if the [script owner](https://wiki.secondlife.com/wiki/LSL_Glossary#script-owner) can modify **target**.
+
+```lsl title="How to use" frame="terminal"
+llRemoteLoadScriptPin(NULL_KEY, "", 0, 0, 0);
+```
+
+## Caveats
+
+- If `name` is present in the **target** prim's inventory then it is silently replaced.
+- **start_param** only lasts until the script is reset.
+- Only the owner of an [attachment](https://wiki.secondlife.com/wiki/Category:LSL_Attachment) can modify it while it is being worn.
+- If **target** is an [attachment](https://wiki.secondlife.com/wiki/Category:LSL_Attachment) owned by a different user, regardless of object modify rights granted, this function will silently fail.
+- If **target** is owned by a different user and modify permission has been granted to the script owner via [Edit, delete, or take my objects](http://community.secondlife.com/t5/tkb/articleprintpage/tkb-id/English_KB@tkb/article-id/215), the script owner must be connected to the sim for this function to succeed.
+- If **pin** fails to match, the error "Task ~Prim~ trying to illegally load script onto task ~Other_Prim~!" is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/). "~Prim~" and "~Other_Prim~" are substituted with the applicable prim names.
+- If **target** is the script's parent (`target == llGetKey()`) then "Unable to add item!" is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/).
+- If the object containing this script is deeded to a group, then script `name` needs transfer permissions; even if **target** is deeded to the same group.
+- When the script is set to run (with **running**, the running checkbox or [llSetScriptState](/functions/llSetScriptState/)) [state_entry](/events/state_entry/) will be queued.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+#### Basic Example
+
+##### Script copier
+
+```lsl
+//Copy a script to the second prim
+integer PIN=1341134;
+
+default {
+    state_entry() {
+        llRemoteLoadScriptPin( llGetLinkKey(2), "some script", PIN, TRUE, 0xBEEEEEEF );
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+##### Pin setter
+
+Simple script used for setting the **pin** for a prim, so you can later send scripts to it with `llRemoteLoadScriptPin`.
+
+```lsl
+//Child Prim PIN setter
+integer PIN=1341134;
+
+default {
+    state_entry() {
+        llOwnerSay(llGetObjectName()+" : "+(string)llGetKey()+" is ready to accept a describer script using the agreed upon PIN.");
+        llSetRemoteScriptAccessPin(PIN);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+#### Rez and copy a file from a control object
+
+Notes: There is currently no signing on the starting messages only the owner is checked.
+
+this example rezs a prim from inventory that has a basic control file inside of it and does a basic handshake to setup the
+
+**pin** and transfer the script.
+
+after the transfert the helper script in the rezzed prim deletes itself.
+
+##### Control prim
+
+```lsl collapse={1-57, 63-81}
+integer controlchan = 0;
+integer controlid = -1;
+start()
+{
+    llSetTimerEvent(0);
+    talkingto = NULL_KEY;
+    integer a = (integer)llFrand(43);
+    controlchan = a * a;
+    controlchan -= controlchan * 3;
+    controlid = llListen(controlchan,"","","set-connect");
+    llRezObject("card",llGetPos()+<0,0,0.1>,<0,0,0>,ZERO_ROTATION,a);
+    llSetTimerEvent(60);
+}
+key talkingto = NULL_KEY;
+integer busy = FALSE;
+integer accesspin = 0;
+default
+{
+    timer()
+    {
+        llSetTimerEvent(0);
+        llOwnerSay("Lost connection!");
+        llListenRemove(controlid);
+        busy = FALSE;
+    }
+    listen(integer chan,string name,key id,string message)
+    {
+        if(chan == controlchan)
+        {
+            if(llGetOwnerKey(id) == llGetOwner())
+            {
+                if(talkingto == NULL_KEY)
+                {
+                    if(message == "set-connect")
+                    {
+                        llSetTimerEvent(0);
+                        talkingto = id;
+                        llListenRemove(controlid);
+                        controlid = llListen(controlchan,"",talkingto,"ready");
+                        llRegionSayTo(id,controlchan,"auto-connect");
+                        llSetTimerEvent(60);
+                    }
+                }
+                else if(id == talkingto)
+                {
+                    if(message == "ready")
+                    {
+                        llSetTimerEvent(0);
+                        accesspin = (integer)llFrand(2345)+213;
+                        llListenRemove(controlid);
+                        controlid = llListen(controlchan,"",talkingto,"pinset");
+                        llSleep(1);
+                        llRegionSayTo(talkingto,controlchan,(string)accesspin);
+                        llSetTimerEvent(60);
+                    }
+                    else if(message == "pinset")
+                    {
+                        llSetTimerEvent(0);
+                        llListenRemove(controlid);
+                        llRemoteLoadScriptPin(talkingto,"demo.lsl",accesspin,1,0);
+                        llSleep(3);
+                        llRegionSayTo(talkingto,controlchan,"finished");
+                        llOwnerSay("Transfer of file finished - control file should have auto deleted itself!");
+                        busy = FALSE;
+                    }
+                }
+            }
+        }
+    }
+    touch_end(integer a)
+    {
+        if(busy == FALSE)
+        {
+            busy = TRUE;
+            if(llGetOwner() == llDetectedKey(0))
+            {
+                start();
+            }
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 4</summary>
+
+##### rezzed prim
+
+```lsl
+integer listen_id = -1;
+integer listen_chan = -1;
+key details_from = NULL_KEY;
+default
+{
+    on_rez(integer a)
+    {
+        if(a == 0)
+        {
+            llOwnerSay("- Direct rez -");
+        }
+        else
+        {
+            llOwnerSay("- Awaiting config connection -");
+            listen_chan = a * a;
+            listen_chan -= listen_chan * 3;
+            listen_id = llListen(listen_chan,"","","auto-connect");
+            llWhisper(listen_chan,"set-connect");
+            llSetTimerEvent(30);
+        }
+    }
+    timer()
+    {
+        llOwnerSay("Failed to connect to rezzer deleting myself!");
+        llSetTimerEvent(0);
+        llDie();
+    }
+    listen(integer chan,string name,key id,string message)
+    {
+        if(llGetOwnerKey(id) == llGetOwner())
+        {
+            if(message == "auto-connect")
+            {
+                llSetTimerEvent(0);
+                llListenRemove(listen_id);
+                listen_id = llListen(listen_chan,"",id,"");
+                llRegionSayTo(id,listen_chan,"ready");
+                details_from = id;
+                llSetTimerEvent(30);
+            }
+            else if(details_from != NULL_KEY)
+            {
+                llSetTimerEvent(0);
+                if(message == "finished")
+                {
+                    llSetRemoteScriptAccessPin((integer)message);
+                    llRemoveInventory(llGetScriptName());
+                }
+                else
+                {
+                    llSetRemoteScriptAccessPin((integer)message);
+                    llRegionSayTo(id,listen_chan,"pinset");
+                }
+                llSetTimerEvent(30);
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## History
+
+- Added in 1.2.6
+- In SL 1.25.4 this function will not copy/move any script into an attachment unless the script is full perm. ([SVC-3725](https://jira.secondlife.com/browse/SVC-3725))
+- SL 1.25.5 will allow this function to copy/move a script into an attachment so long as the target has matching (or more restrictive) copy and transfer permissions. ([SVC-3738](https://jira.secondlife.com/browse/SVC-3738))
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-3321 (bug): stack trace error while running scripts after llRemoteLoadScriptPin
+
+## See also
+
+### Functions
+
+- [llSetRemoteScriptAccessPin](/functions/llSetRemoteScriptAccessPin/) — Used to setup a prim for remote loading
+- [llSetScriptState](/functions/llSetScriptState/) — Set a scripts running state
+- [llResetOtherScript](/functions/llResetOtherScript/) — Reset another script in the prim
+
+<WikiSource />

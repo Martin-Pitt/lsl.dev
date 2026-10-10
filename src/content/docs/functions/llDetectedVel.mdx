@@ -1,0 +1,57 @@
+---
+title: "llDetectedVel"
+slug: "functions/llDetectedVel"
+category: functions
+source:
+  wiki: "LlDetectedVel"
+  url: https://wiki.secondlife.com/wiki/LlDetectedVel
+  revision: 1198875
+  date: 2016-01-18
+  contributor: "Omei Qunhua"
+  raw: /wiki-source/lldetectedvel-0efd308e.txt
+  license: "Content from the Second Life Wiki article LlDetectedVel (revision 1198875, 2016-01-18), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDetectedVel" description />
+
+Returns [&lt;0.0, 0.0, 0.0>](/constants/ZERO_VECTOR/) if **number** is not valid sensed object or avatar.
+
+```lsl title="How to use" frame="terminal"
+vector result = llDetectedVel(0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-11}
+//Tells the name and velocity of all near-by avatars.
+default
+{
+    state_entry()
+    {
+        // Scan once for avatars within a 96 metre radius sphere
+        llSensor("", "", AGENT, 96, PI);
+    }
+    sensor(integer num)
+    {
+        // num will initially be 1 or more. When num is 1, the index of the detected avatar will be zero
+        while(num--)
+        {
+            llOwnerSay(llDetectedName(num) + " is moving at " + (string)llVecMag(llDetectedVel(num)) + " m/s.");
+        }
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-5821 (bug): Velocity is reduced to maximum of 200.0m/s on instant of collision and llDetectedVel reports this incorrect value.
+
+<WikiSource />

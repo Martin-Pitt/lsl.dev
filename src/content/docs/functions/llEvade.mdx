@@ -1,0 +1,96 @@
+---
+title: "llEvade"
+slug: "functions/llEvade"
+category: functions
+source:
+  wiki: "LlEvade"
+  url: https://wiki.secondlife.com/wiki/LlEvade
+  revision: 1218779
+  date: 2026-04-11
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llevade-263af76e.txt
+  license: "Content from the Second Life Wiki article LlEvade (revision 1218779, 2026-04-11), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llEvade" />
+
+Characters will (roughly) try to hide from their pursuers if there is a good hiding spot along their fleeing path. Hiding means no direct line of sight from the head of the character (center of the top of its physics bounding box) to the head of its pursuer and no direct path between the two on the navmesh.
+
+```lsl title="How to use" frame="terminal"
+llEvade(NULL_KEY, []);
+```
+
+## Caveats
+
+- Must use [llCreateCharacter](/functions/llCreateCharacter/) or script will shout an error "You must call [llCreateCharacter](/functions/llCreateCharacter/) before `llEvade`.".
+
+- If the **target** is an object, it must be unlinked or be the root prim of a linkset.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-18, 24-32}
+vector start_position;
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        llDeleteCharacter();
+        llCreateCharacter([CHARACTER_MAX_SPEED, 25, CHARACTER_DESIRED_SPEED, 15.0]);
+
+        start_position = llGetPos();
+        llWanderWithin(start_position, <10.0, 10.0, 2.0>, [] );
+    }
+
+    touch_start(integer num_detected)
+    {
+        llEvade(llDetectedKey(0), []);
+        llSetTimerEvent(20.0);
+    }
+
+    timer()
+    {
+    //  do not keep running away...
+        llSetTimerEvent(0.0);
+
+        llWanderWithin(start_position, <10.0, 10.0, 2.0>, [] );
+    }
+}
+```
+
+</details>
+
+## History
+
+Date of Release [31/07/2012](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-31-262785)
+
+## See also
+
+### Functions
+
+- [llCreateCharacter](/functions/llCreateCharacter/)
+- [llDeleteCharacter](/functions/llDeleteCharacter/)
+- [llEvade](/functions/llEvade/)
+- [llExecCharacterCmd](/functions/llExecCharacterCmd/)
+- [llGetClosestNavPoint](/functions/llGetClosestNavPoint/)
+- [llFleeFrom](/functions/llFleeFrom/)
+- [llNavigateTo](/functions/llNavigateTo/)
+- [llPatrolPoints](/functions/llPatrolPoints/)
+- [llPursue](/functions/llPursue/)
+- [llUpdateCharacter](/functions/llUpdateCharacter/)
+- [llWanderWithin](/functions/llWanderWithin/)
+
+### Events
+
+- [path_update](/events/path_update/)
+
+<WikiSource />

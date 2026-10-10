@@ -1,0 +1,83 @@
+---
+title: "llMoveToTarget"
+slug: "functions/llMoveToTarget"
+category: functions
+source:
+  wiki: "LlMoveToTarget"
+  url: https://wiki.secondlife.com/wiki/LlMoveToTarget
+  revision: 1194415
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llmovetotarget-c98d03ab.txt
+  license: "Content from the Second Life Wiki article LlMoveToTarget (revision 1194415, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llMoveToTarget" />
+
+Critically damp to **target** in **tau** seconds (if the script is physical) Setting tau to 0.0 stops the critical damping; recommended tau values are greater than 0.2.
+
+To stop the object from maintaining the **target** positions use [llStopMoveToTarget](/functions/llStopMoveToTarget/)
+
+To change the rotation in the same manner use [llLookAt](/functions/llLookAt/) or [llRotLookAt](/functions/llRotLookAt/).
+
+```lsl title="How to use" frame="terminal"
+llMoveToTarget(ZERO_VECTOR, 0.0);
+```
+
+## Caveats
+
+- When slowly moving to a lower Z value, beware of [SVC-2441](https://jira.secondlife.com/browse/SVC-2441) - the sim will incorrectly move the object down faster than it should. That is, if you try moving to `llGetPos()` + `<10, 10, -10>`, you can end up at .z-10 several meters before getting to .x-10 and .y-10. There is a demo object in the JIRA which shows this effect.
+- A `llMoveToTarget` call seems to persist even if physics is turned off. This is a useful trick on sluggish sims where the object can drop a bit between the call to enable physics and the call to `llMoveToTarget` - just do the `llMoveToTarget` before setting the object to physical.
+- `llVecDist(llGetPos(), target)` must be *less than* 65, or no movement will occur.
+- Calling `llMoveToTarget` with a **tau** of `0.0` or less will silently fail, and do nothing. The smallest functional **tau** is 0.044444444 (two physics frames, 2/45).
+
+## Examples
+
+<details open>
+<summary>Drop this script in a prim to have it follow the prim owner.</summary>
+
+```lsl collapse={1-6, 12-18}
+default
+{
+    state_entry()
+    {
+        vector pos = llGetPos();
+        llSetStatus(STATUS_PHYSICS, TRUE);
+        // Little pause to allow server to make potentially large linked object physical.
+        llSleep(0.1);
+        llMoveToTarget(pos,0.4);
+        // Look for owner within 20 meters in 360 degree arc every 1 seconds.
+        llSensorRepeat("", llGetOwner(), AGENT, 20.0, PI,1.0);
+    }
+    sensor(integer total_number)
+    {
+        // Get position of detected owner
+        vector pos = llDetectedPos(0);
+        // Offset back one meter in X and up one meter in Z based on world coordinates.
+        vector offset =<-1,0,1>;
+//        offset = offset*llDetectedRot(0);  //Adding this line will orient the follower relative to the owner's position.
+        pos+=offset;
+        llMoveToTarget(pos,0.4);
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-2441 (bug): Slowish llMoveToTarget path inconsistent when moving to a target at a -z position vs moving to +z
+
+## See also
+
+### Functions
+
+- [llStopMoveToTarget](/functions/llStopMoveToTarget/)
+- [llLookAt](/functions/llLookAt/)
+- [llRotLookAt](/functions/llRotLookAt/)
+- [llTarget](/functions/llTarget/)
+
+<WikiSource />

@@ -1,0 +1,75 @@
+---
+title: "llRot2Left"
+slug: "functions/llRot2Left"
+category: functions
+source:
+  wiki: "LlRot2Left"
+  url: https://wiki.secondlife.com/wiki/LlRot2Left
+  revision: 1194481
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llrot2left-9c7ee807.txt
+  license: "Content from the Second Life Wiki article LlRot2Left (revision 1194481, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRot2Left" />
+
+Computes the orientation of the `local y-axis` relative to the parent (i.e. relative to the root prim or the world).
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) that is the left vector defined by **q**, i.e. a unit vector pointing in the local positive Y direction
+
+```lsl title="How to use" frame="terminal"
+vector result = llRot2Left(ZERO_ROTATION);
+```
+
+## Specification
+
+Mathematically equivalent to:
+
+```lsl
+ret = llVecNorm(<0., 1., 0.> * q);
+```
+
+If **q** is known to be a unit quaternion then it can be simplified as:
+
+```lsl
+ret = <0., 1., 0.> * q;
+```
+
+Keep in mind that object and agent rotations will always be unit quaternions. For example, `<0.0, 1.0, 0.0>`\*`llGetRot()` is about 25-30% faster than `llRot2Left(llGetRot())` depending on the VM used. If done often and at extremely fast rates, it can be advantageous to even save `<0.0, 1.0, 0.0>` to a local/global variable and reuse it.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// Move an object 5 metres forwards along its own y axis, when touched, no matter how the object is oriented in world.
+// Works for a root or child prim
+default
+{
+    touch_start(integer total_number)
+    {
+        vector v = llRot2Left( llGetLocalRot() );
+        llSetPos( llGetLocalPos() + v * 5 );
+    }
+}
+```
+
+</details>
+
+## Notes
+
+Can be useful to identify the orientation of the local [sagittal-plane](https://en.wikipedia.org/wiki/sagittal_plane) of the prim, since it's y-axis is always perpendicular to this local sagittal-plane.
+
+## See also
+
+### Functions
+
+- [llRot2Up](/functions/llRot2Up/)
+- [llRot2Fwd](/functions/llRot2Fwd/)
+- [llRot2Axis](/functions/llRot2Axis/)
+- [llRot2Angle](/functions/llRot2Angle/)
+
+<WikiSource />

@@ -1,0 +1,89 @@
+---
+title: "llRemoveInventory"
+slug: "functions/llRemoveInventory"
+category: functions
+source:
+  wiki: "LlRemoveInventory"
+  url: https://wiki.secondlife.com/wiki/LlRemoveInventory
+  revision: 1196044
+  date: 2015-04-06
+  contributor: "Omei Qunhua"
+  raw: /wiki-source/llremoveinventory-c1f00a92.txt
+  license: "Content from the Second Life Wiki article LlRemoveInventory (revision 1196044, 2015-04-06), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRemoveInventory" description />
+
+Remove the named inventory **item**
+
+```lsl title="How to use" frame="terminal"
+llRemoveInventory("");
+```
+
+## Caveats
+
+- If the current script is removed it will continue to run for a short period of time after this call.
+- With multiple executions an `llSleep(0.1)` after `llRemoveInventory` will allow edit window contents to refresh correctly and avoid errors on phantom contents.
+- `llRemoveInventory` will not trigger a changed event.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// Remove the current script from the object
+
+default
+{
+    state_entry()
+    {
+        llRemoveInventory(llGetScriptName());
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-13, 19-26}
+// user-function to include in your script
+// deletes all other contents of any type except the script itself
+delete_all_other_contents()
+{
+    string thisScript = llGetScriptName();
+    string inventoryItemName;
+
+    integer index = llGetInventoryNumber(INVENTORY_ALL);
+    while (index)
+    {
+        --index;        // (faster than index--;)
+
+        inventoryItemName = llGetInventoryName(INVENTORY_ALL, index);
+
+        if (inventoryItemName != thisScript)
+            llRemoveInventory(inventoryItemName);
+    }
+}
+
+default
+{
+    state_entry()
+    {
+        delete_all_other_contents();
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-304 (bug): CHANGED_INVENTORY not triggered by llRemoveInventory()
+
+<WikiSource />

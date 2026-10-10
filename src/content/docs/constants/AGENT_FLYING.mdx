@@ -1,0 +1,74 @@
+---
+title: "AGENT_FLYING"
+slug: "constants/AGENT_FLYING"
+category: constants
+source:
+  wiki: "AGENT FLYING"
+  url: https://wiki.secondlife.com/wiki/AGENT_FLYING
+  revision: 1215050
+  date: 2023-10-14
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/agent-flying-914066ef.txt
+  license: "Content from the Second Life Wiki article AGENT FLYING (revision 1215050, 2023-10-14), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="AGENT_FLYING" description />
+
+Used with [llGetAgentInfo](/functions/llGetAgentInfo/) to determine if the queried avatar is flying.
+
+## Examples
+
+<details open>
+<summary>Count how many people are currently flying within this parcel</summary>
+
+```lsl collapse={1-10}
+// On touch, say how many avatars are currently flying within this parcel
+default
+{
+    touch_start(integer total_number)
+    {
+        list AgentList = llGetAgentList(AGENT_LIST_PARCEL, [] );
+        integer CountAll = (AgentList != [] );
+        integer CountFlying;
+        key AgentKey;
+        while (CountAll)
+        {
+            AgentKey = llList2Key(AgentList, --CountAll);
+            if (llGetAgentInfo(AgentKey) & AGENT_FLYING)       ++CountFlying;
+        }
+        llSay(0, (string) CountFlying + " avatars are currently flying within this parcel" );
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Constants
+
+| Constant | `Val` | Returned if agent... |
+| --- | --- | --- |
+| [4096](/constants/AGENT_ALWAYS_RUN/) | 0x1000 | has running (`{{String\|Always Run}}`) enabled, or is using tap-tap-hold |
+| [2](/constants/AGENT_ATTACHMENTS/) | 0x0002 | has attachments |
+| [16384](/constants/AGENT_AUTOMATED/) | 0x4000 | is marked as a scripted agent/bot |
+| [8192](/constants/AGENT_AUTOPILOT/) | 0x2000 | is in `{{String\|autopilot}}` mode |
+| [64](/constants/AGENT_AWAY/) | 0x0040 | is in `{{String\|away}}` mode |
+| [2048](/constants/AGENT_BUSY/) | 0x0800 | is in `{{String\|busy}}` mode |
+| [1024](/constants/AGENT_CROUCHING/) | 0x0400 | is crouching |
+| [32768](/constants/AGENT_FLOATING_VIA_SCRIPTED_ATTACHMENT/) | 0x8000 | is floating or hovering because of a scripted attachment |
+| [1](/constants/AGENT_FLYING/) | 0x0001 | is flying or hovering |
+| [256](/constants/AGENT_IN_AIR/) | 0x0100 | is in the air (jumping, flying or falling) |
+| [8](/constants/AGENT_MOUSELOOK/) | 0x0008 | is in mouselook |
+| [32](/constants/AGENT_ON_OBJECT/) | 0x0020 | is sitting on an object (and linked to it) |
+| [4](/constants/AGENT_SCRIPTED/) | 0x0004 | has scripted attachments |
+| [16](/constants/AGENT_SITTING/) | 0x0010 | is sitting`{{Footnote\|1="Sit down" on the avatar context menu allows ground sits anywhere: atop the terrain, on objects or even in the air, so it is possible to sit "on" an object without linking.}}` |
+| [512](/constants/AGENT_TYPING/) | 0x0200 | is typing |
+| [128](/constants/AGENT_WALKING/) | 0x0080 | is walking, running or crouch walking |
+
+### Functions
+
+- [llGetAgentInfo](/functions/llGetAgentInfo/)
+
+<WikiSource />

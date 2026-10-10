@@ -1,0 +1,123 @@
+---
+title: "llGetAgentLanguage"
+slug: "functions/llGetAgentLanguage"
+category: functions
+source:
+  wiki: "LlGetAgentLanguage"
+  url: https://wiki.secondlife.com/wiki/LlGetAgentLanguage
+  revision: 1207336
+  date: 2018-07-15
+  contributor: "Chaser Zaks"
+  raw: /wiki-source/llgetagentlanguage-2f59e9fd.txt
+  license: "Content from the Second Life Wiki article LlGetAgentLanguage (revision 1207336, 2018-07-15), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetAgentLanguage" description />
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the language code of the preferred interface language of the user **avatar**.
+
+```lsl title="How to use" frame="terminal"
+string result = llGetAgentLanguage(NULL_KEY);
+```
+
+## Specification
+
+<table>
+	<tr>
+		<td>
+
+			| Return | Description |
+			| --- | --- |
+			| "en" | English |
+			| "az" | Azerbaycanca (Azerbaijani) |
+			| "da" | Dansk (Danish) |
+			| "de" | Deutsch (German) |
+			| "es" | Español (Spanish) |
+			| "fr" | Français (French) |
+			| "it" | Italiano (Italian) |
+			| "hu" | Magyar (Hungarian) |
+			| "nl" | Nederlands (Dutch) |
+			| "pl" | Polski (Polish) |
+			| "pt" | Portugués (Portuguese) |
+			| "ru" | Русский (Russian) |
+			| "tr" | Türkçe (Turkish) |
+			| "uk" | Українська (Ukrainian) |
+			| "zh" | 中文 (简体) (Chinese) |
+			| "ja" | 日本語 (Japanese) |
+			| "ko" | 한국어 (Korean) |
+
+		</td>
+		<td>If the viewer is set to "System Default" the possible return may not be in this list. See [List of ISO 639-1 codes](http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) for reference. The value can also be modified by directly editing the settings.xml file or with debug settings. So the value returned by `llGetAgentLanguage` may not be an ISO 639-1 value at all.</td>
+	</tr>
+</table>
+
+## Caveats
+
+- If the user has "`Share language with objects`" disabled then this function returns an empty string.
+- During a 1-5 seconds period after which an agent is logging in, this function will return an empty string as well, until the viewer sends the data to the simulator.
+- Users may prefer to see the client interface in a language that is not their native language, and some may prefer to use objects in the native language of the creator, or dislike low-quality translations. Consider providing a manual language override when it is appropriate.
+- New language/variant values may be added later. Scripts may need to be prepared for unexpected values.
+- If the viewer is set to "System Default" the possible return may be outside the list given above. see [List of ISO 639-1 codes](http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) for reference.
+- Viewers can specify other arbitrary language strings with the 'InstallLanguage' debug setting. For example, launching the viewer with "--set InstallLanguage american" results this function returning 'american' for the avatar. [VWR-12222](https://jira.secondlife.com/browse/VWR-12222)
+- If the viewer supplies a multiline value, the simulator will only accept the first line and ignore all others. [SVC-5503](https://jira.secondlife.com/browse/SVC-5503)
+- Older viewers may return "en-us" instead of "en".
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={10-34}
+default{
+    touch_start( integer num_detected ){
+        //-- loop through all detected touches
+        for (num_detected -= 1; num_detected > -1; num_detected -= 1 ){
+            key agent = llDetectedKey( num_detected );
+            string name = llGetDisplayName( agent );
+            string language = llGetAgentLanguage( agent );
+
+            if (("" == name) || ("???" == name))
+                name = llDetectedName( num_detected );
+
+            //-- PUBLIC_CHANNEL is 0
+            if (language == "es"){
+                llSay( PUBLIC_CHANNEL, "¡Hola, " + name + "!" );
+            }else if (language == "fr"){
+                llSay( PUBLIC_CHANNEL, "Salut, " + name + " !" );
+            }else if (language == "ja"){
+                llSay( PUBLIC_CHANNEL, "やあ、　" + name + "！" );
+            }else if (language == "de"){
+                llSay( PUBLIC_CHANNEL, "Hallo, " + name + "!" );
+            }else if (language == "en"){ //-- returned by some TPVs
+                llSay( PUBLIC_CHANNEL, "Hello, " + name + "!" );
+            }else if (language == "pt"){
+                llSay( PUBLIC_CHANNEL, "Olá!, " + name + "!" );
+            }else if (language == "ko"){
+                llSay( PUBLIC_CHANNEL, "안녕하세요, " + name + "!" );
+            }else if (language == "zh"){
+                llSay( PUBLIC_CHANNEL, "你好啊， " + name + "！" );
+            }else{ //-- Default to 'en-us' if language is unrecognized / not provided.
+                llSay( PUBLIC_CHANNEL, "Hi there, " + name + "!" );
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## History
+
+- Introduced in `{{SVN|568|rev=88085|branch=Release|anchor=file33|date=Wednesday, 21 May 2008}}`
+- Modified to only return the first line with [SVC-5503](https://jira.secondlife.com/browse/SVC-5503)
+- Date of Release [16-10-2008](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.21)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- VWR-12222 (bug): llGetAgentLanguage() returns "en", not "en-us" -- Bug or (new) feature?
+- SVC-5503 (bug): llGetAgentLanguage() return several lines of text when griefers fiddle with settings.xml
+
+<WikiSource />

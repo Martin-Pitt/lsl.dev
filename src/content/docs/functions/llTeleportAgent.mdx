@@ -1,0 +1,220 @@
+---
+title: "llTeleportAgent"
+slug: "functions/llTeleportAgent"
+category: functions
+source:
+  wiki: "LlTeleportAgent"
+  url: https://wiki.secondlife.com/wiki/LlTeleportAgent
+  revision: 1219013
+  date: 2026-08-25
+  contributor: "Myggen Resident"
+  raw: /wiki-source/llteleportagent-a3dc26a3.txt
+  license: "Content from the Second Life Wiki article LlTeleportAgent (revision 1219013, 2026-08-25), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llTeleportAgent" />
+
+Teleports an **agent** to a **landmark** stored in the object's inventory.
+
+If **landmark** is an empty string, the avatar is teleported to the location **position** in the current region.
+
+If the destination is in the current region, the avatar will land facing **look_at** as a position within that region. Otherwise, **look_at** is treated as a unit direction.
+
+```lsl title="How to use" frame="terminal"
+llTeleportAgent(NULL_KEY, "", ZERO_VECTOR, ZERO_VECTOR);
+```
+
+## Caveats
+
+- **This function can only teleport the owner of the object** (unless part of an [Experience](https://wiki.secondlife.com/wiki/Category:Experience_Tools)).
+- Throttled experiments (August 2026) show:
+- Only 4 initial teleports can be done immediately, or
+- You can keep teleporting every 1.4 seconds.
+- If you get throttled:
+- An error is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/), and
+- No further teleports will succeed until 10 seconds have passed from the first throttle message.
+- Does not work in scripts within attached temp objects [llAttachToAvatarTemp](/functions/llAttachToAvatarTemp/). Error Message is "Temporary attachments cannot request runtime permissions to teleport"
+- Sitting avatars cannot be teleported using this function. You must [llUnSit](/functions/llUnSit/) them first.
+- This function does not override a parcel's teleport settings, i.e. if the parcel has a landing zone enabled the avatar will be teleported there.
+- If the script is part of an experience that the avatar has granted permission, then this function may teleport them without being the owner and it will override parcel teleport routing. See the example below.
+- When **look_at** is treated as a direction, a valid input should be `<llCos(angle), llSin(angle), 0.0>`.
+- In other words, it should be a **unit vector** corresponding to the avatar turning **angle** radians from north.
+
+## Examples
+
+<details open>
+<summary>Basic example with a **landmark** called **Destination** in the object's inventory:</summary>
+
+```lsl
+default
+{
+    touch_start(integer num_detected)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TELEPORT);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (PERMISSION_TELEPORT & perm)
+        {
+            llTeleportAgent(llGetPermissionsKey(), "Destination", ZERO_VECTOR, ZERO_VECTOR);
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Basic example without a **landmark** in the object's inventory, while facing the avatar towards the center of the region:</summary>
+
+```lsl collapse={1-11}
+default
+{
+    touch_start(integer num_detected)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TELEPORT);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (PERMISSION_TELEPORT & perm)
+        {
+            vector region_pos = <100, 130, 40>;
+            vector look_at = <128,128,40>;
+            llTeleportAgent(llGetPermissionsKey(), "", region_pos, look_at);
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>**How to use this function in an Experience**</summary>
+
+```lsl collapse={1-24}
+// A SIMPLE SCRIPT that implements an Experience based teleport.
+// Compile with the "Use Experience" box cnecked and an experience key you own selected.
+// The prim containing this script must contain a landmark named "Landmark" in its contents
+//
+// If the person touching this box has not previously accepted an invitation to your experience,
+// that person will be offered that opportunity when this prim is touched, and if the invitations
+// is accepted, will be immediately teleported to the target of the landmark.
+//
+// If the toucher has previously accepted an invitation, the person will be immediately teleported
+// with no interruption.
+//
+// The script has no safety features, e.g., will simply fail if the prim contains no landmark.
+//
+// Thanks to Rolig Loon for her help in figuring out how to do this
+// See https://community.secondlife.com/t5/English-Knowledge-Base/Experiences-in-Second-Life/ta-p/2744686
+// to read what the Lindens think is an adequate explanation of all this.
+
+default
+{
+    touch_start(integer n)
+    {
+        llRequestExperiencePermissions(llDetectedKey(0), "");
+    }
+
+    experience_permissions(key agent)
+    {
+        llTeleportAgent(agent, "Landmark", ZERO_VECTOR, ZERO_VECTOR);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Below is an example of properly handling the **look_at** value based on whether the destination is the current region or a different one. This ensures that the avatar will always be facing the same *direction* regardless of whether they're teleporting within the region or to another one.</summary>
+
+The script keeps track of the **landmark**'s destination coordinate in the **state_entry** and **changed** events, which is later used to calculate the total distance of the teleport.
+
+```lsl collapse={1-51}
+string landmark;
+vector destination;
+
+default
+{
+    state_entry()
+    {
+        // Get data about the first landmark in object inventory when script starts.
+        if (llGetInventoryNumber(INVENTORY_LANDMARK) > 0) {
+            landmark = llGetInventoryName(INVENTORY_LANDMARK, 0);
+            llRequestInventoryData(landmark);
+        }
+    }
+
+    changed(integer change)
+    {
+        if (!(change & (CHANGED_INVENTORY|CHANGED_REGION))) return;
+
+        // Get data about the first landmark in object inventory when inventory changes.
+        if (llGetInventoryNumber(INVENTORY_LANDMARK) > 0) {
+            landmark = llGetInventoryName(INVENTORY_LANDMARK, 0);
+            llRequestInventoryData(landmark);
+        }
+    }
+
+    dataserver(key query, string data)
+    {
+        // Save llRequestInventoryData response.
+        destination = (vector)data;
+    }
+
+    touch_start(integer num_detected)
+    {
+        llRequestPermissions(llGetOwner(), PERMISSION_TELEPORT);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (!(PERMISSION_TELEPORT & perm)) return;
+
+        float angle = 45 * DEG_TO_RAD;
+
+        // When teleporting to another region, we need a direction vector.
+        vector look_at = <llCos(angle), llSin(angle), 0>;
+
+        float sim_size = llVecMag(<1,1,1>);
+        float distance = llVecDist(<1,1,1>, destination / 256);
+
+        if (distance < sim_size) {
+            // When teleporting within the current region, we should use a position within the region instead.
+            look_at = destination + look_at;
+        }
+
+        llTeleportAgent(llGetPermissionsKey(), landmark, ZERO_VECTOR, look_at);
+    }
+}
+```
+
+</details>
+
+Another example, submitted by [Jesse Barnett](https://wiki.secondlife.com/wiki/User:Jesse_Barnett), shows how to use a list of landmarks inside a HUD to allow teleporting, even inside a no-script area: [Teleport HUD](https://wiki.secondlife.com/wiki/Teleport_HUD).
+
+## History
+
+Date of Release [24/07/2012](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-24-262437)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- BUG-4062 (bug): llTeleportAgent() and llTeleportAgentGlobalCoords() can break any script in any attached object that contains a changed event.
+- SVC-7987 (bug): llTeleportAgent always points in the positive Y direction on teleport
+
+## Additional wiki content
+
+[Category:Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)
+
+## See also
+
+### Functions
+
+- [llTeleportAgentGlobalCoords](/functions/llTeleportAgentGlobalCoords/) — Teleports an agent to a global position.
+
+<WikiSource />

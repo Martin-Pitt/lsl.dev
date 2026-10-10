@@ -1,0 +1,104 @@
+---
+title: "llReplaceAgentEnvironment"
+slug: "functions/llReplaceAgentEnvironment"
+category: functions
+source:
+  wiki: "LlReplaceAgentEnvironment"
+  url: https://wiki.secondlife.com/wiki/LlReplaceAgentEnvironment
+  revision: 1218897
+  date: 2026-06-05
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llreplaceagentenvironment-cdcb8372.txt
+  license: "Content from the Second Life Wiki article LlReplaceAgentEnvironment (revision 1218897, 2026-06-05), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llReplaceAgentEnvironment" />
+
+The `llReplaceAgentEnvironment` function overrides the current region and parcel environment seen by an agent. The new environment persists until the agent crosses to a new region or this function is called with the [NULL_KEY](/constants/NULL_KEY/) or empty string in the **environment** parameter for the particular agent, doing so will strip all environmental settings applied to this agent as part of the experience. This function must be executed as part of an experience.
+
+```lsl title="How to use" frame="terminal"
+integer result = llReplaceAgentEnvironment(NULL_KEY, 0.0, "");
+```
+
+## Specification
+
+****Return Values****
+
+| Value | Constant | Description |
+| --- | --- | --- |
+| [ENV_OK](/constants/ENV_OK/) | 1 | The agent has been instructed to change their environment. |
+| [ENV_NOT_EXPERIENCE](/constants/ENV_NOT_EXPERIENCE/) | -1 | The script is not running as part of an experience with a valid experience key. |
+| [ENV_NO_EXPERIENCE_PERMISSION](/constants/ENV_NO_EXPERIENCE_PERMISSION/) | -2 | The agent has not granted permission. |
+| [ENV_NO_ENVIRONMENT](/constants/ENV_NO_ENVIRONMENT/) | -3 | The environment inventory object could not be found. |
+| [ENV_INVALID_AGENT](/constants/ENV_INVALID_AGENT/) | -4 | Unable to find specified agent. |
+| [ENV_NO_EXPERIENCE_LAND](/constants/ENV_NO_EXPERIENCE_LAND/) | -7 | The experience has not been enabled or can not run on the land. |
+| [ENV_THROTTLE](/constants/ENV_THROTTLE/) | -8 | The scripts have exceeded the throttle. Wait and retry the request. |
+
+## Caveats
+
+- The agent's viewer may choose to ignore this command.
+- An environment set locally on the viewer will override any environment set from this function.
+- If a UUID is passed as the **environment** parameter and that UUID does not specify an environment setting, the viewer quietly ignores the instruction.
+- The [ENV_OK](/constants/ENV_OK/) constant is only present on Lua-enabled sims. On older sims, use it's value of 1 instead
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-18, 24-36}
+string gEnvironment = "A-12AM"; // Can be asset's name in object's inventory or the asset ID
+float gTransitionTime = 3.0;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        key person = llDetectedKey(0);
+        if (llGetAgentSize(person) != ZERO_VECTOR)
+        {
+            llRequestExperiencePermissions(person, "");
+        }
+        else
+        {
+            llInstantMessage(person, "You need to be in the same region to change environment");
+        }
+    }
+
+    experience_permissions(key agent_id)
+    {
+        integer envTest = llReplaceAgentEnvironment(agent_id, gTransitionTime, gEnvironment);
+        if (envTest == 1)
+        {
+            llRegionSayTo(agent_id, 0, "Applying environment for " + (string)agent_id);
+        }
+        else
+        {
+            llRegionSayTo(agent_id, 0, "Cannot apply environment for " + (string)agent_id + " due to reason id: " + (string)envTest);
+        }
+    }
+
+    experience_permissions_denied(key agent_id, integer reason)
+    {
+        llRegionSayTo(agent_id, 0, "Denied experience permissions for " + (string)agent_id + " due to reason id: " + (string)reason);
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+[Category:Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)
+
+## See also
+
+### Functions
+
+- [llGetEnvironment](/functions/llGetEnvironment/)
+- [llSetAgentEnvironment](/functions/llSetAgentEnvironment/)
+- [llSetEnvironment](/functions/llSetEnvironment/)
+- [llReplaceEnvironment](/functions/llReplaceEnvironment/)
+
+<WikiSource />

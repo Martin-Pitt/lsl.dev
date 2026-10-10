@@ -1,0 +1,64 @@
+---
+title: "llGetAccel"
+slug: "functions/llGetAccel"
+category: functions
+source:
+  wiki: "LlGetAccel"
+  url: https://wiki.secondlife.com/wiki/LlGetAccel
+  revision: 1194139
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetaccel-58ee645e.txt
+  license: "Content from the Second Life Wiki article LlGetAccel (revision 1194139, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetAccel" description />
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) that is the acceleration of the object in the [region](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region) frame of reference.
+
+```lsl title="How to use" frame="terminal"
+vector result = llGetAccel();
+```
+
+## Caveats
+
+- Returns [ZERO_VECTOR](/constants/ZERO_VECTOR/) in attachments regardless of the avatar's acceleration.
+- Returns [ZERO_VECTOR](/constants/ZERO_VECTOR/) in child prims regardless of the linkset's acceleration.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//A very simple (and not very effective) way of keeping a physical object in place.
+//If the object is moving when the script is put in the object, then the object will continue to move, so long as it doesn't accelerate.
+//If you ever want to actually stop an object, use llMoveToTarget(llGetPos(), .1)
+default {
+    moving_start(){
+        vector ac;
+        // Go forever
+        while(llVecMag(ac = llGetAccel()) > .001) { //We're accelerating...
+            llApplyImpulse(-ac, 0); //Slow us down.
+        }
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetOmega](/functions/llGetOmega/)
+- [llGetVel](/functions/llGetVel/)
+- [llGetTorque](/functions/llGetTorque/)
+- [llGetMass](/functions/llGetMass/)
+- [llGetForce](/functions/llGetForce/)
+- [llSetForce](/functions/llSetForce/)
+- [llSetTorque](/functions/llSetTorque/)
+- [llSetForceAndTorque](/functions/llSetForceAndTorque/)
+
+<WikiSource />

@@ -1,0 +1,58 @@
+---
+title: "llGetInventoryCreator"
+slug: "functions/llGetInventoryCreator"
+category: functions
+source:
+  wiki: "LlGetInventoryCreator"
+  url: https://wiki.secondlife.com/wiki/LlGetInventoryCreator
+  revision: 1210068
+  date: 2021-05-28
+  contributor: "Rider Linden"
+  raw: /wiki-source/llgetinventorycreator-7ccb2b2a.txt
+  license: "Content from the Second Life Wiki article LlGetInventoryCreator (revision 1210068, 2021-05-28), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetInventoryCreator" description />
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) of the creator of the inventory **item**.
+
+```lsl title="How to use" frame="terminal"
+key result = llGetInventoryCreator("");
+```
+
+## Caveats
+
+- If **item** has multiple creators, then this function will return [NULL_KEY](/constants/NULL_KEY/). (e.g. if an object created by Lex contained a script created by Strife). See [SVC-6985](https://jira.secondlife.com/browse/SVC-6985) and [SVC-6820](https://jira.secondlife.com/browse/SVC-6820) for more information.
+
+## Examples
+
+<details open>
+<summary>Add an object to a prims inventory, as well as this script, in order to get the name of the creator.</summary>
+
+```lsl
+default{
+    state_entry(){
+        llRequestAgentData(llGetInventoryCreator(llGetInventoryName( INVENTORY_OBJECT, 0)),DATA_NAME);
+    }
+
+    dataserver(key qid, string data){
+        llOwnerSay(data);
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetInventoryAcquireTime](/functions/llGetInventoryAcquireTime/) — Returns the time the item was added to the prim's inventory
+- [llGetInventoryName](/functions/llGetInventoryName/) — Returns the inventory item's name
+- [llGetInventoryType](/functions/llGetInventoryType/) — Tests to see if an inventory item exists and returns its type
+- [llGetInventoryNumber](/functions/llGetInventoryNumber/) — Returns the number of items of a specific type in inventory
+- [llGetInventoryPermMask](/functions/llGetInventoryPermMask/) — Returns the inventory item's permissions
+- [llGetInventoryKey](/functions/llGetInventoryKey/) — Returns the inventory item's [UUID](https://wiki.secondlife.com/wiki/UUID) (if full perm)
+
+<WikiSource />

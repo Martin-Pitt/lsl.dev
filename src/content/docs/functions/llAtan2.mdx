@@ -1,0 +1,99 @@
+---
+title: "llAtan2"
+slug: "functions/llAtan2"
+category: functions
+source:
+  wiki: "LlAtan2"
+  url: https://wiki.secondlife.com/wiki/LlAtan2
+  revision: 1200462
+  date: 2016-06-15
+  contributor: "Kayaker Magic"
+  raw: /wiki-source/llatan2-f9f3553e.txt
+  license: "Content from the Second Life Wiki article LlAtan2 (revision 1200462, 2016-06-15), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llAtan2" />
+
+Similar to the &lt;span class="plainlinks">[arctangent](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions)&lt;/span>(**y**/**x**) except it utilizes the signs of **x** & **y** to determine the quadrant and avoids division by zero.
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the [arctangent2](https://en.wikipedia.org/wiki/Atan2) of **y**, **x**.
+
+```lsl title="How to use" frame="terminal"
+float result = llAtan2(0.0, 0.0);
+```
+
+## Specification
+
+If **x** is positive zero and...
+
+- **y** is zero, **zero** is returned.
+- **y** is positive, **[PI](/constants/PI/)/2** is returned.
+- **y** is negative, **-PI/2** is returned.
+
+If **x** is negative zero and...
+
+- **y** is positive zero, **[PI](/constants/PI/)** is returned.
+- **y** is negative zero, **-PI** is returned.
+- **y** is positive, **[PI](/constants/PI/)/2** is returned.
+- **y** is negative, **-PI/2** is returned.
+
+Or
+
+```lsl
+if((string)x != (string)0.0 && y == 0.0)//negative zero
+    return PI * ~-2*((string)y != (string)0.0));
+return ((y > 0) - (y < 0)) * PI_BY_TWO;
+```
+
+The returned value is in the range \[-[PI](/constants/PI/), [PI](/constants/PI/)\].
+
+## Examples
+
+```lsl
+default
+{
+  state_entry()
+  {
+    float num1 = llFrand(100.0);
+    float num2 = llFrand(100.0);
+
+    llOwnerSay("y = " + (string)num1);
+    llOwnerSay("x = " + (string)num2);
+
+    llOwnerSay("The arctangent of y divided by x is " + (string)llAtan2(num1, num2));
+  }
+}
+```
+
+```lsl
+//Function with input of a vector determining the position of a target and returning
+//a string with the literal compass-direction of that target towards your position
+//by Ramana Sweetwater 2009/01, any use allowed license :-)
+//corrected by Patrick Muggins
+
+string compass (vector target)
+{
+    vector source = llGetPos();
+    list DIRS =["W","NW","N","NE","E","SE","S","SW","W"];
+    integer index = llCeil(3.5 - (4 * llAtan2(target.y - source.y, target.x - source.x) / PI));
+    return llList2String(DIRS, index);
+}
+```
+
+[/Compass QA](https://wiki.secondlife.com/wiki//Compass_QA)
+
+## See also
+
+### Functions
+
+- [llSin](/functions/llSin/) — [llAsin](/functions/llAsin/) — sine & inverse Sine
+- [llCos](/functions/llCos/) — [llAcos](/functions/llAcos/) — cosine & inverse cosine
+- [llTan](/functions/llTan/) — tangent
+
+### Articles
+
+- [Atan2](https://en.wikipedia.org/wiki/Atan2)
+- [Inverse trigonometric function](https://en.wikipedia.org/wiki/Inverse_trigonometric_function)
+
+<WikiSource />

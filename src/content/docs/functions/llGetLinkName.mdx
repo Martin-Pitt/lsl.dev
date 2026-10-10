@@ -1,0 +1,104 @@
+---
+title: "llGetLinkName"
+slug: "functions/llGetLinkName"
+category: functions
+source:
+  wiki: "LlGetLinkName"
+  url: https://wiki.secondlife.com/wiki/LlGetLinkName
+  revision: 1206505
+  date: 2017-11-23
+  contributor: "Lucia Nightfire"
+  raw: /wiki-source/llgetlinkname-71267a78.txt
+  license: "Content from the Second Life Wiki article LlGetLinkName (revision 1206505, 2017-11-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetLinkName" description />
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the name of **link** in link set
+
+```lsl title="How to use" frame="terminal"
+string result = llGetLinkName(0);
+```
+
+## Caveats
+
+- If **link** is out of bounds, [NULL_KEY](/constants/NULL_KEY/) is returned.
+- The prim name attribute is limited to 63 bytes, any string longer then that will be truncated. This truncation does not always happen when the attribute is set or read.
+- There is no corresponding **llSetLinkName**, use `llSetLinkPrimitiveParamsFast(link, [PRIM_NAME, name]);` instead.
+
+## Examples
+
+<details open>
+<summary>Listen on channel 10 for a name; check if a prim with that name is part of this object</summary>
+
+```lsl collapse={12-30}
+integer check_for_prim(string name)
+{
+    integer i = llGetNumberOfPrims();
+    for (; i >= 0; --i)
+    {
+        if (llGetLinkName(i) == name)
+        {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+default
+{
+    state_entry()
+    {
+        llListen(10, "", llGetOwner(), "");
+    }
+    listen(integer chan, string obj, key id, string msg)
+    {
+        if (check_for_prim(msg))
+        {
+            llOwnerSay("found a linked prim named \"" + msg + "\"");
+        }
+        else
+        {
+            llOwnerSay("this object does not have any linked prims named \"" + msg + "\"");
+        }
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+integer getLinkWithName(string name) {
+    integer i = llGetLinkNumber() != 0;   // Start at zero (single prim) or 1 (two or more prims)
+    integer x = llGetNumberOfPrims() + i; // [0, 1) or [1, llGetNumberOfPrims()]
+    for (; i < x; ++i)
+        if (llGetLinkName(i) == name)
+            return i; // Found it! Exit loop early with result
+    return -1; // No prim with that name, return -1.
+}
+```
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-600 (bug): llGetLinkKey returns the wrong result when passed LINK_THIS
+
+## See also
+
+### Functions
+
+- [llGetLinkKey](/functions/llGetLinkKey/) — Gets the instance UUID of the link
+- [llGetObjectName](/functions/llGetObjectName/) — Get the prims name
+- [llSetObjectName](/functions/llSetObjectName/) — Set the prims name
+- [llGetObjectDesc](/functions/llGetObjectDesc/) — Get the prims description
+- [llSetObjectDesc](/functions/llSetObjectDesc/) — Set the prims description
+- [llGetObjectDetails](/functions/llGetObjectDetails/)
+
+### Articles
+
+- [Prim Attribute Overloading](https://wiki.secondlife.com/wiki/Prim_Attribute_Overloading)
+
+<WikiSource />

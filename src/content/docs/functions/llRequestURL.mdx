@@ -1,0 +1,174 @@
+---
+title: "llRequestURL"
+slug: "functions/llRequestURL"
+category: functions
+source:
+  wiki: "LlRequestURL"
+  url: https://wiki.secondlife.com/wiki/LlRequestURL
+  revision: 1214060
+  date: 2023-06-11
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llrequesturl-c19acd30.txt
+  license: "Content from the Second Life Wiki article LlRequestURL (revision 1214060, 2023-06-11), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRequestURL" />
+
+Requests one `HTTP://` [URL](https://en.wikipedia.org/wiki/URL) for use by this [script](https://wiki.secondlife.com/wiki/Script). The [http_request](/events/http_request/) [event](https://wiki.secondlife.com/wiki/event) is triggered with the result of the request.
+
+Returns a [key](https://wiki.secondlife.com/wiki/key) used for identifying the result of the request in the [http_request](/events/http_request/) [event](https://wiki.secondlife.com/wiki/event).
+
+```lsl title="How to use" frame="terminal"
+key result = llRequestURL();
+```
+
+## Caveats
+
+- HTTP-in is not on the usual [HTTP](https://wiki.secondlife.com/wiki/HTTP) port number; the URL it provided in the [http_request](/events/http_request/) event includes the correct port number.
+- Your script (and any client that uses it) should not "validate" the provided URL; in particular, do not assume that it maps to any particular address, or is in any particular domain. These will change during the uplift of Second Life to the cloud, and may be more dynamic following that uplift&lt;ref>Occurred *ca.* 2020.&lt;/ref>.
+- Use of this function is [throttled](https://wiki.secondlife.com/wiki/Limits). Although it has no forced sleep time, too many requests (5-ish) in a short period will cause all further requests to be denied until the script stops requesting URLs for at least 1 second. Using an [llSleep](/functions/llSleep/) of 0.6 seconds or greater between each request will prevent you from being throttled.
+- When a region is (re)started all [HTTP server](/events/http_request/) URLs are automatically released and invalidated.
+- Use [CHANGED_REGION_START](/constants/CHANGED_REGION_START/) to detect this so new URL can be requested.
+- The number of available URLs is a limited resource, that is to say, a script can only have so many open URLs. See [LSL http_server](https://wiki.secondlife.com/wiki/LSL_http_server#resource-limitations) for details.
+- When abandoning a URL, release it with [llReleaseURL](/functions/llReleaseURL/), to avoid leaks. Resetting the script, or deleting the prim, will also suffice to release URLs.
+- Unlike [listeners](/functions/llListen/), URLs persist across state changes
+
+## Examples
+
+<details open>
+<summary>A fully worked out example that shows how to get a URL, register that URL with an external client, and do proper backoff and retry for contacting external services can be found at [HTTP Server URL Registration](https://wiki.secondlife.com/wiki/HTTP_Server_URL_Registration).</summary>
+
+This script requests a new URL after region restart.
+
+See the discussion page for explanations as to why this particular script never needs to use [llReleaseURL](/functions/llReleaseURL/)().
+
+```lsl collapse={1-5, 11-21, 27-43}
+string url;
+key urlRequestId;
+
+default
+{
+	state_entry()
+	{
+		urlRequestId = llRequestURL();
+	}
+
+	on_rez(integer start_param)
+	{
+		llResetScript();
+	}
+
+	changed(integer change)
+	{
+		if (change & (CHANGED_OWNER | CHANGED_INVENTORY))
+		{
+			llResetScript();
+		}
+		if (change & (CHANGED_REGION | CHANGED_REGION_START | CHANGED_TELEPORT))
+		{
+			urlRequestId = llRequestURL();
+		}
+	}
+
+	http_request(key id, string method, string body)
+	{
+		if (id == urlRequestId)
+		{
+			if (method == URL_REQUEST_DENIED)
+			{
+				llOwnerSay("The following error occurred while attempting to get a free URL for this device:\n\n" + body);
+			}
+			else if (method == URL_REQUEST_GRANTED)
+			{
+				url = body;
+				llLoadURL(llGetOwner(), "Click to visit my URL!", url);
+			}
+		}
+	}
+}
+```
+
+</details>
+
+<details>
+<summary>It's important to keep in mind that if you request another URL, that the old one will not be released, it will remain active. The following script drives home this point.</summary>
+
+Try the following code ONLY if you can use all your URLs on your land.
+
+Removing the prim/script will release all URLs previous assigned.
+
+```lsl collapse={1-14, 20-26, 32-36}
+// WARNING:
+//
+//      This script is only for proof-of-concept (demo purposes).
+//      DO NOT use it if you don't have the sim owners and/or
+//      estate managers OK to test this script.
+//      This script can possibly block HTTP communication from and to the sim.
+//      ...bringing down all networked vendors and/or similar machines.
+//
+//      This script allocates all available URLs.
+//      Deleting the script and/or derezzing the object containing the script,
+//      will release all previously taken URLs.
+
+default
+{
+	state_entry()
+	{
+		llRequestURL();
+	}
+
+	http_request(key id, string method, string body)
+	{
+		if (method == URL_REQUEST_DENIED)
+		{
+			llSetText("No free URLs!", <1.0, 0.0, 0.0>, 1.0);
+		}
+		else if (method == URL_REQUEST_GRANTED)
+		{
+			llSetText((string)llGetFreeURLs() + " URLs left\n" + body, <1.0, 1.0, 1.0>, 1.0);
+			llRequestURL();
+		}
+		else if (method == "GET")
+		{
+			llHTTPResponse(id, 200, "Hello there!");
+		}
+	}
+}
+```
+
+</details>
+
+This script will, as you can see, use all URLs available on your land because it does not remove the old URLs before requesting a new one.
+
+Just store the old URL in a global variable and release it with [llReleaseURL](/functions/llReleaseURL/).
+
+## Notes
+
+`{{Quote|Another comment on resilient programming: getting a global resource, an HTTP listener in this case, should always be considered an operation that can fail for transitory reasons (as well as permanent ones). In this case, LSL folds retryable and permanent errors into the same error status and there's no opportunity for a script writer to distinguish the two cases. But a reasonable way to handle this is sleeping with limited retries before failing hard in the LSL code.|2=[https://jira.secondlife.com/browse/BUG-3813?focusedCommentId=399955&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-399955 Monty Linden]}}`
+
+## History
+
+- `{{SVN|1836|rev=112899 |trunk=*|anchor=file22|ver=|ser=}}`
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- BUG-3813 (bug): llRequestURL silently failing on simulator restart
+
+## See also
+
+### Functions
+
+- [llRequestSecureURL](/functions/llRequestSecureURL/)
+- [llGetFreeURLs](/functions/llGetFreeURLs/)
+- [llReleaseURL](/functions/llReleaseURL/)
+- [llHTTPResponse](/functions/llHTTPResponse/)
+- [llGetHTTPHeader](/functions/llGetHTTPHeader/)
+
+### Articles
+
+- [LSL http server](https://wiki.secondlife.com/wiki/LSL_http_server)
+
+<WikiSource />

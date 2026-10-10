@@ -1,0 +1,73 @@
+---
+title: "llResetScript"
+slug: "functions/llResetScript"
+category: functions
+source:
+  wiki: "LlResetScript"
+  url: https://wiki.secondlife.com/wiki/LlResetScript
+  revision: 1216200
+  date: 2024-02-16
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/llresetscript-7da0834a.txt
+  license: "Content from the Second Life Wiki article LlResetScript (revision 1216200, 2024-02-16), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llResetScript" />
+
+Resets the script.
+
+On script reset...
+
+- Full Object Update is sent to viewers.
+- The current event/function is exited without further execution or return.
+- Any granted URLs are released.
+- All global variables are set to their defaults.
+- Timers (including repeating sensors) are cleared.
+- Listeners are removed.
+- The event queue is cleared.
+- The [default](https://wiki.secondlife.com/wiki/default) state is set as the active state.
+- If it has a [state_entry](/events/state_entry/) event, then it is queued.
+
+```lsl title="How to use" frame="terminal"
+llResetScript();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={16-21}
+default
+{
+    // reset script when the object is rezzed
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    changed(integer change)
+    {
+        // reset script when the owner or the inventory changed
+        if (change & (CHANGED_OWNER | CHANGED_INVENTORY))
+            llResetScript();
+    }
+
+    // script initialization here
+    state_entry()
+    {
+        ;
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llResetOtherScript](/functions/llResetOtherScript/)
+
+<WikiSource />

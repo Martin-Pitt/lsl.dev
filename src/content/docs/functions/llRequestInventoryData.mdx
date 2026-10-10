@@ -1,0 +1,185 @@
+---
+title: "llRequestInventoryData"
+slug: "functions/llRequestInventoryData"
+category: functions
+source:
+  wiki: "LlRequestInventoryData"
+  url: https://wiki.secondlife.com/wiki/LlRequestInventoryData
+  revision: 1216243
+  date: 2024-02-24
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/llrequestinventorydata-f0480119.txt
+  license: "Content from the Second Life Wiki article LlRequestInventoryData (revision 1216243, 2024-02-24), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRequestInventoryData" description />
+
+Requests data about the item `name` in the prim's inventory. When data is available the [dataserver](/events/dataserver/) event will be raised.
+
+```lsl title="How to use" frame="terminal"
+key result = llRequestInventoryData("");
+```
+
+## Specification
+
+`{{#if: {{#vardefine:InsertRows|1}} }}`
+
+<table>
+	<tr>
+		<th colspan="2">`name`'s Inventory Type</th>
+		<th>[dataserver](/events/dataserver/)</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td colspan="2">Landmark</td>
+		<td>([vector](https://wiki.secondlife.com/wiki/vector))</td>
+		<td colspan="4">The vector [data](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region) received by [dataserver](/events/dataserver/) is a global position *as an offset* from the current region's origin (`<0,0,0>`). To obtain the absolute [global](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#global) position of a landmark, add [llGetRegionCorner](/functions/llGetRegionCorner/)() to the vector.</td>
+	</tr>
+</table>
+
+## Caveats
+
+- This function only returns data for landmark items in inventory. Other item types are not supported.
+- The vector returned from landmarks is the distance in meters of the landmark's location relative to `<0,0,0>` in the region in which the script is running.
+- For a landmark pointing to a location in the current region, that's the same as a region coordinate; however, when used with a landmark pointing to a different region the vector's x and y values can be quite large (and/or negative).
+- The vector is suitable for use in calculating a global coordinate (as above) or a landmark's distance from the object containing the script in the current region or across the entire Second Life grid.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-12, 18-36}
+//-- Open map for owner to 1st landmark in object inventory on touch
+//-- *MUST* be in an attached object (llMapDestination Requirement for non-touch use)
+key vgKeyOwner;
+
+default
+{
+  touch_start( integer vIntNull )
+  {
+    if (llDetectedKey( 0 ) == vgKeyOwner)
+    {
+      integer vIntLMcount = llGetInventoryNumber( INVENTORY_LANDMARK );
+       //-- make sure we have a landmark in invetory
+      if (vIntLMcount)
+      {
+        llRequestInventoryData( llGetInventoryName( INVENTORY_LANDMARK, 0 ) );
+      }
+    }
+  }
+
+  dataserver( key vKeyNull, string vStrData )
+  {
+     //-- because we don't know who touched us in this event, this
+     //-- only works for the owner when called from the dataserver
+    llMapDestination( llGetRegionName(), (vector)vStrData, ZERO_VECTOR );
+  }
+
+  on_rez( integer vIntNull )
+  {
+    llResetScript();
+  }
+
+  state_entry()
+  {
+    vgKeyOwner = llGetOwner();
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-26, 32-68}
+//An easily-configurable teleporter that sets its destination by getting it from a landmark in the prim's inventory
+//Note: this teleporter is subject to the 300m distance limit for llSitTarget
+//by Ilse Mannonen
+
+//on state entry, request inventory data and set text for first landmark found in inventory.
+//If none, complain
+//on getting data, set sit target
+//on change in inventory, reset script
+//on sit, TP the person and unsit
+
+//Thanks to Pol Tabla, who wrote the simple sit-teleport script I have adapted here
+
+key requestid;
+
+default
+{
+    state_entry()
+    {
+        //complain if there are no landmarks
+        if (llGetInventoryNumber(INVENTORY_LANDMARK) == 0)
+        {
+            llSay(0, "There are no landmarks in me.  You need to put a landmark in me for me to work.");
+        }
+        else
+        {
+            //set floating text according to the LM name
+            llSetText("Teleport to " + llGetInventoryName(INVENTORY_LANDMARK, 0), <1.0, 1.0, 1.0>, 1.0);
+            //request the LM data
+            requestid = llRequestInventoryData(llGetInventoryName(INVENTORY_LANDMARK, 0));
+        }
+    }
+
+    dataserver(key id, string data)
+    {
+        if (id == requestid)
+        {
+            //data will be in vector format
+            rotation rot = ZERO_ROTATION / llGetRot();
+            vector dest = (vector)data;
+            vector offset = (dest - llGetPos()) * rot;
+            llSitTarget(offset, rot);
+        }
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        { // and it was a link change
+            llSleep(0.5); // llUnSit works better with this delay
+            key user = llAvatarOnSitTarget();
+            if (user) { // somebody is sitting on me
+                llUnSit(user); // unsit him
+            }
+        }
+        //when doing "ifs" on bitwise things, it's best to do them separate instead of using else..if,
+        //in case you hit the one in a billion chance when the inventory and link changes are reported in the same event.
+        if (change & CHANGED_INVENTORY)
+        {
+            //reset on inventory change, so people don't have to manually reset when they add a new LM
+            llResetScript();
+        }
+    }
+
+    on_rez(integer param)
+    {
+        llResetScript();
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llMapDestination](/functions/llMapDestination/)
+- [Linden_Lab_Official:Map_API_Reference](https://wiki.secondlife.com/wiki/Linden_Lab_Official:Map_API_Reference#region-name-from-global-coordinates)
+
+### Events
+
+- [dataserver](/events/dataserver/)
+
+### Articles
+
+- [landmark2slurl](https://wiki.secondlife.com/wiki/landmark2slurl)
+
+<WikiSource />

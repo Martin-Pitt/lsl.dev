@@ -1,0 +1,112 @@
+---
+title: "llListFindList"
+slug: "functions/llListFindList"
+category: functions
+source:
+  wiki: "LlListFindList"
+  url: https://wiki.secondlife.com/wiki/LlListFindList
+  revision: 1218679
+  date: 2026-03-02
+  contributor: "Tapple Gao"
+  raw: /wiki-source/lllistfindlist-513dd368.txt
+  license: "Content from the Second Life Wiki article LlListFindList (revision 1218679, 2026-03-02), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llListFindList" />
+
+If **test** is not found in **src**, -1 (in LSL) or nil (in SLua) is returned.
+
+The index of the first entry in the list is `0`
+
+If **test** is found at the last index in **src** the positive index is returned (5th entry of 5 returns 4).
+
+```lsl title="How to use" frame="terminal"
+integer result = llListFindList([], []);
+```
+
+## Caveats
+
+- Strict type matching and case sensitivity is enforced.
+- "1" != 1
+- "1.0" != 1.0
+- 1 != 1.0
+- "a822ff2b-ff02-461d-b45d-dcd10a2de0c2" != (key)"a822ff2b-ff02-461d-b45d-dcd10a2de0c2"
+- "Justice" != "justice"
+- If **test** is an `empty list` the value returned is `0` rather than -1.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+list numbers = [1, 2, 3, 4, 5];
+default
+{
+    state_entry()
+    {
+        integer index = llListFindList(numbers, [3]);
+        if (index != -1)
+        {
+            list three_four = llList2List(numbers, index, index + 1);
+            llOwnerSay(llDumpList2String(three_four, ","));
+            // Object: 3,4
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+//You can also search for two items at once to find a pattern in a list
+list avatarsWhoFoundMagicLeaves = ["Fire Centaur","Red Leaf"];
+default
+{
+    state_entry()
+    {
+        integer index = llListFindList(avatarsWhoFoundMagicLeaves, ["Fire Centaur","Red Leaf"]);
+        if (index != -1)
+        {
+            list output = llList2List(avatarsWhoFoundMagicLeaves, index, index + 1);
+            llOwnerSay(llDumpList2String(output, ","));
+            // Object: Fire Centaur, Red Leaf
+        }
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+An easy way to see if an item exists in a list...
+
+```lsl
+if(~llListFindList(myList, (list)item))
+{//it exists
+    // This works because ~(-1) produces 0, but ~ of any other value produces non-zero and causes the 'if' to succeed
+    // So any return value (including 0) that corresponds to a found item, will make the condition succeed
+    // It saves bytecode and is faster then doing != -1
+    // This is a bitwise NOT (~) not a negation (-)
+}
+```
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-5146 (nf): '''llSortedListFindList'''() - improved llListFindList() for known to be sorted lists
+- BUG-10924 (nf): '''llSubListFindList'''() - Search within a sub-list
+
+## See also
+
+### Functions
+
+- [llSubStringIndex](/functions/llSubStringIndex/) — Find a string in another string
+
+<WikiSource />

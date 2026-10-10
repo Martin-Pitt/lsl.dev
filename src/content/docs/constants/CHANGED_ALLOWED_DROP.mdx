@@ -1,0 +1,59 @@
+---
+title: "CHANGED_ALLOWED_DROP"
+slug: "constants/CHANGED_ALLOWED_DROP"
+category: constants
+source:
+  wiki: "CHANGED ALLOWED DROP"
+  url: https://wiki.secondlife.com/wiki/CHANGED_ALLOWED_DROP
+  revision: 1218948
+  date: 2026-07-15
+  contributor: "Maresmares Resident"
+  raw: /wiki-source/changed-allowed-drop-6c19aa45.txt
+  license: "Content from the Second Life Wiki article CHANGED ALLOWED DROP (revision 1218948, 2026-07-15), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="CHANGED_ALLOWED_DROP" description />
+
+A user other then the owner (or the owner if the object is no-mod) has added inventory to the prim. This is only possible if enabled with [llAllowInventoryDrop](/functions/llAllowInventoryDrop/).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llAllowInventoryDrop(TRUE); // With this set to FALSE the drop (on a no mod object) will not be allowed.
+    }                               // This means the allowance may be revoked by use of llAllowInventoryDrop(FALSE).
+    changed(integer change)
+    {
+        if (change & CHANGED_ALLOWED_DROP) // note that it's & and not &&... it's bitwise!
+        {
+            llOwnerSay("The inventory has changed as a result of a user without mod permissions "+
+                       "dropping an item on the prim and it being allowed by the script.");
+        }
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Constants
+
+- [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/)
+
+### Functions
+
+- [llAllowInventoryDrop](/functions/llAllowInventoryDrop/)
+
+### Events
+
+- [changed](/events/changed/)
+
+<WikiSource />

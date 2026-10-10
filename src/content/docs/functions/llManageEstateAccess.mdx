@@ -1,0 +1,71 @@
+---
+title: "llManageEstateAccess"
+slug: "functions/llManageEstateAccess"
+category: functions
+source:
+  wiki: "LlManageEstateAccess"
+  url: https://wiki.secondlife.com/wiki/LlManageEstateAccess
+  revision: 1214203
+  date: 2023-06-30
+  contributor: "Leviathan Linden"
+  raw: /wiki-source/llmanageestateaccess-a4fd5e19.txt
+  license: "Content from the Second Life Wiki article LlManageEstateAccess (revision 1214203, 2023-06-30), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llManageEstateAccess" />
+
+Use to add or remove agents from the estate's agent access or ban lists or groups from the estate's group access list.
+
+Only works for objects owned by the Estate Owner or an [Estate Manager](https://wiki.secondlife.com/wiki/Estate_Manager). By default, the object owner is notified of every change made using this function. But if the owner grants [PERMISSION_SILENT_ESTATE_MANAGEMENT](/constants/PERMISSION_SILENT_ESTATE_MANAGEMENT/) to the script, the owner will not be notified.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) [TRUE](/constants/TRUE/) if the call was successful; [FALSE](/constants/FALSE/) if throttled, invalid action, invalid or null id or object owner is not allowed to manage the estate.
+
+```lsl title="How to use" frame="terminal"
+integer result = llManageEstateAccess(0, NULL_KEY);
+```
+
+## Specification
+
+| ****action**** flag | V | Description |
+| --- | --- | --- |
+| [ESTATE_ACCESS_ALLOWED_AGENT_ADD](/constants/ESTATE_ACCESS_ALLOWED_AGENT_ADD/) | 0x4 | Add the agent to this estate's Allowed Residents list. |
+| [ESTATE_ACCESS_ALLOWED_AGENT_REMOVE](/constants/ESTATE_ACCESS_ALLOWED_AGENT_REMOVE/) | 0x8 | Remove the agent from this estate's Allowed Residents list. |
+| [ESTATE_ACCESS_ALLOWED_GROUP_ADD](/constants/ESTATE_ACCESS_ALLOWED_GROUP_ADD/) | 0x10 | Add the group to this estate's Allowed groups list. |
+| [ESTATE_ACCESS_ALLOWED_GROUP_REMOVE](/constants/ESTATE_ACCESS_ALLOWED_GROUP_REMOVE/) | 0x20 | Remove the group from this estate's Allowed groups list. |
+| [ESTATE_ACCESS_BANNED_AGENT_ADD](/constants/ESTATE_ACCESS_BANNED_AGENT_ADD/) | 0x40 | Add the agent to this estate's Banned residents list. |
+| [ESTATE_ACCESS_BANNED_AGENT_REMOVE](/constants/ESTATE_ACCESS_BANNED_AGENT_REMOVE/) | 0x80 | Remove the agent from this estate's Banned residents list. |
+
+## Caveats
+
+- Calls are throttled at a rate of 30 calls per 30 seconds.
+- [FALSE](/constants/FALSE/) will be returned...
+- if throttled,
+- if object owner doesn't have power to perform **action**,
+- if **avatar** is invalid or null
+- If used on [mainland](https://wiki.secondlife.com/wiki/mainland) the message "`llManageEstateAccess` does not work on mainland" is [shouted](/functions/llShout/) on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/).
+- If the object owner is not allowed to manage the estate the message "`llManageEstateAccess` object owner must manage estate." is [shouted](/functions/llShout/) on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/). -- [SRC-233](https://jira.secondlife.com/browse/SRC-233)
+- If a legit estate manager tries to exceed the max number of entries in the list the call will return [TRUE](/constants/TRUE/) but the operation be truncated at the limit.
+
+## History
+
+Date of Release [18/10/2011](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-10-18-243270)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SCR-293 (bug): ESTATE_ACCESS_BANNED_AGENT_ADD can ban estate owner!
+
+## See also
+
+### Functions
+
+- [llAddToLandPassList](/functions/llAddToLandPassList/)
+- [llAddToLandBanList](/functions/llAddToLandBanList/)
+- [llRemoveFromLandBanList](/functions/llRemoveFromLandBanList/)
+- [llRemoveFromLandPassList](/functions/llRemoveFromLandPassList/)
+- [llResetLandBanList](/functions/llResetLandBanList/)
+- [llResetLandPassList](/functions/llResetLandPassList/)
+
+<WikiSource />

@@ -1,0 +1,76 @@
+---
+title: "llTargetRemove"
+slug: "functions/llTargetRemove"
+category: functions
+source:
+  wiki: "LlTargetRemove"
+  url: https://wiki.secondlife.com/wiki/LlTargetRemove
+  revision: 1194358
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/lltargetremove-9ea84659.txt
+  license: "Content from the Second Life Wiki article LlTargetRemove (revision 1194358, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llTargetRemove" description />
+
+Removes positional target **handle** registered with [llTarget](/functions/llTarget/)
+
+```lsl title="How to use" frame="terminal"
+llTargetRemove(0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-15, 21-29}
+integer target_id;
+vector target_pos;
+
+default
+{
+    state_entry()
+    {
+        target_pos = llGetPos() + <1.0, 0.0, 0.0>;
+        target_id = llTarget(target_pos, 0.5);
+    }
+    at_target(integer tnum, vector targetpos, vector ourpos)
+    {
+        if (tnum == target_id)
+        {
+            llOwnerSay("object is within range of target");
+            llOwnerSay("target position: " + (string)targetpos + ", object is now at: " + (string)ourpos);
+            llOwnerSay("this is " + (string)llVecDist(targetpos, ourpos) + " meters from the target");
+            llTargetRemove(target_id);
+        }
+    }
+    not_at_target()
+    {
+        llOwnerSay(
+            "not there yet - object is at " + (string)llGetPos() +
+            ", which is " + (string)llVecDist(target_pos, llGetPos()) +
+            " meters from the target (" + (string)target_pos + ")"
+        );
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llTarget](/functions/llTarget/)
+- [llRotTarget](/functions/llRotTarget/)
+- [llRotTargetRemove](/functions/llRotTargetRemove/)
+
+### Events
+
+- [at_target](/events/at_target/)
+- [not_at_target](/events/not_at_target/)
+
+<WikiSource />

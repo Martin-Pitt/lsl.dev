@@ -1,0 +1,199 @@
+---
+title: "PARCEL_DETAILS_SEE_AVATARS"
+slug: "constants/PARCEL_DETAILS_SEE_AVATARS"
+category: constants
+source:
+  wiki: "PARCEL DETAILS SEE AVATARS"
+  url: https://wiki.secondlife.com/wiki/PARCEL_DETAILS_SEE_AVATARS
+  revision: 1194677
+  date: 2015-01-23
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/parcel-details-see-avatars-4270d20c.txt
+  license: "Content from the Second Life Wiki article PARCEL DETAILS SEE AVATARS (revision 1194677, 2015-01-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="PARCEL_DETAILS_SEE_AVATARS" description />
+
+This is a flag used with [llGetParcelDetails](/functions/llGetParcelDetails/) to get the "See and chat with residents on this parcel" setting.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={10-34}
+// returns parcel data.
+string getParcelDataRequest()
+{
+    string message; //stores a temp message.
+
+    // get parcel name and details on if others can see avatars on the parcel from other parcels
+    list parcelData = llGetParcelDetails( llGetPos(), [PARCEL_DETAILS_NAME, PARCEL_DETAILS_SEE_AVATARS] );
+
+    // name the parcel and prepare the message.
+    message = "Parcel name is: " + llList2String( parcelData, 0 );
+
+    // determine if people can see avatars (1 = can see, 0 = can't see)
+    if( llList2String( parcelData, 1 ) == "0" )
+    {
+        message += ", avatars on other parcels can't see avatars on this parcel.";
+    }
+
+    // else they can see
+    else
+    {
+        message +=", avatars on other parcels can see avatars on this parcel.";
+    }
+
+    return message;
+}
+
+default
+{
+    state_entry()
+    {
+        // calls the method for getting parcel data.
+        llOwnerSay( getParcelDataRequest() );
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Constants
+
+|
+
+<table>
+	<tr>
+		<th>Flag</th>
+		<th></th>
+		<th>Meaning</th>
+		<th>Max Length</th>
+		<th>Return</th>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_NAME](/constants/PARCEL_DETAILS_NAME/)</td>
+		<td>0</td>
+		<td>The name of the parcel.</td>
+		<td>63 Characters</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_DESC](/constants/PARCEL_DETAILS_DESC/)</td>
+		<td>1</td>
+		<td>The description of the parcel.</td>
+		<td>127 Characters</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_OWNER](/constants/PARCEL_DETAILS_OWNER/)</td>
+		<td>2</td>
+		<td>The parcel [owner](https://wiki.secondlife.com/wiki/Category:LSL_Owner)'s key.</td>
+		<td>(36 Characters)</td>
+		<td>[key](https://wiki.secondlife.com/wiki/key)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_GROUP](/constants/PARCEL_DETAILS_GROUP/)</td>
+		<td>3</td>
+		<td>The parcel [group](https://wiki.secondlife.com/wiki/Category:LSL_Group)'s key.</td>
+		<td>(36 Characters)</td>
+		<td>[key](https://wiki.secondlife.com/wiki/key)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_AREA](/constants/PARCEL_DETAILS_AREA/)</td>
+		<td>4</td>
+		<td>The parcel's area, in sqm.</td>
+		<td>(5 Characters)</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_ID](/constants/PARCEL_DETAILS_ID/)</td>
+		<td>5</td>
+		<td>The parcel's key.</td>
+		<td>(36 Characters)</td>
+		<td>[key](https://wiki.secondlife.com/wiki/key)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_SEE_AVATARS](/constants/PARCEL_DETAILS_SEE_AVATARS/)</td>
+		<td>6</td>
+		<td>The parcel's avatar visibility setting`{{footnote|The parcel avatar visibility setting is used to hide avatars, their chat, and objects they sit on when they are in other parcels.}}`</td>
+		<td>(1 character)</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) - boolean</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_PRIM_CAPACITY](/constants/PARCEL_DETAILS_PRIM_CAPACITY/)</td>
+		<td>7</td>
+		<td>The total prim capacity on this and all same-owner parcels, sim-wide. See [llGetParcelMaxPrims](/functions/llGetParcelMaxPrims/) for same-parcel-only and/or sim-wide reporting.</td>
+		<td></td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_PRIM_USED](/constants/PARCEL_DETAILS_PRIM_USED/)</td>
+		<td>8</td>
+		<td>The total prim usage on this and all same-owner parcels, sim-wide. See [llGetParcelPrimCount](/functions/llGetParcelPrimCount/) to get prim count by parcel owner, group, temp, etc. for same-parcel-only and/or sim-wide reporting.</td>
+		<td></td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_LANDING_POINT](/constants/PARCEL_DETAILS_LANDING_POINT/)</td>
+		<td>9</td>
+		<td>Landing point set for this parcel, if any.</td>
+		<td></td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_LANDING_LOOKAT](/constants/PARCEL_DETAILS_LANDING_LOOKAT/)</td>
+		<td>10</td>
+		<td>Look at vector set for the landing point on this parcel, if any.</td>
+		<td></td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_TP_ROUTING](/constants/PARCEL_DETAILS_TP_ROUTING/)</td>
+		<td>11</td>
+		<td>
+
+			Teleport routing for this parcel.
+
+			- 0 = [TP_ROUTING_BLOCKED](/constants/TP_ROUTING_BLOCKED/)
+			- 1 = [TP_ROUTING_LANDINGP](/constants/TP_ROUTING_LANDINGP/)
+			- 2 = [TP_ROUTING_FREE](/constants/TP_ROUTING_FREE/)
+
+			Note that routing rules are only enforced if the landing point is set.
+
+		</td>
+		<td></td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_FLAGS](/constants/PARCEL_DETAILS_FLAGS/)</td>
+		<td>12</td>
+		<td>Parcel flags set for this parcel. See [llGetParcelFlags](/functions/llGetParcelFlags/) for a listing of the flags and their meaning.</td>
+		<td></td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer)</td>
+	</tr>
+	<tr>
+		<td>[PARCEL_DETAILS_SCRIPT_DANGER](/constants/PARCEL_DETAILS_SCRIPT_DANGER/)</td>
+		<td>13</td>
+		<td>Is the script in danger in the indicated parcel. See [llScriptDanger](/functions/llScriptDanger/) for a discussion of script danger.</td>
+		<td></td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) - boolean</td>
+	</tr>
+	<tr>
+		<td colspan="5">Max Lengths in parentheses represent how many characters required when it is [typecast](https://wiki.secondlife.com/wiki/typecast) to a string.</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+</table>
+
+### Functions
+
+- [llGetParcelDetails](/functions/llGetParcelDetails/)
+
+<WikiSource />

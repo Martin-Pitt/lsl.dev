@@ -1,0 +1,102 @@
+---
+title: "llGetSubString"
+slug: "functions/llGetSubString"
+category: functions
+source:
+  wiki: "LlGetSubString"
+  url: https://wiki.secondlife.com/wiki/LlGetSubString
+  revision: 1215061
+  date: 2023-10-15
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llgetsubstring-eac37e85.txt
+  license: "Content from the Second Life Wiki article LlGetSubString (revision 1215061, 2023-10-15), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetSubString" description />
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the substring of **src** from **start** to **end**, leaving the original [string](https://wiki.secondlife.com/wiki/string) intact.
+
+```lsl title="How to use" frame="terminal"
+string result = llGetSubString("", 0, 0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        string word = "Hello!";
+        llOwnerSay(llGetSubString(word, 0, 0));
+        // Object: H
+        llOwnerSay(llGetSubString(word, -1, -1));
+        // Object: !
+        llOwnerSay(llGetSubString(word, 2, 3));
+        // Object: ll
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-18}
+// display SL time using a script without an 'if'
+default
+{
+    state_entry()
+    {
+        // synchronise our clock to a fraction of a second
+        float fnow = llGetWallclock();
+        while (fnow == llGetWallclock() )   ;   // await a change in seconds
+
+        llSetTimerEvent(1.0);
+    }
+
+    timer()
+    {
+        integer seconds = (integer) llGetWallclock();
+        integer minutes = seconds / 60;
+        seconds = seconds % 60;
+        integer hours = minutes / 60;
+        minutes = minutes % 60;
+
+        string stringHours   = llGetSubString("0" + (string)hours,   -2, -1);
+        string stringMinutes = llGetSubString("0" + (string)minutes, -2, -1);
+        string stringSeconds = llGetSubString("0" + (string)seconds, -2, -1);
+
+        string time = stringHours + ":" + stringMinutes + ":" + stringSeconds;
+
+        llSetText(time, <1.0, 1.0, 1.0>, 1.0);
+    }
+}
+```
+
+</details>
+
+## Notes
+
+The counting of the characters starts at 0. Using 0,0 as start and end positions would return the first character only. Using negative numbers causes backwards counting, so -1 is shortform for the last character in a string. Ergo, using 0, -1 as start and end positions would return the entire string.
+
+To ascertain how long a string is, use [llStringLength](/functions/llStringLength/).
+
+## See also
+
+### Functions
+
+- [llReplaceSubString](/functions/llReplaceSubString/)
+- [llDeleteSubString](/functions/llDeleteSubString/)
+- [llInsertString](/functions/llInsertString/)
+
+### Articles
+
+- [CombinedLibrary: str_replace](https://wiki.secondlife.com/wiki/Library_Combined_Library#str-replace)
+
+<WikiSource />

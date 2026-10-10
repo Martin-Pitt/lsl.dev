@@ -1,0 +1,78 @@
+---
+title: "llLinkSetSoundRadius"
+slug: "functions/llLinkSetSoundRadius"
+category: functions
+source:
+  wiki: "LlSetSoundRadius"
+  url: https://wiki.secondlife.com/wiki/LlSetSoundRadius
+  revision: 1216713
+  date: 2024-05-24
+  contributor: "Frionil Fang"
+  raw: /wiki-source/llsetsoundradius-9b40c542.txt
+  license: "Content from the Second Life Wiki article LlSetSoundRadius (revision 1216713, 2024-05-24), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llLinkSetSoundRadius" />
+
+Establishes a hard cut-off **radius** for audibility for [llPlaySound](/functions/llPlaySound/), [llLoopSound](/functions/llLoopSound/) and [llLinkPlaySound](/functions/llLinkPlaySound/) in non-triggered mode. Sounds are not heard until an observer's camera enters the radius, and immediately stop when leaving the radius. Volume fading is still determined by the distance from camera, not the radius.
+
+`{{LSL_Function/Head |func=llSetSoundRadius |func_id=209|func_sleep=0.0|func_energy=10.0 |p1_type=float|p1_name=radius|p1_desc=in meters |func_footnote |func_desc |return_text }}``{{LSL_Function/Head |func=llLinkSetSoundRadius |func_id=|func_sleep=0.0|func_energy=10.0 |p1_type=integer|p1_subtype=link|p1_name=link |p2_type=float|p2_name=radius |func_footnote |func_desc |return_text }}`
+
+```lsl title="How to use" frame="terminal"
+llLinkSetSoundRadius(0, 0.0);
+```
+
+## Caveats
+
+- This function is a prim property, thus will survive script resets.
+- Has no effect on [llTriggerSound](/functions/llTriggerSound/) or [llLinkPlaySound](/functions/llLinkPlaySound/) in triggered mode. Sounds will play regardless of camera position.
+- [llTriggerSoundLimited](/functions/llTriggerSoundLimited/) can be used instead for a similar effect but the function depends on **avatar** position, not camera position.
+- When used with [llPlaySound](/functions/llPlaySound/) or [llLinkPlaySound](/functions/llLinkPlaySound/) in non-looped mode, the sound will be played from the beginning only once, when the observer's camera enters the radius for the first time. This can happen significantly later than a one-off sound was actually played.
+- With [llLoopSound](/functions/llLoopSound/) or [llLinkPlaySound](/functions/llLinkPlaySound/) in looped mode, the sound will be played from the beginning every time the observer's camera enters the radius.
+
+## Examples
+
+<details open>
+<summary>Enable sound cutoff at 4 meters.</summary>
+
+```lsl
+llSetSoundRadius(4); //Enable sound cutoff at 4 meters.
+```
+
+</details>
+
+<details>
+<summary>Disable sound cutoff.</summary>
+
+```lsl
+llSetSoundRadius(0); //Disable sound cutoff.
+```
+
+</details>
+
+## Notes
+
+Pass 0 to this function to disable it.
+
+## History
+
+`{{LSL Added|0.4.0|remote=http://secondlife.wikia.com/wiki/Version_0.4.0}}`
+
+## Additional wiki content
+
+`{{Issues/SVC-3058}}`
+
+## Related functions
+
+The original wiki page documents these functions together with this one:
+
+- [llSetSoundRadius](/functions/llSetSoundRadius/)
+
+## See also
+
+### Functions
+
+- [llTriggerSoundLimited](/functions/llTriggerSoundLimited/)
+
+<WikiSource />

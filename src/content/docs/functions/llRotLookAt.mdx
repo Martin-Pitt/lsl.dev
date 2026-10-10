@@ -1,0 +1,102 @@
+---
+title: "llRotLookAt"
+slug: "functions/llRotLookAt"
+category: functions
+source:
+  wiki: "LlRotLookAt"
+  url: https://wiki.secondlife.com/wiki/LlRotLookAt
+  revision: 1209185
+  date: 2020-03-27
+  contributor: "Wulfie Reanimator"
+  raw: /wiki-source/llrotlookat-ab4ce0c2.txt
+  license: "Content from the Second Life Wiki article LlRotLookAt (revision 1209185, 2020-03-27), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRotLookAt" />
+
+Causes an object to smoothly rotate to **target_direction** with **strength** resistance at **damping** force.
+
+Maintains rotation **target_direction** until stopped with [llStopLookAt](/functions/llStopLookAt/).
+
+To change the position in the same manner, use [llMoveToTarget](/functions/llMoveToTarget/). For physical objects a range between .2 and 1 is good for both parameters.
+
+```lsl title="How to use" frame="terminal"
+llRotLookAt(ZERO_ROTATION, 0.0, 0.0);
+```
+
+## Caveats
+
+- In Non-Physical objects this function operates effectively the same as [llSetLocalRot](/functions/llSetLocalRot/).
+- **damping** seems to be capped at 1.0; greater values are reduced to 1.0 *(Tested 21 October 2010 on server version 10.10.18.212360)*
+- The minimum value for **strength** seems to be 0.0445 for the function to have any effect.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+#### Point the prim's positive y axis (*&lt;0.0, 1.0, 0.0>*) towards a position on the sim
+
+```lsl
+//-- where vPosTarget is the global position of the object you want to "look" at
+llRotLookAt( llRotBetween( <0.0,1.0,0.0>, llVecNorm( vPosTarget - llGetPos() ) ), 1.0, 0.4 ); // Point +Y axis towards vPosTarget
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+- **vPosTarget - `llGetPos()`** converts the global coordinates of the objects, to a local distance and direction from the object pointing
+- Per [llRotBetween](/functions/llRotBetween/) article:
+- **[llRotBetween](/functions/llRotBetween/)** returns a scaled rotation, unless both inputs are equal magnitude (e.g. unit vector).
+- The use of [llVecNorm](/functions/llVecNorm/) reduces the magnitude to 1 (so that both are equal magnitude), preventing errors.
+
+#### Constraining the Rotation to One Axis
+
+```lsl
+      vector detected = llDetectedPos( 0 );
+      vector pos = llGetPos();
+      llRotLookAt( llRotBetween( <0.0, 1.0, 0.0>, llVecNorm( <detected.x, detected.y, pos.z> - pos ) ), 1.0, 0.4 );
+```
+
+</details>
+
+## Helper functions
+
+- If you want a (mostly) smooth *constant* (rather than damped) rate of motion in a non-physical object try this
+
+```lsl
+//-- Rotates Object to vRotTarget at vFltRate (in radians per second
+//-- vFltRate < ~0.00000003rad/sec, (~0.00002deg/sec) will result in errors (and is just too slow anyway)
+//-- vFltRate >= (PI * 5.0)rad/sec, (900deg/sec) will result in a single snap move to vRotTarget
+uSteppedRotLookAt( rotation vRotTarget, float vFltRate ){
+	if ((integer)(vFltRate = (llAngleBetween( llGetLocalRot(), vRotTarget ) / (vFltRate / 5.0)))){
+		rotation vRotStep = llAxisAngle2Rot( llRot2Axis( vRotTarget / llGetLocalRot() ),
+		                    (1.0 / vFltRate) * llRot2Angle( vRotTarget / llGetLocalRot() ) );
+		vFltRate = (integer)vFltRate;
+		do{
+			llSetLocalRot( vRotStep * llGetLocalRot() );
+		}while (--vFltRate);
+	}
+	llSetLocalRot( vRotTarget );
+} //-- for fixed time on any rotation try llSetKeyframedMotion
+```
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-1903: type=bug|llRotLookAt & llLookAt do not update the object's bounding box
+
+## See also
+
+### Functions
+
+- [llLookAt](/functions/llLookAt/)
+- [llStopLookAt](/functions/llStopLookAt/)
+- [llSetPhysicsMaterial](/functions/llSetPhysicsMaterial/)
+- [llSetKeyframedMotion](/functions/llSetKeyframedMotion/)
+
+<WikiSource />

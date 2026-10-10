@@ -1,0 +1,107 @@
+---
+title: "llGetCameraRot"
+slug: "functions/llGetCameraRot"
+category: functions
+source:
+  wiki: "LlGetCameraRot"
+  url: https://wiki.secondlife.com/wiki/LlGetCameraRot
+  revision: 1194158
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetcamerarot-e665083c.txt
+  license: "Content from the Second Life Wiki article LlGetCameraRot (revision 1194158, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetCameraRot" description />
+
+Returns a [rotation](https://wiki.secondlife.com/wiki/rotation) that is the current camera orientation for the agent the task has permissions for.
+
+```lsl title="How to use" frame="terminal"
+rotation result = llGetCameraRot();
+```
+
+## Caveats
+
+- Seems to act weird when the camera gets too far from the agent.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={5-49}
+//Camera Follower Script
+//llGetCameraPos & llGetCameraRot Example
+//By Nika Rugani
+
+integer perm_track = 0x400;
+float second_check = 0.1;
+
+vector object_offset = <2,0,0>; //Offset of the cameras position where the object will set itself
+
+integer die_channel = 0;
+string die_command = "/die";
+
+quickPosRot(vector pos, rotation rot)
+{//This way you don't have the 0.2 second sleeps from llSetPos and llSetRot
+    llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_POSITION, pos, PRIM_ROTATION, rot]);
+}
+
+default
+{
+    on_rez(integer a)
+    {
+        llResetScript();
+    }
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(), perm_track);
+    }
+    run_time_permissions(integer permission)
+    {
+        if(permission == perm_track)
+        {
+            llSetTimerEvent(second_check);
+            llListen(die_channel, "", llGetOwner(), "");
+        }
+        else
+        {
+            //llResetScript(); //Remove comment to loop the process of requesting permissions if user deny's permission
+            //llDie(); //Remove comment to kill the object if user deny's it
+        }
+    }
+    listen(integer channel, string name, key id, string str)
+    {
+        str = llToLower(str);
+        if(str == die_command)
+        {
+            llDie();
+        }
+    }
+    timer()
+    {
+        vector c_pos = llGetCameraPos(); //Get Users Camera Position
+        rotation c_rot = llGetCameraRot(); //Get Users Camera Rotation
+        c_pos = (c_pos+object_offset*c_rot); //Apply the offset to the position
+        quickPosRot(c_pos, c_rot); //EXECUTE ORDER!
+    }
+}
+```
+
+</details>
+
+## Additional wiki content
+
+`{{LSL_Function/permission|PERMISSION_TRACK_CAMERA}}`
+
+## See also
+
+### Functions
+
+- [llGetCameraPos](/functions/llGetCameraPos/)
+- [llSetCameraParams](/functions/llSetCameraParams/)
+- [llSetCameraAtOffset](/functions/llSetCameraAtOffset/)
+- [llSetCameraEyeOffset](/functions/llSetCameraEyeOffset/)
+
+<WikiSource />

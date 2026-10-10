@@ -1,0 +1,149 @@
+---
+title: "llSetContentType"
+slug: "functions/llSetContentType"
+category: functions
+source:
+  wiki: "LlSetContentType"
+  url: https://wiki.secondlife.com/wiki/LlSetContentType
+  revision: 1219024
+  date: 2026-09-08
+  contributor: "Nelson Jenkins"
+  raw: /wiki-source/llsetcontenttype-b9becbfd.txt
+  license: "Content from the Second Life Wiki article LlSetContentType (revision 1219024, 2026-09-08), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetContentType" description />
+
+Sets the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) `String: {{String|Content-Type}}` header of any subsequent [LSL HTTP server](https://wiki.secondlife.com/wiki/LSL_HTTP_server) response via [llHTTPResponse](/functions/llHTTPResponse/).
+
+```lsl title="How to use" frame="terminal"
+llSetContentType(NULL_KEY, 0);
+```
+
+## Specification
+
+| **content_type** |  | Content-Type |
+| --- | --- | --- |
+| [CONTENT_TYPE_TEXT](/constants/CONTENT_TYPE_TEXT/) | 0 | text/plain |
+| [CONTENT_TYPE_HTML](/constants/CONTENT_TYPE_HTML/) | 1 | text/html |
+| [CONTENT_TYPE_XML](/constants/CONTENT_TYPE_XML/) | 2 | application/xml |
+| [CONTENT_TYPE_XHTML](/constants/CONTENT_TYPE_XHTML/) | 3 | application/xhtml+xml |
+| [CONTENT_TYPE_ATOM](/constants/CONTENT_TYPE_ATOM/) | 4 | application/atom+xml |
+| [CONTENT_TYPE_JSON](/constants/CONTENT_TYPE_JSON/) | 5 | application/json |
+| [CONTENT_TYPE_LLSD](/constants/CONTENT_TYPE_LLSD/) | 6 | application/llsd+xml |
+| [CONTENT_TYPE_FORM](/constants/CONTENT_TYPE_FORM/) | 7 | application/x-www-form-urlencoded |
+| [CONTENT_TYPE_RSS](/constants/CONTENT_TYPE_RSS/) | 8 | application/rss+xml |
+
+## Caveats
+
+- When using [CONTENT_TYPE_HTML](/constants/CONTENT_TYPE_HTML/), this setting will be ignored unless all of these conditions are met:
+- the web browser is the Second Life client
+- the user (logged into the SL client viewing the page) is the owner of the object.
+- the user (logged into the SL client viewing the page) is connected to the region the object is located in
+- : Obviously this is not compatible with group owned objects. One way around this limitation would be to [temporarily attach](/functions/llAttachToAvatarTemp/) a repeater.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-50}
+key url_request;
+
+string HTML_BODY =
+"<!DOCTYPE html>
+<html>
+<body>
+
+<h1>My First Heading</h1>
+
+<p>My first paragraph.</p>
+
+</body>
+</html>";
+
+default
+{
+    state_entry()
+    {
+        url_request = llRequestURL();
+    }
+
+    http_request(key id, string method, string body)
+    {
+        key owner = llGetOwner();
+        vector ownerSize = llGetAgentSize(owner);
+
+        if (url_request == id)
+        {
+        //  if you're usually not resetting the query ID
+        //  now is a good time to start!
+            url_request = "";
+
+            if (method == URL_REQUEST_GRANTED)
+            {
+                llOwnerSay("URL: " + body);
+
+            //  if owner in sim
+                if (ownerSize)//  != ZERO_VECTOR
+                    llLoadURL(owner, "I got a new URL!", body);
+            }
+
+            else if (method == URL_REQUEST_DENIED)
+                llOwnerSay("Something went wrong, no url:\n" + body);
+        }
+
+        else
+        {
+            llOwnerSay("request body:\n" + body);
+
+        //  if owner in sim
+            if (ownerSize)//  != ZERO_VECTOR
+            {
+                llSetContentType(id, CONTENT_TYPE_HTML);
+                llHTTPResponse(id, 200, HTML_BODY);
+            }
+            else
+            {
+                llSetContentType(id, CONTENT_TYPE_TEXT);
+                llHTTPResponse(id, 200, "OK");
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- There is no way to set any other headers in an HTTP response.
+- A workaround for displaying HTML to non-owners inworld can be found [here](https://wiki.secondlife.com/wiki/Teacup).
+
+## Comments
+
+The client and owner limitations are most likely to remove the possibility of running a website from a prim.
+
+## History
+
+- Released August 16, 2011.
+- [SCR-394](https://jira.secondlife.com/browse/SCR-394) - Documentation revised but no change in functionality.
+
+## See also
+
+### Functions
+
+- [llHTTPResponse](/functions/llHTTPResponse/)
+
+### Events
+
+- [http_request](/events/http_request/)
+- [http_response](/events/http_response/)
+
+### Articles
+
+- [LSL HTTP server](https://wiki.secondlife.com/wiki/LSL_HTTP_server)
+- [HTML HUD Demo](https://wiki.secondlife.com/wiki/HTML_HUD_Demo)
+
+<WikiSource />

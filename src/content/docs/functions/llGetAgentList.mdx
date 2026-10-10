@@ -1,0 +1,137 @@
+---
+title: "llGetAgentList"
+slug: "functions/llGetAgentList"
+category: functions
+source:
+  wiki: "LlGetAgentList"
+  url: https://wiki.secondlife.com/wiki/LlGetAgentList
+  revision: 1213288
+  date: 2023-02-05
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llgetagentlist-a1ff622b.txt
+  license: "Content from the Second Life Wiki article LlGetAgentList (revision 1213288, 2023-02-05), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetAgentList" />
+
+Requests a [list](https://wiki.secondlife.com/wiki/list) of [agent](/constants/AGENT/)s currently in the [region](https://wiki.secondlife.com/wiki/region), limited by the **scope** parameter.
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) `[key id0, key id1, ..., key idn]` or `[string error_msg]` - returns avatar [key](https://wiki.secondlife.com/wiki/key)s for all agents in the region limited to the area(s) specified by **scope**
+
+```lsl title="How to use" frame="terminal"
+list result = llGetAgentList(0, []);
+```
+
+## Caveats
+
+- There is no guaranteed understandable order or randomness to the list returned.
+- Will only return up to 100 agents.
+- Ghosts, agents that leave behind a corrupted presence and agents in [God Mode](https://wiki.secondlife.com/wiki/God_Mode) depending on the level will have [NULL_KEY](/constants/NULL_KEY/) returned instead of their real key with [llGetAgentList](/functions/llGetAgentList/)(). There is also an issue with a certain type of ghosted agent still returning a key too. Perhaps check each key against [llGetAgentSize](/functions/llGetAgentSize/)() to verify if they're really in the sim or not; none of the above anomalies affect [llGetAgentSize](/functions/llGetAgentSize/)().
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+:::note
+To check if an avatar is in the same sim, please check whether [llGetAgentSize](/functions/llGetAgentSize/) does NOT return [ZERO_VECTOR](/constants/ZERO_VECTOR/). It's much faster and easier than calling [llGetAgentList](/functions/llGetAgentList/) and running through the list to compare a given key with each list item.
+:::
+
+:::note
+As of now, this function does not have a delimiter for its option list. This means, the function MIGHT return up to a hundred avatar keys. You'll need a lot of free memory to be able to store those keys, be warned of possible [STACK_HEAP_COLLISION_ERROR](https://wiki.secondlife.com/wiki/STACK_HEAP_COLLISION_ERROR)s.
+:::
+
+```lsl collapse={10-27}
+//Displays up to 100 avatar key: name pairs detected in the entire region
+
+default
+{
+    touch_start(integer total_number)
+    {
+        list avatarsInRegion = llGetAgentList(AGENT_LIST_REGION, []);
+        integer numOfAvatars = llGetListLength(avatarsInRegion);
+
+        // if no avatars, abort avatar listing process and give a short notice
+        if (!numOfAvatars)
+        {
+            llOwnerSay("No avatars found within the region!");
+            return;
+        }
+
+        integer index;
+        while (index < numOfAvatars)
+        {
+            key id = llList2Key(avatarsInRegion, index);
+            string name = llKey2Name(id);
+
+            llOwnerSay(name + " [ " + (string)id + " ]");
+            ++index;
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-5, 11-30}
+//  Orders new list based on distance
+//  and returns names and distances on touch
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        list keys = llGetAgentList(AGENT_LIST_REGION, []);
+        integer numberOfKeys = llGetListLength(keys);
+
+        vector currentPos = llGetPos();
+        list newkeys;
+        key thisAvKey;
+
+        integer i;
+        for (i = 0; i < numberOfKeys; ++i) {
+            thisAvKey = llList2Key(keys,i);
+            newkeys += [llRound(llVecDist(currentPos,
+                            llList2Vector(llGetObjectDetails(thisAvKey, [OBJECT_POS]), 0))),
+                        thisAvKey];
+        }
+
+        newkeys = llListSort(newkeys, 2, FALSE);     //  sort strided list by descending distance
+
+        for (i = 0; i < (numberOfKeys * 2); i += 2) {
+            llOwnerSay(llGetDisplayName(llList2Key(newkeys, i+1))
+                +" ["+ (string) llList2Integer(newkeys, i) + "m]");
+        }
+    }
+}
+```
+
+</details>
+
+## History
+
+- New function proposed by LL, reconciling the feature suggestions [SVC-805](https://jira.secondlife.com/browse/SVC-805), [SVC-6427](https://jira.secondlife.com/browse/SVC-6427), [MISC-243](https://jira.secondlife.com/browse/MISC-243) and [SVC-5488](https://jira.secondlife.com/browse/SVC-5488).
+- Pre-Released [Release_Notes/Second_Life_RC_Magnum/12](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_RC_Magnum/12) - Original JIRA requested `llGetRegionAgents()`, the name changed since the released function does more.
+- Date of Release [30/04/2012](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-04-30-255166)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SCR-311: type=bug|llGetAgentList() with scope AGENT_LIST_PARCEL or AGENT_LIST_PARCEL_OWNER returns \{\{HoverText|empty list|\[\]\}\} when attached to avatar *(fixed)*
+- BUG-40680 (nf): '''AGENT_LIST_LIMIT''' option for llGetAgentList()
+- BUG-40681 (nf): '''llGetNumberOfAgents'''() - companion to llGetAgentList() for retrieving count only.
+
+The wiki article also includes shared templates whose conditional content is not reproduced here: [Template:Issues/SVC-5488](https://wiki.secondlife.com/wiki/Template:Issues/SVC-5488), [Template:Issues/MISC-243](https://wiki.secondlife.com/wiki/Template:Issues/MISC-243), [Template:Issues/BUG-227045](https://wiki.secondlife.com/wiki/Template:Issues/BUG-227045).
+
+## See also
+
+### Functions
+
+- [llGetRegionAgentCount](/functions/llGetRegionAgentCount/)
+
+<WikiSource />

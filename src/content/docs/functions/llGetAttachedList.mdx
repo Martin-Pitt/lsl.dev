@@ -1,0 +1,83 @@
+---
+title: "llGetAttachedList"
+slug: "functions/llGetAttachedList"
+category: functions
+source:
+  wiki: "LlGetAttachedList"
+  url: https://wiki.secondlife.com/wiki/LlGetAttachedList
+  revision: 1217886
+  date: 2025-01-21
+  contributor: "Coffee Pancake"
+  raw: /wiki-source/llgetattachedlist-faf44557.txt
+  license: "Content from the Second Life Wiki article LlGetAttachedList (revision 1217886, 2025-01-21), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetAttachedList" />
+
+By design HUD attachment keys are not reported by this function.
+
+If avatar is a child agent, \["NOT ON REGION"\] is returned.
+
+If avatar is not a main agent and not a child agent or not an agent at all, \["NOT FOUND"\] is returned.
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) of object keys corresponding to public attachments worn by an **avatar** in the order they were attached.
+
+```lsl title="How to use" frame="terminal"
+list result = llGetAttachedList(NULL_KEY);
+```
+
+## Caveats
+
+When an avatar first arrives in a region, there is a brief period when their attachments are not yet fully rezzed or added. During this time, those attachments will not appear in the results.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5, 11-18}
+// Touch to list all attachments
+
+default
+{
+    touch_start(integer total_number)
+    {
+        list AttachedNames;
+        list AttachedUUIDs = llGetAttachedList(llDetectedKey(0));
+        integer i;
+        while (i < llGetListLength(AttachedUUIDs) )
+        {
+            list temp = llGetObjectDetails(llList2Key(AttachedUUIDs,i),[OBJECT_NAME]);
+            AttachedNames += [llList2String(temp,0)];
+            ++i;
+        }
+        llSay(PUBLIC_CHANNEL,"\n" + llDumpList2String(AttachedNames,"\n"));
+    }
+}
+```
+
+</details>
+
+## History
+
+- 20/Dec/08 — [SVC-3560](https://jira.secondlife.com/browse/SVC-3560) — llQueryAvatarAttachments Suggested
+- 30/Apr/13 — [BUG-2467](https://jira.secondlife.com/browse/BUG-2467) — `llGetAttachedList` Suggested
+- 14/Jul/15 — [BUG-9683](https://jira.secondlife.com/browse/BUG-9683) — `llGetAttachedList` Suggested again
+
+## See also
+
+### Functions
+
+- [llGetAttached](/functions/llGetAttached/)
+- [llGetAttachedListFiltered](/functions/llGetAttachedListFiltered/)
+- [llAttachToAvatar](/functions/llAttachToAvatar/)
+- [llDetachFromAvatar](/functions/llDetachFromAvatar/)
+- [llAttachToAvatar](/functions/llAttachToAvatar/)
+- [llGetObjectDetails](/functions/llGetObjectDetails/) — [OBJECT_ATTACHED_POINT](/constants/OBJECT_ATTACHED_POINT/)
+
+### Events
+
+- [attach](/events/attach/)
+
+<WikiSource />

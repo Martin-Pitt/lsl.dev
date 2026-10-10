@@ -1,0 +1,151 @@
+---
+title: "llReturnObjectsByID"
+slug: "functions/llReturnObjectsByID"
+category: functions
+source:
+  wiki: "LlReturnObjectsByID"
+  url: https://wiki.secondlife.com/wiki/LlReturnObjectsByID
+  revision: 1219015
+  date: 2026-08-31
+  contributor: "Maestro Linden"
+  raw: /wiki-source/llreturnobjectsbyid-61f3a5f1.txt
+  license: "Content from the Second Life Wiki article LlReturnObjectsByID (revision 1219015, 2026-08-31), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llReturnObjectsByID" />
+
+If the script is owned by an agent, [PERMISSION_RETURN_OBJECTS](/constants/PERMISSION_RETURN_OBJECTS/) may be granted by the owner. If the script is owned by a group, this permission may be granted by an agent belonging to the group's "Owners" role.
+
+If the return value is negative, it represents an [error](#0) flag.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is the number of objects successfully returned to their owners or an [ERR\_\*](#0) flag.
+
+```lsl title="How to use" frame="terminal"
+integer result = llReturnObjectsByID([]);
+```
+
+## Specification
+
+#### Script Owner and Scope
+
+If the script is owned by an estate owner or manager, this function works for objects located on any parcel in the region. Otherwise, the script can return objects located over land owned by the owner of the script.
+
+As a security measure, parcel owner, estate owner, and estate managers can not have their objects returned by this method, except when the object returns itself.
+
+#### Throttle
+
+Throttled at max parcel land impact capacity region-wide per hour.
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [ERR_GENERIC](/constants/ERR_GENERIC/) | integer | `-1` | A nebulous and inexplicable error, nothing is known about it. |
+| [ERR_PARCEL_PERMISSIONS](/constants/ERR_PARCEL_PERMISSIONS/) | integer | `-2` | Permission lacked to perform task on specified parcel. |
+| [ERR_MALFORMED_PARAMS](/constants/ERR_MALFORMED_PARAMS/) | integer | `-3` | Parameters are malformed. |
+| [ERR_RUNTIME_PERMISSIONS](/constants/ERR_RUNTIME_PERMISSIONS/) | integer | `-4` | Script lacks the runtime permission to perform the requested task. |
+| [ERR_THROTTLED](/constants/ERR_THROTTLED/) | integer | `-5` | Task has been throttled. Try again later. |
+
+<table>
+	<tr>
+		<th>Error Flags</th>
+		<th></th>
+		<th colspan="6">Description</th>
+	</tr>
+</table>
+
+## Caveats
+
+- Objects owned by other groups will be returned to their previous owner if the object is transferable, deleted otherwise.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-48}
+key owner;
+
+// list of objects to return
+list objects_to_return = [
+    "929f26d8-b225-5f6a-a26a-eeda27c31416",
+    "f0abe779-1989-6be4-d73c-dcb48b4313cf",
+    "bad9903-139f-2217-81f3-e61884540df6"
+];
+
+default
+{
+    state_entry()
+    {
+        llRequestPermissions(llGetOwner(),PERMISSION_RETURN_OBJECTS);
+    }
+
+    run_time_permissions(integer p)
+    {
+        if (p & PERMISSION_RETURN_OBJECTS)
+        {
+            llSetText("Touch me to return the list of objects defined in this script",<1,1,0>,1);
+        }
+    }
+
+    touch_start(integer total_number)
+    {
+        if ((llGetPermissions() & PERMISSION_RETURN_OBJECTS) == 0)
+        {
+            llOwnerSay("Requesting permission to return objects.");
+            llRequestPermissions(llGetOwner(),PERMISSION_RETURN_OBJECTS);
+        }
+        else
+        {
+            list found_objects = [];
+            integer n = llGetListLength(objects_to_return);
+            while(--n >= 0)
+            {
+                key object = llList2Key(objects_to_return, n);
+                string pos = llList2String(llGetObjectDetails(object, [OBJECT_POS]), 0);
+                if(pos == "" )
+                {
+                    llOwnerSay( "Object in return list " + (string)object + " not found - skipping.");
+                }
+                else
+                {
+                    llOwnerSay("Adding object " + (string)object + " at " + (string)pos + " to return list.");
+                    found_objects += [object];
+                }
+            }
+            llOwnerSay("Found " + (string)llGetListLength(found_objects) + " objects to return.");
+            integer result = llReturnObjectsByID(found_objects);
+            if(result >= 0)
+            {
+                llOwnerSay("Returned " + (string)result + " objects.");
+            }
+            else
+            {
+                llOwnerSay("llReturnObjectsByID returned error code " + (string)result
+                    + " - see https://wiki.secondlife.com/wiki/LlReturnObjectsByID for meaning");
+            }
+        }
+    }
+}
+```
+
+</details>
+
+## History
+
+Date of Release [18/06/2013](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/13#13-06-18-277494)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-6281 (fs): Shared group inventory
+
+## See also
+
+### Functions
+
+- [llReturnObjectsByOwner](/functions/llReturnObjectsByOwner/)
+- [llGetParcelPrimOwners](/functions/llGetParcelPrimOwners/)
+- [llDie](/functions/llDie/)
+
+<WikiSource />

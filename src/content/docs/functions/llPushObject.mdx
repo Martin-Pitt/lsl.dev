@@ -1,0 +1,53 @@
+---
+title: "llPushObject"
+slug: "functions/llPushObject"
+category: functions
+source:
+  wiki: "LlPushObject"
+  url: https://wiki.secondlife.com/wiki/LlPushObject
+  revision: 1216758
+  date: 2024-05-31
+  contributor: "Frionil Fang"
+  raw: /wiki-source/llpushobject-d93b618c.txt
+  license: "Content from the Second Life Wiki article LlPushObject (revision 1216758, 2024-05-31), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llPushObject" description />
+
+Applies **impulse** and **ang_impulse** to object **target**
+
+```lsl title="How to use" frame="terminal"
+llPushObject(NULL_KEY, ZERO_VECTOR, ZERO_VECTOR, 0);
+```
+
+## Caveats
+
+- Only works on land where Push is not restricted or where the script is owned by the land owner.
+- If the land is owned by a group, the scripted object must be deeded to the same group.
+- In no-push areas an object can only push its owner or itself.
+- The effectiveness of Push is modulated by the amount of [script energy](https://wiki.secondlife.com/wiki/Energy) available.
+- There is a [simplified code snippet](https://wiki.secondlife.com/wiki/LlPushObject/Havok4Implementation) describing how Push is implemented in the Havok4 project and reveals some of the details of how the energy budget affects the final Push magnitude.
+- **ang_impulse** is ignored when applying to agents or their attachments.
+- [Energy](https://wiki.secondlife.com/wiki/Energy) is fully depleted by this function when either **impulse** or **ang_impulse** is nonzero. If **impulse** is nonzero, it will drain all energy in the object before **ang_impulse** is processed, causing the push to be purely linear.
+- The push impact is diminished with distance by a factor of distance cubed.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// Pushes the collided object or avatar.
+default
+{
+    collision_start(integer num_detected)
+    {
+        llPushObject(llDetectedKey(0),<0,0,100>, <0,0,100>, TRUE);
+    }
+}
+```
+
+</details>
+
+<WikiSource />

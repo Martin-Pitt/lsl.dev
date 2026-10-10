@@ -1,0 +1,81 @@
+---
+title: "PRIM_OMEGA"
+slug: "constants/PRIM_OMEGA"
+category: constants
+source:
+  wiki: "PRIM OMEGA"
+  url: https://wiki.secondlife.com/wiki/PRIM_OMEGA
+  revision: 1212748
+  date: 2022-11-10
+  contributor: "Sei Lisa"
+  raw: /wiki-source/prim-omega-f2333b25.txt
+  license: "Content from the Second Life Wiki article PRIM OMEGA (revision 1212748, 2022-11-10), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="PRIM_OMEGA" description />
+
+Used to make the object spin at the specified axis and rate, or retrieve spin settings. See [llTargetOmega](/functions/llTargetOmega/) for specification.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+// Set this prim rotating
+llTargetOmega(<1.0,3.0,0.5>, TWO_PI, 1.0);
+
+// Read back this prim's current target omega
+list current_omega = llGetPrimitiveParams([PRIM_OMEGA]); // returns [axis, spinrate, gain]
+vector axis = llList2Vector(current_omega, 0); // Should be llVecNorm(<1.0,3.0,0.5>)
+float spinrate = llList2Float(current_omega, 1); // Should be TWO_PI*llVecMag(<1.0,3.0,0.5>)
+float gain = llList2Float(current_omega, 2); // Should be 1.0
+
+// Set all child prims rotating
+llSetLinkPrimitiveParamsFast(LINK_ALL_CHILDREN, [PRIM_OMEGA, <1.0,3.0,0.5>, TWO_PI, 1.0]);
+```
+
+</details>
+
+<details>
+<summary>Also, can use llSetPrimitiveParams for the root prim.</summary>
+
+```lsl collapse={1-7}
+// will need two prims linked together for this script.
+default
+{
+    state_entry()
+    {
+        // make some sort of rotation angle for the omega...
+        vector rotationAngle = <2.3, 5.5, 9.7> * llTan(85);
+
+        // rotate the main prim slowly using the same rotataion angle, rate, and gain...
+        llSetPrimitiveParams([ PRIM_OMEGA, rotationAngle * 0.3, 1.0, 1.0 ]);
+
+        // rotate the link satellite prim separately around its own axis
+        // it will rotate also around the main prim because the main prim is rotating.
+        llSetLinkPrimitiveParams(2, [ PRIM_OMEGA, rotationAngle, 1.0, 1.0 ]);
+    }
+}
+```
+
+</details>
+
+## History
+
+- Introduced in [Second Life RC BlueSteel 11.06.20.233291](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_RC_BlueSteel/11#11-06-20-233291), June 22, 2011
+- Rolled to main server channel the week of 7/11/2011
+
+## Additional wiki content
+
+&lt;onlyinclude>`{{#if: {{#vardefine:omega_const|{{LSL Const|PRIM_OMEGA|integer|18|c=Used to {{GetSet|{{{1|}}}|get the object's llTargetOmega settings|rotate the object at on the given axis at the given rate|/}} }}}} {{#vardefine:caveats|{{#var:caveats}} *[[PRIM_OMEGA]] on nonphysical objects, and child prims of physical objects, is only a client side effect; the object or prim will collide as non-moving geometry. *[[PRIM_OMEGA]] cannot be used on avatars sitting on the object. It will emit the error message "PRIM_OMEGA disallowed on agent". *If [[PRIM_OMEGA]] does not appear to be working, make sure that that Develop > Network > Velocity Interpolate Objects is enabled on the viewer. *In the parameters returned by <code>llGetPrimitiveParams([PRIM_OMEGA])</code>, the vector is normalized, and the spinrate is multiplied by the magnitude of the original vector.}} {{#vardefine:p_axis_desc|arbitrary axis to rotate the object around}} {{#vardefine:p_spinrate_desc|rate of rotation in radians per second}} {{#vardefine:p_gain_desc|also modulates the final spinrate and disables the rotation behavior if zero}} }}`&lt;/onlyinclude>
+
+## See also
+
+### Functions
+
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llTargetOmega](/functions/llTargetOmega/)
+
+<WikiSource />

@@ -1,0 +1,132 @@
+---
+title: "llRemoveFromLandBanList"
+slug: "functions/llRemoveFromLandBanList"
+category: functions
+source:
+  wiki: "LlRemoveFromLandBanList"
+  url: https://wiki.secondlife.com/wiki/LlRemoveFromLandBanList
+  revision: 1194448
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llremovefromlandbanlist-d6fa9d6a.txt
+  license: "Content from the Second Life Wiki article LlRemoveFromLandBanList (revision 1194448, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRemoveFromLandBanList" description />
+
+Remove **avatar** from the land ban list
+
+```lsl title="How to use" frame="terminal"
+llRemoveFromLandBanList(NULL_KEY);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-71, 77-88}
+// This is not a complete solution, requires full avatar names to work - even for unbanning someone!
+// This is meant only as an example of the land ban and pass management functions.
+// free to copy, use, modify, distribute - just don't ask me to debug your modified code. ;-)
+//
+// Commands are:
+//   /5 ban:full_avatar_name
+//   /5 tempban:full_avatar_name
+//   /5 unban:full_avatar_name
+//   /5 pass:full_avatar_name
+//   /5 unpass:full_avatar_name
+//   /5 clearban
+//   /5 clearpass
+
+string command;
+
+default
+{
+    state_entry()
+    {
+        llListen(5, "", llGetOwner(), "");
+    }
+
+    on_rez(integer param)
+    {
+        llResetScript();
+    }
+
+    listen(integer chan, string name, key id, string message)
+    {
+        if (command != "")
+        {
+            llOwnerSay("Sorry, still processing last command, try again in a second.");
+        }
+
+        list args = llParseString2List(message,[":"],[]);
+        command = llToLower(llList2String(args,0));
+
+        if (command == "clearbans")
+        {
+            llResetLandBanList();
+        }
+        if (command == "clearpass")
+        {
+            llResetLandPassList();
+        }
+        else
+        {
+            llSensor(llList2String(args,1),NULL_KEY,AGENT,96,PI);
+        }
+    }
+
+    no_sensor()
+    {
+        command = "";
+    }
+
+    sensor(integer num)
+    {
+        integer i;
+        for (i=0; i< num; ++i)
+        {
+            if (command == "ban")
+            {
+                // Ban indefinetely
+                llAddToLandBanList(llDetectedKey(i),0.0);
+            }
+            if (command == "tempban")
+            {
+                // Ban for 1 hour.
+                llAddToLandBanList(llDetectedKey(i),1.0);
+            }
+            if (command == "unban")
+            {
+                llRemoveFromLandBanList(llDetectedKey(i));
+            }
+            if (command == "pass")
+            {
+                // Add to land pass list for 1 hour
+                llAddToLandPassList(llDetectedKey(i),1.0);
+            }
+            if (command == "unpass")
+            {
+                llRemoveFromLandPassList(llDetectedKey(i));
+            }
+        }
+        command = "";
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llAddToLandBanList](/functions/llAddToLandBanList/)
+- [llAddToLandPassList](/functions/llAddToLandPassList/)
+- [llRemoveFromLandPassList](/functions/llRemoveFromLandPassList/)
+- [llResetLandBanList](/functions/llResetLandBanList/)
+- [llResetLandPassList](/functions/llResetLandPassList/)
+
+<WikiSource />

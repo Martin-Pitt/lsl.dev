@@ -1,0 +1,136 @@
+---
+title: "llCreateLink"
+slug: "functions/llCreateLink"
+category: functions
+source:
+  wiki: "LlCreateLink"
+  url: https://wiki.secondlife.com/wiki/LlCreateLink
+  revision: 1215423
+  date: 2023-11-21
+  contributor: "Rider Linden"
+  raw: /wiki-source/llcreatelink-6c97a53f.txt
+  license: "Content from the Second Life Wiki article LlCreateLink (revision 1215423, 2023-11-21), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llCreateLink" />
+
+Attempt to link the script's object with **target**.
+
+**target** must be modifiable and have the same owner.
+
+This object must also be modifiable.
+
+```lsl title="How to use" frame="terminal"
+llCreateLink(NULL_KEY, 0);
+```
+
+## Specification
+
+The prims for the child object (**target** if **parent** is [TRUE](/constants/TRUE/), script's object if **parent** is [FALSE](/constants/FALSE/)) are inserted into the parent object's link set starting at link number 2. For example, if the link order for the parent object is A1, A2, A3 and the link order of the child object is B1, B2, B3, then the link order of the resulting object will be A1, B1, B2, B3, A2, A3.
+
+## Caveats
+
+- If **target** is not in the region, not a prim, or is attached to an avatar, an error is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/).
+- If either the object or the **target** are not modifiable or of different owners, then an error is shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/).
+- If the the parent object and **target** are too far apart they will fail to link.
+- The maximum distance is further explained here: [Linkability Rules](https://wiki.secondlife.com/wiki/Linkability_Rules)
+- This function silently fails if called from a script inside an attachment.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-21}
+// Rez an object and link it as a child prim.
+string ObjectName = "Object Name Here";
+// NOTE: must be a name of an object in this object's inventory.
+
+default
+{
+    touch_start(integer count)
+    {
+        // When the object is touched, make sure we can do this before trying.
+        llRequestPermissions(llGetOwner(), PERMISSION_CHANGE_LINKS);
+    }
+    run_time_permissions(integer perm)
+    {
+        // Only bother rezzing the object if will be able to link it.
+        if (perm & PERMISSION_CHANGE_LINKS)
+            llRezObject(ObjectName, llGetPos() + <0,0,0.5>, ZERO_VECTOR, llGetRot(), 0);
+        else
+            llOwnerSay("Sorry, we can't link.");
+    }
+    object_rez(key id)
+    {
+        // NOTE: under some conditions, this could fail to work.
+        // This is the parent object.  Create a link to the newly-created child.
+        llCreateLink(id, TRUE);
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl collapse={1-29, 35-40}
+// child prim key
+key kChild = NULL_KEY;
+integer bLink = TRUE;       // we suppose this script is on a linked object
+default
+{
+
+    state_entry()
+    {
+        // get the permission to change the link
+        llRequestPermissions(llGetOwner(), PERMISSION_CHANGE_LINKS);
+
+        // get the child key
+        kChild = llGetLinkKey(2);
+    }
+
+
+    touch_start(integer nTotalCliquor)
+    {
+        if (bLink)
+        {
+            // break all my links, wait 1.5 sec
+            llBreakAllLinks();
+            llSleep(1.5);
+
+            // i'm unlinked
+            llSay(0, "Unlinked, click to link");
+            bLink = FALSE;
+        }
+        else
+        {
+            // redo my link
+            llCreateLink(kChild, TRUE);
+            llSleep(1.5);
+
+            // i'm linked
+            llSay(0, "Linked, click to unlink");
+            bLink = TRUE;
+        }
+    }
+}
+```
+
+## See also
+
+### Functions
+
+- [llBreakLink](/functions/llBreakLink/) — Break a link
+- [llBreakAllLinks](/functions/llBreakAllLinks/) — Break all links
+
+### Events
+
+- [changed](/events/changed/) — [CHANGED_LINK](/constants/CHANGED_LINK/)
+
+### Articles
+
+- [Linkability Rules](https://wiki.secondlife.com/wiki/Linkability_Rules)
+
+<WikiSource />

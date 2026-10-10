@@ -1,0 +1,148 @@
+---
+title: "llRequestAgentData"
+slug: "functions/llRequestAgentData"
+category: functions
+source:
+  wiki: "LlRequestAgentData"
+  url: https://wiki.secondlife.com/wiki/LlRequestAgentData
+  revision: 1215048
+  date: 2023-10-14
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llrequestagentdata-dfb63062.txt
+  license: "Content from the Second Life Wiki article LlRequestAgentData (revision 1215048, 2023-10-14), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRequestAgentData" description />
+
+Requests **data** about agent **id**. When **data** is available the [dataserver](/events/dataserver/) event will be raised
+
+```lsl title="How to use" frame="terminal"
+key result = llRequestAgentData(NULL_KEY, 0);
+```
+
+## Specification
+
+`{{Template:LSL_Constants/llRequestAgentData}}`
+
+<table>
+	<tr>
+		<th colspan="2">**data** Constant</th>
+		<th>Type</th>
+		<th colspan="4">Description</th>
+	</tr>
+</table>
+
+## Caveats
+
+- [DATA_BORN](/constants/DATA_BORN/) is not UTC. It is Pacific Time based.
+- It's worth restating: if the requested data does not exist - or if the key given is not for an agent - then [dataserver](/events/dataserver/) will **not** be raised.
+
+## Examples
+
+**[DATA_NAME](/constants/DATA_NAME/)**
+
+```lsl collapse={1-7, 13-20}
+key owner_key;
+key owner_name_query;
+string owner_name;
+
+default
+{
+    state_entry()
+    {
+        owner_key = llGetOwner();
+        owner_name_query = llRequestAgentData(owner_key, DATA_NAME);
+    }
+    dataserver(key queryid, string data)
+    {
+        if ( owner_name_query == queryid )
+        {
+            owner_name = data;
+            llSay(0, "The owner of this script is called : " + owner_name );
+        }
+    }
+}//Anylyn Hax 06:19, 23 July 2007 (PDT)
+```
+
+**[DATA_ONLINE](/constants/DATA_ONLINE/)**
+
+```lsl collapse={1-16, 22-58}
+/*
+    Server friendly online status example by Daemonika Nightfire.
+
+    It is not a big load for the server to check every 2 minutes if there is an avatar in the region.
+    But it is nonsense to trigger a dataserver event for online status when nobody is in the region.
+    For this purpose, the script checks the number of avatars in the region on each pass.
+*/
+
+
+key owner;
+float repeat = 120.0; // 60 - 120 sec. Recommended, faster than 60 seconds and LL will kick your XXX.
+
+key status_request;
+Status()
+{
+    integer agent_count = llGetRegionAgentCount();
+    if(agent_count > 0) // skip the request if nobody is in the region
+    {
+        status_request = llRequestAgentData(owner, DATA_ONLINE);
+    }
+}
+
+default
+{
+    state_entry()
+    {
+        owner = llGetOwner();
+        llSetTimerEvent(repeat);
+        Status();
+    }
+
+    timer()
+    {
+        Status();
+    }
+
+    dataserver(key queryid, string data)
+    {
+        if(queryid == status_request)
+        {
+            // requested data contains the string "0" or "1" for DATA_ONLINE
+            // i convert it to an integer and use the boolean as index
+
+            //list index = [   0,       1,     2(0+2), 3(1+2)  ]
+            list status = ["OFFLINE","ONLINE",<1,0,0>,<0,1,0>];
+
+            string text = llList2String(status,(integer)data);    // boolean/index = 0   or 1
+            vector color = llList2Vector(status,(integer)data+2); // boolean/index = 0+2 or 1+2
+
+            llSetText(text, color, 1.0);
+        }
+    }
+
+    on_rez(integer Dae)
+    {
+        llResetScript();
+    }
+}
+```
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-215 (nf): '''llRequestAgentKey'''() ('''llName2Key'''())
+- SVC-6831 (bug): llRequestAgentData with DATA_ONLINE parameter has a delay of up to 10 minutes in reporting offline status
+
+## See also
+
+### Functions
+
+- [llGetAgentInfo](/functions/llGetAgentInfo/)
+
+### Events
+
+- [dataserver](/events/dataserver/)
+
+<WikiSource />

@@ -1,0 +1,103 @@
+---
+title: "llLog"
+slug: "functions/llLog"
+category: functions
+source:
+  wiki: "LlLog"
+  url: https://wiki.secondlife.com/wiki/LlLog
+  revision: 1194348
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/lllog-538e1713.txt
+  license: "Content from the Second Life Wiki article LlLog (revision 1194348, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llLog" />
+
+To get the base 10 logarithm use [llLog10](/functions/llLog10/).
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the [natural logarithm](https://en.wikipedia.org/wiki/natural_logarithm) of **val**.
+
+If **val** &lt;= 0 return 0.0 instead.
+
+```lsl title="How to use" frame="terminal"
+float result = llLog(0.0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+  state_entry()
+  {
+    float num1 = llFrand(100.0);
+
+    llOwnerSay("The natural logarithm of " + (string)num1 + " is " + (string)llLog(num1));
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+float findexp(float result, float base)
+{
+    return llLog(result)/llLog(base);
+}
+default
+{
+    touch_start(integer total_number)
+    {
+        llSay(0, (string)findexp(8.0,2.0));
+        //returns 3.0
+    }
+}
+```
+
+</details>
+
+## Notes
+
+There are only two log functions [llLog](/functions/llLog/) and [llLog10](/functions/llLog10/). Errors introduced as a result of floating-point arithmetic are most noticable when working with logarithms. [llLog](/functions/llLog/) should be used instead of [llLog10](/functions/llLog10/) when converting the base of the logarithm.
+
+```lsl
+float LogBaseN = llLog(value) / llLog(Base); //This technique introduces errors but is the only way
+```
+
+If Base is a constant, your script will run faster if you calculate it's log and divide by that constant instead.
+
+**Useful natural logarithms**
+
+| Number | logarithm |
+| --- | --- |
+| 2 | `{{#ln:2}}` |
+| 4 | `{{#ln:4}}` |
+| 8 | `{{#ln:8}}` |
+| 10 | `{{#ln:10}}` |
+| 16 | `{{#ln:16}}` |
+| 32 | `{{#ln:32}}` |
+| 64 | `{{#ln:64}}` |
+| 128 | `{{#ln:128}}` |
+| 256 | `{{#ln:256}}` |
+
+## See also
+
+### Functions
+
+- [llLog10](/functions/llLog10/)
+- [llPow](/functions/llPow/)
+- [llSqrt](/functions/llSqrt/)
+
+### Articles
+
+- [Natural logarithm](https://en.wikipedia.org/wiki/Natural_logarithm)
+
+<WikiSource />

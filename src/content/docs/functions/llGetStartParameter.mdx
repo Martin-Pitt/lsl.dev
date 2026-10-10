@@ -1,0 +1,81 @@
+---
+title: "llGetStartParameter"
+slug: "functions/llGetStartParameter"
+category: functions
+source:
+  wiki: "LlGetStartParameter"
+  url: https://wiki.secondlife.com/wiki/LlGetStartParameter
+  revision: 1218750
+  date: 2026-03-31
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llgetstartparameter-1ad23317.txt
+  license: "Content from the Second Life Wiki article LlGetStartParameter (revision 1218750, 2026-03-31), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetStartParameter" />
+
+- If the script was loaded with [llRemoteLoadScriptPin](/functions/llRemoteLoadScriptPin/) then that start parameter is returned.
+- If the containing object was rezzed by [llRezObjectWithParams](/functions/llRezObjectWithParams/) or [llRezObject](/functions/llRezObject/) or [llRezAtRoot](/functions/llRezAtRoot/) then the return is the [on_rez](/events/on_rez/) parameter.
+- If the containing object was manually rezzed, by dragging from inventory, the start parameter is 0.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is the script start/rez parameter.
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetStartParameter();
+```
+
+## Caveats
+
+- The start parameter does not survive region restarts ([SVC-2251](https://jira.secondlife.com/browse/SVC-2251)) or region change ([SVC-3258](https://jira.secondlife.com/browse/SVC-3258), crossing or teleport).
+- If the script is reset (using [llResetScript](/functions/llResetScript/) or other means), the start parameter is set to 0.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-6, 12-19}
+default
+{
+    on_rez(integer param)
+    {
+        llOwnerSay("rezzed with the number " + (string)param);
+    }
+    state_entry()
+    {
+        integer i = llGetStartParameter();
+        if (i)
+        {
+            llOwnerSay("I was given the number " + (string)i + " when I was rezzed");
+        }
+        else
+        {
+            llOwnerSay("rezzed from inventory (or rezzed/loaded with 0)");
+        }
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+`{{Issue/V1|SVC-2251|llGetStartParameter returns zero after sim restart|type=bug}}`
+
+`{{Issue/V1|SVC-3258|llGetStartParameter returns zero after change of region|type=bug}}`
+
+## See also
+
+### Functions
+
+- [llGetStartString](/functions/llGetStartString/) — Modern alternative that allows passing even more data.
+- [llRemoteLoadScriptPin](/functions/llRemoteLoadScriptPin/) — Used to load a script into a remote prim
+- [llRezObject](/functions/llRezObject/) — Used to rez an object at the center of mass
+- [llRezAtRoot](/functions/llRezAtRoot/) — Used to rez an object at the root
+
+### Events
+
+- [on_rez](/events/on_rez/)
+
+<WikiSource />

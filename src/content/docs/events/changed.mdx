@@ -1,0 +1,185 @@
+---
+title: "changed"
+slug: "events/changed"
+category: events
+source:
+  wiki: "Changed"
+  url: https://wiki.secondlife.com/wiki/Changed
+  revision: 1216574
+  date: 2024-04-30
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/changed-2a6141e4.txt
+  license: "Content from the Second Life Wiki article Changed (revision 1216574, 2024-04-30), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="changed" />
+
+Multiple changes can be represented in a single event, so use [bitwise arithmetic](https://wiki.secondlife.com/wiki/LSL_Operators).
+
+Various changes to the [object](https://wiki.secondlife.com/wiki/object)/[prim](https://wiki.secondlife.com/wiki/prim) trigger this event.
+
+```lsl title="How to use" frame="terminal"
+changed(integer changes)
+{
+
+}
+```
+
+## Specification
+
+| Flag |  | Description | Scope |
+| --- | --- | --- | --- |
+| [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/) | `0x001` | Prim inventory has changed`{{Footnote\|[[CHANGED_INVENTORY]] won't be triggered if the inventory change was caused by a {{LSLGC\|Inventory\|script function}} or a user taking advantage of [[llAllowInventoryDrop]]}}`. | prim |
+| [CHANGED_COLOR](/constants/CHANGED_COLOR/) | `0x002` | Prim color or alpha parameters have changed. | prim |
+| [CHANGED_SHAPE](/constants/CHANGED_SHAPE/) | `0x004` | Prim shape has changed. | prim |
+| [CHANGED_SCALE](/constants/CHANGED_SCALE/) | `0x008` | Prim scale has changed. | prim |
+| [CHANGED_TEXTURE](/constants/CHANGED_TEXTURE/) | `0x010` | Prim texture parameters have changed. | prim |
+| [CHANGED_LINK](/constants/CHANGED_LINK/) | `0x020` | The number of prims making up the object or avatars seated on the object have changed. | object |
+| [CHANGED_ALLOWED_DROP](/constants/CHANGED_ALLOWED_DROP/) | `0x040` | A user other than the owner (or the owner if the object is no-mod) has added inventory to the prim. | prim |
+| [CHANGED_OWNER](/constants/CHANGED_OWNER/) | `0x080` | The object has changed owners. | object |
+| [CHANGED_REGION](/constants/CHANGED_REGION/) | `0x100` | The object has changed region. | object |
+| [CHANGED_TELEPORT](/constants/CHANGED_TELEPORT/) | `0x200` | The avatar to whom this object is [attached](/events/attach/) has teleported. | object |
+| [CHANGED_REGION_START](/constants/CHANGED_REGION_START/) | `0x400` | The region this object is in has just come online. | region |
+| [CHANGED_MEDIA](/constants/CHANGED_MEDIA/) | `0x800` | [Prim Media](/categories/prim_media/) has changed. | prim |
+| [CHANGED_RENDER_MATERIAL](/constants/CHANGED_RENDER_MATERIAL/) | `0x1000` | [Render Material](https://wiki.secondlife.com/wiki/Category:GlTF) has changed. | prim |
+
+## Caveats
+
+- This [event](https://wiki.secondlife.com/wiki/event) will trigger in any [script](https://wiki.secondlife.com/wiki/Script) using it (in its current running [state](https://wiki.secondlife.com/wiki/state)) whether the script be in a [child](https://wiki.secondlife.com/wiki/child_prim) or [root prim](https://wiki.secondlife.com/wiki/root_prim) of a [link_set](/constants/LINK_SET/), e. g., a changed event in a script in the wheel (child prim) of a car will trigger when any avatar sits on or stands from the seat (root prim) of that car.
+- `CHANGED_SCALE` will fire when the scale of at least one prim in the linked object has changed. Only the root prim will receive this event.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    changed(integer change)
+    {
+        // note that it's & and not &&... it's bitwise!
+        if (change & CHANGED_INVENTORY)
+        {
+            llOwnerSay("The inventory has changed.");
+        }
+        if (change & CHANGED_COLOR)
+        {
+            llOwnerSay("The color or alpha changed.");
+        }
+        if (change & CHANGED_SHAPE)
+        {
+            llOwnerSay("The prims shape has changed.");
+        }
+        if (change & CHANGED_SCALE)
+        {
+            llOwnerSay("The prims size has changed.");
+        }
+        if (change & CHANGED_TEXTURE)
+        {
+            llOwnerSay("The prims texture or texture attributes have changed.");
+        }
+        if (change & CHANGED_LINK)
+        {
+            llOwnerSay("The number of links have changed.");
+        }
+        if (change & CHANGED_ALLOWED_DROP)
+        {
+            llOwnerSay("The inventory has changed as a result of a user without mod permissions "+
+                       "dropping an item on the prim and it being allowed by the script.");
+        }
+        if (change & CHANGED_OWNER)
+        {
+            llOwnerSay("The owner of the object has changed.");
+        }
+        if (change & CHANGED_REGION)
+        {
+            llOwnerSay("The region the object is in has changed.");
+        }
+        if (change & CHANGED_TELEPORT)
+        {
+            llOwnerSay("The object has been teleported while attached.");
+        }
+        if (change & CHANGED_REGION_START)
+        {
+            llOwnerSay("The regions has just restarted.");
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>For the same action to be called for multiple changes we can use the following syntax:</summary>
+
+```lsl
+default
+{
+    changed(integer change)
+    {
+        if(change & (CHANGED_OWNER | CHANGED_INVENTORY)) // Either of the changes will return true.
+            llResetScript();
+    }
+}
+```
+
+</details>
+
+## Notes
+
+- Always test the value of `change` for the specific `CHANGED_*` flags you are interested in, unless you want your script to act upon any change that can cause a changed event to trigger.
+- New `CHANGED_*` flags, bugs and bug fixes could conceivably be added by LL at any time. Scripts should be written under the assumption that they will receive *changed* events not expected at the time or place of writing. For future proof scripts, use bitwise conditions as in the examples.
+- See [llGetOwner](/functions/llGetOwner/) for a full discussion on
+
+  ```lsl
+  (change & CHANGED_OWNER)
+  ```
+- [CHANGED_INVENTORY](/constants/CHANGED_INVENTORY/) will also trigger when inventory permissions are changed, a new feature request for a [CHANGED_PERMISSIONS](https://wiki.secondlife.com/wiki/CHANGED_PERMISSIONS) flag to trigger when the object permissions are changed can be voted for at [SCR-411](https://jira.secondlife.com/browse/SCR-411)&lt;ref>Remember, as of 2024, this may be an archived vote.&lt;/ref>
+- If leaving a [state](https://wiki.secondlife.com/wiki/state) from within a [changed](/events/changed/) event that registers a change just before the [state](https://wiki.secondlife.com/wiki/state) change, on return to that state, the changed event will trigger. For example —
+
+```lsl collapse={20-29}
+default
+{
+    changed(integer change)
+    {
+        if(change & CHANGED_LINK)
+        {
+            integer links = 0;
+            if(llGetObjectPrimCount(llGetKey()) < (links = llGetNumberOfPrims()))
+            {
+                llUnSit(llGetLinkKey(links));
+                state whatever;
+            }
+            else
+            llOwnerSay("Some kind of linking or unlinking has changed me but, I am not being sat on.");
+            // This will be chatted after returning to the default state.
+        }
+    }
+}
+state whatever
+{
+    state_entry()
+    {
+        llSetTimerEvent(10.0);
+    }
+    timer()
+    {
+        state default;
+    }
+}
+```
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SCR-411 (nf): CHANGED_PERMISSIONS new feature request.
+- SVC-2549 (bug): &lt;code>changed(CHANGED_SCALE)&lt;/code> is triggered only in root prim instead of rescaled prim.
+
+## Additional wiki content
+
+`{{LSLC|Region}}``{{LSLC|Owner}}``{{LSLC|Prim}}`
+
+<WikiSource />

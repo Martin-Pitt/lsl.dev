@@ -1,0 +1,65 @@
+---
+title: "llGetExperienceDetails"
+slug: "functions/llGetExperienceDetails"
+category: functions
+source:
+  wiki: "LlGetExperienceDetails"
+  url: https://wiki.secondlife.com/wiki/LlGetExperienceDetails
+  revision: 1199813
+  date: 2016-04-03
+  contributor: "Strife Onizuka"
+  raw: /wiki-source/llgetexperiencedetails-dbaf1ed6.txt
+  license: "Content from the Second Life Wiki article LlGetExperienceDetails (revision 1199813, 2016-04-03), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetExperienceDetails" />
+
+If **experience_id** is [NULL_KEY](/constants/NULL_KEY/), then information about the script's experience is returned. In this situation, if the script isn't associated with an experience, an empty list is returned.
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) of details about the experience. This list has 6 components: `[string experience_name, key owner_id, key experience_id, integer state, string state_message, key group_id]`
+
+```lsl title="How to use" frame="terminal"
+list result = llGetExperienceDetails(NULL_KEY);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+   {
+       touch_start(integer total_number)
+       {
+           key xp = "9170c22b-f445-ea5d-89fa-0f2f1e144f04";
+           llOwnerSay(llDumpList2String(llGetExperienceDetails(xp), "\n"));
+           // Prints:
+           // Linden Realms
+           // id
+           // status msg
+
+           llOwnerSay(llDumpList2String(llGetExperienceDetails(NULL_KEY), "\n"));
+           // Print nothing if not associated with an XP or info about the associated experience
+       }
+   }
+```
+
+</details>
+
+## History
+
+- [BUG-7048](https://jira.secondlife.com/browse/BUG-7048) - [llGetExperienceDetails](/functions/llGetExperienceDetails/) returns 4 for `state` and "operation not permitted" for `state_message` while over mainland parcels that have the experience allowed.
+
+## Additional wiki content
+
+[Category:Experience Tools](https://wiki.secondlife.com/wiki/Category:Experience_Tools)
+
+## See also
+
+### Functions
+
+- [llAgentInExperience](/functions/llAgentInExperience/)
+
+<WikiSource />

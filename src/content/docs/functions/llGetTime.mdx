@@ -1,0 +1,189 @@
+---
+title: "llGetTime"
+slug: "functions/llGetTime"
+category: functions
+source:
+  wiki: "LlGetTime"
+  url: https://wiki.secondlife.com/wiki/LlGetTime
+  revision: 1218600
+  date: 2026-01-31
+  contributor: "Tapple Gao"
+  raw: /wiki-source/llgettime-5053a612.txt
+  license: "Content from the Second Life Wiki article LlGetTime (revision 1218600, 2026-01-31), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetTime" description />
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is script time in seconds with subsecond precision since the script started, was last reset, or call to either [llResetTime](/functions/llResetTime/) or [llGetAndResetTime](/functions/llGetAndResetTime/).
+
+```lsl title="How to use" frame="terminal"
+float result = llGetTime();
+```
+
+## Specification
+
+Script time matches normal time, it is unaffected by time dilation. For example, if you call [llResetTime](/functions/llResetTime/) on two objects in separate simulators at the same time, and later call `llGetTime` on both at the same time, their values will be equal regardless of differences in dilation.
+
+## Caveats
+
+- Script time is the amount of real-world time that the script has been in a running state. It is unaffected by time dilation, but it does not count time while the script is suspended, the user is offline (when in an attachment), the object is in inventory rather than rezzed, etc.
+- Script time resets when...
+- Script reset (user or [llResetScript](/functions/llResetScript/) or [llResetOtherScript](/functions/llResetOtherScript/))
+- Call to either [llResetTime](/functions/llResetTime/) or [llGetAndResetTime](/functions/llGetAndResetTime/)
+- Due to (32 bit) floating point number limitations, the accuracy of this function is 1/<sub>64</sub>sec up to ~3 days, 1/<sub>32</sub>sec up to ~6 days, etc... doubling each time, e.g. it's only 1 second at ~194 days. Use [llResetTime](/functions/llResetTime/) or [llGetAndResetTime](/functions/llGetAndResetTime/) whenever practical to maintain the accuracy you require:
+
+<table>
+	<caption>Floating Point Precision Thesholds</caption>
+	<tr>
+		<th>Precision</th>
+		<th>Up to Seconds</th>
+		<th>Hours</th>
+		<th>Days</th>
+	</tr>
+	<tr>
+		<td>0.016=2<sup>-6</sup></td>
+		<td>262144=2<sup>18</sup></td>
+		<td>72.82</td>
+		<td>3.03</td>
+	</tr>
+	<tr>
+		<td>0.022=<sup>1</sup>/<sub>45</sub></td>
+		<td colspan="3">1 simulator frame</td>
+	</tr>
+	<tr>
+		<td>0.031=2<sup>-5</sup></td>
+		<td>524288=2<sup>19</sup></td>
+		<td>145.63</td>
+		<td>6.06</td>
+	</tr>
+	<tr>
+		<td>0.063=2<sup>-4</sup></td>
+		<td>1048576=2<sup>20</sup></td>
+		<td>291.27</td>
+		<td>12.13</td>
+	</tr>
+	<tr>
+		<td>0.125=2<sup>-3</sup></td>
+		<td>2097152=2<sup>21</sup></td>
+		<td>582.54</td>
+		<td>24.27</td>
+	</tr>
+	<tr>
+		<td>0.250=2<sup>-2</sup></td>
+		<td>4194304=2<sup>22</sup></td>
+		<td>1165.08</td>
+		<td>48.54</td>
+	</tr>
+	<tr>
+		<td>0.500=2<sup>-1</sup></td>
+		<td>8388608=2<sup>23</sup></td>
+		<td>2330.16</td>
+		<td>97.09</td>
+	</tr>
+	<tr>
+		<td>1.000=2<sup>-0</sup></td>
+		<td>16777216=2<sup>24</sup></td>
+		<td>4660.33</td>
+		<td>194.18</td>
+	</tr>
+</table>
+
+- Note that this precision caveat does not apply to scripts written in SLua, only to LSL scripts. In SLua:
+- the timer precision is 64-bit, and will maintain 1/<sub>64</sub>sec precision for ~4.4million years.
+- [llResetTime](/functions/llResetTime/) and [llGetAndResetTime](/functions/llGetAndResetTime/) have been removed
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default {
+    state_entry()
+    {
+        llResetTime();
+    }
+    touch_start(integer num_touch)
+    {
+        float time = llGetTime(); //Instead getting, and then resetting the time, we could use llGetAndResetTime() to accomplish the same thing.
+        llResetTime();
+        llSay(0,(string)time + " seconds have elapsed since the last touch." );
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-6, 12-22}
+// Distinguish between a single click and a double click
+
+float gHoldTime;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        float now = llGetTime();
+        if (now - gHoldTime < 0.3)
+        {
+            llSay(PUBLIC_CHANNEL,"Double clicked");
+            // Trigger one sequence of actions
+        }
+        else
+        {
+            llSetTimerEvent(0.32);
+        }
+        gHoldTime = now;
+    }
+
+    timer()
+    {
+        llSetTimerEvent(0.0);
+        if (llGetTime()-gHoldTime > 0.3)
+        {
+            llSay(PUBLIC_CHANNEL,"Single clicked.");
+            // Trigger a different sequence of actions
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl
+//  To do time-dependant loops of whatever:
+//  for example move 2 meters within 5.0 seconds
+
+float time = 5.0;
+float i;
+llResetTime();
+do
+{
+    i = llGetTime()/time;
+    // move2meters*i
+}
+while (llGetTime() < time);
+```
+
+</details>
+
+## Additional wiki content
+
+`{{Issues/SVC-3293}}`
+
+## See also
+
+### Functions
+
+- [llResetTime](/functions/llResetTime/)
+- [llGetAndResetTime](/functions/llGetAndResetTime/)
+- [llGetRegionTimeDilation](/functions/llGetRegionTimeDilation/)
+
+<WikiSource />

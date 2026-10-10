@@ -1,0 +1,79 @@
+---
+title: "llList2List"
+slug: "functions/llList2List"
+category: functions
+source:
+  wiki: "LlList2List"
+  url: https://wiki.secondlife.com/wiki/LlList2List
+  revision: 1217793
+  date: 2024-12-07
+  contributor: "Quinn Elara"
+  raw: /wiki-source/lllist2list-4d3ce195.txt
+  license: "Content from the Second Life Wiki article LlList2List (revision 1217793, 2024-12-07), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llList2List" description />
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) that is a slice of **src** from `start` to `end`.
+
+```lsl title="How to use" frame="terminal"
+list result = llList2List([], 0, 0);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+list numbers = [1, 2, 3, 4, 5];
+default
+{
+    state_entry()
+    {
+        integer index = llListFindList(numbers, [3]);
+        if (index != -1)
+        {
+            list three_four = llList2List(numbers, index, index + 1);
+            llOwnerSay(llDumpList2String(three_four, ","));
+            // Object: 3,4
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        //as shown below, there is no way to achieve a "wraparound" order of list elements [8,9,0,1]
+
+        list NUMBERS = [0,1,2,3,4,5,6,7,8,9];
+        list L2L;
+        L2L = llList2List(NUMBERS, 8, 1); // [0,1,8,9]
+        L2L = llList2List(NUMBERS, 8,-9); // [0,1,8,9]
+        L2L = llList2List(NUMBERS,-2,-9); // [0,1,8,9]
+        L2L = llList2List(NUMBERS,-2, 1); // [0,1,8,9]
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llList2ListStrided](/functions/llList2ListStrided/) — Similar function for strided lists.
+- [llDeleteSubList](/functions/llDeleteSubList/)
+- [llListInsertList](/functions/llListInsertList/)
+- [llListReplaceList](/functions/llListReplaceList/)
+
+<WikiSource />

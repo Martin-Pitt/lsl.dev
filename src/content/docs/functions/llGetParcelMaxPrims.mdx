@@ -1,0 +1,60 @@
+---
+title: "llGetParcelMaxPrims"
+slug: "functions/llGetParcelMaxPrims"
+category: functions
+source:
+  wiki: "LlGetParcelMaxPrims"
+  url: https://wiki.secondlife.com/wiki/LlGetParcelMaxPrims
+  revision: 1204810
+  date: 2016-11-01
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetparcelmaxprims-1263f690.txt
+  license: "Content from the Second Life Wiki article LlGetParcelMaxPrims (revision 1204810, 2016-11-01), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetParcelMaxPrims" description />
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is the maximum combined [land impact](http://community.secondlife.com/t5/English-Knowledge-Base/Calculating-land-impact/ta-p/974163) allowed for objects on the parcel at **pos**.
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetParcelMaxPrims(ZERO_VECTOR, 0);
+```
+
+## Specification
+
+If **sim_wide** is...
+
+- `{{#var:FALSE}}` then the return is the maximum land impact supported by the parcel.
+- *not* `{{#var:FALSE}}` then the return is the total land impact supported by all land in the region owned by the parcel owner.
+
+## Caveats
+
+- If there is an Object Bonus for the region, the value returned may be more than the region's total limit.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    touch_start(integer total_number)
+    {
+        llSay(0, "The total land impact of objects rezzed on this parcel is "
+             +(string)llGetParcelPrimCount(llGetPos(), PARCEL_COUNT_TOTAL, FALSE) +", of "
+             +(string)llGetParcelMaxPrims(llGetPos(), FALSE) + " allowed.");
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetParcelPrimCount](/functions/llGetParcelPrimCount/)
+
+<WikiSource />

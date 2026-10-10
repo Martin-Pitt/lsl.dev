@@ -1,0 +1,321 @@
+---
+title: "dataserver"
+slug: "events/dataserver"
+category: events
+source:
+  wiki: "Dataserver"
+  url: https://wiki.secondlife.com/wiki/Dataserver
+  revision: 1216564
+  date: 2024-04-30
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/dataserver-29a160ef.txt
+  license: "Content from the Second Life Wiki article Dataserver (revision 1216564, 2024-04-30), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="dataserver" description />
+
+Triggered when task receives asynchronous data
+
+```lsl title="How to use" frame="terminal"
+dataserver(key queryid, string data)
+{
+
+}
+```
+
+## Specification
+
+<table>
+	<tr>
+		<th>Function</th>
+		<th colspan="2">Input</th>
+		<th>Decode</th>
+		<th colspan="4">Description</th>
+	</tr>
+	<tr>
+		<td colspan="3">[llGetNotecardLine](/functions/llGetNotecardLine/)</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string)</td>
+		<td colspan="4">The line in the requested notecard, limited to 255 bytes.<br />If [EOF](/constants/EOF/) the line requested is past the end of the notecard.</td>
+	</tr>
+	<tr>
+		<td colspan="3">[llGetNumberOfNotecardLines](/functions/llGetNumberOfNotecardLines/)</td>
+		<td>([integer](https://wiki.secondlife.com/wiki/integer))</td>
+		<td colspan="4">The number of lines in the notecard requested.</td>
+	</tr>
+	<tr>
+		<td rowspan="7">[llRequestAgentData](/functions/llRequestAgentData/) `{{#if: {{#vardefine:InsertRows|7}} }}`</td>
+		<td>[DATA_ONLINE](/constants/DATA_ONLINE/)</td>
+		<td>1</td>
+		<td>([integer](https://wiki.secondlife.com/wiki/integer)) `boolean`</td>
+		<td colspan="4">If the requested agent is online</td>
+	</tr>
+	<tr>
+		<td>[DATA_NAME](/constants/DATA_NAME/)</td>
+		<td>2</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string)</td>
+		<td colspan="4">The requested agent's [legacy name](https://wiki.secondlife.com/wiki/Category:LSL_Avatar/Name)</td>
+	</tr>
+	<tr>
+		<td>[DATA_BORN](/constants/DATA_BORN/)</td>
+		<td>3</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string)</td>
+		<td colspan="4">The account creation/"born on" date as a string in an ISO 8601 format of YYYY-MM-DD.</td>
+	</tr>
+	<tr>
+		<td>[DATA_RATING](/constants/DATA_RATING/)</td>
+		<td>4</td>
+		<td>[llCSV2List](/functions/llCSV2List/)()</td>
+		<td colspan="4">**Deprecated**: Returns \[0, 0, 0, 0, 0, 0\]<br />Used to return: \[pos_behavior, neg_behavior, pos_appearance, neg_appearance, pos_building, neg_building\]</td>
+	</tr>
+	<tr>
+		<td rowspan="3">[DATA_PAYINFO](/constants/DATA_PAYINFO/)</td>
+		<td rowspan="3">8</td>
+		<td rowspan="3">([integer](https://wiki.secondlife.com/wiki/integer)) `mask`</td>
+		<th colspan="3">Flag</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td colspan="2">[PAYMENT_INFO_ON_FILE](/constants/PAYMENT_INFO_ON_FILE/)</td>
+		<td>0x1</td>
+		<td>If payment info is on file.</td>
+	</tr>
+	<tr>
+		<td colspan="2">[PAYMENT_INFO_USED](/constants/PAYMENT_INFO_USED/)</td>
+		<td>0x2</td>
+		<td>If payment info has been used.</td>
+	</tr>
+	<tr>
+		<td colspan="3">[llRequestDisplayName](/functions/llRequestDisplayName/)</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string)</td>
+		<td colspan="4">The agent's display name</td>
+	</tr>
+	<tr>
+		<td colspan="3">[llRequestUsername](/functions/llRequestUsername/)</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string)</td>
+		<td colspan="4">The agent's username (legacy format: "first.last")</td>
+	</tr>
+	<tr>
+		<td>[llRequestUserKey](/functions/llRequestUserKey/)</td>
+		<td>string name</td>
+		<td></td>
+		<td>[key](https://wiki.secondlife.com/wiki/key)</td>
+		<td colspan="4">The agent's unique ID.</td>
+	</tr>
+	<tr>
+		<td rowspan="1">[llRequestInventoryData](/functions/llRequestInventoryData/) `{{#if: {{#vardefine:InsertRows|1}} }}`</td>
+		<td colspan="2">Landmark</td>
+		<td>([vector](https://wiki.secondlife.com/wiki/vector))</td>
+		<td colspan="4">The vector [data](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region) received by [dataserver](/events/dataserver/) is a global position *as an offset* from the current region's origin (`<0,0,0>`). To obtain the absolute [global](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#global) position of a landmark, add [llGetRegionCorner](/functions/llGetRegionCorner/)() to the vector.</td>
+	</tr>
+	<tr>
+		<td rowspan="13">[llRequestSimulatorData](/functions/llRequestSimulatorData/) `{{#if: {{#vardefine:InsertRows|13}} }}`</td>
+		<td>[DATA_SIM_POS](/constants/DATA_SIM_POS/)</td>
+		<td>5</td>
+		<td>([vector](https://wiki.secondlife.com/wiki/vector))</td>
+		<td colspan="4">The regions [global position](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#global).</td>
+	</tr>
+	<tr>
+		<td rowspan="7">[DATA_SIM_STATUS](/constants/DATA_SIM_STATUS/)</td>
+		<td rowspan="7">6</td>
+		<td rowspan="7">[string](https://wiki.secondlife.com/wiki/string)</td>
+		<th>Value</th>
+		<th colspan="3">Description</th>
+	</tr>
+	<tr>
+		<td>"up"</td>
+		<td colspan="3">region currently up and running</td>
+	</tr>
+	<tr>
+		<td>"down"</td>
+		<td colspan="3">region currently down</td>
+	</tr>
+	<tr>
+		<td>"starting"</td>
+		<td colspan="3">region currently starting</td>
+	</tr>
+	<tr>
+		<td>"stopping"</td>
+		<td colspan="3">region currently stopping</td>
+	</tr>
+	<tr>
+		<td>"crashed"</td>
+		<td colspan="3">region has crashed</td>
+	</tr>
+	<tr>
+		<td>"unknown"</td>
+		<td colspan="3">region status unknown or unknown region</td>
+	</tr>
+	<tr>
+		<td rowspan="5">[DATA_SIM_RATING](/constants/DATA_SIM_RATING/)</td>
+		<td rowspan="5">7</td>
+		<td rowspan="5">[string](https://wiki.secondlife.com/wiki/string)</td>
+		<th>Value</th>
+		<th colspan="3">Maturity rating</th>
+	</tr>
+	<tr>
+		<td>"PG"</td>
+		<td colspan="3">`{{mrg}}`</td>
+	</tr>
+	<tr>
+		<td>"MATURE"</td>
+		<td colspan="3">`{{mrm}}`</td>
+	</tr>
+	<tr>
+		<td>"ADULT"</td>
+		<td colspan="3">`{{mra}}`</td>
+	</tr>
+	<tr>
+		<td>"UNKNOWN"</td>
+		<td colspan="3">rating or region unknown</td>
+	</tr>
+	<tr>
+		<td colspan="3">[llCreateKeyValue](/functions/llCreateKeyValue/)</td>
+		<td>[llCSV2List](/functions/llCSV2List/)()</td>
+		<td colspan="4">`{{LSL Function/KeyValue|k|v|dataserver|value=value|d2_type=string|d2_name=value|dataserver=*}}`</td>
+	</tr>
+	<tr>
+		<td colspan="3">[llDataSizeKeyValue](/functions/llDataSizeKeyValue/)</td>
+		<td>[llCSV2List](/functions/llCSV2List/)()</td>
+		<td colspan="4">`{{LSL Function/KeyValue|d2_type=integer|d2_name=used|d2_desc=Number of bytes used|d3_type=integer|d3_name=quota|d3_desc=Number of bytes the key-store can utilize|dataserver=*}}`</td>
+	</tr>
+	<tr>
+		<td colspan="3">[llDeleteKeyValue](/functions/llDeleteKeyValue/)</td>
+		<td>[llCSV2List](/functions/llCSV2List/)()</td>
+		<td colspan="4">`{{LSL Function/KeyValue|k|value=value|d2_type=string|d2_name=value|dataserver=*}}`</td>
+	</tr>
+	<tr>
+		<td colspan="3">[llKeyCountKeyValue](/functions/llKeyCountKeyValue/)</td>
+		<td>[llCSV2List](/functions/llCSV2List/)()</td>
+		<td colspan="4">`{{LSL Function/KeyValue|d2_type=integer|d2_name=pairs|d2_desc=number of keys-value pairs in the key-value store|dataserver=*}}`</td>
+	</tr>
+	<tr>
+		<td colspan="3">[llKeysKeyValue](/functions/llKeysKeyValue/)</td>
+		<td>[llCSV2List](/functions/llCSV2List/)()</td>
+		<td colspan="4">`{{LSL Function/KeyValue|dl_name=keys |dl_desc=A list of keys ([[String|strings]]) used in the key-value store |dl_hover=A list of keys (strings) used in the key-value store|dataserver=*}}`</td>
+	</tr>
+	<tr>
+		<td colspan="3">[llReadKeyValue](/functions/llReadKeyValue/)</td>
+		<td>[llCSV2List](/functions/llCSV2List/)()</td>
+		<td colspan="4">`{{LSL Function/KeyValue|k|value=value|d2_type=string|d2_name=value|dataserver=*}}`</td>
+	</tr>
+	<tr>
+		<td colspan="3">[llUpdateKeyValue](/functions/llUpdateKeyValue/)</td>
+		<td>[llCSV2List](/functions/llCSV2List/)()</td>
+		<td colspan="4">`{{LSL Function/KeyValue|k|v|value=value|d2_type=string|d2_name=value|dataserver=*}}`</td>
+	</tr>
+</table>
+
+## Caveats
+
+- Dataserver requests will trigger **dataserver** events in all scripts within the same prim where the request was made.
+- If there are multiple scripts with **dataserver** events in the same prim, always use the **queryid** key to determine which answer is being received.
+- **dataserver** events will not be triggered in scripts contained in other prims in the same linked object.
+- When dealing with multiple dataserver queries it is possible to receive the responses in any order, if you receive a response at all. It is good practise to maintain variables (or a list) with keys of all data server events you are waiting for, then use **queryid**
+- When using `if (dKey == queryid)`, or similar, in your dataserver events it is important to remember that changes to `dKey` will cause your script to ignore any requests that were made earlier that have not yet arrived; consider using more than one variable (or a list) if such cases may cause desired events to be ignored.
+- When using a list to track events, it is important to periodically check the list for requests that have taken too long and either resend them, or remove them (see examples), as it is possible for any dataserver request to fail, usually due to high traffic or the script receiving too many other events.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-12}
+// Example script handling sequential data server events (notecard reading)
+
+string notecardNameOrKey = "name or key of the notecard goes here";
+key notecardQueryId;
+integer notecardLine;//  first notecard line is 0, so we don't have to set notecardLine = 1 here
+
+default
+{
+    state_entry()
+    {
+        llSay(0, "Reading notecard...");
+        notecardQueryId = llGetNotecardLine(notecardNameOrKey, notecardLine);
+    }
+
+    dataserver(key query_id, string data)
+    {
+        if (query_id == notecardQueryId)
+        {
+            if (data == EOF)//  we have reached the EOF (end of file)
+            {
+                llSay(0, "No more lines in notecard, read " + (string) notecardLine + " lines.");
+            }
+            else
+            {
+            //  increment line index first, both for line number reporting, and for reading the next line
+                ++notecardLine;
+                llSay(0, "Line " + (string) notecardLine + ": " + data);
+                notecardQueryId = llGetNotecardLine(notecardNameOrKey, notecardLine);
+            }
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-12, 33-46}
+// Example script handling multiple data server events
+
+list events;
+integer stride = 3;
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        events += [llRequestDisplayName(id), id, llGetUnixTime()];
+        llSetTimerEvent(35.0);
+    }
+
+    dataserver(key request_id, string data)
+    {
+        integer index = llListFindList(events, [ request_id] );
+        // The chance of getting a match on an avatar UUID instead of the dataserver event key, is less than 1 in 2^100
+
+        if (~index )
+        {
+            key id = llList2Key(events, index + 1);
+            llRegionSayTo(id, 0, "Hello " + data + "!");
+
+            events = llDeleteSubList(events, index, index + stride - 1);
+
+            if (events == [])
+                llSetTimerEvent(0);
+        }
+    }
+
+    timer()
+    {
+        integer length = (events != []);
+
+        // Loop until we find a valid entry (as all entries after will be valid too)
+        while (length && llList2Integer(events, 2) < (llGetUnixTime() - 30))
+        {
+            events = llDeleteSubList(events, 0, stride - 1);
+            length -= stride;
+        }
+
+        if (events == [])
+            llSetTimerEvent(0);
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-6831 (bug): llRequestAgentData with DATA_ONLINE parameter has a delay of up to 10 minutes in reporting offline status
+- SVC-2596 (bug): Script dataserver events become permanently blocked until sim restart
+
+<WikiSource />

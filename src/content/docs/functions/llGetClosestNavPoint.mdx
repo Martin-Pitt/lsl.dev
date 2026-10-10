@@ -1,0 +1,139 @@
+---
+title: "llGetClosestNavPoint"
+slug: "functions/llGetClosestNavPoint"
+category: functions
+source:
+  wiki: "LlGetClosestNavPoint"
+  url: https://wiki.secondlife.com/wiki/LlGetClosestNavPoint
+  revision: 1194161
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetclosestnavpoint-c8a6fa69.txt
+  license: "Content from the Second Life Wiki article LlGetClosestNavPoint (revision 1194161, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, ConstantGroup, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetClosestNavPoint" />
+
+Used to get a point on the navmesh that is the closest point to **point**.
+
+If an option is not explicitly set, the default value for that option is used.
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) containing a single vector which is the closest point on the navmesh to the point provided or an empty list.
+
+```lsl title="How to use" frame="terminal"
+list result = llGetClosestNavPoint(ZERO_VECTOR, []);
+```
+
+## Specification
+
+<ConstantGroup name="GetClosestNavPointParam" />
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [GCNP_RADIUS](/constants/GCNP_RADIUS/) | integer | `0` | Limits how far out to search for a navigation point. |
+| [GCNP_STATIC](/constants/GCNP_STATIC/) | integer | `1` | Specifies whether the test should use the static or dynamic nav mesh.  In the static case, all dynamic obstacles are ignored. |
+| [CHARACTER_TYPE](/constants/CHARACTER_TYPE/) | integer | `6` | Filters nav points by eliminating nav mesh faces which are 0% walkable for the specified character type.  In the default CHARACTER_TYPE_NONE case, all nav mesh faces are included. |
+
+<table>
+	<tr>
+		<th>Options</th>
+		<th>V</th>
+		<th>Parameters</th>
+		<th>Default</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>\[ [float](https://wiki.secondlife.com/wiki/float) `distance` \]</td>
+		<td>\[ `20.0` \]</td>
+		<td>Limits how far out to search for a navigation point.</td>
+	</tr>
+	<tr>
+		<td>\[ [integer](https://wiki.secondlife.com/wiki/integer) `use_static_mesh` \]</td>
+		<td>\[ `FALSE` \]</td>
+		<td>Specifies whether the test should use the static or dynamic nav mesh. In the static case, all dynamic obstacles are ignored.</td>
+	</tr>
+	<tr>
+		<td>\[ [integer](https://wiki.secondlife.com/wiki/integer) `type` \]</td>
+		<td>\[ `CHARACTER_TYPE_NONE` \]</td>
+		<td>Filters nav points by eliminating nav mesh faces which are 0% walkable for the specified character type. In the default [CHARACTER_TYPE_NONE](/constants/CHARACTER_TYPE_NONE/) case, all nav mesh faces are included.</td>
+	</tr>
+</table>
+
+## Caveats
+
+- There is no guarantee that a path exists from your current location to the returned point.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-23, 29-34}
+create_character()
+{
+//  Clear any previous character behaviors
+    llDeleteCharacter();
+
+//  default speed is 20
+    llCreateCharacter([CHARACTER_DESIRED_SPEED, 10.0]);
+    llWanderWithin(llGetPos(), <64.0, 64.0, 2.0>, []);
+}
+
+default
+{
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        create_character();
+    }
+
+    touch_start(integer num_detected)
+    {
+        vector currentPos = llGetPos();
+        list points = llGetClosestNavPoint(currentPos, [GCNP_RADIUS, 10.0] );
+
+        if (!llGetListLength(points))
+            return;
+
+        llSay(0, "current position " + (string)currentPos
+            + " and closest nav point " + (string)llList2Vector(points, 0) );
+    }
+}
+```
+
+</details>
+
+## Notes
+
+Using the method incurs a one frame script sleep and the call can be extremely expensive. It is intended to be used in response to a path_update message indicating an inability to reach a requested destination (e.g., because the character or the destination is off the mesh).
+
+## History
+
+Date of Release [31/07/2012](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-31-262785)
+
+## See also
+
+### Functions
+
+- [llCreateCharacter](/functions/llCreateCharacter/)
+- [llDeleteCharacter](/functions/llDeleteCharacter/)
+- [llEvade](/functions/llEvade/)
+- [llExecCharacterCmd](/functions/llExecCharacterCmd/)
+- [llGetClosestNavPoint](/functions/llGetClosestNavPoint/)
+- [llFleeFrom](/functions/llFleeFrom/)
+- [llNavigateTo](/functions/llNavigateTo/)
+- [llPatrolPoints](/functions/llPatrolPoints/)
+- [llPursue](/functions/llPursue/)
+- [llUpdateCharacter](/functions/llUpdateCharacter/)
+- [llWanderWithin](/functions/llWanderWithin/)
+
+### Events
+
+- [path_update](/events/path_update/)
+
+<WikiSource />

@@ -1,0 +1,72 @@
+---
+title: "llResetOtherScript"
+slug: "functions/llResetOtherScript"
+category: functions
+source:
+  wiki: "LlResetOtherScript"
+  url: https://wiki.secondlife.com/wiki/LlResetOtherScript
+  revision: 1194467
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llresetotherscript-1540d5b1.txt
+  license: "Content from the Second Life Wiki article LlResetOtherScript (revision 1194467, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llResetOtherScript" />
+
+Resets script `name`.
+
+On script reset...
+
+- The current event/function is exited without further execution or return.
+- All global variables are set to their defaults
+- The event queue is cleared, and recurring events are stopped.
+- The [default](https://wiki.secondlife.com/wiki/default) state is set as the active state
+- If it has a [state_entry](/events/state_entry/) event, then it is queued.
+
+```lsl title="How to use" frame="terminal"
+llResetOtherScript("");
+```
+
+## Caveats
+
+- If the script is not running, this call has no effect, even after the script is set running again.
+- A script can reset itself with this function (not just other scripts).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-12}
+// the other script must be within the same prim and has to be running
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        llResetTime();
+    }
+
+    touch_end(integer num_detected)
+    {
+        if (llGetTime() < 3.0)
+            llSay(0, "Please click & hold for at least 3.0 seconds.");
+        else
+            llResetOtherScript("second");
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llResetScript](/functions/llResetScript/)
+- [llGetScriptState](/functions/llGetScriptState/)
+- [llSetScriptState](/functions/llSetScriptState/)
+
+<WikiSource />

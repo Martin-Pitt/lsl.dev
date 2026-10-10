@@ -1,0 +1,71 @@
+---
+title: "llSetLocalRot"
+slug: "functions/llSetLocalRot"
+category: functions
+source:
+  wiki: "LlSetLocalRot"
+  url: https://wiki.secondlife.com/wiki/LlSetLocalRot
+  revision: 1198713
+  date: 2016-01-03
+  contributor: "Nava Muni"
+  raw: /wiki-source/llsetlocalrot-3714582c.txt
+  license: "Content from the Second Life Wiki article LlSetLocalRot (revision 1198713, 2016-01-03), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetLocalRot" description />
+
+Sets the rotation of a child prim relative to the root prim
+
+```lsl title="How to use" frame="terminal"
+llSetLocalRot(ZERO_ROTATION);
+```
+
+## Examples
+
+<details open>
+<summary>Drop this script into a *child* prim to rotate it in 1 degree increments on each [touch](/events/touch/).</summary>
+
+```lsl collapse={1-11}
+rotation rot_xyzs;
+
+default
+{
+    state_entry()
+    {
+        vector xyz_angles = <0,1.0,0>; // This defines a 1 degree change on the Y axis
+        vector angles_in_radians = xyz_angles*DEG_TO_RAD; // Change to radians
+        rot_xyzs = llEuler2Rot(angles_in_radians); // Convert to a rotation
+    }
+
+    touch_start(integer s)
+    {
+        llSetLocalRot(llGetLocalRot()*rot_xyzs); // Apply the increment rotation to the prim's current rotation ...
+
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+//-- this is an equivalent call from any prim in the same link set
+llSetLinkPrimitiveParamsFast( target_prim, [PRIM_ROT_LOCAL, rot] );
+//-- where "target_prim" is the link number of the prim you want to set the local rotation of
+```
+
+## See also
+
+### Functions
+
+- [llGetRot](/functions/llGetRot/)
+- [llGetLocalRot](/functions/llGetLocalRot/)
+- [llGetRootRotation](/functions/llGetRootRotation/)
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
+- [llSetRot](/functions/llSetRot/)
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+
+<WikiSource />

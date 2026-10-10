@@ -1,0 +1,104 @@
+---
+title: "PRIM_GLOW"
+slug: "constants/PRIM_GLOW"
+category: constants
+source:
+  wiki: "PRIM GLOW"
+  url: https://wiki.secondlife.com/wiki/PRIM_GLOW
+  revision: 1194680
+  date: 2015-01-23
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/prim-glow-deb743fd.txt
+  license: "Content from the Second Life Wiki article PRIM GLOW (revision 1194680, 2015-01-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="PRIM_GLOW" description />
+
+`PRIM_GLOW` is used to get or set the glow status of the `face`. Use the integer number 25 if the compiler rejects the named constant.
+
+## Examples
+
+<details open>
+<summary>basic syntax to set glow</summary>
+
+```lsl
+// adjust as desired .3 to a float number from 0 to 1.0 inclusive
+// adjust as desired ALL_SIDES to specific prim faces if desired
+
+llSetPrimitiveParams( [ PRIM_GLOW, ALL_SIDES, .3 ] ) ;
+```
+
+</details>
+
+<details>
+<summary>basic syntax to get glow status</summary>
+
+```lsl
+list mylist = llGetPrimitiveParams([ PRIM_GLOW,ALL_SIDES] );
+llSay(0, llList2CSV(mylist));
+
+//Assuming for this example that all sides are set to the same float of .3
+//In a box, which has 6 sides, the above example returns 0.300000, 0.300000, 0.300000, 0.300000, 0.300000, 0.300000
+//In a prism, which has 5 sides, returns 0.300000, 0.300000, 0.300000, 0.300000, 0.300000
+//In a sphere, which has only 1 side (as it were), returns 0.300000
+//change ALL_SIDES to a specific prim face if desired.
+```
+
+</details>
+
+```lsl
+//Each time the prim is touched, the intensity of the glow is increased (until it maxes out and cycles back to zero).
+integer steps = 10;
+integer counter = 0;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        llSetPrimitiveParams( [ PRIM_GLOW, ALL_SIDES,  counter / (steps - 1.0) ]);
+        counter = (counter + 1) % steps;
+    }
+}
+```
+
+```lsl
+//Each time the prim is touched, the intensity of the glow is decreased (until it hits zero and cycles back to one).
+integer steps = 10;
+integer counter = 0;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        llSetPrimitiveParams( [ PRIM_GLOW, ALL_SIDES,  counter / (steps - 1.0) ]);
+        counter = (counter + steps - 1) % steps;
+    }
+}
+```
+
+## History
+
+Added in `{{SVN|337|rev=81900|branch=Release|ver=1.20.0|anchor=file6|date=Monday, 10 March 2008}}`
+
+## Additional wiki content
+
+&lt;onlyinclude>`{{#if: {{#vardefine:p_intensity_desc|ranges from 0.0 to 1.0}} {{#vardefine:return|[&nbsp;{{HoverText|0.0|float intensity}}&nbsp;]}} {{#vardefine:glow_const|{{LSL Const|PRIM_GLOW|integer|25|c=Used to {{GetSet|{{{1|}}}|get|set|/}} the glow of a prim's face}}}} {{#vardefine:facetable|{{#var:facetable}} {{!}}- {{!}} [ {{#var:glow_const}} ] {{!}} [&nbsp;{{HoverText|0.0|float intensity}}&nbsp;] }} }}`&lt;/onlyinclude>`{{#if: {{LSL_Function/face|face|{{#var:glow_const}}|!footer=*|return=[&nbsp;{{HoverText|0.0|float intensity}}&nbsp;]}} }}`
+
+## See also
+
+### Constants
+
+| Constant | Type | Value | Description |
+| --- | --- | --- | --- |
+| [CHANGED_TEXTURE](/constants/CHANGED_TEXTURE/) |  |  |  |
+
+### Functions
+
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+
+### Events
+
+- [changed](/events/changed/)
+
+<WikiSource />

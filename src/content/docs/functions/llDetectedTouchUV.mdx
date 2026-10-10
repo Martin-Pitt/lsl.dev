@@ -1,0 +1,121 @@
+---
+title: "llDetectedTouchUV"
+slug: "functions/llDetectedTouchUV"
+category: functions
+source:
+  wiki: "LlDetectedTouchUV"
+  url: https://wiki.secondlife.com/wiki/LlDetectedTouchUV
+  revision: 1218591
+  date: 2026-01-14
+  contributor: "Nexii Malthus"
+  raw: /wiki-source/lldetectedtouchuv-3efa42e2.txt
+  license: "Content from the Second Life Wiki article LlDetectedTouchUV (revision 1218591, 2026-01-14), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDetectedTouchUV" />
+
+For the [touch](/categories/touch/) category of events only. The prim that was touched may not be the prim receiving the event, use [llDetectedLinkNumber](/functions/llDetectedLinkNumber/) to check for this; likewise you can use [llDetectedTouchFace](/functions/llDetectedTouchFace/) to determine which face was touched.
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) that is the texture coordinates for where the prim was touched. The `x` & `y` vector positions contain the horizontal (`u`) & vertical (`v`) texture coordinates respectively (`NoWrap: {{NoWrap|{{LSL_VR|{{LSLPT|u}}|{{LSLPT|v}}|0.0}}}}`). Like [llDetectedTouchST](/functions/llDetectedTouchST/), the interval of each component will be \[0.0, 1.0\] unless the texture repeats are set to a non-default value. Increasing or decreasing the texture repeats of the face will change this interval accordingly. Additionally, unlike with [llDetectedTouchST](/functions/llDetectedTouchST/), changing a texture's rotation will change the results of this function.
+
+[TOUCH_INVALID_TEXCOORD](/constants/TOUCH_INVALID_TEXCOORD/) is returned when the touch UV coordinates cannot be determined. See [Caveats](#caveats) for further details.
+
+```lsl title="How to use" frame="terminal"
+vector result = llDetectedTouchUV(0);
+```
+
+## Caveats
+
+- [TOUCH_INVALID_TEXCOORD](/constants/TOUCH_INVALID_TEXCOORD/) is returned when...
+- The avatar's viewer does not support face touch detection.
+- To check if face touch detection is supported check the return of [llDetectedTouchFace](/functions/llDetectedTouchFace/).
+- The touch has moved off the surface of the prim.
+- The touch happened too close to the edge of the face to determine a location.
+- The event triggered is not a [touch](/categories/touch/) event.
+- The vertical coordinate is flipped on a glTF mesh.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={9-14}
+default
+{
+    touch_start(integer total_number)
+    {
+        integer face = llDetectedTouchFace(0);
+        vector  touchUV   = llDetectedTouchUV(0);
+
+//      ZERO_VECTOR (<0.0, 0.0, 0.0> ... the origin) is in the bottom left corner of the texture
+//      touchUV.x goes across the texture from left to right
+//      touchUV.y goes up the texture from bottom to top
+
+        if (face == TOUCH_INVALID_FACE)
+            llWhisper(PUBLIC_CHANNEL, "Sorry, your viewer doesn't support touched faces.");
+        else if (touchUV == TOUCH_INVALID_TEXCOORD)
+            llWhisper(PUBLIC_CHANNEL, "Sorry, the touch position upon the texture could not be determined.");
+        else
+            llSay(PUBLIC_CHANNEL, "llDetectedTouchUV(" + (string)touchUV + ")"
+                    + "\ntouchUV.x = " + (string)touchUV.x
+                    + "\ntouchUV.y = " + (string)touchUV.y);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-5, 11-20}
+integer numberOfRows    = 12;
+integer numberOfColumns = 12;
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        vector touchUV = llDetectedTouchUV(0);
+
+//      ZERO_VECTOR (<0.0, 0.0, 0.0> ... the origin) is in the bottom left corner of the texture
+//      touchUV.x goes across the texture from left to right
+//      touchUV.y goes up the texture from bottom to top
+
+        integer columnIndex = (integer) (touchUV.x * numberOfColumns);
+        integer rowIndex    = (integer) (touchUV.y * numberOfRows);
+        integer cellIndex   = rowIndex * numberOfColumns + columnIndex;
+
+        llSay(PUBLIC_CHANNEL, "UV grid (" + (string)columnIndex + ", " + (string)rowIndex + ") --> cell " + (string)cellIndex);
+    }
+}
+```
+
+</details>
+
+## History
+
+- Introduced in `{{SVN|870|rev=92872|trunk=*|anchor=file14|date=Wednesday, 23 July 2008}}`.
+- Date of Release Server [29-08-2008](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Beta_Server/1.24#release-notes-for-second-life-beta-server-1-24-3-28august-29th-2c-2008-29)
+- Date of Release Client [16-10-2008](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.21)
+- Server support available in Second Life Server 1.24.7.98039, client support in Release Candidate viewer 1.21.4 (98167).
+
+## See also
+
+### Functions
+
+- [llDetectedLinkNumber](/functions/llDetectedLinkNumber/)
+- [llDetectedTouchFace](/functions/llDetectedTouchFace/)
+- [llDetectedTouchST](/functions/llDetectedTouchST/)
+- [llDetectedTouchPos](/functions/llDetectedTouchPos/)
+- [llDetectedTouchNormal](/functions/llDetectedTouchNormal/)
+- [llDetectedTouchBinormal](/functions/llDetectedTouchBinormal/)
+
+### Events
+
+- [touch_start](/events/touch_start/)
+- [touch](/events/touch/)
+- [touch_end](/events/touch_end/)
+
+<WikiSource />

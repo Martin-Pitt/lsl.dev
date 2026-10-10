@@ -1,0 +1,154 @@
+---
+title: "llDetectedTouchST"
+slug: "functions/llDetectedTouchST"
+category: functions
+source:
+  wiki: "LlDetectedTouchST"
+  url: https://wiki.secondlife.com/wiki/LlDetectedTouchST
+  revision: 1218590
+  date: 2026-01-14
+  contributor: "Nexii Malthus"
+  raw: /wiki-source/lldetectedtouchst-b0eed8a5.txt
+  license: "Content from the Second Life Wiki article LlDetectedTouchST (revision 1218590, 2026-01-14), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDetectedTouchST" />
+
+For the [touch](/categories/touch/) category of events only. The prim that was touched may not be the prim receiving the event, use [llDetectedLinkNumber](/functions/llDetectedLinkNumber/) to check for this; likewise, you can use [llDetectedTouchFace](/functions/llDetectedTouchFace/) to determine which face was touched.
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) that is the surface coordinates for where the prim was touched. The `x` & `y` vector positions contain the horizontal (`s`) & vertical (`t`) face coordinates respectively (`NoWrap: {{NoWrap|{{LSL_VR|{{LSLPT|s}}|{{LSLPT|t}}|0.0}}}}`). Each component is usually in the interval \[0.0, 1.0\] with the origin in the bottom left corner. With some mesh objects, values of less than 0.0 and higher than 1.0 have been observed.
+
+[TOUCH_INVALID_TEXCOORD](/constants/TOUCH_INVALID_TEXCOORD/) is returned when the surface coordinates cannot be determined. See [Caveats](#caveats) for further details.
+
+```lsl title="How to use" frame="terminal"
+vector result = llDetectedTouchST(0);
+```
+
+## Caveats
+
+- [TOUCH_INVALID_TEXCOORD](/constants/TOUCH_INVALID_TEXCOORD/) is returned when...
+- The avatar's viewer does not support face touch detection.
+- To check if face touch detection is supported check the return of [llDetectedTouchFace](/functions/llDetectedTouchFace/).
+- The touch has moved off the surface of the prim.
+- The touch happened too close to the edge of the face to determine a location.
+- The event triggered is not a [touch](/categories/touch/) event.
+- The vertical coordinate is flipped on a glTF mesh.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={9-14}
+default
+{
+    touch_start(integer total_number)
+    {
+        integer touchFace = llDetectedTouchFace(0);
+        vector  touchST   = llDetectedTouchST(0);
+
+//      ZERO_VECTOR (<0.0, 0.0, 0.0> ... the origin) is in the bottom left corner of the face
+//      touchST.x goes across the face from the left to the right
+//      touchST.y goes up the face from the bottom to the top
+
+        if (touchFace == -1)
+            llWhisper(PUBLIC_CHANNEL, "Sorry, your viewer doesn't support touched faces.");
+        else if (touchST == TOUCH_INVALID_TEXCOORD)
+            llWhisper(PUBLIC_CHANNEL, "Sorry, the touch position upon the face could not be determined.");
+        else
+            llSay(PUBLIC_CHANNEL, "llDetectedTouchST(0) = " + (string)touchST
+                    + "\ntouchST.x = " + (string)touchST.x
+                    + "\ntouchST.y = " + (string)touchST.y);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>The following script will assume an (imaginary) 12x12 grid over the face, and identify which square was touched by the user.</summary>
+
+```lsl collapse={1-5, 11-21}
+integer numberOfRows    = 12;
+integer numberOfColumns = 12;
+
+default
+{
+    touch_start(integer total_number)
+    {
+        vector  touchST     = llDetectedTouchST(0);
+
+//      ZERO_VECTOR (<0.0, 0.0, 0.0> ... the origin) is in the bottom left corner of the face
+//      touchST.x goes across the face from the left to the right
+//      touchST.y goes up the face from the bottom to the top
+
+        integer columnIndex = (integer) (touchST.x * numberOfColumns);
+        integer rowIndex    = (integer) (touchST.y * numberOfRows);
+        integer cellIndex   = (rowIndex * numberOfColumns) + columnIndex;
+
+        llSay(PUBLIC_CHANNEL, "ST grid (" + (string)columnIndex + ", " + (string)rowIndex
+                            + ") --> cell " + (string)cellIndex);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl collapse={1-10, 16-25}
+//  with friendly permission of Supremius Maximus
+//  who made the texture used in this script
+//
+//  click & hold the mouse while dragging across
+//  the face of the prim
+
+default
+{
+    touch(integer num_detected)
+    {
+        integer link    = llDetectedLinkNumber(0);
+        integer face    = llDetectedTouchFace(0);
+        vector  touchST = llDetectedTouchST(0);
+
+//      ZERO_VECTOR (<0.0, 0.0, 0.0> ... the origin) is in the bottom left corner of the face
+//      touchST.x goes across the face from the left to the right
+//      touchST.y goes across the face from the bottom to the top
+
+        string uuid = "23badbe7-6d8c-639b-0131-bb321f8e9db5";
+
+        llSetLinkPrimitiveParamsFast(link, [
+            PRIM_TEXTURE, face, uuid, <1.0, 1.0, 0.0>, touchST, 0,
+            PRIM_FULLBRIGHT, ALL_SIDES, TRUE]);
+    }
+}
+```
+
+</details>
+
+## History
+
+- Introduced in Viewer `{{SVN|870|rev=92872|branch=Release|anchor=file14|date=Wednesday, 23 July 2008}}`, Supported by Beta Server 1.24.0.93754 (Wenesday 6th August 2008), and viewer binary 1.20.15 (93532).
+- Date of Release Server [29-08-2008](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Beta_Server/1.24#release-notes-for-second-life-beta-server-1-24-3-28august-29th-2c-2008-29)
+- Date of Release Client [16-10-2008](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/1.21)
+
+## See also
+
+### Functions
+
+- [llDetectedLinkNumber](/functions/llDetectedLinkNumber/)
+- [llDetectedTouchFace](/functions/llDetectedTouchFace/)
+- [llDetectedTouchUV](/functions/llDetectedTouchUV/)
+- [llDetectedTouchPos](/functions/llDetectedTouchPos/)
+- [llDetectedTouchNormal](/functions/llDetectedTouchNormal/)
+- [llDetectedTouchBinormal](/functions/llDetectedTouchBinormal/)
+
+### Events
+
+- [touch_start](/events/touch_start/)
+- [touch](/events/touch/)
+- [touch_end](/events/touch_end/)
+
+<WikiSource />

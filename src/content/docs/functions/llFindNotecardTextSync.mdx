@@ -1,0 +1,61 @@
+---
+title: "llFindNotecardTextSync"
+slug: "functions/llFindNotecardTextSync"
+category: functions
+source:
+  wiki: "LlFindNotecardTextSync"
+  url: https://wiki.secondlife.com/wiki/LlFindNotecardTextSync
+  revision: 1218317
+  date: 2025-05-25
+  contributor: "Madi Melodious"
+  raw: /wiki-source/llfindnotecardtextsync-34f215e1.txt
+  license: "Content from the Second Life Wiki article LlFindNotecardTextSync (revision 1218317, 2025-05-25), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llFindNotecardTextSync" description />
+
+Returns a list of lines and columns where the search **pattern** is found in the notecard.
+
+Returns a list containing only [NAK](/constants/NAK/) if the notecard is not cached.
+
+```lsl title="How to use" frame="terminal"
+list result = llFindNotecardTextSync("", "", 0, 0, []);
+```
+
+## Specification
+
+Searches the text of a cached notecard for lines containing the given **pattern**. If the notecard is not in the cache, returns a list containing a single [NAK](/constants/NAK/), otherwise a list of matches of the **pattern** in the notecard. If no matches are found, or the notecard contains embedded items, an empty list is returned.
+
+Every match in the notecard is represented as a sequence of three integers:
+
+```lsl
+[integer row, integer column, integer length]
+```
+
+In other words the returned list has a stride of 3. A maximum of 64 matches are returned, resulting in a maximum list length of 192.
+
+If the notecard does not exist, returns a list containing a single [NAK](/constants/NAK/) and the script will shout an error on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) (but the script continues to run).
+
+If there is an error in the regular expression, returns an empty list and the script will shout an error on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/) (but the script continues to run).
+
+Notecards are cached into a fixed-size buffer, with the oldest (least-recently read) notecard getting removed first. It is not safe to assume a notecard has been previously cached. Data for a previously cached notecard may be dropped from the cache at any time, especially on a busy server.
+
+## Caveats
+
+- If notecard contains embedded inventory items (such as textures and landmarks), an empty list will be returned, regardless of the search string.
+- No more than 64 matches are returned.
+
+## Notes
+
+`{{LSL Regular Expressions}}`
+
+## See also
+
+### Functions
+
+- [llGetNumberOfNotecardLines](/functions/llGetNumberOfNotecardLines/)
+- [llGetNotecardLine](/functions/llGetNotecardLine/)
+- [llGetNotecardLineSync](/functions/llGetNotecardLineSync/)
+
+<WikiSource />

@@ -1,0 +1,71 @@
+---
+title: "llGetInventoryAcquireTime"
+slug: "functions/llGetInventoryAcquireTime"
+category: functions
+source:
+  wiki: "LlGetInventoryAcquireTime"
+  url: https://wiki.secondlife.com/wiki/LlGetInventoryAcquireTime
+  revision: 1216744
+  date: 2024-05-29
+  contributor: "Lou Netizen"
+  raw: /wiki-source/llgetinventoryacquiretime-03ace0b3.txt
+  license: "Content from the Second Life Wiki article LlGetInventoryAcquireTime (revision 1216744, 2024-05-29), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetInventoryAcquireTime" />
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) with the timestamp that the item was added to the prim's inventory.
+
+The time is in the UTC time zone in the format "YYYY-MM-DDThh:mm:ssZ"
+
+Appears to be accurate to seconds.
+
+```lsl title="How to use" frame="terminal"
+string result = llGetInventoryAcquireTime("");
+```
+
+## Caveats
+
+- This function currently returns an ISO timestamp that is missing milliseconds. It is recommended that you code your applications in preparation of millisecond support being added at a later date.
+- Using [llListSort](/functions/llListSort/) to sort a list of timestamps that both include and exclude milliseconds will have undesired results. ".000000" will first have to be inserted into timestamps missing milliseconds.
+- Changing the contents of a script or notecard (or recompiling a script) does not change its acquire time.
+
+## Examples
+
+<details open>
+<summary>If there is no other item in the inventory, you get the timestamp from the script itself.</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+    touch_start(integer total_number)
+    {
+        string item = llGetInventoryName(INVENTORY_ALL, 0); // 0 means the first item in prim's inventory.
+        string timestamp = llGetInventoryAcquireTime(item);
+
+        llSay(0, "Timestamp for: " + item + " - " + timestamp); // output
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llGetTimestamp](/functions/llGetTimestamp/) — Returns the current timestamp using the same format
+- [llGetInventoryCreator](/functions/llGetInventoryCreator/) — Returns the inventory item's creator
+- [llGetInventoryName](/functions/llGetInventoryName/) — Returns the inventory item's name
+- [llGetInventoryType](/functions/llGetInventoryType/) — Tests to see if an inventory item exists and returns its type
+- [llGetInventoryNumber](/functions/llGetInventoryNumber/) — Returns the number of items of a specific type in inventory
+- [llGetInventoryPermMask](/functions/llGetInventoryPermMask/) — Returns the inventory item's permissions
+- [llGetInventoryKey](/functions/llGetInventoryKey/) — Returns the inventory item's [UUID](https://wiki.secondlife.com/wiki/UUID) (if full perm)
+
+<WikiSource />

@@ -1,0 +1,122 @@
+---
+title: "llKey2Name"
+slug: "functions/llKey2Name"
+category: functions
+source:
+  wiki: "LlKey2Name"
+  url: https://wiki.secondlife.com/wiki/LlKey2Name
+  revision: 1215782
+  date: 2023-12-08
+  contributor: "Peter Stindberg"
+  raw: /wiki-source/llkey2name-a67588df.txt
+  license: "Content from the Second Life Wiki article LlKey2Name (revision 1215782, 2023-12-08), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llKey2Name" />
+
+**id** must specify a valid rezzed prim or avatar key, present in or otherwise known to the sim in which the script is running, otherwise an empty string is returned. In the case of an avatar, this function will still return a valid name if the avatar is a child agent of the sim (i.e., in an adjacent sim, but presently able to see into the one the script is in), or for a short period after the avatar leaves the sim (specifically, when the client completely disconnects from the sim, either as a main or child agent).
+
+Keys of inventory items will not work; in the case of these, use [llGetInventoryName](/functions/llGetInventoryName/) instead.
+
+Returns a [string](https://wiki.secondlife.com/wiki/string) that is the [legacy name](https://wiki.secondlife.com/wiki/Category:LSL_Avatar/Name) of the prim or avatar specified by **id**.
+
+```lsl title="How to use" frame="terminal"
+string result = llKey2Name(NULL_KEY);
+```
+
+## Caveats
+
+- It is difficult to tell the difference between a prim that has a name that is an empty string and a prim that is not in the sim, or because an invalid key was specified. Use [llGetObjectDetails](/functions/llGetObjectDetails/) to avoid this problem.
+- To get around the "avatar must be present" limitation, you can use the [llRequestAgentData](/functions/llRequestAgentData/) function and the [dataserver](/events/dataserver/) event to obtain the avatar's name from a key.
+- The opposite function ([llName2Key](/functions/llName2Key/)) can be used to find the user key associated with an avatar in the same region. To find the user key of an avatar anywhere on the grid, use [llRequestUserKey](/functions/llRequestUserKey/), which triggers a [dataserver](/events/dataserver/) event.
+- If an avatar is "ghosted" (which occasionally happens due to a longstanding server bug), an empty string is returned even though the avatar is seemingly present and shows up in [llSensor](/functions/llSensor/) and the [Mini-Map](https://wiki.secondlife.com/wiki/Mini-Map). This fact can be used as the basis of a [Ghost Detector](https://wiki.secondlife.com/wiki/Ghost_Detector) script.
+- Unlike the related functions [llGetUsername](/functions/llGetUsername/) and [llRequestUsername](/functions/llRequestUsername/), this function returns a 'nice' name in proper case and - if applicable - with a space, e.g. "Peter Stindberg", instead of "peter.stindberg" (or "Josh" instead of "josh.resident") as returned by the other two functions.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5}
+// Best viewed in Chat History (ctrl-h)
+
+default
+{
+    collision_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        string name = llKey2Name(id);
+
+        string detectedName = llDetectedName(0);
+
+        llSay(0, "llKey2Name: " + name
+            + "\nllDetectedName: " + detectedName);
+    }
+
+    touch_start(integer num_detected)
+    {
+        key id = llDetectedKey(0);
+        string name = llKey2Name(id);
+
+        string detectedName = llDetectedName(0);
+
+        llSay(0, "llKey2Name: " + name
+            + "\nllDetectedName: " + detectedName);
+    }
+}
+```
+
+</details>
+
+## Notes
+
+**World Wide Web Consortium**
+
+- [N2K](https://wiki.secondlife.com/wiki/N2K) - Independent of databases or bots, this uses the [W3C html2text](http://cgi.w3.org/cgi-bin/html2txt) to convert the viewer search to text and extract the key from Second Life's own services.
+
+**Active Name2Key Databases:**
+
+- [W-Hat name2key](http://w-hat.com/name2key) (last names replaced with the *Resident* word for the [Usernames](https://wiki.secondlife.com/wiki/Category:LSL_Username))
+- [KDC name2key](http://kdc.ethernia.net/sys/name2key.php)
+
+**Dead Name2Key Databases:**
+
+- [Kubwa name2key](http://kubwa.net/index.php?cmd=name2key) (Bot based name2key Database; Supports: [Legacy](https://wiki.secondlife.com/wiki/Category:LSL_Legacy_Name) and [Username](https://wiki.secondlife.com/wiki/Category:LSL_Username) formats; Shows related names; SSL support.) &lt;font color=red>(Appears to be gone as of Apr 2013 \[Reports Error 404\])&lt;/font>
+- &lt;s>http://wiki.apez.biz/Development (web-service API functions getAvatarKey and getAvatarName)&lt;/s> &lt;font color=red>(Apez seems to be gone ? - May 2011)&lt;/font>
+- &lt;s>http://www.libsecondlife.org/protocol/index.php/Name2key&lt;/s>&lt;font color=red>(Appears to be gone as of Apr 2008, but search for name2key on that site for more information)&lt;/font>
+- &lt;s>http://www.ulrikasheim.org/tools/name2key.html&lt;/s>&lt;font color=red>(Appears to be gone as of Apr 2008)&lt;/font>
+- &lt;s>[DB4MV name2key](http://www.db4mv.info) (Name2Key Database for Avatars ([Legacy Names](https://wiki.secondlife.com/wiki/Category:LSL_Legacy_Name),[Usernames](https://wiki.secondlife.com/wiki/Category:LSL_Username), and [Display Names](https://wiki.secondlife.com/wiki/Category:LSL_Display_Name), GroupNames and Keys, LSL API)&lt;/s>&lt;font color=red>(Currently listed as non-existant by host)&lt;/font>
+
+**Name2Key Libraries:**
+
+- [Name2Key_in_LSL](https://wiki.secondlife.com/wiki/Name2Key_in_LSL)
+- [Ugleh Ulrik's Name2Key PHP script](https://wiki.secondlife.com/wiki/User:Ugleh_Ulrik/Name2Key)
+- [Failsafe name2key script](https://wiki.secondlife.com/wiki/Failsafename2key)
+
+## History
+
+`{{LSL Added|0.4.0|remote=http://secondlife.wikia.com/wiki/Version_0.4.0#Scripting}}`
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-215 (nf): '''llRequestAgentKey'''() ('''llName2Key'''())
+- SVC-4170 (bug): llKey2Name returns avatar names with double space between first and last (sometimes)
+- SVC-3935 (bug): llKey2Name returns text "(Loading...)" instead of empty string or avatar name
+
+## See also
+
+### Functions
+
+- [llGetUsername](/functions/llGetUsername/)
+- [llGetDisplayName](/functions/llGetDisplayName/)
+- [llGetObjectDetails](/functions/llGetObjectDetails/)
+- [llRequestAgentData](/functions/llRequestAgentData/) — Uses the [dataserver](/events/dataserver/) to request avatar information
+
+### Articles
+
+- [Prim Attribute Overloading](https://wiki.secondlife.com/wiki/Prim_Attribute_Overloading)
+
+<WikiSource />

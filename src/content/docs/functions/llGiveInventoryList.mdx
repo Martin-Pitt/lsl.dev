@@ -1,0 +1,166 @@
+---
+title: "llGiveInventoryList"
+slug: "functions/llGiveInventoryList"
+category: functions
+source:
+  wiki: "LlGiveInventoryList"
+  url: https://wiki.secondlife.com/wiki/LlGiveInventoryList
+  revision: 1218154
+  date: 2025-04-06
+  contributor: "Peter Stindberg"
+  raw: /wiki-source/llgiveinventorylist-62736117.txt
+  license: "Content from the Second Life Wiki article LlGiveInventoryList (revision 1218154, 2025-04-06), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGiveInventoryList" description />
+
+Gives **inventory** items to **target**, creating a new **folder** to put them in.
+
+```lsl title="How to use" frame="terminal"
+llGiveInventoryList(NULL_KEY, "", []);
+```
+
+## Specification
+
+### target types
+
+Depending upon the type of **target** this function works differently.
+
+- Avatar
+- Must be in or able to see into the same Region as the sending object, or recently have been so. [SVC-868](#svc-868)
+- Places the inventory items in a newly created **folder** in the avatars inventory (even if there is a **folder** by the same name, a new one is created).
+- Prim / Object
+- The prim *must* be in the same region.
+- Does *not* create a **folder**.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    touch_start(integer n)
+    {
+        key toucher = llDetectedKey(0);
+        string folder = "Item Folder";
+        list inventory = ["item", "another item"];
+        llGiveInventoryList(toucher, folder, inventory);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-34}
+//  when the prim is touched, the script checks all other inventory items whether or not they're copiable
+//  copiable items are added to a list, if the list is not empty when all items have been checked
+//  the prim gives them to the touching avatar within a single folder
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        string thisScript = llGetScriptName();
+        list inventoryItems;
+        integer inventoryNumber = llGetInventoryNumber(INVENTORY_ALL);
+
+        integer index;
+        for ( ; index < inventoryNumber; ++index )
+        {
+            string itemName = llGetInventoryName(INVENTORY_ALL, index);
+
+            if (itemName != thisScript)
+            {
+                if (llGetInventoryPermMask(itemName, MASK_OWNER) & PERM_COPY)
+                {
+                    inventoryItems += itemName;
+                }
+                else
+                {
+                    llSay(0, "Unable to copy the item named '" + itemName + "'.");
+                }
+            }
+        }
+
+        if (inventoryItems == [] )
+        {
+            llSay(0, "No copiable items found, sorry.");
+        }
+        else
+        {
+            llGiveInventoryList(llDetectedKey(0), llGetObjectName(), inventoryItems);    // 3.0 seconds delay
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 3</summary>
+
+```lsl collapse={1-31}
+//  script gives items to owner only
+//  all copiable items are given within a single folder
+//  all no-copy items are transferred separately (only one time, right? right!)
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        key owner = llGetOwner();
+        if (llDetectedKey(0) != owner)
+            return;
+
+        list inventoryItems;
+        integer inventoryNumber = llGetInventoryNumber(INVENTORY_ALL);
+
+        integer index;
+        for ( ; index < inventoryNumber; ++index )
+        {
+            string itemName = llGetInventoryName(INVENTORY_ALL, index);
+            if (itemName != llGetScriptName() )
+            {
+                if (llGetInventoryPermMask(itemName, MASK_OWNER) & PERM_COPY)
+                {
+                    inventoryItems += itemName;
+                }
+                else
+                {
+                    llGiveInventory(owner, itemName);    // 2.0 seconds delay
+                }
+            }
+        }
+
+        if (inventoryItems != [] )
+            llGiveInventoryList(owner, llGetObjectName(), inventoryItems);    // 3.0 seconds delay
+    }
+}
+```
+
+</details>
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-868 (fs): llGiveInventoryList should be able to work gridwide
+
+## See also
+
+### Functions
+
+- [llGiveInventory](/functions/llGiveInventory/)
+- [llGiveAgentInventory](/functions/llGiveAgentInventory/)
+
+### Events
+
+- [changed](/events/changed/)
+
+<WikiSource />

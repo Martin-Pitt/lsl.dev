@@ -1,0 +1,100 @@
+---
+title: "llFleeFrom"
+slug: "functions/llFleeFrom"
+category: functions
+source:
+  wiki: "LlFleeFrom"
+  url: https://wiki.secondlife.com/wiki/LlFleeFrom
+  revision: 1210635
+  date: 2022-04-17
+  contributor: "Gwyneth Llewelyn"
+  raw: /wiki-source/llfleefrom-aff1c461.txt
+  license: "Content from the Second Life Wiki article LlFleeFrom (revision 1210635, 2022-04-17), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llFleeFrom" description />
+
+Directs a character to keep a specific **distance** from a specific **position** in the region or adjacent regions.
+
+```lsl title="How to use" frame="terminal"
+llFleeFrom(ZERO_VECTOR, 0.0, []);
+```
+
+## Caveats
+
+- Must use [llCreateCharacter](/functions/llCreateCharacter/) or script won't compile.
+- The **position** to flee from must be near the nav mesh; otherwise, this behavior will fail and trigger [path update](/events/path_update/) with [PU_FAILURE_INVALID_GOAL](/constants/PU_FAILURE_INVALID_GOAL/).
+- If you want to avoid an agent or object as per the example below, it's much more elegant and less sim resource intensive to use [llEvade](/functions/llEvade/) instead.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-12, 18-22}
+vector last_touched_pos;
+key last_touched_key;
+
+default
+{
+    state_entry()
+    {
+        llCreateCharacter([CHARACTER_DESIRED_SPEED, 50.0]);
+    }
+
+    touch_start(integer total_number)
+    {
+	last_touched_key = llDetectedKey(0);
+	last_touched_pos = llDetectedPos(0);
+	llFleeFrom(last_touched_pos, 10, []);
+	llSetTimerEvent(0.2);
+    }
+
+    timer()
+    {
+	vector last_touched_pos_now = llList2Vector(llGetObjectDetails(last_touched_key, [OBJECT_POS]), 0);
+	if ( llVecDist(last_touched_pos, last_touched_pos_now) > 1 )
+	{
+	    last_touched_pos = last_touched_pos_now;
+	    llFleeFrom(last_touched_pos, 10, []);
+	}
+    }
+}
+```
+
+</details>
+
+## Notes
+
+The position vector can be set outside the current region by using extended range region coordinates: e.g., to avoid the SE corner of the region to the East of the current one, you could
+
+```lsl
+llFleeFrom(<0.0, 512.0, 0.0>, 20.0, []);
+```
+
+## History
+
+Date of Release [31/07/2012](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/12#12-07-31-262785)
+
+## See also
+
+### Functions
+
+- [llCreateCharacter](/functions/llCreateCharacter/)
+- [llDeleteCharacter](/functions/llDeleteCharacter/)
+- [llEvade](/functions/llEvade/)
+- [llExecCharacterCmd](/functions/llExecCharacterCmd/)
+- [llGetClosestNavPoint](/functions/llGetClosestNavPoint/)
+- [llFleeFrom](/functions/llFleeFrom/)
+- [llNavigateTo](/functions/llNavigateTo/)
+- [llPatrolPoints](/functions/llPatrolPoints/)
+- [llPursue](/functions/llPursue/)
+- [llUpdateCharacter](/functions/llUpdateCharacter/)
+- [llWanderWithin](/functions/llWanderWithin/)
+
+### Events
+
+- [path_update](/events/path_update/)
+
+<WikiSource />

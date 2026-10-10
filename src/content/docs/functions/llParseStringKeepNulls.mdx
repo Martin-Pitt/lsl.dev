@@ -1,0 +1,84 @@
+---
+title: "llParseStringKeepNulls"
+slug: "functions/llParseStringKeepNulls"
+category: functions
+source:
+  wiki: "LlParseStringKeepNulls"
+  url: https://wiki.secondlife.com/wiki/LlParseStringKeepNulls
+  revision: 1194430
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llparsestringkeepnulls-75f6fca9.txt
+  license: "Content from the Second Life Wiki article LlParseStringKeepNulls (revision 1194430, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llParseStringKeepNulls" description />
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) that is **src** broken into a list, discarding **separators**, keeping **spacers**, keeping any null values generated.
+
+```lsl title="How to use" frame="terminal"
+list result = llParseStringKeepNulls("", [], []);
+```
+
+## Specification
+
+The behavior is identical to that for [llParseString2List](/functions/llParseString2List/), except blank strings found in the list are kept. This is useful when parsing a list that contains values that can be null or empty (and subsequently removing the nulls would upset the distribution of data and the element indexes).
+
+`llParseStringKeepNulls("", ["~"], [])` will return \[""\]
+
+## Caveats
+
+- Only the first 8 **separators** and first 8 **spacers** will be used any extras will be ignored.
+- All **separators** and **spacers** must be strings, all other types will be ignored.
+- **separators** take precedent over **spacers**. The string is parsed from start to finish, each position is compared against the **separators** then **spacers** before moving onto the next position. The first match is the one that is returned. Using the list \["A", "AB"\] will always act with "A" and never "AB".
+- Duplicate or irrelevant **separators** or **spacers** count towards the limits and slow down parsing.
+- All entries in the return are typed as string. Use explicit typecasting on [llList2String](/functions/llList2String/) to convert the values into other types. Do not rely upon the implicit typecasting of the other llList2\* functions (as they typically return a default value).
+- Remember to capture the result of the operation with a variable, unless you are planning to act directly on the results.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-10}
+default
+{
+    state_entry()
+    {
+        // This will say:
+        // <A><crazy><fox><.><Saw><the><moon><.><.>
+        string my_string = "A crazy fox.  Saw the moon..";
+        list my_list = llParseString2List(my_string,[" "],["."]);
+        llOwnerSay("<" + llDumpList2String(my_list,"><") + ">");
+
+        // This will say:
+        //  <A><crazy><fox><.><><><Saw><the><moon><.><><.><>
+        my_list = llParseStringKeepNulls(my_string,[" "],["."]);
+        llOwnerSay("<" + llDumpList2String(my_list,"><") + ">");
+    }
+}
+```
+
+</details>
+
+## Helper functions
+
+**Replacement functions without or very large separator/spacer count limits**
+
+- [ParseString2List](https://wiki.secondlife.com/wiki/ParseString2List) — Functions exactly the same as [llParseString2List](/functions/llParseString2List/) and [llParseStringKeepNulls](/functions/llParseStringKeepNulls/).
+- [separateWords](https://wiki.secondlife.com/wiki/Separate_Words) — Functions the same as [llParseString2List](/functions/llParseString2List/) unless certain preconditions are not met.
+
+<table>
+</table>
+
+## See also
+
+### Functions
+
+- [llParseString2List](/functions/llParseString2List/)
+- [llDumpList2String](/functions/llDumpList2String/)
+- [llCSV2List](/functions/llCSV2List/)
+- [llList2CSV](/functions/llList2CSV/)
+
+<WikiSource />

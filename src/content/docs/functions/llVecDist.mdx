@@ -1,0 +1,88 @@
+---
+title: "llVecDist"
+slug: "functions/llVecDist"
+category: functions
+source:
+  wiki: "LlVecDist"
+  url: https://wiki.secondlife.com/wiki/LlVecDist
+  revision: 1210534
+  date: 2022-03-23
+  contributor: "Draconis Neurocam"
+  raw: /wiki-source/llvecdist-a2058efe.txt
+  license: "Content from the Second Life Wiki article LlVecDist (revision 1210534, 2022-03-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llVecDist" description />
+
+Returns a [float](https://wiki.secondlife.com/wiki/float) that is the undirected nonnegative distance between **vec_a** and **vec_b**.
+
+```lsl title="How to use" frame="terminal"
+float result = llVecDist(ZERO_VECTOR, ZERO_VECTOR);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default {
+    state_entry()
+    {
+        vector input_1 = <1.0,2.0,3.0>;
+        vector input_2 = <3.0,2.0,1.0>;
+        llOwnerSay("The distance between " + (string) input_1 +
+            " and " + (string) input_2 + " is: "+(string)llVecDist(input_1, input_2) );
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-9}
+//To reset script on touch if the object has been rotated since the last script reset
+float gTolerance = 0.05;  //This corresponds to about a 3 degree rotation
+default
+{
+	state_entry()
+	{
+		llSetObjectDesc((string)llRot2Euler(llGetRot()));
+	}
+
+	touch_start(integer total_number)
+	{
+		if (llVecDist(llRot2Euler(llGetRot()), (vector)llGetObjectDesc()) > gTolerance)
+		{
+			llSay(0,"This object has rotated. Automatic reset engaged.");
+			llResetScript();
+		}
+	}
+}
+```
+
+</details>
+
+### Video Tutorial
+
+https://www.youtube.com/watch?v=D0WvH58IWEo
+
+## Notes
+
+- Mathematically equivalent to:
+- [llVecMag](/functions/llVecMag/)( **vec_a** - **vec_b** )
+- [llSqrt](/functions/llSqrt/)( (vec_b.x - vec_a.x) \* (vec_b.x - vec_a.x) + (vec_b.y - vec_a.y) \* (vec_b.y - vec_a.y) + (vec_b.z - vec_a.z) \* (vec_b.z - vec_a.z) )
+- Knowing this, there are ways to circumvent `llVecDist` for more efficient code.
+- For example, vector v3 = (v1-v2); v3\*v3 &lt; (f\*f); is over twice as fast as `llVecDist(v1,v2)` &lt; f;
+
+## See also
+
+### Functions
+
+- [llVecMag](/functions/llVecMag/)
+- [llVecNorm](/functions/llVecNorm/)
+
+<WikiSource />

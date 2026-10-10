@@ -1,0 +1,81 @@
+---
+title: "llGetLocalRot"
+slug: "functions/llGetLocalRot"
+category: functions
+source:
+  wiki: "LlGetLocalRot"
+  url: https://wiki.secondlife.com/wiki/LlGetLocalRot
+  revision: 1194201
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetlocalrot-e2dbd600.txt
+  license: "Content from the Second Life Wiki article LlGetLocalRot (revision 1194201, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetLocalRot" description />
+
+If called from the root prim, it returns the objects rotation.
+
+```lsl title="How to use" frame="terminal"
+rotation result = llGetLocalRot();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-18}
+ //--// Door Script - Works At ANY Angle //--//
+
+//-- works in ANY single prim door, linked or un-linked
+//-- works in muti prim doors NOT linked to a larger structure
+//-- REQUIREMENTS: a cut root prim. Suggest cube, pathcut start=.125, end=.625
+//-- CAVEAT: single prim doors are limited to 5m width
+
+ //--// USERS MODIFY HERE v
+integer vgIntDoorSwing = 90;
+//-- use -# to reverse the direction of swing, eg. -90;
+
+
+rotation gRotDoorSwing;
+
+default{
+  state_entry(){
+    gRotDoorSwing = llEuler2Rot( <0.0, 0.0, vgIntDoorSwing> * DEG_TO_RAD );
+  }
+
+  touch_start( integer vIntTouched ){
+    llSetLocalRot( (gRotDoorSwing = ZERO_ROTATION / gRotDoorSwing) * llGetLocalRot() );
+  }
+}
+```
+
+</details>
+
+## Helper functions
+
+```lsl
+ //-- this is an equivalent call from any prim in the same link set
+llList2Rot( llGetLinkPrimitiveParams( target_prim, [PRIM_ROT_LOCAL] ), 0 )
+//-- where "target_prim" is the link number of the prim you want to get the local rotation of
+```
+
+## Notes
+
+Returns the region relative rotation of the object if called from the root
+
+## See also
+
+### Functions
+
+- [llGetRot](/functions/llGetRot/)
+- [llGetRootRotation](/functions/llGetRootRotation/)
+- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
+- [llSetRot](/functions/llSetRot/)
+- [llSetLocalRot](/functions/llSetLocalRot/)
+- [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
+
+<WikiSource />

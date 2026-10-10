@@ -1,0 +1,85 @@
+---
+title: "llGenerateKey"
+slug: "functions/llGenerateKey"
+category: functions
+source:
+  wiki: "LlGenerateKey"
+  url: https://wiki.secondlife.com/wiki/LlGenerateKey
+  revision: 1194138
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgeneratekey-81311762.txt
+  license: "Content from the Second Life Wiki article LlGenerateKey (revision 1194138, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGenerateKey" description />
+
+Generates a key using [Version 5 (SHA-1 hash)](http://en.wikipedia.org/wiki/UUID#Version_5_.28SHA-1_hash.29) [UUID](https://wiki.secondlife.com/wiki/UUID) generation to create a unique key.
+
+```lsl title="How to use" frame="terminal"
+key result = llGenerateKey();
+```
+
+## Caveats
+
+- The specific UUID version is an implementation detail that has changed in the past and may change again in the future. Do not depend upon the UUID that is returned to be Version 5.
+- As the UUID produced is versioned, it should never return a value of [NULL_KEY](/constants/NULL_KEY/).
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-10, 16-37}
+default
+{
+    touch_start(integer num_detected)
+    {
+        // avatar touching
+        key avatarKey = llDetectedKey(0);
+        string avatarName = llKey2Name(avatarKey);
+
+        // key of the owner
+        key owner = llGetOwner();
+
+        // generated random key
+        key random = llGenerateKey();
+
+        // number of objects inside the same prim
+        integer numberOfObjects = llGetInventoryNumber(INVENTORY_OBJECT);
+
+        if (numberOfObjects)
+        {
+            // name of first object sorted by name inside the prim's inventory
+            string itemName = llGetInventoryName(INVENTORY_OBJECT, 0);
+
+            llGiveInventory(avatarKey, itemName);
+            llInstantMessage(avatarKey, "Your transaction key is '" + (string)random + "'.");
+
+            llInstantMessage(owner, "Transaction record:\n"
+                + "receiver: " + avatarName + " (" + (string)avatarKey + ")\n"
+                + "item: " + itemName + "\n"
+                + "transaction key: " + (string)random);
+        }
+        else
+        {
+            // PUBLIC_CHANNEL has the integer value 0
+            llSay(PUBLIC_CHANNEL, "No items to give away, sorry!");
+        }
+    }
+}
+```
+
+</details>
+
+## History
+
+- Inspired by the library function [generateKey](https://wiki.secondlife.com/wiki/GenerateKey).
+- Changed from using [Version 3 (MD5 hash)](http://en.wikipedia.org/wiki/UUID#Version_3_.28MD5_hash.29) to [Version 5 (SHA-1 hash)](http://en.wikipedia.org/wiki/UUID#Version_5_.28SHA-1_hash.29). Date of this change is unknown.
+
+## Additional wiki content
+
+`{{LSLC{{#var:lang}}|Encryption|llGenerateKey}}`
+
+<WikiSource />

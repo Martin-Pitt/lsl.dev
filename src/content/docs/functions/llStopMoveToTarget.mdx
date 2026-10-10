@@ -1,0 +1,83 @@
+---
+title: "llStopMoveToTarget"
+slug: "functions/llStopMoveToTarget"
+category: functions
+source:
+  wiki: "LlStopMoveToTarget"
+  url: https://wiki.secondlife.com/wiki/LlStopMoveToTarget
+  revision: 1209960
+  date: 2021-04-11
+  contributor: "Panterapolnocy Resident"
+  raw: /wiki-source/llstopmovetotarget-b5920537.txt
+  license: "Content from the Second Life Wiki article LlStopMoveToTarget (revision 1209960, 2021-04-11), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llStopMoveToTarget" description />
+
+Stops critically damped motion
+
+Use in conjunction with [llMoveToTarget](/functions/llMoveToTarget/)
+
+To stop rotation movement use [llStopLookAt](/functions/llStopLookAt/)
+
+```lsl title="How to use" frame="terminal"
+llStopMoveToTarget();
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-10, 16-36}
+integer gLockPrimInPlace;
+
+default
+{
+
+    on_rez(integer sp)
+    {
+        llResetScript();
+    }
+
+    state_entry()
+    {
+        llStopMoveToTarget();
+        llSetStatus(STATUS_PHYSICS, TRUE);
+    }
+
+    touch_start(integer total_number)
+    {
+
+        if (llDetectedKey(0) != llGetOwner())
+        {
+            return;
+        }
+
+        if (!llGetStatus(STATUS_PHYSICS))
+        {
+            llOwnerSay("Locking or unlocking position works only for physical objects.");
+            return;
+        }
+
+        gLockPrimInPlace = !gLockPrimInPlace;
+        if (gLockPrimInPlace)
+        {
+            llMoveToTarget(llGetPos(), 0.05);
+            llOwnerSay("Locked in place.");
+        }
+        else
+        {
+            llStopMoveToTarget();
+            llOwnerSay("Unlocked.");
+        }
+
+    }
+
+}
+```
+
+</details>
+
+<WikiSource />

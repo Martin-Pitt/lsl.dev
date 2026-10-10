@@ -1,0 +1,131 @@
+---
+title: "llGetGameControlModeAxes"
+slug: "functions/llGetGameControlModeAxes"
+category: functions
+source:
+  wiki: "LlGetGameControlModeAxes"
+  url: https://wiki.secondlife.com/wiki/LlGetGameControlModeAxes
+  revision: 1219076
+  date: 2026-09-17
+  contributor: "Leviathan Linden"
+  raw: /wiki-source/llgetgamecontrolmodeaxes-0754056a.txt
+  license: "Content from the Second Life Wiki article LlGetGameControlModeAxes (revision 1219076, 2026-09-17), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetGameControlModeAxes" />
+
+Returns the *semantic* (mode-dependent) axis values of **id** for the current [game_control](/events/game_control/) input. Element count and index meanings vary by mode; use the GAME_CONTROL_AXIS\_\* constants as indices.
+
+Returns a [list](https://wiki.secondlife.com/wiki/list) of [float](https://wiki.secondlife.com/wiki/float) values whose length and meaning depend on the mode returned by [llGetGameControlMode](/functions/llGetGameControlMode/). The list is empty when no game-control data is available for **id**.
+
+```lsl title="How to use" frame="terminal"
+list result = llGetGameControlModeAxes(NULL_KEY);
+```
+
+## Specification
+
+Where the **axes** parameter of the [game_control](/events/game_control/) event reports the raw gamepad sticks and triggers, this function reports the axes the viewer derived from them for the current mode: reordered, combined (the two triggers become one axis) and remapped according to the user's bindings.
+
+For **[GAME_CONTROL_MODE_AVATAR](/constants/GAME_CONTROL_MODE_AVATAR/)**, **[GAME_CONTROL_MODE_MOUSELOOK](/constants/GAME_CONTROL_MODE_MOUSELOOK/)** and **[GAME_CONTROL_MODE_CAPTIVE](/constants/GAME_CONTROL_MODE_CAPTIVE/)** the list has 5 elements, each in the range \[-1.0, 1.0\]:
+
+| Index | Name |
+| --- | --- |
+| 0 | [GAME_CONTROL_AXIS_STRAFE](/constants/GAME_CONTROL_AXIS_STRAFE/) |
+| 1 | [GAME_CONTROL_AXIS_ADVANCE](/constants/GAME_CONTROL_AXIS_ADVANCE/) |
+| 2 | [GAME_CONTROL_AXIS_TURN](/constants/GAME_CONTROL_AXIS_TURN/) |
+| 3 | [GAME_CONTROL_AXIS_LOOK](/constants/GAME_CONTROL_AXIS_LOOK/) |
+| 4 | [GAME_CONTROL_AXIS_RISE](/constants/GAME_CONTROL_AXIS_RISE/) |
+
+For **[GAME_CONTROL_MODE_FLYCAM](/constants/GAME_CONTROL_MODE_FLYCAM/)** the list has 7 elements, each in the range \[-1.0, 1.0\]:
+
+| Index | Name | Description |
+| --- | --- | --- |
+| 0 | [GAME_CONTROL_AXIS_TRUCK](/constants/GAME_CONTROL_AXIS_TRUCK/) | Camera sideways movement (left/right); equivalent to [GAME_CONTROL_AXIS_STRAFE](/constants/GAME_CONTROL_AXIS_STRAFE/) |
+| 1 | [GAME_CONTROL_AXIS_DOLLY](/constants/GAME_CONTROL_AXIS_DOLLY/) | Camera forward/back movement; equivalent to [GAME_CONTROL_AXIS_ADVANCE](/constants/GAME_CONTROL_AXIS_ADVANCE/) |
+| 2 | [GAME_CONTROL_AXIS_PAN](/constants/GAME_CONTROL_AXIS_PAN/) | Camera yaw: rotation left/right around the vertical axis; equivalent to [GAME_CONTROL_AXIS_TURN](/constants/GAME_CONTROL_AXIS_TURN/) |
+| 3 | [GAME_CONTROL_AXIS_TILT](/constants/GAME_CONTROL_AXIS_TILT/) | Camera pitch: rotation up/down around the horizontal axis; equivalent to [GAME_CONTROL_AXIS_LOOK](/constants/GAME_CONTROL_AXIS_LOOK/) |
+| 4 | [GAME_CONTROL_AXIS_BOOM](/constants/GAME_CONTROL_AXIS_BOOM/) | Camera vertical movement (up/down); equivalent to [GAME_CONTROL_AXIS_RISE](/constants/GAME_CONTROL_AXIS_RISE/) |
+| 5 | [GAME_CONTROL_AXIS_ROLL](/constants/GAME_CONTROL_AXIS_ROLL/) | Camera roll: rotation around the forward axis (banking) |
+| 6 | [GAME_CONTROL_AXIS_ZOOM](/constants/GAME_CONTROL_AXIS_ZOOM/) | Camera field of view (zoom in/out) |
+
+For **[GAME_CONTROL_MODE_CURSOR](/constants/GAME_CONTROL_MODE_CURSOR/)** the list has 6 elements:
+
+| Index | Name | Range | Description |
+| --- | --- | --- | --- |
+| 0 | CURSOR_DX | \[-1.0, 1.0\] | Cursor horizontal motion, normalized to the cursor movement rectangle |
+| 1 | CURSOR_DY | \[-1.0, 1.0\] | Cursor vertical motion, normalized to the cursor movement rectangle |
+| 2 | CURSOR_PX | \[0.0, width\] | Cursor horizontal position in pixels, measured from the left edge of the cursor movement rectangle |
+| 3 | CURSOR_PY | \[0.0, height\] | Cursor vertical position in pixels, measured from the top edge of the cursor movement rectangle |
+| 4 | CURSOR_NX | \[0.0, 1.0\] | Cursor horizontal position normalized to the cursor movement rectangle; 0.0 is the left edge, 1.0 is the right edge |
+| 5 | CURSOR_NY | \[0.0, 1.0\] | Cursor vertical position normalized to the cursor movement rectangle; 0.0 is the top edge, 1.0 is the bottom edge |
+
+CURSOR_PX/CURSOR_PY are measured within the rectangle the cursor is allowed to move in: `<0, 0>` is its upper-left corner. CURSOR_NX/CURSOR_NY are the same position normalized to that rectangle. CURSOR mode has no turn/look slot: turning and looking still work, they are simply not mirrored here because those slots carry cursor position instead.
+
+## Caveats
+
+- Only meaningful inside a [game_control](/events/game_control/) event: the values are a snapshot taken when the event was queued, so the mode, buttons and axes read by a script are all consistent with the event being processed.
+- Returns an empty list when the script has no game-control snapshot for **id**, for example when called outside of a [game_control](/events/game_control/) event.
+- Game-control input is only delivered to scripts which have been granted [PERMISSION_GAME_CONTROL](/constants/PERMISSION_GAME_CONTROL/) by **id**.
+- **The length of the list depends on the mode and may grow in the future.** Do not read the list from the end, do not use negative indexes, and do not assume its length; check [llGetGameControlMode](/functions/llGetGameControlMode/) and index from the front.
+- Unlike the [game_control](/events/game_control/) event's **axes** list, CURSOR_PX and CURSOR_PY are **not** restricted to \[-1.0, 1.0\]: they are pixel values.
+- Several directional buttons are folded into these axes (for example the D-pad contributes to AXIS_ADVANCE and AXIS_STRAFE) while also appearing in [llGetGameControlModeButtons](/functions/llGetGameControlModeButtons/); reacting to both will double-count the input. In CURSOR mode the D-pad is *not* folded into the axes.
+- If enabled at the client, keyboard avatar movement may also be translated into game-control input.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={9-27}
+default
+{
+    game_control(key id, integer button_levels, list axes)
+    {
+        integer mode = llGetGameControlMode(id);
+        list mode_axes = llGetGameControlModeAxes(id);
+        if (mode_axes == [])
+            return;
+
+        if (mode == GAME_CONTROL_MODE_AVATAR
+            || mode == GAME_CONTROL_MODE_MOUSELOOK
+            || mode == GAME_CONTROL_MODE_CAPTIVE)
+        {
+            float strafe  = llList2Float(mode_axes, 0);
+            float advance = llList2Float(mode_axes, 1);
+            float rise    = llList2Float(mode_axes, 4);
+            llOwnerSay("move: " + (string)llList2Vector(
+                [<strafe, advance, rise>], 0));
+        }
+        else if (mode == GAME_CONTROL_MODE_CURSOR)
+        {
+            llOwnerSay("cursor at <"
+                + (string)llList2Float(mode_axes, 4) + ", "
+                + (string)llList2Float(mode_axes, 5) + "> (normalized)");
+        }
+    }
+}
+```
+
+</details>
+
+## Notes
+
+The semantic axes are supplied by the viewer in the **GameControlData** message. Older viewers that only send the deprecated **GameControlInput** message provide raw axes through the [game_control](/events/game_control/) event but no semantic axes, so this function returns an empty list for them.
+
+## See also
+
+### Functions
+
+- [llGetGameControlMode](/functions/llGetGameControlMode/) — Current game-control mode
+- [llGetGameControlModeButtons](/functions/llGetGameControlModeButtons/) — Semantic button bitfield for the current mode
+
+### Events
+
+- [game_control](/events/game_control/)
+
+### Articles
+
+[LSL Game Control Beta](https://wiki.secondlife.com/wiki/LSL_Game_Control_Beta)
+
+<WikiSource />

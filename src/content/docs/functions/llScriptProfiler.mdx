@@ -1,0 +1,110 @@
+---
+title: "llScriptProfiler"
+slug: "functions/llScriptProfiler"
+category: functions
+source:
+  wiki: "LlScriptProfiler"
+  url: https://wiki.secondlife.com/wiki/LlScriptProfiler
+  revision: 1196004
+  date: 2015-03-31
+  contributor: "Billjoebob Resident"
+  raw: /wiki-source/llscriptprofiler-8424ef84.txt
+  license: "Content from the Second Life Wiki article LlScriptProfiler (revision 1196004, 2015-03-31), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llScriptProfiler" description />
+
+Enables or disables the scripts profiling state.
+
+```lsl title="How to use" frame="terminal"
+llScriptProfiler(0);
+```
+
+## Specification
+
+This function's behavior is dependent upon the VM the script is using. [Mono](#mono) is the new VM, [LSO](#lso) is the old VM. The big difference between Mono and LSO is that Mono scripts run faster and can utilize four times more memory.
+
+### Mono
+
+Use this function with [PROFILE_SCRIPT_MEMORY](/constants/PROFILE_SCRIPT_MEMORY/) to enable memory profiling at a severe script performance penalty. Use it with [PROFILE_NONE](/constants/PROFILE_NONE/) to disable profiling. During and after a profiling run [llGetSPMaxMemory](/functions/llGetSPMaxMemory/) will return the most memory used at any one time.
+
+### LSO
+
+This function has no effect for scripts not compiled to Mono.
+
+| Constant | Val | Description |
+| --- | --- | --- |
+| [PROFILE_NONE](/constants/PROFILE_NONE/) | 0 | Disables profiling |
+| [PROFILE_SCRIPT_MEMORY](/constants/PROFILE_SCRIPT_MEMORY/) | 1 | Enables memory profiling |
+
+## Caveats
+
+- Scripts compiled to LSO can not be profiled for memory use.
+- The profile state will reset to [PROFILE_NONE](/constants/PROFILE_NONE/) if:
+- the object the script is in is de-rezed, rezed or changes regions (via region cross or teleport)
+- the region that object with the script is in shuts down or restarts
+- if the script is reset or taken to or from inventory
+- There is up to 100x performance penalty to the script being profiled (but not the region).
+
+## Examples
+
+<details open>
+<summary>Calling `llScriptProfiler` can look like this:</summary>
+
+```lsl
+llScriptProfiler(PROFILE_SCRIPT_MEMORY);
+my_func();
+llScriptProfiler(PROFILE_NONE);
+llOwnerSay("This script used at most " + (string)llGetSPMaxMemory() + " bytes of memory during my_func.");
+```
+
+</details>
+
+<details>
+<summary>This is how it looks in a script as an example:</summary>
+
+```lsl collapse={1-12, 20-26}
+// need to run something for the profile to register...
+workerMethod()
+{
+    float mathNumber = 3 * PI + 3 * llSin( PI );
+    llSetText( "Answer: " + (string)mathNumber, <1, 0, 0>, 1.0 );
+}
+
+default
+{
+    state_entry()
+    {
+        llSetMemoryLimit( 5000 ); // set the memory limit
+
+        // call up the profiler, execute a method, stop profiler
+        llScriptProfiler( PROFILE_SCRIPT_MEMORY );
+        workerMethod();
+        llScriptProfiler( PROFILE_NONE );
+
+        // display memory usage...
+        llSay(0, "Memory used: " + (string)llGetSPMaxMemory() + " bytes, total memory: " +
+            (string)llGetMemoryLimit() + " bytes." );
+    }
+}
+
+// outputs
+// Object: Memory used: 4968 bytes, total memory: 5000 bytes.
+```
+
+</details>
+
+## History
+
+Date of Release [17/06/2011](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Server/11#11-06-17-233176)
+
+## See also
+
+### Functions
+
+- [llGetSPMaxMemory](/functions/llGetSPMaxMemory/)
+- [llGetMemoryLimit](/functions/llGetMemoryLimit/)
+- [llSetMemoryLimit](/functions/llSetMemoryLimit/)
+
+<WikiSource />

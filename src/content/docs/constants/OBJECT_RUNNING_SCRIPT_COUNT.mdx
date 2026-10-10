@@ -1,0 +1,625 @@
+---
+title: "OBJECT_RUNNING_SCRIPT_COUNT"
+slug: "constants/OBJECT_RUNNING_SCRIPT_COUNT"
+category: constants
+source:
+  wiki: "OBJECT RUNNING SCRIPT COUNT"
+  url: https://wiki.secondlife.com/wiki/OBJECT_RUNNING_SCRIPT_COUNT
+  revision: 1194671
+  date: 2015-01-23
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/object-running-script-count-c8819931.txt
+  license: "Content from the Second Life Wiki article OBJECT RUNNING SCRIPT COUNT (revision 1194671, 2015-01-23), CC BY-SA 3.0."
+---
+import { LSLConstant, WikiSource } from '~/components/lsl';
+
+<LSLConstant name="OBJECT_RUNNING_SCRIPT_COUNT" description />
+
+This is a flag used with [llGetObjectDetails](/functions/llGetObjectDetails/) to get the number of [running](/functions/llGetScriptState/) scripts.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-6, 12-19}
+// an example that demonstrates running scripts, total scripts, memory usage, and script time usage.
+
+default
+{
+    touch_start( integer params )
+    {
+        key toucher = llDetectedKey(0);
+
+        list scriptInfo = llGetObjectDetails( toucher, [OBJECT_TOTAL_SCRIPT_COUNT, OBJECT_RUNNING_SCRIPT_COUNT, OBJECT_SCRIPT_TIME, OBJECT_SCRIPT_MEMORY]);
+
+        string displayMessage = llGetDisplayName( toucher ) + ", has " + llList2String( scriptInfo, 1 ) +
+            " number of scripts running, with a total of " + llList2String( scriptInfo, 0 ) +
+            " scripts.\nThese take up " + (string)(llList2Integer( scriptInfo, 3 ) * 1024) +
+            " KiB of memory while using up " + (string)(llList2Float( scriptInfo, 2 ) * 1000) +
+            "ms of script time.";
+
+        llSetPrimitiveParams([ PRIM_TEXT, displayMessage, <0, 1, 1>, 1.0 ]);
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Constants
+
+|
+
+<table>
+	<tr>
+		<th>Flags</th>
+		<th></th>
+		<th>Description</th>
+		<th>Length when [typecast](https://wiki.secondlife.com/wiki/typecast) to a [string](https://wiki.secondlife.com/wiki/string)</th>
+		<th>Return</th>
+		<th>Alternatives</th>
+		<th>Local</th>
+	</tr>
+	<tr>
+		<td>[OBJECT_NAME](/constants/OBJECT_NAME/)</td>
+		<td>1</td>
+		<td>Gets the prim's name.<br />If **id** is an avatar, the [Legacy Name](https://wiki.secondlife.com/wiki/Category:LSL_Legacy_Name) is returned.</td>
+		<td>max. 63 characters</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string) `name`</td>
+		<td>
+
+			- [llKey2Name](/functions/llKey2Name/)
+			- [llDetectedName](/functions/llDetectedName/)
+
+		</td>
+		<td>[llGetObjectName](/functions/llGetObjectName/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_DESC](/constants/OBJECT_DESC/)</td>
+		<td>2</td>
+		<td>Gets the prim's description.<br />If **id** is an avatar, an empty string is returned.</td>
+		<td>max. 127 characters</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string) `desc`</td>
+		<td></td>
+		<td>[llGetObjectDesc](/functions/llGetObjectDesc/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_POS](/constants/OBJECT_POS/)</td>
+		<td>3</td>
+		<td>Gets the prim's position in [region coordinates](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region).<br />If **id** is an avatar outside the region (see above), this position is relative to the region the script is [running in](/functions/llGetRegionName/).</td>
+		<td>max. 37 characters</td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) `pos`</td>
+		<td>
+
+			- [llDetectedPos](/functions/llDetectedPos/)
+
+		</td>
+		<td>[llGetPos](/functions/llGetPos/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_ROT](/constants/OBJECT_ROT/)</td>
+		<td>4</td>
+		<td>Gets the prim's rotation.</td>
+		<td>max. 48 characters</td>
+		<td>[rotation](https://wiki.secondlife.com/wiki/rotation) `rot`</td>
+		<td>
+
+			- [llDetectedRot](/functions/llDetectedRot/)
+
+		</td>
+		<td>[llGetRot](/functions/llGetRot/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_VELOCITY](/constants/OBJECT_VELOCITY/)</td>
+		<td>5</td>
+		<td>Gets the object's velocity.</td>
+		<td>36 characters</td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) `vel`</td>
+		<td>
+
+			- [llDetectedVel](/functions/llDetectedVel/)
+
+		</td>
+		<td>[llGetVel](/functions/llGetVel/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_OWNER](/constants/OBJECT_OWNER/)</td>
+		<td>6</td>
+		<td>Gets an object's [owner](https://wiki.secondlife.com/wiki/Category:LSL_Owner) key.<br />If **id** is an avatar, that avatar's key is returned (which is the same as **id**).<br />If **id** is group-owned, a [NULL_KEY](/constants/NULL_KEY/) is returned.</td>
+		<td>36 characters</td>
+		<td>[key](https://wiki.secondlife.com/wiki/key)</td>
+		<td>
+
+			- [llDetectedOwner](/functions/llDetectedOwner/)
+			- [llGetOwnerKey](/functions/llGetOwnerKey/)
+
+		</td>
+		<td>[llGetOwner](/functions/llGetOwner/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_GROUP](/constants/OBJECT_GROUP/)</td>
+		<td>7</td>
+		<td>Gets the prim's [group](https://wiki.secondlife.com/wiki/Category:LSL_Group) key.<br />If **id** is an avatar, a [NULL_KEY](/constants/NULL_KEY/) is returned, which means a workaround is required to get an avatar's active group.`{{Footnote|There are at least 3 JIRA's about OBJECT_GROUP and avatars, LL has refused all of them. Most recently on December 5th 2013 in {{JIRA|BUG-4654}}.|There are at least 3 JIRA's about OBJECT_GROUP and avatars, LL has refused all of them. Most recently on December 5th 2013 in BUG-4654.}}`</td>
+		<td>36 characters</td>
+		<td>[key](https://wiki.secondlife.com/wiki/key) `group`</td>
+		<td>[Group](https://wiki.secondlife.com/wiki/Category:LSL_Group)</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_CREATOR](/constants/OBJECT_CREATOR/)</td>
+		<td>8</td>
+		<td>Gets the prim's [creator](https://wiki.secondlife.com/wiki/Category:LSL_Creator) key.<br />If **id** is an avatar, a [NULL_KEY](/constants/NULL_KEY/) is returned.</td>
+		<td>36 characters</td>
+		<td>[key](https://wiki.secondlife.com/wiki/key) `creator`</td>
+		<td>[Creator](https://wiki.secondlife.com/wiki/Category:LSL_Creator)</td>
+		<td>[llGetCreator](/functions/llGetCreator/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_RUNNING_SCRIPT_COUNT](/constants/OBJECT_RUNNING_SCRIPT_COUNT/)</td>
+		<td>9</td>
+		<td>Gets the number of [running](/functions/llGetScriptState/) scripts attached to the object or agent.</td>
+		<td>max. 11 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `count`</td>
+		<td></td>
+		<td>[llGetScriptState](/functions/llGetScriptState/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_TOTAL_SCRIPT_COUNT](/constants/OBJECT_TOTAL_SCRIPT_COUNT/)</td>
+		<td>10</td>
+		<td>Gets the number of scripts, both running and stopped, attached to the object or agent.</td>
+		<td>max. 11 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `count`</td>
+		<td></td>
+		<td>[llGetInventoryNumber](/functions/llGetInventoryNumber/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_SCRIPT_MEMORY](/constants/OBJECT_SCRIPT_MEMORY/)</td>
+		<td>11</td>
+		<td>Gets the amount of [script memory](https://wiki.secondlife.com/wiki/LSL_Script_Memory) used by the object or agent, in bytes, or its upper limit. [See page for more info.](/constants/OBJECT_SCRIPT_MEMORY/)</td>
+		<td>max. 11 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `bytes`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_SCRIPT_TIME](/constants/OBJECT_SCRIPT_TIME/)</td>
+		<td>12</td>
+		<td>Gets the total amount of average script CPU time used by the object or agent, in seconds. [See page for more info.](/constants/OBJECT_SCRIPT_TIME/)</td>
+		<td>max. 15 characters</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) `seconds`</td>
+		<td>[Top Scripts](https://wiki.secondlife.com/wiki/Viewerhelp:Top_Colliders_and_Top_Scripts)</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_PRIM_EQUIVALENCE](/constants/OBJECT_PRIM_EQUIVALENCE/)</td>
+		<td>13</td>
+		<td>Gets the prim equivalence of the object.</td>
+		<td>max. 11 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `count`</td>
+		<td>[Calculating land impact](http://community.secondlife.com/t5/English-Knowledge-Base/Calculating-land-impact/ta-p/974163)</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_SERVER_COST](/constants/OBJECT_SERVER_COST/)</td>
+		<td>14</td>
+		<td>Gets the [server cost](https://wiki.secondlife.com/wiki/Mesh/Mesh_Server_Weight) of the object.</td>
+		<td>max. 15 characters</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) `cost`</td>
+		<td>[Server cost](https://wiki.secondlife.com/wiki/Mesh/Mesh_Server_Weight)</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_STREAMING_COST](/constants/OBJECT_STREAMING_COST/)</td>
+		<td>15</td>
+		<td>Gets the [streaming (download) cost](https://wiki.secondlife.com/wiki/Mesh/Mesh_Streaming_Cost) of the object.</td>
+		<td>max. 15 characters</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) `cost`</td>
+		<td>[Streaming (download) cost](https://wiki.secondlife.com/wiki/Mesh/Mesh_Streaming_Cost)</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_PHYSICS_COST](/constants/OBJECT_PHYSICS_COST/)</td>
+		<td>16</td>
+		<td>Gets the [physics cost](https://wiki.secondlife.com/wiki/Mesh/Mesh_physics#physics-resource-cost) of the object.</td>
+		<td>max. 15 characters</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) `cost`</td>
+		<td>[Physics cost](https://wiki.secondlife.com/wiki/Mesh/Mesh_physics)</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_CHARACTER_TIME](/constants/OBJECT_CHARACTER_TIME/)</td>
+		<td>17</td>
+		<td>Gets the average CPU time (in seconds) used by the object for navigation, if the object is a pathfinding character. Returns 0 for non-characters.</td>
+		<td>max. 15 characters</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) `seconds`</td>
+		<td>[Pathfinding characters](https://wiki.secondlife.com/wiki/Viewerhelp:Pathfinding_characters)</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_ROOT](/constants/OBJECT_ROOT/)</td>
+		<td>18</td>
+		<td>Gets the id of the [root prim](https://wiki.secondlife.com/wiki/Link#root-prim) of the object requested.<br />If **id** is an avatar, returns the id of the [root prim](https://wiki.secondlife.com/wiki/Link#root-prim) of the [linkset](https://wiki.secondlife.com/wiki/Link#link-set) the avatar is sitting on and linked to (or the avatar's own id if the avatar is not sitting on an object within the region).</td>
+		<td>36 characters</td>
+		<td>[key](https://wiki.secondlife.com/wiki/key) `root`</td>
+		<td></td>
+		<td>[llGetLinkKey](/functions/llGetLinkKey/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_ATTACHED_POINT](/constants/OBJECT_ATTACHED_POINT/)</td>
+		<td>19</td>
+		<td>Gets the attachment point to which the object is attached. It returns an integer matching one of the [ATTACH\_\*](https://wiki.secondlife.com/wiki/Category:LSL_Integer/attach_point) constants.</td>
+		<td>max. 11 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer)</td>
+		<td></td>
+		<td>[llGetAttached](/functions/llGetAttached/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_PATHFINDING_TYPE](/constants/OBJECT_PATHFINDING_TYPE/)</td>
+		<td>20</td>
+		<td>Gets the pathfinding setting of the object in the region. It returns an integer matching one of the [OPT\_\*](https://wiki.secondlife.com/wiki/Category:LSL_Pathfinding_Types) constants.</td>
+		<td>max. 11 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `type`</td>
+		<td>[Pathfinding types](https://wiki.secondlife.com/wiki/Pathfinding_Quick_Start_Guide)</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_PHYSICS](/constants/OBJECT_PHYSICS/)</td>
+		<td>21</td>
+		<td>Gets the integer boolean detailing if physics is enabled or disabled on the object.<br />If **id** is an [avatar](/categories/avatar/) or [attachment](https://wiki.secondlife.com/wiki/Category:LSL_Attachment), `0` is returned.</td>
+		<td>1 character</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer)</td>
+		<td></td>
+		<td>[llGetStatus](/functions/llGetStatus/) [PRIM_PHYSICS](/constants/PRIM_PHYSICS/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_PHANTOM](/constants/OBJECT_PHANTOM/)</td>
+		<td>22</td>
+		<td>Gets the integer boolean detailing if phantom is enabled or disabled on the object.<br />If **id** is an [avatar](/categories/avatar/) or [attachment](https://wiki.secondlife.com/wiki/Category:LSL_Attachment), `0` is returned.</td>
+		<td>1 character</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer)</td>
+		<td></td>
+		<td>[llGetStatus](/functions/llGetStatus/) [PRIM_PHANTOM](/constants/PRIM_PHANTOM/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_TEMP_ON_REZ](/constants/OBJECT_TEMP_ON_REZ/)</td>
+		<td>23</td>
+		<td>Gets the integer boolean detailing if temporary is enabled or disabled on the object.</td>
+		<td>1 character</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer)</td>
+		<td></td>
+		<td>[PRIM_TEMP_ON_REZ](/constants/PRIM_TEMP_ON_REZ/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_RENDER_WEIGHT](/constants/OBJECT_RENDER_WEIGHT/)</td>
+		<td>24</td>
+		<td>Gets the avatar's render weight.<br />If **id** is an object, `0` is returned. If **id** is an avatar whose render weight is unknown to the simulator, -1 is returned. The maximum render weight reported by the server is 500000&lt;ref>On July 2016, `{{u|Rolig Loon}}` commented on [the talk page for llGetObjectDetails()](https://wiki.secondlife.com/wiki/Talk:LlGetObjectDetails#new-constants-sep-2013) that allegedly SL viewers are showing render weights of 1,300,000.&lt;/ref>.</td>
+		<td>max. 6 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `weight`</td>
+		<td>[Avatar_Rendering_Cost](https://wiki.secondlife.com/wiki/Avatar_Rendering_Cost)</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_HOVER_HEIGHT](/constants/OBJECT_HOVER_HEIGHT/)</td>
+		<td>25</td>
+		<td>Gets the [hover height](https://wiki.secondlife.com/wiki/Hover_Height) of the avatar.<br />If **id** is not an avatar, 0.0 is returned. Normal values are in the range \[-2.0, 2.0\] with a default of 0.0. This value does *not* reflect the avatar shape's "Hover" slider, only the dynamic viewer setting.</td>
+		<td>max. 9 characters</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) `height`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_BODY_SHAPE_TYPE](/constants/OBJECT_BODY_SHAPE_TYPE/)</td>
+		<td>26</td>
+		<td>
+
+			Gets a float which describes the sex setting of the avatar's currently worn shape.
+
+			If **id** is not an avatar, -1.0 is returned.
+
+			Normal operational values are in the range \[0.0, 1.0\].
+
+			- 0.0 is standard female setting,
+			- 1.0 is standard male setting.
+
+			Intermediate values with visible differences are possible with manually crafted shapes.
+
+		</td>
+		<td>max. 9 characters</td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) `shape`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_LAST_OWNER_ID](/constants/OBJECT_LAST_OWNER_ID/)</td>
+		<td>27</td>
+		<td>
+
+			Gets the UUID of the object's previous owner, if known.
+
+			- For group-owned objects, this is the avatar that deeded the object.
+			- Returns [NULL_KEY](/constants/NULL_KEY/) for avatars, or objects that were never transferred.
+			- A rezzed object taken back to inventory, then re-rezzed, will return its current owner key.
+
+		</td>
+		<td>36 characters</td>
+		<td>[key](https://wiki.secondlife.com/wiki/key) `last_owner`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_CLICK_ACTION](/constants/OBJECT_CLICK_ACTION/)</td>
+		<td>28</td>
+		<td>Gets the [click action](/functions/llSetClickAction/) of the prim. It returns an integer matching one of the [CLICK_ACTION\_\*](https://wiki.secondlife.com/wiki/Category:LSL_Click_Action) constants.</td>
+		<td>max. 3 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `action`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_OMEGA](/constants/OBJECT_OMEGA/)</td>
+		<td>29</td>
+		<td>Gets the object's rotational velocity (radians per second).</td>
+		<td>36 characters</td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) `omega`</td>
+		<td></td>
+		<td>[llGetOmega](/functions/llGetOmega/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_PRIM_COUNT](/constants/OBJECT_PRIM_COUNT/)</td>
+		<td>30</td>
+		<td>Gets the object's prim count</td>
+		<td>max. 3 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `count`</td>
+		<td>[llGetObjectPrimCount](/functions/llGetObjectPrimCount/)</td>
+		<td>[llGetNumberOfPrims](/functions/llGetNumberOfPrims/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_TOTAL_INVENTORY_COUNT](/constants/OBJECT_TOTAL_INVENTORY_COUNT/)</td>
+		<td>31</td>
+		<td>Gets the object's total number of [inventory items](/functions/llGetInventoryNumber/).</td>
+		<td>max. 10 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `count`</td>
+		<td></td>
+		<td>[llGetInventoryNumber](/functions/llGetInventoryNumber/)([INVENTORY_ALL](/constants/INVENTORY_ALL/))</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_REZZER_KEY](/constants/OBJECT_REZZER_KEY/)</td>
+		<td>32</td>
+		<td>Gets the key of the object that rezzed this object be it an object or an avatar.</td>
+		<td>36 characters</td>
+		<td>[key](https://wiki.secondlife.com/wiki/key) `rezzer`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_GROUP_TAG](/constants/OBJECT_GROUP_TAG/)</td>
+		<td>33</td>
+		<td>Gets the avatar's group tag text.<br />If **id** is not an avatar, an empty string is returned.</td>
+		<td>max. 20 bytes</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string) `text`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_TEMP_ATTACHED](/constants/OBJECT_TEMP_ATTACHED/)</td>
+		<td>34</td>
+		<td>Gets the integer boolean detailing if the object is [temporarily attached](/functions/llAttachToAvatarTemp/).</td>
+		<td>1 character</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer)</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_ATTACHED_SLOTS_AVAILABLE](/constants/OBJECT_ATTACHED_SLOTS_AVAILABLE/)</td>
+		<td>35</td>
+		<td>Gets the avatar's available attachment slot count.<br />If **id** is not an avatar, 0 is returned.</td>
+		<td>max. 2 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `count`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_CREATION_TIME](/constants/OBJECT_CREATION_TIME/)</td>
+		<td>36</td>
+		<td>Gets the object's creation time. This time is established with raw material rezzing through the build menu and with mesh uploads.<br />This time is NOT established with inventory rezzes, scripted rezzes, object modifying, copying or transferring.<br />If **id** is an avatar, an empty string is returned.</td>
+		<td>max. 27 bytes</td>
+		<td>[string](https://wiki.secondlife.com/wiki/string) `timestamp`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_SELECT_COUNT](/constants/OBJECT_SELECT_COUNT/)</td>
+		<td>37</td>
+		<td>Gets the total number of agents selecting any links in the object.<br />If **id** is an avatar, 0 is returned.</td>
+		<td>max. 3 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `count`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_SIT_COUNT](/constants/OBJECT_SIT_COUNT/)</td>
+		<td>38</td>
+		<td>Gets the total number of agents sitting on any links in the object.<br />If **id** is an avatar, 0 is returned.</td>
+		<td>max. 3 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `count`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_ANIMATED_COUNT](/constants/OBJECT_ANIMATED_COUNT/)</td>
+		<td>39</td>
+		<td>Gets the integer boolean detailing if the object's root is set to "Animated Mesh" or gets the total number of "Animated Mesh" attachments worn by an agent.</td>
+		<td>max. 1 character</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `count`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_ANIMATED_SLOTS_AVAILABLE](/constants/OBJECT_ANIMATED_SLOTS_AVAILABLE/)</td>
+		<td>40</td>
+		<td>Gets the avatar's available "Animated Mesh" attachment slot count.<br />If **id** is not an avatar, 0 is returned.</td>
+		<td>max. 2 characters</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `count`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_ACCOUNT_LEVEL](/constants/OBJECT_ACCOUNT_LEVEL/)</td>
+		<td>41</td>
+		<td>
+
+			Gets the account level of an avatar.
+
+			If **id** is not an avatar, -1 is returned.
+
+			- 0 is Basic account level.
+			- 1 is Premium account level.
+			- 5 is Plus account level.
+			- 10 is Premium Plus account level.
+
+		</td>
+		<td>max. 1 character</td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `level`</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_MATERIAL](/constants/OBJECT_MATERIAL/)</td>
+		<td>42</td>
+		<td>Retrieves the physics material set on this object. It returns an integer matching one of the [PRIM_MATERIAL\_\*](https://wiki.secondlife.com/wiki/Category:LSL_Prim/Materials) constants.</td>
+		<td></td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) `material`</td>
+		<td></td>
+		<td>[llGetPrimitiveParams](/functions/llGetPrimitiveParams/)<br />[PRIM_MATERIAL](/constants/PRIM_MATERIAL/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_MASS](/constants/OBJECT_MASS/)</td>
+		<td>43</td>
+		<td>Gets the mass (in Kilograms) of this object's linkset.</td>
+		<td></td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) `mass`</td>
+		<td></td>
+		<td>[llGetMassMKS](/functions/llGetMassMKS/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_TEXT](/constants/OBJECT_TEXT/)</td>
+		<td>44</td>
+		<td>Gets the floating text displayed above this object.</td>
+		<td></td>
+		<td>[string](https://wiki.secondlife.com/wiki/string) `text`</td>
+		<td></td>
+		<td>[llGetPrimitiveParams](/functions/llGetPrimitiveParams/)<br />[PRIM_TEXT](/constants/PRIM_TEXT/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_REZ_TIME](/constants/OBJECT_REZ_TIME/)</td>
+		<td>45</td>
+		<td>Retrieves the time that this object was rezzed.</td>
+		<td></td>
+		<td>[string](https://wiki.secondlife.com/wiki/string) time</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>[OBJECT_LINK_NUMBER](/constants/OBJECT_LINK_NUMBER/)</td>
+		<td>46</td>
+		<td>Get this object's index in the linkset.</td>
+		<td></td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) link_number</td>
+		<td></td>
+		<td>[llGetLinkNumber](/functions/llGetLinkNumber/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_SCALE](/constants/OBJECT_SCALE/)</td>
+		<td>47</td>
+		<td>Get the size of this object.</td>
+		<td></td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) scale</td>
+		<td></td>
+		<td>[llGetScale](/functions/llGetScale/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_TEXT_COLOR](/constants/OBJECT_TEXT_COLOR/)</td>
+		<td>48</td>
+		<td>Gets the color of the floating text displayed above this object.</td>
+		<td></td>
+		<td>[vector](https://wiki.secondlife.com/wiki/vector) color</td>
+		<td></td>
+		<td>[llGetPrimitiveParams](/functions/llGetPrimitiveParams/)<br />[PRIM_TEXT](/constants/PRIM_TEXT/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_TEXT_ALPHA](/constants/OBJECT_TEXT_ALPHA/)</td>
+		<td>49</td>
+		<td>Gets the alpha value of the floating text displayed above this object.</td>
+		<td></td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) alpha</td>
+		<td></td>
+		<td>[llGetPrimitiveParams](/functions/llGetPrimitiveParams/)<br />[PRIM_TEXT](/constants/PRIM_TEXT/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_HEALTH](/constants/OBJECT_HEALTH/)</td>
+		<td>50</td>
+		<td>Retrieves the health of an avatar or prim.</td>
+		<td></td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) health</td>
+		<td></td>
+		<td>[llGetPrimitiveParams](/functions/llGetPrimitiveParams/)<br />[PRIM_HEALTH](/constants/PRIM_HEALTH/)<br /> [llGetHealth](/functions/llGetHealth/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_DAMAGE](/constants/OBJECT_DAMAGE/)</td>
+		<td>51</td>
+		<td>Retrieves the amount of damage a prim inflicts on collision.</td>
+		<td></td>
+		<td>[float](https://wiki.secondlife.com/wiki/float) damage</td>
+		<td></td>
+		<td>[llGetPrimitiveParams](/functions/llGetPrimitiveParams/)<br />[PRIM_DAMAGE](/constants/PRIM_DAMAGE/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_DAMAGE_TYPE](/constants/OBJECT_DAMAGE_TYPE/)</td>
+		<td>52</td>
+		<td>Retrieves the type of damage a prim inflicts on collision. It returns an integer that can match one of the [DAMAGE_TYPE\_\*](https://wiki.secondlife.com/wiki/Category:LSL_Combat2) constants, be a custom damage type or be repurposed by a combat system.</td>
+		<td></td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) damage_type</td>
+		<td></td>
+		<td>[llGetPrimitiveParams](/functions/llGetPrimitiveParams/)<br />[PRIM_DAMAGE](/constants/PRIM_DAMAGE/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_PERMS](/constants/OBJECT_PERMS/)`, integer base, integer owner, integer group, integer everyone, integer next_owner`</td>
+		<td>53</td>
+		<td>Retrieves the permissions for this object as 5 integers.</td>
+		<td rowspan="2"></td>
+		<td rowspan="2">[integer](https://wiki.secondlife.com/wiki/integer) base, [integer](https://wiki.secondlife.com/wiki/integer) owner, [integer](https://wiki.secondlife.com/wiki/integer) group, [integer](https://wiki.secondlife.com/wiki/integer) everyone, [integer](https://wiki.secondlife.com/wiki/integer) next_owner</td>
+		<td rowspan="2"></td>
+		<td rowspan="2">[llGetObjectPermMask](/functions/llGetObjectPermMask/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_PERMS_COMBINED](/constants/OBJECT_PERMS_COMBINED/)`, integer base, integer owner, integer group, integer everyone, integer next_owner`</td>
+		<td>54</td>
+		<td>Retrieves the permissions for this object combined with all of its inventory items as 5 integers.</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_LOCKED](/constants/OBJECT_LOCKED/)</td>
+		<td>55</td>
+		<td>Retrieves the [locked](https://wiki.secondlife.com/wiki/locked) status of this object</td>
+		<td></td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) isLocked</td>
+		<td></td>
+		<td>[llGetObjectPermMask](/functions/llGetObjectPermMask/)</td>
+	</tr>
+	<tr>
+		<td>[OBJECT_VOLUME_DETECT](/constants/OBJECT_VOLUME_DETECT/)</td>
+		<td>56</td>
+		<td>Retrieves the VolumeDetect status of this object</td>
+		<td></td>
+		<td>[integer](https://wiki.secondlife.com/wiki/integer) isVolumeDetect</td>
+		<td></td>
+		<td>[llVolumeDetect](/functions/llVolumeDetect/)</td>
+	</tr>
+</table>
+
+### Functions
+
+- [llGetObjectDetails](/functions/llGetObjectDetails/)
+
+<WikiSource />

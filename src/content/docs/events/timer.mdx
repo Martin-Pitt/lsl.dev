@@ -1,0 +1,70 @@
+---
+title: "timer"
+slug: "events/timer"
+category: events
+source:
+  wiki: "Timer"
+  url: https://wiki.secondlife.com/wiki/Timer
+  revision: 1194108
+  date: 2015-01-22
+  contributor: "Lady Sumoku"
+  raw: /wiki-source/timer-cdeec2b3.txt
+  license: "Content from the Second Life Wiki article Timer (revision 1194108, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLEvent, WikiSource } from '~/components/lsl';
+
+<LSLEvent name="timer" />
+
+Repeats the code in the timer(). Result of the [llSetTimerEvent](/functions/llSetTimerEvent/) library function call.
+
+```lsl title="How to use" frame="terminal"
+timer()
+{
+
+}
+```
+
+## Caveats
+
+- The time between timer events can be longer than that specified with [llSetTimerEvent](/functions/llSetTimerEvent/), this is caused by:
+- **Time dilation** - See [llGetRegionTimeDilation](/functions/llGetRegionTimeDilation/) for more information;
+- **Default event delay** - Only so many events can be triggered per second;
+- **Event Execution** - If the execution of an event takes too long;
+- **`llSleep()`**.
+- Only one timer can be active at one time.
+- The timer survives state changes, but does not survive resets.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-5}
+float gap = 2.0;
+float counter = 0.0;
+
+default
+{
+    state_entry()
+    {
+        // Activate the timer listener every 2 seconds
+        llSetTimerEvent(gap);
+    }
+
+    timer()
+    {
+        counter = counter + gap;
+        llSay(0, (string)counter+" seconds have passed");
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llSetTimerEvent](/functions/llSetTimerEvent/)
+
+<WikiSource />

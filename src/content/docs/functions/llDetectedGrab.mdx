@@ -1,0 +1,117 @@
+---
+title: "llDetectedGrab"
+slug: "functions/llDetectedGrab"
+category: functions
+source:
+  wiki: "LlDetectedGrab"
+  url: https://wiki.secondlife.com/wiki/LlDetectedGrab
+  revision: 1218200
+  date: 2025-04-23
+  contributor: "Thunder Rahja"
+  raw: /wiki-source/lldetectedgrab-aa8a304e.txt
+  license: "Content from the Second Life Wiki article LlDetectedGrab (revision 1218200, 2025-04-23), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDetectedGrab" />
+
+Returns [&lt;0.0, 0.0, 0.0>](/constants/ZERO_VECTOR/) if **number** is out of range or if called from an event other than the [touch](/events/touch/) event.
+
+Returns a [vector](https://wiki.secondlife.com/wiki/vector) that is the [grab](https://wiki.secondlife.com/wiki/Category:LSL_Grab) offset of the user [touching](/events/touch/) the object; only works in the [touch](/events/touch/) event.
+
+```lsl title="How to use" frame="terminal"
+vector result = llDetectedGrab(0);
+```
+
+## Specification
+
+- If the object is [physical](https://wiki.secondlife.com/wiki/LSL_Glossary#physical), grabs are detected if the avatar has permission to move the object and the object is not [locked](https://wiki.secondlife.com/wiki/locked).
+- If the object is [nonphysical](https://wiki.secondlife.com/wiki/LSL_Glossary#nonphysical), grabs from all avatars are detected.
+
+## Caveats
+
+- When called in HUD attachments, values returned are affected by the wearer's position and rotation.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llSetStatus(PRIM_PHYSICS,TRUE);//This allows the object to be "grabbed" and dragged
+    }
+    touch(integer num_detected)
+    {
+        llSay(0,(string)llDetectedGrab(0));//Be prepared for a great amount of chatted info.
+                                           //The faster you move the mouse while grabbing the object the greater the offset becomes.
+                                           //This is not due to the speed but the reaction time of the turn around of the physical prim,
+                                           //thus an offset (distance from grab to prim center) is created and measured by this function.
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={6-25}
+/******
+
+Simple llDetectedGrab illustration, rez a prim and add this script.
+The prim will become a cone that follows mouse grabs.
+
+ Click and hold the mouse button down on the object, then:
+ - Drag left and right to move parallel to the camera focal plane.
+ - Drag up and down to move to and from the camera.
+ - Hold down Ctrl, then drag up and down to move vertically.
+
+******/
+
+default
+{
+    state_entry()
+    {
+        llMinEventDelay(0.25);
+        llSetStatus(STATUS_PHYSICS, FALSE); // make the object static for simplicity
+        llSetPrimitiveParams([
+            PRIM_SIZE, <0.5, 0.5, 0.5>,
+            PRIM_TYPE, PRIM_TYPE_CYLINDER, PRIM_HOLE_DEFAULT, <0.0, 1.0, 0.0>,
+              0.0, ZERO_VECTOR, ZERO_VECTOR, ZERO_VECTOR
+        ]); // a cone that can follow the mouse pointer
+    }
+
+    touch(integer total_number)
+    {
+        llLookAt(llGetPos() + llDetectedGrab(0), 1.0, 1.0);
+    }
+}
+```
+
+</details>
+
+## Notes
+
+`llDetectedGrab()` is not blocked by [STATUS_BLOCK_GRAB](/constants/STATUS_BLOCK_GRAB/) or [STATUS_BLOCK_GRAB_OBJECT](/constants/STATUS_BLOCK_GRAB_OBJECT/).
+
+## See also
+
+### Functions
+
+- [llPassTouches](/functions/llPassTouches/)
+
+### Events
+
+- [touch_start](/events/touch_start/)
+- [touch](/events/touch/)
+- [touch_end](/events/touch_end/)
+
+### Articles
+
+- [Grab](https://wiki.secondlife.com/wiki/Category:LSL_Grab)
+
+<WikiSource />

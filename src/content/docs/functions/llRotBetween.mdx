@@ -1,0 +1,120 @@
+---
+title: "llRotBetween"
+slug: "functions/llRotBetween"
+category: functions
+source:
+  wiki: "LlRotBetween"
+  url: https://wiki.secondlife.com/wiki/LlRotBetween
+  revision: 1212796
+  date: 2022-11-17
+  contributor: "Signal Linden"
+  raw: /wiki-source/llrotbetween-90944b8e.txt
+  license: "Content from the Second Life Wiki article LlRotBetween (revision 1212796, 2022-11-17), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llRotBetween" />
+
+Returns a [rotation](https://wiki.secondlife.com/wiki/rotation) that is the shortest rotation between the *direction* **start** and the *direction* **end**
+
+```lsl title="How to use" frame="terminal"
+rotation result = llRotBetween(ZERO_VECTOR, ZERO_VECTOR);
+```
+
+## Specification
+
+**start** and **end** are *directions* and are relative to the origin `<0.0, 0.0, 0.0>`. If you have coordinates relative to a different origin, subtract that origin from the input vectors.
+
+**Note that the input vectors are** *directions*, NOT position coordinates.
+
+Feeding position coordinates will **not** work, or at minimum be very inaccurate and / or inconsistent.
+
+## Caveats
+
+- `start * llRotBetween(start, end) == end` is only true if **start** and **end** have the same magnitude and neither have a magnitude of zero (see [useful snippets](#useful-snippets) for a workaround).
+- This of course is ignoring floating point precision errors.
+- The above is true because of vector magnitudes and not a shortcoming of this function. The **rotation** returned is **correct** regardless of magnitudes
+- Rotations are from -PI to +[PI](/constants/PI/) around each axis.
+
+## Examples
+
+<details open>
+<summary>Drop the below script into a prim. This script will cause the object to orient it's positive X axis towards it's owner's avatar when touched.</summary>
+
+```lsl
+default
+{
+    touch_start(integer total_number)
+    {
+        list lTemp = llGetObjectDetails(llGetOwner(),[OBJECT_POS]); //Get the owner's position (region coordinates)
+        vector start = llRot2Fwd(ZERO_ROTATION); //Object's X axis is forward. (Can be substituted with llRot2Left (Y axis) or llRot2Up (Z axis). Negative values (-llRot2Fwd) can be used to spin the prim 180 degrees)
+        //start = llRot2Fwd( llAxisAngle2Rot(<0,0,1>,45*DEG_TO_RAD) ); //Uncommenting this line will cause the prim to point one of it's corners towards the avatar, instead of the forward face.
+        vector end = llVecNorm(llList2Vector(lTemp,0) - llGetPos()); //Convert the owner's position into a normalized direction vector (relative to the prim).
+        llSetLinkPrimitiveParamsFast(LINK_THIS,[PRIM_ROTATION,llRotBetween(start,end)]); //Set the prim's rotation accordingly.
+    }
+    //llRot2Fwd(ZERO_ROTATION) is equivalent to <1,0,0> , llRot2Left would be <0,1,0> and llRot2Up would be <0,0,1>. Negative values ( -llRot2Fwd(ZERO_ROTATION) ) would be <-1,0,0>, -llRot2Left would be <0,-1,0> and -llRot2Up would be <0,0,-1>
+    //Note that a value other than ZERO_ROTATION may cause unexpected results. Unless you know the exact offset you need for your object, then leave this as-is.
+} //Jenna Huntsman
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl
+llRotBetween(<1.0, 0.0, 0.0>, <0.0, -1.0, 0.0>)
+// will return <0.00000, 0.00000, -0.70711, 0.70711> (which represents -90 degrees on the z axis)
+
+llRotBetween(<0.0, 0.0, 0.0>, <0.0, -1.0, 0.0>)
+// will return <0.00000, 0.00000, 0.00000, 1.00000> (which represents a zero angle on all axis)
+// because <0.0, 0.0, 0.0> does not convey a direction.
+```
+
+</details>
+
+## Helper functions
+
+This function adjusts the magnitude of the quaternion so `start * llRotBetween(start, end) == end` is true as long as neither have a magnitude really close to zero. They do not have to have the same magnitude. (If either is too close to zero than this will return an unadjusted quaternion). While this is mathematically correct, it won't help with floating point rounding errors, so it's more accurate to say `start * return ≈ end`.
+
+```lsl
+rotation RotBetween(vector start, vector end) //adjusts quaternion magnitude so (start * return == end)
+{//Authors note: I have never had a use for this but it's good to know how to do it if I did.
+    rotation rot = llRotBetween(start, end);
+    float d = start * start;
+    if(d)//is 'start' zero?
+        if((d = llPow(end * end / d, 0.25)))//is 'end' zero?
+            return <rot.x * d, rot.y * d, rot.z * d, rot.s * d>;
+    return rot;
+}//Strife Onizuka
+```
+
+## Notes
+
+Vectors that are near opposite each other in direction may lead to erroneous results.
+
+```lsl
+// First Vector is due north second vector is ALMOST due south.
+rotation lRotation = llRotBetween( <0., 1., 0.>, <-0.001, -.1, 0.> );
+llSay(0, lRotation );
+// Provides a result of <1.00000, 0.00000, 0.00000, 0.00000>.
+```
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- SVC-4415: type=bug|llRotBetween sometimes gives erroneous results.
+- SCR-309: type=fs|llRotBetween has issues, give us something better
+
+## See also
+
+### Functions
+
+- [llAngleBetween](/functions/llAngleBetween/)
+- [llRot2Fwd](/functions/llRot2Fwd/)
+- [llRot2Left](/functions/llRot2Left/)
+- [llRot2Up](/functions/llRot2Up/)
+- [llVecNorm](/functions/llVecNorm/)
+
+<WikiSource />

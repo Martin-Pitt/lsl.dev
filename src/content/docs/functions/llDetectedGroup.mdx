@@ -1,0 +1,57 @@
+---
+title: "llDetectedGroup"
+slug: "functions/llDetectedGroup"
+category: functions
+source:
+  wiki: "LlDetectedGroup"
+  url: https://wiki.secondlife.com/wiki/LlDetectedGroup
+  revision: 1218165
+  date: 2025-04-09
+  contributor: "WolfGang Senizen"
+  raw: /wiki-source/lldetectedgroup-4f69f23f.txt
+  license: "Content from the Second Life Wiki article LlDetectedGroup (revision 1218165, 2025-04-09), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llDetectedGroup" description />
+
+Returns [FALSE](/constants/FALSE/) if **number** is out of range.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is [TRUE](/constants/TRUE/) if the detected [object](https://wiki.secondlife.com/wiki/object) or [agent](/constants/AGENT/) has the same *active* [group](https://wiki.secondlife.com/wiki/group) as the [prim](https://wiki.secondlife.com/wiki/prim) containing the script. Otherwise [FALSE](/constants/FALSE/) is returned.
+
+```lsl title="How to use" frame="terminal"
+integer result = llDetectedGroup(0);
+```
+
+## Caveats
+
+- There is no way to detect if the prim is in the same group as one of the agent's inactive groups.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//Gives inventory only to agents with the same active group
+default
+{
+    touch_start(integer total_number)
+    {
+        if (llDetectedGroup(0) )     //same as llSameGroup(llDetectedKey(0) ) (with llSameGroup, detected must be in the sim)
+            llGiveInventory(llDetectedKey(0), llGetInventoryName(INVENTORY_OBJECT, 0) );
+        else
+            llSay(0, "Wrong active group!");
+    }
+}
+```
+
+</details>
+
+## See also
+
+### Functions
+
+- [llSameGroup](/functions/llSameGroup/)
+
+<WikiSource />

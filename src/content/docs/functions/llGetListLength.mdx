@@ -1,0 +1,102 @@
+---
+title: "llGetListLength"
+slug: "functions/llGetListLength"
+category: functions
+source:
+  wiki: "LlGetListLength"
+  url: https://wiki.secondlife.com/wiki/LlGetListLength
+  revision: 1194199
+  date: 2015-01-22
+  contributor: "ObviousAltIsObvious Resident"
+  raw: /wiki-source/llgetlistlength-76826f9a.txt
+  license: "Content from the Second Life Wiki article LlGetListLength (revision 1194199, 2015-01-22), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetListLength" description />
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is the number of elements in the list **src**.
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetListLength([]);
+```
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl
+//Basic usage
+default
+{
+    state_entry()
+    {
+        list testList = ["one", "two", "three"];
+        integer length = llGetListLength(testList);
+        llOwnerSay("There are " + (string)length + " entries in the list.");
+    }
+}
+```
+
+</details>
+
+## Notes
+
+### Best Practices
+
+When using list length to help you loop through a list, it is better to determine the length first, then start your loop:
+
+```lsl
+integer length = llGetListLength(mylist);
+
+integer index;// default is 0
+while (index < length)
+{
+    llSay(0, llList2String(mylist, index));
+    ++index;
+}
+```
+
+The following example is to illustrate what not to do, it calculates the length in the "for" loop and is inefficient because the length gets recalculated at each pass through the loop. This should only ever be done if the list is in fact changing (in length) with each iteration of the loop`{{Footnote|Recalculating the length is slow because the VM duplicates the entire list (including the values) when it is pushed on the stack (so it can be popped off the stack when the length is calculated).}}`.
+
+```lsl
+integer index;// default is 0
+while (index < llGetListLength(mylist))
+{
+    llSay(0, llList2String(mylist, index));
+    ++index;
+}
+```
+
+:::note
+Please read [this intro of how to iterate over a list in LSL](https://wiki.secondlife.com/wiki/User:Kireji_Haiku/How_to_deal_with_lists_in_LSL).
+:::
+
+### LSO Optimizations
+
+A faster and lighter (in bytecode) way to determine the length of a list is to do a not-equals compare with a null list. This works because the list not-equals compare returns the difference between the lengths, meaning that it returns the same result as `llGetListLength()`, minus the overhead in bytecode, and performance penalty of calling a non-native function. Note: This optimization is much less beneficial time-wise in Mono as Mono's `llGetListLength` function is almost twice as fast, however the bytecode saving is still about 30 bytes.
+
+```lsl
+list in;
+integer len_in = llGetListLength(in);
+integer flen_in = (in != []);
+//flen_in and len_in will be the same
+
+integer neg_len_in = -llGetListLength(in);
+integer fneg_len_in = ([] != in);
+//fneg_len_in and neg_len_in will be the same
+```
+
+## Additional wiki content
+
+`{{Issues/SVC-6364}}`
+
+## See also
+
+### Functions
+
+- [llListStatistics](/functions/llListStatistics/) — [LIST_STAT_NUM_COUNT](/constants/LIST_STAT_NUM_COUNT/) – Returns the number of [integer](https://wiki.secondlife.com/wiki/integer)s and [float](https://wiki.secondlife.com/wiki/float)s in the list
+- [llStringLength](/functions/llStringLength/) — Returns the number of characters in a string.
+
+<WikiSource />

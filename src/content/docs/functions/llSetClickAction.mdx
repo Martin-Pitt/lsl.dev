@@ -1,0 +1,235 @@
+---
+title: "llSetClickAction"
+slug: "functions/llSetClickAction"
+category: functions
+source:
+  wiki: "LlSetClickAction"
+  url: https://wiki.secondlife.com/wiki/LlSetClickAction
+  revision: 1217909
+  date: 2025-01-28
+  contributor: "Maestro Linden"
+  raw: /wiki-source/llsetclickaction-d8526360.txt
+  license: "Content from the Second Life Wiki article LlSetClickAction (revision 1217909, 2025-01-28), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llSetClickAction" />
+
+Sets the action performed when a prim is clicked upon (aka [click action](https://wiki.secondlife.com/wiki/click_action)).
+
+When the cursor hovers over the prim, its image changes to reflect the action.
+
+```lsl title="How to use" frame="terminal"
+llSetClickAction(0);
+```
+
+## Specification
+
+&lt;div id="box">
+
+### Constants
+
+&lt;div style="padding: 0.5em;">
+
+| Flag |  | Description | Cursor |
+| --- | --- | --- | --- |
+| [CLICK_ACTION_NONE](/constants/CLICK_ACTION_NONE/) | 0 | Performs the default action: when the prim is touched, touch events are triggered |  |
+| [CLICK_ACTION_TOUCH](/constants/CLICK_ACTION_TOUCH/) | 0 | When the prim is touched, touch events are triggered |  |
+| [CLICK_ACTION_SIT](/constants/CLICK_ACTION_SIT/) | 1 | When the prim is touched, the avatar sits upon it | [File:SitActionCursor.png‎](https://wiki.secondlife.com/wiki/File:SitActionCursor.png%E2%80%8E) |
+| [CLICK_ACTION_BUY](/constants/CLICK_ACTION_BUY/) | 2 | When the prim is touched, the buy dialog is opened | [File:SaleOneclickCursor.png](https://wiki.secondlife.com/wiki/File:SaleOneclickCursor.png) |
+| [CLICK_ACTION_PAY](/constants/CLICK_ACTION_PAY/) | 3 | When the prim is touched, the pay dialog is opened | [File:SaleOneclickCursor.png](https://wiki.secondlife.com/wiki/File:SaleOneclickCursor.png) |
+| [CLICK_ACTION_OPEN](/constants/CLICK_ACTION_OPEN/) | 4 | When the prim is touched, the object inventory dialog is opened | [File:OpenOneclickCursor.png](https://wiki.secondlife.com/wiki/File:OpenOneclickCursor.png) |
+| [CLICK_ACTION_PLAY](/constants/CLICK_ACTION_PLAY/) | 5 | Play or pause parcel media on touch | [Image:Toolplay.png](https://wiki.secondlife.com/wiki/Image:Toolplay.png) |
+| [CLICK_ACTION_OPEN_MEDIA](/constants/CLICK_ACTION_OPEN_MEDIA/) | 6 | Play parcel media on touch, no pause | [Image:Toolmediaopen.png](https://wiki.secondlife.com/wiki/Image:Toolmediaopen.png) |
+| [CLICK_ACTION_ZOOM](/constants/CLICK_ACTION_ZOOM/) | 7 | Zoom the avatar camera on this object ([Viewer 2](https://wiki.secondlife.com/wiki/Viewer_2_Help)) | [Image:Toolzoom.png](https://wiki.secondlife.com/wiki/Image:Toolzoom.png) |
+| [CLICK_ACTION_DISABLED](/constants/CLICK_ACTION_DISABLED/) | 8 | No click action. No touches detected or passed. |  |
+| [CLICK_ACTION_IGNORE](/constants/CLICK_ACTION_IGNORE/) | 9 | Clicks go through the object to whatever is behind it. No touches detected. |  |
+
+&lt;/div>&lt;/div>
+
+## Caveats
+
+- When set in the root of an object the chosen CLICK_ACTION\_\* will be that for the children also even if they have their own [llSetClickAction](/functions/llSetClickAction/) set (it will be over-ridden). However (in the case of [touch](/events/touch/) for example) if the CLICK_ACTION\_\* is set in the root but not at all in the children (including not having [touch](/events/touch/) [event](https://wiki.secondlife.com/wiki/event) [script](https://wiki.secondlife.com/wiki/Script)s in them (this creates a default [CLICK_ACTION_TOUCH](/constants/CLICK_ACTION_TOUCH/))) the effect of the roots CLICK_ACTION\_\* is not *seen* but the CLICK_ACTION\_\* is *used* on clicking. To both use **and see** the correct cursor the CLICK_ACTION\_\* flags must match in the children and root.
+- If [llSetClickAction](/functions/llSetClickAction/) is [CLICK_ACTION_PAY](/constants/CLICK_ACTION_PAY/) then you must have a [money](/events/money/) event, or it will revert to [CLICK_ACTION_NONE](/constants/CLICK_ACTION_NONE/).
+- While this function works or attached objects (click action can be changed), the configured click action of an attachment is ignored by the viewer (with exceptions). The viewer always\* behaves as though an attached object has [CLICK_ACTION_TOUCH](/constants/CLICK_ACTION_TOUCH/) set.
+- The only exception to the above rule is when the chosen click action is [CLICK_ACTION_DISABLED](/constants/CLICK_ACTION_DISABLED/), which will disable the cursor changing from the standard pointer arrow to the touch pointer.
+- [llSetClickAction](/functions/llSetClickAction/) has to be called **before** an avatar clicks on an object. Calling it while an avatar is clicking (click & holding) will cause this function to silently fail. You *can* set the click action after an avatar touches an object, but bear in mind that there may be some delay before the given avatar's viewer will update due to ping times, etc.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+<table>
+	<tr>
+		<th>**make sitting easier**</th>
+		<th>**make unpacking for next owner easier**</th>
+		<th>**make buying for customers easier**</th>
+	</tr>
+	<tr>
+		<td>
+
+			```lsl
+			default
+			{
+			    state_entry()
+			    {
+			        llSetClickAction(CLICK_ACTION_SIT);
+			        llRemoveInventory(llGetScriptName());
+			    }
+			}
+			```
+
+		</td>
+		<td>
+
+			```lsl
+			default
+			{
+			    state_entry()
+			    {
+			        llSetClickAction(CLICK_ACTION_OPEN);
+			        llRemoveInventory(llGetScriptName());
+			    }
+			}
+			```
+
+		</td>
+		<td>
+
+			```lsl
+			//  remember you'll have to set a price
+			//  in the general tab of the edit window
+			//  for your object before using this script
+
+			default
+			{
+			    state_entry()
+			    {
+			        llSetClickAction(CLICK_ACTION_BUY);
+			        llRemoveInventory(llGetScriptName());
+			    }
+			}
+			```
+
+		</td>
+	</tr>
+</table>
+
+```lsl collapse={10-19}
+//  simple tipjar
+
+default
+{
+    state_entry()
+    {
+        llSetClickAction(CLICK_ACTION_PAY);
+
+    //  enabled edit field to put own amount, all quick-pay-buttons hidden
+        llSetPayPrice(PAY_DEFAULT, [PAY_HIDE, PAY_HIDE, PAY_HIDE, PAY_HIDE]);
+    }
+
+    money(key id, integer amount)
+    {
+        string name = llKey2Name(id);
+
+        llInstantMessage(id, "Thank you for the tip, " + name + "!");
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Example 2</summary>
+
+```lsl collapse={1-29, 41-51}
+//Sit Only with Permission
+
+list gAvWhitelist = ["953d10f1-44ce-462a-8bc1-f634333ee031", "599dce91-a2b8-48c5-b96d-54965433022b"];
+
+default
+{
+    state_entry()
+    {
+        llSitTarget(<0.0, 0.0, 0.5>, ZERO_ROTATION);
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        {
+            list Properties = llGetObjectDetails(llGetKey(), [OBJECT_CLICK_ACTION]);
+            integer Click = llList2Integer(Properties, 0);
+            key Av = llAvatarOnSitTarget();
+            if ((Av != NULL_KEY) && (!Click))
+            {
+                llSay(0, "Please click first for permission to sit.");
+                llUnSit(Av);
+            }
+        }
+    }
+    touch_start(integer total_number)
+    {
+        list Properties = llGetObjectDetails(llGetKey(), [OBJECT_CLICK_ACTION]);
+        integer Click = llList2Integer(Properties, 0);
+        if (!Click && (~llListFindList(gAvWhitelist, [(string)llDetectedKey(0)])))
+        {
+            llSetClickAction(CLICK_ACTION_SIT);
+            llSetTimerEvent(10.0);
+            llSay(0, "Please take a seat.");
+        }
+        else
+        {
+            llSetClickAction(CLICK_ACTION_TOUCH);
+            if (llAvatarOnSitTarget() != NULL_KEY)
+            {
+                llSay(0, "Good bye!");
+            }
+            else
+            {
+                llSay(0, "Sorry.  You are not allowed to sit here.");
+            }
+            llUnSit(llDetectedKey(0));
+        }
+    }
+
+    timer()
+    {
+        llSetTimerEvent(0.0);
+        llSetClickAction(CLICK_ACTION_TOUCH);
+    }
+}
+```
+
+</details>
+
+## History
+
+- Introduced in SL Client 1.19.1(0)
+- [CLICK_ACTION_ZOOM](/constants/CLICK_ACTION_ZOOM/) added in SL Server 1.32 and [Viewer 2](https://wiki.secondlife.com/wiki/Viewer_2_Help)
+
+## Known issues
+
+From the issue templates included by the wiki article:
+
+- VWR-640 (bug): Shift-drag to copy object does not copy all settings
+- VWR-10829 (bug): Linux Viewer: CLICK_ACTION_PAY shows CLICK_ACTION_PLAY icon
+
+## See also
+
+### Functions
+
+- [llPassTouches](/functions/llPassTouches/)
+
+### Events
+
+- [touch_start](/events/touch_start/)
+- [touch](/events/touch/)
+- [touch_end](/events/touch_end/)
+
+### Articles
+
+- [Detected](/categories/detected/)
+
+<WikiSource />

@@ -1,0 +1,140 @@
+---
+title: "llGetGameControlMode"
+slug: "functions/llGetGameControlMode"
+category: functions
+source:
+  wiki: "LlGetGameControlMode"
+  url: https://wiki.secondlife.com/wiki/LlGetGameControlMode
+  revision: 1219065
+  date: 2026-09-16
+  contributor: "Leviathan Linden"
+  raw: /wiki-source/llgetgamecontrolmode-5f6cca6c.txt
+  license: "Content from the Second Life Wiki article LlGetGameControlMode (revision 1219065, 2026-09-16), CC BY-SA 3.0."
+---
+import { LSLFunction, WikiSource } from '~/components/lsl';
+
+<LSLFunction name="llGetGameControlMode" />
+
+Returns the game-control mode the viewer of **id** was in when the current [game_control](/events/game_control/) input was generated.
+
+Returns an [integer](https://wiki.secondlife.com/wiki/integer) that is one of the **GAME_CONTROL_MODE\_\*** constants, or `-1` if no game-control data is available for **id**.
+
+```lsl title="How to use" frame="terminal"
+integer result = llGetGameControlMode(NULL_KEY);
+```
+
+## Specification
+
+The mode determines how the viewer maps the physical gamepad onto *semantic* (mode-dependent) axes and buttons, which are read with [llGetGameControlModeAxes](/functions/llGetGameControlModeAxes/) and [llGetGameControlModeButtons](/functions/llGetGameControlModeButtons/).
+
+| Constant | Value | Meaning |
+| --- | --- | --- |
+| [GAME_CONTROL_MODE_AVATAR](/constants/GAME_CONTROL_MODE_AVATAR/) | 0 | Normal third-person avatar control. |
+| [GAME_CONTROL_MODE_MOUSELOOK](/constants/GAME_CONTROL_MODE_MOUSELOOK/) | 1 | Avatar is in mouselook. |
+| [GAME_CONTROL_MODE_FLYCAM](/constants/GAME_CONTROL_MODE_FLYCAM/) | 2 | Flycam (camera) control. |
+| [GAME_CONTROL_MODE_CAPTIVE](/constants/GAME_CONTROL_MODE_CAPTIVE/) | 3 | Avatar is sitting, or controls have been taken. |
+| [GAME_CONTROL_MODE_CURSOR](/constants/GAME_CONTROL_MODE_CURSOR/) | 4 | The left stick drives the on-screen mouse cursor. |
+
+## Caveats
+
+- Only meaningful inside a [game_control](/events/game_control/) event: the value is a snapshot taken when the event was queued, so that the mode, buttons and axes read by a script are all consistent with the event being processed.
+- Returns `-1` when the script has no game-control snapshot for **id**, for example when called outside of a [game_control](/events/game_control/) event, or after the queued events for that agent have all been consumed.
+- Game-control input is only delivered to scripts which have been granted [PERMISSION_GAME_CONTROL](/constants/PERMISSION_GAME_CONTROL/) by **id**.
+- The mode is chosen by the viewer, not by the script. It can change at any time (for example when the user enters mouselook or stands up), and a mode change on its own is enough to trigger a [game_control](/events/game_control/) event.
+- New modes may be added in the future; do not assume the list above is exhaustive.
+
+## Examples
+
+<details open>
+<summary>Example 1</summary>
+
+```lsl collapse={1-44, 50-65}
+default
+{
+    state_entry()
+    {
+        llOwnerSay("Ready for game_control events");
+    }
+
+    attach(key id)
+    {
+        if (id != NULL_KEY)
+        {
+            // game_control() event will only fire for object with permissions
+            // request them when this object is attached
+            llRequestPermissions(id, PERMISSION_GAME_CONTROL);
+        }
+    }
+
+    touch_start(integer num_detected)
+    {
+        // game_control() event will only fire for object with permissions
+        // request them when this object is touched
+        llRequestPermissions(llDetectedKey(0), PERMISSION_GAME_CONTROL);
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        {
+            key agent = llAvatarOnSitTarget();
+            if (agent != NULL_KEY)
+            {
+                // game_control() event will only fire for object with permissions
+                // request them when this object is used as a seat
+                llRequestPermissions(agent, PERMISSION_GAME_CONTROL);
+            }
+        }
+    }
+
+    run_time_permissions(integer permissions)
+    {
+        // seats and attached objects will automatically accept PERMISSION_GAME_CONTROL
+        // others will only get here when permissions are explicitly granted
+    }
+
+    game_control(key id, integer button_levels, list axes)
+    {
+        integer mode = llGetGameControlMode(id);
+        if (mode == GAME_CONTROL_MODE_FLYCAM)
+        {
+            // 7 semantic axes: truck, dolly, pan, tilt, boom, roll, zoom
+            llOwnerSay("flycam axes: " + llList2CSV(llGetGameControlModeAxes(id)));
+        }
+        else if (mode == GAME_CONTROL_MODE_CURSOR)
+        {
+            list a = llGetGameControlModeAxes(id);
+            llOwnerSay("cursor pixels: <" + (string)llList2Float(a, 2)
+                + ", " + (string)llList2Float(a, 3) + ">");
+        }
+        else if (mode != -1)
+        {
+            // 5 semantic axes: strafe, advance, turn, look, rise
+            llOwnerSay("movement axes: " + llList2CSV(llGetGameControlModeAxes(id)));
+        }
+   }
+}
+```
+
+</details>
+
+## Notes
+
+The mode and the semantic data are supplied by the viewer in the **GameControlData** message. Older viewers that only send the deprecated **GameControlInput** message still fire [game_control](/events/game_control/) events, but provide no mode, so this function returns `-1` for them.
+
+## See also
+
+### Functions
+
+- [llGetGameControlModeAxes](/functions/llGetGameControlModeAxes/) — Semantic axes for the current mode
+- [llGetGameControlModeButtons](/functions/llGetGameControlModeButtons/) — Semantic button bitfield for the current mode
+
+### Events
+
+- [game_control](/events/game_control/)
+
+### Articles
+
+[LSL Game Control Beta](https://wiki.secondlife.com/wiki/LSL_Game_Control_Beta)
+
+<WikiSource />

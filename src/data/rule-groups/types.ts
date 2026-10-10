@@ -1,7 +1,8 @@
 /**
  * Hand-editable grouping for long rule lists (see docs/editing-api-pages.md, "Grouping a long
  * rules list"). A page passes one of these to <ConstantGroup order={…} />; the component renders
- * the sections in this order, each header linking to the `###` section with the same `id`.
+ * the sections in this order. Most groups live entirely in the code block (shape plus a short comment);
+ * a group with `details: true` also has a `###` section below it, and its header links there.
  */
 export interface RuleForm {
 	/** The form's leading constant, e.g. PRIM_TYPE_BOX. */
@@ -26,5 +27,7 @@ export interface RuleSection {
 	title: string;
 	/** Anchor of the `###` section below the block (Starlight's slug of the heading). */
 	id: string;
+	/** The page has a `###` detail section for this group (only where the block can't say enough). */
+	details?: boolean;
 	rules: (string | RuleLine)[];
 }

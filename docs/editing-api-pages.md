@@ -103,7 +103,7 @@ and `npm run test:data` fail on such links).
 
 A rules list with dozens of entries (`PRIM_*`, `PSYS_*`, `OBJECT_*`) reads best like slua.dev's
 math library page: one code block, sorted and grouped by everyday usage and related functionality,
-each group headed by a comment that links to a `###` section with the details. The PRIM_* rules
+each group headed by a comment. Keep it compact: the shape and a short comment usually say enough. The PRIM_* rules
 on [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/),
 [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/),
 [llGetPrimitiveParams](/functions/llGetPrimitiveParams/) and `/constants/groups/PrimParam/` are the
@@ -140,10 +140,10 @@ worked example.
    Getter pages add `mode="get"`. Notation: `[ RULE, request arguments ] → [ returned values ]`; the
    request arguments are `face` (YAML `access: arg`) and `link_target`, everything else is returned.
    A rule with no request arguments reads `[ PRIM_NAME ] → [ string name ]`.
-3. **Sections.** Below the block, one `### <title>` per section with a `params-list` table: the rule as a
-   link followed by `<InlineSyntax code=", typed, args" />`, and the exact wiki wording (description,
-   limits, caveats, linked constant groups such as `[PRIM_TEXGEN_*](/constants/groups/PrimTexgen/)`).
-   Long-form text lives here, never in the block.
+3. **Sections, only when needed.** Most groups need nothing below the block: put what matters in the
+   shape and a short comment. Only a group the block can't explain (e.g. Shape, with its `PRIM_TYPE`
+   forms) gets `details: true` and a `### <title>` section with the exact wiki wording; its header
+   then links there. Don't add a detail table per group.
 4. **Group page.** Register the order in `src/data/rule-groups/index.ts` so `/constants/groups/<name>/`
    uses the same block and splits its constants table under the same `###` ids.
 5. **Check.** `npm run test:links` fails if a header link has no matching section.

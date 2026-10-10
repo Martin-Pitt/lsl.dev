@@ -46,7 +46,7 @@ export const primParams: RuleSection[] = [
 		{ rule: 'PRIM_NAME', args: 'string name' },
 		{ rule: 'PRIM_DESC', args: 'string description' },
 	] },
-	{ title: 'Shape', id: 'shape', rules: [
+	{ title: 'Shape', id: 'shape', details: true, rules: [
 		{ rule: 'PRIM_TYPE', note: 'no effect on mesh', forms: [
 			{ name: 'PRIM_TYPE_BOX', args: `${shape}, vector top_size, vector top_shear` },
 			{ name: 'PRIM_TYPE_CYLINDER', args: `${shape}, vector top_size, vector top_shear` },

@@ -1,0 +1,27 @@
+# lsl.dev local category overlay -- NOT upstream data.
+#
+# data/sources/lsl_definitions.yaml is a read-only upstream snapshot. This file adds
+# lsl.dev-only topic categories on top of it. scripts/import-datasets.py applies it
+# after reading the YAML (see scripts/lib/category_overlay.py):
+#
+#   - Membership is additive: an API keeps every YAML category and the overlay
+#     category is appended after them (so the YAML's first category stays first).
+#   - Only public APIs are eligible. Entries the YAML flags deprecated or private
+#     are dropped by the importer before the overlay runs, so they never match.
+#   - `match` holds regular expressions tested (re.fullmatch) against public
+#     function, event and constant names; `include` lists extra names explicitly.
+#     An `include` name that is not public is reported in
+#     data/reports/import-report.json under categoryOverlay.skipped.
+#
+# The catalog records this file and its SHA-256 under meta.sources.overlays.
+categories:
+  gamepad:
+    label: Gamepad
+    members:
+      match:
+        - 'llGetGameControl.*'
+        - 'game_control'
+        - 'GAME_CONTROL_.*'
+      include:
+        # Script permission for game-control input (ScriptPermission enum).
+        - PERMISSION_GAME_CONTROL

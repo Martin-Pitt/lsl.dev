@@ -36,6 +36,18 @@ catalog without requiring Python or access to the original Windows download path
 - `definitions-LICENSE`: the definitions' MIT license, retained verbatim.
 - `categories.en.json`: human-readable category labels from the user's `slua.dev`.
 
+### Local overlay (not upstream)
+
+`data/overlays/categories.yaml` is **lsl.dev's own data, not an upstream source**. It adds
+topic categories that the definitions do not have, currently `gamepad` ("Gamepad"): every
+public API matching `llGetGameControl*`, `game_control` or `GAME_CONTROL_*`, plus
+`PERMISSION_GAME_CONTROL`. The importer applies it after the YAML through
+`scripts/lib/category_overlay.py`. Membership is additive: YAML categories are kept and stay
+first. Deprecated and private definitions are dropped before the overlay runs, so they never
+match. The catalog records the file, its SHA-256 and per-category member counts under
+`meta.sources.overlays` (`"local": true`). `data/reports/import-report.json` lists any
+`include` name that is not public under `categoryOverlay.skipped`.
+
 Wiki prose is attributed to Second Life Wiki contributors under CC BY-SA 3.0.
 Each page includes its original revision ID, timestamp, latest revision contributor,
 source/revision URL, and history URL. The latest contributor is **not** a list of

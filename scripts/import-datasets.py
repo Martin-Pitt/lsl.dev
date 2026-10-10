@@ -5,6 +5,7 @@ from pathlib import Path
 from urllib.parse import quote
 import yaml
 from lib.wiki_render import Renderer, page_sections, anchor, head_funcs
+from lib.category_overlay import apply_category_overlay
 
 ROOT=Path(__file__).resolve().parents[1]
 def digest(path): return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -238,6 +239,10 @@ def main():
         if 'replaces' in e: e['replaces'].sort(key=str.lower)
     catalog['deprecated'].sort(key=lambda x:x['name'].lower())
     labels=json.loads((ROOT/'data/sources/categories.en.json').read_text(encoding='utf8'))
+    # lsl.dev-local categories (not upstream): data/overlays/categories.yaml, additive to the YAML's.
+    overlay_path=ROOT/'data/overlays/categories.yaml'
+    overlay_labels,overlay_report=apply_category_overlay(catalog,yaml.safe_load(overlay_path.read_text(encoding='utf8')))
+    labels={**labels,**overlay_labels}
     cats={}
     for plural in ('functions','events','constants'):
         for entry in catalog[plural]:
@@ -246,9 +251,9 @@ def main():
     catalog['categories']=sorted(cats.values(),key=lambda x:x['label'])
     for plural in ('functions','events','constants','types','controls'): catalog[plural].sort(key=lambda x:x['name'].lower())
     catalog['wiki'].sort(key=lambda x:x['title'].lower())
-    catalog['meta']={'schemaVersion':1,'sourcePolicy':'Definitions are authoritative for signatures, parameter names and categories. Wiki text remains a historical community source; templates are partially rendered; source.sources lists every wiki page and template each page was built from, with its revision.','sources':{'wiki':{'file':args.wiki.name,'sha256':digest(args.wiki)},'supplements':[{'file':x.name,'sha256':digest(x)} for x in supplements],'definitions':{'file':args.definitions.name,'sha256':digest(args.definitions)}},'counts':{k:len(catalog[k]) for k in ('functions','events','constants','categories','wiki','types','controls')},'wikiLicense':'Creative Commons Attribution-ShareAlike 3.0','wikiLicenseUrl':'https://creativecommons.org/licenses/by-sa/3.0/','definitionsLicense':'MIT','latestWikiRevision':max(w['source']['timestamp'] for w in catalog['wiki'])}
+    catalog['meta']={'schemaVersion':1,'sourcePolicy':'Definitions are authoritative for signatures, parameter names and categories; sources.overlays lists lsl.dev-local category additions. Wiki text remains a historical community source; templates are partially rendered; source.sources lists every wiki page and template each page was built from, with its revision.','sources':{'wiki':{'file':args.wiki.name,'sha256':digest(args.wiki)},'supplements':[{'file':x.name,'sha256':digest(x)} for x in supplements],'definitions':{'file':args.definitions.name,'sha256':digest(args.definitions)},'overlays':[{'file':'data/overlays/categories.yaml','sha256':digest(overlay_path),'local':True,'note':'lsl.dev-local category overlay, not upstream data; adds category membership on top of the definitions','categories':overlay_report['categories']}]},'counts':{k:len(catalog[k]) for k in ('functions','events','constants','categories','wiki','types','controls')},'wikiLicense':'Creative Commons Attribution-ShareAlike 3.0','wikiLicenseUrl':'https://creativecommons.org/licenses/by-sa/3.0/','definitionsLicense':'MIT','latestWikiRevision':max(w['source']['timestamp'] for w in catalog['wiki'])}
     write_split(catalog)
-    report={'counts':catalog['meta']['counts'],'excluded':excluded,'apiWithoutWiki':{k:[e['name'] for e in catalog[k] if not e['wiki']] for k in ('functions','events','constants')},'unexpandedTemplates':sorted(renderer.unknown),'referencedTitlesWithoutLocalRoute':sorted(renderer.missing),'deprecatedAliasesSkipped':skipped}
+    report={'counts':catalog['meta']['counts'],'excluded':excluded,'apiWithoutWiki':{k:[e['name'] for e in catalog[k] if not e['wiki']] for k in ('functions','events','constants')},'unexpandedTemplates':sorted(renderer.unknown),'referencedTitlesWithoutLocalRoute':sorted(renderer.missing),'deprecatedAliasesSkipped':skipped,'categoryOverlay':overlay_report}
     write_json(ROOT/'data/reports/import-report.json',report)
     print(json.dumps(report['counts']))
 if __name__=='__main__': main()

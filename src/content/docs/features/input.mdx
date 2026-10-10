@@ -14,21 +14,14 @@ Touch needs no permission. Controls need [`PERMISSION_TAKE_CONTROLS`](/constants
 <Column>
 <Box title="Concepts">
 
-- Clicking an object raises [`touch_start`](/events/touch_start/), [`touch`](/events/touch/) and [`touch_end`](/events/touch_end/), following a click from press to release
-  - Several avatars can touch at once; [who touched](/functions/llDetectedKey/) and [which prim](/functions/llDetectedLinkNumber/) are read with the detected functions
-  - The touch position functions give the [face](/functions/llDetectedTouchFace/) and [surface coordinates](/functions/llDetectedTouchST/), which makes single-prim buttons possible
-  - Child prims can [pass touches to the root](/functions/llPassTouches/)
-- A [click action](/functions/llSetClickAction/) changes what a left-click does: touch, sit, pay, open, play media, or nothing
-  - Setting a HUD root to ignore clicks lets each interactive prim choose its own cursor
-  - The right-click menu can show [other text instead of "Touch"](/functions/llSetTouchText/)
+- Clicking an object raises [touch events](/features/input/touch/), with [who touched](/functions/llDetectedKey/), [which prim](/functions/llDetectedLinkNumber/) and [where](/functions/llDetectedTouchST/) read by the detected functions
+  - A [click action](/functions/llSetClickAction/) changes what a left-click does
 - Scripts can [capture](/functions/llTakeControls/) movement keys and the left mouse button
   - Needs [permission](/functions/llRequestPermissions/) from the avatar, granted in [`run_time_permissions`](/events/run_time_permissions/)
   - The [`control`](/events/control/) event reports which keys are held and which changed
   - Controls can also pass through to normal movement
   - Sitting avatars can be [forced into mouselook](/functions/llForceMouselook/), and [agent info](/functions/llGetAgentInfo/) tells whether an avatar is [in mouselook](/constants/AGENT_MOUSELOOK/)
-- [Gamepad](https://wiki.secondlife.com/wiki/Game_control) buttons and axes arrive in [`game_control`](/events/game_control/)
-  - Available on all regions of the main grid; viewer support is still in progress
-  - Only triggers for scripts in attachments or seats
+- [Gamepad](/features/input/gamepad/) buttons and axes arrive in [`game_control`](/events/game_control/), for scripts in attachments or seats
 
 </Box>
 </Column>
@@ -41,14 +34,14 @@ Touch needs no permission. Controls need [`PERMISSION_TAKE_CONTROLS`](/constants
 ]} />
 
 </Box>
-<Box title="Touch position" href="https://wiki.secondlife.com/wiki/LSL_Touch_Position">
+<Box title="Touch" href="/features/input/touch/">
 
-Touch face, ST, UV, position, normal and binormal tell exactly where a prim was clicked.
+[Touch events](/events/touch_start/), [where a prim was touched](/functions/llDetectedTouchFace/), click actions and touch text.
 
 </Box>
-<Box title="Game control" href="https://wiki.secondlife.com/wiki/Game_control">
+<Box title="Gamepad" href="/features/input/gamepad/">
 
-Gamepad input reported to scripts as buttons and axes, with the avatar's [game-control mode](/functions/llGetGameControlMode/) readable by script.
+Game controller [buttons and axes](/events/game_control/) and the avatar's [game-control mode](/functions/llGetGameControlMode/), with modal axes and buttons per mode.
 
 </Box>
 </Column>
@@ -57,43 +50,20 @@ Gamepad input reported to scripts as buttons and axes, with the avatar's [game-c
 <Box title="Scripting Details">
 
 <Signatures names={[
-  "touch_start", "touch", "touch_end", "llDetectedTouchFace", "llDetectedTouchST",
-  "llDetectedTouchUV", "llDetectedTouchPos", "llDetectedTouchNormal",
-  "llDetectedTouchBinormal", "llDetectedLinkNumber", "llDetectedKey", "llPassTouches",
-  "llSetClickAction", "llSetTouchText", "llRequestPermissions", "run_time_permissions",
-  "llTakeControls", "llReleaseControls", "control", "llForceMouselook", "llGetAgentInfo",
-  "game_control", "llGetGameControlMode", "llGetGameControlModeButtons",
-  "llGetGameControlModeAxes"
+  "llRequestPermissions", "run_time_permissions", "llTakeControls", "llReleaseControls",
+  "control", "llForceMouselook", "llGetAgentInfo"
 ]} descriptions />
 
 </Box>
 
 <Box title="Additional">
 
-- [`llSetLinkPrimitiveParamsFast`](/functions/llSetLinkPrimitiveParamsFast/) — set a click action per prim
-  - [`PRIM_CLICK_ACTION`](/constants/PRIM_CLICK_ACTION/) — followed by a `CLICK_ACTION_*` constant ([click actions](/constants/groups/ClickAction/))
 - [`llRequestPermissions`](/functions/llRequestPermissions/) — permissions for input
   - [`PERMISSION_TAKE_CONTROLS`](/constants/PERMISSION_TAKE_CONTROLS/) — allows [`llTakeControls`](/functions/llTakeControls/)
   - [`PERMISSION_GAME_CONTROL`](/constants/PERMISSION_GAME_CONTROL/) — needed for gamepad input
 - [`llTakeControls`](/functions/llTakeControls/) — keys to capture are `CONTROL_*` [control buttons](/constants/groups/ControlButton/)
-- [`llPassTouches`](/functions/llPassTouches/) — pass mode [constants](/constants/groups/PassMode/)
 
 </Box>
-
-## Touch
-
-<ConstantGroups names={["PassMode"]} />
-
-<SeeAlso items={[
-  "category:touch", "wiki:LSL Touch Position",
-  "wiki:CatTouchDetection|Script library: touch detection"
-]}>
-  <Planned>Recipe: buttons on one prim with touch positions</Planned>
-</SeeAlso>
-
-## Click actions
-
-<ConstantGroups names={["ClickAction"]} />
 
 ## Keyboard and mouse controls
 
@@ -103,17 +73,11 @@ Gamepad input reported to scripts as buttons and axes, with the avatar's [game-c
   <Planned>Guide: capturing controls for a vehicle or weapon</Planned>
 </SeeAlso>
 
-## Gamepad controls
-
-<ConstantGroups names={["GameControlButton", "GameControlMode"]} />
-
-<SeeAlso items={["wiki:Game control", "wiki:Category:LSL GameControls"]} />
-
 ## Related
 
 <SeeAlso items={["feature:dialog", "feature:communications", "feature:camera"]} />
 
 <FeatureFooter
   related={["dialog", "camera", "avatar"]}
-  categories={["touch", "input"]}
+  categories={["touch", "input", "gamepad"]}
 />

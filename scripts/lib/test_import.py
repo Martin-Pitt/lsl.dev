@@ -163,7 +163,10 @@ class DatasetTests(unittest.TestCase):
     def test_canonical_signatures_and_categories(self):
         for kind in ('functions','events'):
             for entry in self.c[kind]:
-                self.assertEqual(entry['categories'],entry['definition'].get('categories',[]))
+                # Definition categories come first; data/overlays/categories.yaml may only append lsl.dev ones.
+                yaml_cats=entry['definition'].get('categories',[])
+                self.assertEqual(entry['categories'][:len(yaml_cats)],yaml_cats)
+                self.assertLessEqual(set(entry['categories'][len(yaml_cats):]),set(self.c['meta']['sources']['overlays'][0]['categories']))
                 self.assertEqual([p['name'] for p in entry['parameters']],[n for a in entry['definition']['arguments'] for n in a])
     def test_actual_llabs_caveat_keeps_precise_label(self):
         entry=next(e for e in self.c['functions'] if e['name']=='llAbs')

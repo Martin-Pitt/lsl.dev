@@ -1,0 +1,101 @@
+---
+title: "Gamepad"
+description: "Game controller input: game-control modes, canonical and modal axes and buttons, and the game_control event."
+---
+import { Box, ConstantGroups, SeeAlso, Signatures } from '../../../../components/features';
+
+A compatible viewer can send game controller input for an avatar to scripts. Part of the [Input](/features/input/) feature; lsl.dev lists these APIs together in the [Gamepad](/categories/gamepad/) category.
+
+- Controller changes raise [`game_control`](/events/game_control/), but only for scripts in attachments or seats
+  - **id** is the avatar supplying the controller input
+  - **button_levels** is a 32-bit mask of the [canonical buttons](/constants/groups/GameControlButton/) currently held down
+  - **axes** is a list of six floats in the range [-1.0, 1.0], the [canonical axes](#canonical-axes) indexed by `GAME_CONTROL_AXIS_*`
+- A script can [read the current game-control mode](/functions/llGetGameControlMode/) of an avatar, as a [`GAME_CONTROL_MODE_*`](/constants/groups/GameControlMode/) value
+  - Each mode has its own [modal axes](/functions/llGetGameControlModeAxes/) and [modal buttons](/functions/llGetGameControlModeButtons/); element count, index and bit meanings vary by mode
+  - Modal values use the `GAME_CONTROL_AXIS_*` constants as indices and the `GAME_CONTROL_BUTTON_*` constants as masks
+- [`PERMISSION_GAME_CONTROL`](/constants/PERMISSION_GAME_CONTROL/) is a [script permission](/constants/groups/ScriptPermission/) for game control
+
+<Box title="Gamepad functions and events">
+
+<Signatures names={["game_control", "llGetGameControlMode", "llGetGameControlModeAxes", "llGetGameControlModeButtons"]} descriptions />
+
+</Box>
+
+## Game-control modes
+
+`llGetGameControlMode` returns one of these `GAME_CONTROL_MODE_*` values for the avatar given by **id**.
+
+<ConstantGroups names={["GameControlMode"]} />
+
+## Canonical axes
+
+The six entries of the **axes** list in `game_control`.
+
+| Constant | Index | Description |
+| --- | ---: | --- |
+| [`GAME_CONTROL_AXIS_LEFTX`](/constants/GAME_CONTROL_AXIS_LEFTX/) | 0 | Left stick X axis. Canonical axis index 0. |
+| [`GAME_CONTROL_AXIS_LEFTY`](/constants/GAME_CONTROL_AXIS_LEFTY/) | 1 | Left stick Y axis. Canonical axis index 1. |
+| [`GAME_CONTROL_AXIS_RIGHTX`](/constants/GAME_CONTROL_AXIS_RIGHTX/) | 2 | Right stick X axis. Canonical axis index 2. |
+| [`GAME_CONTROL_AXIS_RIGHTY`](/constants/GAME_CONTROL_AXIS_RIGHTY/) | 3 | Right stick Y axis. Canonical axis index 3. |
+| [`GAME_CONTROL_AXIS_LEFT_TRIGGER`](/constants/GAME_CONTROL_AXIS_LEFT_TRIGGER/) | 4 | Left trigger. Canonical axis index 4. |
+| [`GAME_CONTROL_AXIS_RIGHT_TRIGGER`](/constants/GAME_CONTROL_AXIS_RIGHT_TRIGGER/) | 5 | Right trigger. Canonical axis index 5. |
+
+## Modal axes
+
+Indices into the list returned by `llGetGameControlModeAxes`; which ones apply depends on the mode.
+
+| Constant | Index | Description |
+| --- | ---: | --- |
+| [`GAME_CONTROL_AXIS_STRAFE`](/constants/GAME_CONTROL_AXIS_STRAFE/) | 0 | Left/right movement. Modal axis index 0 for AVATAR, MOUSELOOK, and CAPTIVE modes. |
+| [`GAME_CONTROL_AXIS_ADVANCE`](/constants/GAME_CONTROL_AXIS_ADVANCE/) | 1 | Forward/backward movement. Modal axis index 1 for AVATAR, MOUSELOOK, and CAPTIVE modes. |
+| [`GAME_CONTROL_AXIS_TURN`](/constants/GAME_CONTROL_AXIS_TURN/) | 2 | Turning left/right. Modal axis index 2 for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_AXIS_LOOK`](/constants/GAME_CONTROL_AXIS_LOOK/) | 3 | Looking up/down. Modal axis index 3 for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_AXIS_RISE`](/constants/GAME_CONTROL_AXIS_RISE/) | 4 | Up/down movement. Modal axis index 4 for AVATAR, MOUSELOOK, and CAPTIVE modes. |
+| [`GAME_CONTROL_AXIS_ZOOM`](/constants/GAME_CONTROL_AXIS_ZOOM/) | 6 | Camera zoom in/out. Modal axis index 6 for AVATAR, MOUSELOOK, CAPTIVE, and FLYCAM modes. |
+| [`GAME_CONTROL_AXIS_TRUCK`](/constants/GAME_CONTROL_AXIS_TRUCK/) | 0 | Camera lateral (left/right) movement. Modal axis index 0 for FLYCAM mode. |
+| [`GAME_CONTROL_AXIS_DOLLY`](/constants/GAME_CONTROL_AXIS_DOLLY/) | 1 | Camera forward/backward movement. Modal axis index 1 for FLYCAM mode. |
+| [`GAME_CONTROL_AXIS_PAN`](/constants/GAME_CONTROL_AXIS_PAN/) | 2 | Camera pan left/right. Modal axis index 2 for FLYCAM mode. |
+| [`GAME_CONTROL_AXIS_TILT`](/constants/GAME_CONTROL_AXIS_TILT/) | 3 | Camera tilt up/down. Modal axis index 3 for FLYCAM mode. |
+| [`GAME_CONTROL_AXIS_BOOM`](/constants/GAME_CONTROL_AXIS_BOOM/) | 4 | Camera up/down movement. Modal axis index 4 for FLYCAM mode. |
+| [`GAME_CONTROL_AXIS_ROLL`](/constants/GAME_CONTROL_AXIS_ROLL/) | 5 | Camera roll. Modal axis index 5 for FLYCAM mode. |
+
+## Canonical buttons
+
+Bits of **button_levels** in `game_control`.
+
+<ConstantGroups names={["GameControlButton"]} />
+
+## Modal buttons
+
+Masks for the bitmask returned by `llGetGameControlModeButtons`. Bit meanings vary by mode, so the same value is reused across modes.
+
+| Constant | Mask | Description |
+| --- | ---: | --- |
+| [`GAME_CONTROL_BUTTON_JUMP`](/constants/GAME_CONTROL_BUTTON_JUMP/) | 0x1 | Jump. Modal button for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_CROUCH`](/constants/GAME_CONTROL_BUTTON_CROUCH/) | 0x2 | Crouch. Modal button for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_SIT`](/constants/GAME_CONTROL_BUTTON_SIT/) | 0x4 | Toggle sitting. Modal button for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_TOGGLE_CURSOR`](/constants/GAME_CONTROL_BUTTON_TOGGLE_CURSOR/) | 0x10 | Toggle cursor mode. Modal button for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_TOGGLE_SPEAK`](/constants/GAME_CONTROL_BUTTON_TOGGLE_SPEAK/) | 0x20 | Toggle voice speak. Modal button for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK`](/constants/GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK/) | 0x40 | Toggle mouselook mode. Modal button for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_TOGGLE_FLYCAM`](/constants/GAME_CONTROL_BUTTON_TOGGLE_FLYCAM/) | 0x100 | Toggle flycam mode. Modal button for all modes. |
+| [`GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT`](/constants/GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT/) | 0x200 | Left mouse button click. Modal button for MOUSELOOK and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT`](/constants/GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT/) | 0x400 | Right mouse button click. Modal button for MOUSELOOK and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_ADVANCE_FORWARD`](/constants/GAME_CONTROL_BUTTON_ADVANCE_FORWARD/) | 0x800 | Move forward. Modal button for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_ADVANCE_BACK`](/constants/GAME_CONTROL_BUTTON_ADVANCE_BACK/) | 0x1000 | Move backward. Modal button for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_STRAFE_LEFT`](/constants/GAME_CONTROL_BUTTON_STRAFE_LEFT/) | 0x2000 | Strafe left. Modal button for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_STRAFE_RIGHT`](/constants/GAME_CONTROL_BUTTON_STRAFE_RIGHT/) | 0x4000 | Strafe right. Modal button for AVATAR, MOUSELOOK, CAPTIVE, and CURSOR modes. |
+| [`GAME_CONTROL_BUTTON_ZOOM_OUT`](/constants/GAME_CONTROL_BUTTON_ZOOM_OUT/) | 0x1 | Zoom camera out. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_PAN_RIGHT`](/constants/GAME_CONTROL_BUTTON_PAN_RIGHT/) | 0x2 | Camera pan right. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_PAN_LEFT`](/constants/GAME_CONTROL_BUTTON_PAN_LEFT/) | 0x4 | Camera pan left. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_ZOOM_IN`](/constants/GAME_CONTROL_BUTTON_ZOOM_IN/) | 0x8 | Zoom camera in. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_TOGGLE_ALT_ZOOM`](/constants/GAME_CONTROL_BUTTON_TOGGLE_ALT_ZOOM/) | 0x10 | Toggle alt-zoom. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_TOGGLE_FOLLOW`](/constants/GAME_CONTROL_BUTTON_TOGGLE_FOLLOW/) | 0x40 | Toggle camera follow mode. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_RESET`](/constants/GAME_CONTROL_BUTTON_RESET/) | 0x80 | Reset camera to default view. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_ROLL_CCW`](/constants/GAME_CONTROL_BUTTON_ROLL_CCW/) | 0x200 | Roll camera counter-clockwise. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_ROLL_CW`](/constants/GAME_CONTROL_BUTTON_ROLL_CW/) | 0x400 | Roll camera clockwise. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_DOLLY_FORWARD`](/constants/GAME_CONTROL_BUTTON_DOLLY_FORWARD/) | 0x800 | Camera dolly forward. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_DOLLY_BACK`](/constants/GAME_CONTROL_BUTTON_DOLLY_BACK/) | 0x1000 | Camera dolly backward. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_TRUCK_LEFT`](/constants/GAME_CONTROL_BUTTON_TRUCK_LEFT/) | 0x2000 | Camera truck left. Modal button for FLYCAM mode. |
+| [`GAME_CONTROL_BUTTON_TRUCK_RIGHT`](/constants/GAME_CONTROL_BUTTON_TRUCK_RIGHT/) | 0x4000 | Camera truck right. Modal button for FLYCAM mode. |
+
+<SeeAlso items={["category:gamepad", "wiki:Game control", "wiki:Category:LSL GameControls"]} />

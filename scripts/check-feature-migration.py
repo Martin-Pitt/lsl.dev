@@ -33,6 +33,8 @@ MOVED_CATEGORIES = {
     'prim_inventory': ('prims', 'inventory'),
     'avatar_inventory': ('avatar', 'inventory'),
 }
+# Categories added after the conversion (data/overlays/categories.yaml): category -> home feature.
+ADDED_CATEGORIES = {'gamepad': 'input'}
 
 
 def href_for(item, wiki_slugs):
@@ -78,6 +80,7 @@ def main():
         same('title', old['title'], new['title'])
         same('related', old.get('related', []), new['related'])
         expected_cats = [c for c in old['categories'] if MOVED_CATEGORIES.get(c, (None,))[0] != old['id']]
+        expected_cats += [c for c, home in ADDED_CATEGORIES.items() if home == old['id']]
         same('categories', expected_cats, new['categories'])
         links = [l for s in old['sections'] for l in s.get('links', [])]
         new_hrefs = {href_for(i, wiki_slugs) for i in new['links']} | {h.split('#')[0] for h in new['hrefs']}

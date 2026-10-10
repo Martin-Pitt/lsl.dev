@@ -13,16 +13,16 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 ## Counts
 
 - APIs: 1585
-- With a primary feature: 1506
+- With a primary feature: 1553
   - override: 0
-  - main: 547
-  - subpage: 2
+  - main: 537
+  - subpage: 12
   - group: 924
-  - prose: 14
+  - prose: 61
   - minor: 18
   - category: 1
-- No feature (breadcrumb falls back to the category or constant group): 79
-  - with neither category nor group (breadcrumb is section › name): 79
+- No feature (breadcrumb falls back to the category or constant group): 32
+  - with neither category nor group (breadcrumb is section › name): 32
 - Ambiguous (tied on tier and category ownership, decided by size or id): 157
 
 ## Ambiguous choices
@@ -54,7 +54,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llRezObject | linkset | main | inventory | smallest |
 | llRezObjectWithParams | linkset | main | combat, inventory | smallest |
 | llSetAgentEnvironment | experience | main | environments | smallest |
-| llSetClickAction | money | main | dialog, input, prims | smallest |
+| llSetClickAction | money | main | dialog, prims, input | smallest |
 | llSetForce | movement | main | physics | smallest |
 | llSetLinkAlpha | linkset | main | textures | smallest |
 | llSetLinkColor | linkset | main | textures | smallest |
@@ -69,7 +69,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSetText | effects | main | prims | smallest |
 | llSetTextureAnim | effects | main | textures | smallest |
 | llSetTorque | movement | main | physics | smallest |
-| llSetTouchText | dialog | main | input, prims | smallest |
+| llSetTouchText | dialog | main | prims | smallest |
 | llSetVelocity | movement | main | physics | smallest |
 | llSitOnLink | experience | main | avatar | smallest |
 | llTeleportAgentHome | land | main | avatar | smallest |
@@ -192,50 +192,6 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | API | Kind | Breadcrumb fallback |
 | --- | --- | --- |
 | FALSE | constants | section only |
-| GAME_CONTROL_AXIS_ADVANCE | constants | section only |
-| GAME_CONTROL_AXIS_BOOM | constants | section only |
-| GAME_CONTROL_AXIS_DOLLY | constants | section only |
-| GAME_CONTROL_AXIS_LEFT_TRIGGER | constants | section only |
-| GAME_CONTROL_AXIS_LEFTX | constants | section only |
-| GAME_CONTROL_AXIS_LEFTY | constants | section only |
-| GAME_CONTROL_AXIS_LOOK | constants | section only |
-| GAME_CONTROL_AXIS_PAN | constants | section only |
-| GAME_CONTROL_AXIS_RIGHT_TRIGGER | constants | section only |
-| GAME_CONTROL_AXIS_RIGHTX | constants | section only |
-| GAME_CONTROL_AXIS_RIGHTY | constants | section only |
-| GAME_CONTROL_AXIS_RISE | constants | section only |
-| GAME_CONTROL_AXIS_ROLL | constants | section only |
-| GAME_CONTROL_AXIS_STRAFE | constants | section only |
-| GAME_CONTROL_AXIS_TILT | constants | section only |
-| GAME_CONTROL_AXIS_TRUCK | constants | section only |
-| GAME_CONTROL_AXIS_TURN | constants | section only |
-| GAME_CONTROL_AXIS_ZOOM | constants | section only |
-| GAME_CONTROL_BUTTON_ADVANCE_BACK | constants | section only |
-| GAME_CONTROL_BUTTON_ADVANCE_FORWARD | constants | section only |
-| GAME_CONTROL_BUTTON_CROUCH | constants | section only |
-| GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT | constants | section only |
-| GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT | constants | section only |
-| GAME_CONTROL_BUTTON_DOLLY_BACK | constants | section only |
-| GAME_CONTROL_BUTTON_DOLLY_FORWARD | constants | section only |
-| GAME_CONTROL_BUTTON_JUMP | constants | section only |
-| GAME_CONTROL_BUTTON_PAN_LEFT | constants | section only |
-| GAME_CONTROL_BUTTON_PAN_RIGHT | constants | section only |
-| GAME_CONTROL_BUTTON_RESET | constants | section only |
-| GAME_CONTROL_BUTTON_ROLL_CCW | constants | section only |
-| GAME_CONTROL_BUTTON_ROLL_CW | constants | section only |
-| GAME_CONTROL_BUTTON_SIT | constants | section only |
-| GAME_CONTROL_BUTTON_STRAFE_LEFT | constants | section only |
-| GAME_CONTROL_BUTTON_STRAFE_RIGHT | constants | section only |
-| GAME_CONTROL_BUTTON_TOGGLE_ALT_ZOOM | constants | section only |
-| GAME_CONTROL_BUTTON_TOGGLE_CURSOR | constants | section only |
-| GAME_CONTROL_BUTTON_TOGGLE_FLYCAM | constants | section only |
-| GAME_CONTROL_BUTTON_TOGGLE_FOLLOW | constants | section only |
-| GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK | constants | section only |
-| GAME_CONTROL_BUTTON_TOGGLE_SPEAK | constants | section only |
-| GAME_CONTROL_BUTTON_TRUCK_LEFT | constants | section only |
-| GAME_CONTROL_BUTTON_TRUCK_RIGHT | constants | section only |
-| GAME_CONTROL_BUTTON_ZOOM_IN | constants | section only |
-| GAME_CONTROL_BUTTON_ZOOM_OUT | constants | section only |
 | IMG_USE_BAKED_AUX1 | constants | section only |
 | IMG_USE_BAKED_AUX2 | constants | section only |
 | IMG_USE_BAKED_AUX3 | constants | section only |
@@ -264,9 +220,6 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | TEXTURE_MEDIA | constants | section only |
 | TEXTURE_PLYWOOD | constants | section only |
 | TEXTURE_TRANSPARENT | constants | section only |
-| TOUCH_INVALID_FACE | constants | section only |
-| TOUCH_INVALID_TEXCOORD | constants | section only |
-| TOUCH_INVALID_VECTOR | constants | section only |
 | TRUE | constants | section only |
 | URL_REQUEST_DENIED | constants | section only |
 | URL_REQUEST_GRANTED | constants | section only |
@@ -324,18 +277,18 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llDetectedGrab | functions | Events (events) | minor |
 | llDetectedGroup | functions | Events (events) | minor |
 | llDetectedKey | functions | Events (events) | main + category |
-| llDetectedLinkNumber | functions | Input (input) | main |
+| llDetectedLinkNumber | functions | Input (input) | subpage |
 | llDetectedName | functions | Events (events) | minor |
 | llDetectedOwner | functions | Combat (combat) | prose |
 | llDetectedPos | functions | Events (events) | minor |
 | llDetectedRezzer | functions | Combat (combat) | main |
 | llDetectedRot | functions | Events (events) | minor |
-| llDetectedTouchBinormal | functions | Input (input) | main |
+| llDetectedTouchBinormal | functions | Input (input) | subpage |
 | llDetectedTouchFace | functions | Input (input) | main |
-| llDetectedTouchNormal | functions | Input (input) | main |
-| llDetectedTouchPos | functions | Input (input) | main |
-| llDetectedTouchST | functions | Input (input) | main |
-| llDetectedTouchUV | functions | Input (input) | main |
+| llDetectedTouchNormal | functions | Input (input) | subpage |
+| llDetectedTouchPos | functions | Input (input) | subpage |
+| llDetectedTouchST | functions | Input (input) | subpage |
+| llDetectedTouchUV | functions | Input (input) | subpage |
 | llDetectedType | functions | Events (events) | minor |
 | llDetectedVel | functions | Physics (physics) | main |
 | llDialog | functions | Dialog (dialog) | main + smallest |
@@ -390,9 +343,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetForce | functions | Physics (physics) | main |
 | llGetFreeMemory | functions | Data Storage (data-storage) | main |
 | llGetFreeURLs | functions | Communications (communications) | main |
-| llGetGameControlMode | functions | Input (input) | main |
-| llGetGameControlModeAxes | functions | Input (input) | main |
-| llGetGameControlModeButtons | functions | Input (input) | main |
+| llGetGameControlMode | functions | Input (input) | subpage |
+| llGetGameControlModeAxes | functions | Input (input) | subpage |
+| llGetGameControlModeButtons | functions | Input (input) | subpage |
 | llGetGeometricCenter | functions | Linksets (linkset) | main |
 | llGetGMTclock | functions | Events (events) | minor |
 | llGetHealth | functions | Combat (combat) | main |
@@ -597,7 +550,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llParseStringKeepNulls | functions | Data Transmission (data-transmission) | main |
 | llParticleSystem | functions | Effects (effects) | main |
 | llPassCollisions | functions | Physics (physics) | main |
-| llPassTouches | functions | Input (input) | main |
+| llPassTouches | functions | Input (input) | subpage |
 | llPatrolPoints | functions | Pathfinding (pathfinding) | main |
 | llPlaySound | functions | Sound (sound) | main |
 | llPlaySoundSlave | functions | Sound (sound) | main |
@@ -1044,38 +997,38 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | FILTER_INCLUDE | constants | Avatars (avatar) | group |
 | FORCE_DIRECT_PATH | constants | Pathfinding (pathfinding) | group |
 | FRICTION | constants | Physics (physics) | group |
-| GAME_CONTROL_AXIS_ADVANCE | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_BOOM | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_DOLLY | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_LEFT_TRIGGER | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_LEFTX | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_LEFTY | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_LOOK | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_PAN | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_RIGHT_TRIGGER | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_RIGHTX | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_RIGHTY | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_RISE | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_ROLL | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_STRAFE | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_TILT | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_TRUCK | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_TURN | constants | — (section only) | none |
-| GAME_CONTROL_AXIS_ZOOM | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_ADVANCE_BACK | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_ADVANCE_FORWARD | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_CROUCH | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_DOLLY_BACK | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_DOLLY_FORWARD | constants | — (section only) | none |
+| GAME_CONTROL_AXIS_ADVANCE | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_BOOM | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_DOLLY | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_LEFT_TRIGGER | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_LEFTX | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_LEFTY | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_LOOK | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_PAN | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_RIGHT_TRIGGER | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_RIGHTX | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_RIGHTY | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_RISE | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_ROLL | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_STRAFE | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_TILT | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_TRUCK | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_TURN | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_ZOOM | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_ADVANCE_BACK | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_ADVANCE_FORWARD | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_CROUCH | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_DOLLY_BACK | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_DOLLY_FORWARD | constants | Input (input) | prose |
 | GAME_CONTROL_BUTTON_DPAD_DOWN | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_DPAD_LEFT | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_DPAD_RIGHT | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_DPAD_UP | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_EAST | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_HOME | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_JUMP | constants | — (section only) | none |
+| GAME_CONTROL_BUTTON_JUMP | constants | Input (input) | prose |
 | GAME_CONTROL_BUTTON_LEFTSHOULDER | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_LEFTSTICK | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_MISC1 | constants | Input (input) | group |
@@ -1084,31 +1037,31 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | GAME_CONTROL_BUTTON_PADDLE2 | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_PADDLE3 | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_PADDLE4 | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_PAN_LEFT | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_PAN_RIGHT | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_RESET | constants | — (section only) | none |
+| GAME_CONTROL_BUTTON_PAN_LEFT | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_PAN_RIGHT | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_RESET | constants | Input (input) | prose |
 | GAME_CONTROL_BUTTON_RIGHTSHOULDER | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_RIGHTSTICK | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_ROLL_CCW | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_ROLL_CW | constants | — (section only) | none |
+| GAME_CONTROL_BUTTON_ROLL_CCW | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_ROLL_CW | constants | Input (input) | prose |
 | GAME_CONTROL_BUTTON_SELECT | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_SIT | constants | — (section only) | none |
+| GAME_CONTROL_BUTTON_SIT | constants | Input (input) | prose |
 | GAME_CONTROL_BUTTON_SOUTH | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_START | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_STRAFE_LEFT | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_STRAFE_RIGHT | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_TOGGLE_ALT_ZOOM | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_TOGGLE_CURSOR | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_TOGGLE_FLYCAM | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_TOGGLE_FOLLOW | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_TOGGLE_SPEAK | constants | — (section only) | none |
+| GAME_CONTROL_BUTTON_STRAFE_LEFT | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_STRAFE_RIGHT | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_TOGGLE_ALT_ZOOM | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_TOGGLE_CURSOR | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_TOGGLE_FLYCAM | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_TOGGLE_FOLLOW | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_TOGGLE_SPEAK | constants | Input (input) | prose |
 | GAME_CONTROL_BUTTON_TOUCHPAD | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_TRUCK_LEFT | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_TRUCK_RIGHT | constants | — (section only) | none |
+| GAME_CONTROL_BUTTON_TRUCK_LEFT | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_TRUCK_RIGHT | constants | Input (input) | prose |
 | GAME_CONTROL_BUTTON_WEST | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_ZOOM_IN | constants | — (section only) | none |
-| GAME_CONTROL_BUTTON_ZOOM_OUT | constants | — (section only) | none |
+| GAME_CONTROL_BUTTON_ZOOM_IN | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_ZOOM_OUT | constants | Input (input) | prose |
 | GAME_CONTROL_MODE_AVATAR | constants | Input (input) | group |
 | GAME_CONTROL_MODE_CAPTIVE | constants | Input (input) | group |
 | GAME_CONTROL_MODE_CURSOR | constants | Input (input) | group |
@@ -1755,9 +1708,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | TEXTURE_MEDIA | constants | — (section only) | none |
 | TEXTURE_PLYWOOD | constants | — (section only) | none |
 | TEXTURE_TRANSPARENT | constants | — (section only) | none |
-| TOUCH_INVALID_FACE | constants | — (section only) | none |
-| TOUCH_INVALID_TEXCOORD | constants | — (section only) | none |
-| TOUCH_INVALID_VECTOR | constants | — (section only) | none |
+| TOUCH_INVALID_FACE | constants | Input (input) | prose |
+| TOUCH_INVALID_TEXCOORD | constants | Input (input) | prose |
+| TOUCH_INVALID_VECTOR | constants | Input (input) | prose |
 | TP_ROUTING_BLOCKED | constants | Parcels & Regions (land) | group |
 | TP_ROUTING_FREE | constants | Parcels & Regions (land) | group |
 | TP_ROUTING_LANDINGP | constants | Parcels & Regions (land) | group |

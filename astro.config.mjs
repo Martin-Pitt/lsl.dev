@@ -9,6 +9,7 @@ import { singleMemberCategories } from './src/lib/category-members.mjs';
 /** The sidebar is built from the feature pages when this config loads. In dev, reload it when a
  * feature page is added or removed, or when an edit changes what the sidebar shows (titles,
  * sub-pages, categories), so new features appear without restarting the dev server by hand. */
+/** @returns {import('astro').AstroIntegration} */
 function reloadSidebarOnFeatureChanges() {
 	const dir = 'src/content/docs/features';
 	const snapshot = () => JSON.stringify(loadFeatures().map(f => [f.id, f.title, f.categories, f.subpages.map(s => [s.title, s.href])]));
@@ -26,9 +27,9 @@ function reloadSidebarOnFeatureChanges() {
 					logger.info('Feature pages changed; reloading the sidebar.');
 					server.restart();
 				};
-				server.watcher.on('add', f => check(f, true));
-				server.watcher.on('unlink', f => check(f, true));
-				server.watcher.on('change', f => check(f, false));
+				server.watcher.on('add', (/** @type {string} */ f) => check(f, true));
+				server.watcher.on('unlink', (/** @type {string} */ f) => check(f, true));
+				server.watcher.on('change', (/** @type {string} */ f) => check(f, false));
 			},
 		},
 	};

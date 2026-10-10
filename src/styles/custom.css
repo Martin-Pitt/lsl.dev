@@ -5,7 +5,12 @@
  */
 /* Larger page content width with more information density is preferred (as on the original
    lsl.dev). Unlayered so it overrides slua-base.css (17rem / 60rem). */
-:root { --sl-sidebar-width: 15rem; --sl-content-width: 75rem; }
+:root {
+	--sl-content-width: 75rem;
+	/* The sidebar is 15rem, growing up to 20rem when the viewport has room left over beside the
+	   content column (viewport minus content width and its side padding). */
+	--sl-sidebar-width: clamp(15rem, 100vw - var(--sl-content-width) - 2 * var(--sl-content-pad-x, 1.5rem), 20rem);
+}
 /* Dense reference pages opt in to the wide feature layout with <div class="wide-page" hidden></div>. */
 :root:has(.sl-markdown-content .wide-page) { --sl-content-width: 84rem; }
 
@@ -90,4 +95,30 @@
    consecutive pinned entries stay together and the gap follows the last one. */
 .sidebar-content li:has(> .is-priority):not(:has(+ li > .is-priority)) {
 	padding-bottom: 0.6em;
+}
+
+/* Homepage only (Starlight sets data-has-hero on pages with a hero): a very subtle mix of radial
+   and linear gradients in the accent hue behind the content. */
+html[data-has-hero] body {
+	background-color: var(--sl-color-bg);
+	background-image:
+		radial-gradient(60rem 40rem at 85% -10%, color-mix(in srgb, var(--sl-color-accent) 14%, transparent), transparent 70%),
+		radial-gradient(50rem 35rem at -10% 30%, color-mix(in srgb, hsl(270, 80%, 60%) 8%, transparent), transparent 70%),
+		radial-gradient(45rem 30rem at 60% 110%, color-mix(in srgb, hsl(190, 90%, 50%) 7%, transparent), transparent 70%),
+		linear-gradient(180deg, color-mix(in srgb, var(--sl-color-accent) 4%, transparent), transparent 40rem);
+	background-attachment: fixed;
+}
+html[data-theme='light'][data-has-hero] body {
+	background-image:
+		radial-gradient(60rem 40rem at 85% -10%, color-mix(in srgb, var(--sl-color-accent) 10%, transparent), transparent 70%),
+		radial-gradient(50rem 35rem at -10% 30%, color-mix(in srgb, hsl(270, 80%, 60%) 6%, transparent), transparent 70%),
+		radial-gradient(45rem 30rem at 60% 110%, color-mix(in srgb, hsl(190, 90%, 50%) 6%, transparent), transparent 70%),
+		linear-gradient(180deg, color-mix(in srgb, var(--sl-color-accent) 3%, transparent), transparent 40rem);
+}
+/* Let the gradient show through the content panels; the sticky header stays readable over
+   scrolling content with a translucent, blurred background. */
+html[data-has-hero] :is(.main-frame, .content-panel) { background-color: transparent; }
+html[data-has-hero] .header {
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 75%, transparent);
+	backdrop-filter: blur(12px);
 }

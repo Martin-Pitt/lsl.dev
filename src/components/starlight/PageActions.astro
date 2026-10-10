@@ -1,0 +1,91 @@
+---
+/**
+ * Page actions next to the title, after slua.dev's starlight-contextual-menu: "Copy page" copies
+ * the page's Markdown (/<page>/index.md, src/pages/[...page]/index.md.ts); the menu also links the
+ * Markdown and opens ChatGPT or Claude with a prompt that points at it. Rendered by PageTitle only
+ * for MDX content pages. Inline SVG icons, no remote assets; the external links are plain links
+ * that are never fetched. Without JavaScript the menu still opens (<details>); the copy buttons are hidden.
+ */
+interface Props { id: string; title: string }
+const { id, title } = Astro.props;
+import { markdownHref } from '../../lib/page-markdown';
+const md = markdownHref(id);
+const mdUrl = new URL(md, Astro.site ?? 'https://lsl.dev').href;
+const prompt = `Read ${mdUrl} (the lsl.dev page "${title}", Second Life LSL scripting reference) so I can ask questions about it.`;
+const chatgpt = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
+const claude = `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
+const copyIcon = '<svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="13" height="13" x="9" y="9" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const checkIcon = '<svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+const mdIcon = '<svg aria-hidden="true" viewBox="0 0 208 128" width="16" height="16"><rect width="198" height="118" x="5" y="5" ry="10" fill="none" stroke="currentColor" stroke-width="12"/><path fill="currentColor" d="M30 98V30h20l20 25 20-25h20v68H90V59L70 84 50 59v39zm125 0-30-33h20V30h20v35h20z"/></svg>';
+const extIcon = '<svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>';
+const chevron = '<svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+---
+<page-actions class="page-actions not-content print:hidden" data-md={md} data-pagefind-ignore>
+	<button type="button" class="pa-main pa-copy" title="Copy this page as Markdown">
+		<Fragment set:html={copyIcon} /><span class="pa-label">Copy page</span>
+	</button>
+	<details class="pa-more">
+		<summary aria-label="More page actions" title="More page actions"><Fragment set:html={chevron} /></summary>
+		<div class="pa-menu">
+			<button type="button" class="pa-item pa-copy"><Fragment set:html={copyIcon} /><span><span class="pa-label">Copy page</span><small>Copy as Markdown for LLMs</small></span></button>
+			<a class="pa-item" href={md}><Fragment set:html={mdIcon} /><span>View as Markdown<small>This page as plain text</small></span></a>
+			<a class="pa-item" href={chatgpt} target="_blank" rel="external noopener noreferrer"><Fragment set:html={extIcon} /><span>Open in ChatGPT<small>Ask questions about this page</small></span></a>
+			<a class="pa-item" href={claude} target="_blank" rel="external noopener noreferrer"><Fragment set:html={extIcon} /><span>Open in Claude<small>Ask questions about this page</small></span></a>
+		</div>
+	</details>
+	<template class="pa-check"><Fragment set:html={checkIcon} /></template>
+</page-actions>
+
+<script>
+	class PageActions extends HTMLElement {
+		connectedCallback() {
+			const details = this.querySelector('details')!;
+			const md = this.dataset.md!;
+			const check = (this.querySelector('template.pa-check') as HTMLTemplateElement).innerHTML;
+			for (const button of this.querySelectorAll<HTMLButtonElement>('.pa-copy')) {
+				button.addEventListener('click', async () => {
+					details.open = false;
+					const label = button.querySelector('.pa-label')!;
+					const icon = button.querySelector('svg')!;
+					const before = [label.textContent, icon.outerHTML];
+					try {
+						// ClipboardItem with a promise keeps the user activation in Safari while the fetch runs.
+						const text = fetch(md).then(r => { if (!r.ok) throw new Error(`${r.status} ${md}`); return r.text(); });
+						if (typeof ClipboardItem !== 'undefined' && 'write' in navigator.clipboard) {
+							await navigator.clipboard.write([new ClipboardItem({ 'text/plain': text.then(t => new Blob([t], { type: 'text/plain' })) })]);
+						} else await navigator.clipboard.writeText(await text);
+						label.textContent = 'Copied';
+						icon.outerHTML = check;
+					} catch (error) {
+						console.error('Copy page failed:', error);
+						label.textContent = 'Copy failed';
+					}
+					setTimeout(() => { label.textContent = before[0]; button.querySelector('svg')!.outerHTML = before[1]; }, 2000);
+				});
+			}
+			details.querySelectorAll('a').forEach(a => a.addEventListener('click', () => (details.open = false)));
+			document.addEventListener('click', e => { if (details.open && !details.contains(e.target as Node)) details.open = false; });
+			details.addEventListener('keydown', e => { if (e.key === 'Escape' && details.open) { details.open = false; details.querySelector('summary')!.focus(); } });
+		}
+	}
+	customElements.define('page-actions', PageActions);
+</script>
+
+<style>
+	.page-actions { position: relative; display: flex; flex: none; align-items: stretch; height: 2rem; align-self: flex-end; font-size: var(--sl-text-sm); }
+	page-actions:not(:defined) .pa-copy { display: none; }
+	page-actions:not(:defined) summary { border-radius: .5rem; }
+	.pa-main, .pa-more summary { display: flex; align-items: center; gap: .4rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-bg); color: var(--sl-color-white); cursor: pointer; font: inherit; }
+	.pa-main { padding: 0 .65rem; border-inline-end: 0; border-radius: .5rem 0 0 .5rem; white-space: nowrap; }
+	.pa-more summary { height: 100%; padding: 0 .45rem; border-radius: 0 .5rem .5rem 0; list-style: none; }
+	.pa-more summary::-webkit-details-marker { display: none; }
+	.pa-main:hover, .pa-more summary:hover, .pa-more[open] summary { background: var(--sl-color-gray-6); }
+	.pa-main:focus-visible, .pa-more summary:focus-visible, .pa-item:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 1px; }
+	.pa-menu { position: absolute; z-index: 20; top: calc(100% + .4rem); inset-inline-end: 0; width: max-content; max-width: min(18rem, calc(100vw - 2rem)); padding: .25rem; border: 1px solid var(--sl-color-gray-5); border-radius: .5rem; background: var(--sl-color-bg); box-shadow: var(--sl-shadow-md); }
+	.pa-item { display: flex; align-items: flex-start; gap: .6rem; width: 100%; padding: .45rem .6rem; border: 0; border-radius: .35rem; background: none; color: var(--sl-color-white); font: inherit; text-align: start; text-decoration: none; cursor: pointer; line-height: 1.35; }
+	.pa-item:hover { background: var(--sl-color-gray-6); color: var(--sl-color-white); }
+	.pa-item svg { flex: none; margin-top: .15rem; color: var(--sl-color-gray-3); }
+	.pa-item small { display: block; color: var(--sl-color-gray-3); font-size: var(--sl-text-xs); }
+	.pa-main svg { color: var(--sl-color-gray-3); }
+	@media (max-width: 40rem) { .pa-main .pa-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } .pa-main { padding: 0 .55rem; } }
+</style>

@@ -3,14 +3,19 @@
  * Site-wide page title (Starlight PageTitle override), as on the original lsl.dev: the h1, then
  * breadcrumbs under it, then one wrapping row of chips (constant groups, categories, feature
  * areas, sibling feature pages). Crumbs and chips come from src/lib/page-nav.ts. No crumbs on
- * the homepage or top-level index pages.
+ * the homepage or top-level index pages. MDX content pages also get the page actions menu
+ * (copy/view Markdown, open in ChatGPT/Claude) beside the h1; Astro-route pages do not.
  */
 const PAGE_TITLE_ID = '_top'; // Starlight's PAGE_TITLE_ID (not exported)
 import { getCollection } from 'astro:content';
+import PageActions from './PageActions.astro';
 import { pageNav } from '../../lib/page-nav';
 const route = Astro.locals.starlightRoute;
 const title = route.entry.data.title;
 const path = Astro.url.pathname;
+// Astro-route pages (StarlightPage) have a synthetic entry with no file in the docs collection, so no Markdown.
+const doc = (await getCollection('docs')).find(e => e.id === route.entry.id);
+const hasMarkdown = Boolean(doc?.filePath && doc.filePath === route.entry.filePath);
 let siblings: { label: string; href: string }[] = [];
 const feature = path.match(/^\/features\/([^/]+)\/[^/]+\/$/);
 if (feature) {
@@ -20,7 +25,10 @@ if (feature) {
 const { crumbs, chips } = pageNav(path, title, siblings);
 const chevron = '<svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><polyline points="9 18 15 12 9 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 ---
-<h1 id={PAGE_TITLE_ID}>{title}</h1>
+<div class="page-title-row">
+	<h1 id={PAGE_TITLE_ID}>{title}</h1>
+	{hasMarkdown && <PageActions id={route.entry.id} title={title} />}
+</div>
 {crumbs.length > 1 && (
 	<nav class="page-crumbs" aria-label="Breadcrumb">
 		<ol>{crumbs.map((c, i) => (
@@ -37,6 +45,8 @@ const chevron = '<svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="
 	@layer starlight.core {
 		h1 { margin-top: 1rem; font-size: var(--sl-text-h1); line-height: var(--sl-line-height-headings); font-weight: 600; color: var(--sl-color-white); }
 	}
+	.page-title-row { display: flex; align-items: flex-start; gap: .75rem; }
+	.page-title-row h1 { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 	.page-crumbs { margin-top: .5rem; font-size: var(--sl-text-sm); }
 	.page-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem .3rem; margin: 0; padding: 0; list-style: none; }
 	.page-crumbs li { display: inline-flex; align-items: center; gap: .3rem; min-width: 0; }

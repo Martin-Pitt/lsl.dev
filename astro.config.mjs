@@ -96,6 +96,9 @@ export default defineConfig({
 	integrations: [reloadSidebarOnFeatureChanges(), starlight({
 		title: 'LSL Dev',
 		favicon: '/favicon.svg',
+		// Logo: prototype 33 (Left Fold) mark; header uses its lockup with prototype 18's lettering.
+		logo: { light: './src/assets/wordmark.light.svg', dark: './src/assets/wordmark.dark.svg', replacesTitle: true, alt: 'lsl.dev' },
+		head: [{ tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } }],
 		description: 'Unofficial developer documentation for the Linden Scripting Language (LSL) of Second Life.',
 		defaultLocale: 'root',
 		locales: { root: { label: 'English', lang: 'en' } },

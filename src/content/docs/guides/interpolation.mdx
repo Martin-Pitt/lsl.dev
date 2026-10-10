@@ -15,10 +15,9 @@ most a fixed amount per call, for values driven over time, such as vehicle engin
 
 ```lsl
 // Maps from, a value in the range from_min..from_max, to the range to_min..to_max.
-// Returns to_min when the input range is empty (from_min == from_max).
+// from_min and from_max must differ (an empty range divides by zero).
 float Rescale(float from_min, float from_max, float to_min, float to_max, float from)
 {
-    if (from_max == from_min) return to_min;
     return to_min + ((to_max - to_min) * ((from - from_min) / (from_max - from_min)));
 }
 
@@ -239,8 +238,8 @@ rotation StepRotation(rotation from, rotation to, float maxAngle)
   [Constraining rotations](/guides/constraining-rotations/#usage) does.
 - If you only need to know how far apart two rotations are,
   [`llAngleBetween`](/functions/llAngleBetween/) returns the angle between them.
-- Dividing by zero stops the script with a
-  [Math Error](/fundamentals/errors/), which is why `Rescale` checks for an empty input range.
+- Dividing by zero stops the script with a [Math Error](/fundamentals/errors/), so don't pass
+  `Rescale` an empty input range (`from_min == from_max`).
 
 ## Source and licence
 
@@ -254,8 +253,7 @@ Changes from the original:
   `TargetStep` and so on), and every expression where operator order matters is bracketed. The
   Hermite slopes `a0`, `a1` and weights `b0` to `b3` are renamed `m0`, `m1` and `h0` to `h3`, so
   they don't look like the points **a** and **b**.
-- **`rescale` divided by zero when `from_min == from_max`**, which stops the script with a Math
-  Error. `Rescale` returns **to_min** in that case. Its formula,
+- `rescale`'s formula,
   `(from_min - from) / (from_min - from_max)`, is rewritten as the equal
   `(from - from_min) / (from_max - from_min)`, and `RescaleClamped` calls `Rescale` instead of
   repeating it.

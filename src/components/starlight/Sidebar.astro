@@ -1,0 +1,39 @@
+---
+// Override of Starlight 0.42's Sidebar: identical, except that it renders our SidebarSublist,
+// which turns nested groups with an overview page into split link + toggle rows (docs/sidebar.md).
+// @ts-expect-error Starlight's virtual module (resolves user overrides of MobileMenuFooter) has no public types.
+import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import SidebarSublist from './SidebarSublist.astro';
+
+const { sidebar } = Astro.locals.starlightRoute;
+---
+
+<SidebarPersister>
+	<SidebarSublist sublist={sidebar} />
+</SidebarPersister>
+
+<div class="md:sl-hidden">
+	<MobileMenuFooter />
+</div>
+
+<script>
+	// The split toggle is a real <button>; it drives the group's <details> by clicking its hidden
+	// <summary>, so the native open state and Starlight's state persistence (which listens for
+	// summary clicks) keep working. aria-expanded and the name follow the details' state.
+	const sync = (details: HTMLDetailsElement) => {
+		const button = details.parentElement?.querySelector<HTMLButtonElement>(':scope > .split-row > .split-toggle');
+		if (!button) return;
+		button.setAttribute('aria-expanded', String(details.open));
+		button.setAttribute('aria-label', `${details.open ? 'Collapse' : 'Expand'} ${button.dataset.label}`);
+	};
+	for (const details of document.querySelectorAll<HTMLDetailsElement>('details.split-details')) {
+		sync(details);
+		details.addEventListener('toggle', () => sync(details));
+	}
+	document.addEventListener('click', (event) => {
+		const button = (event.target as Element | null)?.closest?.('.split-toggle');
+		if (!button) return;
+		button.closest('li')?.querySelector<HTMLElement>(':scope > details > summary')?.click();
+	});
+</script>

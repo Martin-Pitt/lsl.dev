@@ -1,0 +1,280 @@
+---
+/*
+ * Copy of Starlight 0.42's SidebarSublist with two changes (see docs/sidebar.md):
+ * - Nested groups (depth >= 1) use the size and weight of ordinary links, not the bold heading style
+ *   that top-level groups keep.
+ * - A nested group whose items include a link with the `data-sidebar-group-link` attribute becomes a
+ *   split control: that link becomes the group's label (and leaves the list of children), and a separate
+ *   <button> expands and collapses the group. The group still uses <details>, whose <summary> is
+ *   hidden while scripting is on, so state persistence and current-page expansion keep working.
+ */
+import type { StarlightRouteData } from '@astrojs/starlight/route-data';
+import { Badge, Icon } from '@astrojs/starlight/components';
+import SidebarRestorePoint from '@astrojs/starlight/components/SidebarRestorePoint.astro';
+
+type SidebarEntry = StarlightRouteData['sidebar'][number];
+type Group = Extract<SidebarEntry, { type: 'group' }>;
+type Link = Extract<SidebarEntry, { type: 'link' }>;
+
+interface Props {
+	sublist: SidebarEntry[];
+	nested?: boolean;
+}
+
+const { sublist, nested } = Astro.props;
+
+/** Same as Starlight's sidebarGroupHasCurrent (not exported). */
+const hasCurrent = (group: Group): boolean => group.entries.some(e => e.type === 'link' ? e.isCurrent : hasCurrent(e));
+const GROUP_LINK = 'data-sidebar-group-link';
+const groupLink = (group: Group) => nested ? group.entries.find((e): e is Link => e.type === 'link' && GROUP_LINK in e.attrs) : undefined;
+/** Running id for aria-controls, unique within the page. */
+const counter = Symbol.for('lsl-sidebar-split-index');
+const locals = Astro.locals as unknown as Record<symbol, number>;
+const nextId = () => `sidebar-group-${(locals[counter] = (locals[counter] || 0) + 1)}`;
+/** The lifted link drops its own class; is-priority spacing only makes sense inside a list. */
+const linkAttrs = ({ class: _class, ...attrs }: Link['attrs']) => attrs;
+---
+
+<ul class:list={{ 'top-level': !nested }}>
+	{
+		sublist.map((entry) => {
+			if (entry.type === 'link') return (
+				<li>
+					<a
+						href={entry.href}
+						aria-current={entry.isCurrent ? 'page' : undefined}
+						class:list={[{ large: !nested }, entry.attrs.class]}
+						{...entry.attrs}
+					>
+						<span>{entry.label}</span>
+						{entry.badge && <Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />}
+					</a>
+				</li>
+			);
+			const open = hasCurrent(entry) || !entry.collapsed;
+			const link = groupLink(entry);
+			if (!link) return (
+				<li>
+					<details open={open} class:list={{ 'nested-group': nested }}>
+						<summary>
+							<span class="group-label">
+								<span class:list={{ large: !nested }}>{entry.label}</span>
+								{entry.badge && <Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />}
+							</span>
+							<Icon name="right-caret" class="caret" size="1.25rem" />
+						</summary>
+						<SidebarRestorePoint />
+						<Astro.self sublist={entry.entries} nested />
+					</details>
+				</li>
+			);
+			const id = nextId();
+			return (
+				<li class="split-group">
+					<div class="split-row">
+						<a href={link.href} aria-current={link.isCurrent ? 'page' : undefined} class="split-link" {...linkAttrs(link.attrs)}>
+							<span>{entry.label}</span>
+							{entry.badge && <Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />}
+						</a>
+						<button type="button" class="split-toggle" aria-controls={id} aria-expanded={open ? 'true' : 'false'} aria-label={`${open ? 'Collapse' : 'Expand'} ${entry.label}`} data-label={entry.label}>
+							<Icon name="right-caret" class="caret" size="1.25rem" />
+						</button>
+					</div>
+					<details open={open} class="split-details" id={id}>
+						<summary aria-label={`${entry.label} pages`}><Icon name="right-caret" class="caret" size="1.25rem" /></summary>
+						<SidebarRestorePoint />
+						<Astro.self sublist={entry.entries.filter(e => e !== link)} nested />
+					</details>
+				</li>
+			);
+		})
+	}
+</ul>
+
+<style>
+	@layer starlight.core {
+		ul {
+			--sl-sidebar-item-padding-inline: 0.5rem;
+			list-style: none;
+			padding: 0;
+		}
+
+		li {
+			overflow-wrap: anywhere;
+		}
+
+		ul ul li {
+			margin-inline-start: var(--sl-sidebar-item-padding-inline);
+			border-inline-start: 1px solid var(--sl-color-hairline-light);
+			padding-inline-start: var(--sl-sidebar-item-padding-inline);
+		}
+
+		.large {
+			font-size: var(--sl-text-lg);
+			font-weight: 600;
+			color: var(--sl-color-white);
+		}
+
+		.top-level > li + li {
+			margin-top: 0.75rem;
+		}
+
+		summary {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0.2em var(--sl-sidebar-item-padding-inline);
+			line-height: 1.4;
+			cursor: pointer;
+			user-select: none;
+		}
+		summary::marker,
+		summary::-webkit-details-marker {
+			display: none;
+		}
+
+		.caret {
+			transition: transform 0.2s ease-in-out;
+			flex-shrink: 0;
+		}
+		:global([dir='rtl']) .caret {
+			transform: rotateZ(180deg);
+		}
+		[open] > summary .caret,
+		.split-toggle[aria-expanded='true'] .caret {
+			transform: rotateZ(90deg);
+		}
+
+		a {
+			display: block;
+			border-radius: 0.25rem;
+			text-decoration: none;
+			color: var(--sl-color-gray-2);
+			padding: 0.3em var(--sl-sidebar-item-padding-inline);
+			line-height: 1.4;
+		}
+
+		a:hover,
+		a:focus {
+			color: var(--sl-color-white);
+		}
+
+		[aria-current='page'],
+		[aria-current='page']:hover,
+		[aria-current='page']:focus {
+			font-weight: 600;
+			color: var(--sl-color-text-invert);
+			background-color: var(--sl-color-text-accent);
+		}
+
+		a > *:not(:last-child),
+		.group-label > *:not(:last-child) {
+			margin-inline-end: 0.25em;
+		}
+
+		/* Nested groups look like sibling links plus a chevron. */
+		.nested-group > summary {
+			padding: 0.3em var(--sl-sidebar-item-padding-inline);
+			color: var(--sl-color-gray-2);
+			border-radius: 0.25rem;
+		}
+		.nested-group > summary:hover {
+			color: var(--sl-color-white);
+		}
+
+		/* Split groups: the label links to the overview page, the button beside it toggles. */
+		.split-row {
+			display: flex;
+			align-items: stretch;
+			border-radius: 0.25rem;
+		}
+		.split-link {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+		.split-row:has(.split-link[aria-current='page']) {
+			background-color: var(--sl-color-text-accent);
+		}
+		.split-toggle {
+			flex: 0 0 auto;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 2.25rem;
+			margin: 0;
+			padding: 0 0.5rem;
+			border: 0;
+			border-inline-start: 1px solid var(--sl-color-hairline-light);
+			border-radius: 0 0.25rem 0.25rem 0;
+			background: transparent;
+			color: var(--sl-color-gray-3);
+			cursor: pointer;
+			font: inherit;
+		}
+		:global([dir='rtl']) .split-toggle {
+			border-radius: 0.25rem 0 0 0.25rem;
+		}
+		.split-toggle:hover {
+			color: var(--sl-color-white);
+			background-color: var(--sl-color-gray-6);
+		}
+		.split-link[aria-current='page'] + .split-toggle {
+			color: var(--sl-color-text-invert);
+			border-inline-start-color: color-mix(in srgb, var(--sl-color-text-invert) 35%, transparent);
+		}
+		.split-link[aria-current='page'] + .split-toggle:hover {
+			background-color: color-mix(in srgb, var(--sl-color-text-invert) 15%, transparent);
+		}
+		.split-link:focus-visible,
+		.split-toggle:focus-visible,
+		.nested-group > summary:focus-visible {
+			outline: 2px solid var(--sl-color-text-accent);
+			outline-offset: -2px;
+		}
+		.split-link[aria-current='page']:focus-visible,
+		.split-link[aria-current='page'] + .split-toggle:focus-visible {
+			outline-color: var(--sl-color-text-invert);
+		}
+		/* Touch targets: at least 44px wide on coarse pointers and in the mobile menu. */
+		@media (pointer: coarse), (max-width: 49.99rem) {
+			.split-toggle {
+				min-width: 2.75rem;
+			}
+		}
+		@media (pointer: coarse) {
+			.split-toggle {
+				min-height: 2.75rem;
+			}
+		}
+		/* With scripting on, the button replaces the summary; without it, the summary is the toggle. */
+		.split-details > summary {
+			display: none;
+		}
+		@media (scripting: none) {
+			.split-toggle {
+				display: none;
+			}
+			.split-details > summary {
+				display: flex;
+				justify-content: flex-end;
+				margin-top: -1.9em;
+				margin-inline-start: auto;
+				width: 2.75rem;
+				position: relative;
+			}
+		}
+
+		@media (min-width: 50rem) {
+			.top-level > li + li {
+				margin-top: 0.5rem;
+			}
+			.large {
+				font-size: var(--sl-text-base);
+			}
+			a,
+			.nested-group > summary {
+				font-size: var(--sl-text-sm);
+			}
+		}
+	}
+</style>

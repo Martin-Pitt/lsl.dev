@@ -38,7 +38,7 @@ const featureItems = features.map(f => f.subpages.length === 0
 		/** A feature with sub-pages (features/<id>/<topic>.mdx) becomes a collapsed group. */
 		label: f.title,
 		collapsed: true,
-		items: [{ label: 'Overview', link: `/features/${f.id}/`, attrs: { class: 'is-priority' } }, ...f.subpages.map(s => ({ label: s.title, link: s.href }))],
+		items: [{ label: 'Overview', link: `/features/${f.id}/`, attrs: { 'data-sidebar-group-link': '' } }, ...f.subpages.map(s => ({ label: s.title, link: s.href }))],
 	});
 
 export default defineConfig({
@@ -63,7 +63,10 @@ export default defineConfig({
 			Hero: './src/components/starlight/Hero.astro',
 			Footer: './src/components/starlight/Footer.astro',
 			PageTitle: './src/components/starlight/PageTitle.astro',
+			Sidebar: './src/components/starlight/Sidebar.astro',
 		},
+		// A nested group's link with the data-sidebar-group-link attribute becomes the group's own label
+		// (a link to its overview page beside a separate expand/collapse button); see docs/sidebar.md.
 		sidebar: [
 			{
 				label: 'Fundamentals',
@@ -79,14 +82,14 @@ export default defineConfig({
 				collapsed: true,
 				items: [
 					{ label: 'Overview', link: '/reference/', attrs: { class: 'is-priority' } },
-					{ label: 'Categories', collapsed: true, items: [{ label: 'All categories', link: '/categories/', attrs: { class: 'is-priority' } }, ...referenceCategories] },
+					{ label: 'Categories', collapsed: true, items: [{ label: 'All categories', link: '/categories/', attrs: { 'data-sidebar-group-link': '' } }, ...referenceCategories] },
 					{ label: 'Functions', link: '/functions/' },
 					{ label: 'Events', link: '/events/' },
 					{
 						label: 'Constants',
 						collapsed: true,
 						items: [
-							{ label: 'All constants', link: '/constants/' },
+							{ label: 'All constants', link: '/constants/', attrs: { 'data-sidebar-group-link': '' } },
 							{ label: 'Constant groups', link: '/constants/groups/' },
 						],
 					},

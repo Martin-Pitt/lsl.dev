@@ -9,3 +9,5 @@ Internal guides for writing and maintaining lsl.dev. These are not published on 
   feature components, and what reads the pages (sidebar, API feature chips)
 - [editing-api-pages.md](editing-api-pages.md): editing or adding a function, event or constant
   page, the API components, and what `npm run generate:mdx` does and does not overwrite
+- [sidebar.md](sidebar.md): how the sidebar is configured, nested groups, and split groups whose
+  label links to an overview page

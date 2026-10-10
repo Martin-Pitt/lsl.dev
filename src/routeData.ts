@@ -15,8 +15,8 @@ export const onRequest = defineRouteMiddleware((context) => {
 	const route = context.locals.starlightRoute;
 	const all = links(route.sidebar as Entry[]);
 	const current = all.filter(l => l.isCurrent);
-	// The same page can be linked twice (Fundamentals › Language types and Reference › Types both link
-	// /types/). Keep only the most deeply nested match, so the page opens in its own section.
+	// The same page can be linked twice (e.g. an overview link
+	// and a split-group label). Keep only the most deeply nested match, so the page opens in its own section.
 	if (current.length > 1) {
 		const depth = new Map<Entry, number>();
 		const walk = (es: Entry[], d: number) => es.forEach(e => e.type === 'link' ? depth.set(e, d) : walk(e.entries, d + 1));

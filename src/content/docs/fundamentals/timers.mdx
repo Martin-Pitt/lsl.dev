@@ -1,0 +1,42 @@
+---
+title: Timers and time
+description: The timer event, pausing a script, and reading script time and the clock.
+sidebar:
+  order: 7
+  badge:
+    text: Stub
+    variant: danger
+---
+import { Attribution } from '../../../components/features';
+
+:::caution[Stub]
+This documentation page is a stub and is currently under development.
+:::
+
+## The timer
+
+[`llSetTimerEvent`](/functions/llSetTimerEvent/): "Cause the timer event to be triggered a maximum of once every **sec** seconds. Passing in 0.0 stops further timer events." From the wiki caveats on [`timer`](/events/timer/) and `llSetTimerEvent`:
+
+- "Only one timer can be active at one time."
+- "The timer persists across state changes, but gets removed when the script is reset."
+- "Setting a new timer replaces the old timer and resets the timer clock."
+- "The timer event is not an interrupt, it will not pause the execution of the currently running event to execute the timer."
+- The time between timer events can be longer because of time dilation (see [`llGetRegionTimeDilation`](/functions/llGetRegionTimeDilation/)), the default event delay, long-running events, and [`llSleep`](/functions/llSleep/).
+
+## Pausing
+
+[`llSleep`](/functions/llSleep/): "Puts the script to sleep for **sec** seconds. The script will not do anything during this time." and "The script will sleep at least until the next server-frame, which happen every (1/45 = ~0.02222) seconds under normal conditions."
+
+## Reading time
+
+- [`llGetTime`](/functions/llGetTime/) returns a float "that is script time in seconds with subsecond precision since the script started, was last reset, or call to either llResetTime or llGetAndResetTime."
+- [`llGetUnixTime`](/functions/llGetUnixTime/) returns an integer "that is the number of seconds elapsed since 00:00 hours, Jan 1, 1970 UTC from the system clock". Caveat: "Scripts that rely on this function after January 19, 2038 may have logical errors." with [`llGetTimestamp`](/functions/llGetTimestamp/) suggested instead.
+
+## Reference
+
+- [`llSetTimerEvent`](/functions/llSetTimerEvent/), [`timer`](/events/timer/), [`llSensorRepeat`](/functions/llSensorRepeat/)
+- [`llGetTime`](/functions/llGetTime/), [`llResetTime`](/functions/llResetTime/), [`llGetAndResetTime`](/functions/llGetAndResetTime/)
+- [`llGetUnixTime`](/functions/llGetUnixTime/), [`llGetTimestamp`](/functions/llGetTimestamp/), [`llGetWallclock`](/functions/llGetWallclock/)
+- [`llSleep`](/functions/llSleep/), [`llGetRegionTimeDilation`](/functions/llGetRegionTimeDilation/)
+
+<Attribution pages={["LlSetTimerEvent", "Timer", "LlSleep", "LlGetTime", "LlGetUnixTime"]} what="Quotations are from the Second Life Wiki pages" />

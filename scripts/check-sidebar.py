@@ -44,6 +44,23 @@ check('href="/categories/combat/"' in ref,'Categories › Combat is not a direct
 sub=sidebar('/features/combat/combat-log/')
 a,b,d=split(sub,'Combat')
 check(attr(b,'aria-expanded')=='true' and attr(a,'aria-current') is None,'Combat is not open (or wrongly current) on a sub-page')
+# Fundamentals has its own pages (src/content/docs/fundamentals/) plus Learn LSL, never Reference pages.
+def section(html,start,end):return html[html.index(f'>{start}</span>'):html.index(f'>{end}</span>')]
+fund=section(s,'Fundamentals','Reference')
+hrefs=re.findall(r'href="([^"]*)"',fund)
+check('/fundamentals/' in hrefs and '/guides/' in hrefs,'Fundamentals lacks its overview or Learn LSL')
+check(len(hrefs)>2,'Fundamentals has no concept pages')
+for h in hrefs:check(h.startswith('/fundamentals/') or h=='/guides/',f'Fundamentals links outside /fundamentals/: {h}')
+# Reference pages open in Reference, Fundamentals pages in Fundamentals.
+def current(page):
+ h=sidebar(page);m=re.search(r'<a [^>]*aria-current="page"[^>]*>',h)
+ check(m,f'{page}: no current sidebar entry')
+ if not m:return None
+ i=m.start();return 'Fundamentals' if h.index('>Fundamentals</span>')<i<h.index('>Reference</span>') else 'Reference' if i<h.index('>Features</span>') else 'other'
+for page in ['/types/','/types/integer/','/controls/','/controls/if/']:
+ check(current(page)=='Reference',f'{page} does not mark a Reference entry as current')
+for page in ['/fundamentals/','/fundamentals/types/']:
+ check(current(page)=='Fundamentals',f'{page} does not mark a Fundamentals entry as current')
 if errors:
  print('\n'.join(errors));sys.exit(1)
 print('Sidebar OK: top-level groups unchanged, nested overview groups are split controls.')

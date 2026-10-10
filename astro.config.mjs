@@ -103,11 +103,7 @@ export default defineConfig({
 			{
 				label: 'Fundamentals',
 				collapsed: true,
-				items: [
-					{ label: 'Learn LSL', link: '/guides/' },
-					{ label: 'Language types', link: '/types/' },
-					{ label: 'Flow control', link: '/controls/' },
-				],
+				items: [{ autogenerate: { directory: 'fundamentals' } }, { label: 'Learn LSL', link: '/guides/' }],
 			},
 			{
 				label: 'Reference',

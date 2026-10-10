@@ -102,8 +102,8 @@ feature areas, categories and indexes, never to individual functions or constant
 | Source | `data/sources/*` | Replaced deliberately when refreshing snapshots |
 | Curated | `src/data/topic-guides.json`, `src/content/docs/**` | Edited by hand |
 | Generated index | `src/data/feature-clusters.json` | `node scripts/feature-index.mjs` after editing feature pages |
-| Curated, generated once | `src/content/docs/{functions,events,constants}/*.mdx` | Created by `npm run generate:mdx` when missing, then edited by hand; never overwritten |
-| Derived | `src/data/catalog.json`, `src/data/wiki-html/`, `data/derived/`, `public/wiki-source/*.txt`, `data/reports/import-report.json` | Written by `npm run import:data`, never edited by hand |
+| Curated, generated once | `src/content/docs/{functions,events,constants}/*.mdx` | Created by `bun run generate:mdx` when missing, then edited by hand; never overwritten |
+| Derived | `src/data/catalog.json`, `src/data/wiki-html/`, `data/derived/`, `public/wiki-source/*.txt`, `data/reports/import-report.json` | Written by `bun run import:data`, never edited by hand |
 | Diagnostic | `data/reports/built-links.json`, `data/reports/npm-audit*.json`, `data/reports/dependency-audit.md` | Written by checks/audits |
 
 Derived files are committed so that `astro build` needs only Node, not Python or the
@@ -127,30 +127,35 @@ meaningful phrases, plus components for signature tables, panels and link rows. 
 
 Requirements:
 
-- **Node.js >= 22.12.0** (the `engines` requirement of `astro@7.3.8`; npm >= 9.6.5). CI
+- **Bun** (package manager; `bun.lock` is the only lockfile, and CI installs with `bun ci`).
+- **Node.js >= 22.12.0** (the `engines` requirement of `astro@7.3.8`). CI
   uses Node 22. Development was also checked on Node 26.7.0.
 - **Python >= 3.12** only for the importer and tests (CI uses 3.12; also checked locally
   on 3.14.7), plus `PyYAML==6.0.3`. Building the site does not need Python.
 
 ```sh
-npm ci                                       # or npm install
+bun install                                  # CI uses `bun ci` (frozen bun.lock)
 python -m pip install -r scripts/requirements.txt
-npm run dev                                  # http://localhost:4321
+bun run dev                                  # http://localhost:4321
 ```
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Astro dev server |
-| `npm run build` | Production build to `dist/` (includes Pagefind) |
-| `npm run preview` | Serve the built `dist/` |
-| `npm run check` | `astro check` type/diagnostic pass |
-| `npm run features:index` | Regenerate `src/data/feature-clusters.json` from the feature pages |
-| `npm run import:data` | `python scripts/import-datasets.py`: regenerate derived data from `data/sources` |
-| `npm run generate:mdx` | `python scripts/generate-mdx.py`: create missing API pages, report drift (`--check`, `--force NAME`, `--accept NAME`) |
-| `npm run test:data` | `python -m unittest discover -s scripts/lib -p "test_*.py"` |
-| `npm run test:links` | `python scripts/check-built-links.py`: needs a prior build. Checks local `href`s in `dist/` and fails on remote assets. Writes `data/reports/built-links.json` |
+| `bun run dev` | Astro dev server |
+| `bun run build` | Production build to `dist/` (includes Pagefind) |
+| `bun run preview` | Serve the built `dist/` |
+| `bun run check` | `astro check` type/diagnostic pass |
+| `bun run features:index` | Regenerate `src/data/feature-clusters.json` from the feature pages |
+| `bun run import:data` | `python scripts/import-datasets.py`: regenerate derived data from `data/sources` |
+| `bun run generate:mdx` | `python scripts/generate-mdx.py`: create missing API pages, report drift (`--check`, `--force NAME`, `--accept NAME`) |
+| `bun run test:data` | `python -m unittest discover -s scripts/lib -p "test_*.py"` |
+| `bun run test:links` | `python scripts/check-built-links.py`: needs a prior build. Checks local `href`s in `dist/` and fails on remote assets. Writes `data/reports/built-links.json` |
+
+Install dependencies with Bun only. `package-lock.json` is ignored, and `npm install` is not a
+supported install path because it ignores `bun.lock`. Once dependencies are installed, `npm run <script>`
+runs the same package.json scripts.
 
 Importer options: `python scripts/import-datasets.py --wiki PATH --definitions PATH`
 reads other local files instead of the default snapshots. No network is involved.
@@ -158,10 +163,10 @@ reads other local files instead of the default snapshots. No network is involved
 ## Regeneration and tests
 
 ```sh
-npm run import:data     # rewrites catalog.json, public/wiki-source/, import-report.json
-npm run test:data       # importer/renderer unit tests
-npm run build
-npm run test:links
+bun run import:data     # rewrites catalog.json, public/wiki-source/, import-report.json
+bun run test:data       # importer/renderer unit tests
+bun run build
+bun run test:links
 git diff --stat         # derived output should change only where the sources changed
 ```
 
@@ -234,10 +239,10 @@ wikitext is always available at the page's `rawPath`.
 2. Try it first without replacing anything:
    `python scripts/import-datasets.py --wiki /path/new.xml --definitions /path/lsl_definitions.yaml`
 3. Review the diff of `src/data/catalog.json` and `data/reports/import-report.json`,
-   then run `npm run test:data`, `npm run build` and `npm run test:links`.
+   then run `bun run test:data`, `bun run build` and `bun run test:links`.
 4. To accept it, copy the files over `data/sources/wiki-English.xml` and
    `data/sources/lsl_definitions.yaml`, update `data/sources/README.md` (date, page
-   count, provenance), and run `npm run import:data` with no arguments so the default
+   count, provenance), and run `bun run import:data` with no arguments so the default
    run reproduces the committed output. Keep translations out of the English export.
 
 ## License and attribution

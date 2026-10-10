@@ -82,14 +82,14 @@ the build. Props must be JSON arrays (double quotes, no trailing commas) because
   if any component lists it or the prose links `/functions/<name>/`, `/events/<name>/` or
   `/constants/<name>/`; a constant group counts through `<ConstantGroups>` or `/constants/groups/<name>/`.
 - `src/data/feature-clusters.json` is a **generated** index for older code. After editing pages,
-  run `node scripts/feature-index.mjs`; `npm run test:data` fails if it is stale.
+  run `node scripts/feature-index.mjs`; `bun run test:data` fails if it is stale.
 
 ## Adding a page
 
 1. Create `src/content/docs/features/<slug>.mdx` from the skeleton above.
 2. Give it `<FeatureFooter categories={[...]}>` if it should own definition categories (each
    category belongs to exactly one feature).
-3. Run `node scripts/feature-index.mjs`, `npm run test:data`, `npm run build` and `npm run test:links`.
+3. Run `node scripts/feature-index.mjs`, `bun run test:data`, `bun run build` and `bun run test:links`.
    The tests check that every public function and event is linked from at least one feature page
    (except `llFindNotecardTextCount`), that every constant group is linked, and that all links resolve.
    If the new page is a slua.dev feature, add it to `SLUA_FEATURES` in `scripts/lib/test_features.py`.

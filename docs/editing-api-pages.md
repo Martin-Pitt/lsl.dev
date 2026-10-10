@@ -23,7 +23,7 @@ them like any other Markdown file; nothing regenerates them behind your back.
 | Everything else: prose, Specification tables, caveats, examples, notes, see also | the MDX | the `.mdx` file |
 | Attribution footer | the page's `source` frontmatter | the `.mdx` frontmatter |
 
-`npm run import:data` turns the YAML into `src/data/catalog.json`, which the components read
+`bun run import:data` turns the YAML into `src/data/catalog.json`, which the components read
 at build time. After a definitions sync the signatures on every page update without any MDX
 change.
 
@@ -99,8 +99,8 @@ Plain Markdown covers the rest:
 
 Links: point at our own pages (`/functions/…/`, `/constants/groups/…/`, `/categories/…/`,
 `/features/…/`) or at the live wiki (`https://wiki.secondlife.com/wiki/…`). Never link API
-pages to the `/wiki/` archive; its templates are only partly rendered (`npm run test:links`
-and `npm run test:data` fail on such links).
+pages to the `/wiki/` archive; its templates are only partly rendered (`bun run test:links`
+and `bun run test:data` fail on such links).
 
 ## Grouping a long rules list
 
@@ -149,7 +149,7 @@ worked example.
    then links there. Don't add a detail table per group.
 4. **Group page.** Register the order in `src/data/rule-groups/index.ts` so `/constants/groups/<name>/`
    uses the same block and splits its constants table under the same `###` ids.
-5. **Check.** `npm run test:links` fails if a header link has no matching section.
+5. **Check.** `bun run test:links` fails if a header link has no matching section.
 
 Candidates not converted yet: [llParticleSystem](/functions/llParticleSystem/) (PSYS_*),
 [llRezObjectWithParams](/functions/llRezObjectWithParams/) (REZ_*),
@@ -161,8 +161,8 @@ Candidates not converted yet: [llParticleSystem](/functions/llParticleSystem/) (
 New APIs arrive with a definitions sync. Run
 
 ```sh
-npm run import:data        # if the YAML or wiki export changed
-npm run generate:mdx       # creates the pages that are missing, nothing else
+bun run import:data        # if the YAML or wiki export changed
+bun run generate:mdx       # creates the pages that are missing, nothing else
 ```
 
 and edit the new file. To start a page by hand instead, copy a similar page and change the
@@ -171,7 +171,7 @@ the build fail; deprecated and private entries stay out of the reference.
 
 ## The generator: what it does and does not overwrite
 
-`npm run generate:mdx` (`python scripts/generate-mdx.py`):
+`bun run generate:mdx` (`python scripts/generate-mdx.py`):
 
 - **Creates** a page for every public API that has none, converted from the local wiki export
   (`data/derived/api-wiki.json`, written by the importer).
@@ -184,7 +184,7 @@ the build fail; deprecated and private entries stay out of the reference.
   - `orphaned`: pages with no public API
   - `drift`: pages whose API changed signature or parameter names, or whose wiki revision
     changed, since the page was generated. The signature block is already current; check that
-    the prose still matches, then run `npm run generate:mdx -- --accept NAME` (or `--accept all`).
+    the prose still matches, then run `bun run generate:mdx -- --accept NAME` (or `--accept all`).
 - `--check` creates nothing and exits with 1 if anything is missing or orphaned (CI runs this).
 
 `src/data/mdx-pages.json` records the signature and wiki revision each page was generated

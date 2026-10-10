@@ -63,4 +63,4 @@ Notes:
 - Without scripting (`@media (scripting: none)`) the button is hidden and the `<summary>` chevron is
   shown in its place.
 
-`npm run test:sidebar` checks the built HTML (run `npm run build` first).
+`bun run test:sidebar` checks the built HTML (run `bun run build` first).

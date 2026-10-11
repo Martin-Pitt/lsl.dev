@@ -1,7 +1,85 @@
 /*
- * Styles for the guide batch. Owned by the guide batch agent; loaded site-wide through
- * ../authoring.css. Build on the tokens in ../shared/tokens.css (--au-*) rather than new palettes,
- * keep rules inside @layer authoring, and guard motion with prefers-reduced-motion.
+ * Styles for the guide batch: Param, Params, Returns. Loaded site-wide through ../authoring.css.
+ * Visually follows the API syntax block (src/components/reference/ApiSignature.astro): mono name,
+ * LSL-highlighted type, muted prose. No JS.
  */
 @layer authoring {
+	.au-param {
+		margin: 0;
+		padding-block: .6rem;
+		border-block-end: 1px solid var(--au-border);
+		font-size: var(--sl-text-sm);
+
+		& > dt {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: baseline;
+			gap: .25rem .6rem;
+			font-weight: normal;
+		}
+		& > dd {
+			margin: .25rem 0 0;
+			color: var(--sl-color-gray-2);
+			& > :first-child { margin-top: 0; }
+			& > :last-child { margin-bottom: 0; }
+			&:empty { display: none; }
+		}
+		.au-param-name {
+			padding: 0;
+			background: none;
+			border: 0;
+			font-weight: 600;
+			color: var(--sl-color-white);
+		}
+		.au-param-type, .au-param-type code.lsl-inline { font-size: inherit; background: none; border: 0; padding: 0; }
+		code.lsl-inline { white-space: nowrap; }
+	}
+	.au-param-badge {
+		padding: 0 .4rem;
+		border: 1px solid var(--au-border);
+		border-radius: var(--au-radius-sm);
+		font-size: var(--sl-text-xs);
+		line-height: 1.5;
+		color: var(--au-text-muted);
+	}
+	.au-param-badge--required {
+		border-color: color-mix(in oklab, var(--au-caution) 45%, transparent);
+		background: var(--au-caution-tint);
+		color: var(--sl-color-orange-high);
+	}
+	.au-param-default {
+		font-size: var(--sl-text-xs);
+		color: var(--au-text-muted);
+		& code { font-size: inherit; }
+	}
+	.au-param--deprecated {
+		.au-param-name { color: var(--au-text-muted); font-weight: normal; }
+		& > dd { color: var(--au-text-muted); }
+	}
+	.au-returns-label {
+		font-size: var(--sl-text-xs);
+		font-weight: 600;
+		letter-spacing: .04em;
+		text-transform: uppercase;
+		color: var(--au-text-muted);
+	}
+
+	.au-params {
+		margin-block: 1rem;
+		padding: .1rem 1rem;
+		border: 1px solid var(--au-border);
+		border-radius: var(--au-radius);
+		background: var(--au-surface);
+
+		& > .au-param:last-child { border-block-end: 0; }
+	}
+	.au-params-title {
+		margin: .6rem 0 0;
+		font-size: var(--sl-text-xs);
+		color: var(--au-text-muted);
+	}
+	/* Outside a group, a run of entries gets a top rule on the first one only. */
+	.sl-markdown-content :not(.au-param) + .au-param { border-block-start: 1px solid var(--au-border); }
+	.sl-markdown-content .au-param + .au-param { margin-top: 0; }
+	.au-params > .au-param { border-block-start: 0 !important; }
 }

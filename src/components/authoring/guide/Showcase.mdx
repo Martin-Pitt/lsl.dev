@@ -1,9 +1,33 @@
-{/* Showcase section for the guide batch, imported by src/content/docs/meta/components.mdx. Owned by the guide batch agent: show every component in every state (long content, overflow, light and dark). Import components from '~/components/authoring' (the Markdown-export guard keys on that path). */}
+{/* Showcase section for the guide batch, imported by src/content/docs/meta/components.mdx. */}
+import { Param, Params, Returns } from '~/components/authoring';
 
 ## Guide kit
 
 <div id="showcase-guide" data-showcase="guide">
 
-Nothing here yet.
+### Grouped, as in the interpolation guide
+
+`InterpolateFloatHermite` returns a point on a Hermite curve through `b` and `c`, steered by the neighbouring points `a` and `d`.
+
+<Params title="Parameters">
+<Param name="a" type="float" required>The point before the segment. Only its slope matters.</Param>
+<Param name="b" type="float" required>Start of the segment, returned when `t` is `0.0`.</Param>
+<Param name="c" type="float" required>End of the segment, returned when `t` is `1.0`.</Param>
+<Param name="d" type="float" required>The point after the segment.</Param>
+<Param name="t" type="float" required>Position along the segment, from `0.0` to `1.0`.</Param>
+<Param name="tens" type="float" default="0.0">Tension. `1.0` pulls the tangents to zero and gives sharp corners; `-1.0` makes the curve loose.</Param>
+<Param name="bias" type="float" default="0.0">Bias. Positive values lean the curve towards `a`, negative values towards `d`.</Param>
+<Returns type="float">The interpolated value. Pass the result to `llSetLinkPrimitiveParamsFast` or a timer loop.</Returns>
+</Params>
+
+### Ungrouped, with every state
+
+<Param name="target" type="key" required>Avatar to follow.</Param>
+<Param name="range" type="float" default="10.0">Stop distance in metres.</Param>
+<Param name="rules" type="list">A rule list, as for `llSetLinkPrimitiveParamsFast`. Long description that wraps across several lines on a narrow screen, to check that the text stays aligned under the header row and does not run under the type.</Param>
+<Param name="channel" type="integer" deprecated>Use `range` instead. Kept for old callers.</Param>
+<Param name="aVeryLongParameterNameThatShouldWrapOnAPhone" type="rotation" required default="ZERO_ROTATION">A long name and a default together.</Param>
+<Param name="callback" type="handler">A type with no page, shown highlighted but not linked.</Param>
+<Returns type="integer">`TRUE` if the target was found, otherwise `FALSE`.</Returns>
 
 </div>

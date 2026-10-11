@@ -1,0 +1,23 @@
+---
+/**
+ * One parameter of a user-defined function in a guide.
+ *   <Param name="target" type="key" required>Avatar to follow.</Param>
+ *   <Param name="range" type="float" default="10.0">Stop distance in metres.</Param>
+ * Markup: a one-entry <dl> (name and type in <dt>, description in <dd>); "required",
+ * "deprecated" and the default are text, not colour alone.
+ */
+import { typeLabel } from './typeLabel';
+interface Props { name: string; type: string; required?: boolean; default?: string; deprecated?: boolean }
+const { name, type, required = false, default: def, deprecated = false } = Astro.props;
+const typeHtml = await typeLabel(type);
+---
+<dl class:list={['au-param', { 'au-param--deprecated': deprecated }]}>
+	<dt>
+		<code class="au-param-name">{deprecated ? <del>{name}</del> : name}</code>
+		<Fragment set:html={typeHtml} />
+		{required && <span class="au-param-badge au-param-badge--required">required</span>}
+		{deprecated && <span class="au-param-badge">deprecated</span>}
+		{def !== undefined && <span class="au-param-default">default <code>{def}</code></span>}
+	</dt>
+	<dd><slot /></dd>
+</dl>

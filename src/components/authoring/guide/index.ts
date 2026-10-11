@@ -1,7 +1,4 @@
-/**
- * Exports of the guide batch (see docs/design/components-ownership.md for its components).
- * Owned by the guide batch agent. Add one line per component, e.g.
- *   export { default as Example } from './Example.astro';
- * The barrel (../index.ts) re-exports everything here.
- */
-export {};
+/** Exports of the guide batch (see docs/design/components-ownership.md). */
+export { default as Param } from './Param.astro';
+export { default as Params } from './Params.astro';
+export { default as Returns } from './Returns.astro';

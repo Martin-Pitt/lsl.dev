@@ -60,7 +60,7 @@ export async function constantGroups(constants: any[]) {
 		id: g, label: g || 'Other constants', href: g ? constantGroupHref(g) : undefined, letter: g ? g.charAt(0).toLowerCase() : undefined,
 		items: await Promise.all(byGroup.get(g)!.map(async c => ({
 			title: c.name, href: apiHref(c.kind, c.name), description: oneLine(c.description), categories: c.groups,
-			flags: apiFlags(c), code: c.signature ? await inlineLsl(c.signature.replace(/^\w+\s+/, ''), { link: false }) : undefined,
+			flags: apiFlags(c), code: c.signature ? await inlineLsl(c.signature.replace(/^\w+\s+/, '').replace(/\s*=\s*"?[0-9a-f]{8}-[0-9a-f-]{27}"?$/i, ''),{ link: false }) : undefined,
 		}))),
 	})));
 }

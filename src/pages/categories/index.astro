@@ -1,18 +1,19 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import CatalogList from '../../components/reference/CatalogList.astro';
 import { categoryMap } from '../../lib/catalog';
 import { featurePages as features, featureHref } from '../../lib/features';
 import { categoryLink } from '../../lib/categories';
+// Same dense layout as the constants page: one block per feature, its categories as entries with their member counts.
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const groups = features.filter(f => f.categories.length > 0).map(f => ({
+	id: f.id, label: f.title, href: featureHref(f.id),
+	items: f.categories.map(id => categoryMap.get(id)!).map(cat => {
+		const link = categoryLink(cat.id), n = cat.functions.length + cat.events.length;
+		return { title: link.label, href: link.href, description: `${cat.functions.length} functions · ${cat.events.length} events`, code: `<span class="cat">${esc(link.label)} <small>${n}</small></span>` };
+	}),
+}));
 ---
 <StarlightPage frontmatter={{ title: 'Categories', description: 'LSL Definitions categories, arranged by feature.', editUrl: false }}>
-	<p>Each category page lists every function and event in that category from LSL Definitions. Categories are arranged under the <a href="/features/">feature</a> they belong to.</p>
-	{features.filter(c => c.categories.length > 0).map(c => (
-		<>
-			<h2 id={c.id}><a href={featureHref(c.id)}>{c.title}</a></h2>
-			<CardGrid>
-				{c.categories.map(id => categoryMap.get(id)!).map(cat => <LinkCard title={categoryLink(cat.id).label} href={categoryLink(cat.id).href} description={`${cat.functions.length} functions · ${cat.events.length} events`} />)}
-			</CardGrid>
-		</>
-	))}
+<CatalogList groups={groups} label="categories" />
 </StarlightPage>

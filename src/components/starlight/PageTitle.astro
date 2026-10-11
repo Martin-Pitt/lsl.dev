@@ -25,16 +25,18 @@ if (feature) {
 const { crumbs, chips } = pageNav(path, title, siblings);
 const chevron = '<svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><polyline points="9 18 15 12 9 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 ---
-<div class="page-title-row">
-	<h1 id={PAGE_TITLE_ID}>{title}</h1>
-	{hasMarkdown && <PageActions id={route.entry.id} title={title} />}
-</div>
-{crumbs.length > 1 && (
-	<nav class="page-crumbs" aria-label="Breadcrumb" data-nosnippet>
-		<ol>{crumbs.map((c, i) => (
-			<li>{i === crumbs.length - 1 ? <span aria-current="page">{c.label}</span> : c.href ? <a href={c.href}>{c.label}</a> : <span>{c.label}</span>}{i < crumbs.length - 1 && <Fragment set:html={chevron} />}</li>
-		))}</ol>
-	</nav>
+<h1 id={PAGE_TITLE_ID}>{title}</h1>
+{(crumbs.length > 1 || hasMarkdown) && (
+	<div class="page-meta-row">
+		{crumbs.length > 1 && (
+			<nav class="page-crumbs" aria-label="Breadcrumb" data-nosnippet>
+				<ol>{crumbs.map((c, i) => (
+					<li>{i === crumbs.length - 1 ? <span aria-current="page">{c.label}</span> : c.href ? <a href={c.href}>{c.label}</a> : <span>{c.label}</span>}{i < crumbs.length - 1 && <Fragment set:html={chevron} />}</li>
+				))}</ol>
+			</nav>
+		)}
+		{hasMarkdown && <PageActions id={route.entry.id} title={title} />}
+	</div>
 )}
 {chips.length > 0 && (
 	<ul class="page-chips" aria-label="Related" data-nosnippet>
@@ -45,9 +47,12 @@ const chevron = '<svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="
 	@layer starlight.core {
 		h1 { margin-top: 0; font-size: var(--sl-text-h1); line-height: var(--sl-line-height-headings); font-weight: 600; color: var(--sl-color-white); }
 	}
-	.page-title-row { display: flex; align-items: flex-start; gap: .75rem; }
-	.page-title-row h1 { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-	.page-crumbs { margin-top: .5rem; font-size: var(--sl-text-sm); }
+	h1 { overflow-wrap: anywhere; }
+	/* Breadcrumbs on the left, page actions (Copy page …) on the right of the same row; on narrow
+	   screens the actions wrap below the breadcrumbs. */
+	.page-meta-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem .75rem; margin-top: .5rem; }
+	.page-meta-row > :global(.page-actions) { margin-inline-start: auto; align-self: center; }
+	.page-crumbs { min-width: 0; font-size: var(--sl-text-sm); }
 	.page-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem .3rem; margin: 0; padding: 0; list-style: none; }
 	.page-crumbs li { display: inline-flex; align-items: center; gap: .3rem; min-width: 0; }
 	.page-crumbs a { font-weight: 500; color: var(--sl-color-white); text-decoration: none; }

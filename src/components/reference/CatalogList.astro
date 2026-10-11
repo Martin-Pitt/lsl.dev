@@ -46,7 +46,19 @@ const flagged = blocks ? blocks.flatMap(g => g.items) : rows;
 // a very long list (e.g. 122 constant groups) stays a compact select.
 const catCount = new Map<string, number>();
 for (const it of rows) for (const c of it.categories ?? []) catCount.set(c, (catCount.get(c) ?? 0) + 1);
-const catOptions = filterCategories.filter((c: any) => catCount.has(c.id));
+// Labels whose last word is shared by other categories are flipped ("Avatar Communication" →
+// "Communication, Avatar"), so related categories sort together A–Z. One-offs keep their wording.
+const lastWord = (l: string) => l.trim().split(/\s+/).pop()!.toLowerCase();
+const shared = new Map<string, number>();
+for (const c of filterCategories) { const w = lastWord(String(c.label)); shared.set(w, (shared.get(w) ?? 0) + 1); }
+for (const c of filterCategories) { const w = String(c.label).toLowerCase(); if (shared.has(w)) shared.set(w, shared.get(w)! + 1); }
+const cloudLabel = (l: string) => {
+	const words = l.trim().split(/\s+/);
+	return words.length > 1 && (shared.get(lastWord(l)) ?? 0) > 1 ? `${words.at(-1)}, ${words.slice(0, -1).join(' ')}` : l;
+};
+const catOptions = filterCategories.filter((c: any) => catCount.has(c.id))
+	.map((c: any) => ({ ...c, cloud: cloudLabel(String(c.label)) }))
+	.sort((a: any, b: any) => a.cloud.localeCompare(b.cloud));
 const catCloud = catOptions.length > 0 && catOptions.length <= 80;
 const legend = BADGES.filter(b => flagged.some(it => it.flags?.some((f: any) => f.code === b.code)));
 const badges = (f?: { code: string }[]) => (f?.length ? f.map(x => x.code).join(' ') : undefined);
@@ -61,7 +73,7 @@ const cats = (c?: string[]) => (c?.length ? c.join(' ') : undefined);
 </div>
 {legend.length > 0 && <div class="legend" role="group" aria-label="Filter by badge"><span>Badges</span>{legend.map(b => <button type="button" data-b={b.code} data-state="off" data-label={`${b.code}: ${b.label}`} aria-label={`${b.code}: ${b.label}, filter: off`} title="Click: include"><b class="b" data-k={b.code}>{b.code}</b> {b.label}</button>)}<button type="button" class="clear" aria-label="Clear badge filters" hidden>× Clear</button></div>}
 {az && <div class="pick" role="group" aria-label="Filter by first letter" data-key="l">{letters.map(l => <button type="button" aria-pressed="false" data-v={l} disabled={!letterIds.has(l)} aria-label={`Starts with ${l.toUpperCase()}`}>{l.toUpperCase()}</button>)}</div>}
-{catCloud && <div class="cloud" role="group" aria-label={`Filter by ${filterLabel.toLowerCase()}`}><span>{filterLabel}</span>{catOptions.map((c: any) => <button type="button" aria-pressed="false" data-v={c.id}>{c.label}</button>)}</div>}
+{catCloud && <div class="cloud" role="group" aria-label={`Filter by ${filterLabel.toLowerCase()}`}><span>{filterLabel}</span>{catOptions.map((c: any) => <button type="button" aria-pressed="false" data-v={c.id}>{c.cloud}</button>)}</div>}
 {prefixes.length > 0 && <div class="pick prefix" role="group" aria-label="Filter by name prefix" data-key="p"><span>Prefix</span>{prefixes.map(([v, n]) => <button type="button" aria-pressed="false" data-v={v}>{v} <small>{n}</small></button>)}</div>}
 {blocks ? (
 	<div class="cl-groups" data-pagefind-ignore>{blocks.map(g => (

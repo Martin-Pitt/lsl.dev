@@ -9,7 +9,7 @@ and the menu adds **View as Markdown**, **Open in ChatGPT** and **Open in Claude
 | Button and menu | `src/components/starlight/PageActions.astro` |
 | Placement (beside the h1, above breadcrumbs and chips) | `src/components/starlight/PageTitle.astro` |
 | Markdown endpoint, `/<page>/index.md` and `/index.md` | `src/pages/[...page]/index.md.ts` |
-| MDX to Markdown conversion | `src/lib/page-markdown.ts` |
+| MDX to Markdown conversion | `src/lib/page-markdown.ts` (cases in `src/lib/page-markdown/`) |
 
 - The Markdown is built from the MDX source, not scraped from HTML. Imports and JSX
   expressions are dropped, and the data-driven components are expanded from `catalog.json`:
@@ -17,7 +17,9 @@ and the menu adds **View as Markdown**, **Open in ChatGPT** and **Open in Claude
   `<ConstantGroup>` becomes an `lsl` block of members, `<Signatures>` becomes a linked list,
   `<Box>` becomes a `##` heading, `<SeeAlso>`/`<FeatureFooter>`/`<Attribution>`/`<WikiSource>`
   become links and the CC BY-SA credit. Code is copied verbatim. Unknown components keep their
-  children. When you add a new component to MDX pages, add a case in `page-markdown.ts`.
+  children. When you add a new component to MDX pages, add a case in
+  `src/lib/page-markdown/` (`core.ts` for site components, `<batch>.ts` for authoring components).
+  An authoring component without a case fails the build.
 - Astro-route pages (catalog lists, categories, constant groups, the wiki archive)
   have no Markdown source. PageTitle renders the menu only when the route's entry is a file in the
   docs collection, so those pages show no menu.

@@ -1,0 +1,49 @@
+/*
+ * Authoring component tokens (--au-*). Integrator-owned; batch CSS reads these.
+ *
+ * Required browser features (current evergreen Chrome, Edge, Firefox and Safari):
+ * CSS anchor positioning, the Popover API (including popover="hint"), <details name>,
+ * container queries, :has(), @starting-style, transition-behavior: allow-discrete,
+ * light-dark(), color-mix() and native CSS nesting. @scope, ::details-content and interestfor
+ * are used where useful but are not required. No JS polyfills or positioning libraries: in an
+ * older browser the fallback only has to keep content readable (see "Platform features" in
+ * docs/design/components-plan.md).
+ *
+ * Colour rules: accent blue only for links and interactive state. Semantic colours come from
+ * Starlight's --sl-color-* tokens. Themes use light-dark(), which follows color-scheme, which
+ * follows :root[data-theme]. Tints are color-mix(in oklab, <colour> 12%, transparent).
+ */
+@layer authoring {
+	:root { color-scheme: dark; }
+	:root[data-theme='light'] { color-scheme: light; }
+
+	:root {
+		/* Shape */
+		--au-radius: .5rem;
+		--au-radius-sm: .25rem;
+		--au-gap: .75rem;
+		--au-tint: 12%;
+
+		/* Surfaces: neutral, matching the code surface depth in dark mode. */
+		--au-surface: light-dark(var(--sl-color-gray-7), var(--sl-color-gray-6));
+		--au-surface-raised: light-dark(var(--sl-color-white), var(--sl-color-gray-5));
+		--au-border: var(--sl-color-hairline);
+		--au-text-muted: var(--sl-color-gray-3);
+
+		/* Semantic colours: a solid colour for rules and icons, and a tint for fills. */
+		--au-note: light-dark(var(--sl-color-gray-3), var(--sl-color-gray-2)); /* Caveat, Limit: neutral, never accent */
+		--au-info: var(--sl-color-blue);
+		--au-tip: var(--sl-color-green);
+		--au-caution: var(--sl-color-orange);
+		--au-danger: var(--sl-color-red);
+		--au-note-tint: color-mix(in oklab, var(--au-note) var(--au-tint), transparent);
+		--au-info-tint: color-mix(in oklab, var(--au-info) var(--au-tint), transparent);
+		--au-tip-tint: color-mix(in oklab, var(--au-tip) var(--au-tint), transparent);
+		--au-caution-tint: color-mix(in oklab, var(--au-caution) var(--au-tint), transparent);
+		--au-danger-tint: color-mix(in oklab, var(--au-danger) var(--au-tint), transparent);
+
+		/* Motion: animate only inside @media (prefers-reduced-motion: no-preference). */
+		--au-duration: 150ms;
+		--au-ease: cubic-bezier(.2, 0, 0, 1);
+	}
+}

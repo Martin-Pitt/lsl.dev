@@ -4,6 +4,8 @@ import starlight from '@astrojs/starlight';
 import { unified } from '@astrojs/markdown-remark';
 import { readFileSync } from 'node:fs';
 import rehypeInlineLsl from './src/lib/rehype-inline-lsl.ts';
+import rehypeApiHovercards from './src/components/authoring/hovercards/rehype-api-hovercards.ts';
+import sitemap from '@astrojs/sitemap';
 import { loadFeatures } from './scripts/feature-index.mjs';
 import { singleMemberCategories } from './src/lib/category-members.mjs';
 
@@ -89,11 +91,18 @@ const featureItems = features.map(f => f.subpages.length === 0
 		items: [{ label: 'Overview', link: `/features/${f.id}/`, attrs: { 'data-sidebar-group-link': '' } }, ...f.subpages.map(s => ({ label: s.title, link: s.href }))],
 	});
 
+/** Hidden pages kept out of the sitemap (they also set robots noindex and pagefind: false). */
+const sitemapExcluded = ['/meta/'];
+
 export default defineConfig({
 	site: 'https://lsl.dev',
 	// Inline `code` and links to API pages in Markdown/MDX are highlighted as LSL (see the plugin).
-	markdown: { processor: unified({ rehypePlugins: [rehypeInlineLsl] }) },
-	integrations: [reloadSidebarOnFeatureChanges(), starlight({
+	// API hover cards run after it (src/components/authoring/hovercards/, Batch 1 of docs/design/components-plan.md).
+	markdown: { processor: unified({ rehypePlugins: [rehypeInlineLsl, rehypeApiHovercards] }) },
+	integrations: [reloadSidebarOnFeatureChanges(),
+		// Registered here, before Starlight, so Starlight doesn't add its own; hidden pages stay out of it.
+		sitemap({ filter: page => !sitemapExcluded.some(path => new URL(page).pathname.startsWith(path)) }),
+		starlight({
 		title: 'LSL Dev',
 		favicon: '/favicon.svg',
 		// Logo: prototype 33 (Left Fold) mark; header uses its lockup with prototype 18's lettering.
@@ -107,7 +116,7 @@ export default defineConfig({
 		pagination: false,
 		// Breadcrumbs and meta description of the MDX API pages.
 		routeMiddleware: ['./src/route-middleware.ts', './src/routeData.ts'],
-		customCss: ['./src/styles/slua-base.css', './src/styles/custom.css'],
+		customCss: ['./src/styles/slua-base.css', './src/styles/custom.css', './src/components/authoring/authoring.css'],
 		components: {
 			Header: './src/components/starlight/Header.astro',
 			PageFrame: './src/components/starlight/PageFrame.astro',

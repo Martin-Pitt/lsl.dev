@@ -96,3 +96,7 @@ the build. Props must be JSON arrays (double quotes, no trailing commas) because
 
 `python scripts/check-feature-migration.py` compares the pages with the snapshot of the old JSON
 (`scripts/lib/fixtures/feature-clusters-pre-mdx.json`) and reports anything that was dropped.
+
+## Components
+
+For callouts, disclosure, recipe and guide components, see [components.md](components.md).

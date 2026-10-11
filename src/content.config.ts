@@ -28,6 +28,11 @@ const source = z.object({
 export const collections = {
 	docs: defineCollection({
 		loader: docsLoader(),
-		schema: docsSchema({ extend: z.object({ category: z.string().optional(), source: source.optional() }) }),
+		schema: docsSchema({ extend: z.object({
+			category: z.string().optional(),
+			source: source.optional(),
+			/** `false` turns off API hover cards on the page (docs/components.md). */
+			hoverCards: z.boolean().optional(),
+		}) }),
 	}),
 };

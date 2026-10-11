@@ -4,127 +4,20 @@
  * source level: imports and JSX expressions are dropped, the data-driven API components
  * (<LSLFunction>, <ConstantGroup>, <Signatures>, ...) are expanded from catalog.json the same way
  * they render, and layout components (<Columns>, <Box>, ...) become plain headings or nothing.
- * Fenced code and inline code are copied verbatim. Unknown components keep their children.
+ * Fenced code and inline code are copied verbatim. Unknown components keep their children, except
+ * authoring components (imported from src/components/authoring): one without a case fails the build.
  */
-import { catalog, apiMap, apiHref, constantGroupHref, constantsInGroup, categoryMap, wikiByTitle } from './catalog';
-import { categoryLink } from './categories';
-import { featurePageMap, featureHref } from './features';
-import { parseSeeAlsoItem } from './feature-mdx.mjs';
+import { catalog } from './catalog';
+import { selfClosingCases, pairedCases, handledBy } from './page-markdown/index';
+import { SITE, pageHref } from './page-markdown/util';
+import type { Attrs, MarkdownPage } from './page-markdown/types';
 
-type Attrs = Record<string, any>;
-type Source = { url?: string; wiki?: string; license?: string } | undefined;
-export type MarkdownPage = { id: string; body?: string; data: { title: string; description?: string; source?: Source } };
-
-const SITE = 'https://lsl.dev';
+export type { MarkdownPage } from './page-markdown/types';
 export const markdownHref = (id: string) => (id === 'index' ? '/index.md' : `/${id}/index.md`);
-const pageHref = (id: string) => (id === 'index' ? '/' : `/${id}/`);
 
-const code = (s: string) => (s.includes('`') ? `\`\` ${s} \`\`` : `\`${s}\``);
-const lslType = (t: string) => ({ boolean: 'integer', asset: 'string', uuid: 'key' } as Record<string, string>)[t] ?? t;
-const literal = (c: any) => (c.type === 'string' || c.type === 'key' ? JSON.stringify(String(c.value)) : String(c.value));
-const params = (e: any) => `(${(e.parameters ?? []).map((p: any) => `${p.type} ${p.name}`).join(', ')})`;
-const typeOf = (e: any) => (e.kind === 'event' ? 'event' : e.kind === 'constant' ? e.type : e.returnType);
-/** One-line linked signature, as in a <Signatures> row. */
-const sigLine = (e: any) => `\`${typeOf(e)}\` [\`${e.name}\`](${apiHref(e.kind, e.name)})${e.kind === 'constant' ? ` \`= ${literal(e)}\`` : ` \`${params(e)}\``}`;
-const need = (v: any, what: string) => { if (!v) throw new Error(`page-markdown: unknown ${what}`); return v; };
-
-function apiHeader(kind: 'function' | 'event' | 'constant', name: string, showDescription: boolean) {
-	const list = { function: catalog.functions, event: catalog.events, constant: catalog.constants }[kind] as any[];
-	const e = need(list.find(x => x.name === name), `${kind} "${name}"`);
-	const d = e.definition ?? {};
-	const out: string[] = [];
-	const flags = [['experience', 'requires an experience'], ['linden-experience', 'Linden experience only'], ['god-mode', 'privileged function']].filter(([k]) => d[k]).map(([, l]) => l);
-	out.push(`*LSL ${kind}${flags.length ? ` (${flags.join(', ')})` : ''}*`);
-	if (e.replaces?.length) out.push(`Replaces deprecated ${e.replaces.map(code).join(', ')}.`);
-	const sig = kind === 'constant' ? `${e.type} ${e.name} = ${literal(e)};` : kind === 'function' ? `${e.returnType} ${e.signature};` : `${e.signature}`;
-	out.push('```lsl\n' + sig + '\n```');
-	if (kind !== 'constant' && e.parameters?.length) out.push(e.parameters.map((p: any) => `- ${code(`${p.type} ${p.name}`)}${p.description ? `: ${p.description}` : ''}`).join('\n'));
-	const sleep = d['mono-sleep'] ?? d.sleep;
-	const facts = [
-		kind === 'function' && e.returnType !== 'void' && `Returns: ${code(e.returnType)}`,
-		kind === 'function' && sleep && `Delay: ${sleep} s`,
-		kind === 'function' && d.energy != null && `Energy: ${d.energy}`,
-		d['requires-permission'] && `Permission: ${code(String(d['requires-permission']))}`,
-	].filter(Boolean);
-	if (facts.length) out.push(facts.map(f => `- ${f}`).join('\n'));
-	if (showDescription && e.description) out.push(e.description);
-	const groups: string[] = d['member-of'] ?? [];
-	if (groups.length) out.push(`Constant groups: ${groups.map(g => `[${g}](${constantGroupHref(g)})`).join(', ')}`);
-	return out.join('\n\n');
-}
-
-function constantGroup(name: string) {
-	const members = constantsInGroup(name) as any[];
-	need(members.length, `constant group "${name}"`);
-	const lines = members.map(c => {
-		const vals = c.definition?.values as any[] | undefined;
-		return vals?.length ? `${c.name}, ${vals.map(a => `${lslType(a['value-type'] ?? a.type ?? '')} ${a.name}`.trim()).join(', ')}` : `${c.name} = ${literal(c)}`;
-	});
-	return `Constant group [${name}](${constantGroupHref(name)}):\n\n\`\`\`lsl\n${lines.join('\n')}\n\`\`\``;
-}
-
-function seeAlso(items: string[]) {
-	return items.map(item => {
-		const { kind, target, label } = parseSeeAlsoItem(item);
-		if (kind === 'feature') { const f = need(featurePageMap.get(target), item); return `[${label ?? f.title}](${featureHref(f.id)})`; }
-		if (kind === 'category') { need(categoryMap.get(target), item); const l = categoryLink(target); return `[${label ?? l.label}](${l.href})`; }
-		if (kind === 'wiki') { const w: any = need(wikiByTitle.get(target), item); return `[${label ?? w.title.replace(/^Category:/, '')} (Second Life Wiki)](${w.source.url})`; }
-		return `[${label ?? target}](${target})`;
-	}).join(', ');
-}
-
-function featureFooter(a: Attrs) {
-	const out: string[] = [];
-	if (a.related?.length) out.push('## Related features\n\n' + a.related.map((id: string) => { const f = need(featurePageMap.get(id), `feature "${id}"`); return `- [${f.title}](${featureHref(f.id)})`; }).join('\n'));
-	if (a.categories?.length) out.push('## Categories\n\n' + a.categories.map((id: string) => { const l = categoryLink(id); return `- [${l.label}](${l.href})`; }).join('\n'));
-	if (a.archive?.length) out.push('## On the Second Life Wiki\n\n' + a.archive.map((t: string) => { const w: any = need(wikiByTitle.get(t), `wiki page "${t}"`); return `- [${w.title.replace(/^Category:/, '')}](${w.source.url})`; }).join('\n'));
-	return out.join('\n\n');
-}
-
-function attribution(a: Attrs) {
-	const titles: string[] = [...(a.pages ?? []), ...(a.page ? [a.page] : [])];
-	const links = titles.map(t => { const w: any = wikiByTitle.get(t) ?? wikiByTitle.get(t.replace(/_/g, ' ')); return w ? `[${w.source.title}](${w.source.url})` : t; });
-	return `*${a.what ?? 'Adapted from the Second Life Wiki'} ${links.join(', ')}, by Second Life Wiki contributors, under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).*`;
-}
-
-function wikiSource(source: Source) {
-	if (!source?.url) return '';
-	return `---\n\n*Source: [${source.wiki ?? 'Second Life Wiki'}](${source.url}) on the Second Life Wiki.${source.license ? ' ' + source.license : ''}*`;
-}
-
-/** Self-closing components (or the opening tag of paired ones that render their own content). */
-function selfClosing(tag: string, a: Attrs, page: MarkdownPage): string | undefined {
-	switch (tag) {
-		case 'LSLFunction': return apiHeader('function', a.name, !!a.description);
-		case 'LSLEvent': return apiHeader('event', a.name, !!a.description);
-		case 'LSLConstant': return apiHeader('constant', a.name, !!a.description);
-		case 'ConstantGroup': return constantGroup(a.name);
-		case 'WikiSource': return wikiSource(page.data.source);
-		case 'InlineSyntax': return code(String(a.code ?? ''));
-		case 'ConstantGroups': return `Constant groups: ${(a.names ?? []).map((g: string) => `[${g}](${constantGroupHref(g)}) (${constantsInGroup(g).length})`).join(', ')}`;
-		case 'FeatureFooter': return featureFooter(a);
-		case 'Attribution': return attribution(a);
-		case 'LinkCard': return `- [${a.title}](${a.href})${a.description ? `: ${a.description}` : ''}`;
-		case 'LSLControl': { const e: any = need(catalog.controls.find((c: any) => c.name === a.name), `control "${a.name}"`); return ['do', 'else', 'for', 'if', 'jump', 'return', 'state', 'while'].includes(a.name) ? '```text\n' + e.description + '\n```' : e.description; }
-		case 'LSLType': { const e: any = need(catalog.types.find((c: any) => c.name === a.name), `type "${a.name}"`); return e.description; }
-	}
-	return undefined;
-}
-
-/** Opening/closing text of paired components; children are converted in between. */
-function paired(tag: string, a: Attrs): [string, string] {
-	switch (tag) {
-		case 'Box': return [`\n\n## ${a.href ? `[${a.title}](${a.href})` : a.title}\n\n`, '\n\n'];
-		case 'Card': return [`\n\n### ${a.title}\n\n`, '\n\n'];
-		case 'Signatures': return [(a.names ?? []).map((n: string) => `- ${sigLine(need(apiMap.get(n), `API "${n}"`))}${a.descriptions && (apiMap.get(n) as any).description ? `: ${(apiMap.get(n) as any).description}` : ''}`).join('\n') + '\n', '\n'];
-		case 'Signature': return [`- ${sigLine(need(apiMap.get(a.name), `API "${a.name}"`))}: `, '\n'];
-		case 'SeeAlso': return [`\n\nSee also: ${seeAlso(a.items ?? [])}`, '\n\n'];
-		case 'Planned': return [' (planned: ', ')'];
-		case 'LinkButton': return ['[', `](${a.href})`];
-		case 'Aside': return [`\n\n**${a.title ?? (a.type ? a.type[0].toUpperCase() + a.type.slice(1) : 'Note')}:** `, '\n\n'];
-	}
-	return ['', ''];
-}
+/** Component cases live in src/lib/page-markdown/<file>.ts, one file per batch (see ./page-markdown/index.ts). */
+const selfClosing = (tag: string, a: Attrs, page: MarkdownPage) => selfClosingCases.get(tag)?.(a, page);
+const paired = (tag: string, a: Attrs, page: MarkdownPage): [string, string] => pairedCases.get(tag)?.(a, page) ?? ['', ''];
 
 /** Parses JSX attributes starting at s[i] (just after the tag name); returns attrs and the index after `>`. */
 function parseTag(s: string, i: number): { attrs: Attrs; end: number; selfClose: boolean } | null {
@@ -163,8 +56,17 @@ function flowExpression(expr: string, page: MarkdownPage): string {
 	return `*(Generated list; see ${SITE}${pageHref(page.id)})*`;
 }
 
+/** Names imported from the authoring barrel (src/components/authoring) in an MDX body. */
+function authoringImports(body: string): Set<string> {
+	const names = new Set<string>();
+	for (const m of body.matchAll(/^import\s*\{([^}]*)\}\s*from\s*['"][^'"]*components\/authoring[^'"]*['"]/gm)) {
+		for (const n of m[1].split(',')) { const local = n.trim().split(/\s+as\s+/).pop(); if (local) names.add(local); }
+	}
+	return names;
+}
+
 /** Converts MDX prose (no fenced code) with a stack of open components. */
-function convertText(s: string, page: MarkdownPage): string {
+function convertText(s: string, page: MarkdownPage, authoring: Set<string>): string {
 	let out = '';
 	const stack: string[] = [];
 	for (let i = 0; i < s.length;) {
@@ -175,9 +77,11 @@ function convertText(s: string, page: MarkdownPage): string {
 			const name = /^[A-Za-z][\w.]*/.exec(s.slice(i + (closing ? 2 : 1)))![0];
 			const t = parseTag(s, i + (closing ? 2 : 1) + name.length);
 			if (t) {
+				// Guard: an authoring component without a case would silently degrade the export.
+				if (!closing && authoring.has(name) && !handledBy.has(name)) throw new Error(`page-markdown: <${name}> (on ${page.id}) has no case in src/lib/page-markdown/<batch>.ts`);
 				if (closing) { const top = stack.pop(); out += top ?? ''; }
-				else if (t.selfClose) { const r = selfClosing(name, t.attrs, page); out += r !== undefined ? `\n\n${r}\n\n` : paired(name, t.attrs).join(''); }
-				else { const [open, close] = paired(name, t.attrs); out += open; stack.push(close); }
+				else if (t.selfClose) { const r = selfClosing(name, t.attrs, page); out += r !== undefined ? `\n\n${r}\n\n` : paired(name, t.attrs, page).join(''); }
+				else { const [open, close] = paired(name, t.attrs, page); out += open; stack.push(close); }
 				i = t.end;
 				continue;
 			}
@@ -195,13 +99,28 @@ function convertText(s: string, page: MarkdownPage): string {
 	return out;
 }
 
+/** The showcase partials (src/components/authoring/<batch>/Showcase.mdx), raw. */
+const showcaseSources = import.meta.glob('../components/authoring/*/Showcase.mdx', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+
+/** Replaces `<X />` with the source of a Showcase.mdx imported as X, so the showcase page's export
+ * (and the authoring guard) covers each batch's section. */
+function inlineShowcases(body: string): string {
+	for (const m of body.matchAll(/^import\s+(\w+)\s+from\s+['"][^'"]*components\/authoring\/(\w+)\/Showcase\.mdx['"]/gm)) {
+		const src = showcaseSources[`../components/authoring/${m[2]}/Showcase.mdx`];
+		if (src !== undefined) body = body.replace(new RegExp(`^<${m[1]}\\s*/>`, 'm'), () => src);
+	}
+	return body;
+}
+
 /** MDX body to Markdown: fenced code is kept verbatim, imports/exports are dropped, the rest is converted. */
 export function mdxToMarkdown(body: string, page: MarkdownPage): string {
+	body = inlineShowcases(body);
+	const authoring = authoringImports(body);
 	const lines = body.replace(/\r\n/g, '\n').split('\n');
 	const parts: string[] = [];
 	let text: string[] = [];
 	let fence: string | null = null;
-	const flush = () => { if (text.length) parts.push(convertText(text.join('\n'), page)); text = []; };
+	const flush = () => { if (text.length) parts.push(convertText(text.join('\n'), page, authoring)); text = []; };
 	for (const line of lines) {
 		const f = /^\s*(`{3,}|~{3,})/.exec(line);
 		if (fence) { parts.push(line); if (f && f[1][0] === fence[0] && f[1].length >= fence.length && line.trim() === f[1]) fence = null; continue; }

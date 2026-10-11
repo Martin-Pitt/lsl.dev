@@ -1,0 +1,30 @@
+/*
+ * Shared base for hint popovers (hover cards, Requires and Since tips). Integrator-owned.
+ * Positioning uses CSS anchor positioning; without it the popover opens in the UA default spot.
+ * Batches add their own look in their batch CSS on top of .au-popover.
+ */
+@layer authoring {
+	.au-popover {
+		margin: 0;
+		max-inline-size: min(28rem, calc(100vw - 2rem));
+		padding: .75rem 1rem;
+		border: 1px solid var(--au-border);
+		border-radius: var(--au-radius);
+		background: var(--au-surface-raised);
+		color: var(--sl-color-text);
+		font-size: var(--sl-text-sm);
+		box-shadow: var(--sl-shadow-md);
+		position-area: block-end span-inline-end;
+		position-try-fallbacks: flip-block, flip-inline;
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.au-popover {
+			opacity: 0;
+			transition: opacity var(--au-duration) var(--au-ease), display var(--au-duration) allow-discrete, overlay var(--au-duration) allow-discrete;
+			&:popover-open { opacity: 1; }
+		}
+		@starting-style {
+			.au-popover:popover-open { opacity: 0; }
+		}
+	}
+}

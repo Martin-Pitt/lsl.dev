@@ -21,5 +21,9 @@ lockfile). `npm run <script>` still works but `npm install` is not a supported i
 - [content-ideas.md](content-ideas.md): backlog of Guide and Recipe ideas mined from the local
   wiki snapshot, with priorities, feature areas, sources and coverage status
 - [design/logo-brief.md](design/logo-brief.md): brief for logo and favicon prototypes
+- [components.md](components.md): the authoring components (asides, recipe kit, hover cards,
+  guide kit): syntax, props and the hidden showcase page
 - [design/components-plan.md](design/components-plan.md): plan for authoring MDX components
-  (API hover cards, recipe kit, asides, guide kit), modelled on Mintlify
+  (API hover cards, recipe kit, asides, guide kit), modelled on Mintlify, with the decisions taken
+- [design/components-ownership.md](design/components-ownership.md): which files each component
+  batch owns and which only the integrator edits

@@ -1,6 +1,8 @@
 # Authoring components plan
 
-Status: plan only, nothing built yet. Scope: four component batches plus a showcase page.
+Status: approved, with the [decisions](#decisions) below, which override anything later in this
+document. Phase 0 (the shared scaffold) is built. The batches are next, built in parallel by
+separate agents on disjoint files ([components-ownership.md](components-ownership.md)).
 Real-page conversions come later.
 
 Goal: give guide, recipe, feature and API authors a small, readable set of MDX components,
@@ -9,17 +11,77 @@ they exist, and the site stays static with almost no client JS.
 
 ## Contents
 
-1. [Ground rules](#ground-rules)
-2. [Platform features (required)](#platform-features-required)
-3. [Comparison table](#comparison-table)
-4. [Batch 1: API hover cards](#batch-1-api-hover-cards)
-5. [Batch 2: Recipe kit](#batch-2-recipe-kit)
-6. [Batch 3: Asides and disclosure](#batch-3-asides-and-disclosure)
-7. [Batch 4: Guide kit](#batch-4-guide-kit)
-8. [Optional ideas](#optional-ideas)
-9. [Cross-cutting: layout, naming, discovery, showcase, tests](#cross-cutting)
-10. [Open questions (with recommendations)](#open-questions)
-11. [Phasing, effort, risks, parallelisation](#phasing)
+1. [Decisions](#decisions)
+2. [Ground rules](#ground-rules)
+3. [Platform features (required)](#platform-features-required)
+4. [Comparison table](#comparison-table)
+5. [Batch 1: API hover cards](#batch-1-api-hover-cards)
+6. [Batch 2: Recipe kit](#batch-2-recipe-kit)
+7. [Batch 3: Asides and disclosure](#batch-3-asides-and-disclosure)
+8. [Batch 4: Guide kit](#batch-4-guide-kit)
+9. [Optional ideas](#optional-ideas)
+10. [Cross-cutting: layout, naming, discovery, showcase, verification](#cross-cutting)
+11. [Open questions (resolved)](#open-questions)
+12. [Phasing, effort, risks, parallelisation](#phasing)
+
+## Decisions
+
+Recorded 2026-10-11 from the user's answers to the open questions and their review of two
+independent critiques of this plan. They override the rest of the document.
+
+1. **Diagrams: deferred.** When they come back, they use a custom build-time SVG renderer, not
+   Mermaid (dagre or a simple layered layout, CSS-variable theming). No dependency is installed now.
+2. **LSL ⇄ SLua tabs and `<CodeGroup>`: deferred.** Without SLua, CodeGroup is just Starlight
+   Tabs, which authors can already use. No Luau grammar, no SLua lint.
+3. **Limits become a dataset** (this replaces "per-row ids added to the Markdown tables"):
+   - `src/data/limits.yaml` holds one entry per limit row: `id`, `label`, `section`, lower and
+     upper values with units, exact-wording notes, related APIs and feature links (from the
+     "More coverage" column). It is extracted from the tables in
+     `src/content/docs/reference/limits.mdx` and checked against them, so no figure changes.
+   - The Limits page keeps its hand-written prose, asides and attribution. Its tables render from
+     the data, e.g. `<LimitsTable section="…" />`, and per-row ids come from the data.
+   - `<Limit id="…" />` renders the value inline (highlighted, linking to its row), and
+     `<Limit id="…" note />` renders a callout with the value and the note. Unknown ids fail the
+     build.
+   - It can feed hover cards later.
+   - Owner: the asides batch. It owns `src/data/limits.yaml`, the Limits table component and the
+     table conversion in `limits.mdx`.
+4. **Hover cards** (Batch 1, details in its section): Popover plus CSS anchor positioning,
+   opening on hover and focus only (`interestfor` where supported, otherwise a tiny script). The
+   link stays a normal `<a href>` that navigates on click and tap: no `popovertarget` on the
+   link, and no tap-to-open on touch. One popover per link, inserted next to it in the content
+   tree, so anchors are never shared. The card has no links or other interactive content, no
+   `role="tooltip"` and no `aria-describedby` pointing at it. It is purely supplementary
+   (`aria-hidden="true"`) and carries `data-pagefind-ignore`.
+5. **`<Linkset>` v1** is a styled nested Markdown list (FileTree-style wrapper) with no pipe DSL.
+6. **No permanent test infrastructure.** No test runner, no Playwright/axe, no snapshots.
+   Each batch checks that its work behaves as intended during development (build, look at the
+   showcase, ad-hoc scripts that are not committed). The one committed guard is in
+   `src/lib/page-markdown.ts`: an authoring component (imported from `src/components/authoring`)
+   without a Markdown-export case fails the build. Starlight's and the site's existing
+   components are not checked.
+7. **Phasing:** simple, low-risk components first (asides including the Limits dataset,
+   Details/FAQ/Figure/Since, RecipeMeta, ScriptFile, Requires as static badges, Param/Returns),
+   then hover cards, then Linkset and BuildStep. Deferred items come last.
+8. **Every other open question** takes the recommended answer: a slim generated hover-card JSON
+   with per-page markup; a closed Requires vocabulary; BuildStep titles are not headings; cards
+   on API pages too, except self-links, headings and the sidebar; no `:::gotcha` directives in
+   v1; the built-in Starlight asides are restyled with the new ones.
+9. **Execution:** the integrator built Phase 0. Batch agents work in parallel and touch only the
+   files [components-ownership.md](components-ownership.md) gives them.
+
+Facts checked while recording these:
+
+- There are about 1,660 MDX sources but 4,128 built pages (the rest are Astro routes: catalog
+  lists, categories, constant groups, the wiki archive).
+- `rehype-inline-lsl` already runs on MDX pages, so hover cards see its links.
+- A sitemap does exist: Starlight adds `@astrojs/sitemap` by itself whenever `site` is set (the
+  build writes `sitemap-index.xml`). Phase 0 registers it explicitly, before Starlight, with a
+  filter that drops `/meta/`, so the hidden showcase stays out of it.
+- Restyling the asides is global CSS. It belongs to the asides batch, inside
+  `src/components/authoring/asides/asides.css`, not `custom.css`.
+- If `<Since>` or API flags ever go on API pages, `scripts/generate-mdx.py` must emit them, or a
+  regeneration drops them. That is for later.
 
 ## Ground rules
 
@@ -31,8 +93,9 @@ they exist, and the site stays static with almost no client JS.
   `Icon`, and diagrams are rendered at build time.
 - **Static output.** Anything interactive works without JS through platform features
   (popover, `<details>`).
-- **Markdown export.** `src/lib/page-markdown.ts` is a hand-written MDX-source scanner, and
-  `docs/page-actions.md` requires a `selfClosing` or `paired` case for every new component.
+- **Markdown export.** `src/lib/page-markdown.ts` is a hand-written MDX-source scanner. Each
+  authoring component needs a case in its batch's `src/lib/page-markdown/<batch>.ts`, and the
+  build fails without one.
   Each component below states its export.
 - **Simple props.** Feature components get parsed from source by `scripts/lib/feature_mdx.py`
   (props as JSON), so props stay as strings, numbers, booleans or short string lists. No
@@ -59,8 +122,8 @@ have to keep content accessible and readable. They don't have to look the same.
 | Feature | Used for | Support (late 2026) | Fallback when missing |
 |---|---|---|---|
 | Anchor positioning (`anchor-name`, `position-anchor`, `position-area`, `position-try-fallbacks`) | Hover cards, tooltips | All evergreen engines | The popover opens in the UA default spot (centred top layer). Still readable. |
-| Popover API (`popover`, `popovertarget`, `popover="hint"`) | Hover cards, Since and Requires chip tips | All evergreen engines; `hint` is newer | `hint` falls back to `auto`. If popovers are unsupported, the plain link still navigates. |
-| `interestfor` (interest invokers) | Hover/focus to open a card without JS | Chromium; others in progress | A tiny shared inline script (under 1 KB) opens on hover and focus. Tap and click use `popovertarget`. The link always works. |
+| Popover API (`popover`, `popover="hint"`) | Hover cards, the optional Since note | All evergreen engines; `hint` is newer | `hint` falls back to `auto`. If popovers are unsupported, the plain link still navigates. |
+| `interestfor` (interest invokers) | Hover/focus to open a card without JS | Chromium; others in progress | A tiny shared inline script (under 1 KB) opens on hover and focus. Click and tap always navigate. |
 | `<details name>` | Exclusive FAQ accordions | All evergreen | Items open independently. |
 | `::details-content` | Animated open/close | Chromium, Firefox; Safari recent | No animation. |
 | Container queries | RecipeMeta, Linkset, Param, Columns, cards | All evergreen | Content stacks in one column. |
@@ -87,15 +150,15 @@ Rules that apply to every component:
 | Expandable | `<Details>` inside `<Param>` | New |
 | Steps / Step | Starlight `<Steps>` + `<BuildStep>` | Wraps Starlight |
 | Tabs | Starlight Tabs/TabItem | Already exists |
-| CodeGroup | `<CodeGroup>` (LSL ⇄ SLua, `syncKey="lang"`) | Wraps Starlight Tabs |
+| CodeGroup | Starlight Tabs for now; `<CodeGroup>` (LSL ⇄ SLua) | Deferred |
 | Code meta (title, highlight, wrap, collapse) | Expressive Code | Already exists |
 | Code line numbers / focus / diff | EC line-numbers plugin, markers | Optional (plugin install) |
 | ParamField / ResponseField | `<Param>` / `<Returns>` | New |
 | Frame | `<Figure>` | New |
 | Badge | Starlight Badge; `<Since>` | Wraps Starlight |
 | Card / Columns / Tile | Starlight Card/CardGrid/LinkCard; `<Columns>` (optional) | Exists / optional |
-| Tree | `<Linkset>` (prim tree); Starlight FileTree | New (FileTree-like) |
-| Mermaid | `<StateFlow>` / `<EventFlow>` | New (build-time SVG) |
+| Tree | `<Linkset>` (prim tree, styled nested list); Starlight FileTree | New (FileTree-like) |
+| Mermaid | `<StateFlow>` / `<EventFlow>` | Deferred (build-time SVG) |
 | Update | `<Update>` changelog entry (optional) | Optional |
 | Visibility | `<Visibility for>` (optional) | Optional, tied to the Markdown export |
 | Prompt | `<Prompt>` (optional) | Optional |
@@ -112,47 +175,58 @@ Every link to an API page (`/reference/functions/llFoo/` etc., and inline-LSL li
 energy, permission, experience). Readers can check an API without leaving the page.
 
 ### Authoring
-None. The cards apply globally. Opt out per link by adding
-`data-nocard` through a tiny wrapper (`<NoCard>`), or per page with frontmatter
-`hoverCards: false`. Opt-outs should be rare.
+None. The cards apply globally. Opt out per link by wrapping it in `<NoCard>` (adds
+`data-nocard`), or per page with frontmatter `hoverCards: false` (already in the content schema).
+Opt-outs should be rare.
 
 ### Data
-`src/data/catalog.json` is 5 MB, mostly wiki metadata. A build step
-(`scripts/build-hovercards.ts`, run before astro) writes `src/data/hovercards.json` with one
-record per entry: `{k: kind, s: signature, d: oneLine (≤140 chars), f: flags[]}`. Flags
-come from `definition.sleep`, `energy`, `requires-permission` and `experience`, plus
-deprecated and SLua flags from the YAML. The target size is about 400–600 KB total. It is
-never shipped whole.
+`src/data/catalog.json` is 5 MB, mostly wiki metadata. `scripts/build-hovercards.ts` (runs
+before `astro dev` and `astro build`; stub in place) writes `src/data/hovercards.json`
+(git-ignored) with one record per entry: `{k: kind, s: signature, d: oneLine (≤140 chars),
+f: flags[]}`. Flags come from `definition.sleep`, `energy`, `requires-permission` and
+`experience`, plus deprecated and SLua flags from the YAML. Target size: about 400–600 KB. It is
+read at build time only and never shipped.
 
-### Rendering
-- A rehype plugin, `rehype-api-hovercards`, runs after `rehype-inline-lsl`. For each `<a>`
-  whose href resolves to a catalog entry, it adds an `aria-describedby` and an
-  `interestfor`/`popovertarget` pointing at `hc-<name>`.
-- It appends **one popover per distinct API per page** at the end of `<main>`:
-  `<div popover="hint" id="hc-llSetTimerEvent" role="tooltip" class="hc">`. A page with 30
-  distinct APIs adds roughly 6–10 KB of HTML, and the payload scales with the page, not the
-  catalog.
-- Positioning: each link gets `anchor-name: --hc-<n>` (set inline as a style), and the
-  popover uses `position-anchor`, `position-area: block-end span-inline-end` and
-  `position-try-fallbacks: flip-block, flip-inline`.
-- Opening:
-  - Hover and focus use `interestfor` where supported. Elsewhere a shared inline script
-    (under 1 KB, no island) listens with delegation for `pointerenter`, `focusin`,
-    `pointerleave` and `focusout` with a 300 ms intent delay.
-  - Tap works like this: the first tap on a touch pointer opens the card (the card contains
-    "Open reference →"), and a second tap navigates. That is implemented in the same
-    script, with `pointerType === "touch"`.
-  - Esc and light dismiss come from the popover itself.
-- Build cost: one map lookup per link. Memoise the JSON import once per build. The cost is
-  negligible across ~4,100 pages.
+### Rendering (decision 4)
+`rehype-api-hovercards` (registered in `astro.config` after `rehype-inline-lsl`) visits each
+`<a>` whose href resolves to a catalog entry, and skips self-links, links inside headings,
+`[data-nocard]` and pages with `hoverCards: false`. The sidebar is not Markdown, so the plugin
+never sees it. For each link it inserts one card **right after the link**, in the content tree
+(rehype can't append to `<main>`; no PageFrame change is needed). `n` counts links on the page:
+
+```html
+<a href="/functions/llSetTimerEvent/" class="lsl-ref" interestfor="hc-7"
+   style="anchor-name: --hc-7">llSetTimerEvent</a><span
+   popover="hint" id="hc-7" class="au-popover hc" aria-hidden="true" data-pagefind-ignore
+   style="position-anchor: --hc-7">
+  <span class="hc-sig"><code>…signature, LSL token colours…</code></span>
+  <span class="hc-desc">One-line description.</span>
+  <span class="hc-flags"><span class="hc-flag">Sleeps 0.2 s</span>…</span>
+</span>
+```
+
+- The link keeps its `href`, text and classes. It gets only `interestfor` and an inline
+  `anchor-name`. It never gets `popovertarget`, so click and tap always navigate.
+- The card is phrasing content (`<span>`s, styled as blocks), so it is valid inside `<p>`, list
+  items and table cells. It has no links, buttons or other focusable content.
+- One card per link means no shared anchors. The cost is HTML size: about 250–400 bytes per
+  link. Check the heaviest pages during development and keep them under about 15 KB of card
+  markup.
+- Positioning comes from `shared/popover.css` (`.au-popover`): `position-area: block-end
+  span-inline-end`, `position-try-fallbacks: flip-block, flip-inline`.
+- Opening: `interestfor` where supported. Elsewhere a shared inline script in
+  `hovercards/PageEnd.astro` (under 1 KB, no island) uses delegation on `a[interestfor]` for
+  `pointerenter` and `focusin` (300 ms intent delay, mouse and pen only; `pointerType ===
+  "touch"` is ignored), and `pointerleave`/`focusout` to hide. Esc and light dismiss come from
+  the popover.
+- Build cost: one map lookup per link, with the JSON memoised once per build.
 
 ### Accessibility
-- The card is supplementary. The link text and destination are unchanged.
-  `aria-describedby` points at a short visually-hidden description (the one-liner), so
-  screen readers get the summary without needing the popover.
-- Focus never moves into a hint popover. The card's "Open reference" link is the same
-  destination as the link that opened it, so you can always reach it.
-- Respect `prefers-reduced-motion`.
+- The card is supplementary and hidden from assistive tech (`aria-hidden="true"`). The link text
+  and destination are unchanged, and the destination has everything the card shows.
+- No `role="tooltip"`, no `aria-describedby` and no visually hidden description in the link
+  (it would be read in the middle of the sentence).
+- Focus never moves into the card. Respect `prefers-reduced-motion`.
 
 ### Markdown export
 Nothing changes: links export as links. Cards are web-only.
@@ -231,21 +305,15 @@ scripts and inventory in each prim.
 </Linkset>
 ```
 
-- **Syntax:** a Markdown nested list, the same approach FileTree takes. The first item is
-  the root (link 1). `#n` sets the link number explicitly, otherwise numbering follows
-  depth-first order. `| kind: a, b` segments list inventory, where kind is one of
-  `scripts`, `notecards`, `sounds`, `textures`, `animations` or `objects`. `(root)` is
-  implied for the first item.
-- **Props:** `title?: string`, `numbers?: boolean = true`.
-- **Rendering:** a rehype transform at build time, done in the component via
-  `Astro.slots.render` plus a hast parse, which is how Starlight's FileTree works. It
-  outputs a nested `<ul role="tree">`. No JS by default. The optional keyboard tree
-  navigation is described under [Optional ideas](#optional-ideas).
-- **Accessibility:** if we don't ship the arrow-key script, use a plain nested `<ul>`
-  without `role="tree"`. A tree role without keyboard support is worse than no role.
-  Recommendation: plain lists first.
-- **Markdown export:** keep the source list as is, minus the pipes. Inventory becomes
-  ` — scripts: door.lsl`.
+- **Syntax (decision 5):** a plain Markdown nested list, with no pipe DSL. The first item is
+  the root (link 1). Inventory, if needed, is ordinary nested list items or text such as
+  "scripts: door.lsl". `(root)` is implied for the first item.
+- **Props:** `title?: string`, `numbers?: boolean = true` (link numbers shown in depth-first
+  order).
+- **Rendering:** a FileTree-style wrapper: the component renders its slot and styles the nested
+  `<ul>`, adding prim icons and link-number pills with CSS (counters) or a light hast pass. No JS
+  and no `role="tree"` (a tree role without keyboard support is worse than none).
+- **Markdown export:** the source list as it is.
 - **Styling:** FileTree look. Prim icons are inline SVG (cube, a variant for root). Link
   numbers show as a neutral monospace pill. Script names are links when they match a
   `<ScriptFile name>` on the page (`#script-door-lsl`).
@@ -291,11 +359,10 @@ default { touch_start(integer n) { ... } }
 | attachment / seated | boolean | false |
 | owner | boolean (owner-only) | false |
 
-- **Rendering:** an Astro component that renders a `<ul>` of Starlight Badges. Each chip has
-  a `popover="hint"` explanation, using the same machinery as hover cards. Permission chips
-  link to the constant page.
-- **Accessibility:** a list labelled "Requires", and each chip's explanation is also in
-  `aria-describedby`.
+- **Rendering:** an Astro component that renders a `<ul>` of static Starlight Badges, with no
+  popovers. Permission chips link to the constant page, so they get hover cards once Batch 1
+  lands.
+- **Accessibility:** a list labelled "Requires". Each chip's text says what it means.
 - **Markdown export:** `**Requires:** PERMISSION_ATTACH, an experience, build rights, attached`.
 - **Styling:** neutral badges. Only permissions that prompt the user use `caution`.
 
@@ -314,7 +381,8 @@ default { touch_start(integer n) { ... } }
 | Prop | Type | Default |
 |---|---|---|
 | title | string | Caveat / Limit / Gotcha / Performance |
-| id (Limit only) | string, the anchor on `/reference/limits/` | none |
+| id (Limit only) | string, a row id from `src/data/limits.yaml` | required for Limit |
+| note (Limit only) | boolean: render a callout with the value and the note | false |
 
 - **Rendering:** each is an Astro component that renders **Starlight's Aside markup**
   (`<aside class="starlight-aside starlight-aside--<base>">`). Base types:
@@ -323,16 +391,21 @@ default { touch_start(integer n) { ... } }
   - Limit uses `note` with its own icon
   - Performance uses `tip`
 
-  Icons are inline SVG, because Starlight Icon can't register custom icons. `Limit`
-  appends "See limits →" linking to `/reference/limits/#<id>`. Only section anchors exist
-  today, so the build fails if `id` doesn't match a heading id on the Limits page.
-  Per-row ids are a follow-up.
+  Icons are inline SVG, because Starlight Icon can't register custom icons.
+- **Limit (decision 3):** the value comes from `src/data/limits.yaml`. `<Limit id />` is inline:
+  the highlighted value, linking to `/reference/limits/#<id>`. `<Limit id note />` is the
+  callout (Aside markup) with the value and the row's note. An unknown id fails the build. The
+  Limits tables render through `<LimitsTable section>` from the same data, so every row id
+  exists.
 - **Directive syntax:** optionally, register remark-directive names `:::gotcha` etc. via
   Starlight's aside directive handling. Recommendation: components only for v1, so there is
   one way to do it.
 - **Accessibility:** `<aside aria-label="Gotcha">`, and the title is in the visible text.
-- **Markdown export:** `> **Gotcha:** body` (blockquote). Limit adds the link.
-- **Styling:** restyle all asides together, since today they are unstyled defaults. Use a
+- **Markdown export:** `> **Gotcha:** body` (blockquote). An inline Limit becomes
+  `[value](/reference/limits/#id)`, and the callout form adds the note and the link.
+  `<LimitsTable>` becomes a Markdown table built from the data.
+- **Styling:** restyle all asides together, since today they are unstyled defaults. This is
+  global CSS, owned by the asides batch in `asides/asides.css`. Use a
   left rule plus a `color-mix` tint, with semantic colours only. Never accent blue for
   Caveat or Limit; those use neutral gray-blue. Dark mode matches the code surface depth.
 
@@ -402,6 +475,7 @@ default { touch_start(integer n) { ... } }
 - **Rendering:** wraps Starlight Badge (`variant="note"`, size small), with text like
   "Since Nov 2022" in a `<time datetime>`. An optional `note` opens as a hint popover.
 - **Markdown export:** `(since 2022-11)`.
+- **Later:** on API pages, `scripts/generate-mdx.py` would have to emit `<Since>`.
 - **Styling:** a small outline badge. It never uses the accent fill.
 
 ---
@@ -438,7 +512,10 @@ ResponseField.
 - **Styling:** the type uses the code token colour for types. "required" is a small caution
   text label, and "deprecated" is struck through and gray.
 
-### `<CodeGroup>` (LSL ⇄ SLua)
+### `<CodeGroup>` (LSL ⇄ SLua): deferred
+
+Deferred (decision 2). Kept here as the design for when SLua support is picked up again. Until
+then, authors use Starlight Tabs.
 
 ````mdx
 <CodeGroup>
@@ -462,7 +539,9 @@ ll.Say(0, "Hi")
 - **Markdown export:** each block in order, preceded by `**LSL**` or `**SLua**`.
 - **Styling:** Starlight Tabs, sitting tight above the EC frame with no gap.
 
-### `<StateFlow>` / `<EventFlow>`
+### `<StateFlow>` / `<EventFlow>`: deferred
+
+Deferred (decision 1). Kept here as the design for later.
 **Purpose:** LSL state machines and event sequences.
 
 ```mdx
@@ -518,20 +597,27 @@ listen -> timer: llSetTimerEvent(30)
 ## Cross-cutting
 
 ### File layout
+As built in Phase 0:
+
 ```
 src/components/authoring/
-  index.ts                 # the single import barrel for MDX
-  hovercards/              # Batch 1: rehype-api-hovercards.ts, HoverCard.css, hc-intent.ts (inline script)
-  recipe/                  # Batch 2: RecipeMeta, Steps, BuildStep, Linkset, ScriptFile, Requires
-  asides/                  # Batch 3: Caveat, Limit, Gotcha, Performance, Details, FAQ, Figure, Since
-  guide/                   # Batch 4: Param, Returns, CodeGroup, StateFlow, EventFlow, flow/ (parser+layout)
-  shared/                  # icons (inline SVG), popover.css, tokens.css (light-dark/color-mix helpers)
-scripts/build-hovercards.ts
-src/data/hovercards.json   # generated, git-ignored
+  index.ts                 # the single import barrel; re-exports each <batch>/index.ts
+  authoring.css            # CSS entry (customCss, after custom.css): shared/*, then <batch>/<batch>.css
+  PageEnd.astro            # mounts each <batch>/PageEnd.astro once per page (from the Footer override)
+  shared/                  # tokens.css (--au-*, light-dark/color-mix), popover.css, icons.ts
+  asides/ recipe/ hovercards/ guide/   # one folder per batch, each with:
+    index.ts               #   the batch's exports
+    <batch>.css            #   the batch's styles
+    PageEnd.astro          #   optional per-page inline script
+    Showcase.mdx           #   the batch's showcase section
+  hovercards/rehype-api-hovercards.ts  # Batch 1 plugin, already registered in astro.config
+src/lib/page-markdown.ts   # the scanner and the authoring-component guard
+src/lib/page-markdown/     # core.ts (existing components), asides|recipe|hovercards|guide.ts, index.ts (registry)
+src/content/docs/meta/components.mdx   # the hidden showcase page; imports each Showcase.mdx
+scripts/build-hovercards.ts            # writes src/data/hovercards.json (git-ignored) before dev and build
 ```
-Each batch has its own directory and its own `page-markdown` case file
-(`src/lib/page-markdown/<batch>.ts`, registered from one list). That keeps parallel work
-on disjoint files.
+Each batch has its own folder, its own `page-markdown` case file and its own showcase partial,
+so parallel work stays on disjoint files.
 
 ### Naming
 - PascalCase, a domain noun, no prefix (`Linkset`, not `LslLinkset`).
@@ -545,6 +631,7 @@ Authors write one line:
 import { RecipeMeta, Steps, Linkset, ScriptFile, Requires } from '~/components/authoring';
 ```
 
+The barrel exists as `src/components/authoring/index.ts` (the `~/` alias maps to `src/`).
 Optionally, auto-import via an MDX components map later. Explicit imports stay greppable and
 work with `feature_mdx.py`.
 
@@ -555,51 +642,49 @@ work with `feature_mdx.py`.
 - `editing-feature-pages.md` and `style/feature-pages.md` get a "Components" pointer.
 
 ### Showcase page
-- Path: `src/content/docs/meta/components.mdx`.
+- Path: `src/content/docs/meta/components.mdx`, importing one partial per batch from
+  `src/components/authoring/<batch>/Showcase.mdx`. The docs loader only skips `_`-prefixed
+  file names, not folders, so the partials live outside the content collection. The page's
+  Markdown export inlines them, so the export guard covers them too.
 - Frontmatter: `pagefind: false`, `sidebar: { hidden: true }`, and
   `head: [{ tag: meta, attrs: { name: robots, content: noindex } }]`.
-- It is excluded from the sitemap, via the sitemap filter in `astro.config`.
+- It is excluded from the sitemap by the `/meta/` filter on `@astrojs/sitemap` in
+  `astro.config` (see the facts under [Decisions](#decisions)).
 - It shows every component in every state: light and dark, long content, and an overflowing
-  Linkset. It doubles as the test fixture.
+  Linkset. It is the place to check a batch's work by eye.
 
-### Tests
-- **Build-output checks**, run in the existing test runner against `dist/`:
-  - Showcase HTML contains the expected structure (one popover per distinct API, `<details
-    name>` on an exclusive FAQ, a `<figure>` with `<figcaption>`, an SVG with `role="img"`
-    plus a hidden list).
-  - No page has a hover-card id without a matching popover.
-  - The hover-card HTML budget is under 15 KB per page, as a warning.
-- **Markdown export:** snapshot tests of `page-markdown.ts` on the showcase source, so every
-  component has a defined Markdown form.
-- **No remote assets:** the existing link checker runs over the showcase. Add a unit test that
-  `Figure` rejects `http(s)` sources.
-- **a11y:** there are none today. Add `@axe-core/playwright` (dev-only, local) against the
-  showcase in light and dark, plus a keyboard test: Tab to an API link opens the card, Esc
-  closes it, and tap behaviour is emulated.
-- **Build time:** record `astro build` duration before and after Batch 1, with a budget of
-  +5 %.
+### Verification (decision 6)
+No committed test suites. While building, each batch:
+
+- runs `bun run check` and a build into a temporary outDir, then `test:links` and `test:sidebar`
+  against it (the existing Python checks, which also forbid remote assets);
+- looks at its showcase section in light and dark, keyboard only and at narrow widths;
+- opens the showcase's `/meta/components/index.md` to check its Markdown forms;
+- for hover cards, records `astro build` time before and after (budget +5 %) and the card
+  markup size on the heaviest pages.
+
+The build fails when an authoring component has no Markdown-export case (guard in
+`src/lib/page-markdown.ts`).
 
 ## Open questions
 
-1. **Mermaid or a custom diagram renderer?** Recommended: a custom build-time SVG renderer
+1. **(Deferred, decision 1.) Mermaid or a custom diagram renderer?** Recommended: a custom build-time SVG renderer
    (dagre layout, CSS-variable theming). Revisit Mermaid only if authors need sequence or
    class diagrams.
 2. **Hover-card data source and payload?** Recommended: a slim generated
    `hovercards.json` (~500 KB, build only), with per-page inline popovers for distinct APIs
    only (~6–10 KB of HTML per heavy page). Don't ship a client-side JSON index.
-3. **Where does the SLua code come from?** Recommended: hand-written by authors in each
+3. **(Deferred, decision 2.) Where does the SLua code come from?** Recommended: hand-written by authors in each
    CodeGroup, with a lint that warns when an LSL block has no SLua sibling only on pages that
    opt in. Don't machine-translate. Add a vendored Luau grammar first.
 4. **Requires vocabulary?** Recommended: a closed set: `permissions[]` (catalog constants),
    `experience`, `land` (build | scripts | owner | group), `attachment`, `seated`, `owner`.
    Unknown values fail the build. Extend as needed.
-5. **Limit anchors?** Only section ids exist. Recommended: add per-row ids to the Limits page
-   (stable slugs such as `#script-memory`) in the Batch 3 PR, and validate at build time.
+5. **Limit anchors?** Superseded by decision 3: the Limits page becomes a dataset
+   (`src/data/limits.yaml`), and its rows and ids render from it.
 6. **Should BuildStep titles be headings?** Recommended: no, keep them out of the TOC. Recipes
    with long builds can use real `##` sections between Steps.
-7. **Tap behaviour for hover cards?** Recommended: on touch, the first tap opens the card and
-   the card links to the reference. Alternative: no cards on touch at all. Simpler, but loses
-   value on mobile.
+7. **Tap behaviour for hover cards?** Decided (decision 4): no cards on touch; a tap navigates.
 8. **Apply hover cards on API pages themselves?** Recommended: yes, except self-links. Skip
    links inside headings and the sidebar.
 9. **Callout directive syntax (`:::gotcha`)?** Recommended: not in v1. Use components only,
@@ -611,30 +696,29 @@ work with `feature_mdx.py`.
 
 | Phase | Work | Effort | Notes |
 |---|---|---|---|
-| 0 | Scaffold `src/components/authoring/`, barrel, `shared/` tokens and popover CSS, showcase page (hidden), `docs/components.md` stub, split `page-markdown` into per-batch case files, add axe and the build-output test harness | 1 day | Must land first, because everything else depends on it |
-| 1 | Batch 3 asides and disclosure (simplest; restyles asides; Limit anchors) | 1.5 days | Low risk |
-| 2 | Batch 2 recipe kit (Linkset parser is the largest item) | 3 days | Linkset syntax needs user sign-off |
-| 3 | Batch 1 hover cards (data script, rehype, popover, intent script, tap) | 2.5 days | Most cross-page impact; measure build time |
-| 4 | Batch 4 guide kit: Param/Returns (0.5 d), CodeGroup + Luau grammar (1 d), flow renderer (2.5 d) | 4 days | Flow layout quality is the main unknown |
-| 5 | Optional ideas, then real-page conversions | later | |
+| 0 | Scaffold: `src/components/authoring/`, barrel, shared tokens and popover CSS, hidden showcase page, `docs/components.md` skeleton, per-batch `page-markdown` case files and the export guard, hover-card rehype slot and data stub, sitemap filter | 1 day | Done |
+| 1 | Simple components, in parallel: asides (Caveat, Gotcha, Performance, Limit, the Limits dataset and `<LimitsTable>`, Details/FAQ, Figure, Since, aside restyle); recipe (RecipeMeta, ScriptFile, Requires as static badges); guide (Param, Params, Returns) | 2.5 days | Low risk; the limits extraction must not change any figure |
+| 2 | Hover cards (data script, rehype, popover, intent script) | 2 days | Most cross-page impact; measure build time and HTML size |
+| 3 | Recipe: Linkset (styled nested list) and Steps/BuildStep | 1.5 days | |
+| 4 | Deferred: CodeGroup (LSL ⇄ SLua), StateFlow/EventFlow; optional ideas; real-page conversions | later | |
 
-**Parallelisation.** After Phase 0, batches 1–4 can run as four agents at once. Each owns
-only its `src/components/authoring/<batch>/` directory, its
-`src/lib/page-markdown/<batch>.ts` file and its showcase section. The showcase should be
-split into partials (`src/content/docs/meta/_showcase/<batch>.mdx`) so there are no edit
-conflicts. Shared files (the barrel, `ec.config.mjs` for the Luau grammar, `astro.config`
-for the rehype plugin, `custom.css`) are edited by a single integrator at merge time.
+**Parallelisation.** The batch folders stay as built (asides, recipe, hovercards, guide), and
+the four agents can start at once because their files are disjoint. Phase order is about
+priority, not file locks: the hovercards agent can start alongside phase 1, and the recipe agent
+does Linkset and BuildStep after its phase 1 items. Phase 0 registered every shared hook (barrel,
+CSS entry, rehype slot, page-end scripts, `hoverCards` frontmatter, the hover-card data script),
+so no batch has to edit a shared file. The exact map is in
+[components-ownership.md](components-ownership.md).
 
 **Risks.**
-- Hover cards on every page could bloat HTML or slow the build. Mitigate with per-page
-  dedupe, a size budget and memoised data.
+- Hover cards on every page could bloat HTML or slow the build. One card per link (decision 4)
+  costs more HTML than per-API dedupe. Mitigate with short cards, a size check on the heaviest
+  pages and memoised data.
 - `interestfor` support differs between browsers. The small intent script covers the gap,
   and links always work.
-- Starlight upgrades could change Aside and Steps markup that our wrappers rely on. Pin
-  behaviour with snapshot tests.
-- The Luau grammar may not cover SLua-specific syntax (`ll.*` namespaces, types). Accept that
-  minor highlighting gaps are possible.
-- Dagre layout quality on cyclic state graphs is unknown. Prototype in Phase 4 before
-  committing, with a simple layered layout as the fallback.
-- Every component adds a `page-markdown.ts` case. Missing one silently degrades the export, so
-  add a test that fails on unknown capitalised tags.
+- Starlight upgrades could change Aside and Steps markup that our wrappers rely on. Check the
+  showcase after each upgrade.
+- (Deferred items) the Luau grammar may not cover SLua-specific syntax, and dagre's layout
+  quality on cyclic state graphs is unknown; prototype before committing.
+- Every authoring component needs a `page-markdown` case. The build-time guard fails on one
+  without a case, and checks only authoring components.

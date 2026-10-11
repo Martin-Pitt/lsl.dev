@@ -258,12 +258,11 @@ Nothing changes: links export as links. Cards are web-only.
 **Purpose:** a summary strip at the top of a recipe.
 
 ```mdx
-<RecipeMeta difficulty="beginner" prims={2} scripts={1} permissions={["PERMISSION_TAKE_CONTROLS"]} time="15 min" />
+<RecipeMeta prims={2} scripts={1} permissions={["PERMISSION_TAKE_CONTROLS"]} time="15 min" />
 ```
 
 | Prop | Type | Default |
 |---|---|---|
-| difficulty | `"beginner" \| "intermediate" \| "advanced"` | required |
 | prims | number | 1 |
 | scripts | number | 1 |
 | permissions | string[] (catalog constants) | `[]` |
@@ -272,11 +271,11 @@ Nothing changes: links export as links. Cards are web-only.
 - **Rendering:** Astro component with no JS. Markup is a `<dl>` grid. A container query
   switches it from 4 columns to 2 to a stacked list. Permission names link to their API
   pages, so they get hover cards automatically.
-- **Accessibility:** `<dl>` semantics, and difficulty is given as text, not colour alone.
+- **Accessibility:** `<dl>` semantics.
 - **Markdown export:** a single line,
-  `**Difficulty:** beginner · **Prims:** 2 · **Scripts:** 1 · **Permissions:** PERMISSION_TAKE_CONTROLS`.
-- **Styling:** neutral surface (`--sl-color-gray-6`) with a hairline border, and a
-  three-dot difficulty meter in a neutral colour.
+  `**Prims:** 2 · **Scripts:** 1 · **Permissions:** PERMISSION_TAKE_CONTROLS`.
+- **Styling:** neutral surface with a hairline border. Difficulty was dropped (user decision): a
+  `<Prerequisites>` "What you need to know" box lists the knowledge a recipe assumes instead.
 
 ### `<Steps>` / `<BuildStep>`
 **Purpose:** numbered build instructions. Starlight `Steps` requires a single `<ol>` and

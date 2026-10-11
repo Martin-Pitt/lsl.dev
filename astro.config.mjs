@@ -140,7 +140,7 @@ export default defineConfig({
 			},
 			{
 				label: 'Reference',
-				collapsed: true,
+				collapsed: false,
 				items: [
 					{ label: 'Overview', link: '/reference/', attrs: { 'data-sidebar-group-link': '' } },
 					{ label: 'Categories', collapsed: true, items: [{ label: 'All categories', link: '/categories/', attrs: { 'data-sidebar-group-link': '' } }, ...referenceCategories] },

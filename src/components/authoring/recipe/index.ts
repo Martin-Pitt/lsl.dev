@@ -5,7 +5,6 @@
 export { default as RecipeMeta } from './RecipeMeta.astro';
 export { default as Requires } from './Requires.astro';
 export { default as ScriptFile } from './ScriptFile.astro';
-export { default as Linkset } from './Linkset.astro';
 export { default as Steps } from './Steps.astro';
 export { default as BuildStep } from './BuildStep.astro';
 export { default as Prerequisites } from './Prerequisites.astro';

@@ -101,16 +101,16 @@ Export: `(since 2022-11)`.
 
 ## Recipe kit
 
-RecipeMeta, Prerequisites, ScriptFile, Requires, Linkset, Steps and BuildStep. Showcase:
+RecipeMeta, Prerequisites, ScriptFile, Requires, Steps and BuildStep. Showcase:
 `/meta/components/#showcase-recipe`.
 
 ```mdx
-import { RecipeMeta, Prerequisites, Requires, Linkset, Steps, BuildStep, ScriptFile } from '~/components/authoring';
+import { RecipeMeta, Prerequisites, Requires, Steps, BuildStep, ScriptFile } from '~/components/authoring';
 ```
 
 **`<RecipeMeta>`**: the summary at the top of a recipe, an inline row of two small labelled chips
 (`SCRIPTS 1` `TIME 15 min`, a `<dl>` with one `<div>` per fact; wraps on a phone): `scripts`
-(default 1) and an optional free-text `time`. Exports as `**Scripts:** 1 · **Time:** 15 min`. Prims are shown by `<Linkset>` and permissions by `<Requires>`, so they aren't repeated here.
+(default 1) and an optional free-text `time`. Exports as `**Scripts:** 1 · **Time:** 15 min`. Prims are shown by `<Scene>` (with `<Inventory>` for their contents; see [Scene](#scene)) and permissions by `<Requires>`, so they aren't repeated here.
 
 ```mdx
 <RecipeMeta scripts={1} time="15 min" />
@@ -136,21 +136,6 @@ that always ask the owner, such as `PERMISSION_DEBIT`, get the caution colour.
 
 ```mdx
 <Requires permissions={["PERMISSION_ATTACH"]} experience land="build" attachment />
-```
-
-**`<Linkset>`**: a linked object as a plain nested Markdown list. The first item is the root,
-marked "root"; nested items are child prims (`title` adds a caption). Child link numbers aren't
-shown: they depend on link order (the root is just the last prim selected when linking), so
-refer to prims by name instead. Put inventory as text on the
-prim's line; a script name in inline code with an `.lsl`, `.slua` or `.luau` extension links to the
-`<ScriptFile>` of that name, so only use the extension for scripts shown on the page.
-
-```mdx
-<Linkset title="Door">
-- **Door frame**: `door.lsl`, notecard `config`
-  - **Door panel**
-    - **Handle**: sound `creak`
-</Linkset>
 ```
 
 **`<ScriptFile>`**: says which prim a script goes in. Wrap exactly one code block, and give the

@@ -55,6 +55,8 @@ independent critiques of this plan. They override the rest of the document.
    `role="tooltip"` and no `aria-describedby` pointing at it. It is purely supplementary
    (`aria-hidden="true"`) and carries `data-pagefind-ignore`.
 5. **`<Linkset>` v1** is a styled nested Markdown list (FileTree-style wrapper) with no pipe DSL.
+   *Superseded 2026-10-11:* Linkset is removed and replaced by `<Scene>` + `<Inventory>`
+   ([Batch 5](#batch-5-scene)).
 6. **No permanent test infrastructure.** No test runner, no Playwright/axe, no snapshots.
    Each batch checks that its work behaves as intended during development (build, look at the
    showcase, ad-hoc scripts that are not committed). The one committed guard is in
@@ -305,7 +307,10 @@ before delegating to Starlight's Steps CSS. Authors can use either list syntax o
 - **Markdown export:** `1. **Title**` followed by the indented body.
 - **Styling:** Starlight Steps styling. `:has(pre)` widens the step rail spacing.
 
-### `<Linkset>`
+### `<Linkset>` (removed, replaced by [`<Scene>`](#batch-5-scene))
+
+Kept for the record: Linkset shipped as below, then was replaced by `<Scene>` and `<Inventory>`.
+
 **Purpose:** show a linked object: the root and child prims, their names, and the
 scripts and inventory in each prim.
 

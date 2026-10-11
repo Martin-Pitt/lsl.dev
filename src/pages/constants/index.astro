@@ -3,11 +3,13 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import CatalogList from '../../components/reference/CatalogList.astro';
 import { constantGroups } from '../../components/reference/catalog-items';
 import { catalog } from '../../lib/catalog';
+import { featurePages } from '../../lib/features';
+const features = featurePages.map(f => ({ id: f.id, label: f.title }));
 // `NAME = value` grouped by constant group (a constant in several groups is listed under its first);
-// the category filter uses categories derived from the functions that take each group. Descriptions show on hover.
+// the feature filter uses the features of the functions that take each group. Descriptions show on hover.
 const groups = await constantGroups(catalog.constants);
 ---
 <StarlightPage frontmatter={{title:'Constants',description:'Browse the current LSL constants reference.',editUrl:false}}>
 <div class="wide-page" hidden></div>
-<CatalogList groups={groups} label="constants" filterCategories={catalog.categories} az/>
+<CatalogList groups={groups} label="constants" filterCategories={features} filterLabel="Feature" az/>
 </StarlightPage>

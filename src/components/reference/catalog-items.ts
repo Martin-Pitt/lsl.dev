@@ -2,6 +2,7 @@
 import { inlineLsl } from '../../lib/inline-lsl';
 import { apiHref, constantGroupHref, catalog } from '../../lib/catalog';
 import { recentBadges } from '../../lib/recent';
+import { featurePageByCategory } from '../../lib/features';
 
 export type Flag = { code: string; title: string };
 /** Badge legend, in display order (after the LSL Wiki key); only data-backed badges from definition.*. */
@@ -60,7 +61,7 @@ export async function constantGroups(constants: any[]) {
 	return Promise.all(names.map(async g => ({
 		id: g, label: g || 'Other constants', href: g ? constantGroupHref(g) : undefined, letter: g ? g.charAt(0).toLowerCase() : undefined,
 		items: await Promise.all(byGroup.get(g)!.map(async c => ({
-			title: c.name, href: apiHref(c.kind, c.name), description: oneLine(c.description), categories: cats(c),
+			title: c.name, href: apiHref(c.kind, c.name), description: oneLine(c.description), categories: [...new Set(cats(c).map(id => featurePageByCategory.get(id)?.id).filter(Boolean))],
 			flags: apiFlags(c), code: c.signature ? await inlineLsl(c.signature.replace(/^\w+\s+/, '').replace(/\s*=\s*"?[0-9a-f]{8}-[0-9a-f-]{27}"?$/i, ''),{ link: false }) : undefined,
 		}))),
 	})));

@@ -42,6 +42,12 @@ for (const entry of picked) {
 	}
 }
 const flagged = blocks ? blocks.flatMap(g => g.items) : rows;
+// Categories as a one-click cloud (like the letters and prefixes), only those present in this list;
+// a very long list (e.g. 122 constant groups) stays a compact select.
+const catCount = new Map<string, number>();
+for (const it of rows) for (const c of it.categories ?? []) catCount.set(c, (catCount.get(c) ?? 0) + 1);
+const catOptions = filterCategories.filter((c: any) => catCount.has(c.id));
+const catCloud = catOptions.length > 0 && catOptions.length <= 80;
 const legend = BADGES.filter(b => flagged.some(it => it.flags?.some((f: any) => f.code === b.code)));
 const badges = (f?: { code: string }[]) => (f?.length ? f.map(x => x.code).join(' ') : undefined);
 const cats = (c?: string[]) => (c?.length ? c.join(' ') : undefined);
@@ -50,11 +56,12 @@ const cats = (c?: string[]) => (c?.length ? c.join(' ') : undefined);
 {css && <style is:inline set:html={css}></style>}
 <div class="catalog-tools">
 	<label class="find"><span>Find {label}</span><input type="search" placeholder={`Search ${total} ${label}…`} autocomplete="off" /></label>
-	{filterCategories.length > 0 && <label><span>{filterLabel}</span><select><option value="">{filterAll}</option>{filterCategories.map((c: any) => <option value={c.id}>{c.label}</option>)}</select></label>}
+	{filterCategories.length > 0 && !catCloud && <label><span>{filterLabel}</span><select><option value="">{filterAll}</option>{filterCategories.map((c: any) => <option value={c.id}>{c.label}</option>)}</select></label>}
 	<p class="result-count" role="status" aria-live="polite">{total} {label}</p>
 </div>
 {legend.length > 0 && <div class="legend" role="group" aria-label="Filter by badge"><span>Badges</span>{legend.map(b => <button type="button" data-b={b.code} data-state="off" data-label={`${b.code}: ${b.label}`} aria-label={`${b.code}: ${b.label}, filter: off`} title="Click: include"><b class="b" data-k={b.code}>{b.code}</b> {b.label}</button>)}<button type="button" class="clear" aria-label="Clear badge filters" hidden>× Clear</button></div>}
 {az && <div class="pick" role="group" aria-label="Filter by first letter" data-key="l">{letters.map(l => <button type="button" aria-pressed="false" data-v={l} disabled={!letterIds.has(l)} aria-label={`Starts with ${l.toUpperCase()}`}>{l.toUpperCase()}</button>)}</div>}
+{catCloud && <div class="cloud" role="group" aria-label={`Filter by ${filterLabel.toLowerCase()}`}><span>{filterLabel}</span>{catOptions.map((c: any) => <button type="button" aria-pressed="false" data-v={c.id}>{c.label}</button>)}</div>}
 {prefixes.length > 0 && <div class="pick prefix" role="group" aria-label="Filter by name prefix" data-key="p"><span>Prefix</span>{prefixes.map(([v, n]) => <button type="button" aria-pressed="false" data-v={v}>{v} <small>{n}</small></button>)}</div>}
 {blocks ? (
 	<div class="cl-groups" data-pagefind-ignore>{blocks.map(g => (
@@ -78,7 +85,7 @@ class CatalogList extends HTMLElement {
 	connectedCallback() {
 		if (this.dataset.ready) return; this.dataset.ready = 'true';
 		const $ = (q: string) => this.querySelector<any>(q), $$ = (q: string) => Array.from(this.querySelectorAll<any>(q));
-		const input: HTMLInputElement = $('input'), select: HTMLSelectElement | null = $('select'), status = $('[role="status"]'), empty = $('.no-results'), clear = $('.clear');
+		const input: HTMLInputElement = $('input'), select: HTMLSelectElement | null = $('select'), cloud: HTMLElement | null = $('.cloud'), status = $('[role="status"]'), empty = $('.no-results'), clear = $('.clear');
 		const rows: HTMLLIElement[] = $$('li'), sections: HTMLElement[] = $$('section'), buttons: HTMLButtonElement[] = $$('.legend [data-b]');
 		const state = new Map<string, number>(), url = new URL(location.href);
 		// Letter and prefix: one mutually exclusive single-select (?letter=s or ?prefix=Set); a second click turns it off.
@@ -87,9 +94,11 @@ class CatalogList extends HTMLElement {
 		if (pick.l && pick.p) pick.l = '';
 		for (const [i, key] of [[1, 'include'], [2, 'exclude']] as const) for (const b of url.searchParams.get(key)?.split(',') ?? []) state.set(b, i);
 		let text: string[] | undefined;
+		// Category cloud: single-select, a second click turns it off; independent of letter/prefix (?category=).
+		let cat = cloud ? url.searchParams.get('category') ?? '' : '';
 		const update = (sync = true) => {
 			text ??= rows.map(r => `${r.textContent} ${r.querySelector('a')?.title ?? ''}`.toLowerCase());
-			const terms = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean), category = select?.value;
+			const terms = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean), category = cloud ? cat : select?.value;
 			let count = 0;
 			rows.forEach((row, i) => {
 				const has = (row.dataset.b ?? '').split(' ');
@@ -101,12 +110,14 @@ class CatalogList extends HTMLElement {
 			for (const s of sections) s.hidden = !s.querySelector('li:not([hidden])');
 			const badges = [...state.values()].some(Boolean), active = terms.length > 0 || !!category || badges || Object.values(pick).some(Boolean);
 			for (const g of picks) for (const b of g.querySelectorAll<HTMLButtonElement>('button')) b.setAttribute('aria-pressed', String(b.dataset.v === pick[g.dataset.key!]));
+			if (cloud) for (const b of cloud.querySelectorAll<HTMLButtonElement>('button')) b.setAttribute('aria-pressed', String(b.dataset.v === cat));
 			for (const b of buttons) { const s = STATES[state.get(b.dataset.b!) ?? 0]; b.dataset.state = s; b.setAttribute('aria-label', `${b.dataset.label}, filter: ${s}`); b.title = `Click: ${['include', 'exclude', 'clear'][STATES.indexOf(s)]}`; }
 			status.textContent = active ? `${count} of ${rows.length} entries` : `${rows.length} entries`;
 			empty.hidden = count > 0; if (clear) clear.hidden = !badges;
 			if (sync) {
 				for (const [i, key] of [[1, 'include'], [2, 'exclude']] as const) { const v = [...state].filter(([, s]) => s === i).map(([b]) => b).join(','); v ? url.searchParams.set(key, v) : url.searchParams.delete(key); }
 				for (const k in pick) pick[k] ? url.searchParams.set(param[k], pick[k]) : url.searchParams.delete(param[k]);
+				if (cloud) cat ? url.searchParams.set('category', cat) : url.searchParams.delete('category');
 				history.replaceState(history.state, '', url.pathname + url.search.replace(/%2C/g, ',').replace(/%21/g, '!') + location.hash);
 			}
 		};
@@ -119,7 +130,8 @@ class CatalogList extends HTMLElement {
 		clear?.addEventListener('click', () => { state.clear(); update(); buttons[0]?.focus(); });
 		input.addEventListener('input', () => update(false)); select?.addEventListener('change', () => update(false));
 		for (const g of picks) g.addEventListener('click', e => { const b = (e.target as Element).closest<HTMLButtonElement>('button'); if (!b) return; const k = g.dataset.key!, v = pick[k] === b.dataset.v ? '' : b.dataset.v!; for (const o in pick) pick[o] = ''; pick[k] = v; update(); });
-		if (state.size || Object.values(pick).some(Boolean)) update(false);
+		cloud?.addEventListener('click', e => { const b = (e.target as Element).closest<HTMLButtonElement>('button'); if (!b) return; cat = cat === b.dataset.v ? '' : b.dataset.v!; update(); });
+		if (state.size || cat || Object.values(pick).some(Boolean)) update(false);
 		// Truncated descriptions show their full text on hover.
 		this.addEventListener('pointerover', e => { const d = (e.target as Element).closest?.<HTMLElement>('.d'); if (d && !d.title && d.scrollWidth > d.clientWidth) d.title = d.textContent!.trim(); });
 	}
@@ -134,14 +146,14 @@ if (!customElements.get('catalog-list')) customElements.define('catalog-list', C
 	.catalog-tools span { display: block; font-size: var(--sl-text-xs); font-weight: 600; margin-bottom: .2rem; }
 	.catalog-tools input, .catalog-tools select { width: 100%; padding: .4rem .6rem; border: 1px solid var(--sl-color-gray-4); border-radius: .4rem; background: var(--sl-color-bg); color: var(--sl-color-text); font: inherit; font-size: var(--sl-text-sm); }
 	.result-count { flex: 0 0 auto; margin: 0 0 .45rem; font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); }
-	.pick { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem; margin: .4rem 0 0; font-size: var(--sl-text-xs); }
-	.pick > span { font-weight: 600; color: var(--sl-color-gray-2); margin-inline-end: .35rem; }
-	.pick button { min-width: 1.6rem; padding: .15rem .35rem; border: 1px solid transparent; border-radius: .3rem; background: none; color: var(--sl-color-text-accent); font: inherit; font-family: var(--__sl-font-mono); cursor: pointer; }
-	.pick.prefix button { font-family: inherit; }
-	.pick small { color: var(--sl-color-gray-3); font-size: .9em; }
-	.pick button:hover { background: var(--sl-color-gray-6); }
-	.pick button:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 1px; }
-	.pick button[aria-pressed='true'] { border-color: var(--sl-color-accent); background: var(--sl-color-accent-low); color: var(--sl-color-text); font-weight: 600; }
+	.pick, .cloud { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem; margin: .4rem 0 0; font-size: var(--sl-text-xs); }
+	:is(.pick, .cloud) > span { font-weight: 600; color: var(--sl-color-gray-2); margin-inline-end: .35rem; }
+	:is(.pick, .cloud) button { min-width: 1.6rem; padding: .15rem .35rem; border: 1px solid transparent; border-radius: .3rem; background: none; color: var(--sl-color-text-accent); font: inherit; font-family: var(--__sl-font-mono); cursor: pointer; }
+	:is(.pick.prefix, .cloud) button { font-family: inherit; }
+	:is(.pick, .cloud) small { color: var(--sl-color-gray-3); font-size: .9em; }
+	:is(.pick, .cloud) button:hover { background: var(--sl-color-gray-6); }
+	:is(.pick, .cloud) button:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 1px; }
+	:is(.pick, .cloud) button[aria-pressed='true'] { border-color: var(--sl-color-accent); background: var(--sl-color-accent-low); color: var(--sl-color-text); font-weight: 600; }
 	.pick button:disabled { color: var(--sl-color-gray-5); cursor: default; background: none; }
 	.catalog-browser ul { list-style: none; margin: 0; padding: 0; }
 	.catalog-browser li { margin: 0; }

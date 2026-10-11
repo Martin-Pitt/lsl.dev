@@ -19,10 +19,11 @@ they exist, and the site stays static with almost no client JS.
 6. [Batch 2: Recipe kit](#batch-2-recipe-kit)
 7. [Batch 3: Asides and disclosure](#batch-3-asides-and-disclosure)
 8. [Batch 4: Guide kit](#batch-4-guide-kit)
-9. [Optional ideas](#optional-ideas)
-10. [Cross-cutting: layout, naming, discovery, showcase, verification](#cross-cutting)
-11. [Open questions (resolved)](#open-questions)
-12. [Phasing, effort, risks, parallelisation](#phasing)
+9. [Batch 5: Scene](#batch-5-scene)
+10. [Optional ideas](#optional-ideas)
+11. [Cross-cutting: layout, naming, discovery, showcase, verification](#cross-cutting)
+12. [Open questions (resolved)](#open-questions)
+13. [Phasing, effort, risks, parallelisation](#phasing)
 
 ## Decisions
 
@@ -592,6 +593,44 @@ listen -> timer: llSetTimerEvent(30)
   initial state marker.
 
 ---
+
+## Batch 5: Scene
+
+Added 2026-10-11 (user-approved design). Folder `src/components/authoring/scene/`, export cases in
+`src/lib/page-markdown/scene.ts`. Author reference: the "Scene" section of `docs/components.md`.
+
+### `<Scene>`, `<Prim>`, `<Model>`
+**Purpose:** an interactive 3D view of an SL object or linkset, written in MDX, replacing the
+`<Linkset>` list.
+
+- **Syntax:** `<Scene caption explode? grid?>` with `<Prim name shape size? pos? rot? root? color?
+  alpha? texture? note? inventory?>` and `<Model src name pos? rot? scale? root? note? inventory?>`
+  children. Shapes: box, cylinder, sphere, torus, prism, oriented as in SL. SL units and axes:
+  metres, Z up, Euler degrees in LSL order. The root's `pos` places the object; children are local
+  to the root.
+- **Build:** each part validates its props and writes an encoded marker comment; `<Scene>`
+  collects them, checks for exactly one root and unique names, and renders the stage, the toolbar
+  (hidden until JS runs), a collapsible parts table and the caption. Textures and `.glb` files must
+  be local (`import.meta.glob`), so a remote or missing file fails the build.
+- **Client:** Scene's own `<script>` (on scene pages only) watches scenes with an
+  IntersectionObserver and dynamically imports `viewer.ts` (three.js, a separate chunk of about
+  144 KB gzipped; GLTFLoader is another 13 KB, fetched only when a scene has a model). It uses
+  custom controls, not OrbitControls, because of the SL alt-cam: drag orbits, wheel and pinch zoom,
+  Alt+drag orbits a clicked point, Ctrl+Alt+drag pans, Shift+Alt+drag zooms, plus a Turn range
+  input, Reset, and arrow keys on the focused canvas. Explode animates the parts out along their
+  offsets from the root, reframes, and shows DOM labels placed from projected points with simple
+  overlap relaxation. Rendering is on demand and pauses offscreen. Reduced motion means no
+  auto-spin and an instant explode.
+- **Accessibility:** the canvas is `role="img"` with an `aria-label` from the caption. The parts
+  table is the text form for screen readers, no JS and no WebGL. Without WebGL it opens with a
+  message.
+- **Markdown export:** the caption, then `- **name** (root): shape; size; pos; rot; note; contents: id`.
+
+### `<Inventory>` / `<Item>`
+A prim's contents: `<Inventory id title>` with `<Item type name>` children, using a closed list of
+SL inventory types, each with an inline SVG icon. The anchor is `#inv-<id>`, which `<Prim inventory>`
+links to. Script items link to a `<ScriptFile>` only when one is on the page (a tiny inline script
+adds the link). Export: the title, then `- type: name`.
 
 ## Optional ideas
 

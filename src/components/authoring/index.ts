@@ -11,3 +11,4 @@ export * from './recipe/index';
 export * from './hovercards/index';
 export * from './guide/index';
 export * from './media/index';
+export * from './scene/index';

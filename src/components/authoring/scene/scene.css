@@ -1,0 +1,162 @@
+/*
+ * Scene batch: <Scene> (3D view, toolbar, labels, parts table) and <Inventory>. Loaded site-wide
+ * via ../authoring.css. The stage's background is the scene's background (the canvas is
+ * transparent), and its `color` is read by the viewer as the ground-grid colour.
+ */
+@layer authoring {
+	.au-scene {
+		margin-inline: 0;
+		container-type: inline-size;
+		& figcaption { margin-block-start: .5rem; color: var(--au-text-muted); font-size: var(--sl-text-sm); }
+	}
+	.au-scene__stage {
+		position: relative;
+		aspect-ratio: 16 / 10;
+		max-block-size: 70vh;
+		border: 1px solid var(--au-border);
+		border-radius: var(--au-radius);
+		overflow: hidden;
+		background:
+			radial-gradient(ellipse at 50% 35%, light-dark(#ffffff, #2d3240), transparent 70%),
+			light-dark(#e9ebef, #1b1e26);
+		color: light-dark(#9aa1ad, #4a5263);
+	}
+	@container (max-width: 30rem) { .au-scene__stage { aspect-ratio: 1; } }
+	.au-scene__view, .au-scene__view canvas { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; }
+	.au-scene__view canvas {
+		display: block;
+		touch-action: none;
+		cursor: grab;
+		&:active { cursor: grabbing; }
+		&:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: -3px; border-radius: var(--au-radius); }
+	}
+	.au-scene__msg {
+		position: absolute;
+		inset: 0;
+		display: grid;
+		place-items: center;
+		margin: 0;
+		padding: 1rem;
+		text-align: center;
+		color: var(--au-text-muted);
+		font-size: var(--sl-text-sm);
+	}
+	.au-scene.is-live .au-scene__msg { display: none; }
+
+	/* Toolbar */
+	.au-scene__bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: .5rem .75rem;
+		margin-block-start: .5rem;
+		font-size: var(--sl-text-sm);
+		&[hidden] { display: none; }
+		& button {
+			padding: .25rem .7rem;
+			border: 1px solid var(--au-border);
+			border-radius: var(--au-radius-sm);
+			background: var(--au-surface);
+			color: var(--sl-color-text);
+			font: inherit;
+			cursor: pointer;
+			&:hover { border-color: var(--sl-color-text-accent); }
+			&:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
+			&[aria-pressed='true'] { background: var(--sl-color-text-accent); border-color: var(--sl-color-text-accent); color: var(--sl-color-black); }
+		}
+	}
+	.au-scene__turn {
+		display: flex;
+		align-items: center;
+		gap: .5rem;
+		color: var(--au-text-muted);
+		& input { inline-size: 9rem; accent-color: var(--sl-color-text-accent); }
+	}
+	.au-scene__hint { flex-basis: 100%; color: var(--au-text-muted); font-size: var(--sl-text-xs); }
+
+	/* Exploded-view labels: placed by the viewer (translate), styled like the hover cards. */
+	.au-scene__labels, .au-scene__lines { position: absolute; inset: 0; pointer-events: none; }
+	.au-scene__lines {
+		inline-size: 100%;
+		block-size: 100%;
+		& line { stroke: var(--sl-color-text); stroke-width: 1; opacity: .55; }
+		& circle { fill: var(--sl-color-text); }
+	}
+	.au-scene__label {
+		position: absolute;
+		inset: 0 auto auto 0;
+		max-inline-size: min(14rem, 45%);
+		padding: .3rem .55rem;
+		border: 1px solid var(--au-border);
+		border-radius: var(--au-radius-sm);
+		background: color-mix(in oklab, var(--au-surface-raised) 92%, transparent);
+		box-shadow: var(--sl-shadow-sm);
+		color: var(--sl-color-text);
+		font-size: var(--sl-text-xs);
+		line-height: 1.35;
+		& strong { display: block; color: var(--sl-color-white); }
+		& span { display: block; color: var(--au-text-muted); }
+		& .au-scene__label-inv { font-style: italic; }
+	}
+	/* Narrow scenes: names only (the notes stay in the parts table). */
+	@container (max-width: 30rem) { .au-scene__label span { display: none; } }
+	@media (prefers-reduced-motion: no-preference) {
+		.au-scene__labels:not([hidden]) { animation: au-scene-fade var(--au-duration) var(--au-ease); }
+	}
+	@keyframes au-scene-fade { from { opacity: 0; } }
+
+	/* Parts table (the accessible and no-JS form of the scene) */
+	.au-scene__parts {
+		margin-block-start: .5rem;
+		border: 1px solid var(--au-border);
+		border-radius: var(--au-radius);
+		background: var(--au-surface);
+		font-size: var(--sl-text-sm);
+		& summary { padding: .4rem .75rem; cursor: pointer; font-weight: 600; }
+		& summary:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: -2px; border-radius: var(--au-radius); }
+	}
+	.au-scene.is-nogl .au-scene__stage { aspect-ratio: auto; min-block-size: 6rem; }
+	.au-scene__table {
+		overflow-x: auto;
+		padding: 0 .75rem .5rem;
+		& table { display: table; inline-size: 100%; margin: 0; border-collapse: collapse; font-size: inherit; }
+		& th, & td { padding: .3rem .5rem; border-block-end: 1px solid var(--au-border); text-align: start; vertical-align: top; white-space: nowrap; }
+		& td:last-child { white-space: normal; min-inline-size: 12rem; }
+		& tbody th { font-weight: 600; }
+	}
+	.au-scene__root {
+		margin-inline-start: .4rem;
+		padding: 0 .35rem;
+		border-radius: var(--au-radius-sm);
+		background: var(--au-info-tint);
+		font-size: var(--sl-text-xs);
+		font-weight: 500;
+	}
+	.au-scene__rel { color: var(--au-text-muted); font-size: var(--sl-text-xs); }
+
+	/* <Inventory> */
+	.au-inv {
+		max-inline-size: 28rem;
+		padding: .5rem .75rem;
+		border: 1px solid var(--au-border);
+		border-radius: var(--au-radius);
+		background: var(--au-surface);
+		font-size: var(--sl-text-sm);
+		scroll-margin-block-start: 5rem;
+		&:target { border-color: var(--sl-color-text-accent); }
+	}
+	.au-inv__title { margin: 0 0 .3rem; font-weight: 600; }
+	.au-inv__list { margin: 0; padding: 0; list-style: none; }
+	.au-inv__item {
+		display: grid;
+		grid-template-columns: 1rem 5.5rem minmax(0, 1fr);
+		align-items: center;
+		gap: .5rem;
+		margin: 0;
+		padding-block: .15rem;
+		& + & { margin-block-start: 0; border-block-start: 1px solid var(--au-border); }
+	}
+	.au-inv__icon { color: var(--au-text-muted); }
+	.au-inv__type { color: var(--au-text-muted); font-size: var(--sl-text-xs); text-transform: uppercase; letter-spacing: .04em; }
+	.au-inv__name { overflow-wrap: anywhere; }
+}

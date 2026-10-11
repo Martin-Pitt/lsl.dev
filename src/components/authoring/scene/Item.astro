@@ -1,0 +1,20 @@
+---
+/**
+ * <Item type="script" name="door.lsl" />: one entry of an <Inventory>. type is one of the
+ * Second Life inventory types (see ./icons.ts); a script links to the <ScriptFile> of the same
+ * name on the page (#script-<slug>), added in the browser only when that anchor exists.
+ */
+import { ITEM_TYPES, icon, type ItemType } from './icons';
+import { onlyProps } from './parts';
+import { scriptId } from '../recipe/vocab';
+
+interface Props { type: ItemType; name: string }
+onlyProps(Astro.props, ['type', 'name'], 'Item');
+const { type, name } = Astro.props;
+if (!name) throw new Error('<Item>: the name prop is required');
+if (!ITEM_TYPES.includes(type)) throw new Error(`<Item name="${name}">: unknown type "${type ?? ''}" (use ${ITEM_TYPES.join(', ')})`);
+---
+<li class="au-inv__item" data-type={type}>
+	<Fragment set:html={icon(type)} /><span class="au-inv__type">{type}</span>
+	{type === 'script' ? <span class="au-inv__name" data-script={scriptId(name)}><code>{name}</code></span> : <span class="au-inv__name">{name}</span>}
+</li>

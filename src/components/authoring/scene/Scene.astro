@@ -1,0 +1,84 @@
+---
+/**
+ * <Scene>: an interactive 3D view of a Second Life object or linkset, built from <Prim> and
+ * <Model> children (exactly one of them `root`).
+ *
+ *   <Scene caption="A hinged door" explode grid>
+ *   <Prim name="Door frame" root shape="box" size="1.2, 0.1, 2.2" pos="0, 0, 1.1" />
+ *   <Prim name="Door panel" shape="box" size="1, 0.05, 2" pos="0, 0.02, -0.1" note="…" />
+ *   </Scene>
+ *
+ * Without JS (or WebGL) it is a caption and a collapsible table of the parts. three.js
+ * (./viewer.ts) is fetched only when a scene scrolls near the viewport, so pages without a scene
+ * ship none of it. The canvas is role="img", named by the caption; `explode` adds a toggle that
+ * moves the parts apart and labels them; `grid` draws a ground grid.
+ */
+import { decodeParts, vecText, inventoryId, onlyProps } from './parts';
+
+interface Props { caption: string; explode?: boolean; grid?: boolean }
+onlyProps(Astro.props, ['caption', 'explode', 'grid'], 'Scene');
+const { caption, explode, grid } = Astro.props;
+if (!caption) throw new Error('<Scene>: the caption prop is required (it names the 3D view for screen readers)');
+const parts = decodeParts(await Astro.slots.render('default'));
+if (!parts.length) throw new Error(`<Scene caption="${caption}">: add <Prim> or <Model> children`);
+const roots = parts.filter(p => p.root);
+if (roots.length !== 1) throw new Error(`<Scene caption="${caption}">: exactly one part must be \`root\` (found ${roots.length ? roots.map(r => `"${r.name}"`).join(', ') : 'none'})`);
+const names = new Set<string>();
+for (const p of parts) { if (names.has(p.name)) throw new Error(`<Scene caption="${caption}">: two parts are named "${p.name}"`); names.add(p.name); }
+// Root first, the rest in source order.
+parts.sort((a, b) => Number(b.root) - Number(a.root));
+const data = JSON.stringify({ parts, grid: !!grid }).replace(/</g, '\u003c');
+---
+<figure class="au-scene" data-explode={explode ? '' : undefined}>
+	<div class="au-scene__stage">
+		<div class="au-scene__view"></div>
+		<svg class="au-scene__lines" aria-hidden="true"></svg>
+		<div class="au-scene__labels" aria-hidden="true"></div>
+		<p class="au-scene__msg">The 3D view needs JavaScript and WebGL. The parts are listed below.</p>
+	</div>
+	<div class="au-scene__bar" hidden>
+		<label class="au-scene__turn"><span>Turn</span><input type="range" min="0" max="360" step="5" value="0" aria-valuetext="0 degrees" /></label>
+		<button type="button" class="au-scene__reset">Reset view</button>
+		{explode && <button type="button" class="au-scene__explode" aria-pressed="false">Explode</button>}
+		<span class="au-scene__hint">Drag to orbit, scroll to zoom. Alt+drag orbits a point, Ctrl+Alt pans, Shift+Alt zooms. Arrow keys when focused.</span>
+	</div>
+	<details class="au-scene__parts">
+		<summary>Parts ({parts.length})</summary>
+		<div class="au-scene__table">
+			<table>
+				<thead><tr><th scope="col">Part</th><th scope="col">Shape</th><th scope="col">Size (m)</th><th scope="col">Position (m)</th><th scope="col">Rotation (°)</th><th scope="col">Notes</th></tr></thead>
+				<tbody>
+					{parts.map(p => (
+						<tr>
+							<th scope="row">{p.name}{p.root && <span class="au-scene__root">root</span>}</th>
+							<td>{p.kind === 'model' ? 'mesh (.glb)' : p.shape}</td>
+							<td>{p.kind === 'model' ? `scale ${vecText(p.size)}` : vecText(p.size)}</td>
+							<td>{vecText(p.pos)}{!p.root && <span class="au-scene__rel"> from root</span>}</td>
+							<td>{vecText(p.rot)}</td>
+							<td>{p.note}{p.note && p.inventory && ' '}{p.inventory && <a href={`#${inventoryId(p.inventory)}`}>Contents</a>}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	</details>
+	<figcaption>{caption}</figcaption>
+	<script type="application/json" class="au-scene__data" set:html={data} />
+</figure>
+
+<script>
+	// Fetch three.js only once a scene is near the viewport; pages without a scene never load this.
+	const scenes = document.querySelectorAll<HTMLElement>('.au-scene:not([data-ready])');
+	const io = new IntersectionObserver(entries => {
+		for (const e of entries) {
+			if (!e.isIntersecting) continue;
+			io.unobserve(e.target);
+			import('./viewer').then(m => m.mount(e.target as HTMLElement));
+		}
+	}, { rootMargin: '200px 0px' });
+	scenes.forEach(s => {
+		s.dataset.ready = '';
+		s.querySelector('.au-scene__msg')!.textContent = 'Loading the 3D view…';
+		io.observe(s);
+	});
+</script>

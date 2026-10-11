@@ -365,6 +365,89 @@ next). Escape or a click outside closes it and returns focus to that image's thu
 
 Export: each figure's image and caption, one after another.
 
+## Scene
+
+Scene, Prim, Model, Inventory and Item: an interactive 3D view of an object or linkset, and a
+prim's contents. Showcase: `/meta/components/#showcase-scene`.
+
+```mdx
+import { Scene, Prim, Model, Inventory, Item } from '~/components/authoring';
+```
+
+**`<Scene>`** holds `<Prim>` and `<Model>` parts, exactly one of them `root`. Props: `caption`
+(required; it also names the canvas for screen readers), `explode` (adds an Explode toggle) and
+`grid` (a subtle ground grid under the object).
+
+```mdx
+<Scene caption="A hinged door" explode grid>
+<Prim name="Door frame" root shape="box" size="1.3, 0.14, 0.12" pos="0, 0, 2.16" inventory="door-frame" />
+<Prim name="Door panel" shape="box" size="1.04, 0.05, 2.06" pos="0, 0, -1.11" color="#8a6" note="Rotates around its hinge edge" />
+<Prim name="Handle" shape="cylinder" size="0.04, 0.04, 0.15" pos="0.4, 0.06, -1.16" rot="90, 0, 0" />
+<Model name="Knob" src="~/assets/knob.glb" pos="0.4, -0.06, -1.16" />
+</Scene>
+```
+
+Units and axes are Second Life's: metres, Z up, and `rot` in Euler degrees applied in LSL order
+(X, then Y, then Z, as `llEuler2Rot`). Vectors are three numbers, `"x, y, z"` (angle brackets are
+allowed). The root's `pos` places the object above the ground. Every other part's `pos` and `rot`
+are local to the root, like `PRIM_POS_LOCAL` and `PRIM_ROT_LOCAL`, and turn with it.
+
+**`<Prim>`** props: `name` (required, unique in the scene), `shape` (`box`, `cylinder`, `sphere`,
+`torus` or `prism`, oriented as in SL: a cylinder's axis is Z, a torus revolves around X with hole
+size 0.25, and a prism is a triangle in XY extruded along Z), `size` (0.01 to 64 m per axis,
+default `0.5, 0.5, 0.5`), `pos`, `rot`, `root`, `color` (hex), `alpha` (0 to 1), `texture` (a local
+image under `src/`, png, jpg or webp), `note` and `inventory` (the `id` of an `<Inventory>`).
+
+**`<Model>`** is a local binary glTF (`.glb` under `src/`), placed like a prim: `src`, `name`,
+`pos`, `rot`, `scale` (default `1, 1, 1`), `root`, `note`, `inventory`. It is turned from glTF's
+Y-up to Z-up.
+
+The build fails on an unknown shape or prop, a malformed vector or colour, a size out of range,
+no root or more than one, two parts with the same name, or a missing or remote model or texture.
+
+How it behaves:
+
+- **Loading.** three.js is bundled locally and fetched only when a scene scrolls near the
+  viewport (an IntersectionObserver and a dynamic import). Pages without a scene ship none of it.
+  The viewer chunk is about 144 KB gzipped. GLTFLoader is a further 13 KB, fetched only for scenes
+  with a `<Model>`. The loader script on scene pages is under 0.5 KB.
+- **Controls.** Drag to orbit, and scroll or pinch to zoom. SL-style alt-cam: Alt+drag orbits
+  around the point you click, Ctrl+Alt+drag pans, Shift+Alt+drag zooms (right or middle drag and
+  two fingers also pan). The **Turn** slider (a native range, so it works from the keyboard) sets
+  the view's rotation, and **Reset view** restores the first view. With the canvas focused, the
+  arrow keys orbit (Shift for bigger steps), `+`/`-` zoom and Home resets.
+- **Explode.** The toggle (`aria-pressed`) moves each part away from the root along its offset
+  and frames the result. It then labels every part with its name and note, with a leader line.
+  Labels are DOM boxes placed by JS from projected 3D points, nudged apart so they don't overlap.
+  In narrow scenes (under 30rem) the labels show names only.
+- **Motion.** The view spins slowly until the first interaction. Under
+  `prefers-reduced-motion` there is no spin and the explode is instant.
+- **Theme.** The canvas is transparent over a CSS background, and the lights and grid follow the
+  light or dark theme.
+- **Accessibility and fallbacks.** The canvas is `role="img"`, labelled "3D view: caption", and
+  described by the controls hint. A collapsible **Parts** table (name, shape, size, position,
+  rotation, notes, a link to the contents) is always in the page. Without JS, the stage says the
+  view needs JavaScript and WebGL. Without WebGL it says so and opens the table.
+
+Export: the caption in bold, then one line per part, like
+`- **Handle**: cylinder; size 0.04, 0.04, 0.15 m; pos 0.4, 0.06, -1.16 m; rot 90, 0, 0°; contents: \`door-frame\``.
+
+**`<Inventory>`** lists one prim's contents: `id` (letters, digits, dashes; the anchor is
+`#inv-<id>`, which a Prim's `inventory` links to) and `title`, both required. Each `<Item>` has a
+`type` and a `name`. The types are `script`, `notecard`, `sound`, `texture`, `animation`, `object`,
+`landmark`, `clothing`, `bodypart`, `gesture`, `material` and `settings`, and each has a small
+inline SVG icon. A script's name links to the `<ScriptFile>` of the same name when one is on the
+page (a tiny script adds the link only then). Export: the title in bold, then `- type: name` per
+item.
+
+```mdx
+<Inventory id="door-frame" title="Door frame contents">
+<Item type="script" name="door.lsl" />
+<Item type="notecard" name="config" />
+<Item type="sound" name="creak" />
+</Inventory>
+```
+
 ## Deferred
 
 CodeGroup (LSL ⇄ SLua tabs) and StateFlow/EventFlow diagrams are planned but not scheduled. Use

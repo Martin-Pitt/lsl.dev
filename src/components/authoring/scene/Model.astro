@@ -1,0 +1,26 @@
+---
+/**
+ * <Model>: a local binary glTF (.glb) part of a <Scene>, placed like a <Prim>.
+ *
+ *   <Model src="~/assets/knob.glb" name="Knob" pos="0, 0.1, 0" rot="0, 0, 90" scale="1, 1, 1" />
+ *
+ * The model is converted from glTF's Y-up to Second Life's Z-up. scale multiplies its own size
+ * (default 1, 1, 1); `size` in the prim list is its scale, since the model's extent is only known
+ * in the browser. Remote or missing files fail the build.
+ */
+import { onlyProps, vec, encodePart, modelUrl } from './parts';
+
+interface Props { src: string; name: string; pos?: string; rot?: string; scale?: string; root?: boolean; note?: string; inventory?: string }
+const p = Astro.props;
+onlyProps(p, ['src', 'name', 'pos', 'rot', 'scale', 'root', 'note', 'inventory'], 'Model');
+if (!p.name) throw new Error('<Model>: the name prop is required');
+const who = `Model name="${p.name}"`;
+const scale = vec(p.scale, 'scale', who, [1, 1, 1]);
+if (scale.some(n => n <= 0)) throw new Error(`<${who}>: scale="${p.scale}" must be positive on every axis`);
+const marker = encodePart({
+	kind: 'model', name: p.name, root: !!p.root, src: await modelUrl(p.src, who),
+	size: scale, pos: vec(p.pos, 'pos', who, [0, 0, 0]), rot: vec(p.rot, 'rot', who, [0, 0, 0]),
+	note: p.note, inventory: p.inventory,
+});
+---
+<Fragment set:html={marker} />

@@ -1,0 +1,31 @@
+---
+/**
+ * <Prim>: one prim of a <Scene>, which reads it (it renders nothing visible on its own).
+ *
+ *   <Prim name="Door panel" shape="box" size="1, 0.05, 2" pos="0.5, 0, -0.1" color="#8a6" note="…" inventory="door-script" />
+ *
+ * shape: box, cylinder, sphere, torus or prism. size (metres, default 0.5 on each axis), pos
+ * (metres; the root's is its place in the scene, a child's is local to the root, like
+ * PRIM_POS_LOCAL) and rot (Euler degrees, LSL order) are "x, y, z" with Z up. Exactly one part of
+ * a scene is `root`. Optional color (hex), alpha (0 to 1), texture (a local image), note and
+ * inventory (the id of an <Inventory> on the page).
+ */
+import { SHAPES, onlyProps, vec, sizeVec, colour, alphaNum, textureUrl, encodePart, type Shape } from './parts';
+
+interface Props {
+	name: string; shape: Shape; size?: string; pos?: string; rot?: string; root?: boolean;
+	color?: string; alpha?: number | string; texture?: string; note?: string; inventory?: string;
+}
+const p = Astro.props;
+onlyProps(p, ['name', 'shape', 'size', 'pos', 'rot', 'root', 'color', 'alpha', 'texture', 'note', 'inventory'], 'Prim');
+if (!p.name) throw new Error('<Prim>: the name prop is required');
+const who = `Prim name="${p.name}"`;
+if (!SHAPES.includes(p.shape)) throw new Error(`<${who}>: unknown shape "${p.shape ?? ''}" (use ${SHAPES.join(', ')})`);
+const marker = encodePart({
+	kind: 'prim', name: p.name, root: !!p.root, shape: p.shape,
+	size: sizeVec(p.size, who, [0.5, 0.5, 0.5]), pos: vec(p.pos, 'pos', who, [0, 0, 0]), rot: vec(p.rot, 'rot', who, [0, 0, 0]),
+	color: colour(p.color, who), alpha: alphaNum(p.alpha, who), texture: await textureUrl(p.texture, who),
+	note: p.note, inventory: p.inventory,
+});
+---
+<Fragment set:html={marker} />

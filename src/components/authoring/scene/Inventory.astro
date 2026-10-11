@@ -1,0 +1,29 @@
+---
+/**
+ * <Inventory id="door-script" title="Door frame contents">: the contents of one prim, as a
+ * compact list of <Item> children with type icons. A <Prim inventory="door-script"> links here
+ * (anchor #inv-<id>). No JS needed; a tiny script links script names to their <ScriptFile>
+ * when it is on the page.
+ */
+import { inventoryId, onlyProps } from './parts';
+
+interface Props { id: string; title: string }
+onlyProps(Astro.props, ['id', 'title'], 'Inventory');
+const { id, title } = Astro.props;
+if (!id || !/^[a-z0-9][a-z0-9-]*$/i.test(id)) throw new Error(`<Inventory>: id="${id ?? ''}" is required (letters, digits and dashes)`);
+if (!title) throw new Error(`<Inventory id="${id}">: the title prop is required`);
+const items = (await Astro.slots.render('default')).trim();
+if (!items.includes('au-inv__item')) throw new Error(`<Inventory id="${id}">: add <Item> children`);
+---
+<section class="au-inv" id={inventoryId(id)} aria-label={title}>
+	<p class="au-inv__title">{title}</p>
+	<ul class="au-inv__list"><Fragment set:html={items} /></ul>
+</section>
+
+<script>
+	// Script names become links to their <ScriptFile> only when it is on the page.
+	for (const s of document.querySelectorAll<HTMLElement>('.au-inv__name[data-script]')) {
+		const id = s.dataset.script!;
+		if (document.getElementById(id)) s.replaceWith(Object.assign(document.createElement('a'), { className: 'au-inv__name', href: `#${id}`, innerHTML: s.innerHTML }));
+	}
+</script>

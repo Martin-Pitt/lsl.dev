@@ -5,7 +5,7 @@ parallel. Phase 0 (the scaffold) registered every shared hook, so a batch agent 
 edit a shared file. If one really does, it stops and asks the integrator, and says exactly which
 change it needs.
 
-`<batch>` is one of `asides`, `recipe`, `hovercards`, `guide`, `media`.
+`<batch>` is one of `asides`, `recipe`, `hovercards`, `guide`, `media`, `scene`.
 
 ## Every batch owns
 
@@ -28,6 +28,7 @@ change it needs.
 | hovercards | NoCard, the cards themselves (phase 2) | `src/components/authoring/hovercards/rehype-api-hovercards.ts` (already registered in `astro.config.mjs`); `scripts/build-hovercards.ts` (already run by `bun run dev` and `bun run build`); the generated `src/data/hovercards.json` (git-ignored) |
 | guide | Param, Params, Returns (phase 1) | nothing else |
 | media | Figure (moved from asides, with `zoom`), Compare, Hotspots/Hotspot, Gallery | the placeholder images in `media/demo/`; the shared image rules in `media/image.ts`. The image scan in `src/pages/[...page]/index.md.ts` (which tags and props get a built URL) stays integrator-owned: ask there when a new media component takes an image prop |
+| scene | Scene, Prim, Model, Inventory, Item | the demo assets in `scene/demo/` (a generated `.glb` and a texture); the `three` dependency is used only by `scene/viewer.ts` |
 
 Deferred and not assigned: CodeGroup (LSL ⇄ SLua), StateFlow and EventFlow.
 
@@ -73,7 +74,11 @@ the batches. Leave it alone.
   export default { ...base, cacheDir: `${tmp}/cache`, outDir: `${tmp}/out`, build: { ...base.build, server: `${tmp}/server` } };
   ```
 
-  Delete the config and the temp folder afterwards. Separate git worktrees also work. The normal
+  Delete the config and the temp folder afterwards. Caveat: for a static build, Astro puts
+  `.prerender/` in the outDir only when the outDir is inside the working directory; otherwise it
+  falls back to `<cwd>/.astro/.prerender/` and ignores `build.server`. So a temp outDir outside the
+  repo still shares the repo's `.prerender/`. To isolate it, put the outDir in the git-ignored
+  `node_modules/` (e.g. `node_modules/.my-build/out`) instead. Separate git worktrees also work. The normal
   `bun run build` stays as it is.
 - Check your work before handing it back: `bun run check`, the build, `bun run test:links <dir>`
   and `bun run test:sidebar <dir>`, plus your showcase section by eye. Don't commit test suites

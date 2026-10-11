@@ -1,0 +1,13 @@
+---
+/** "What you need to know" box for recipes and guides: a Markdown list of links as children. No JS. */
+import { onlyProps, PREREQ_TITLE } from './vocab';
+
+interface Props { title?: string }
+onlyProps(Astro.props, ['title'], 'Prerequisites');
+const { title = PREREQ_TITLE } = Astro.props;
+if (typeof title !== 'string' || !title.trim()) throw new Error('Prerequisites: title must be non-empty text');
+---
+<aside class="au-prereq" aria-label={title}>
+	<p class="au-prereq-title" aria-hidden="true">{title}</p>
+	<slot />
+</aside>

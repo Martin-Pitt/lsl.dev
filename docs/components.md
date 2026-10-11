@@ -111,19 +111,31 @@ Export: `(since 2022-11)`.
 
 ## Recipe kit
 
-RecipeMeta, ScriptFile, Requires, Linkset, Steps and BuildStep. Showcase:
+RecipeMeta, Prerequisites, ScriptFile, Requires, Linkset, Steps and BuildStep. Showcase:
 `/meta/components/#showcase-recipe`.
 
 ```mdx
-import { RecipeMeta, Requires, Linkset, Steps, BuildStep, ScriptFile } from '~/components/authoring';
+import { RecipeMeta, Prerequisites, Requires, Linkset, Steps, BuildStep, ScriptFile } from '~/components/authoring';
 ```
 
-**`<RecipeMeta>`**: the summary strip at the top of a recipe. `difficulty` is `beginner`,
-`intermediate` or `advanced` (required); `prims` and `scripts` default to 1; `permissions` are
+**`<RecipeMeta>`**: the summary strip at the top of a recipe, factual fields only. `prims` and `scripts` default to 1; `permissions` are
 `PERMISSION_*` constants and link to their pages; `time` is optional free text.
 
 ```mdx
-<RecipeMeta difficulty="beginner" prims={3} scripts={1} permissions={["PERMISSION_TAKE_CONTROLS"]} time="15 min" />
+<RecipeMeta prims={3} scripts={1} permissions={["PERMISSION_TAKE_CONTROLS"]} time="15 min" />
+```
+
+**`<Prerequisites>`**: a "What you need to know" box for recipes and guides. Children are an
+ordinary Markdown list of links (they get inline-code styling and hover cards like any link);
+`title` is optional and defaults to "What you need to know". Renders as
+`<aside class="au-prereq" aria-label="…">` with a visible label; no JS. Exports to Markdown as
+`**What you need to know**` (or the title) followed by the list.
+
+```mdx
+<Prerequisites>
+- [States and events](/fundamentals/states-and-events/)
+- [`llSetLinkPrimitiveParamsFast`](/functions/llSetLinkPrimitiveParamsFast/)
+</Prerequisites>
 ```
 
 **`<Requires>`**: static badges for what a script needs. Closed vocabulary: `permissions`

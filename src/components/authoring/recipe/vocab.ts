@@ -15,7 +15,8 @@ export function permission(name: string, where: string) {
 	return { name, href: apiHref('constant', name), prompts: PROMPTING.has(name) };
 }
 
-export const DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const;
+/** Default heading of <Prerequisites> (also used by its Markdown export). */
+export const PREREQ_TITLE = 'What you need to know';
 
 export const LAND: Record<string, string> = { build: 'build rights', scripts: 'script rights', owner: 'land owner', group: 'land group' };
 

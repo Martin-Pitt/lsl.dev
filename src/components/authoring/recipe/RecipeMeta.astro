@@ -1,17 +1,14 @@
 ---
-/** Summary strip at the top of a recipe: difficulty, prims, scripts, time, permissions. No JS. */
-import { DIFFICULTIES, onlyProps, permission } from './vocab';
+/** Summary strip at the top of a recipe: prims, scripts, time, permissions. No JS. */
+import { onlyProps, permission } from './vocab';
 
-interface Props { difficulty: (typeof DIFFICULTIES)[number]; prims?: number; scripts?: number; permissions?: string[]; time?: string }
-onlyProps(Astro.props, ['difficulty', 'prims', 'scripts', 'permissions', 'time'], 'RecipeMeta');
-const { difficulty, prims = 1, scripts = 1, permissions = [], time } = Astro.props;
-const level = DIFFICULTIES.indexOf(difficulty) + 1;
-if (!level) throw new Error(`RecipeMeta: difficulty must be one of ${DIFFICULTIES.join(', ')} (got "${difficulty}")`);
+interface Props { prims?: number; scripts?: number; permissions?: string[]; time?: string }
+onlyProps(Astro.props, ['prims', 'scripts', 'permissions', 'time'], 'RecipeMeta');
+const { prims = 1, scripts = 1, permissions = [], time } = Astro.props;
 const perms = permissions.map(p => permission(p, 'RecipeMeta'));
 ---
 <div class="au-recipe-meta">
 	<dl>
-		<div><dt>Difficulty</dt><dd><span class="au-meter" data-level={level} aria-hidden="true"><span></span><span></span><span></span></span>{difficulty}</dd></div>
 		<div><dt>Prims</dt><dd>{prims}</dd></div>
 		<div><dt>Scripts</dt><dd>{scripts}</dd></div>
 		{time && <div><dt>Time</dt><dd>{time}</dd></div>}

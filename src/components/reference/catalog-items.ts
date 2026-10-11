@@ -66,19 +66,27 @@ export async function constantGroups(constants: any[]) {
 	})));
 }
 
-/** Categories for constants, which rarely carry their own: those of the functions and events whose
- * parameters (or results) take the constant's group, e.g. PrimParam → Prim Appearance, Prim Properties;
- * a group no function names borrows from groups sharing its first word (PrimShiny → Prim*). */
+/** Categories for constants, which rarely carry their own: those shared by at least half of the functions
+ * and events whose parameters (or results) take the constant's group, e.g. Link → Linkset (not UUID just
+ * because llGetLinkKey takes a link number). A group no function names borrows from groups sharing its
+ * first word (PrimShiny → Prim*). */
 function constantCategories() {
-	const byGroup = new Map<string, Set<string>>(), byHead = new Map<string, Set<string>>();
+	type Tally = { n: number; c: Map<string, number> };
+	const byGroup = new Map<string, Tally>(), byHead = new Map<string, Tally>();
 	const head = (s: string) => s.match(/^(?:[A-Z]+(?=[A-Z][a-z])|[A-Z][a-z]+)/)?.[0] ?? s;
-	const add = (m: Map<string, Set<string>>, k: string, v: string[]) => { const set = m.get(k) ?? m.set(k, new Set()).get(k)!; v.forEach(x => set.add(x)); };
-	for (const f of [...catalog.functions, ...catalog.events] as any[])
-		for (const p of [f, ...(f.parameters ?? [])])
-			for (const [k, v] of Object.entries(p)) if (k.endsWith('semantics') && typeof v === 'string') { add(byGroup, v, f.categories ?? []); add(byHead, head(v), f.categories ?? []); }
+	const add = (m: Map<string, Tally>, k: string, cats: string[]) => {
+		const t = m.get(k) ?? m.set(k, { n: 0, c: new Map() }).get(k)!;
+		t.n++; for (const x of cats) t.c.set(x, (t.c.get(x) ?? 0) + 1);
+	};
+	for (const f of [...catalog.functions, ...catalog.events] as any[]) {
+		const groups = new Set<string>();
+		for (const p of [f, ...(f.parameters ?? [])]) for (const [k, v] of Object.entries(p)) if (k.endsWith('semantics') && typeof v === 'string') groups.add(v);
+		for (const g of groups) { add(byGroup, g, f.categories ?? []); add(byHead, head(g), f.categories ?? []); }
+	}
+	const shared = (t?: Tally) => t ? [...t.c].filter(([, k]) => k * 2 >= t.n).map(([x]) => x) : [];
 	return (c: any) => {
 		const out = new Set<string>(c.categories ?? []);
-		for (const g of c.groups ?? []) for (const x of byGroup.get(g) ?? byHead.get(head(g)) ?? []) out.add(x);
+		for (const g of c.groups ?? []) for (const x of shared(byGroup.get(g) ?? byHead.get(head(g)))) out.add(x);
 		return [...out];
 	};
 }

@@ -31,7 +31,7 @@ function apiHeader(kind: 'function' | 'event' | 'constant', name: string, showDe
 	const sleep = d['mono-sleep'] ?? d.sleep;
 	const facts = [
 		kind === 'function' && e.returnType !== 'void' && `Returns: ${code(e.returnType)}`,
-		kind === 'function' && sleep && `Delay: ${sleep} s`,
+		kind === 'function' && sleep && `Delay: ${sleep}s`,
 		kind === 'function' && d.energy != null && `Energy: ${d.energy}`,
 		d['requires-permission'] && `Permission: ${code(String(d['requires-permission']))}`,
 	].filter(Boolean);

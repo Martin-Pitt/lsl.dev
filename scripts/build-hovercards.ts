@@ -27,7 +27,7 @@ function oneLine(text = ''): string {
 function flags(e: Entry): string[] {
 	const d = e.definition ?? {};
 	const out: string[] = [];
-	if (d.sleep > 0) out.push(`Sleeps ${d.sleep} s`);
+	if (d.sleep > 0) out.push(`Sleeps ${d.sleep}s`);
 	if (typeof d.energy === 'number' && d.energy !== DEFAULT_ENERGY) out.push(`Energy ${d.energy}`);
 	for (const p of d['requires-permission'] ?? []) out.push(p);
 	if (d.experience) out.push('Experience');

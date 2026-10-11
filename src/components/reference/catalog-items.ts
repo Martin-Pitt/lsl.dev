@@ -18,7 +18,7 @@ export function apiFlags(entry: any): Flag[] {
 	if (def.experience) out.push({ code: 'X', title: 'Requires an experience' });
 	if (def['linden-experience']) out.push({ code: 'LX', title: 'Requires a Linden-owned experience' });
 	if (def['god-mode']) out.push({ code: 'G', title: 'Requires god mode' });
-	if (def.sleep > 0) out.push({ code: 'S', title: `Sleeps ${def.sleep} s` });
+	if (def.sleep > 0) out.push({ code: 'S', title: `Sleeps ${def.sleep}s` });
 	if (def['requires-permission']?.length) out.push({ code: 'P', title: `Requires ${def['requires-permission'].join(', ')}` });
 	if (def['slua-removed']) out.push({ code: '!SL', title: 'Not available in SLua' });
 	return out;

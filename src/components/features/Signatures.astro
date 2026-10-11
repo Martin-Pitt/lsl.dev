@@ -15,14 +15,15 @@ const entries = names.map(name => {
 	return e;
 });
 const hasRows = Astro.slots.has('default');
-const typeOf = (e: any) => e.kind === 'event' ? 'event' : e.kind === 'constant' ? e.type : e.returnType;
+// A void return shows nothing in the type column.
+const typeOf = (e: any) => e.kind === 'event' ? 'event' : e.kind === 'constant' ? e.type : e.returnType === 'void' ? '' : e.returnType;
 import './features.css';
 ---
 <table class="signatures not-content">
 	<tbody>
 		{entries.map(e => (
 			<tr>
-				<td class="sig-type"><code>{typeOf(e)}</code></td>
+				<td class="sig-type">{typeOf(e) && <code>{typeOf(e)}</code>}</td>
 				<td class="sig-name">
 					<code><a href={apiHref(e.kind, e.name)}>{e.name}</a>{e.kind === 'constant' ? <> = {e.value}</> : <>({e.parameters.map((p: any, i: number) => <>{i > 0 && ', '}<span class="sig-ptype">{p.type}</span> {p.name}</>)})</>}</code>
 					{descriptions && e.description && <div class="sig-desc">{e.description}</div>}

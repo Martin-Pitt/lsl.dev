@@ -38,7 +38,7 @@ function plainSignature(e: any) {
 export async function apiRows(entries: any[]) {
 	return Promise.all(entries.map(async e => ({
 		title: e.name, href: apiHref(e.kind, e.name), hover: e.description, categories: e.categories,
-		type: e.kind === 'event' ? 'event' : e.returnType, code: plainSignature(e),
+		type: e.kind === 'event' ? 'event' : e.returnType === 'void' ? '' : e.returnType, code: plainSignature(e),
 		flags: apiFlags(e), letter: letterOf(e.name), prefix: e.kind === 'function' ? e.name.match(/^ll([A-Z][a-z]*)/)?.[1] : undefined,
 	})));
 }

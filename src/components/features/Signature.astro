@@ -5,10 +5,10 @@ import { apiMap, apiHref } from '../../lib/catalog';
 interface Props { name: string }
 const e = apiMap.get(Astro.props.name) as any;
 if (!e) throw new Error(`<Signature>: "${Astro.props.name}" is not a public function, event or constant`);
-const type = e.kind === 'event' ? 'event' : e.kind === 'constant' ? e.type : e.returnType;
+const type = e.kind === 'event' ? 'event' : e.kind === 'constant' ? e.type : e.returnType === 'void' ? '' : e.returnType;
 ---
 <tr>
-	<td class="sig-type"><code>{type}</code></td>
+	<td class="sig-type">{type && <code>{type}</code>}</td>
 	<td class="sig-name">
 		<code><a href={apiHref(e.kind, e.name)}>{e.name}</a>{e.kind === 'constant' ? <> = {e.value}</> : <>({e.parameters.map((p: any, i: number) => <>{i > 0 && ', '}<span class="sig-ptype">{p.type}</span> {p.name}</>)})</>}</code>
 		<div class="sig-desc"><slot /></div>

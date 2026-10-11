@@ -108,8 +108,9 @@ RecipeMeta, Prerequisites, ScriptFile, Requires, Linkset, Steps and BuildStep. S
 import { RecipeMeta, Prerequisites, Requires, Linkset, Steps, BuildStep, ScriptFile } from '~/components/authoring';
 ```
 
-**`<RecipeMeta>`**: the summary strip at the top of a recipe: `scripts` (default 1) and an optional
-free-text `time`. Prims are shown by `<Linkset>` and permissions by `<Requires>`, so they aren't repeated here.
+**`<RecipeMeta>`**: the summary at the top of a recipe, an inline row of two small labelled chips
+(`SCRIPTS 1` `TIME 15 min`, a `<dl>` with one `<div>` per fact; wraps on a phone): `scripts`
+(default 1) and an optional free-text `time`. Exports as `**Scripts:** 1 · **Time:** 15 min`. Prims are shown by `<Linkset>` and permissions by `<Requires>`, so they aren't repeated here.
 
 ```mdx
 <RecipeMeta scripts={1} time="15 min" />
@@ -230,34 +231,46 @@ hoverCards: false
 
 ## Guide kit
 
-Param, Params, Returns. Showcase: `/meta/components/#showcase-guide`.
+FunctionSignature, Param, Returns, Params. Showcase: `/meta/components/#showcase-guide`.
 
-Document the parameters and return value of a function a guide defines (not an API function:
-those have their own pages). The type is highlighted as LSL and links to its `/types/` page when
-there is one.
+Document a function a guide defines (not an API function: those have their own pages).
+`<FunctionSignature>` is the usual form: an LSL-highlighted code block of the signature, one parameter per
+line, with each explanation as a full-width row under its line (like a code editor's inline hints).
 
 ```mdx
-import { Param, Params, Returns } from '~/components/authoring';
+import { FunctionSignature, Param, Returns } from '~/components/authoring';
 
-<Params title="Parameters">
-<Param name="t" type="float" required>Position along the segment, from `0.0` to `1.0`.</Param>
-<Param name="tens" type="float" default="0.0">Tension. `1.0` gives sharp corners.</Param>
-<Param name="old" type="integer" deprecated>Use `tens` instead.</Param>
-<Returns type="float">The interpolated value.</Returns>
-</Params>
+<FunctionSignature returns="float" name="InterpolateFloatHermite">
+<Param type="float" name="a">Point before the segment.</Param>
+<Param type="float" name="t">Position along the segment, `0.0` to `1.0`.</Param>
+<Returns>The interpolated value.</Returns>
+</FunctionSignature>
 ```
 
 | Component | Props |
 |---|---|
-| `<Param>` | `name` (required), `type` (required), `required`, `default="…"`, `deprecated` |
-| `<Returns>` | `type` (required) |
-| `<Params>` | `title?`; optional bordered group around consecutive Param/Returns |
+| `<FunctionSignature>` | `name` (required), `returns?` (omit or `void` for none); children are `<Param>`s and one optional `<Returns>` |
+| `<Param>` | `type` (required), `name` (required), `deprecated` |
+| `<Returns>` | `type` (required outside a FunctionSignature; inside, the FunctionSignature's `returns` is used) |
+| `<Params>` | `title?`; optional bordered group around standalone Param/Returns entries |
 
-- Keep each description on the same line as its tag; the Markdown export puts it straight after
-  the list bullet: ``- `t` (float, required): Position…`` and ``**Returns** (float): …``.
-- Inline Markdown (code, links) works in the description. For nested fields, put a
-  `<Details>` inside the description.
-- Without `<Params>`, a run of entries still gets dividing rules.
+- Type comes first, as in LSL (`integer channel`). There is no `required` or `default`: LSL has no
+  optional parameters, so say in the description what to pass for the usual behaviour
+  ("Pass `0.0` for none.").
+- Rendering: same highlighting and colours as the API pages' syntax block (inline-lsl, types
+  linked to their `/types/` page). The code lines are `float InterpolateFloatHermite(`, one indented
+  `type name,` line per Param, then `)`; the Returns row sits under the first line wherever it is
+  written. Rows are faint accent bands in the body font and take any inline Markdown (code, links,
+  hover cards); keep each description on the same line as its tag.
+- Copying: the Copy button (added by the guide PageEnd script) copies the plain signature, and a
+  selection that spans an explanation row copies only the code lines.
+- Accessibility: each Param is a one-entry `<dl>` (code line in `<dt>`, explanation in `<dd>`), the
+  block is a `role="group"` labelled "Signature of …"; "deprecated" is a text badge.
+- Export: the signature as an ` ```lsl ` fence, then a list: ``- `float a`: Point before…`` and
+  ``- **Returns** `float`: The interpolated value.``
+- Standalone `<Param>`/`<Returns>` (optionally inside `<Params>`) still work for things that are
+  not one function, such as the fields of a link message: `type name` with the description below.
+  Export: ``- `key target`: Avatar to follow.`` and ``**Returns** `integer`: …``.
 
 Coming later (deferred, see the Deferred section): `<CodeGroup>` LSL ⇄ SLua tabs, and the
 `<StateFlow>` / `<EventFlow>` diagrams.
@@ -315,8 +328,10 @@ Export: `**Plain**`, its image, `**Textured**`, its image, then the caption.
 
 **Hotspots.** Numbered markers over an image, one per `<Hotspot>` child. `x` and `y` are
 percentages from the top-left corner of the image, and `label` is required. The note (Markdown
-children) opens in a popover anchored to the marker. Click, Enter or Space opens it, and a click
-outside or Escape closes it. CSS anchor positioning flips the popover to stay on screen. Each
+children) opens in a hint popover anchored to the marker when you hover it or focus it with the
+keyboard (`interestfor`, with a small fallback script elsewhere), with no click needed. A click,
+Enter or Space also opens it and keeps it open. On touch a tap opens it and a second tap closes
+it. A click outside or Escape closes it. CSS anchor positioning flips the popover to stay on screen. Each
 marker is named "1: label", for example. The same notes are listed below the image as a
 numbered list, for screen readers, print and readers without popovers. Keep one-paragraph notes
 on the same line as the tag. For several paragraphs, put blank lines inside the tag.
@@ -335,7 +350,11 @@ then `1. **label**: note` for each hotspot, then the caption.
 4 from 48rem (container queries on the gallery's own width), and 1 when it is very narrow. Each
 child is a `<Figure … zoom />`; the build fails if a Figure inside lacks `zoom`. Thumbnails are
 cropped to 4:3, and the enlarged view shows the whole image. `label` is an optional accessible
-name for the group.
+name for the group. In the enlarged view, previous/next buttons at the sides and the Left/Right
+arrow keys move through the images (Home/End go to the first and last). Navigation wraps
+around: next on the last image shows the first. The view shows its position ("3 / 6"), its
+accessible name ends in "(3 of 6)", and focus stays inside it (Tab cycles close, previous and
+next). Escape or a click outside closes it and returns focus to that image's thumbnail.
 
 ```mdx
 <Gallery label="Texture swatches">

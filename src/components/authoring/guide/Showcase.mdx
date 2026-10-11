@@ -1,33 +1,53 @@
 {/* Showcase section for the guide batch, imported by src/content/docs/meta/components.mdx. */}
-import { Param, Params, Returns } from '~/components/authoring';
+import { FunctionSignature, Param, Params, Returns } from '~/components/authoring';
 
 ## Guide kit
 
 <div id="showcase-guide" data-showcase="guide">
 
-### Grouped, as in the interpolation guide
+### Annotated signature, as in the interpolation guide
 
 `InterpolateFloatHermite` returns a point on a Hermite curve through `b` and `c`, steered by the neighbouring points `a` and `d`.
 
-<Params title="Parameters">
-<Param name="a" type="float" required>The point before the segment. Only its slope matters.</Param>
-<Param name="b" type="float" required>Start of the segment, returned when `t` is `0.0`.</Param>
-<Param name="c" type="float" required>End of the segment, returned when `t` is `1.0`.</Param>
-<Param name="d" type="float" required>The point after the segment.</Param>
-<Param name="t" type="float" required>Position along the segment, from `0.0` to `1.0`.</Param>
-<Param name="tens" type="float" default="0.0">Tension. `1.0` pulls the tangents to zero and gives sharp corners; `-1.0` makes the curve loose.</Param>
-<Param name="bias" type="float" default="0.0">Bias. Positive values lean the curve towards `a`, negative values towards `d`.</Param>
-<Returns type="float">The interpolated value. Pass the result to `llSetLinkPrimitiveParamsFast` or a timer loop.</Returns>
+<FunctionSignature returns="float" name="InterpolateFloatHermite">
+<Param type="float" name="a">The point before the segment. Only its slope matters.</Param>
+<Param type="float" name="b">Start of the segment, returned when `t` is `0.0`.</Param>
+<Param type="float" name="c">End of the segment, returned when `t` is `1.0`.</Param>
+<Param type="float" name="d">The point after the segment.</Param>
+<Param type="float" name="t">Position along the segment, from `0.0` to `1.0`.</Param>
+<Param type="float" name="tens">Tension. `1.0` pulls the tangents to zero and gives sharp corners; `-1.0` makes the curve loose. Pass `0.0` for a Catmull-Rom curve.</Param>
+<Param type="float" name="bias">Bias. Positive values lean the curve towards `a`, negative values towards `d`. Pass `0.0` for none.</Param>
+<Returns>The interpolated value. Pass the result to [`llSetLinkPrimitiveParamsFast`](/functions/llSetLinkPrimitiveParamsFast/) or use it in a timer loop.</Returns>
+</FunctionSignature>
+
+### Annotated signature: no return value, a deprecated parameter, a long name
+
+<FunctionSignature name="FollowAvatarWithAVeryLongHelperFunctionName">
+<Param type="key" name="target">Avatar to follow. Use [`llDetectedKey`](/functions/llDetectedKey/) in a `touch_start` event to follow whoever touched the object.</Param>
+<Param type="list" name="rules">A rule list, as for `llSetLinkPrimitiveParamsFast`. A longer description that wraps across several lines on a narrow screen, to check that the explanation row stays readable and full width.</Param>
+<Param type="integer" name="channel" deprecated>Ignored. Kept so that old callers still compile.</Param>
+</FunctionSignature>
+
+### Annotated signature with no parameters
+
+<FunctionSignature returns="integer" name="CountSeatedAvatars">
+<Returns>How many avatars sit on the linkset.</Returns>
+</FunctionSignature>
+
+### Standalone entries, grouped
+
+<Params title="Link message fields">
+<Param type="integer" name="num">The command: `1` to open, `2` to close.</Param>
+<Param type="string" name="str">The door name, or `""` for every door.</Param>
+<Returns type="integer">`TRUE` if a door moved.</Returns>
 </Params>
 
-### Ungrouped, with every state
+### Standalone entries, with every state
 
-<Param name="target" type="key" required>Avatar to follow.</Param>
-<Param name="range" type="float" default="10.0">Stop distance in metres.</Param>
-<Param name="rules" type="list">A rule list, as for `llSetLinkPrimitiveParamsFast`. Long description that wraps across several lines on a narrow screen, to check that the text stays aligned under the header row and does not run under the type.</Param>
-<Param name="channel" type="integer" deprecated>Use `range` instead. Kept for old callers.</Param>
-<Param name="aVeryLongParameterNameThatShouldWrapOnAPhone" type="rotation" required default="ZERO_ROTATION">A long name and a default together.</Param>
-<Param name="callback" type="handler">A type with no page, shown highlighted but not linked.</Param>
+<Param type="key" name="target">Avatar to follow.</Param>
+<Param type="integer" name="channel" deprecated>Use `range` instead. Kept for old callers.</Param>
+<Param type="rotation" name="aVeryLongParameterNameThatShouldWrapOnAPhone">A long name.</Param>
+<Param type="handler" name="callback">A type with no page, shown highlighted but not linked.</Param>
 <Returns type="integer">`TRUE` if the target was found, otherwise `FALSE`.</Returns>
 
 </div>

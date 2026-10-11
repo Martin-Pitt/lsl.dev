@@ -1,23 +1,23 @@
 ---
 /**
- * One parameter of a user-defined function in a guide.
- *   <Param name="target" type="key" required>Avatar to follow.</Param>
- *   <Param name="range" type="float" default="10.0">Stop distance in metres.</Param>
- * Markup: a one-entry <dl> (name and type in <dt>, description in <dd>); "required",
- * "deprecated" and the default are text, not colour alone.
+ * One parameter of a user-defined function in a guide, written LSL style: type first.
+ *   <Param type="key" name="target">Avatar to follow.</Param>
+ * Inside <FunctionSignature> it is one indented code line of the signature followed by its explanation row;
+ * on its own (or in <Params>) it is a "type name" entry with the description below.
+ * Markup either way: a one-entry <dl> (the "type name" code in <dt>, the description in <dd>), so
+ * the explanation stays associated with its parameter. "deprecated" is text, not colour alone.
+ * LSL has no optional parameters or default values, so there is no `required` or `default`:
+ * say in the description which value to pass for the usual behaviour.
  */
 import { typeLabel } from './typeLabel';
-interface Props { name: string; type: string; required?: boolean; default?: string; deprecated?: boolean }
-const { name, type, required = false, default: def, deprecated = false } = Astro.props;
+interface Props { type: string; name: string; deprecated?: boolean }
+const { type, name, deprecated = false } = Astro.props;
 const typeHtml = await typeLabel(type);
 ---
-<dl class:list={['au-param', { 'au-param--deprecated': deprecated }]}>
+<dl class:list={['au-param', { 'au-param--deprecated': deprecated }]} data-au-type={type} data-au-name={name}>
 	<dt>
-		<code class="au-param-name">{deprecated ? <del>{name}</del> : name}</code>
-		<Fragment set:html={typeHtml} />
-		{required && <span class="au-param-badge au-param-badge--required">required</span>}
+		<span class="au-param-code"><Fragment set:html={typeHtml} /> <code class="au-param-name">{deprecated ? <del>{name}</del> : name}</code><span class="au-param-comma">,</span></span>
 		{deprecated && <span class="au-param-badge">deprecated</span>}
-		{def !== undefined && <span class="au-param-default">default <code>{def}</code></span>}
 	</dt>
 	<dd><slot /></dd>
 </dl>

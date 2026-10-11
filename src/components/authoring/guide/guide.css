@@ -1,9 +1,10 @@
 /*
- * Styles for the guide batch: Param, Params, Returns. Loaded site-wide through ../authoring.css.
- * Visually follows the API syntax block (src/components/reference/ApiSignature.astro): mono name,
- * LSL-highlighted type, muted prose. No JS.
+ * Styles for the guide batch: FunctionSignature, Param, Params, Returns. Loaded site-wide through ../authoring.css.
+ * Follows the API syntax block (src/components/reference/ApiSignature.astro): same surface, mono
+ * font and inline-lsl colours. No JS needed to read anything (the Copy button is an enhancement).
  */
 @layer authoring {
+	/* ---- Standalone entries: "type name" then the description. ---- */
 	.au-param {
 		margin: 0;
 		padding-block: .6rem;
@@ -19,21 +20,28 @@
 		}
 		& > dd {
 			margin: .25rem 0 0;
+			padding: 0;
 			color: var(--sl-color-gray-2);
 			& > :first-child { margin-top: 0; }
 			& > :last-child { margin-bottom: 0; }
 			&:empty { display: none; }
 		}
+		.au-param-code {
+			font-family: var(--__sl-font-mono);
+			overflow-wrap: anywhere;
+		}
 		.au-param-name {
 			padding: 0;
 			background: none;
 			border: 0;
+			font-size: inherit;
 			font-weight: 600;
 			color: var(--sl-color-white);
 		}
 		.au-param-type, .au-param-type code.lsl-inline { font-size: inherit; background: none; border: 0; padding: 0; }
 		code.lsl-inline { white-space: nowrap; }
 	}
+	.au-param-comma { display: none; }
 	.au-param-badge {
 		padding: 0 .4rem;
 		border: 1px solid var(--au-border);
@@ -41,16 +49,6 @@
 		font-size: var(--sl-text-xs);
 		line-height: 1.5;
 		color: var(--au-text-muted);
-	}
-	.au-param-badge--required {
-		border-color: color-mix(in oklab, var(--au-caution) 45%, transparent);
-		background: var(--au-caution-tint);
-		color: var(--sl-color-orange-high);
-	}
-	.au-param-default {
-		font-size: var(--sl-text-xs);
-		color: var(--au-text-muted);
-		& code { font-size: inherit; }
 	}
 	.au-param--deprecated {
 		.au-param-name { color: var(--au-text-muted); font-weight: normal; }
@@ -82,4 +80,99 @@
 	.sl-markdown-content :not(.au-param) + .au-param { margin-top: .75rem; border-block-start: 1px solid var(--au-border); }
 	.sl-markdown-content .au-param + .au-param { margin-top: 0; }
 	.au-params > .au-param { border-block-start: 0 !important; }
+
+	/* ---- FunctionSignature: code lines with full-width explanation rows in between. ---- */
+	.au-sig {
+		--au-sig-pad: 1rem;
+		--au-sig-indent: 2rem;
+		margin-block: 1rem;
+		padding: .6rem 0 .85rem;
+		border: 1px solid var(--sl-color-hairline);
+		border-radius: .6rem;
+		background: var(--sl-color-gray-7, var(--sl-color-black));
+		font-family: var(--__sl-font-mono);
+		font-size: var(--sl-text-sm);
+		line-height: 1.65;
+
+		& code.lsl-inline { padding: 0; background: none; border: 0; font-size: inherit; white-space: pre-wrap; }
+		& a.lsl-ref, & a.lsl-link { text-decoration: none; }
+		& a.lsl-ref:hover, & a.lsl-link:hover { text-decoration: underline; }
+	}
+	.au-sig-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		min-height: 1.6rem;
+		padding-inline: var(--au-sig-pad);
+		font-family: var(--__sl-font);
+		user-select: none;
+	}
+	.au-sig-title { font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); }
+	.au-sig-copy {
+		padding: .05rem .5rem;
+		border: 1px solid var(--sl-color-hairline);
+		border-radius: var(--au-radius-sm);
+		background: transparent;
+		font: inherit;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-2);
+		cursor: pointer;
+		&:hover { color: var(--sl-color-white); border-color: var(--sl-color-gray-4); }
+		&:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 2px; }
+	}
+	.au-sig-line { padding-inline: var(--au-sig-pad); overflow-wrap: anywhere; }
+	.au-sig-body {
+		display: flex;
+		flex-direction: column;
+		/* The Returns row belongs to the first line, whatever its place in the source. */
+		& > .au-returns { order: -1; }
+	}
+	.au-sig .au-param {
+		padding: 0;
+		border: 0 !important;
+		margin: 0 !important;
+		font-size: inherit;
+
+		& > dt {
+			display: flex;
+			padding-inline: calc(var(--au-sig-pad) + var(--au-sig-indent)) var(--au-sig-pad);
+			gap: .25rem .75rem;
+		}
+		.au-param-name { font-weight: normal; }
+		.au-param-comma { display: inline; color: var(--sl-color-gray-3); }
+		/* The explanation row: full width, sans-serif prose on a faint band with an accent rule. */
+		& > dd {
+			margin: .15rem 0 .35rem;
+			padding: .35rem var(--au-sig-pad) .4rem calc(var(--au-sig-pad) + var(--au-sig-indent) - 2px);
+			border-inline-start: 2px solid color-mix(in oklab, var(--sl-color-accent) 55%, transparent);
+			background: color-mix(in oklab, var(--sl-color-accent) 7%, transparent);
+			font-family: var(--__sl-font);
+			font-size: var(--sl-text-sm);
+			line-height: 1.55;
+			color: var(--sl-color-gray-2);
+			& > * + * { margin-top: .5rem; }
+			& code:not(.lsl-inline) { font-size: var(--sl-text-xs); }
+		}
+	}
+	.au-sig .au-param:nth-last-child(1 of .au-param:not(.au-returns)) .au-param-comma { display: none; }
+	/* Returns: a labelled explanation row only; the type is already in the code line. */
+	.au-sig .au-returns {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		align-items: baseline;
+		margin: .15rem 0 .35rem !important;
+		padding-inline-start: calc(var(--au-sig-pad) - 2px);
+		border-inline-start: 2px solid color-mix(in oklab, var(--sl-color-accent) 55%, transparent) !important;
+		background: color-mix(in oklab, var(--sl-color-accent) 7%, transparent);
+
+		& > dt { padding: 0; font-family: var(--__sl-font); user-select: none; }
+		.au-returns-type { display: none; }
+		& > dd { margin: 0; padding-inline-start: .75rem; border: 0; background: none; }
+	}
+	@media (max-width: 40rem) {
+		.au-sig { --au-sig-pad: .75rem; --au-sig-indent: 1.25rem; }
+		.au-sig .au-returns { grid-template-columns: 1fr; padding-block-start: .3rem; }
+		.au-sig .au-returns > dd { padding-inline-start: 0; padding-block-start: .1rem; }
+	}
 }

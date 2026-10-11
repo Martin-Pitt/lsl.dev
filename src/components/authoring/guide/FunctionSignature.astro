@@ -1,0 +1,32 @@
+---
+/**
+ * Annotated signature of a function a guide defines: an LSL-highlighted code block (return type and
+ * name, one indented parameter per line, closing parenthesis) with each <Param> explanation as a
+ * full-width row under its line, and the <Returns> explanation under the first line.
+ *   <FunctionSignature returns="float" name="InterpolateFloatHermite">
+ *   <Param type="float" name="a">Point before the segment.</Param>
+ *   <Returns>The interpolated value.</Returns>
+ *   </FunctionSignature>
+ * Same highlighting and colours as the API signature block (../../reference/ApiSignature.astro).
+ * Copying: the Copy button (shown once the guide PageEnd script runs) and any selection that spans
+ * an explanation row copy only the code lines, as plain text.
+ */
+import { inlineLsl, unescapeHtml } from '../../../lib/inline-lsl';
+interface Props { name: string; returns?: string }
+const { name, returns } = Astro.props;
+const ret = returns && returns !== 'void' ? `${returns} ` : '';
+const body = await Astro.slots.render('default');
+const params = [...body.matchAll(/<dl\b[^>]*\bdata-au-type="([^"]*)"[^>]*\bdata-au-name="([^"]*)"/g)].map(m => `${unescapeHtml(m[1])} ${unescapeHtml(m[2])}`);
+const plain = params.length ? `${ret}${name}(\n${params.map(p => `    ${p}`).join(',\n')}\n)` : `${ret}${name}()`;
+const head = await inlineLsl(`${ret}${name}(${params.length ? '' : ')'}`, { self: name });
+const tail = params.length ? await inlineLsl(')', { self: name }) : '';
+---
+<div class="au-sig not-content" role="group" aria-label={`Signature of ${name}`} data-au-sig-code={plain}>
+	<div class="au-sig-bar">
+		<small class="au-sig-title">Function syntax</small>
+		<button type="button" class="au-sig-copy" hidden>Copy</button>
+	</div>
+	<div class="au-sig-line"><Fragment set:html={head} /></div>
+	<div class="au-sig-body"><Fragment set:html={body} /></div>
+	{tail && <div class="au-sig-line"><Fragment set:html={tail} /></div>}
+</div>

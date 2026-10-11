@@ -4,33 +4,28 @@
  * tokens, no JS, no motion.
  */
 @layer authoring {
-	/* RecipeMeta: a <dl> grid that goes 4 → 2 → 1 columns by container width. */
+	/* RecipeMeta: an inline row of small labelled chips ("SCRIPTS 1", "TIME 15 min"); wraps on a phone. */
 	.au-recipe-meta {
-		container: au-recipe-meta / inline-size;
-		margin-block: 1rem;
+		display: flex;
+		flex-wrap: wrap;
+		gap: .375rem .5rem;
+		margin: 0 0 1rem;
+		padding: 0;
 
-		& dl {
-			display: grid;
-			grid-template-columns: 1fr;
-			gap: 1px;
-			margin: 0;
-			background: var(--au-border);
-			border: 1px solid var(--au-border);
-			border-radius: var(--au-radius);
-			overflow: hidden;
-		}
-		& dl > div {
-			margin: 0;
-			padding: .5rem .75rem;
-			background: var(--au-surface);
-			display: flex;
-			gap: .75rem;
+		& > div {
+			display: inline-flex;
 			align-items: baseline;
-			justify-content: space-between;
+			gap: .4em;
+			margin: 0;
+			padding: .125rem .55rem;
+			border: 1px solid var(--au-border);
+			border-radius: var(--au-radius-sm);
+			background: var(--au-surface);
+			font-size: var(--sl-text-xs);
+			line-height: 1.6;
 		}
 		& dt {
 			margin: 0;
-			font-size: var(--sl-text-xs);
 			font-weight: 600;
 			text-transform: uppercase;
 			letter-spacing: .04em;
@@ -39,25 +34,14 @@
 		& dd {
 			margin: 0;
 			padding: 0; /* Starlight indents every <dd> by 1rem */
-			color: var(--sl-color-white);
 			font-weight: 600;
+			color: var(--sl-color-white);
 			overflow-wrap: anywhere;
-			text-align: end;
 		}
-		& dd code { font-size: var(--sl-text-xs); font-weight: 400; }
-
-		@container au-recipe-meta (min-width: 26rem) {
-			& dl { grid-template-columns: repeat(2, 1fr); }
-			& dl > div { flex-direction: column; justify-content: flex-start; gap: .125rem; }
-			& dd { text-align: start; }
-			& .au-recipe-meta-perms { grid-column: 1 / -1; }
-			/* Without a time cell, four cells fill a 2 × 2 grid. */
-			& dl:not(:has(> div:nth-child(5))) .au-recipe-meta-perms { grid-column: auto; }
-		}
-		@container au-recipe-meta (min-width: 40rem) {
-			& dl { grid-template-columns: repeat(4, 1fr); }
-		}
+		& dd code { font-size: inherit; font-weight: 400; }
 	}
+	.sl-markdown-content .au-recipe-meta :is(dt, dd) { margin-top: 0; }
+
 	/* Prerequisites: a compact labelled box; neutral left rule like the note aside, links keep their colour. */
 	.au-prereq {
 			margin-block: 1rem;

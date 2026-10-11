@@ -1,7 +1,46 @@
 ---
 /**
  * Per-page markup for the guide batch, rendered once at the end of every page (in the footer, via
- * ../PageEnd.astro). Owned by the guide batch agent. Use it for tiny shared inline scripts
- * (hover-card intent, details deep links); leave it empty when the batch needs nothing.
+ * ../PageEnd.astro). Owned by the guide batch agent.
+ * <FunctionSignature> copy: shows each block's Copy button (it copies data-au-sig-code, the plain
+ * signature), and a selection that spans an explanation row is copied as its code lines only.
  */
 ---
+<script is:inline>
+(() => {
+	const blocks = document.querySelectorAll('.au-sig[data-au-sig-code]');
+	if (!blocks.length) return;
+	for (const sig of blocks) {
+		const btn = sig.querySelector('.au-sig-copy');
+		if (!btn || !navigator.clipboard) continue;
+		btn.hidden = false;
+		btn.addEventListener('click', async () => {
+			try { await navigator.clipboard.writeText(sig.dataset.auSigCode); btn.textContent = 'Copied'; }
+			catch { btn.textContent = 'Copy failed'; }
+			setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+		});
+	}
+	const lineText = (el) => el.textContent.replace(/\s+/g, ' ').trim();
+	document.addEventListener('copy', (e) => {
+		const sel = getSelection();
+		if (!sel || sel.isCollapsed || !e.clipboardData) return;
+		const range = sel.getRangeAt(0);
+		const sig = [...blocks].find((b) => range.intersectsNode(b));
+		if (!sig) return;
+		const rows = [...sig.querySelectorAll('.au-sig-body > .au-param > dd')];
+		if (!rows.some((r) => range.intersectsNode(r))) return;
+		const params = [...sig.querySelectorAll('.au-sig-body > .au-param:not(.au-returns) > dt .au-param-code')];
+		const text = (l) => {
+			const i = params.indexOf(l);
+			if (i < 0) return lineText(l);
+			return '    ' + lineText(l).replace(/,$/, '') + (i < params.length - 1 ? ',' : '');
+		};
+		const lines = [...sig.querySelectorAll(':scope > .au-sig-line, .au-sig-body > .au-param:not(.au-returns) > dt .au-param-code')]
+			.filter((l) => range.intersectsNode(l))
+			.map(text);
+		if (!lines.length) return;
+		e.preventDefault();
+		e.clipboardData.setData('text/plain', lines.join('\n'));
+	});
+})();
+</script>

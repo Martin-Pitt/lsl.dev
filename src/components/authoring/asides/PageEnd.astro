@@ -2,8 +2,8 @@
 /**
  * Per-page script of the asides batch, rendered once at the end of every page (../PageEnd.astro).
  * Deep links into <Details>: a closed <details> doesn't always open for a #hash inside it, so this
- * opens every <details> around the target, on load and on hashchange (under 300 bytes).
+ * opens every <details> around the target, on load and on hashchange (about 300 bytes). A malformed %-escape in the hash is used as written.
  * Without it, the content stays reachable by opening the item by hand.
  */
 ---
-<script is:inline>(()=>{const f=()=>{const t=location.hash&&document.getElementById(decodeURIComponent(location.hash.slice(1)));let d=t&&t.closest('details:not([open])');if(!d)return;for(;d;d=d.parentElement.closest('details'))d.open=true;t.scrollIntoView()};addEventListener('hashchange',f);f()})()</script>
+<script is:inline>(()=>{const f=()=>{let h=location.hash.slice(1),t;try{h=decodeURIComponent(h)}catch{}t=h&&document.getElementById(h);let d=t&&t.closest('details:not([open])');if(!d)return;for(;d;d=d.parentElement.closest('details'))d.open=true;t.scrollIntoView()};addEventListener('hashchange',f);f()})()</script>

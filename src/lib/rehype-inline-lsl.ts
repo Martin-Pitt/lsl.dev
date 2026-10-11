@@ -25,9 +25,10 @@ export default function rehypeInlineLsl() {
 	return async (tree: Node, file: any) => {
 		const self: string | undefined = file?.data?.astro?.frontmatter?.title;
 		const jobs: Promise<void>[] = [];
-		const visit = (node: Node, inLink: boolean) => {
+		/** Visits node's children, or only `only` of them; jobs always splice the real node.children. */
+		const visit = (node: Node, inLink: boolean, only?: Node[]) => {
 			// Iterate over a snapshot: unlinking below splices node.children.
-			for (const child of [...(node.children ?? [])]) {
+			for (const child of [...(only ?? node.children ?? [])]) {
 				if (isEl(child, 'pre')) continue;
 				if (isEl(child, 'code')) {
 					const kids = child.children ?? [];
@@ -48,8 +49,8 @@ export default function rehypeInlineLsl() {
 						if (plain) jobs.push(inlineLsl(label, { link: false }).then(html => { node.children!.splice(node.children!.indexOf(child), 1, ...fragment(html)); }));
 						else {
 							node.children!.splice(at, 1, ...kids);
-							// The unwrapped content still gets inline highlighting.
-							visit({ type: 'root', children: kids }, inLink);
+							// The unwrapped content, now in node, still gets highlighting and unlinking.
+							visit(node, inLink, kids);
 						}
 						continue;
 					}

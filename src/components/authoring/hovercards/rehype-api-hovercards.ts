@@ -24,9 +24,10 @@
  */
 import { readFileSync } from 'node:fs';
 import { fromHtml } from 'hast-util-from-html';
+import { toHtml } from 'hast-util-to-html';
 import { inlineLsl } from '../../../lib/inline-lsl';
 
-type Node = { type: string; tagName?: string; name?: string; value?: string; properties?: Record<string, any>; children?: Node[] };
+type Node = { type: string; tagName?: string; name?: string; value?: string; properties?: Record<string, any>; attributes?: any[]; children?: Node[] };
 type Card = { k: string; s: string; d: string; f?: string[] };
 
 const API_HREF = /^\/(?:functions|events|constants)\/([A-Za-z_][A-Za-z0-9_]*)\/(?:#.*)?$/;
@@ -36,8 +37,12 @@ const SKIP_TAGS = new Set(['pre', 'script', 'style', 'svg']);
 let data: Record<string, Card> | undefined;
 function cards(): Record<string, Card> {
 	if (!data) {
-		try { data = JSON.parse(readFileSync(new URL('../../../data/hovercards.json', import.meta.url), 'utf8')); }
-		catch { data = {}; }
+		// Next to this file when it runs as the Markdown plugin; from the repo root when it runs inside
+		// the bundled server build (bindFragmentCards, fragment renders), where import.meta.url is the chunk's.
+		for (const at of [new URL('../../../data/hovercards.json', import.meta.url), `${process.cwd()}/src/data/hovercards.json`]) {
+			try { data = JSON.parse(readFileSync(at, 'utf8')); break; } catch {}
+		}
+		data ??= {};
 	}
 	return data!;
 }
@@ -76,7 +81,44 @@ const classes = (n: Node): string[] => {
 	return Array.isArray(c) ? c.map(String) : typeof c === 'string' ? c.split(/\s+/) : [];
 };
 
-export default function rehypeApiHovercards() {
+/**
+ * Components that render Markdown fragments themselves (the Limits dataset: <LimitsTable>, <Limit>).
+ * Their HTML is made at render time, out of this plugin's sight, so the page pass hands them its
+ * prefix and the APIs it already has cards for (props hcPrefix, hcHave); the fragment is rendered
+ * with `{ fragment: true }`, which only marks its API links (data-hc), and bindFragmentCards()
+ * points them at the page's cards, adding a card only for an API that has none yet on the page.
+ */
+const FRAGMENT_TAGS = new Set(['LimitsTable', 'Limit']);
+const cardSpan = (id: string, children: Node[]): Node => ({
+	type: 'element', tagName: 'span',
+	properties: { popover: 'hint', id, className: ['au-popover', 'hc'], ariaHidden: 'true', dataPagefindIgnore: '' },
+	children,
+});
+
+/**
+ * For a fragment component: rewrites the data-hc marks of its rendered HTML to interestfor links
+ * and returns the cards it must add (one per API not yet claimed on the page, tracked per render in
+ * `locals`). Without a prefix (not in an MDX page, inside <NoCard>, `hoverCards: false`) the
+ * marks are dropped and there are no cards.
+ */
+export async function bindFragmentCards(htmls: string[], props: { hcPrefix?: string; hcHave?: string }, locals: Record<string, any>) {
+	const prefix = props.hcPrefix;
+	const MARK = / data-hc="([A-Za-z_][A-Za-z0-9_]*)"/g;
+	if (!prefix) return { htmls: htmls.map(h => h.replace(MARK, '')), cards: '' };
+	const claimedAll: Map<string, Set<string>> = (locals.__hovercards ??= new Map());
+	let claimed = claimedAll.get(prefix);
+	if (!claimed) claimedAll.set(prefix, (claimed = new Set((props.hcHave ?? '').split(' ').filter(Boolean))));
+	const fresh: string[] = [];
+	const out = htmls.map(h => h.replace(MARK, (_, name) => {
+		if (!claimed!.has(name)) { claimed!.add(name); fresh.push(name); } // claimed synchronously: no duplicates across concurrent renders
+		return ` interestfor="${prefix}-${name}"`;
+	}));
+	const all = cards();
+	const built = await Promise.all(fresh.map(n => body(n, all[n])));
+	return { htmls: out, cards: toHtml(fresh.map((n, i) => cardSpan(`${prefix}-${n}`, structuredClone(built[i]))) as any) };
+}
+
+export default function rehypeApiHovercards(options: { fragment?: boolean } = {}) {
 	return async (tree: Node, file: any) => {
 		const fm = file?.data?.astro?.frontmatter ?? {};
 		if (fm.hoverCards === false) return;
@@ -93,9 +135,11 @@ export default function rehypeApiHovercards() {
 		const skip = (n: Node) => n.type === 'element'
 			? HEADING.test(n.tagName!) || SKIP_TAGS.has(n.tagName!) || n.properties?.dataNocard != null || classes(n).includes('hc')
 			: n.name === 'NoCard';
+		const fragments: Node[] = [];
 		const visit = (node: Node) => {
 			for (const child of node.children ?? []) {
 				if (!(child.type === 'element' || child.type === 'mdxJsxTextElement' || child.type === 'mdxJsxFlowElement') || skip(child)) continue;
+				if (child.type !== 'element' && FRAGMENT_TAGS.has(child.name!)) fragments.push(child);
 				if (child.type === 'element' && child.tagName === 'a') {
 					const name = String(child.properties?.href ?? '').match(API_HREF)?.[1];
 					if (name && all[name] && !self.has(name)) links.set(name, [...(links.get(name) ?? []), child]);
@@ -105,6 +149,13 @@ export default function rehypeApiHovercards() {
 			}
 		};
 		visit(tree);
+		if (options.fragment) {
+			// A fragment render: mark the links; the component binds them to the page's cards.
+			for (const [name, ls] of links) for (const link of ls) link.properties = { ...link.properties, dataHc: name };
+			return;
+		}
+		const have = [...links.keys()].join(' ');
+		for (const f of fragments) f.attributes = [...(f.attributes ?? []), { type: 'mdxJsxAttribute', name: 'hcPrefix', value: prefix }, { type: 'mdxJsxAttribute', name: 'hcHave', value: have }];
 		if (!links.size) return;
 
 		// One card per API per file, appended to the end of the file's tree; every link to it shares it.
@@ -113,11 +164,7 @@ export default function rehypeApiHovercards() {
 		names.forEach((name, i) => {
 			const id = `${prefix}-${name}`;
 			for (const link of links.get(name)!) link.properties = { ...link.properties, interestfor: id };
-			tree.children!.push({
-				type: 'element', tagName: 'span',
-				properties: { popover: 'hint', id, className: ['au-popover', 'hc'], ariaHidden: 'true', dataPagefindIgnore: '' },
-				children: structuredClone(built[i]),
-			});
+			tree.children!.push(cardSpan(id, structuredClone(built[i])));
 		});
 	};
 }

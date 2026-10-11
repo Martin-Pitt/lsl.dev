@@ -6,8 +6,8 @@
  * - Caveat / Gotcha / Performance: `> **Gotcha:** body`, the whole body quoted (every paragraph and code block).
  * - Limit: inline `[value](/reference/limits/#id)`; with `note`, a quoted callout with the label,
  *   the linked value and the row's note. LimitsTable: a Markdown table built from the data.
- * - Details: `**Summary**` and the body, never collapsed; inside a FAQ, `### Summary` and the body. FAQ: its title as `### Title`
- *   (its questions then use `####`).
+ * - Details: `**Summary**` and the body, never collapsed; inside a FAQ, `### Summary` and the body.
+ *   FAQ: its title, if any, as `## Title`, so its `###` questions sit under it.
  * - Figure: `![alt](built URL)` (the .md route resolves the src with getImage, see page.images) and the
  *   caption (a prop in italics, or the children as they are). Without a resolved URL, `*[Figure: alt]*`.
  * - Since: `(since 2022-11)`.
@@ -36,9 +36,8 @@ function limitsTable(section: string) {
 
 function limitCallout(a: Record<string, any>) {
 	const l = getLimit(a.id);
-	const lines = [`**${a.title ?? 'Limit'}:** ${l.label}: [${value(l.id)}](${limitHref(l.id)})`];
-	if (l.notes) lines.push(l.notes);
-	return lines.map(s => `> ${s}`).join('\n>\n');
+	const head = `**${a.title ?? 'Limit'}:** ${l.label}: [${value(l.id)}](${limitHref(l.id)})`;
+	return quote(l.notes ? `${head}\n\n${l.notes}` : head);
 }
 
 export default {
@@ -52,7 +51,7 @@ export default {
 	paired: {
 		Limit: (a) => (a.note ? [`\n\n${limitCallout(a)}\n\n`, '\n\n'] : [`[${value(a.id)}](${limitHref(a.id)})`, '']),
 		Details: (a, _page, ctx) => [ctx.parents.includes('FAQ') ? `\n\n### ${a.summary}\n\n` : `\n\n**${a.summary}**\n\n`, '\n\n'],
-		FAQ: (a) => [a.title ? `\n\n### ${a.title}\n\n` : '\n\n', '\n\n'],
+		FAQ: (a) => [a.title ? `\n\n## ${a.title}\n\n` : '\n\n', '\n\n'],
 		Figure: (a, page) => [`\n\n${figureImage(a, page)}${a.caption ? `\n\n*${a.caption}*` : ''}\n\n`, '\n\n'],
 		Since: (a) => [`(since ${a.date})`, ''],
 	},

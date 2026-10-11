@@ -3,8 +3,10 @@
  * <LimitsTable>, <Limit> and the Markdown export (src/lib/page-markdown/asides.ts).
  *
  * Every text field is Markdown copied verbatim from the wiki-derived tables. It is rendered with
- * the site's Markdown pipeline (GFM, smartypants, rehype-inline-lsl and the hover-card plugin), so
- * the cells look exactly as they did when they were written as Markdown tables in limits.mdx.
+ * the site's Markdown pipeline (GFM, smartypants, rehype-inline-lsl), so the cells look exactly as
+ * they did when they were written as Markdown tables in limits.mdx. The hover-card plugin runs in
+ * fragment mode: it only marks API links, and the component binds them to the page's cards with
+ * bindFragmentCards() (see rehype-api-hovercards.ts), so the page keeps one card per API.
  */
 import { parse } from 'yaml';
 import { createMarkdownProcessor, type MarkdownRenderer } from '@astrojs/markdown-remark';
@@ -72,7 +74,7 @@ export function renderMarkdown(md: string, inline = true): Promise<string> {
 	const key = `${inline ? 'i' : 'b'}:${md}`;
 	let html = cache.get(key);
 	if (!html) {
-		renderer ??= createMarkdownProcessor({ rehypePlugins: [rehypeInlineLsl as any, rehypeApiHovercards as any] });
+		renderer ??= createMarkdownProcessor({ rehypePlugins: [rehypeInlineLsl as any, [rehypeApiHovercards as any, { fragment: true }]] });
 		html = renderer.then(r => r.render(md, { frontmatter: { title: 'Limits' } as any })).then(({ code }) => {
 			// Starlight's MDX pipeline marks inline code dir="auto" (RTL support); match it.
 			code = code.replace(/<code([^>]*)>/g, (tag, attrs) => (/\sdir=/.test(attrs) ? tag : `<code${attrs} dir="auto">`));

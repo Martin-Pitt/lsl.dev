@@ -4,7 +4,7 @@
  * docs/design/components-plan.md for the agreed Markdown form of each component.
  */
 import { DIFFICULTIES, permission, requirements } from '../../components/authoring/recipe/vocab';
-import { code } from './util';
+import { code, indent } from './util';
 import type { CaseFile } from './types';
 
 export default {
@@ -28,7 +28,10 @@ export default {
 	paired: {
 		ScriptFile: a => [`\n\n**${a.name}**${a.in ? ` (put in: ${a.in})` : ''}\n\n`, '\n\n'],
 		Linkset: a => [a.title ? `\n\n**${a.title}** (linkset; the first item is the root, link 1)\n\n` : '\n\n', '\n\n'],
-		BuildStep: a => [`\n\n1. **${a.title}**\n\n`, '\n\n'],
+	},
+	transform: {
+		/** `1. **Title**` and the body indented under it, so its fences stay inside the list item. */
+		BuildStep: (children, a) => `\n\n1. **${a.title}**${children.trim() ? `\n\n   ${indent(children.trim(), 3)}` : ''}\n\n`,
 	},
 	passthrough: ['Steps'], // Starlight Steps; the recipe kit wraps it
 } satisfies CaseFile;

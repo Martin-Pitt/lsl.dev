@@ -386,7 +386,8 @@ default { touch_start(integer n) { ... } }
 
 ```mdx
 <Gotcha>`llSetTimerEvent(0)` stops the timer, but a pending event may still fire once.</Gotcha>
-<Limit id="scripting" title="64 KB memory">Mono scripts get 64 KB of memory.</Limit>
+<Limit id="scripting-max-script-memory-size-mono" note title="Script memory">Plan for the cap from the start.</Limit>
+{/* Children need `note` (the callout form); the inline form, <Limit id="…" />, takes none. */}
 <Performance>Avoid `llSleep` in busy event handlers.</Performance>
 ```
 

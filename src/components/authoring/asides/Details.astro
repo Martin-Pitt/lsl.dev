@@ -12,6 +12,14 @@ import { asideIcons } from './icons';
 interface Props { summary: string; open?: boolean; id?: string }
 const { summary, open = false } = Astro.props;
 if (!summary) throw new Error('<Details>: the summary prop is required');
-const id = Astro.props.id ?? summary.toLowerCase().replace(/<[^>]+>|[`*]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+// The slug of the summary, or "details" when nothing ASCII is left; a repeat on the page gets -2, -3…
+const used: Set<string> = ((Astro.locals as any).__detailsIds ??= new Set());
+let id = Astro.props.id;
+if (!id) {
+	const base = summary.toLowerCase().replace(/<[^>]+>|[`*]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'details';
+	id = base;
+	for (let n = 2; used.has(id); n++) id = `${base}-${n}`;
+}
+used.add(id);
 ---
 <details class="au-details" id={id} open={open}><summary><Fragment set:html={asideIcons.chevron} /><span class="au-details__summary">{summary}</span></summary><div class="au-details__body"><slot /></div></details>

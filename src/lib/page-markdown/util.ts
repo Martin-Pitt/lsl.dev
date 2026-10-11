@@ -9,3 +9,5 @@ export const need = <T>(v: T, what: string): NonNullable<T> => { if (!v) throw n
 export const imageKey = (src: string, width?: unknown) => `${src}|${width ?? ''}`;
 /** Prefixes every line with `> ` (blank lines become `>`), for a blockquote holding whole blocks. */
 export const quote = (s: string) => s.split('\n').map(l => (l.trim() ? `> ${l}` : '>')).join('\n');
+/** Indents every line but the first by `n` spaces (blank lines stay empty), so blocks stay inside a list item. */
+export const indent = (s: string, n: number) => s.split('\n').map((l, i) => (i && l.trim() ? ' '.repeat(n) + l : l)).join('\n');

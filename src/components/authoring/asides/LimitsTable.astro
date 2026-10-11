@@ -7,11 +7,15 @@
  *   <LimitsTable section="scripting" />
  */
 import { limitSections, limitsIn, renderMarkdown, type LimitField } from './limits';
+import { bindFragmentCards } from '../hovercards/rehype-api-hovercards';
 
-interface Props { section: string }
+/** hcPrefix / hcHave are set by the hover-card plugin, never by authors. */
+interface Props { section: string; hcPrefix?: string; hcHave?: string }
 const { section } = Astro.props;
 const rows = limitsIn(section);
 const columns = Object.entries(limitSections.get(section)!.columns) as [LimitField, string][];
-const cells = await Promise.all(rows.map(row => Promise.all(columns.map(([field]) => row[field] ? renderMarkdown(row[field]!) : Promise.resolve('')))));
+const rendered = await Promise.all(rows.flatMap(row => columns.map(([field]) => row[field] ? renderMarkdown(row[field]!) : Promise.resolve(''))));
+const { htmls, cards } = await bindFragmentCards(rendered, Astro.props, Astro.locals);
+const cells = rows.map((_, r) => htmls.slice(r * columns.length, (r + 1) * columns.length));
 ---
-<table class="au-limits" data-limits-section={section}><thead><tr>{columns.map(([, header]) => <th>{header}</th>)}</tr></thead><tbody>{rows.map((row, r) => <tr id={row.id}>{cells[r].map((html, c) => <td data-label={columns[c][1]} set:html={html} />)}</tr>)}</tbody></table>
+<table class="au-limits" data-limits-section={section}><thead><tr>{columns.map(([, header]) => <th>{header}</th>)}</tr></thead><tbody>{rows.map((row, r) => <tr id={row.id}>{cells[r].map((html, c) => <td data-label={columns[c][1]} set:html={html} />)}</tr>)}</tbody></table>{cards && <Fragment set:html={cards} />}

@@ -10,8 +10,10 @@
  */
 import AsideBox from './AsideBox.astro';
 import { getLimit, limitHref, limitValue, renderMarkdown } from './limits';
+import { bindFragmentCards } from '../hovercards/rehype-api-hovercards';
 
-interface Props { id: string; note?: boolean; title?: string }
+/** hcPrefix / hcHave are set by the hover-card plugin, never by authors. */
+interface Props { id: string; note?: boolean; title?: string; hcPrefix?: string; hcHave?: string }
 const { id, note = false, title = 'Limit' } = Astro.props;
 const row = getLimit(id);
 const href = limitHref(id);
@@ -21,9 +23,10 @@ if (!note && Astro.slots.has('default')) throw new Error(`<Limit id="${id}">: ch
 const unlink = (html: string) => html.replace(/<a\b[^>]*>|<\/a>/g, '');
 const value = unlink(await renderMarkdown(limitValue(row)));
 const label = callout ? unlink(await renderMarkdown(row.label)) : '';
-const notes = callout && row.notes ? await renderMarkdown(row.notes, false) : '';
+// The value and label lose their links; only the note keeps API links, bound to the page's cards.
+const { htmls: [notes], cards } = await bindFragmentCards([callout && row.notes ? await renderMarkdown(row.notes, false) : ''], callout ? Astro.props : {}, Astro.locals);
 const plainLabel = row.label.replace(/<[^>]+>/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*\\]/g, '');
 ---
 {callout
-	? <AsideBox kind="limit" base="note" title={title}><p class="au-limit__headline"><span set:html={label} />: <a class="au-limit" href={href} set:html={value} /></p>{notes && <div class="au-limit__note" set:html={notes.startsWith('<p>') ? notes : `<p>${notes}</p>`} />}<slot /></AsideBox>
+	? <AsideBox kind="limit" base="note" title={title}><p class="au-limit__headline"><span set:html={label} />: <a class="au-limit" href={href} set:html={value} /></p>{notes && <div class="au-limit__note" set:html={notes.startsWith('<p>') ? notes : `<p>${notes}</p>`} />}<slot />{cards && <Fragment set:html={cards} />}</AsideBox>
 	: <a class="au-limit" href={href} title={`${plainLabel} (Limits)`} set:html={value} />}

@@ -104,12 +104,16 @@ class CatalogList extends HTMLElement {
 			// options that would leave none are disabled (the active one stays enabled so it can be turned off).
 			const avail: Record<string, Map<string, number>> = {};
 			for (const k in pick) avail[k] = new Map();
+			const catAvail = new Set<string>(); // categories with rows under every filter except the category
 			rows.forEach((row, i) => {
 				const has = (row.dataset.b ?? '').split(' ');
 				const base = terms.every(t => text![i].includes(t)) && (!category || (row.dataset.c ?? '').split(' ').includes(category))
 					&& [...state].every(([b, s]) => !s || (s === 1) === has.includes(b));
+				const pickOk = Object.entries(pick).every(([k, v]) => !v || row.dataset[k] === v);
 				if (base) for (const k in pick) { const v = row.dataset[k]; if (v) avail[k].set(v, (avail[k].get(v) ?? 0) + 1); }
-				const match = base && Object.entries(pick).every(([k, v]) => !v || row.dataset[k] === v);
+				if (cloud && pickOk && terms.every(t => text![i].includes(t)) && [...state].every(([b, s]) => !s || (s === 1) === has.includes(b)))
+					for (const c of (row.dataset.c ?? '').split(' ')) if (c) catAvail.add(c);
+				const match = base && pickOk;
 				row.hidden = !match; if (match) count++;
 			});
 			for (const g of picks) for (const b of g.querySelectorAll<HTMLButtonElement>('button')) {
@@ -120,7 +124,10 @@ class CatalogList extends HTMLElement {
 			for (const s of sections) s.hidden = !s.querySelector('li:not([hidden])');
 			const badges = [...state.values()].some(Boolean), active = terms.length > 0 || !!category || badges || Object.values(pick).some(Boolean);
 			for (const g of picks) for (const b of g.querySelectorAll<HTMLButtonElement>('button')) b.setAttribute('aria-pressed', String(b.dataset.v === pick[g.dataset.key!]));
-			if (cloud) for (const b of cloud.querySelectorAll<HTMLButtonElement>('button')) b.setAttribute('aria-pressed', String(b.dataset.v === cat));
+			if (cloud) for (const b of cloud.querySelectorAll<HTMLButtonElement>('button')) {
+				b.setAttribute('aria-pressed', String(b.dataset.v === cat));
+				b.disabled = !catAvail.has(b.dataset.v!) && b.dataset.v !== cat;
+			}
 			for (const b of buttons) { const s = STATES[state.get(b.dataset.b!) ?? 0]; b.dataset.state = s; b.setAttribute('aria-label', `${b.dataset.label}, filter: ${s}`); b.title = `Click: ${['include', 'exclude', 'clear'][STATES.indexOf(s)]}`; }
 			status.textContent = active ? `${count} of ${rows.length} entries` : `${rows.length} entries`;
 			empty.hidden = count > 0; if (clear) clear.hidden = !badges;
@@ -164,7 +171,7 @@ if (!customElements.get('catalog-list')) customElements.define('catalog-list', C
 	:is(.pick, .cloud) button:hover { background: var(--sl-color-gray-6); }
 	:is(.pick, .cloud) button:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 1px; }
 	:is(.pick, .cloud) button[aria-pressed='true'] { border-color: var(--sl-color-accent); background: var(--sl-color-accent-low); color: var(--sl-color-text); font-weight: 600; }
-	.pick button:disabled { color: var(--sl-color-gray-5); cursor: default; background: none; }
+	:is(.pick, .cloud) button:disabled { color: var(--sl-color-gray-5); cursor: default; background: none; }
 	.catalog-browser ul { list-style: none; margin: 0; padding: 0; }
 	.catalog-browser li { margin: 0; }
 	.catalog-browser li[hidden], .catalog-browser section[hidden] { display: none; }

@@ -4,11 +4,10 @@ import CatalogList from '../../components/reference/CatalogList.astro';
 import { constantGroups } from '../../components/reference/catalog-items';
 import { catalog } from '../../lib/catalog';
 // `NAME = value` grouped by constant group (a constant in several groups is listed under its first);
-// the group filter matches every group. Descriptions show on hover.
+// the category filter uses categories derived from the functions that take each group. Descriptions show on hover.
 const groups = await constantGroups(catalog.constants);
-const filter = Object.keys(catalog.enums).filter(g => catalog.constants.some(c => ((c as any).groups || []).includes(g))).sort().map(id => ({ id, label: id }));
 ---
 <StarlightPage frontmatter={{title:'Constants',description:'Browse the current LSL constants reference.',editUrl:false}}>
 <div class="wide-page" hidden></div>
-<CatalogList groups={groups} label="constants" filterCategories={filter} filterLabel="Group" filterAll="All groups" az/>
+<CatalogList groups={groups} label="constants" filterCategories={catalog.categories} az/>
 </StarlightPage>

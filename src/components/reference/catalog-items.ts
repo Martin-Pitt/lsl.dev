@@ -1,6 +1,6 @@
 /** Row and group data for CatalogList on the reference index pages. */
 import { inlineLsl } from '../../lib/inline-lsl';
-import { apiHref, constantGroupHref } from '../../lib/catalog';
+import { apiHref, constantGroupHref, catalog } from '../../lib/catalog';
 import { recentBadges } from '../../lib/recent';
 
 export type Flag = { code: string; title: string };
@@ -52,6 +52,7 @@ export function oneLine(text = ''): string {
 
 /** Constants grouped under their first constant group (alphabetical), ungrouped ones last. */
 export async function constantGroups(constants: any[]) {
+	const cats = constantCategories();
 	const byGroup = new Map<string, any[]>();
 	for (const c of constants) { const g = c.groups?.[0] ?? ''; if (!byGroup.has(g)) byGroup.set(g, []); byGroup.get(g)!.push(c); }
 	const names = [...byGroup.keys()].filter(Boolean).sort((a, b) => a.localeCompare(b));
@@ -59,8 +60,25 @@ export async function constantGroups(constants: any[]) {
 	return Promise.all(names.map(async g => ({
 		id: g, label: g || 'Other constants', href: g ? constantGroupHref(g) : undefined, letter: g ? g.charAt(0).toLowerCase() : undefined,
 		items: await Promise.all(byGroup.get(g)!.map(async c => ({
-			title: c.name, href: apiHref(c.kind, c.name), description: oneLine(c.description), categories: c.groups,
+			title: c.name, href: apiHref(c.kind, c.name), description: oneLine(c.description), categories: cats(c),
 			flags: apiFlags(c), code: c.signature ? await inlineLsl(c.signature.replace(/^\w+\s+/, '').replace(/\s*=\s*"?[0-9a-f]{8}-[0-9a-f-]{27}"?$/i, ''),{ link: false }) : undefined,
 		}))),
 	})));
+}
+
+/** Categories for constants, which rarely carry their own: those of the functions and events whose
+ * parameters (or results) take the constant's group, e.g. PrimParam → Prim Appearance, Prim Properties;
+ * a group no function names borrows from groups sharing its first word (PrimShiny → Prim*). */
+function constantCategories() {
+	const byGroup = new Map<string, Set<string>>(), byHead = new Map<string, Set<string>>();
+	const head = (s: string) => s.match(/^(?:[A-Z]+(?=[A-Z][a-z])|[A-Z][a-z]+)/)?.[0] ?? s;
+	const add = (m: Map<string, Set<string>>, k: string, v: string[]) => { const set = m.get(k) ?? m.set(k, new Set()).get(k)!; v.forEach(x => set.add(x)); };
+	for (const f of [...catalog.functions, ...catalog.events] as any[])
+		for (const p of [f, ...(f.parameters ?? [])])
+			for (const [k, v] of Object.entries(p)) if (k.endsWith('semantics') && typeof v === 'string') { add(byGroup, v, f.categories ?? []); add(byHead, head(v), f.categories ?? []); }
+	return (c: any) => {
+		const out = new Set<string>(c.categories ?? []);
+		for (const g of c.groups ?? []) for (const x of byGroup.get(g) ?? byHead.get(head(g)) ?? []) out.add(x);
+		return [...out];
+	};
 }

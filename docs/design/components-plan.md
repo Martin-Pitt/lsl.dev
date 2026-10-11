@@ -112,7 +112,7 @@ Every link to an API page (`/reference/functions/llFoo/` etc., and inline-LSL li
 energy, permission, experience). Readers can check an API without leaving the page.
 
 ### Authoring
-None. The cards apply globally. Opt out per link with `{/* nocard */}`-free syntax by adding
+None. The cards apply globally. Opt out per link by adding
 `data-nocard` through a tiny wrapper (`<NoCard>`), or per page with frontmatter
 `hoverCards: false`. Opt-outs should be rare.
 

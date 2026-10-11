@@ -26,7 +26,8 @@ export default function rehypeInlineLsl() {
 		const self: string | undefined = file?.data?.astro?.frontmatter?.title;
 		const jobs: Promise<void>[] = [];
 		const visit = (node: Node, inLink: boolean) => {
-			for (const child of node.children ?? []) {
+			// Iterate over a snapshot: unlinking below splices node.children.
+			for (const child of [...(node.children ?? [])]) {
 				if (isEl(child, 'pre')) continue;
 				if (isEl(child, 'code')) {
 					const kids = child.children ?? [];
@@ -45,7 +46,11 @@ export default function rehypeInlineLsl() {
 						const plain = IDENT.test(label) && kids.every(k => k.type === 'text');
 						const at = node.children!.indexOf(child);
 						if (plain) jobs.push(inlineLsl(label, { link: false }).then(html => { node.children!.splice(node.children!.indexOf(child), 1, ...fragment(html)); }));
-						else node.children!.splice(at, 1, ...kids);
+						else {
+							node.children!.splice(at, 1, ...kids);
+							// The unwrapped content still gets inline highlighting.
+							visit({ type: 'root', children: kids }, inLink);
+						}
 						continue;
 					}
 					if (API_HREF.test(href) && IDENT.test(label) && (child.children ?? []).every(k => k.type === 'text')) {

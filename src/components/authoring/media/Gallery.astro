@@ -9,11 +9,31 @@
  *   </Gallery>
  *
  * `label` names the group for screen readers (aria-label on the list).
+ *
+ * In the zoomed view, previous/next buttons (popovertarget to the neighbouring popover) and the
+ * Left/Right arrow keys (Home/End: first/last) move through the images. It wraps around: next on
+ * the last image goes to the first. The view shows "3 / 6" and its accessible name ends in
+ * "(3 of 6)". ./PageEnd.astro swaps the popovers (so they don't nest), handles the keys and keeps
+ * focus in the view; without JS the buttons still open the neighbour, on top of the current one.
  */
 interface Props { label?: string }
 const { label } = Astro.props;
-const html = await Astro.slots.render('default');
+let html = await Astro.slots.render('default');
 if (!/class="au-figure\b/.test(html)) throw new Error('<Gallery>: put <Figure zoom> children inside');
 if (/class="au-figure"/.test(html)) throw new Error('<Gallery>: every <Figure> inside a Gallery needs the zoom prop');
+const ids = [...html.matchAll(/<div popover id="(au-zoom-[^"]+)"/g)].map((m) => m[1]);
+const n = ids.length;
+const icon = (d: string) => `<svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
+if (n > 1) {
+	let i = 0, j = 0;
+	html = html.replace(/(<div popover id="au-zoom-[^"]+" class="au-zoom" role="dialog" aria-label=")([^"]*)"/g, (_, a, name) => `${a}${name} (${++i} of ${n})"`);
+	html = html.replaceAll('<!--au-zoom-nav-->', () => {
+		const prev = ids[(j + n - 1) % n], next = ids[(j + 1) % n];
+		j++;
+		return `<button type="button" class="au-zoom__prev" popovertarget="${prev}" popovertargetaction="show" aria-label="Previous image" title="Previous (Left arrow)">${icon('M10 3 5 8l5 5')}</button>`
+			+ `<button type="button" class="au-zoom__next" popovertarget="${next}" popovertargetaction="show" aria-label="Next image" title="Next (Right arrow)">${icon('M6 3l5 5-5 5')}</button>`
+			+ `<span class="au-zoom__pos" aria-hidden="true">${j} / ${n}</span>`;
+	});
+}
 ---
 <div class="au-gallery" role="group" aria-label={label}><div class="au-gallery__grid"><Fragment set:html={html} /></div></div>

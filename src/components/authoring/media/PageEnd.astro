@@ -1,8 +1,16 @@
 ---
 /**
  * Per-page script of the media batch, rendered once at the end of every page (../PageEnd.astro).
- * <Compare>: marks each comparison [data-js] (stacked mode) and copies its range value into --pos
- * (one delegated input listener). Without it the two images stay side by side.
+ * - <Compare>: marks each comparison [data-js] (stacked mode) and copies its range value into
+ *   --pos (one delegated input listener). Without it the two images stay side by side.
+ * - <Hotspots>: a tap on a marker whose note is open closes it (touch has no hover). Where
+ *   `interestfor` is missing: open the note on mouse/pen hover and keyboard focus, close it on
+ *   leave (200 ms, so the pointer can reach the note) and blur.
+ * - <Gallery> zoom: prev/next buttons and Left/Right/Home/End swap the open popover for its
+ *   neighbour (hide, then show; no nesting) and focus the same button in the new view. Opening a
+ *   gallery image focuses its next button, closing it focuses that image's thumbnail, and
+ *   Tab cycles through the view's buttons (close, previous, next), so focus stays inside.
  */
 ---
-<script is:inline>(()=>{const s=f=>{const r=f.querySelector('input');f.style.setProperty('--pos',r.value+'%');r.setAttribute('aria-valuetext',r.value+'% '+r.dataset.before)};document.querySelectorAll('.au-compare').forEach(f=>{f.dataset.js='';s(f)});addEventListener('input',e=>{const f=e.target.closest?.('.au-compare');f&&s(f)})})()</script>
+<script is:inline>(()=>{const d=document,s=f=>{const r=f.querySelector('input');f.style.setProperty('--pos',r.value+'%');r.setAttribute('aria-valuetext',r.value+'% '+r.dataset.before)};d.querySelectorAll('.au-compare').forEach(f=>{f.dataset.js='';s(f)});addEventListener('input',e=>{const f=e.target.closest?.('.au-compare');f&&s(f)})})()</script>
+<script is:inline>(()=>{let d=document,L=(t,f,c)=>d.addEventListener(t,f,c),u,t,m=e=>e.target.closest?.(".au-hotspot__marker"),q=b=>d.getElementById(b.getAttribute("popovertarget")),o=p=>p.matches(":popover-open");L("pointerdown",e=>u=e.pointerType,1);L("click",e=>{let b=m(e);if(b&&u=="touch"&&o(q(b))){e.preventDefault();q(b).hidePopover()}});if(!("interestForElement"in HTMLButtonElement.prototype)){let w=b=>{clearTimeout(t);try{q(b).showPopover({source:b})}catch{}},h=()=>{clearTimeout(t);t=setTimeout(()=>d.querySelectorAll(".au-hotspot__pop:popover-open").forEach(p=>p.matches(":hover")||p.hidePopover()),200)},n=e=>e.target.closest?.(".au-hotspot__pop");L("pointerover",e=>{if(e.pointerType=="touch")return;let b=m(e);b?w(b):n(e)&&clearTimeout(t)});L("pointerout",e=>e.pointerType!="touch"&&(m(e)||n(e))&&h());L("focusin",e=>{let b=m(e);b&&b.matches(":focus-visible")&&w(b)});L("focusout",e=>m(e)&&h())}let g=(z,p,c)=>{z.hidePopover();p.showPopover();p.querySelector(c).focus()};L("click",e=>{let b=e.target.closest?.(".au-zoom__prev,.au-zoom__next");if(b){e.preventDefault();g(b.closest(".au-zoom"),q(b),"."+b.className)}});L("keydown",e=>{let z=d.querySelector(".au-gallery .au-zoom:popover-open");if(!z)return;let a=[...z.closest(".au-gallery").querySelectorAll(".au-zoom")],i=a.indexOf(z),f=[...z.querySelectorAll("button")],k={ArrowLeft:i-1,ArrowRight:i+1,Home:0,End:a.length-1}[e.key];if(e.key=="Tab"){e.preventDefault();f[(f.indexOf(d.activeElement)+(e.shiftKey?f.length-1:1))%f.length].focus();return}if(k==null||a.length<2||e.altKey||e.ctrlKey||e.metaKey)return;e.preventDefault();g(z,a[(k+a.length)%a.length],e.key=="ArrowLeft"?".au-zoom__prev":".au-zoom__next")});L("toggle",e=>{let z=e.target;z.matches?.(".au-gallery .au-zoom")&&(e.newState=="open"?z.contains(d.activeElement)||z.querySelector(".au-zoom__next")?.focus():d.querySelector(".au-zoom:popover-open")||d.querySelector('.au-zoom__thumb[popovertarget="'+z.id+'"]').focus())},1)})()</script>

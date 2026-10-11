@@ -1,7 +1,143 @@
 /*
- * Styles for the asides batch. Owned by the asides batch agent; loaded site-wide through
- * ../authoring.css. Build on the tokens in ../shared/tokens.css (--au-*) rather than new palettes,
- * keep rules inside @layer authoring, and guard motion with prefers-reduced-motion.
+ * Styles for the asides batch, loaded site-wide through ../authoring.css (after Starlight's layers,
+ * so these win without !important). Built on ../shared/tokens.css (--au-*).
+ *
+ * 1. The global restyle of every aside: Starlight's own (:::note, :::tip, :::caution, :::danger and
+ *    <Aside>) and ours (Caveat, Limit, Gotcha, Performance), which reuse its markup. A left rule plus
+ *    a tint in the semantic colour. Note, Caveat and Limit are neutral gray-blue, tip and Performance
+ *    green, caution and Gotcha orange, danger red. Accent blue stays for links and interactive state.
+ * 2. Inline <Limit>, <LimitsTable> row targets, <Details>/<FAQ>, <Figure> and <Since>.
  */
 @layer authoring {
+	/* 1. Asides */
+	.starlight-aside {
+		--_c: var(--au-note);
+		/* Dark: a tint over the code surface depth; light: a tint over the page. */
+		--_bg: light-dark(color-mix(in oklab, var(--_c) 9%, var(--sl-color-bg)), color-mix(in oklab, var(--_c) 12%, var(--au-surface)));
+		/* --sl-color-white is the text colour in both themes, so this darkens in light and lightens in dark. */
+		--sl-color-asides-text-accent: color-mix(in oklab, var(--_c) 70%, var(--sl-color-white));
+		--sl-color-asides-border: var(--_c);
+		padding: .875rem 1rem;
+		border-inline-start: .25rem solid var(--_c);
+		border-radius: 0 var(--au-radius) var(--au-radius) 0;
+		background-color: var(--_bg);
+		color: var(--sl-color-text);
+	}
+	.starlight-aside--note { --_c: var(--au-note); }
+	.starlight-aside--tip { --_c: var(--au-tip); }
+	.starlight-aside--caution { --_c: var(--au-caution); }
+	.starlight-aside--danger { --_c: var(--au-danger); }
+	.starlight-aside__title {
+		font-size: var(--sl-text-base);
+		color: var(--sl-color-asides-text-accent);
+		svg { flex: none; }
+	}
+	.starlight-aside__title + .starlight-aside__content { margin-top: .375rem; }
+	/* Links keep the site's link colour inside every aside. */
+	.starlight-aside__content a:not(.au-limit) { color: var(--sl-color-text-accent); }
+	.starlight-aside__content code { background-color: color-mix(in oklab, var(--_c) 10%, transparent); }
+
+	/* 2. Inline <Limit>: the value, highlighted like a code figure, linking to its row. */
+	a.au-limit {
+		color: inherit;
+		text-decoration: underline dotted color-mix(in oklab, var(--sl-color-text-accent) 60%, transparent);
+		text-underline-offset: .2em;
+		&:hover, &:focus-visible { text-decoration-style: solid; text-decoration-color: var(--sl-color-text-accent); }
+	}
+	.au-limit__headline { font-weight: 600; }
+	.au-limit__headline a.au-limit { font-weight: 400; }
+
+	/* <LimitsTable>: the row an #id or <Limit> link lands on. */
+	.au-limits tr[id] { scroll-margin-block-start: calc(var(--sl-nav-height, 3.5rem) + 1rem); }
+	.au-limits tr:target > td {
+		background-color: var(--au-note-tint);
+		box-shadow: inset 0 1px var(--au-note), inset 0 -1px var(--au-note);
+	}
+	.au-limits tr:target > td:first-child { box-shadow: inset 3px 0 var(--sl-color-text-accent), inset 0 1px var(--au-note), inset 0 -1px var(--au-note); }
+
+	/* <Details> / <FAQ>: hairline-separated rows, a chevron that turns with [open], no fill. */
+	.au-details {
+		border-block-end: 1px solid var(--au-border);
+		& > summary {
+			display: flex;
+			gap: .5rem;
+			align-items: center;
+			padding-block: .625rem;
+			font-weight: 600;
+			color: var(--sl-color-white);
+			cursor: pointer;
+			list-style: none;
+			&::-webkit-details-marker { display: none; }
+			&:hover { color: var(--sl-color-text-accent); }
+			&:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; border-radius: var(--au-radius-sm); }
+		}
+		&:first-child, :not(.au-details) + & { border-block-start: 1px solid var(--au-border); }
+		&[open] > summary .au-details__chevron { rotate: 90deg; }
+		&:target > summary { color: var(--sl-color-text-accent); }
+	}
+	.au-details__chevron { flex: none; color: var(--au-text-muted); }
+	.au-details__body {
+		padding: 0 0 .875rem 1.5rem;
+		& > :first-child { margin-top: 0; }
+	}
+	.au-faq__title { font-weight: 600; font-size: var(--sl-text-h5); color: var(--sl-color-white); }
+	.au-faq .au-faq__title + .au-details { margin-top: .5rem; border-block-start: 1px solid var(--au-border); }
+	.sl-markdown-content .au-faq > .au-details + .au-details, .sl-markdown-content .au-details + .au-details { margin-top: 0; }
+	@media (prefers-reduced-motion: no-preference) {
+		.au-details__chevron { transition: rotate var(--au-duration) var(--au-ease); }
+		.au-details {
+			interpolate-size: allow-keywords;
+			&::details-content {
+				block-size: 0;
+				overflow: clip;
+				transition: block-size var(--au-duration) var(--au-ease), content-visibility var(--au-duration) allow-discrete;
+			}
+			&[open]::details-content { block-size: auto; }
+		}
+	}
+
+	/* <Figure>: a framed surface like a code block, with neutral padding. */
+	.au-figure {
+		container: au-figure / inline-size;
+		margin-inline: 0;
+	}
+	.au-figure__hint { margin: 0 0 .375rem; font-size: var(--sl-text-xs); color: var(--au-text-muted); }
+	.au-figure__frame {
+		display: grid;
+		place-items: center;
+		padding: 1rem;
+		border: 1px solid var(--au-border);
+		border-radius: var(--au-radius);
+		background: var(--au-surface);
+		img { max-inline-size: 100%; block-size: auto; border-radius: var(--au-radius-sm); }
+	}
+	@container au-figure (inline-size < 30rem) { .au-figure__frame { padding: .5rem; } }
+	.au-figure figcaption {
+		margin-top: .5rem; font-size: var(--sl-text-sm); color: var(--au-text-muted); text-align: center;
+		& > p { margin: 0; }
+	}
+
+	/* <Since>: a small outline badge; never the accent fill. */
+	.au-since { display: inline-flex; vertical-align: middle; }
+	.au-since__badge {
+		display: inline-flex;
+		margin: 0;
+		padding: .0625rem .4375rem;
+		border: 1px solid var(--au-border);
+		border-radius: 999px;
+		background: transparent;
+		color: var(--au-text-muted);
+		font: inherit;
+		font-size: var(--sl-text-xs);
+		font-weight: 500;
+		line-height: 1.5;
+		white-space: nowrap;
+	}
+	button.au-since__badge {
+		cursor: help;
+		&:hover, &:focus-visible { border-color: var(--sl-color-text-accent); color: var(--sl-color-text-accent); }
+		&:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
+	}
+	.au-since__note { font-weight: 400; }
+	:is(h1, h2, h3, h4) .au-since { margin-inline-start: .375rem; }
 }

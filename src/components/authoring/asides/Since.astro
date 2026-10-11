@@ -1,0 +1,19 @@
+---
+/**
+ * <Since date="YYYY-MM[-DD]" />: a small outline badge, "Since Nov 2022", in a <time datetime>.
+ * An optional note opens as a hint popover on hover or focus (interestfor) and on click (no JS).
+ *
+ *   ## llLinksetDataWrite <Since date="2022-11" />
+ *   <Since date="2022-11-04" note="Server 2022-11-04" />
+ */
+interface Props { date: string; note?: string }
+const { date, note } = Astro.props;
+const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(date ?? '');
+if (!m || +m[2] < 1 || +m[2] > 12 || (m[3] && (+m[3] < 1 || +m[3] > 31))) throw new Error(`<Since>: date must be YYYY-MM or YYYY-MM-DD (got "${date}")`);
+const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m[2] - 1];
+const text = `Since ${m[3] ? `${+m[3]} ` : ''}${month} ${m[1]}`;
+const uid = `au-since-${Math.random().toString(36).slice(2, 8)}`;
+---
+{note
+	? <span class="au-since"><button type="button" class="au-since__badge" popovertarget={uid} {...{ interestfor: uid }} style={`anchor-name: --${uid}`}><time datetime={date}>{text}</time></button><span id={uid} popover="hint" class="au-popover au-since__note" style={`position-anchor: --${uid}`}>{note}</span></span>
+	: <span class="au-since"><span class="au-since__badge"><time datetime={date}>{text}</time></span></span>}

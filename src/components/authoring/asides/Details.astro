@@ -1,0 +1,17 @@
+---
+/**
+ * <Details summary="…">: a native disclosure (<details>/<summary>), closed by default. Its id (the
+ * slug of the summary unless given) makes it deep-linkable: PageEnd.astro opens it on a #hash.
+ * Inside <FAQ exclusive>, it shares a `name` with its siblings, so one opens at a time.
+ *
+ *   <Details summary="Why does my timer drift?">Body in **Markdown**.</Details>
+ *   <Details summary="…" open id="timer-drift">…</Details>
+ */
+import { asideIcons } from './icons';
+
+interface Props { summary: string; open?: boolean; id?: string }
+const { summary, open = false } = Astro.props;
+if (!summary) throw new Error('<Details>: the summary prop is required');
+const id = Astro.props.id ?? summary.toLowerCase().replace(/<[^>]+>|[`*]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+---
+<details class="au-details" id={id} open={open}><summary><Fragment set:html={asideIcons.chevron} /><span class="au-details__summary">{summary}</span></summary><div class="au-details__body"><slot /></div></details>

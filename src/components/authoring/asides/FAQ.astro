@@ -1,0 +1,20 @@
+---
+/**
+ * <FAQ>: a group of <Details> items. With `exclusive`, the items share a `name`, so opening one
+ * closes the others (native <details name>; without support they open independently).
+ *
+ *   <FAQ title="Timers" exclusive>
+ *     <Details summary="Why does my timer drift?">…</Details>
+ *     <Details summary="Can I use llSleep instead?">…</Details>
+ *   </FAQ>
+ */
+interface Props { title?: string; exclusive?: boolean }
+const { title, exclusive = false } = Astro.props;
+let html = await Astro.slots.render('default');
+if (exclusive) {
+	const name = `faq-${Math.random().toString(36).slice(2, 8)}`;
+	// Only items without a name yet: a nested exclusive FAQ has already named its own.
+	html = html.replace(/<details class="au-details"(?![^>]*\sname=)/g, `<details class="au-details" name="${name}"`);
+}
+---
+<div class="au-faq" role="group" aria-label={title ?? 'Frequently asked questions'}>{title && <p class="au-faq__title">{title}</p>}<Fragment set:html={html} /></div>

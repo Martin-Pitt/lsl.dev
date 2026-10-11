@@ -1,0 +1,17 @@
+---
+/**
+ * <LimitsTable section="…" />: one section's table of the Limits dataset (src/data/limits.yaml),
+ * with the section's own columns and headers. Each row carries its limit id, so
+ * /reference/limits/#<id> (and <Limit id="…" />) lands on it. An unknown section fails the build.
+ *
+ *   <LimitsTable section="scripting" />
+ */
+import { limitSections, limitsIn, renderMarkdown, type LimitField } from './limits';
+
+interface Props { section: string }
+const { section } = Astro.props;
+const rows = limitsIn(section);
+const columns = Object.entries(limitSections.get(section)!.columns) as [LimitField, string][];
+const cells = await Promise.all(rows.map(row => Promise.all(columns.map(([field]) => row[field] ? renderMarkdown(row[field]!) : Promise.resolve('')))));
+---
+<table class="au-limits" data-limits-section={section}><thead><tr>{columns.map(([, header]) => <th>{header}</th>)}</tr></thead><tbody>{rows.map((row, r) => <tr id={row.id}>{cells[r].map(html => <td set:html={html} />)}</tr>)}</tbody></table>

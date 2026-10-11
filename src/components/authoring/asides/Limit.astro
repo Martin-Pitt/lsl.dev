@@ -1,0 +1,29 @@
+---
+/**
+ * <Limit>: a value from the Limits dataset (src/data/limits.yaml). An unknown id fails the build.
+ *
+ *   The chat range is <Limit id="communication-chat-distance" />.     inline: the value, linking to its row
+ *   <Limit id="scripting-max-active-listeners-per-script" note />     callout: label, value and the row's note
+ *   <Limit id="…" note title="Listeners">Extra Markdown, after the note.</Limit>
+ *
+ * Children are only allowed in the callout form (with `note`).
+ */
+import AsideBox from './AsideBox.astro';
+import { getLimit, limitHref, limitValue, renderMarkdown } from './limits';
+
+interface Props { id: string; note?: boolean; title?: string }
+const { id, note = false, title = 'Limit' } = Astro.props;
+const row = getLimit(id);
+const href = limitHref(id);
+const callout = note;
+if (!note && Astro.slots.has('default')) throw new Error(`<Limit id="${id}">: children need the callout form; add \`note\``);
+/** Links inside the value would nest inside ours, so they are unwrapped (their text stays). */
+const unlink = (html: string) => html.replace(/<a\b[^>]*>|<\/a>/g, '');
+const value = unlink(await renderMarkdown(limitValue(row)));
+const label = callout ? unlink(await renderMarkdown(row.label)) : '';
+const notes = callout && row.notes ? await renderMarkdown(row.notes, false) : '';
+const plainLabel = row.label.replace(/<[^>]+>/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*\\]/g, '');
+---
+{callout
+	? <AsideBox kind="limit" base="note" title={title}><p class="au-limit__headline"><span set:html={label} />: <a class="au-limit" href={href} set:html={value} /></p>{notes && <div class="au-limit__note" set:html={notes.startsWith('<p>') ? notes : `<p>${notes}</p>`} />}<slot /></AsideBox>
+	: <a class="au-limit" href={href} title={`${plainLabel} (Limits)`} set:html={value} />}

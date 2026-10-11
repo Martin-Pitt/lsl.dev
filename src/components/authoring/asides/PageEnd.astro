@@ -1,7 +1,9 @@
 ---
 /**
- * Per-page markup for the asides batch, rendered once at the end of every page (in the footer, via
- * ../PageEnd.astro). Owned by the asides batch agent. Use it for tiny shared inline scripts
- * (hover-card intent, details deep links); leave it empty when the batch needs nothing.
+ * Per-page script of the asides batch, rendered once at the end of every page (../PageEnd.astro).
+ * Deep links into <Details>: a closed <details> doesn't always open for a #hash inside it, so this
+ * opens every <details> around the target, on load and on hashchange (under 300 bytes).
+ * Without it, the content stays reachable by opening the item by hand.
  */
 ---
+<script is:inline>(()=>{const f=()=>{const t=location.hash&&document.getElementById(decodeURIComponent(location.hash.slice(1)));let d=t&&t.closest('details:not([open])');if(!d)return;for(;d;d=d.parentElement.closest('details'))d.open=true;t.scrollIntoView()};addEventListener('hashchange',f);f()})()</script>

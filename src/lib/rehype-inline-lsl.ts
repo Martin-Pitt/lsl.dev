@@ -13,7 +13,8 @@ import { fromHtml } from 'hast-util-from-html';
 import { inlineLsl, hasApiPage, apiHrefName } from './inline-lsl';
 
 type Node = { type: string; tagName?: string; name?: string; value?: string; properties?: Record<string, any>; attributes?: any[]; children?: Node[] };
-const API_HREF = /^\/(?:functions|events|constants)\/[A-Za-z_][A-Za-z0-9_]*\/$/;
+// API page links, optionally with a #section anchor.
+const API_HREF = /^\/(?:functions|events|constants)\/[A-Za-z_][A-Za-z0-9_]*\/(?:#.*)?$/;
 const IDENT = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 const isEl = (n: Node, tag: string) => (n.type === 'element' && n.tagName === tag) || ((n.type === 'mdxJsxTextElement' || n.type === 'mdxJsxFlowElement') && n.name === tag);

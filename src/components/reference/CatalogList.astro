@@ -149,6 +149,19 @@ class CatalogList extends HTMLElement {
 		for (const g of picks) g.addEventListener('click', e => { const b = (e.target as Element).closest<HTMLButtonElement>('button'); if (!b) return; const k = g.dataset.key!, v = pick[k] === b.dataset.v ? '' : b.dataset.v!; for (const o in pick) pick[o] = ''; pick[k] = v; update(); });
 		cloud?.addEventListener('click', e => { const b = (e.target as Element).closest<HTMLButtonElement>('button'); if (!b) return; cat = cat === b.dataset.v ? '' : b.dataset.v!; update(); });
 		if (state.size || cat || Object.values(pick).some(Boolean)) update(false);
+		// Preview: hovering or focusing a category, letter or prefix fades the visible rows it would filter out.
+		const unfade = () => { for (const r of rows) r.classList.remove('fade'); };
+		const preview = (e: Event) => {
+			const b = (e.target as Element).closest<HTMLButtonElement>('.cloud button, .pick button');
+			if (!b || b.disabled || b.getAttribute('aria-pressed') === 'true') return unfade();
+			const key = (b.closest('.pick') as HTMLElement | null)?.dataset.key, v = b.dataset.v!;
+			for (const r of rows) r.classList.toggle('fade', !r.hidden && !(key ? r.dataset[key] === v : (r.dataset.c ?? '').split(' ').includes(v)));
+		};
+		for (const g of [...picks, cloud].filter(Boolean) as HTMLElement[]) {
+			g.addEventListener('pointerover', preview); g.addEventListener('focusin', preview);
+			g.addEventListener('pointerleave', unfade); g.addEventListener('focusout', unfade);
+			g.addEventListener('click', unfade);
+		}
 		// Truncated descriptions show their full text on hover.
 		this.addEventListener('pointerover', e => { const d = (e.target as Element).closest?.<HTMLElement>('.d'); if (d && !d.title && d.scrollWidth > d.clientWidth) d.title = d.textContent!.trim(); });
 	}
@@ -171,6 +184,8 @@ if (!customElements.get('catalog-list')) customElements.define('catalog-list', C
 	:is(.pick, .cloud) button:hover { background: var(--sl-color-gray-6); }
 	:is(.pick, .cloud) button:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 1px; }
 	:is(.pick, .cloud) button[aria-pressed='true'] { border-color: var(--sl-color-accent); background: var(--sl-color-accent-low); color: var(--sl-color-text); font-weight: 600; }
+	catalog-list li.fade { opacity: .3; }
+	@media (prefers-reduced-motion: no-preference) { catalog-list li { transition: opacity .12s; } }
 	:is(.pick, .cloud) button:disabled { color: var(--sl-color-gray-5); cursor: default; background: none; }
 	.catalog-browser ul { list-style: none; margin: 0; padding: 0; }
 	.catalog-browser li { margin: 0; }

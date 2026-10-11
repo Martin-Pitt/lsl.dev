@@ -1,7 +1,7 @@
 name: Sync LSL Definitions
 
-# Refreshes data/sources/lsl_definitions.yaml from secondlife/lsl-definitions and
-# regenerates the catalog. Only the definitions repo is fetched; the wiki snapshot
+# Refreshes data/sources/lsl_definitions.yaml (and definitions-history.json, from the
+# repo's git history) from secondlife/lsl-definitions and regenerates the catalog. Only the definitions repo is fetched; the wiki snapshot
 # (data/sources/wiki-English.xml) is never refreshed automatically, because the
 # Second Life Wiki blocks automated requests.
 
@@ -32,13 +32,22 @@ jobs:
     - name: Install importer requirements
       run: pip install -r scripts/requirements.txt
 
-    - name: Download LSL definitions
+    # Full history: scripts/definitions-history.py derives per-API added/updated dates from it.
+    - name: Checkout LSL definitions
+      uses: actions/checkout@v6
+      with:
+        repository: secondlife/lsl-definitions
+        path: .lsl-definitions
+        fetch-depth: 0
+
+    - name: Copy LSL definitions
       run: |
-        curl -fL -o data/sources/lsl_definitions.yaml \
-          https://raw.githubusercontent.com/secondlife/lsl-definitions/main/lsl_definitions.yaml
-        curl -fL -o data/sources/definitions-LICENSE \
-          https://raw.githubusercontent.com/secondlife/lsl-definitions/main/LICENSE
+        cp .lsl-definitions/lsl_definitions.yaml data/sources/lsl_definitions.yaml
+        cp .lsl-definitions/LICENSE data/sources/definitions-LICENSE
         echo "LSL definitions file size: $(wc -c < data/sources/lsl_definitions.yaml) bytes"
+
+    - name: Derive added/updated dates from definitions history
+      run: python scripts/definitions-history.py --repo .lsl-definitions
 
     - name: Regenerate catalog
       run: python scripts/import-datasets.py
@@ -71,6 +80,7 @@ jobs:
 
           Changes:
           - Updated `data/sources/lsl_definitions.yaml` from secondlife/lsl-definitions
+          - Regenerated `data/sources/definitions-history.json` (added/updated dates) from its git history
           - Regenerated `src/data/catalog.json`, `src/data/wiki-html`, `data/derived` (including the raw wikitext in `data/derived/wiki-source`) and `data/reports`
           - Created MDX pages for new APIs only; existing pages are never rewritten
 
@@ -84,6 +94,7 @@ jobs:
         branch: auto-update-lsl-definitions
         add-paths: |
           data/sources
+          data/sources/definitions-history.json
           src/data
           src/content/docs/functions
           src/content/docs/events

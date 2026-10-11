@@ -36,6 +36,8 @@ function callable(e: any) {
 		godMode: d['god-mode'] === true,
 		categories: e.categories,
 		replaces: e.replaces,
+		added: e.added ?? undefined,
+		updated: e.updated ?? undefined,
 		...urls(apiHref(e.kind, e.name)),
 	});
 }
@@ -58,11 +60,12 @@ export function buildApi() {
 		source: {
 			definitions: { ...m.sources.definitions, url: DEFINITIONS_YAML, repo: DEFINITIONS_REPO },
 			wiki: { ...m.sources.wiki, latestRevision: m.latestWikiRevision },
+			definitionsHistory: m.definitionsHistory ? { commit: m.definitionsHistory.commit, commitDate: m.definitionsHistory.commitDate, baseline: m.definitionsHistory.baseline } : undefined,
 		},
 		counts: { functions: catalog.functions.length, events: catalog.events.length, constants: catalog.constants.length, constantGroups: constantGroups.length, categories: catalog.categories.length },
 		functions: catalog.functions.map(callable),
 		events: catalog.events.map(callable),
-		constants: catalog.constants.map((c: any) => compact({ name: c.name, type: c.type, value: c.value, description: c.description, groups: c.groups, replaces: c.replaces, ...urls(apiHref('constant', c.name)) })),
+		constants: catalog.constants.map((c: any) => compact({ name: c.name, type: c.type, value: c.value, description: c.description, groups: c.groups, replaces: c.replaces, added: c.added ?? undefined, updated: c.updated ?? undefined, ...urls(apiHref('constant', c.name)) })),
 		constantGroups,
 		categories: catalog.categories.map(c => compact({ id: c.id, label: c.label, functions: c.functions, events: c.events, constants: c.constants, url: abs(categoryLinkHref(c.id)) })),
 		deprecated: deprecatedItems().map(d => ({ ...d, status: `deprecated, use ${d.use}`, useUrl: abs(apiHref(d.kind, d.use)) })),

@@ -34,6 +34,26 @@ catalog without requiring Python or access to the original Windows download path
   constant values, enum relationships, and topic categories. Its SHA-256 is included
   in catalog metadata. The local snapshot does not prove server availability.
 - `definitions-LICENSE`: the definitions' MIT license, retained verbatim.
+- `definitions-history.json`: per-API `added` and `updated` dates derived from the
+  lsl-definitions git history by `scripts/definitions-history.py --repo <clone>` (the clone
+  needs full history). It analyses the upstream commit whose `lsl_definitions.yaml` blob has
+  the same sha256 as the snapshot here (falling back to HEAD with a warning) and records that
+  sha256 as `definitionsSha256`; the importer warns when it no longer matches.
+  - `baseline`: the commit that first added the YAML (f88cace, 2025-07-02). Items present
+    there get `added: null`: they existed at import and are not new.
+  - `added`: blame of the item's key line, cross-checked by a key-presence scan over every
+    version (the scan wins; mismatches, all from whole-block moves, are listed in
+    `blameDisagreements`).
+  - `updated`: the newest commit that changed the item's behaviour fingerprint: argument
+    count and types, return, sleep, energy, mono-sleep, requires-permission, experience,
+    linden-experience, god-mode, deprecated, private, slua-removed; for constants type,
+    value (numbers normalized), deprecated, private, slua-removed. Tooltips, categories,
+    `member-of` enum classification and argument renames are ignored, as are the baseline
+    and the item's own `added` commit. Dates are committer dates (UTC).
+  The importer copies `added`/`updated` onto each function, event and constant entry and
+  records the commit and baseline in `meta.definitionsHistory`; it works without the file.
+  `src/lib/recent.ts` `recentBadges(entry, now = buildDate)` turns them into NEW / U badges
+  (12-month window; NEW wins over U).
 - `categories.en.json`: human-readable category labels from the user's `slua.dev`.
 
 ### Local overlay (not upstream)
@@ -61,6 +81,7 @@ From the repository root:
 
 ```sh
 python -m pip install -r scripts/requirements.txt
+python scripts/definitions-history.py --repo ../lsl-definitions   # optional, needs a full clone
 python scripts/import-datasets.py
 python -m unittest discover -s scripts/lib -p 'test_*.py'
 ```

@@ -14,7 +14,11 @@ network access at build time.
 
 `api.json` has `schemaVersion` (bump it when fields change shape), `generated`, and `source` with
 the definitions file's sha256 and upstream URL. The bulky wiki metadata is left out. Fields that would be
-false or empty are omitted. Deprecated and private items have no pages, so they are not in the main lists.
+false or empty are omitted. Functions, events and constants carry `added` and `updated` (`YYYY-MM-DD`) from
+lsl-definitions git history when known: `added` is omitted for items that existed at the baseline import
+(`source.definitionsHistory.baseline`), and `updated` is the newest behaviour change (arguments and their types,
+return, sleep, energy, permission/experience flags, deprecated, constant type/value), never wording.
+See `data/sources/README.md`. Deprecated and private items have no pages, so they are not in the main lists.
 
 ## In the HTML
 

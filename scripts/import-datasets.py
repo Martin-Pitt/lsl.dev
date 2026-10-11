@@ -111,6 +111,11 @@ def main():
         OWN[id(record)]=dict(record['source'])
         text=get('text'); records.append((record,text)); by_title[key(title)]=(record,text)
         routes[title.replace('_',' ').casefold()]='/wiki/'+s+'/'
+    # Optional added/updated dates from scripts/definitions-history.py (lsl-definitions git history).
+    history_path=ROOT/'data/sources/definitions-history.json'
+    history=json.loads(history_path.read_text(encoding='utf8')) if history_path.exists() else None
+    if history and history.get('definitionsSha256')!=digest(args.definitions):
+        print('warning: data/sources/definitions-history.json was built for a different lsl_definitions.yaml; re-run scripts/definitions-history.py')
     catalog={'meta':{},'functions':[],'events':[],'constants':[],'categories':[],'wiki':[],'types':[],'controls':[],'enums':defs.get('enums',{})}
     excluded={}
     for plural,kind in [('functions','function'),('events','event'),('constants','constant'),('types','type'),('controls','control')]:
@@ -123,6 +128,9 @@ def main():
             signature=(ret+' ' if kind=='function' and ret!='void' else '')+name+'('+', '.join(p['type']+' '+p['name'] for p in params)+')' if kind in ('function','event') else (typ+' '+name+' = '+str(d.get('value','')) if kind=='constant' else name)
             entry={'name':name,'kind':kind,'slug':name,'description':d.get('tooltip','').replace('\\n','\n'),'signature':signature,'returnType':ret,'parameters':params,'categories':d.get('categories',[]),'definition':d,'wiki':None}
             if kind=='constant': entry.update(type=typ,value=d.get('value'),groups=d.get('member-of',[]))
+            if history and kind in ('function','event','constant'):
+                h=history.get(plural,{}).get(name) or {}
+                entry.update(added=h.get('added'),updated=h.get('updated'))
             catalog[plural].append(entry)
             if kind in ('function','event','constant'): routes[name.replace('_',' ').casefold()]='/'+plural+'/'+name+'/'
     renderer=Renderer(routes,{r['title'].replace('_',' ').casefold():(r,t) for r,t in records})
@@ -252,6 +260,7 @@ def main():
     for plural in ('functions','events','constants','types','controls'): catalog[plural].sort(key=lambda x:x['name'].lower())
     catalog['wiki'].sort(key=lambda x:x['title'].lower())
     catalog['meta']={'schemaVersion':1,'sourcePolicy':'Definitions are authoritative for signatures, parameter names and categories; sources.overlays lists lsl.dev-local category additions. Wiki text remains a historical community source; templates are partially rendered; source.sources lists every wiki page and template each page was built from, with its revision.','sources':{'wiki':{'file':args.wiki.name,'sha256':digest(args.wiki)},'supplements':[{'file':x.name,'sha256':digest(x)} for x in supplements],'definitions':{'file':args.definitions.name,'sha256':digest(args.definitions)},'overlays':[{'file':'data/overlays/categories.yaml','sha256':digest(overlay_path),'local':True,'note':'lsl.dev-local category overlay, not upstream data; adds category membership on top of the definitions','categories':overlay_report['categories']}]},'counts':{k:len(catalog[k]) for k in ('functions','events','constants','categories','wiki','types','controls')},'wikiLicense':'Creative Commons Attribution-ShareAlike 3.0','wikiLicenseUrl':'https://creativecommons.org/licenses/by-sa/3.0/','definitionsLicense':'MIT','latestWikiRevision':max(w['source']['timestamp'] for w in catalog['wiki'])}
+    if history: catalog['meta']['definitionsHistory']={'file':history_path.name,'sha256':digest(history_path),'commit':history['commit'],'commitDate':history['commitDate'],'baseline':history['baseline'],'note':'added/updated on functions, events and constants are dates (YYYY-MM-DD) from lsl-definitions git history; added = null means the item existed at the baseline import; updated counts behaviour changes only'}
     write_split(catalog)
     report={'counts':catalog['meta']['counts'],'excluded':excluded,'apiWithoutWiki':{k:[e['name'] for e in catalog[k] if not e['wiki']] for k in ('functions','events','constants')},'unexpandedTemplates':sorted(renderer.unknown),'referencedTitlesWithoutLocalRoute':sorted(renderer.missing),'deprecatedAliasesSkipped':skipped,'categoryOverlay':overlay_report}
     write_json(ROOT/'data/reports/import-report.json',report)

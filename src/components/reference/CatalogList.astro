@@ -46,19 +46,31 @@ const flagged = blocks ? blocks.flatMap(g => g.items) : rows;
 // a very long list (e.g. 122 constant groups) stays a compact select.
 const catCount = new Map<string, number>();
 for (const it of rows) for (const c of it.categories ?? []) catCount.set(c, (catCount.get(c) ?? 0) + 1);
-// Labels whose last word is shared by other categories are flipped ("Avatar Communication" →
-// "Communication, Avatar"), so related categories sort together A–Z. One-offs keep their wording.
-const lastWord = (l: string) => l.trim().split(/\s+/).pop()!.toLowerCase();
-const shared = new Map<string, number>();
-for (const c of filterCategories) { const w = lastWord(String(c.label)); shared.set(w, (shared.get(w) ?? 0) + 1); }
-for (const c of filterCategories) { const w = String(c.label).toLowerCase(); if (shared.has(w)) shared.set(w, shared.get(w)! + 1); }
-const cloudLabel = (l: string) => {
-	const words = l.trim().split(/\s+/);
-	return words.length > 1 && (shared.get(lastWord(l)) ?? 0) > 1 ? `${words.at(-1)}, ${words.slice(0, -1).join(' ')}` : l;
-};
-const catOptions = filterCategories.filter((c: any) => catCount.has(c.id))
-	.map((c: any) => ({ ...c, cloud: cloudLabel(String(c.label)) }))
-	.sort((a: any, b: any) => a.cloud.localeCompare(b.cloud));
+// Categories sharing a last word become one segmented group: "Avatar Communication" and "Script
+// Communication" → Communication [Avatar | Script]. A bare category of that name ("Media",
+// "Permissions") is the group's first segment; a few related one-offs are attached by hand (Chat goes
+// with Communication). Groups and single categories sort together A–Z by their head word.
+const ATTACH: Record<string, string> = { chat: 'Communication' };
+const words = (l: string) => l.trim().split(/\s+/);
+const lastWord = (l: string) => words(l).at(-1)!;
+const tally = new Map<string, number>();
+for (const c of filterCategories) { const w = lastWord(String(c.label)).toLowerCase(); tally.set(w, (tally.get(w) ?? 0) + 1); }
+const present = filterCategories.filter((c: any) => catCount.has(c.id));
+type Seg = { id: string; label: string };
+const cloudGroups = new Map<string, Seg[]>();
+for (const c of present) {
+	const label = String(c.label), w = words(label), head = ATTACH[c.id]
+		?? (w.length > 1 && (tally.get(lastWord(label).toLowerCase()) ?? 0) > 1 ? lastWord(label)
+		: [...tally.keys()].some(k => k === label.toLowerCase() && (tally.get(k) ?? 0) > 1) ? label : '');
+	const key = head || label;
+	const seg = { id: c.id, label: !head ? label : head === label ? head : ATTACH[c.id] ? label : w.slice(0, -1).join(' ') };
+	(cloudGroups.get(key) ?? cloudGroups.set(key, []).get(key)!).push(seg);
+}
+const catGroups = [...cloudGroups].map(([head, segs]) => ({
+	head, single: segs.length === 1 && segs[0].label === head,
+	segs: segs.sort((a, b) => (a.label === head ? -1 : b.label === head ? 1 : a.label.localeCompare(b.label))),
+})).sort((a, b) => a.head.localeCompare(b.head));
+const catOptions = present;
 const catCloud = catOptions.length > 0 && catOptions.length <= 80;
 const legend = BADGES.filter(b => flagged.some(it => it.flags?.some((f: any) => f.code === b.code)));
 const badges = (f?: { code: string }[]) => (f?.length ? f.map(x => x.code).join(' ') : undefined);
@@ -73,7 +85,9 @@ const cats = (c?: string[]) => (c?.length ? c.join(' ') : undefined);
 </div>
 {legend.length > 0 && <div class="legend" role="group" aria-label="Filter by badge"><span>Badges</span>{legend.map(b => <button type="button" data-b={b.code} data-state="off" data-label={`${b.code}: ${b.label}`} aria-label={`${b.code}: ${b.label}, filter: off`} title="Click: include"><b class="b" data-k={b.code}>{b.code}</b> {b.label}</button>)}<button type="button" class="clear" aria-label="Clear badge filters" hidden>× Clear</button></div>}
 {az && <div class="pick" role="group" aria-label="Filter by first letter" data-key="l">{letters.map(l => <button type="button" aria-pressed="false" data-v={l} disabled={!letterIds.has(l)} aria-label={`Starts with ${l.toUpperCase()}`}>{l.toUpperCase()}</button>)}</div>}
-{catCloud && <div class="cloud" role="group" aria-label={`Filter by ${filterLabel.toLowerCase()}`}><span>{filterLabel}</span>{catOptions.map((c: any) => <button type="button" aria-pressed="false" data-v={c.id}>{c.cloud}</button>)}</div>}
+{catCloud && <div class="cloud" role="group" aria-label={`Filter by ${filterLabel.toLowerCase()}`}><span>{filterLabel}</span>{catGroups.map(g => g.single
+	? <button type="button" aria-pressed="false" data-v={g.segs[0].id}>{g.head}</button>
+	: <span class="seg" role="group" aria-label={g.head}>{!g.segs.some(s => s.label === g.head) && <span class="seg-head">{g.head}</span>}{g.segs.map(s => <button type="button" aria-pressed="false" data-v={s.id} aria-label={s.label === g.head ? g.head : `${g.head}: ${s.label}`}>{s.label}</button>)}</span>)}</div>}
 {prefixes.length > 0 && <div class="pick prefix" role="group" aria-label="Filter by name prefix" data-key="p"><span>Prefix</span>{prefixes.map(([v, n]) => <button type="button" aria-pressed="false" data-v={v}>{v} <small>{n}</small></button>)}</div>}
 {blocks ? (
 	<div class="cl-groups" data-pagefind-ignore>{blocks.map(g => (
@@ -196,6 +210,13 @@ if (!customElements.get('catalog-list')) customElements.define('catalog-list', C
 	:is(.pick, .cloud) button:hover { background: var(--sl-color-gray-6); }
 	:is(.pick, .cloud) button:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 1px; }
 	:is(.pick, .cloud) button[aria-pressed='true'] { border-color: var(--sl-color-accent); background: var(--sl-color-accent-low); color: var(--sl-color-text); font-weight: 600; }
+	/* Segmented category groups: one joined pill, head label then segments. */
+	.cloud .seg { display: inline-flex; align-items: stretch; border: 1px solid var(--sl-color-hairline); border-radius: .35rem; overflow: hidden; }
+	.cloud .seg > * { border-radius: 0; }
+	.cloud .seg > * + * { border-inline-start: 1px solid var(--sl-color-hairline); }
+	.cloud .seg-head { display: inline-flex; align-items: center; padding: .15rem .35rem; color: var(--sl-color-gray-4); font-weight: 400; font-size: .92em; }
+	.cloud .seg > .seg-head + * { border-inline-start: 0; }
+	.cloud .seg button[aria-pressed='true'] { border-color: transparent; box-shadow: inset 0 0 0 1px var(--sl-color-accent); }
 	catalog-list li.fade { opacity: .3; }
 	@media (prefers-reduced-motion: no-preference) { catalog-list li { transition: opacity .12s; } }
 	:is(.pick, .cloud) button:disabled { color: var(--sl-color-gray-5); cursor: default; background: none; }

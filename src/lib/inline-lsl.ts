@@ -97,8 +97,8 @@ export async function enhanceHtml(html: string, opts: InlineOptions = {}): Promi
 			if (inner.includes('<')) return whole; // mixed markup stays as authored
 			return inlineLsl(unescapeHtml(inner), opts);
 		});
-		seg = await replaceAsync(seg, /<a href="(\/(?:functions|events|constants)\/[^"/#]+\/(?:#[^"]*)?)">([A-Za-z_][A-Za-z0-9_]*)<\/a>/g, async (_, href, name) =>
-			!hasApiPage(apiHrefName(href)!) ? inlineLsl(name, { link: false }) : `<a class="lsl-ref" href="${href}">${await inlineLsl(name, { link: false })}</a>`);
+		seg = await replaceAsync(seg, /<a href="(\/(?:functions|events|constants)\/[^"/#]+\/(?:#[^"]*)?)">([A-Za-z_][A-Za-z0-9_]*)<\/a>/g, async (whole, href, name) =>
+			name !== apiHrefName(href) ? whole : !hasApiPage(apiHrefName(href)!) ? inlineLsl(name, { link: false }) : `<a class="lsl-ref" href="${href}">${await inlineLsl(name, { link: false })}</a>`);
 		seg = await replaceAsync(seg, /<td>(\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*)<\/td>/g, async (whole, a, name, b) =>
 			IDENT.test(name) && apiMap.has(name) ? `<td>${a}${await inlineLsl(name, opts)}${b}</td>` : whole);
 		parts[i] = seg;

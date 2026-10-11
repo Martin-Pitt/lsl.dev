@@ -3,8 +3,9 @@
  *
  * - `code` outside `pre` (Markdown backticks, or an HTML <code> in MDX) is highlighted with the
  *   LSL grammar; API names inside it link to their pages (see src/lib/inline-lsl.ts).
- * - A link to an API page whose text is the API name, e.g. [llListen](/functions/llListen/),
- *   is rendered as highlighted code inside the link.
+ * - A link to an API page whose text is exactly that API's name, e.g. [llListen](/functions/llListen/)
+ *   (optionally with a #section), is rendered as highlighted code inside the link. Other link text,
+ *   e.g. [rezzing](/functions/llRezAtRoot/), stays a plain link.
  * - A link to an API that has no page (deprecated or private, e.g. llSetPrimitiveParams) is
  *   unlinked: only the highlighted code remains, so no dead link and no hover card.
  * The page's own name (its frontmatter title) is never linked.
@@ -15,7 +16,6 @@ import { inlineLsl, hasApiPage, apiHrefName } from './inline-lsl';
 type Node = { type: string; tagName?: string; name?: string; value?: string; properties?: Record<string, any>; attributes?: any[]; children?: Node[] };
 // API page links, optionally with a #section anchor.
 const API_HREF = /^\/(?:functions|events|constants)\/[A-Za-z_][A-Za-z0-9_]*\/(?:#.*)?$/;
-const IDENT = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 const isEl = (n: Node, tag: string) => (n.type === 'element' && n.tagName === tag) || ((n.type === 'mdxJsxTextElement' || n.type === 'mdxJsxFlowElement') && n.name === tag);
 const textOf = (n: Node): string => n.type === 'text' ? n.value ?? '' : (n.children ?? []).map(textOf).join('');
@@ -45,7 +45,7 @@ export default function rehypeInlineLsl() {
 					if (API_HREF.test(href) && !hasApiPage(apiHrefName(href)!)) {
 						// No page: replace the link by its content, highlighted when it is just the name.
 						const kids = child.children ?? [];
-						const plain = IDENT.test(label) && kids.every(k => k.type === 'text');
+						const plain = label === apiHrefName(href) && kids.every(k => k.type === 'text');
 						const at = node.children!.indexOf(child);
 						if (plain) jobs.push(inlineLsl(label, { link: false }).then(html => { node.children!.splice(node.children!.indexOf(child), 1, ...fragment(html)); }));
 						else {
@@ -55,7 +55,8 @@ export default function rehypeInlineLsl() {
 						}
 						continue;
 					}
-					if (API_HREF.test(href) && IDENT.test(label) && (child.children ?? []).every(k => k.type === 'text')) {
+					// Only when the link text is the linked API's own name, not just any single word ("rezzing").
+					if (API_HREF.test(href) && label === apiHrefName(href) && (child.children ?? []).every(k => k.type === 'text')) {
 						if (child.type === 'element') child.properties = { ...child.properties, className: ['lsl-ref'] };
 						jobs.push(inlineLsl(label, { link: false }).then(html => { child.children = fragment(html); }));
 						continue;

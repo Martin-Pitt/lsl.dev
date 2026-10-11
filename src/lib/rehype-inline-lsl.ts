@@ -5,7 +5,8 @@
  *   LSL grammar; API names inside it link to their pages (see src/lib/inline-lsl.ts).
  * - A link to an API page whose text is exactly that API's name, e.g. [llListen](/functions/llListen/)
  *   (optionally with a #section), is rendered as highlighted code inside the link. Other link text,
- *   e.g. [rezzing](/functions/llRezAtRoot/), stays a plain link.
+ *   e.g. [rezzing](/functions/llRezAtRoot/), stays a plain link; text that contains the name, e.g.
+ *   [llParticleSystem Caveats](…#caveats), gets just the name styled as code.
  * - A link to an API that has no page (deprecated or private, e.g. llSetPrimitiveParams) is
  *   unlinked: only the highlighted code remains, so no dead link and no hover card.
  * The page's own name (its frontmatter title) is never linked.
@@ -59,6 +60,22 @@ export default function rehypeInlineLsl() {
 					if (API_HREF.test(href) && label === apiHrefName(href) && (child.children ?? []).every(k => k.type === 'text')) {
 						if (child.type === 'element') child.properties = { ...child.properties, className: ['lsl-ref'] };
 						jobs.push(inlineLsl(label, { link: false }).then(html => { child.children = fragment(html); }));
+						continue;
+					}
+					// Mixed text that names the linked API, e.g. [llParticleSystem Caveats](…#caveats): style
+					// just the name as code and keep the rest as plain link text.
+					const name = API_HREF.test(href) ? apiHrefName(href) : undefined;
+					const kidsAllText = (child.children ?? []).every(k => k.type === 'text');
+					const at = name && kidsAllText ? label.search(new RegExp(`(?<![A-Za-z0-9_])${name}(?![A-Za-z0-9_])`)) : -1;
+					if (name && at >= 0) {
+						const before = label.slice(0, at), after = label.slice(at + name.length);
+						jobs.push(inlineLsl(name, { link: false }).then(html => {
+							child.children = [
+								...(before ? [{ type: 'text', value: before }] : []),
+								...fragment(html),
+								...(after ? [{ type: 'text', value: after }] : []),
+							];
+						}));
 						continue;
 					}
 					visit(child, true);

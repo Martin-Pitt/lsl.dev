@@ -26,6 +26,8 @@ and the menu adds **View as Markdown**, **Open in ChatGPT** and **Open in Claude
 - ChatGPT and Claude are plain links (`chatgpt.com/?q=…`, `claude.ai/new?q=…`) whose prompt
   points at the page's `.md` URL on `site`. They are never fetched at build time. Icons are inline
   SVG, so no remote assets are loaded, and `test:links` checks the `.md` links like other local links.
+- Every `.md` export has a one-line pointer to `/api.json` and `/llms.txt` under the title, and each
+  page with an export has `<link rel="alternate" type="text/markdown">` in its head (see [llms.md](llms.md)).
 - Without JavaScript the menu still opens (`<details>`), the links work and the copy buttons are hidden.
 
 ## Why not `starlight-contextual-menu`

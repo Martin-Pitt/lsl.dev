@@ -14,6 +14,8 @@ lockfile). `npm run <script>` still works but `npm install` is not a supported i
   page, the API components, and what `bun run generate:mdx` does and does not overwrite
 - [page-actions.md](page-actions.md): the copy/view Markdown and ChatGPT/Claude menu beside page
   titles, the `.md` endpoints, and why slua.dev's starlight-contextual-menu plugin is not used
+- [llms.md](llms.md): `/llms.txt`, `/api.json`, `/llms-full.txt`, robots.txt, the Markdown
+  alternate links, JSON-LD and `data-nosnippet`: what is generated, from where, and the choices made
 - [sidebar.md](sidebar.md): how the sidebar is configured, nested groups, and split groups whose
   label links to an overview page
 - [open-source-snippets.md](open-source-snippets.md): bringing open-source LSL code into guides:

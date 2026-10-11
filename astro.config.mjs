@@ -107,7 +107,11 @@ export default defineConfig({
 		favicon: '/favicon.svg',
 		// Logo: prototype 33 (Left Fold) mark; header uses its lockup with prototype 18's lettering.
 		logo: { light: './src/assets/wordmark.light.svg', dark: './src/assets/wordmark.dark.svg', replacesTitle: true, alt: 'lsl.dev' },
-		head: [{ tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } }],
+		head: [
+			{ tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } },
+			// Index for LLMs and tools (docs/llms.md). llms.txt defines no rel; alternate + text/plain + title is the common form.
+			{ tag: 'link', attrs: { rel: 'alternate', type: 'text/plain', title: 'llms.txt', href: '/llms.txt' } },
+		],
 		description: 'Unofficial developer documentation for the Linden Scripting Language (LSL) of Second Life.',
 		defaultLocale: 'root',
 		locales: { root: { label: 'English', lang: 'en' } },

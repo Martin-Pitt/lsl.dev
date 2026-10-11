@@ -8,7 +8,7 @@
  *
  *   <a href="/functions/llSay/" interestfor="hcx1a-llSay">…</a> … <a href="/functions/llSay/" interestfor="hcx1a-llSay">…</a>
  *   … <span popover="hint" id="hcx1a-llSay" class="au-popover hc" aria-hidden="true"
- *       data-pagefind-ignore>signature, one line, flags</span>
+ *       data-pagefind-ignore data-nosnippet>signature, one line, flags</span>
  *
  * The card anchors to whichever link opened it: an invoker is the popover's implicit anchor, so
  * position-area needs no anchor-name. The fallback script (PageEnd.astro) opens it with
@@ -91,7 +91,7 @@ const classes = (n: Node): string[] => {
 const FRAGMENT_TAGS = new Set(['LimitsTable', 'Limit']);
 const cardSpan = (id: string, children: Node[]): Node => ({
 	type: 'element', tagName: 'span',
-	properties: { popover: 'hint', id, className: ['au-popover', 'hc'], ariaHidden: 'true', dataPagefindIgnore: '' },
+	properties: { popover: 'hint', id, className: ['au-popover', 'hc'], ariaHidden: 'true', dataPagefindIgnore: '', dataNosnippet: '' },
 	children,
 });
 

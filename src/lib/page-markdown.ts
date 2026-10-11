@@ -11,6 +11,7 @@ import { catalog } from './catalog';
 import { selfClosingCases, pairedCases, transformCases, handledBy } from './page-markdown/index';
 import { SITE, pageHref } from './page-markdown/util';
 import type { Attrs, Context, MarkdownPage } from './page-markdown/types';
+import { MARKDOWN_HEADER } from './llms';
 
 export type { MarkdownPage } from './page-markdown/types';
 export const markdownHref = (id: string) => (id === 'index' ? '/index.md' : `/${id}/index.md`);
@@ -164,8 +165,10 @@ export function mdxToMarkdown(body: string, page: MarkdownPage): string {
 		.map((part, k) => (k % 2 ? part : part.replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n'))).join('').trim();
 }
 
-export function pageMarkdown(page: MarkdownPage): string {
+/** `header: false` leaves out the lsl.dev pointer line (used by /llms-full.txt, which concatenates pages). */
+export function pageMarkdown(page: MarkdownPage, { header = true } = {}): string {
 	const head = [`# ${page.data.title}`];
+	if (header) head.push(MARKDOWN_HEADER);
 	if (page.data.description) head.push(`> ${page.data.description}`);
 	const body = mdxToMarkdown(page.body ?? '', page);
 	return `${head.join('\n\n')}\n\n${body}\n\n---\n\nFrom lsl.dev: ${SITE}${pageHref(page.id)}\n`;

@@ -112,6 +112,13 @@ examples are kept verbatim from the original revisions, with no rewriting or sum
 The main API reference leaves out entries flagged `private` or `deprecated` for LSL.
 The wiki archive keeps every imported page, including historical ones.
 
+## Files for LLMs and tools
+
+The build also emits `/llms.txt` (index in the llmstxt.org format), `/api.json` (the public API in
+one minified file, with page and Markdown URLs), `/llms-full.txt` (every API page's Markdown),
+`/robots.txt`, a `text/markdown` alternate link on each MDX page and JSON-LD on API pages.
+See [docs/llms.md](docs/llms.md).
+
 ## Feature pages
 
 Feature pages are MDX in `src/content/docs/features/<slug>.mdx`: Markdown prose with links on

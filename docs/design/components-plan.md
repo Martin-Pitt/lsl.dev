@@ -305,22 +305,22 @@ before delegating to Starlight's Steps CSS. Authors can use either list syntax o
 - **Styling:** Starlight Steps styling. `:has(pre)` widens the step rail spacing.
 
 ### `<Linkset>`
-**Purpose:** show a linked object: the root and child prims, link numbers, names, and the
+**Purpose:** show a linked object: the root and child prims, their names, and the
 scripts and inventory in each prim.
 
 ```mdx
 <Linkset>
-- Door frame (root) | scripts: door.lsl | notecards: config
-  - Door panel #2
-  - Handle #3 | sounds: creak
+- **Door frame**: `door.lsl`, notecard `config`
+  - Door panel
+  - Handle: sound `creak`
 </Linkset>
 ```
 
 - **Syntax (decision 5):** a plain Markdown nested list, with no pipe DSL. The first item is
-  the root (link 1). Inventory, if needed, is ordinary nested list items or text such as
+  the root. Inventory, if needed, is ordinary nested list items or text such as
   "scripts: door.lsl". `(root)` is implied for the first item.
-- **Props:** `title?: string`, `numbers?: boolean = true` (link numbers shown in depth-first
-  order).
+- **Props:** `title?: string`. No link numbers (user decision): apart from the root they depend on
+  link order and aren't predictable, so prims are identified by name.
 - **Rendering:** a FileTree-style wrapper: the component renders its slot and styles the nested
   `<ul>`, adding prim icons and link-number pills with CSS (counters) or a light hast pass. No JS
   and no `role="tree"` (a tree role without keyboard support is worse than none).

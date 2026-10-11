@@ -1,20 +1,21 @@
 ---
 /**
- * A linked object as a styled nested Markdown list (FileTree-like). The first item is the root
- * (link 1); nested items are child prims, numbered depth-first with CSS counters. Inventory is
+ * A linked object as a styled nested Markdown list (FileTree-like). The first item is the root,
+ * marked "root"; nested items are child prims. Child link numbers depend on link order (the root
+ * is simply the last prim selected when linking), so they aren't shown. Inventory is
  * plain text on the prim's line; inline-code script names (`door.lsl`) link to the matching
  * <ScriptFile> anchor. No JS, and deliberately no role="tree" (no keyboard model yet).
  */
 import { onlyProps, scriptId } from './vocab';
 
-interface Props { title?: string; numbers?: boolean }
-onlyProps(Astro.props, ['title', 'numbers'], 'Linkset');
-const { title, numbers = true } = Astro.props;
+interface Props { title?: string }
+onlyProps(Astro.props, ['title'], 'Linkset');
+const { title } = Astro.props;
 let html = (await Astro.slots.render('default')).trim();
 if (!html.startsWith('<ul>')) throw new Error('Linkset: the content must be a single Markdown list');
 html = html.replace(/(<code[^>]*>)([^<]+\.(?:lsl|luau|slua))<\/code>/g, (_, open, n) => `<a href="#${scriptId(n)}">${open}${n}</code></a>`);
 ---
-<figure class="au-linkset" data-numbers={numbers ? 'on' : 'off'}>
+<figure class="au-linkset">
 	{title && <figcaption>{title}</figcaption>}
 	<Fragment set:html={html} />
 </figure>

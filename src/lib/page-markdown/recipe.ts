@@ -18,7 +18,7 @@ export default {
 	paired: {
 		Prerequisites: a => [`\n\n**${a.title ?? PREREQ_TITLE}**\n\n`, '\n\n'],
 		ScriptFile: a => [`\n\n**${a.name}**${a.in ? ` (put in: ${a.in})` : ''}\n\n`, '\n\n'],
-		Linkset: a => [a.title ? `\n\n**${a.title}** (linkset; the first item is the root, link 1)\n\n` : '\n\n', '\n\n'],
+		Linkset: a => [a.title ? `\n\n**${a.title}** (linkset; the first item is the root)\n\n` : '\n\n', '\n\n'],
 	},
 	transform: {
 		/** `1. **Title**` and the body indented under it, so its fences stay inside the list item. */

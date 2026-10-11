@@ -147,9 +147,10 @@ that always ask the owner, such as `PERMISSION_DEBIT`, get the caution colour.
 <Requires permissions={["PERMISSION_ATTACH"]} experience land="build" attachment />
 ```
 
-**`<Linkset>`**: a linked object as a plain nested Markdown list. The first item is the root
-(link 1); nested items are child prims, numbered depth-first (`numbers={false}` hides the
-numbers; `title` adds a caption). Don't write link numbers yourself. Put inventory as text on the
+**`<Linkset>`**: a linked object as a plain nested Markdown list. The first item is the root,
+marked "root"; nested items are child prims (`title` adds a caption). Child link numbers aren't
+shown: they depend on link order (the root is just the last prim selected when linking), so
+refer to prims by name instead. Put inventory as text on the
 prim's line; a script name in inline code with an `.lsl`, `.slua` or `.luau` extension links to the
 `<ScriptFile>` of that name, so only use the extension for scripts shown on the page.
 

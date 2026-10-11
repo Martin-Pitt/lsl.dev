@@ -143,7 +143,6 @@ export default defineConfig({
 				collapsed: true,
 				items: [
 					{ label: 'Overview', link: '/reference/', attrs: { 'data-sidebar-group-link': '' } },
-					{ label: 'Limits', link: '/reference/limits/', attrs: { class: 'is-priority' } },
 					{ label: 'Categories', collapsed: true, items: [{ label: 'All categories', link: '/categories/', attrs: { 'data-sidebar-group-link': '' } }, ...referenceCategories] },
 					{ label: 'Functions', link: '/functions/' },
 					{ label: 'Events', link: '/events/' },
@@ -157,6 +156,7 @@ export default defineConfig({
 					},
 					{ label: 'Types', collapsed: true, items: [{ autogenerate: { directory: 'types' } }] },
 					{ label: 'Flow control', collapsed: true, items: [{ autogenerate: { directory: 'controls' } }] },
+					{ label: 'Limits', link: '/reference/limits/' },
 				],
 			},
 			{ label: 'Features', collapsed: true, items: [{ label: 'Features Overview', link: '/features/', attrs: { 'data-sidebar-group-link': '' } }, ...featureItems] },

@@ -155,7 +155,14 @@ export default defineConfig({
 					{ label: 'Categories', collapsed: true, items: [{ label: 'All categories', link: '/categories/', attrs: { 'data-sidebar-group-link': '' } }, ...referenceCategories] },
 					{ label: 'Functions', link: '/functions/' },
 					{ label: 'Events', link: '/events/' },
-					{ label: 'Constants', link: '/constants/' },
+					{
+						label: 'Constants',
+						collapsed: true,
+						items: [
+							{ label: 'All constants', link: '/constants/', attrs: { 'data-sidebar-group-link': '' } },
+							{ label: 'Constant groups', link: '/constants/groups/' },
+						],
+					},
 					{ label: 'Limits', link: '/reference/limits/' },
 				],
 			},

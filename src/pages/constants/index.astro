@@ -1,11 +1,15 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import CatalogList from '../../components/reference/CatalogList.astro';
-import { catalog, apiHref } from '../../lib/catalog';
-const items=catalog.constants.map(e=>({title:e.name,description:e.description,href:apiHref(e.kind,e.name),categories:(e as any).groups||[]}));
-const groups=Object.keys(catalog.enums).filter(g=>catalog.constants.some(c=>((c as any).groups||[]).includes(g))).sort().map(id=>({id,label:id}));
+import { constantGroups } from '../../components/reference/catalog-items';
+import { catalog } from '../../lib/catalog';
+// `NAME = value` grouped by constant group (a constant in several groups is listed under its first);
+// the group filter matches every group. Descriptions show on hover.
+const groups = await constantGroups(catalog.constants);
+const filter = Object.keys(catalog.enums).filter(g => catalog.constants.some(c => ((c as any).groups || []).includes(g))).sort().map(id => ({ id, label: id }));
 ---
 <StarlightPage frontmatter={{title:'Constants',description:'Browse the current LSL constants reference.',editUrl:false}}>
-<p>Find LSL constants by name or by <a href="/constants/groups/">constant group</a>. Signatures and descriptions follow the current definitions; deprecated and private entries are excluded.</p>
-<CatalogList items={items} label="constants" filterCategories={groups} filterLabel="Group" filterAll="All groups"/>
+<div class="wide-page" hidden></div>
+<p>Find LSL constants by name, value or description, grouped by <a href="/constants/groups/">constant group</a>. Values follow the current definitions; deprecated and private entries are excluded. Hover a constant for its description.</p>
+<CatalogList groups={groups} label="constants" filterCategories={filter} filterLabel="Group" filterAll="All groups" az/>
 </StarlightPage>

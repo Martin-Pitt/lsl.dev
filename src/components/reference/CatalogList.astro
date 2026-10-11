@@ -1,23 +1,221 @@
 ---
-const { items, label = 'entries', filterCategories = [], filterLabel = 'Category', filterAll = 'All categories' } = Astro.props;
+/**
+ * Dense, filterable reference list (functions, events, constants, category pages).
+ *
+ * Rows (`items`): one line per entry, a subgrid of signature | one-line description | flag chips.
+ *   item: { title, href, code? (highlighted HTML, unlinked), description?, descriptionHtml?, hover? (link title), kind?,
+ *           flags?: { code, title }[] (badges), categories?: string[], letter? }
+ * Groups (`groups`): headed multi-column blocks of `NAME = value` (constants), description on hover.
+ *   group: { id, label, href?, letter?, items: { title, href, code?, description?, categories? }[] }
+ *
+ * `az`: A–Z letter filter (single-select, ?letter=); the first entry (or group) of each letter keeps id="from-<letter>" (the landing
+ * page links  #from-a, #from-l, #from-t). Token colours are compacted into shared classes (compact-lsl.ts).
+ * The list body is left out of Pagefind: every entry has its own indexed page.
+ */
+import { styleRegistry } from './compact-lsl';
+import { BADGES } from './catalog-items';
+const { items = [], groups, label = 'entries', filterCategories = [], filterLabel = 'Category', filterAll = 'All categories', az = false } = Astro.props;
+const reg = styleRegistry();
+const letterIds = new Set<string>();
+const anchor = (letter?: string) => { if (!az || !letter || letterIds.has(letter)) return undefined; letterIds.add(letter); return `from-${letter}`; };
+const rows = (items as any[]).map(it => ({ ...it, id: it.anchor ?? anchor(it.letter), code: it.code ? reg.compact(it.code) : undefined }));
+const blocks = (groups as any[] | undefined)?.map(g => ({ ...g, id: anchor(g.letter), items: g.items.map((it: any) => ({ ...it, code: it.code ? reg.compact(it.code) : undefined })) }));
+const total = blocks ? blocks.reduce((n, g) => n + g.items.length, 0) : rows.length;
+const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const css = reg.css('.catalog-browser');
+// Legend of the badges this list uses; each legend badge toggles a filter to its entries.
+// Name prefixes (first CamelCase word after ll) shared by at least 5 entries, at most 14, by count.
+const prefixCount = new Map<string, number>();
+for (const it of rows) if (it.prefix) prefixCount.set(it.prefix, (prefixCount.get(it.prefix) ?? 0) + 1);
+const prefixes = [...prefixCount].filter(([, n]) => n >= 5).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])).slice(0, 14);
+const flagged = blocks ? blocks.flatMap(g => g.items) : rows;
+const legend = BADGES.filter(b => flagged.some(it => it.flags?.some((f: any) => f.code === b.code)));
+const badges = (f?: { code: string }[]) => (f?.length ? f.map(x => x.code).join(' ') : undefined);
+const cats = (c?: string[]) => (c?.length ? c.join(' ') : undefined);
 ---
-<catalog-list class="catalog-browser">
-<div class="catalog-tools"><label><span>Find {label}</span><input type="search" placeholder={`Search ${label}…`} autocomplete="off" /></label>{filterCategories.length>0 && <label><span>{filterLabel}</span><select><option value="">{filterAll}</option>{filterCategories.map((c:any)=><option value={c.id}>{c.label}</option>)}</select></label>}</div>
-<p class="result-count" role="status" aria-live="polite">{items.length} {label}</p>
-<ul class="catalog-list">{items.map((item:any)=><li id={item.anchor} data-search={`${item.title} ${item.description||''}`.toLowerCase()} data-categories={(item.categories||[]).join(' ')}><a href={item.href}>{item.titleHtml ? <span class="item-title item-sig" set:html={item.titleHtml}/> : <span class="item-title">{item.title}</span>}{item.kind && <span class="item-kind">{item.kind}</span>}</a>{item.descriptionHtml ? <p set:html={item.descriptionHtml}/> : item.description && <p>{item.description}</p>}</li>)}</ul>
+<catalog-list class="catalog-browser not-content">
+{css && <style is:inline set:html={css}></style>}
+<div class="catalog-tools">
+	<label class="find"><span>Find {label}</span><input type="search" placeholder={`Search ${total} ${label}…`} autocomplete="off" /></label>
+	{filterCategories.length > 0 && <label><span>{filterLabel}</span><select><option value="">{filterAll}</option>{filterCategories.map((c: any) => <option value={c.id}>{c.label}</option>)}</select></label>}
+	<p class="result-count" role="status" aria-live="polite">{total} {label}</p>
+</div>
+{legend.length > 0 && <div class="legend" role="group" aria-label="Filter by badge"><span>Badges</span>{legend.map(b => <button type="button" data-b={b.code} data-state="off" data-label={`${b.code}: ${b.label}`} aria-label={`${b.code}: ${b.label}, filter: off`} title="Click: include"><b class="b" data-k={b.code}>{b.code}</b> {b.label}</button>)}<button type="button" class="clear" aria-label="Clear badge filters" hidden>× Clear</button></div>}
+{az && <div class="pick" role="group" aria-label="Filter by first letter" data-key="l">{letters.map(l => <button type="button" aria-pressed="false" data-v={l} disabled={!letterIds.has(l)} aria-label={`Starts with ${l.toUpperCase()}`}>{l.toUpperCase()}</button>)}</div>}
+{prefixes.length > 0 && <div class="pick prefix" role="group" aria-label="Filter by name prefix" data-key="p"><span>Prefix</span>{prefixes.map(([v, n]) => <button type="button" aria-pressed="false" data-v={v}>{v} <small>{n}</small></button>)}</div>}
+{blocks ? (
+	<div class="cl-groups" data-pagefind-ignore>{blocks.map(g => (
+		<section id={g.id}>
+			<h2>{g.href ? <a href={g.href}>{g.label}</a> : g.label} <small>{g.items.length}</small></h2>
+			<ul>{g.items.map((it: any) => <li data-c={cats(it.categories)} data-b={badges(it.flags)} data-l={az ? g.letter : undefined}><a href={it.href} title={it.description}>{it.code ? <Fragment set:html={it.code} /> : <code>{it.title}</code>}</a>{it.flags?.map((f: any) => <> <b class="b" data-k={f.code} title={f.title}>{f.code}<span class="sr-only"> ({f.title})</span></b></>)}</li>)}</ul>
+		</section>
+	))}</div>
+) : (
+	<ul class:list={["cl-rows", { "sig-only": !rows.some(it => it.description || it.descriptionHtml), gutter: rows.some(it => it.type) }]} data-pagefind-ignore>{rows.map(it => (
+		<li id={it.id} data-c={cats(it.categories)} data-b={badges(it.flags)} data-l={az ? it.letter : undefined} data-p={prefixes.some(([v]) => v === it.prefix) ? it.prefix : undefined}>{it.type && <span class="t">{it.type}</span>}<a href={it.href} title={it.hover}>{it.code ? <Fragment set:html={it.code} /> : <code>{it.title}</code>}</a>{it.descriptionHtml ? <span class="d" set:html={it.descriptionHtml} /> : it.description && <span class="d">{it.description}</span>}{(it.kind || it.flags?.length > 0) ? <span class="f">{it.kind && <span class="k">{it.kind}</span>}{it.flags?.map((f: any) => <b class="b" data-k={f.code} title={f.title}>{f.code}<span class="sr-only"> ({f.title})</span></b>)}</span> : null}</li>
+	))}</ul>
+)}
 <p class="no-results" hidden>No matching entries. Try a different term or filter.</p>
 </catalog-list>
 <script>
+// Filters: search text (row text plus link title), category select, and tri-state badge toggles
+// (off → include → exclude), combined with AND. Badge state is kept in ?include=S,P&exclude=G.
+const STATES = ['off', 'include', 'exclude'];
 class CatalogList extends HTMLElement {
- connectedCallback(){
-  if(this.dataset.ready)return;this.dataset.ready='true';
-  const input=this.querySelector('input')!;const select=this.querySelector('select');const rows=Array.from(this.querySelectorAll<HTMLLIElement>('li'));const status=this.querySelector('[role="status"]')!;const empty=this.querySelector<HTMLElement>('.no-results')!;
-  const update=()=>{const terms=input.value.toLowerCase().trim().split(/\s+/).filter(Boolean);const category=select?.value;let count=0;for(const row of rows){const match=terms.every(t=>row.dataset.search!.includes(t))&&(!category||row.dataset.categories!.split(' ').includes(category));row.hidden=!match;if(match)count++;}status.textContent=`${count} of ${rows.length} entries`;empty.hidden=count>0;};
-  input.addEventListener('input',update);select?.addEventListener('change',update);
- }
+	connectedCallback() {
+		if (this.dataset.ready) return; this.dataset.ready = 'true';
+		const $ = (q: string) => this.querySelector<any>(q), $$ = (q: string) => Array.from(this.querySelectorAll<any>(q));
+		const input: HTMLInputElement = $('input'), select: HTMLSelectElement | null = $('select'), status = $('[role="status"]'), empty = $('.no-results'), clear = $('.clear');
+		const rows: HTMLLIElement[] = $$('li'), sections: HTMLElement[] = $$('section'), buttons: HTMLButtonElement[] = $$('.legend [data-b]');
+		const state = new Map<string, number>(), url = new URL(location.href);
+		// Letter and prefix: one mutually exclusive single-select (?letter=s or ?prefix=Set); a second click turns it off.
+		const picks: HTMLElement[] = $$('.pick'), pick: Record<string, string> = {}, param = { l: 'letter', p: 'prefix' } as Record<string, string>;
+		for (const g of picks) pick[g.dataset.key!] = url.searchParams.get(param[g.dataset.key!]) ?? '';
+		if (pick.l && pick.p) pick.l = '';
+		for (const [i, key] of [[1, 'include'], [2, 'exclude']] as const) for (const b of url.searchParams.get(key)?.split(',') ?? []) state.set(b, i);
+		let text: string[] | undefined;
+		const update = (sync = true) => {
+			text ??= rows.map(r => `${r.textContent} ${r.querySelector('a')?.title ?? ''}`.toLowerCase());
+			const terms = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean), category = select?.value;
+			let count = 0;
+			rows.forEach((row, i) => {
+				const has = (row.dataset.b ?? '').split(' ');
+				const match = terms.every(t => text![i].includes(t)) && (!category || (row.dataset.c ?? '').split(' ').includes(category))
+					&& Object.entries(pick).every(([k, v]) => !v || row.dataset[k] === v)
+					&& [...state].every(([b, s]) => !s || (s === 1) === has.includes(b));
+				row.hidden = !match; if (match) count++;
+			});
+			for (const s of sections) s.hidden = !s.querySelector('li:not([hidden])');
+			const badges = [...state.values()].some(Boolean), active = terms.length > 0 || !!category || badges || Object.values(pick).some(Boolean);
+			for (const g of picks) for (const b of g.querySelectorAll<HTMLButtonElement>('button')) b.setAttribute('aria-pressed', String(b.dataset.v === pick[g.dataset.key!]));
+			for (const b of buttons) { const s = STATES[state.get(b.dataset.b!) ?? 0]; b.dataset.state = s; b.setAttribute('aria-label', `${b.dataset.label}, filter: ${s}`); b.title = `Click: ${['include', 'exclude', 'clear'][STATES.indexOf(s)]}`; }
+			status.textContent = active ? `${count} of ${rows.length} entries` : `${rows.length} entries`;
+			empty.hidden = count > 0; if (clear) clear.hidden = !badges;
+			if (sync) {
+				for (const [i, key] of [[1, 'include'], [2, 'exclude']] as const) { const v = [...state].filter(([, s]) => s === i).map(([b]) => b).join(','); v ? url.searchParams.set(key, v) : url.searchParams.delete(key); }
+				for (const k in pick) pick[k] ? url.searchParams.set(param[k], pick[k]) : url.searchParams.delete(param[k]);
+				history.replaceState(history.state, '', url.pathname + url.search.replace(/%2C/g, ',').replace(/%21/g, '!') + location.hash);
+			}
+		};
+		const cycle = (b: HTMLButtonElement, step: number) => { state.set(b.dataset.b!, ((state.get(b.dataset.b!) ?? 0) + step + 3) % 3); update(); };
+		for (const b of buttons) {
+			b.addEventListener('click', e => cycle(b, e.shiftKey ? -1 : 1));
+			b.addEventListener('contextmenu', e => { e.preventDefault(); cycle(b, -1); });
+		}
+		// Clear resets the badge filters (and their URL params) only; text and category stay.
+		clear?.addEventListener('click', () => { state.clear(); update(); buttons[0]?.focus(); });
+		input.addEventListener('input', () => update(false)); select?.addEventListener('change', () => update(false));
+		for (const g of picks) g.addEventListener('click', e => { const b = (e.target as Element).closest<HTMLButtonElement>('button'); if (!b) return; const k = g.dataset.key!, v = pick[k] === b.dataset.v ? '' : b.dataset.v!; for (const o in pick) pick[o] = ''; pick[k] = v; update(); });
+		if (state.size || Object.values(pick).some(Boolean)) update(false);
+		// Truncated descriptions show their full text on hover.
+		this.addEventListener('pointerover', e => { const d = (e.target as Element).closest?.<HTMLElement>('.d'); if (d && !d.title && d.scrollWidth > d.clientWidth) d.title = d.textContent!.trim(); });
+	}
 }
-if(!customElements.get('catalog-list'))customElements.define('catalog-list',CatalogList);
+if (!customElements.get('catalog-list')) customElements.define('catalog-list', CatalogList);
 </script>
 <style>
-.catalog-browser{display:block}.catalog-tools{display:flex;gap:1rem;align-items:end;margin:1.7rem 0 .5rem;flex-wrap:wrap}.catalog-tools label{flex:1;min-width:12rem}.catalog-tools span{display:block;font-size:.8rem;font-weight:600;margin-bottom:.35rem}.catalog-tools input,.catalog-tools select{width:100%;padding:.8rem;border:1px solid var(--sl-color-gray-4);border-radius:.5rem;background:var(--sl-color-bg);color:var(--sl-color-text);font:inherit}.result-count{font-size:.8rem;color:var(--sl-color-gray-3)}.catalog-list{list-style:none!important;padding:0!important}.catalog-list li{padding:1rem 0;border-bottom:1px solid var(--sl-color-hairline);margin:0}.catalog-list li[hidden]{display:none}.catalog-list a{display:flex;gap:1rem;align-items:baseline;text-decoration:none}.item-title{font-family:var(--sl-font-mono);font-size:.95rem}.item-sig :global(code){font-size:.9rem;white-space:normal;background:none;padding:0}.item-kind{font-size:.7rem;color:var(--sl-color-gray-3);margin-left:auto}.catalog-list p{margin:.25rem 0 0;font-size:.87rem;line-height:1.55;color:var(--sl-color-gray-2)}
+	.catalog-browser { display: block; container-type: inline-size; margin-top: 1.25rem; }
+	.catalog-tools { display: flex; gap: .5rem 1rem; align-items: end; flex-wrap: wrap; }
+	.catalog-tools label { flex: 1 1 12rem; }
+	.catalog-tools .find { flex-grow: 2; }
+	.catalog-tools span { display: block; font-size: var(--sl-text-xs); font-weight: 600; margin-bottom: .2rem; }
+	.catalog-tools input, .catalog-tools select { width: 100%; padding: .4rem .6rem; border: 1px solid var(--sl-color-gray-4); border-radius: .4rem; background: var(--sl-color-bg); color: var(--sl-color-text); font: inherit; font-size: var(--sl-text-sm); }
+	.result-count { flex: 0 0 auto; margin: 0 0 .45rem; font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); }
+	.pick { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem; margin: .4rem 0 0; font-size: var(--sl-text-xs); }
+	.pick > span { font-weight: 600; color: var(--sl-color-gray-2); margin-inline-end: .35rem; }
+	.pick button { min-width: 1.6rem; padding: .15rem .35rem; border: 1px solid transparent; border-radius: .3rem; background: none; color: var(--sl-color-text-accent); font: inherit; font-family: var(--__sl-font-mono); cursor: pointer; }
+	.pick.prefix button { font-family: inherit; }
+	.pick small { color: var(--sl-color-gray-3); font-size: .9em; }
+	.pick button:hover { background: var(--sl-color-gray-6); }
+	.pick button:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 1px; }
+	.pick button[aria-pressed='true'] { border-color: var(--sl-color-accent); background: var(--sl-color-accent-low); color: var(--sl-color-text); font-weight: 600; }
+	.pick button:disabled { color: var(--sl-color-gray-5); cursor: default; background: none; }
+	.catalog-browser ul { list-style: none; margin: 0; padding: 0; }
+	.catalog-browser li { margin: 0; }
+	.catalog-browser li[hidden], .catalog-browser section[hidden] { display: none; }
+	.catalog-browser :global(code) { font-size: inherit; background: none; padding: 0; border: 0; white-space: normal; }
+	.catalog-browser a { text-decoration: none; }
+	.catalog-browser a:hover :global(code), .catalog-browser a:focus-visible :global(code) { text-decoration: underline; text-decoration-color: var(--sl-color-text-accent); text-underline-offset: .2em; }
+	[id^='from-'] { scroll-margin-top: calc(var(--sl-nav-height, 3.5rem) + 2.5rem); }
+
+	/* Rows: signature | description | flags, aligned across rows through a subgrid. */
+	.cl-rows { display: grid; grid-template-columns: fit-content(58%) minmax(0, 1fr) auto; column-gap: 1rem; margin-top: .25rem !important; font-size: var(--sl-text-sm); line-height: 1.45; }
+	.cl-rows li { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: baseline; padding: .2rem .25rem; border-bottom: 1px solid var(--sl-color-hairline); }
+	.cl-rows li:hover { background: var(--sl-color-gray-7, var(--sl-color-gray-6)); }
+	.cl-rows > li > a { font-family: var(--__sl-font-mono); font-size: .8rem; overflow-wrap: anywhere; }
+	.cl-rows .d { grid-column: 2; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--sl-color-gray-2); font-size: var(--sl-text-xs); }
+	.cl-rows .d :global(code) { font-size: .95em; white-space: nowrap; }
+	.cl-rows .f { grid-column: 3; display: flex; gap: .25rem; justify-content: end; }
+	.legend { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem .4rem; margin: .5rem 0 0; font-size: var(--sl-text-xs); color: var(--sl-color-gray-2); }
+	.legend > span { font-weight: 600; margin-inline-end: .2rem; }
+	/* Legend toggles. off = the plain badge and label; include = squircle; exclude = gentle scoop, badge
+	   greyed. 	   Without corner-shape a glyph and strike-through carry the state; the aria-label names it either way. */
+	.legend button { --fill: transparent; --line: transparent; --shape: superellipse(1); display: inline-flex; align-items: center; gap: .3rem; padding: .1rem .45rem .1rem .2rem; border: 1px solid var(--line); border-radius: .5rem; corner-shape: var(--shape); background: var(--fill); color: inherit; font: inherit; cursor: pointer; transition: background-color .08s, border-color .08s; }
+	.legend button:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 2px; }
+	.legend [hidden] { display: none; }
+	.legend [data-b]:hover { filter: brightness(1.08); }
+	.legend [data-state='off']:hover { --fill: var(--sl-color-gray-6); }
+	.legend [data-state='include'] { --shape: squircle; border-radius: .7rem; }
+	.legend [data-state='exclude'] { --shape: scoop; border-radius: .3rem; color: var(--sl-color-gray-2); }
+	.legend [data-state='exclude'] .b { --b: var(--sl-color-gray-3); --bt: var(--sl-color-gray-2); }
+	/* Fills: include and exclude share one oklch lightness, close to the page; include takes the badge hue,
+	   exclude a neutral slate. */
+	.legend { --lc: .32; }
+	:root[data-theme='light'] .legend { --lc: .95; }
+	.legend [data-state='include'] { --fill: oklch(from var(--b) var(--lc) calc(c * .35) h); --line: color-mix(in oklab, var(--b) 45%, transparent); }
+	.legend [data-state='exclude'] { --fill: oklch(var(--lc) .01 250); --line: oklch(from var(--sl-color-gray-3) l .015 250 / .6); }
+	@supports not (corner-shape: scoop) {
+		.legend [data-state]:not([data-state='off'])::before { width: .7rem; font-weight: 700; text-align: center; }
+		.legend [data-state='include']::before { content: '✓'; color: var(--bt, var(--b)); }
+		.legend [data-state='exclude']::before { content: '✕'; }
+		.legend [data-state='exclude'] { text-decoration: line-through; }
+	}
+	.legend .clear { margin-inline-start: auto; padding: .1rem .4rem; color: var(--sl-color-gray-3); }
+	.legend .clear:is(:hover, :focus-visible) { --fill: var(--sl-color-gray-6); color: var(--sl-color-text); }
+	@media (prefers-reduced-motion: reduce) { .legend button { transition: none; } }
+	/* Badge colours: reusable --au-badge-* tokens (src/styles/custom.css); tint and border mix from the text colour. */
+	.b { --b: var(--sl-color-gray-2); display: inline-block; min-width: 1.5rem; padding: 0 .25rem; border: 1px solid color-mix(in oklab, var(--b) 55%, transparent); border-radius: .25rem; background: color-mix(in oklab, var(--b) 18%, transparent); color: var(--bt, var(--b)); font: 700 .66rem/1.45 var(--__sl-font-mono); text-align: center; white-space: nowrap; }
+	.legend button { --b: var(--sl-color-gray-2); }
+	[data-k='X'], [data-b='X'] { --b: var(--au-badge-x); --bt: var(--au-badge-x-text); }
+	[data-k='LX'], [data-b='LX'] { --b: var(--au-badge-lx); --bt: var(--au-badge-lx-text); }
+	[data-k='G'], [data-b='G'] { --b: var(--au-badge-g); --bt: var(--au-badge-g-text); }
+	[data-k='S'], [data-b='S'] { --b: var(--au-badge-s); --bt: var(--au-badge-s-text); }
+	[data-k='P'], [data-b='P'] { --b: var(--au-badge-p); --bt: var(--au-badge-p-text); }
+	[data-k='!SL'], [data-b='!SL'] { --b: var(--au-badge-nosl); --bt: var(--au-badge-nosl-text); }
+	[data-k='NEW'], [data-b='NEW'] { --b: var(--au-badge-new); --bt: var(--au-badge-new-text); }
+	.cl-rows .f .k { padding: 0 .3rem; border: 1px solid var(--sl-color-gray-5); border-radius: .25rem; font-size: .68rem; line-height: 1.4; color: var(--sl-color-gray-3); white-space: nowrap; }
+	.sig-only { grid-template-columns: minmax(0, 1fr) auto; }
+	.sig-only .f { grid-column: 2; }
+	/* Gutter rows (functions, events): return type right-aligned in a shared column, names aligned after it;
+	   long signatures wrap at spaces with a hanging indent. Types muted, the name is the emphasis. */
+	.gutter { grid-template-columns: max-content minmax(0, 1fr) auto; column-gap: .6rem; }
+	.gutter .t { grid-column: 1; text-align: end; white-space: nowrap; font: .75rem/1.45 var(--__sl-font-mono); color: var(--sl-color-gray-3); }
+	.gutter > li > a { grid-column: 2; padding-inline-start: 2ch; text-indent: -2ch; overflow-wrap: break-word; color: var(--sl-color-gray-2); }
+	.gutter > li > a :global(b) { font-weight: 600; color: var(--sl-color-white); }
+	.gutter > li > a:hover :global(b) { color: var(--sl-color-text-accent); }
+	.gutter :global(.pt) { color: var(--sl-color-gray-3); }
+	.gutter .f { grid-column: 3; }
+	@container (max-width: 40rem) {
+		.cl-rows { display: block; }
+		.cl-rows li { display: flex; flex-wrap: wrap; column-gap: .5rem; padding: .3rem 0; }
+		.cl-rows > li > a { flex: 1 1 auto; }
+		.cl-rows .d { order: 3; flex: 1 0 100%; }
+		.cl-rows.gutter { display: grid; }
+		.cl-rows.gutter li { display: grid; column-gap: .5rem; padding: .25rem 0; }
+		.gutter .f { grid-column: 2; justify-content: start; }
+		.gutter > li > a { flex: none; }
+	}
+
+	/* Groups: headed blocks in as many columns as fit, read top to bottom. */
+	.cl-groups { columns: 15rem; column-gap: 1.5rem; margin-top: .5rem; font-family: var(--__sl-font-mono); font-size: .76rem; line-height: 1.4; }
+	.cl-groups section { break-inside: avoid-column; padding-bottom: .6rem; }
+	.cl-groups section:has(li:nth-child(25)) { break-inside: auto; }
+	.cl-groups h2 { margin: 0 0 .15rem; padding-top: .2rem; font-family: var(--__sl-font); font-size: var(--sl-text-sm); font-weight: 600; border-bottom: 1px solid var(--sl-color-hairline); break-after: avoid; }
+	.cl-groups h2 small { font-weight: 400; color: var(--sl-color-gray-3); font-size: var(--sl-text-xs); }
+	.cl-groups li { padding: .05rem 0; overflow-wrap: anywhere; break-inside: avoid; }
+	.cl-groups li a { color: var(--sl-color-text); }
+	/* Softer token colours in the dense grid: half-way towards the text colour. */
+	:global(:root) .cl-groups :global(code.lsl-inline span) { color: color-mix(in oklab, var(--shiki-dark) 55%, var(--sl-color-gray-2)); }
+	:global(:root[data-theme='light']) .cl-groups :global(code.lsl-inline span) { color: color-mix(in oklab, var(--shiki-light) 55%, var(--sl-color-gray-2)); }
+	.cl-groups :global(.b) { margin-inline-start: .3rem; vertical-align: .05em; }
 </style>

@@ -3,6 +3,7 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { CardGrid } from '@astrojs/starlight/components';
 import { inlineLsl, enhanceText } from '../../lib/inline-lsl';
 import CatalogList from '../../components/reference/CatalogList.astro';
+import { apiFlags } from '../../components/reference/catalog-items';
 import { catalog, apiMap, apiHref } from '../../lib/catalog';
 import { featurePageByCategory, featureHref } from '../../lib/features';
 import { categoryPageIds } from '../../lib/categories';
@@ -15,7 +16,7 @@ const guide=(guides as any)[category.id];
 // description with API names highlighted and linked; the signature sits inside the entry's link, so it has no links itself.
 const items=await Promise.all([...category.functions,...category.events,...category.constants].map(name=>apiMap.get(name)).filter(Boolean).map(async e=>({
 	title:e!.name, description:e!.description, href:apiHref(e!.kind,e!.name), kind:e!.kind,
-	titleHtml: e!.signature ? await inlineLsl(e!.signature,{link:false}) : undefined,
+	flags: apiFlags(e!), code: e!.signature ? await inlineLsl(e!.signature,{link:false}) : undefined,
 	descriptionHtml: e!.description ? await enhanceText(e!.description,{self:e!.name, params:(e!.parameters||[]).map((p:any)=>p.name)}) : undefined,
 })));
 // Task cards are titled with the highlighted call (the task wording is the fallback); the whole card is the link, so the code has no links of its own.

@@ -1,12 +1,13 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import CatalogList from '../../components/reference/CatalogList.astro';
-import { catalog, apiHref } from '../../lib/catalog';
-const items=catalog.functions.map(e=>({title:e.name,description:e.description,href:apiHref(e.kind,e.name),categories:e.categories}));
-// Jump targets for alphabetical ranges (e.g. /functions/#from-l): the first function at or after each letter, ignoring the ll prefix.
-for(const letter of ['a','l','t']){const i=items.findIndex(it=>it.title.replace(/^ll/,'').toLowerCase()>=letter);if(i>=0)(items[i] as any).anchor=`from-${letter}`;}
+import { apiRows } from '../../components/reference/catalog-items';
+import { catalog } from '../../lib/catalog';
+// One row per function: highlighted signature, one-line description, flag chips. The A–Z bar's anchors
+// (#from-a … #from-z, first function of each letter ignoring the ll prefix) are linked from the landing page.
+const items = await apiRows(catalog.functions);
 ---
 <StarlightPage frontmatter={{title:'Functions',description:'Browse the current LSL functions reference.',editUrl:false}}>
-<p>Find LSL functions by name, purpose, or topic. Signatures and descriptions follow the current definitions; deprecated and private entries are excluded.</p>
-<CatalogList items={items} label="functions" filterCategories={catalog.categories}/>
+<p>Find LSL functions by name, purpose, or topic. Signatures and descriptions follow the current definitions; deprecated and private entries are excluded. Hover a signature for its description; the badges are explained above the list, and selecting one shows only those functions.</p>
+<CatalogList items={items} label="functions" filterCategories={catalog.categories} az/>
 </StarlightPage>

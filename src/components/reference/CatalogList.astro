@@ -24,10 +24,23 @@ const total = blocks ? blocks.reduce((n, g) => n + g.items.length, 0) : rows.len
 const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
 const css = reg.css('.catalog-browser');
 // Legend of the badges this list uses; each legend badge toggles a filter to its entries.
-// Name prefixes (first CamelCase word after ll) shared by at least 5 entries, at most 14, by count.
+// Name prefixes (first CamelCase word after ll) shared by at least 5 entries, at most 14, by count,
+// plus the counterpart of any opposite pair (Start/Stop and so on).
 const prefixCount = new Map<string, number>();
 for (const it of rows) if (it.prefix) prefixCount.set(it.prefix, (prefixCount.get(it.prefix) ?? 0) + 1);
-const prefixes = [...prefixCount].filter(([, n]) => n >= 5).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])).slice(0, 14);
+const picked = [...prefixCount].filter(([, n]) => n >= 5).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])).slice(0, 14);
+// Opposite pairs read oddly half-present (Stop without Start), so a shown prefix brings its
+// counterpart along, right after it, whatever the counterpart's count.
+const PAIRS: [string, string][] = [['Start', 'Stop'], ['Get', 'Set'], ['Add', 'Remove'], ['Attach', 'Detach'], ['Open', 'Close']];
+const prefixes: [string, number][] = [];
+for (const entry of picked) {
+	if (prefixes.some(([v]) => v === entry[0])) continue;
+	prefixes.push(entry);
+	for (const pair of PAIRS) {
+		const other = pair[0] === entry[0] ? pair[1] : pair[1] === entry[0] ? pair[0] : undefined;
+		if (other && prefixCount.has(other) && !prefixes.some(([v]) => v === other)) prefixes.push([other, prefixCount.get(other)!]);
+	}
+}
 const flagged = blocks ? blocks.flatMap(g => g.items) : rows;
 const legend = BADGES.filter(b => flagged.some(it => it.flags?.some((f: any) => f.code === b.code)));
 const badges = (f?: { code: string }[]) => (f?.length ? f.map(x => x.code).join(' ') : undefined);

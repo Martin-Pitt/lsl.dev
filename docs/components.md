@@ -87,13 +87,13 @@ Props: Details `summary` (required), `open`, `id`; FAQ `title`, `exclusive`. Exp
 `**Summary**` followed by the body; inside a FAQ each question is `### Summary` followed by the
 answer, and the FAQ title is `### Title`.
 
-**Figure.** A local image in a frame, with a caption given as a prop or as Markdown children.
+**Figure.** Just a local image, with an optional caption given as a prop or as Markdown children.
 `alt` is required (use `alt=""` only for decorative images). A string `src` is a path under `src/`
 (`~/assets/…`); `src={importedImage}` also works. A remote or missing image fails the build.
 
 ```mdx
 <Figure src="~/assets/door-linkset.png" alt="Door linkset in edit mode" caption="The root prim is highlighted yellow." />
-<Figure src="~/assets/door-linkset.png" alt="…" hint="Edit mode" width={320}>Caption with **Markdown**.</Figure>
+<Figure src="~/assets/door-linkset.png" alt="…" width={320}>Caption with **Markdown**.</Figure>
 ```
 
 Export: `![alt](/_astro/…)` (the built image URL) followed by the caption. If the src can't be

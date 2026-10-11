@@ -1,12 +1,12 @@
 /**
- * Markdown export cases for Batch 1 (API hover cards): NoCard. Links export as plain links, so most of this batch needs no case.
- * Owned by the hovercards batch agent. Each component gets a case here; see ./types.ts and
- * docs/design/components-plan.md for the agreed Markdown form of each component.
+ * Markdown export cases for Batch 1 (API hover cards). The export reads the MDX source, where the
+ * cards don't exist (rehype adds them to the HTML only), so links export as plain links and no
+ * card text can leak. <NoCard> keeps its children and adds nothing.
  */
 import type { CaseFile } from './types';
 
 export default {
 	selfClosing: {},
 	paired: {},
-	passthrough: [],
+	passthrough: ['NoCard'],
 } satisfies CaseFile;

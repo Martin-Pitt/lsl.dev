@@ -1,7 +1,58 @@
 /*
- * Styles for the hovercards batch. Owned by the hovercards batch agent; loaded site-wide through
- * ../authoring.css. Build on the tokens in ../shared/tokens.css (--au-*) rather than new palettes,
- * keep rules inside @layer authoring, and guard motion with prefers-reduced-motion.
+ * API hover cards (Batch 1). Owned by the hovercards batch agent; loaded site-wide through
+ * ../authoring.css. Positioning and the fade come from .au-popover in ../shared/popover.css; this
+ * file adds the code-surface look, the card layout and a small slide.
  */
 @layer authoring {
+	.hc {
+		inset: auto;
+		position-area: block-end span-inline-end;
+		position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+		margin-block: .375rem;
+		inline-size: max-content;
+		max-inline-size: min(28rem, calc(100vw - 2rem));
+		/* --sl-color-gray-7 exists only in the light theme, so give it a fallback or dark mode loses the background. */
+		background: light-dark(var(--sl-color-gray-7, #f6f6f6), #24292e);
+		border-color: var(--sl-color-gray-5);
+		color: var(--sl-color-text);
+		font: normal var(--sl-text-sm) / 1.45 var(--sl-font);
+		text-align: start;
+		white-space: normal;
+		pointer-events: auto;
+		&, & * { text-decoration: none; }
+	}
+	.hc > span { display: block; }
+	.hc .hc-sig code {
+		display: block;
+		padding: 0; border: 0; background: none;
+		font: var(--sl-text-sm) / 1.4 var(--__sl-font-mono, var(--sl-font-mono));
+		white-space: normal;
+		overflow-wrap: anywhere;
+		color: light-dark(#24292e, #e1e4e8);
+	}
+	.hc .hc-sig i { font-style: normal; }
+	.hc .hc-sig .k { color: light-dark(#d73a49, #f97583); }
+	.hc .hc-sig .f { color: light-dark(#005cc5, #79b8ff); }
+	.hc .hc-sig .p { color: light-dark(#6f42c1, #b392f0); }
+	.hc .hc-desc { margin-block-start: .375rem; color: var(--sl-color-gray-2); }
+	.hc .hc-flags { display: flex; flex-wrap: wrap; gap: .25rem; margin-block-start: .5rem; }
+	.hc .hc-flag {
+		padding: .0625rem .4rem;
+		border: 1px solid var(--au-border);
+		border-radius: var(--au-radius-sm);
+		font-size: var(--sl-text-xs);
+		line-height: 1.4;
+		color: var(--au-text-muted);
+		&[data-tone='caution'] { border-color: var(--au-caution); background: var(--au-caution-tint); color: var(--sl-color-text); }
+	}
+	/* Touch never shows a card, even if a browser maps long-press to interest. */
+	@media (hover: none) { .hc { display: none !important; } }
+	@media (prefers-reduced-motion: no-preference) {
+		.hc {
+			translate: 0 -.25rem;
+			transition-property: opacity, translate, display, overlay;
+			&:popover-open { translate: 0 0; }
+		}
+		@starting-style { .hc:popover-open { translate: 0 -.25rem; } }
+	}
 }

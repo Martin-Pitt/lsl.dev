@@ -1,7 +1,5 @@
 /**
- * Exports of the hovercards batch (see docs/design/components-ownership.md for its components).
- * Owned by the hovercards batch agent. Add one line per component, e.g.
- *   export { default as Example } from './Example.astro';
- * The barrel (../index.ts) re-exports everything here.
+ * Exports of the hovercards batch. The cards themselves need no import: rehype-api-hovercards.ts
+ * adds them to every API link. The barrel (../index.ts) re-exports everything here.
  */
-export {};
+export { default as NoCard } from './NoCard.astro';

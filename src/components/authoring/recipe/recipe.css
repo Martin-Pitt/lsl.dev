@@ -1,7 +1,204 @@
 /*
- * Styles for the recipe batch. Owned by the recipe batch agent; loaded site-wide through
- * ../authoring.css. Build on the tokens in ../shared/tokens.css (--au-*) rather than new palettes,
- * keep rules inside @layer authoring, and guard motion with prefers-reduced-motion.
+ * Styles for the recipe batch (RecipeMeta, Requires, ScriptFile, Linkset, Steps/BuildStep).
+ * Owned by the recipe batch agent; loaded site-wide through ../authoring.css. Uses the --au-*
+ * tokens, no JS, no motion.
  */
 @layer authoring {
+	/* RecipeMeta: a <dl> grid that goes 4 → 2 → 1 columns by container width. */
+	.au-recipe-meta {
+		container: au-recipe-meta / inline-size;
+		margin-block: 1rem;
+
+		& dl {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 1px;
+			margin: 0;
+			background: var(--au-border);
+			border: 1px solid var(--au-border);
+			border-radius: var(--au-radius);
+			overflow: hidden;
+		}
+		& dl > div {
+			margin: 0;
+			padding: .5rem .75rem;
+			background: var(--au-surface);
+			display: flex;
+			gap: .75rem;
+			align-items: baseline;
+			justify-content: space-between;
+		}
+		& dt {
+			margin: 0;
+			font-size: var(--sl-text-xs);
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: .04em;
+			color: var(--au-text-muted);
+		}
+		& dd {
+			margin: 0;
+			color: var(--sl-color-white);
+			font-weight: 600;
+			overflow-wrap: anywhere;
+			text-align: end;
+		}
+		& dd code { font-size: var(--sl-text-xs); font-weight: 400; }
+
+		@container au-recipe-meta (min-width: 26rem) {
+			& dl { grid-template-columns: repeat(2, 1fr); }
+			& dl > div { flex-direction: column; justify-content: flex-start; gap: .125rem; }
+			& dd { text-align: start; }
+			& .au-recipe-meta-perms { grid-column: 1 / -1; }
+			/* Without a time cell, four cells fill a 2 × 2 grid. */
+			& dl:not(:has(> div:nth-child(5))) .au-recipe-meta-perms { grid-column: auto; }
+		}
+		@container au-recipe-meta (min-width: 40rem) {
+			& dl { grid-template-columns: repeat(4, 1fr); }
+		}
+	}
+	.au-meter {
+		display: inline-flex;
+		gap: 3px;
+		margin-inline-end: .4em;
+		vertical-align: .1em;
+		& span {
+			margin: 0;
+			width: .5em;
+			height: .5em;
+			border-radius: 50%;
+			border: 1px solid var(--au-note);
+		}
+		&[data-level='1'] span:nth-child(-n + 1),
+		&[data-level='2'] span:nth-child(-n + 2),
+		&[data-level='3'] span { background: var(--au-note); }
+	}
+
+	/* Requires: a labelled row of static badges. */
+	.au-requires {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: .375rem .5rem;
+		margin-block: 1rem;
+
+		& .au-requires-label {
+			font-size: var(--sl-text-xs);
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: .04em;
+			color: var(--au-text-muted);
+		}
+		& ul {
+			display: contents;
+			list-style: none;
+		}
+		& li { margin: 0; }
+		/* Neutral badges; only prompting permissions keep Starlight's caution variant. */
+		& .sl-badge.default {
+			background: var(--au-surface);
+			border-color: var(--au-border);
+			color: var(--sl-color-white);
+		}
+		& a { text-decoration: none; }
+		& a:hover .sl-badge, & a:focus-visible .sl-badge { text-decoration: underline; }
+	}
+	.sl-markdown-content .au-requires ul { padding: 0; margin: 0; }
+	.sl-markdown-content .au-requires li + li { margin-top: 0; }
+
+	/* ScriptFile: a small neutral "Put in" chip above the Expressive Code frame. */
+	.au-script-file {
+		margin-block: 1rem;
+		scroll-margin-top: calc(var(--sl-nav-height, 4rem) + 1rem);
+
+		& .au-script-file-in {
+			display: inline-flex;
+			gap: .4em;
+			align-items: baseline;
+			margin: 0 0 .375rem;
+			padding: .125rem .5rem;
+			font-size: var(--sl-text-xs);
+			border: 1px solid var(--au-border);
+			border-radius: var(--au-radius-sm);
+			background: var(--au-surface);
+			color: var(--sl-color-white);
+		}
+		& .au-script-file-in > span {
+			color: var(--au-text-muted);
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: .04em;
+		}
+		& .expressive-code { margin-top: 0; }
+	}
+	.sl-markdown-content .au-script-file-in + * { margin-top: 0; }
+
+	/* Linkset: FileTree-like nested list, prims numbered depth-first with counters. */
+	.au-linkset {
+		--au-prim-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23888' stroke-width='1.3' stroke-linejoin='round'%3E%3Cpath d='M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z'/%3E%3Cpath d='M2 4.75 8 8l6-3.25M8 8v6.5'/%3E%3C/svg%3E");
+		--au-root-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' stroke='%23888' stroke-width='1.3' stroke-linejoin='round'%3E%3Cpath d='M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z' fill='%23888' fill-opacity='.35'/%3E%3Cpath d='M2 4.75 8 8l6-3.25M8 8v6.5' fill='none'/%3E%3C/svg%3E");
+		container: au-linkset / inline-size;
+		margin: 1rem 0;
+		padding: .75rem 1rem;
+		border: 1px solid var(--au-border);
+		border-radius: var(--au-radius);
+		background: var(--au-surface);
+		counter-reset: au-link;
+
+		& figcaption {
+			margin: 0 0 .5rem;
+			font-size: var(--sl-text-xs);
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: .04em;
+			color: var(--au-text-muted);
+		}
+		& ul { list-style: none; margin: 0; padding: 0; }
+		& ul ul {
+			margin-inline-start: .55rem;
+			padding-inline-start: 1rem;
+			border-inline-start: 1px solid var(--au-border);
+		}
+		& li {
+			counter-increment: au-link;
+			margin: .25rem 0 0;
+			padding-inline-start: 1.5rem;
+			background: var(--au-prim-icon) no-repeat 0 .2em / 1.1em;
+			color: var(--sl-color-gray-2);
+			overflow-wrap: anywhere;
+		}
+		& > ul > li:first-child { background-image: var(--au-root-icon); }
+		& > ul > li:first-child > :is(strong, p:first-child > strong):first-child { color: var(--sl-color-white); }
+		& li > p { margin: 0; display: inline; }
+		&[data-numbers='on'] li::before,
+		& > ul > li:first-child::before {
+			content: counter(au-link);
+			display: inline-block;
+			min-width: 1.6em;
+			margin-inline-end: .5em;
+			padding: 0 .3em;
+			font: 600 var(--sl-text-xs) / 1.5 var(--__sl-font-mono, monospace);
+			text-align: center;
+			border: 1px solid var(--au-border);
+			border-radius: var(--au-radius-sm);
+			background: var(--sl-color-bg);
+			color: var(--sl-color-white);
+			vertical-align: .1em;
+		}
+		&[data-numbers='on'] > ul > li:first-child::before { content: counter(au-link) ' root'; }
+		&[data-numbers='off'] > ul > li:first-child::before { content: 'root'; }
+		& code { font-size: var(--sl-text-xs); }
+
+		@container au-linkset (max-width: 22rem) {
+			& ul ul { margin-inline-start: .25rem; padding-inline-start: .6rem; }
+		}
+	}
+	.sl-markdown-content .au-linkset :is(ul, li, li + li) { margin-top: .25rem; }
+
+	/* BuildStep: the title reads as the step's lead line; :has(pre) gives code steps more room. */
+	.sl-steps .au-build-step {
+		& > .step-title { font-weight: 600; color: var(--sl-color-white); }
+		&:has(pre) { padding-bottom: 1.5rem; }
+		scroll-margin-top: calc(var(--sl-nav-height, 4rem) + 1rem);
+	}
 }

@@ -1,9 +1,88 @@
-{/* Showcase section for the recipe batch, imported by src/content/docs/meta/components.mdx. Owned by the recipe batch agent: show every component in every state (long content, overflow, light and dark). Import components from '~/components/authoring' (the Markdown-export guard keys on that path). */}
+{/* Showcase section for the recipe batch, imported by src/content/docs/meta/components.mdx. Owned by the recipe batch agent. Import components from '~/components/authoring' (the Markdown-export guard keys on that path). */}
+import { RecipeMeta, Requires, ScriptFile, Linkset, Steps, BuildStep } from '~/components/authoring';
 
 ## Recipe kit
 
 <div id="showcase-recipe" data-showcase="recipe">
 
-Nothing here yet.
+### A mini recipe: a swinging door
+
+<RecipeMeta difficulty="beginner" prims={3} scripts={1} time="15 min" />
+
+<Requires land="build" owner />
+
+<Linkset title="Door">
+- **Door frame**: `door.lsl`, notecard `config`
+  - **Door panel**
+    - **Handle**: sound `creak`
+  - **Threshold**
+</Linkset>
+
+<Steps>
+<BuildStep title="Rez and link the prims">
+Rez a box for the frame, a flat box for the panel and a small cylinder for the handle.
+Select the frame **last** before you link, so it becomes the root.
+</BuildStep>
+<BuildStep title="Name the panel">
+Name the panel prim `Door panel`. The script finds it by name, so link order doesn't matter.
+</BuildStep>
+<BuildStep title="Add the script">
+Drop this script into the frame.
+
+<ScriptFile name="door.lsl" in="Door frame (root)">
+```lsl title="door.lsl"
+integer panel;
+integer open;
+
+default
+{
+    state_entry()
+    {
+        integer i = llGetNumberOfPrims();
+        for (; i > 1; --i)
+            if (llGetLinkName(i) == "Door panel") panel = i;
+    }
+
+    touch_start(integer n)
+    {
+        if (llDetectedKey(0) != llGetOwner()) return;
+        open = !open;
+        rotation r = llEuler2Rot(<0, 0, open * PI_BY_TWO>);
+        llSetLinkPrimitiveParamsFast(panel, [PRIM_ROT_LOCAL, r]);
+    }
+}
+```
+</ScriptFile>
+</BuildStep>
+</Steps>
+
+### RecipeMeta states
+
+<RecipeMeta difficulty="intermediate" prims={12} scripts={3} permissions={["PERMISSION_TAKE_CONTROLS", "PERMISSION_TRIGGER_ANIMATION"]} time="45 min" />
+
+<RecipeMeta difficulty="advanced" prims={1} scripts={2} permissions={["PERMISSION_DEBIT"]} />
+
+### Requires states
+
+Permissions that always ask the owner (here `PERMISSION_DEBIT`) use the caution colour.
+
+<Requires permissions={["PERMISSION_ATTACH", "PERMISSION_DEBIT"]} experience land="scripts" attachment />
+
+<Requires seated permissions={["PERMISSION_TAKE_CONTROLS", "PERMISSION_CONTROL_CAMERA", "PERMISSION_TRACK_CAMERA"]} />
+
+### Linkset without link numbers, with a long name
+
+<Linkset numbers={false}>
+- **Vehicle body**: scripts `vehicle` and `seat`, animation `drive`
+  - **Front-left wheel with a deliberately long prim name to check wrapping on narrow screens**
+  - **Front-right wheel**
+</Linkset>
+
+### Steps as a plain Markdown list
+
+<Steps>
+1. Rez a prim.
+2. Put `vehicle.lsl` in it.
+</Steps>
 
 </div>

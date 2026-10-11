@@ -1,0 +1,11 @@
+---
+/**
+ * Starlight Steps, plus <BuildStep> support: BuildStep items are gathered into the single <ol>
+ * that Starlight's Steps requires. A plain Markdown ordered list passes through unchanged.
+ */
+import { Steps as StarlightSteps } from '@astrojs/starlight/components';
+
+let html = (await Astro.slots.render('default')).trim();
+if (!html.startsWith('<ol') && html.includes('class="au-build-step"')) html = `<ol>${html}</ol>`;
+---
+<StarlightSteps><Fragment set:html={html} /></StarlightSteps>

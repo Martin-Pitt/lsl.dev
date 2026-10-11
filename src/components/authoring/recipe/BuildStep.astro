@@ -1,0 +1,11 @@
+---
+/** One numbered build step, used inside the recipe <Steps>. The title is not a heading, so it stays out of the TOC. */
+import { onlyProps, slug } from './vocab';
+
+interface Props { title: string; id?: string }
+onlyProps(Astro.props, ['title', 'id'], 'BuildStep');
+const { title } = Astro.props;
+if (!title) throw new Error('BuildStep: title is required');
+const id = Astro.props.id ?? slug(title);
+---
+<li id={`step-${id}`} class="au-build-step"><p class="step-title">{title}</p><slot /></li>

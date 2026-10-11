@@ -1,7 +1,10 @@
 /**
  * Exports of the recipe batch (see docs/design/components-ownership.md for its components).
- * Owned by the recipe batch agent. Add one line per component, e.g.
- *   export { default as Example } from './Example.astro';
- * The barrel (../index.ts) re-exports everything here.
+ * Owned by the recipe batch agent. The barrel (../index.ts) re-exports everything here.
  */
-export {};
+export { default as RecipeMeta } from './RecipeMeta.astro';
+export { default as Requires } from './Requires.astro';
+export { default as ScriptFile } from './ScriptFile.astro';
+export { default as Linkset } from './Linkset.astro';
+export { default as Steps } from './Steps.astro';
+export { default as BuildStep } from './BuildStep.astro';

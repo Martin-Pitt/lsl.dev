@@ -1,0 +1,15 @@
+---
+/** Static badges listing what a script needs. Closed vocabulary: unknown props or values fail the build. */
+import { Badge } from '@astrojs/starlight/components';
+import { requirements } from './vocab';
+
+interface Props { permissions?: string[]; experience?: boolean; land?: 'build' | 'scripts' | 'owner' | 'group'; attachment?: boolean; seated?: boolean; owner?: boolean }
+const { perms, flags } = requirements(Astro.props);
+---
+<div class="au-requires">
+	<span class="au-requires-label" aria-hidden="true">Requires</span>
+	<ul aria-label="Requires">
+		{perms.map(p => <li><a href={p.href}><Badge text={p.name} variant={p.prompts ? 'caution' : 'default'} /></a>{p.prompts && <span class="sr-only"> (asks the owner)</span>}</li>)}
+		{flags.map(t => <li><Badge text={t} variant="default" /></li>)}
+	</ul>
+</div>

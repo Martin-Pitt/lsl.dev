@@ -1,0 +1,20 @@
+---
+/**
+ * Says which prim a script goes in. Wraps one Expressive Code fence that carries its own title
+ * (```lsl title="door.lsl"); the build fails if that title is missing or differs from `name`.
+ * Copy and the editor frame come from Expressive Code. Sets the anchor id="script-<slug>".
+ */
+import { onlyProps, scriptId } from './vocab';
+
+interface Props { name: string; in?: string; lang?: 'lsl' | 'slua' }
+onlyProps(Astro.props, ['name', 'in', 'lang'], 'ScriptFile');
+const { name, in: prim } = Astro.props;
+if (!name) throw new Error('ScriptFile: name is required');
+const html = await Astro.slots.render('default');
+const titles = [...html.matchAll(/<span class="title"[^>]*>([^<]*)<\/span>/g)].map(m => m[1].trim());
+if (titles.length !== 1 || titles[0] !== name) throw new Error(`ScriptFile "${name}": wrap exactly one code block whose fence has title="${name}" (found ${titles.length ? titles.map(t => `"${t}"`).join(', ') : 'none'})`);
+---
+<div class="au-script-file" id={scriptId(name)}>
+	{prim && <p class="au-script-file-in"><span>Put in</span> {prim}</p>}
+	<Fragment set:html={html} />
+</div>

@@ -42,10 +42,9 @@ for (const entry of picked) {
 	}
 }
 const flagged = blocks ? blocks.flatMap(g => g.items) : rows;
-// Categories as a one-click cloud (like the letters and prefixes), only those present in this list;
-// a very long list (e.g. 122 constant groups) stays a compact select.
+// Categories as a one-click cloud (like the letters and prefixes), only those present in this list.
 const catCount = new Map<string, number>();
-for (const it of rows) for (const c of it.categories ?? []) catCount.set(c, (catCount.get(c) ?? 0) + 1);
+for (const it of flagged) for (const c of it.categories ?? []) catCount.set(c, (catCount.get(c) ?? 0) + 1);
 // Categories sharing a last word become one segmented group: "Avatar Communication" and "Script
 // Communication" → Communication [Avatar | Script]. A bare category of that name ("Media",
 // "Permissions") is the group's first segment; a few related one-offs are attached by hand (Chat goes
@@ -66,12 +65,23 @@ for (const c of present) {
 	const seg = { id: c.id, label: !head ? label : head === label ? head : ATTACH[c.id] ? label : w.slice(0, -1).join(' ') };
 	(cloudGroups.get(key) ?? cloudGroups.set(key, []).get(key)!).push(seg);
 }
+// PascalCase names (constant groups) group by their first word instead: Prim [Bump | Param | Type …].
+const camelHead = (l: string) => l.match(/^(?:[A-Z]+(?=[A-Z][a-z])|[A-Z][a-z]+)/)?.[0];
+if (present.every((c: any) => /^[A-Za-z]+$/.test(String(c.label)))) {
+	cloudGroups.clear();
+	const n = new Map<string, number>();
+	for (const c of present) { const h = camelHead(String(c.label)) ?? String(c.label); n.set(h, (n.get(h) ?? 0) + 1); }
+	for (const c of present) {
+		const label = String(c.label), h = camelHead(label) ?? label, key = (n.get(h) ?? 0) > 1 ? h : label;
+		(cloudGroups.get(key) ?? cloudGroups.set(key, []).get(key)!).push({ id: c.id, label: key === label ? label : label === h ? h : label.slice(h.length) });
+	}
+}
 const catGroups = [...cloudGroups].map(([head, segs]) => ({
 	head, single: segs.length === 1 && segs[0].label === head,
 	segs: segs.sort((a, b) => (a.label === head ? -1 : b.label === head ? 1 : a.label.localeCompare(b.label))),
 })).sort((a, b) => a.head.localeCompare(b.head));
 const catOptions = present;
-const catCloud = catOptions.length > 0 && catOptions.length <= 80;
+const catCloud = catOptions.length > 0;
 const legend = BADGES.filter(b => flagged.some(it => it.flags?.some((f: any) => f.code === b.code)));
 const badges = (f?: { code: string }[]) => (f?.length ? f.map(x => x.code).join(' ') : undefined);
 const cats = (c?: string[]) => (c?.length ? c.join(' ') : undefined);
@@ -211,7 +221,7 @@ if (!customElements.get('catalog-list')) customElements.define('catalog-list', C
 	:is(.pick, .cloud) button:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 1px; }
 	:is(.pick, .cloud) button[aria-pressed='true'] { border-color: var(--sl-color-accent); background: var(--sl-color-accent-low); color: var(--sl-color-text); font-weight: 600; }
 	/* Segmented category groups: one joined pill, head label then segments. */
-	.cloud .seg { display: inline-flex; align-items: stretch; border: 1px solid var(--sl-color-hairline); border-radius: .35rem; overflow: hidden; }
+	.cloud .seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; align-items: stretch; border: 1px solid var(--sl-color-hairline); border-radius: .35rem; overflow: hidden; }
 	.cloud .seg > * { border-radius: 0; }
 	/* Round the outer ends explicitly (overflow clipping alone missed the pressed/hover fills). */
 	.cloud .seg > :first-child { border-start-start-radius: .3rem; border-end-start-radius: .3rem; }

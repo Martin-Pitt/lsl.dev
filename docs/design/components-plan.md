@@ -455,6 +455,10 @@ default { touch_start(integer n) { ... } }
 
 ### `<Figure>`
 
+> Moved to the media batch, which added a `zoom` prop and built Compare, Hotspots and Gallery
+> on top of it; the current reference is the "Media" section of [../components.md](../components.md).
+> The frame and `hint` below were dropped: a Figure is now just the image and an optional caption.
+
 ```mdx
 <Figure src="./door-linkset.png" alt="Door linkset in edit mode" caption="The root prim is highlighted yellow." />
 ```

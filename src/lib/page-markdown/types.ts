@@ -4,7 +4,7 @@
  */
 export type Attrs = Record<string, any>;
 export type Source = { url?: string; wiki?: string; license?: string } | undefined;
-/** `images`: built URLs of the page's <Figure> sources, keyed by imageKey() (filled by the .md route). */
+/** `images`: built URLs of the page's media-component images (Figure, Compare, Hotspots), keyed by imageKey() (filled by the .md route). */
 export type MarkdownPage = { id: string; body?: string; data: { title: string; description?: string; source?: Source }; images?: Map<string, string> };
 /** Where a case sits: the names of the open components around it, outermost first. */
 export type Context = { parents: string[] };

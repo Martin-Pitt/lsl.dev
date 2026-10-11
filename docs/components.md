@@ -28,11 +28,11 @@ Rules that apply to every component:
 
 ## Asides and disclosure
 
-Caveat, Gotcha, Performance, Limit, LimitsTable, Details, FAQ, Figure, Since. Showcase:
+Caveat, Gotcha, Performance, Limit, LimitsTable, Details, FAQ, Since. Showcase:
 `/meta/components/#showcase-asides`.
 
 ```mdx
-import { Caveat, Gotcha, Performance, Limit, LimitsTable, Details, FAQ, Figure, Since } from '~/components/authoring';
+import { Caveat, Gotcha, Performance, Limit, LimitsTable, Details, FAQ, Since } from '~/components/authoring';
 ```
 
 **Asides.** All asides share one look: a left rule and a tint in a semantic colour. Starlight's
@@ -87,17 +87,7 @@ Props: Details `summary` (required), `open`, `id`; FAQ `title`, `exclusive`. Exp
 `**Summary**` followed by the body; inside a FAQ each question is `### Summary` followed by the
 answer, and the FAQ title is `### Title`.
 
-**Figure.** Just a local image, with an optional caption given as a prop or as Markdown children.
-`alt` is required (use `alt=""` only for decorative images). A string `src` is a path under `src/`
-(`~/assets/…`); `src={importedImage}` also works. A remote or missing image fails the build.
-
-```mdx
-<Figure src="~/assets/door-linkset.png" alt="Door linkset in edit mode" caption="The root prim is highlighted yellow." />
-<Figure src="~/assets/door-linkset.png" alt="…" width={320}>Caption with **Markdown**.</Figure>
-```
-
-Export: `![alt](/_astro/…)` (the built image URL) followed by the caption. If the src can't be
-resolved (an imported image passed as `src={img}`), `*[Figure: alt]*` instead.
+**Figure.** Images moved to the media batch: see [Media](#media) (Figure, zoom, Compare, Hotspots, Gallery).
 
 **Since.** A small outline badge reading "Since Nov 2022". `date` is `YYYY-MM` or `YYYY-MM-DD`.
 An optional `note` opens as a hint popover on hover, focus or click.
@@ -271,6 +261,90 @@ import { Param, Params, Returns } from '~/components/authoring';
 
 Coming later (deferred, see the Deferred section): `<CodeGroup>` LSL ⇄ SLua tabs, and the
 `<StateFlow>` / `<EventFlow>` diagrams.
+
+## Media
+
+Figure, Compare, Hotspots, Hotspot, Gallery, and zoom (`<Figure zoom>`). Showcase:
+`/meta/components/#showcase-media`.
+
+```mdx
+import { Figure, Compare, Hotspots, Hotspot, Gallery } from '~/components/authoring';
+```
+
+Shared rules: every image is local. A string `src` (or `before`/`after`) is a path under `src/`
+(`~/assets/…`), and an imported image (`src={img}`) also works. A remote or missing image fails
+the build. Alt text is required (`alt=""` only for a purely decorative image). Captions are
+optional. Without JavaScript everything stays visible. Only Compare uses JS, and only to move its
+slider (`media/PageEnd.astro`, about 320 bytes inline).
+
+**Figure.** Just a local image, with an optional caption given as a prop or as Markdown children.
+
+```mdx
+<Figure src="~/assets/door-linkset.png" alt="Door linkset in edit mode" caption="The root prim is highlighted yellow." />
+<Figure src="~/assets/door-linkset.png" alt="…" width={320}>Caption with **Markdown**.</Figure>
+```
+
+Export: `![alt](/_astro/…)` (the built image URL) followed by the caption. If the src can't be
+resolved (an imported image passed as `src={img}`), `*[Figure: alt]*` instead.
+
+**Zoom.** Add `zoom` to a Figure to make it click-to-enlarge. The thumbnail (usually with a
+`width`) becomes a button named "Enlarge: <alt>". It opens a popover with the full-size image,
+fitted to the viewport over a dark backdrop. Escape, a click outside and the close button all
+close it. No JS: `popovertarget` and `popover="auto"`.
+
+```mdx
+<Figure src="~/assets/build-floater.png" alt="The Build floater" width={240} caption="Click to enlarge." zoom />
+```
+
+Export: the image at its full-size URL, then the caption.
+
+**Compare.** Two images of the same aspect ratio (otherwise the build fails), stacked, with a
+slider revealing `before` on the left over `after` on the right. The slider is a native range
+input (named "Reveal: Plain (left) and Textured (right)"). It covers the image, so a drag
+anywhere or the arrow keys move it. A divider with a grip and the two labels in the top corners
+show where it is. `start` is the initial split in percent (default 50). The labels default to
+"Before" and "After". Without JS the two images sit side by side, each with its label.
+
+```mdx
+<Compare before="~/assets/plain.png" after="~/assets/textured.png"
+  beforeAlt="A plain grey cube" afterAlt="The same cube with a wood texture"
+  beforeLabel="Plain" afterLabel="Textured" caption="Drag to compare." start={30} />
+```
+
+Export: `**Plain**`, its image, `**Textured**`, its image, then the caption.
+
+**Hotspots.** Numbered markers over an image, one per `<Hotspot>` child. `x` and `y` are
+percentages from the top-left corner of the image, and `label` is required. The note (Markdown
+children) opens in a popover anchored to the marker. Click, Enter or Space opens it, and a click
+outside or Escape closes it. CSS anchor positioning flips the popover to stay on screen. Each
+marker is named "1: label", for example. The same notes are listed below the image as a
+numbered list, for screen readers, print and readers without popovers. Keep one-paragraph notes
+on the same line as the tag. For several paragraphs, put blank lines inside the tag.
+
+```mdx
+<Hotspots src="~/assets/build-floater.png" alt="The Build floater, Object tab" caption="The Object tab.">
+<Hotspot x="15%" y="21%" label="Object tab">Prim properties: position, size, rotation.</Hotspot>
+<Hotspot x="44%" y="31%" label="Position">Region coordinates, read with [llGetPos](/functions/llGetPos/).</Hotspot>
+</Hotspots>
+```
+
+Props: Hotspots `src`, `alt`, `caption?`, `width?`; Hotspot `x`, `y`, `label`. Export: the image,
+then `1. **label**: note` for each hotspot, then the caption.
+
+**Gallery.** A responsive grid of zoomable figures. It has 2 columns, 3 from a width of 30rem and
+4 from 48rem (container queries on the gallery's own width), and 1 when it is very narrow. Each
+child is a `<Figure … zoom />`; the build fails if a Figure inside lacks `zoom`. Thumbnails are
+cropped to 4:3, and the enlarged view shows the whole image. `label` is an optional accessible
+name for the group.
+
+```mdx
+<Gallery label="Texture swatches">
+<Figure src="~/assets/sky.png" alt="Blue gradient swatch" caption="Sky" zoom />
+<Figure src="~/assets/grass.png" alt="Green gradient swatch" caption="Grass" zoom />
+</Gallery>
+```
+
+Export: each figure's image and caption, one after another.
 
 ## Deferred
 

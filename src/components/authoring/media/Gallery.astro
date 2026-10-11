@@ -1,0 +1,19 @@
+---
+/**
+ * <Gallery>: several <Figure zoom> children as a responsive grid (container queries), each
+ * thumbnail cropped to the same shape and enlarged by its own zoom popover.
+ *
+ *   <Gallery>
+ *   <Figure src="~/assets/a.png" alt="…" caption="…" zoom />
+ *   <Figure src="~/assets/b.png" alt="…" caption="…" zoom />
+ *   </Gallery>
+ *
+ * `label` names the group for screen readers (aria-label on the list).
+ */
+interface Props { label?: string }
+const { label } = Astro.props;
+const html = await Astro.slots.render('default');
+if (!/class="au-figure\b/.test(html)) throw new Error('<Gallery>: put <Figure zoom> children inside');
+if (/class="au-figure"/.test(html)) throw new Error('<Gallery>: every <Figure> inside a Gallery needs the zoom prop');
+---
+<div class="au-gallery" role="group" aria-label={label}><div class="au-gallery__grid"><Fragment set:html={html} /></div></div>

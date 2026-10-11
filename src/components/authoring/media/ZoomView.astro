@@ -1,0 +1,20 @@
+---
+/**
+ * The click-to-enlarge part of <Figure zoom> (not exported). No JS: the thumbnail is a button with
+ * popovertarget; the popover (popover="auto": Escape and a click outside close it) shows the
+ * full-size image fitted to the viewport over a backdrop, with a visible close button.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { nextId } from './image';
+
+interface Props { image: ImageMetadata; alt: string; width?: number }
+const { image, alt, width } = Astro.props;
+const id = nextId('au-zoom');
+const name = alt ? `Enlarge: ${alt}` : 'Enlarge image';
+---
+<button type="button" class="au-zoom__thumb" popovertarget={id} aria-label={name} title={name}><Image src={image} alt="" width={width} /><span class="au-zoom__icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16"><path d="M6.5 1a5.5 5.5 0 0 1 4.38 8.82l3.65 3.65-1.06 1.06-3.65-3.65A5.5 5.5 0 1 1 6.5 1Zm0 1.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM7.25 4v1.75H9v1.5H7.25V9h-1.5V7.25H4v-1.5h1.75V4h1.5Z" fill="currentColor"/></svg></span></button>
+<div popover id={id} class="au-zoom" role="dialog" aria-label={alt || 'Enlarged image'}>
+	<Image src={image} alt={alt} loading="lazy" />
+	<button type="button" class="au-zoom__close" popovertarget={id} popovertargetaction="hide" aria-label="Close" title="Close (Esc)"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3.7 2.6 8 6.9l4.3-4.3 1.1 1.1L9.1 8l4.3 4.3-1.1 1.1L8 9.1l-4.3 4.3-1.1-1.1L6.9 8 2.6 3.7Z" fill="currentColor"/></svg></button>
+</div>

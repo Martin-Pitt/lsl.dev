@@ -9,5 +9,4 @@ export { default as Limit } from './Limit.astro';
 export { default as LimitsTable } from './LimitsTable.astro';
 export { default as Details } from './Details.astro';
 export { default as FAQ } from './FAQ.astro';
-export { default as Figure } from './Figure.astro';
 export { default as Since } from './Since.astro';

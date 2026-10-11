@@ -1,0 +1,36 @@
+---
+/**
+ * <Hotspots>: numbered markers over a local image. Each <Hotspot> marker is a button opening its
+ * note in a popover anchored to it (popovertarget, CSS anchor positioning, light dismiss, Escape);
+ * the notes also render as an ordered list below the image (screen readers, no JS, print).
+ *
+ *   <Hotspots src="~/assets/floater.png" alt="The Build floater" caption="…">
+ *   <Hotspot x="30%" y="40%" label="Position">Markdown note.</Hotspot>
+ *   </Hotspots>
+ *
+ * Markers are placed with container query units: the box is the image's width, so a y of n% is
+ * n% × (height / width) of the inline size.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { resolveImage, requireAlt, nextId } from './image';
+
+interface Props { src: ImageMetadata | string; alt: string; caption?: string; width?: number }
+const { caption, width } = Astro.props;
+const alt = requireAlt(Astro.props.alt, 'Hotspots');
+const image = await resolveImage(Astro.props.src, 'Hotspots');
+const base = nextId('au-hs');
+// Each <Hotspot> starts with <!--au-hs--> and writes @@n@@ for its number and @@id@@ for its ids.
+const parts = (await Astro.slots.render('default')).split('<!--au-hs-->');
+if (parts.length < 2) throw new Error('<Hotspots>: add at least one <Hotspot> child');
+const items = parts.map((p, i) => (i ? p.replaceAll('@@n@@', String(i)).replaceAll('@@id@@', `${base}-${i}`) : p)).join('');
+const hasCaption = !!caption;
+const w = width ?? image.width;
+---
+<figure class="au-hotspots" style={`--w:${w}px;--r:${image.height / image.width}`}>
+	<div class="au-hotspots__box">
+		<Image src={image} alt={alt} width={width} />
+		<ol class="au-hotspots__list" aria-label="Notes"><Fragment set:html={items} /></ol>
+	</div>
+	{hasCaption && <figcaption>{caption}</figcaption>}
+</figure>

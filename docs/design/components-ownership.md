@@ -5,7 +5,7 @@ parallel. Phase 0 (the scaffold) registered every shared hook, so a batch agent 
 edit a shared file. If one really does, it stops and asks the integrator, and says exactly which
 change it needs.
 
-`<batch>` is one of `asides`, `recipe`, `hovercards`, `guide`.
+`<batch>` is one of `asides`, `recipe`, `hovercards`, `guide`, `media`.
 
 ## Every batch owns
 
@@ -23,10 +23,11 @@ change it needs.
 
 | Batch | Components (phase) | Also owns |
 |---|---|---|
-| asides | Caveat, Gotcha, Performance, Limit, LimitsTable, Details, FAQ, Figure, Since (phase 1) | `src/data/limits.yaml`; the table conversion in `src/content/docs/reference/limits.mdx` (tables only: its prose, asides and attribution stay as they are); the global restyle of Starlight's built-in asides, written in `asides/asides.css` |
+| asides | Caveat, Gotcha, Performance, Limit, LimitsTable, Details, FAQ, Since (phase 1) | `src/data/limits.yaml`; the table conversion in `src/content/docs/reference/limits.mdx` (tables only: its prose, asides and attribution stay as they are); the global restyle of Starlight's built-in asides, written in `asides/asides.css` |
 | recipe | RecipeMeta, ScriptFile, Requires as static badges (phase 1); Linkset as a styled nested list, Steps/BuildStep (phase 3) | the `Steps` passthrough entry already in `src/lib/page-markdown/recipe.ts` |
 | hovercards | NoCard, the cards themselves (phase 2) | `src/components/authoring/hovercards/rehype-api-hovercards.ts` (already registered in `astro.config.mjs`); `scripts/build-hovercards.ts` (already run by `bun run dev` and `bun run build`); the generated `src/data/hovercards.json` (git-ignored) |
 | guide | Param, Params, Returns (phase 1) | nothing else |
+| media | Figure (moved from asides, with `zoom`), Compare, Hotspots/Hotspot, Gallery | the placeholder images in `media/demo/`; the shared image rules in `media/image.ts`. The image scan in `src/pages/[...page]/index.md.ts` (which tags and props get a built URL) stays integrator-owned: ask there when a new media component takes an image prop |
 
 Deferred and not assigned: CodeGroup (LSL ⇄ SLua), StateFlow and EventFlow.
 

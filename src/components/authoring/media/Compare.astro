@@ -1,0 +1,40 @@
+---
+/**
+ * <Compare>: two same-size local images stacked, with a slider revealing `before` (left) over
+ * `after` (right). The slider is a native <input type="range"> covering the image, so a drag
+ * anywhere or the arrow keys move it; a few lines in ./PageEnd.astro copy its value into --pos,
+ * which drives clip-path on the top image. Without JS both images show side by side.
+ *
+ *   <Compare before="~/assets/plain.png" after="~/assets/textured.png" beforeAlt="…" afterAlt="…"
+ *     beforeLabel="Plain" afterLabel="Textured" caption="…" start={30} />
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { resolveImage, requireAlt } from './image';
+
+interface Props {
+	before: ImageMetadata | string; after: ImageMetadata | string;
+	beforeAlt: string; afterAlt: string;
+	beforeLabel?: string; afterLabel?: string;
+	caption?: string; start?: number;
+}
+const { caption, beforeLabel = 'Before', afterLabel = 'After', start = 50 } = Astro.props;
+const beforeAlt = requireAlt(Astro.props.beforeAlt, 'Compare', 'beforeAlt');
+const afterAlt = requireAlt(Astro.props.afterAlt, 'Compare', 'afterAlt');
+const before = await resolveImage(Astro.props.before, 'Compare');
+const after = await resolveImage(Astro.props.after, 'Compare');
+if (Math.abs(before.width / before.height - after.width / after.height) > 0.01)
+	throw new Error(`<Compare>: before (${before.width}×${before.height}) and after (${after.width}×${after.height}) must have the same aspect ratio`);
+const pos = Math.min(100, Math.max(0, Number(start)));
+if (Number.isNaN(pos)) throw new Error('<Compare>: start must be a number from 0 to 100');
+const hasCaption = !!caption || Astro.slots.has('default');
+---
+<figure class="au-compare" style={`--pos:${pos}%;--w:${after.width}px`}>
+	<div class="au-compare__stage">
+		<div class="au-compare__pane au-compare__pane--after"><Image src={after} alt={afterAlt} /><span class="au-compare__label">{afterLabel}</span></div>
+		<div class="au-compare__pane au-compare__pane--before"><Image src={before} alt={beforeAlt} /><span class="au-compare__label">{beforeLabel}</span></div>
+		<span class="au-compare__handle" aria-hidden="true"></span>
+		<input class="au-compare__range" type="range" min="0" max="100" step="1" value={pos} aria-label={`Reveal: ${beforeLabel} (left) and ${afterLabel} (right)`} aria-valuetext={`${pos}% ${beforeLabel}`} data-before={beforeLabel} />
+	</div>
+	{hasCaption && <figcaption>{caption}<slot /></figcaption>}
+</figure>

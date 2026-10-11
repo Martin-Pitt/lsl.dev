@@ -5,7 +5,7 @@ export const pageHref = (id: string) => (id === 'index' ? '/' : `/${id}/`);
 export const code = (s: string) => (s.includes('`') ? `\`\` ${s} \`\`` : `\`${s}\``);
 /** Throws a build error naming the missing thing, so a typo in a page fails loudly. */
 export const need = <T>(v: T, what: string): NonNullable<T> => { if (!v) throw new Error(`page-markdown: unknown ${what}`); return v as NonNullable<T>; };
-/** Key of a <Figure> image in MarkdownPage.images: the src as written plus the width prop. */
+/** Key of a media-component image in MarkdownPage.images: the src as written plus the width prop. */
 export const imageKey = (src: string, width?: unknown) => `${src}|${width ?? ''}`;
 /** Prefixes every line with `> ` (blank lines become `>`), for a blockquote holding whole blocks. */
 export const quote = (s: string) => s.split('\n').map(l => (l.trim() ? `> ${l}` : '>')).join('\n');

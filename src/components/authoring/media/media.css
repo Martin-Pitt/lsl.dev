@@ -1,0 +1,252 @@
+/*
+ * Media batch: Figure (and its zoom popover), Compare, Hotspots, Gallery. Loaded site-wide via
+ * ../authoring.css. Owned by the media batch.
+ */
+@layer authoring {
+	/* <Figure>: just the image, plus an optional small caption underneath. */
+	.au-figure {
+		margin-inline: 0;
+		& img { display: block; max-inline-size: 100%; block-size: auto; border-radius: var(--au-radius-sm); }
+		& figcaption { margin-top: .375rem; font-size: var(--sl-text-sm); color: var(--au-text-muted); }
+		& figcaption > p { margin: 0; }
+	}
+
+	/* Zoom (<Figure zoom>): the thumbnail button and the full-size popover. */
+	.au-zoom__thumb {
+		position: relative;
+		display: block;
+		max-inline-size: 100%;
+		padding: 0;
+		border: 0;
+		border-radius: var(--au-radius-sm);
+		background: none;
+		cursor: zoom-in;
+		&:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
+	}
+	.au-zoom__icon {
+		position: absolute;
+		inset-block-start: .375rem;
+		inset-inline-end: .375rem;
+		display: grid;
+		place-items: center;
+		inline-size: 1.75rem;
+		block-size: 1.75rem;
+		border-radius: 50%;
+		background: rgb(0 0 0 / .6);
+		color: #fff;
+		opacity: 0;
+	}
+	.au-zoom__thumb:is(:hover, :focus-visible) .au-zoom__icon { opacity: 1; }
+	@media (hover: none) { .au-zoom__icon { opacity: 1; } }
+
+	.au-zoom {
+		/* Centred by the UA popover rules (inset: 0; margin: auto) and sized to the fitted image. */
+		margin: auto; /* Starlight's flow margin would otherwise pin it to the top. */
+		padding: 0;
+		border: 0;
+		border-radius: var(--au-radius);
+		background: transparent;
+		overflow: visible;
+		& > img {
+			display: block;
+			max-inline-size: calc(100vw - 2rem);
+			max-block-size: calc(100dvh - 2rem);
+			inline-size: auto;
+			block-size: auto;
+			object-fit: contain;
+			border-radius: var(--au-radius);
+			background: var(--au-surface-raised);
+			box-shadow: var(--sl-shadow-lg);
+		}
+		&::backdrop { background: rgb(0 0 0 / .75); }
+	}
+	.au-zoom__close {
+		position: absolute;
+		inset-block-start: .5rem;
+		inset-inline-end: .5rem;
+		display: grid;
+		place-items: center;
+		inline-size: 2.25rem;
+		block-size: 2.25rem;
+		padding: 0;
+		border: 1px solid rgb(255 255 255 / .5);
+		border-radius: 50%;
+		background: rgb(0 0 0 / .65);
+		color: #fff;
+		cursor: pointer;
+		&:hover { background: rgb(0 0 0 / .85); }
+		&:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.au-zoom, .au-zoom::backdrop {
+			opacity: 0;
+			transition: opacity var(--au-duration) var(--au-ease), display var(--au-duration) allow-discrete, overlay var(--au-duration) allow-discrete;
+		}
+		.au-zoom:popover-open, .au-zoom:popover-open::backdrop { opacity: 1; }
+		@starting-style { .au-zoom:popover-open, .au-zoom:popover-open::backdrop { opacity: 0; } }
+		.au-zoom__icon { transition: opacity var(--au-duration) var(--au-ease); }
+	}
+
+	/* <Compare>. Without JS (no [data-js]): both images side by side, each with its label. */
+	.au-compare {
+		margin-inline: 0;
+		& figcaption { margin-top: .375rem; font-size: var(--sl-text-sm); color: var(--au-text-muted); }
+		& figcaption > p { margin: 0; }
+		& img { display: block; inline-size: 100%; block-size: auto; }
+	}
+	.au-compare__stage {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--au-gap);
+		/* Starlight puts a margin between flow siblings; none inside the stage. */
+		& > * { margin: 0 !important; }
+	}
+	.au-compare__pane {
+		position: relative;
+		overflow: hidden;
+		border-radius: var(--au-radius-sm);
+		&.au-compare__pane--before { order: -1; }
+	}
+	.au-compare__label {
+		position: absolute;
+		inset-block-start: .5rem;
+		inset-inline-start: .5rem;
+		padding: .0625rem .5rem;
+		border-radius: var(--au-radius-sm);
+		background: rgb(0 0 0 / .65);
+		color: #fff;
+		font-size: var(--sl-text-xs);
+		font-weight: 600;
+		line-height: 1.6;
+		pointer-events: none;
+	}
+	.au-compare__handle, .au-compare__range { display: none; }
+
+	/* With JS: stacked, the before image clipped to the left --pos of the stage. */
+	.au-compare[data-js] {
+		inline-size: min(100%, var(--w));
+		.au-compare__stage {
+			position: relative;
+			display: block;
+			overflow: hidden;
+			border-radius: var(--au-radius-sm);
+		}
+		.au-compare__pane { border-radius: 0; }
+		.au-compare__pane--before {
+			position: absolute;
+			inset: 0;
+			clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+		}
+		.au-compare__pane--after .au-compare__label { inset-inline: auto .5rem; }
+		.au-compare__handle {
+			position: absolute;
+			inset-block: 0;
+			inset-inline-start: var(--pos);
+			display: block;
+			inline-size: 2px;
+			margin-inline-start: -1px !important;
+			background: #fff;
+			box-shadow: 0 0 0 1px rgb(0 0 0 / .35), 0 0 6px rgb(0 0 0 / .4);
+			pointer-events: none;
+			/* The grip in the middle. */
+			&::after {
+				content: '';
+				position: absolute;
+				inset-block-start: 50%;
+				inset-inline-start: 50%;
+				inline-size: 2.25rem;
+				block-size: 2.25rem;
+				translate: -50% -50%;
+				border: 2px solid #fff;
+				border-radius: 50%;
+				background: rgb(0 0 0 / .55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6 3 12l6 6M15 6l6 6-6 6' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") center / 1.25rem no-repeat;
+				box-shadow: 0 1px 4px rgb(0 0 0 / .5);
+			}
+		}
+		/* The range covers the whole image, so a drag anywhere moves it. It is transparent: the handle is drawn above. */
+		.au-compare__range {
+			position: absolute;
+			inset: 0;
+			display: block;
+			inline-size: 100%;
+			block-size: 100%;
+			margin: 0 !important;
+			appearance: none;
+			background: transparent;
+			cursor: ew-resize;
+			touch-action: pan-y;
+			opacity: 0;
+			/* A 2px thumb keeps the value under the pointer (a wide thumb offsets the mapping). */
+			&::-webkit-slider-thumb { appearance: none; inline-size: 2px; block-size: 2.5rem; }
+			&::-moz-range-thumb { inline-size: 2px; block-size: 2.5rem; border: 0; }
+		}
+		&:has(.au-compare__range:focus-visible) .au-compare__handle::after { outline: 3px solid var(--sl-color-text-accent); outline-offset: 2px; }
+	}
+
+	/* <Hotspots>: markers over the image, the notes listed below. */
+	.au-hotspots {
+		margin-inline: 0;
+		& > figcaption { margin-top: .375rem; font-size: var(--sl-text-sm); color: var(--au-text-muted); }
+	}
+	.au-hotspots__box {
+		position: relative;
+		inline-size: min(100%, var(--w));
+		container-type: inline-size;
+		& > img { display: block; inline-size: 100%; block-size: auto; border-radius: var(--au-radius-sm); }
+	}
+	.sl-markdown-content .au-hotspots__list { margin-block: .75rem 0; padding-inline-start: 1.5rem; }
+	.au-hotspot__marker {
+		position: absolute;
+		inset-inline-start: calc(var(--x) * 1%);
+		inset-block-start: calc(var(--y) * var(--r) * 1cqi);
+		translate: -50% -50%;
+		display: grid;
+		place-items: center;
+		inline-size: 1.75rem;
+		block-size: 1.75rem;
+		margin: 0 !important;
+		padding: 0;
+		border: 2px solid #fff;
+		border-radius: 50%;
+		background: light-dark(var(--sl-color-accent), var(--sl-color-accent-high));
+		color: light-dark(#fff, #000);
+		font: 700 var(--sl-text-xs) / 1 var(--sl-font-system);
+		/* A dark ring outside the white one keeps the marker visible on light and dark images. */
+		box-shadow: 0 0 0 2px rgb(0 0 0 / .5), 0 2px 6px rgb(0 0 0 / .5);
+		cursor: pointer;
+		anchor-name: var(--a);
+		&:hover { scale: 1.12; }
+		&:focus-visible { outline: 3px solid var(--sl-color-text-accent); outline-offset: 3px; }
+	}
+	.au-hotspot:has(:popover-open) .au-hotspot__marker { scale: 1.12; background: var(--sl-color-white); color: var(--sl-color-black); }
+	.au-hotspot__pop {
+		position-anchor: var(--a);
+		position-area: block-end;
+		position-try-fallbacks: flip-block, block-end span-inline-end, block-end span-inline-start, block-start span-inline-end, block-start span-inline-start;
+		margin: .5rem;
+		max-inline-size: min(22rem, calc(100vw - 2rem));
+		& .au-hotspot__label { display: block; margin-block-end: .25rem; color: var(--sl-color-white); }
+		& .au-hotspot__note > :first-child { margin-block-start: 0; }
+		& .au-hotspot__note > :last-child { margin-block-end: 0; }
+	}
+	.au-hotspot__text > p:first-of-type { display: inline; }
+	.au-hotspot__text > p + p { margin-block: .375rem 0; }
+	@media (prefers-reduced-motion: no-preference) {
+		.au-hotspot__marker { transition: scale var(--au-duration) var(--au-ease); }
+	}
+
+	/* <Gallery>: a grid of zoomable figures, its column count chosen by the gallery's own width. */
+	.au-gallery { container-type: inline-size; }
+	.au-gallery__grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--au-gap);
+		& > * { margin: 0 !important; }
+		& .au-zoom__thumb { inline-size: 100%; }
+		& .au-zoom__thumb > img { inline-size: 100%; block-size: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+		& figcaption { margin-top: .25rem; }
+	}
+	@container (width < 18rem) { .au-gallery__grid { grid-template-columns: minmax(0, 1fr); } }
+	@container (width >= 30rem) { .au-gallery__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+	@container (width >= 48rem) { .au-gallery__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+}

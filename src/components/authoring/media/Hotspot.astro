@@ -1,0 +1,21 @@
+---
+/**
+ * <Hotspot x="30%" y="40%" label="…">Markdown note</Hotspot>: one marker of a <Hotspots>, which
+ * fills in its number and ids. x and y are percentages of the image, from its top-left corner.
+ */
+interface Props { x: string | number; y: string | number; label: string }
+const { label } = Astro.props;
+const pct = (v: unknown, axis: string) => {
+	const n = parseFloat(String(v));
+	if (Number.isNaN(n) || n < 0 || n > 100) throw new Error(`<Hotspot label="${label}">: ${axis} must be a percentage from 0% to 100%`);
+	return n;
+};
+const x = pct(Astro.props.x, 'x'), y = pct(Astro.props.y, 'y');
+if (!label) throw new Error('<Hotspot>: the label prop is required');
+const note = await Astro.slots.render('default');
+---
+<Fragment set:html="<!--au-hs-->" /><li class="au-hotspot" style={`--x:${x};--y:${y};--a:--@@id@@`}>
+	<button type="button" class="au-hotspot__marker" popovertarget="@@id@@" aria-label={`@@n@@: ${label}`}>@@n@@</button>
+	<div popover id="@@id@@" class="au-popover au-hotspot__pop"><strong class="au-hotspot__label">{label}</strong><div class="au-hotspot__note"><Fragment set:html={note} /></div></div>
+	<span class="au-hotspot__text"><strong>{label}</strong>{note && ': '}<Fragment set:html={note} /></span>
+</li>

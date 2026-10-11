@@ -1,0 +1,25 @@
+---
+/**
+ * <Figure>: a local image with an optional caption (a prop, or Markdown children). Just the image:
+ * no frame or padding. `alt` is required (alt="" only for a purely decorative image). A remote or
+ * unknown src fails the build.
+ *
+ *   <Figure src="~/assets/door-linkset.png" alt="Door linkset in edit mode" caption="The root prim is highlighted yellow." />
+ *   <Figure src="~/assets/door-linkset.png" alt="…">Caption with **Markdown**.</Figure>
+ *   <Figure src="~/assets/door-linkset.png" alt="…" width={320} zoom />   click to enlarge (ZoomView)
+ *
+ * A string src is a path under src/ (`~/…` or `/src/…`); an imported image (src={img}) also works.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { resolveImage, requireAlt } from './image';
+import ZoomView from './ZoomView.astro';
+
+interface Props { src: ImageMetadata | string; alt: string; caption?: string; width?: number; zoom?: boolean }
+const { src, caption, width, zoom } = Astro.props;
+if ('hint' in Astro.props) throw new Error('<Figure>: the hint prop was removed; put the text in the caption');
+const alt = requireAlt(Astro.props.alt, 'Figure');
+const image = await resolveImage(src, 'Figure');
+const hasCaption = !!caption || Astro.slots.has('default');
+---
+<figure class:list={['au-figure', zoom && 'au-figure--zoom']}>{zoom ? <ZoomView image={image} alt={alt} width={width} /> : <Image src={image} alt={alt} width={width} />}{hasCaption && <figcaption>{caption}<slot /></figcaption>}</figure>

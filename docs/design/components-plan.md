@@ -258,7 +258,7 @@ Nothing changes: links export as links. Cards are web-only.
 **Purpose:** a summary strip at the top of a recipe.
 
 ```mdx
-<RecipeMeta prims={2} scripts={1} permissions={["PERMISSION_TAKE_CONTROLS"]} time="15 min" />
+<RecipeMeta scripts={1} time="15 min" />
 ```
 
 | Prop | Type | Default |

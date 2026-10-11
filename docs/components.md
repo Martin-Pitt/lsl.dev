@@ -118,17 +118,17 @@ RecipeMeta, Prerequisites, ScriptFile, Requires, Linkset, Steps and BuildStep. S
 import { RecipeMeta, Prerequisites, Requires, Linkset, Steps, BuildStep, ScriptFile } from '~/components/authoring';
 ```
 
-**`<RecipeMeta>`**: the summary strip at the top of a recipe, factual fields only. `prims` and `scripts` default to 1; `permissions` are
-`PERMISSION_*` constants and link to their pages; `time` is optional free text.
+**`<RecipeMeta>`**: the summary strip at the top of a recipe: `scripts` (default 1) and an optional
+free-text `time`. Prims are shown by `<Linkset>` and permissions by `<Requires>`, so they aren't repeated here.
 
 ```mdx
-<RecipeMeta prims={3} scripts={1} permissions={["PERMISSION_TAKE_CONTROLS"]} time="15 min" />
+<RecipeMeta scripts={1} time="15 min" />
 ```
 
 **`<Prerequisites>`**: a "What you need to know" box for recipes and guides. Children are an
 ordinary Markdown list of links (they get inline-code styling and hover cards like any link);
 `title` is optional and defaults to "What you need to know". Renders as
-`<aside class="au-prereq" aria-label="…">` with a visible label; no JS. Exports to Markdown as
+`<aside class="au-prereq" aria-label="â€¦">` with a visible label; no JS. Exports to Markdown as
 `**What you need to know**` (or the title) followed by the list.
 
 ```mdx

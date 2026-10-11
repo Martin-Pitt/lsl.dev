@@ -1,17 +1,17 @@
 ---
-/** Summary strip at the top of a recipe: prims, scripts, time, permissions. No JS. */
-import { onlyProps, permission } from './vocab';
+/**
+ * Summary strip at the top of a recipe: how many scripts and roughly how long it takes. No JS.
+ * Prims are shown by <Linkset>, and permissions by <Requires>, so they aren't repeated here.
+ */
+import { onlyProps } from './vocab';
 
-interface Props { prims?: number; scripts?: number; permissions?: string[]; time?: string }
-onlyProps(Astro.props, ['prims', 'scripts', 'permissions', 'time'], 'RecipeMeta');
-const { prims = 1, scripts = 1, permissions = [], time } = Astro.props;
-const perms = permissions.map(p => permission(p, 'RecipeMeta'));
+interface Props { scripts?: number; time?: string }
+onlyProps(Astro.props, ['scripts', 'time'], 'RecipeMeta');
+const { scripts = 1, time } = Astro.props;
 ---
 <div class="au-recipe-meta">
 	<dl>
-		<div><dt>Prims</dt><dd>{prims}</dd></div>
 		<div><dt>Scripts</dt><dd>{scripts}</dd></div>
 		{time && <div><dt>Time</dt><dd>{time}</dd></div>}
-		<div class="au-recipe-meta-perms"><dt>Permissions</dt><dd>{perms.length ? perms.map((p, i) => <>{i > 0 && ', '}<a href={p.href}><code>{p.name}</code></a></>) : 'none'}</dd></div>
 	</dl>
 </div>

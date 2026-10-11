@@ -3,21 +3,13 @@
  * Owned by the recipe batch agent. Each component gets a case here; see ./types.ts and
  * docs/design/components-plan.md for the agreed Markdown form of each component.
  */
-import { PREREQ_TITLE, permission, requirements } from '../../components/authoring/recipe/vocab';
+import { PREREQ_TITLE, requirements } from '../../components/authoring/recipe/vocab';
 import { code, indent } from './util';
 import type { CaseFile } from './types';
 
 export default {
 	selfClosing: {
-		RecipeMeta: a => {
-			const perms: string[] = (a.permissions ?? []).map((p: string) => permission(p, 'RecipeMeta').name);
-			return [
-				`**Prims:** ${a.prims ?? 1}`,
-				`**Scripts:** ${a.scripts ?? 1}`,
-				a.time && `**Time:** ${a.time}`,
-				`**Permissions:** ${perms.length ? perms.map(code).join(', ') : 'none'}`,
-			].filter(Boolean).join(' · ');
-		},
+		RecipeMeta: a => [`**Scripts:** ${a.scripts ?? 1}`, a.time && `**Time:** ${a.time}`].filter(Boolean).join(' · '),
 		Requires: a => {
 			const { perms, flags } = requirements(a);
 			return `**Requires:** ${[...perms.map(p => code(p.name)), ...flags].join(', ')}`;

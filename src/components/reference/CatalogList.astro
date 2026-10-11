@@ -100,13 +100,23 @@ class CatalogList extends HTMLElement {
 			text ??= rows.map(r => `${r.textContent} ${r.querySelector('a')?.title ?? ''}`.toLowerCase());
 			const terms = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean), category = cloud ? cat : select?.value;
 			let count = 0;
+			// Letter/prefix options follow the other filters: each shows how many rows it would leave, and
+			// options that would leave none are disabled (the active one stays enabled so it can be turned off).
+			const avail: Record<string, Map<string, number>> = {};
+			for (const k in pick) avail[k] = new Map();
 			rows.forEach((row, i) => {
 				const has = (row.dataset.b ?? '').split(' ');
-				const match = terms.every(t => text![i].includes(t)) && (!category || (row.dataset.c ?? '').split(' ').includes(category))
-					&& Object.entries(pick).every(([k, v]) => !v || row.dataset[k] === v)
+				const base = terms.every(t => text![i].includes(t)) && (!category || (row.dataset.c ?? '').split(' ').includes(category))
 					&& [...state].every(([b, s]) => !s || (s === 1) === has.includes(b));
+				if (base) for (const k in pick) { const v = row.dataset[k]; if (v) avail[k].set(v, (avail[k].get(v) ?? 0) + 1); }
+				const match = base && Object.entries(pick).every(([k, v]) => !v || row.dataset[k] === v);
 				row.hidden = !match; if (match) count++;
 			});
+			for (const g of picks) for (const b of g.querySelectorAll<HTMLButtonElement>('button')) {
+				const n = avail[g.dataset.key!]?.get(b.dataset.v!) ?? 0, small = b.querySelector('small');
+				b.disabled = n === 0 && b.dataset.v !== pick[g.dataset.key!];
+				if (small) small.textContent = String(n);
+			}
 			for (const s of sections) s.hidden = !s.querySelector('li:not([hidden])');
 			const badges = [...state.values()].some(Boolean), active = terms.length > 0 || !!category || badges || Object.values(pick).some(Boolean);
 			for (const g of picks) for (const b of g.querySelectorAll<HTMLButtonElement>('button')) b.setAttribute('aria-pressed', String(b.dataset.v === pick[g.dataset.key!]));

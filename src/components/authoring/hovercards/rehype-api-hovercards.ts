@@ -3,12 +3,16 @@
  * docs/design/components-plan.md). Registered in astro.config after rehype-inline-lsl, so it also
  * sees the links that plugin makes inside inline code.
  *
- * For each link to /functions|events|constants/<name>/ it inserts one card right after the link
- * (after the enclosing inline <code> when the link sits inside one):
+ * One card per distinct API per file (an MDX page or an imported partial), appended at the end of
+ * the file's content; every link to /functions|events|constants/<name>/ in that file points at it:
  *
- *   <a href="/functions/llSay/" interestfor="hcx1a-3" style="anchor-name:--hcx1a-3">…</a><span
- *     popover="hint" id="hcx1a-3" class="au-popover hc" aria-hidden="true"
- *     data-pagefind-ignore style="position-anchor:--hcx1a-3">signature, one line, flags</span>
+ *   <a href="/functions/llSay/" interestfor="hcx1a-llSay">…</a> … <a href="/functions/llSay/" interestfor="hcx1a-llSay">…</a>
+ *   … <span popover="hint" id="hcx1a-llSay" class="au-popover hc" aria-hidden="true"
+ *       data-pagefind-ignore>signature, one line, flags</span>
+ *
+ * The card anchors to whichever link opened it: an invoker is the popover's implicit anchor, so
+ * position-area needs no anchor-name. The fallback script (PageEnd.astro) opens it with
+ * showPopover({ source: link }) for the same effect.
  *
  * The link keeps its href (never popovertarget), so click and tap always navigate. The card is
  * phrasing content with nothing focusable in it. Skipped: self-links, links in headings, in <pre>,
@@ -16,7 +20,7 @@
  *
  * Card data: src/data/hovercards.json from scripts/build-hovercards.ts. It may be missing (astro
  * check, fresh clones), so it is loaded lazily and a missing file means "no cards". Each card body
- * is built once per API per build and cloned for every link.
+ * is built once per API per build and shared by the files that use it.
  */
 import { readFileSync } from 'node:fs';
 import { fromHtml } from 'hast-util-from-html';
@@ -85,39 +89,35 @@ export default function rehypeApiHovercards() {
 		const prefix = `hc${hash.toString(36).slice(-3)}`;
 		const self = new Set<string>([fm.title, path.match(/([^\\/]+)\.mdx?$/)?.[1]].filter(Boolean));
 
-		type Job = { link: Node; parent: Node; after: Node; name: string };
-		const jobs: Job[] = [];
+		const links = new Map<string, Node[]>(); // API name -> its links, in document order
 		const skip = (n: Node) => n.type === 'element'
 			? HEADING.test(n.tagName!) || SKIP_TAGS.has(n.tagName!) || n.properties?.dataNocard != null || classes(n).includes('hc')
 			: n.name === 'NoCard';
-		// `host` is set inside inline <code>: the card then goes after that <code>, not inside it.
-		const visit = (node: Node, host?: { parent: Node; code: Node }) => {
+		const visit = (node: Node) => {
 			for (const child of node.children ?? []) {
 				if (!(child.type === 'element' || child.type === 'mdxJsxTextElement' || child.type === 'mdxJsxFlowElement') || skip(child)) continue;
 				if (child.type === 'element' && child.tagName === 'a') {
 					const name = String(child.properties?.href ?? '').match(API_HREF)?.[1];
-					if (name && all[name] && !self.has(name)) jobs.push({ link: child, parent: host?.parent ?? node, after: host?.code ?? child, name });
+					if (name && all[name] && !self.has(name)) links.set(name, [...(links.get(name) ?? []), child]);
 					continue; // nothing card-worthy nests inside a link
 				}
-				visit(child, host ?? (child.type === 'element' && child.tagName === 'code' ? { parent: node, code: child } : undefined));
+				visit(child);
 			}
 		};
 		visit(tree);
-		if (!jobs.length) return;
+		if (!links.size) return;
 
-		const built = await Promise.all(jobs.map(j => body(j.name, all[j.name])));
-		// Insert from the last job backwards so earlier indexes stay valid; ids follow document order.
-		for (let i = jobs.length - 1; i >= 0; i--) {
-			const { link, parent, after } = jobs[i];
-			const id = `${prefix}-${i + 1}`;
-			link.properties = { ...link.properties, interestfor: id, style: [link.properties?.style, `anchor-name:--${id}`].filter(Boolean).join(';') };
-			const card: Node = {
+		// One card per API per file, appended to the end of the file's tree; every link to it shares it.
+		const names = [...links.keys()];
+		const built = await Promise.all(names.map(n => body(n, all[n])));
+		names.forEach((name, i) => {
+			const id = `${prefix}-${name}`;
+			for (const link of links.get(name)!) link.properties = { ...link.properties, interestfor: id };
+			tree.children!.push({
 				type: 'element', tagName: 'span',
-				properties: { popover: 'hint', id, className: ['au-popover', 'hc'], ariaHidden: 'true', dataPagefindIgnore: '', style: `position-anchor:--${id}` },
+				properties: { popover: 'hint', id, className: ['au-popover', 'hc'], ariaHidden: 'true', dataPagefindIgnore: '' },
 				children: structuredClone(built[i]),
-			};
-			const kids = parent.children!;
-			kids.splice(kids.indexOf(after) + 1, 0, card);
-		}
+			});
+		});
 	};
 }

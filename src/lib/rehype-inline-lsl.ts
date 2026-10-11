@@ -5,10 +5,12 @@
  *   LSL grammar; API names inside it link to their pages (see src/lib/inline-lsl.ts).
  * - A link to an API page whose text is the API name, e.g. [llListen](/functions/llListen/),
  *   is rendered as highlighted code inside the link.
+ * - A link to an API that has no page (deprecated or private, e.g. llSetPrimitiveParams) is
+ *   unlinked: only the highlighted code remains, so no dead link and no hover card.
  * The page's own name (its frontmatter title) is never linked.
  */
 import { fromHtml } from 'hast-util-from-html';
-import { inlineLsl } from './inline-lsl';
+import { inlineLsl, hasApiPage, apiHrefName } from './inline-lsl';
 
 type Node = { type: string; tagName?: string; name?: string; value?: string; properties?: Record<string, any>; attributes?: any[]; children?: Node[] };
 const API_HREF = /^\/(?:functions|events|constants)\/[A-Za-z_][A-Za-z0-9_]*\/$/;
@@ -37,6 +39,15 @@ export default function rehypeInlineLsl() {
 				if (isEl(child, 'a')) {
 					const href = String(hrefOf(child) ?? '');
 					const label = textOf(child);
+					if (API_HREF.test(href) && !hasApiPage(apiHrefName(href)!)) {
+						// No page: replace the link by its content, highlighted when it is just the name.
+						const kids = child.children ?? [];
+						const plain = IDENT.test(label) && kids.every(k => k.type === 'text');
+						const at = node.children!.indexOf(child);
+						if (plain) jobs.push(inlineLsl(label, { link: false }).then(html => { node.children!.splice(node.children!.indexOf(child), 1, ...fragment(html)); }));
+						else node.children!.splice(at, 1, ...kids);
+						continue;
+					}
 					if (API_HREF.test(href) && IDENT.test(label) && (child.children ?? []).every(k => k.type === 'text')) {
 						if (child.type === 'element') child.properties = { ...child.properties, className: ['lsl-ref'] };
 						jobs.push(inlineLsl(label, { link: false }).then(html => { child.children = fragment(html); }));

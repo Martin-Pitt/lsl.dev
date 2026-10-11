@@ -24,10 +24,17 @@
 		--au-gap: .75rem;
 		--au-tint: 12%;
 
-		/* Surfaces: neutral, matching the code surface depth in dark mode. */
-		--au-surface: light-dark(var(--sl-color-gray-7), var(--sl-color-gray-6));
-		--au-surface-raised: light-dark(var(--sl-color-white), var(--sl-color-gray-5));
-		--au-border: var(--sl-color-hairline);
+		/*
+		 * Surfaces: neutral, matching the code surface depth in dark mode. Only use Starlight
+		 * variables defined in BOTH themes: an undefined var() inside light-dark() invalidates the
+		 * whole value (dark has no --sl-color-gray-7), and --sl-color-white/black swap meaning
+		 * between themes (white is the text colour). --sl-color-bg-nav is gray-7 in light and
+		 * gray-6 in dark; --sl-color-bg is the page background (white in light).
+		 */
+		--au-surface: var(--sl-color-bg-nav);
+		--au-surface-raised: light-dark(var(--sl-color-bg), var(--sl-color-gray-5));
+		/* Dark --sl-color-hairline equals --au-surface (gray-6), so rules on a surface vanish; use gray-5 there. */
+		--au-border: light-dark(var(--sl-color-hairline), var(--sl-color-hairline-light));
 		--au-text-muted: var(--sl-color-gray-3);
 
 		/* Semantic colours: a solid colour for rules and icons, and a tint for fills. */

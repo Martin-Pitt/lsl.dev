@@ -9,6 +9,9 @@ export function apiHref(kind: string, name: string) { return `/${kind.endsWith('
 export function categoryHref(id: string) { return `/categories/${encodeURIComponent(id)}/`; }
 export const allApi = [...data.functions, ...data.events, ...data.constants];
 export const apiMap = new Map(allApi.map(a => [a.name, a]));
+/** Href of an LSL type's page (src/content/docs/types/<name>.mdx; one per catalog type), or undefined. */
+const typeNames = new Set(data.types.map(t => t.name));
+export function typeHref(name: string) { return typeNames.has(name) ? `/types/${name}/` : undefined; }
 export function wikiHref(slug: string) { return `/wiki/${slug}/`; }
 
 // Feature pages: curated dashboards that drive /features/ and the sidebar (slugs match slua.dev).

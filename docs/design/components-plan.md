@@ -49,8 +49,8 @@ independent critiques of this plan. They override the rest of the document.
 4. **Hover cards** (Batch 1, details in its section): Popover plus CSS anchor positioning,
    opening on hover and focus only (`interestfor` where supported, otherwise a tiny script). The
    link stays a normal `<a href>` that navigates on click and tap: no `popovertarget` on the
-   link, and no tap-to-open on touch. One popover per link, inserted next to it in the content
-   tree, so anchors are never shared. The card has no links or other interactive content, no
+   link, and no tap-to-open on touch. One popover per API per file, appended to the content tree
+   and shared by every link to that API; it anchors to the link that opened it (implicit anchor). The card has no links or other interactive content, no
    `role="tooltip"` and no `aria-describedby` pointing at it. It is purely supplementary
    (`aria-hidden="true"`) and carries `data-pagefind-ignore`.
 5. **`<Linkset>` v1** is a styled nested Markdown list (FileTree-style wrapper) with no pipe DSL.
@@ -96,7 +96,11 @@ Facts checked while recording these:
 - **Markdown export.** `src/lib/page-markdown.ts` is a hand-written MDX-source scanner. Each
   authoring component needs a case in its batch's `src/lib/page-markdown/<batch>.ts`, and the
   build fails without one.
-  Each component below states its export.
+  Each component below states its export. A case is `selfClosing`, `paired` (open/close text) or
+  `transform` (gets the converted children, fenced code included, and returns the whole output,
+  e.g. to quote every line), and every case receives a context with its open parent components
+  (`ctx.parents`, e.g. a Details inside a FAQ). The `.md` route resolves `<Figure>` sources with
+  `getImage()` into `page.images`, so figures export as `![alt](url)`.
 - **Simple props.** Feature components get parsed from source by `scripts/lib/feature_mdx.py`
   (props as JSON), so props stay as strings, numbers, booleans or short string lists. No
   JSX expressions beyond `{["a","b"]}`.
@@ -191,34 +195,42 @@ read at build time only and never shipped.
 `rehype-api-hovercards` (registered in `astro.config` after `rehype-inline-lsl`) visits each
 `<a>` whose href resolves to a catalog entry, and skips self-links, links inside headings,
 `[data-nocard]` and pages with `hoverCards: false`. The sidebar is not Markdown, so the plugin
-never sees it. For each link it inserts one card **right after the link**, in the content tree
-(rehype can't append to `<main>`; no PageFrame change is needed). `n` counts links on the page:
+never sees it. It emits **one card per distinct API per file** (the page or an imported MDX
+partial), appended at the end of that file's content tree (rehype can't append to `<main>`; no
+PageFrame change is needed). Every link to that API in the file points at the same card. Ids are
+`hc<3-char hash of the file path>-<API name>`, unique on the page even with partials:
 
 ```html
-<a href="/functions/llSetTimerEvent/" class="lsl-ref" interestfor="hc-7"
-   style="anchor-name: --hc-7">llSetTimerEvent</a><span
-   popover="hint" id="hc-7" class="au-popover hc" aria-hidden="true" data-pagefind-ignore
-   style="position-anchor: --hc-7">
+<a href="/functions/llSetTimerEvent/" class="lsl-ref" interestfor="hck0t-llSetTimerEvent">llSetTimerEvent</a>
+… <a href="/functions/llSetTimerEvent/" class="lsl-ref" interestfor="hck0t-llSetTimerEvent">…</a>
+…
+<span popover="hint" id="hck0t-llSetTimerEvent" class="au-popover hc" aria-hidden="true" data-pagefind-ignore>
   <span class="hc-sig"><code>…signature, LSL token colours…</code></span>
   <span class="hc-desc">One-line description.</span>
   <span class="hc-flags"><span class="hc-flag">Sleeps 0.2 s</span>…</span>
 </span>
 ```
 
-- The link keeps its `href`, text and classes. It gets only `interestfor` and an inline
-  `anchor-name`. It never gets `popovertarget`, so click and tap always navigate.
-- The card is phrasing content (`<span>`s, styled as blocks), so it is valid inside `<p>`, list
-  items and table cells. It has no links, buttons or other focusable content.
-- One card per link means no shared anchors. The cost is HTML size: about 250–400 bytes per
-  link. Check the heaviest pages during development and keep them under about 15 KB of card
-  markup.
-- Positioning comes from `shared/popover.css` (`.au-popover`): `position-area: block-end
-  span-inline-end`, `position-try-fallbacks: flip-block, flip-inline`.
+- The link keeps its `href`, text and classes. It gets only `interestfor`. It never gets
+  `popovertarget`, so click and tap always navigate.
+- The card is phrasing content (`<span>`s, styled as blocks) with no links, buttons or other
+  focusable content.
+- One card per API (changed from one per link): the card anchors to whichever link opened it,
+  because an invoker is the popover's implicit anchor, so `position-area` needs no `anchor-name`.
+  Measured card markup (cards plus `interestfor` attributes) before → after: features/combat
+  26.9 → 16.2 KB, features/avatar 35.4 → 27.9 KB, llSetLinkPrimitiveParamsFast 18.4 → 11.0 KB,
+  llRequestPermissions 21.1 → 13.6 KB.
+- Positioning comes from `shared/popover.css` (`.au-popover`): `inset: auto`, `position-area:
+  block-end span-inline-end`, `position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline`.
+- Only APIs with a reference page get a card (or a link at all, see `hasApiPage` in
+  `src/lib/inline-lsl.ts`); deprecated or private names render as unlinked highlighted code.
 - Opening: `interestfor` where supported. Elsewhere a shared inline script in
   `hovercards/PageEnd.astro` (under 1 KB, no island) uses delegation on `a[interestfor]` for
-  `pointerenter` and `focusin` (300 ms intent delay, mouse and pen only; `pointerType ===
-  "touch"` is ignored), and `pointerleave`/`focusout` to hide. Esc and light dismiss come from
-  the popover.
+  `pointerover` and `focusin` (300 ms intent delay, mouse and pen only; `pointerType ===
+  "touch"` is ignored), and `pointerout`/`focusout` to hide. It opens the card with
+  `showPopover({ source: link })` (implicit anchor) and also sets `anchor-name: --hc` on the
+  active link, which the card uses as `position-anchor`, for engines without `source`. Esc and
+  light dismiss come from the popover.
 - Build cost: one map lookup per link, with the JSON memoised once per build.
 
 ### Accessibility
@@ -711,8 +723,8 @@ so no batch has to edit a shared file. The exact map is in
 [components-ownership.md](components-ownership.md).
 
 **Risks.**
-- Hover cards on every page could bloat HTML or slow the build. One card per link (decision 4)
-  costs more HTML than per-API dedupe. Mitigate with short cards, a size check on the heaviest
+- Hover cards on every page could bloat HTML or slow the build. Cards are deduplicated per API
+  per file (about 25-40 % less card markup than the original one-card-per-link design). Mitigate with short cards, a size check on the heaviest
   pages and memoised data.
 - `interestfor` support differs between browsers. The small intent script covers the gap,
   and links always work.

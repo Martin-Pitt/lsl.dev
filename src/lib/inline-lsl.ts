@@ -21,6 +21,13 @@ const NAMED: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', a
 export const unescapeHtml = (s: string) => s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) =>
 	e[0] === '#' ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10)) : NAMED[e.toLowerCase()] ?? m);
 
+/** True if the API has a reference page. Every catalog function, event and constant has one
+ * (src/content/docs/<kind>/<name>.mdx); deprecated or private names (catalog.deprecated, `replaces`,
+ * e.g. llSetPrimitiveParams) are not in apiMap and have none, so they are never linked or carded. */
+export const hasApiPage = (name: string) => apiMap.has(name);
+/** Name in an API page href (/functions/llSay/), or undefined. */
+export const apiHrefName = (href: string) => href.match(/^\/(?:functions|events|constants)\/([A-Za-z_][A-Za-z0-9_]*)\/$/)?.[1];
+
 /** Href of an API entry by exact name, if it is in the public reference. */
 export function apiLink(name: string): string | undefined {
 	const entry = apiMap.get(name);
@@ -85,12 +92,13 @@ export async function enhanceHtml(html: string, opts: InlineOptions = {}): Promi
 		let seg = parts[i];
 		seg = await replaceAsync(seg, /<code>([\s\S]*?)<\/code>/g, async (whole, inner) => {
 			const link = inner.match(/^<a href="([^"]+)">([^<]*)<\/a>$/);
+			if (link && apiHrefName(link[1]) && !hasApiPage(apiHrefName(link[1])!)) return inlineLsl(unescapeHtml(link[2]), { link: false });
 			if (link) return `<a class="lsl-ref" href="${link[1]}">${await inlineLsl(unescapeHtml(link[2]), { link: false })}</a>`;
 			if (inner.includes('<')) return whole; // mixed markup stays as authored
 			return inlineLsl(unescapeHtml(inner), opts);
 		});
 		seg = await replaceAsync(seg, /<a href="(\/(?:functions|events|constants)\/[^"/]+\/)">([A-Za-z_][A-Za-z0-9_]*)<\/a>/g, async (_, href, name) =>
-			`<a class="lsl-ref" href="${href}">${await inlineLsl(name, { link: false })}</a>`);
+			!hasApiPage(apiHrefName(href)!) ? inlineLsl(name, { link: false }) : `<a class="lsl-ref" href="${href}">${await inlineLsl(name, { link: false })}</a>`);
 		seg = await replaceAsync(seg, /<td>(\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*)<\/td>/g, async (whole, a, name, b) =>
 			IDENT.test(name) && apiMap.has(name) ? `<td>${a}${await inlineLsl(name, opts)}${b}</td>` : whole);
 		parts[i] = seg;

@@ -8,16 +8,16 @@
  * authoring components (imported from src/components/authoring): one without a case fails the build.
  */
 import { catalog } from './catalog';
-import { selfClosingCases, pairedCases, handledBy } from './page-markdown/index';
+import { selfClosingCases, pairedCases, transformCases, handledBy } from './page-markdown/index';
 import { SITE, pageHref } from './page-markdown/util';
-import type { Attrs, MarkdownPage } from './page-markdown/types';
+import type { Attrs, Context, MarkdownPage } from './page-markdown/types';
 
 export type { MarkdownPage } from './page-markdown/types';
 export const markdownHref = (id: string) => (id === 'index' ? '/index.md' : `/${id}/index.md`);
 
 /** Component cases live in src/lib/page-markdown/<file>.ts, one file per batch (see ./page-markdown/index.ts). */
-const selfClosing = (tag: string, a: Attrs, page: MarkdownPage) => selfClosingCases.get(tag)?.(a, page);
-const paired = (tag: string, a: Attrs, page: MarkdownPage): [string, string] => pairedCases.get(tag)?.(a, page) ?? ['', ''];
+const selfClosing = (tag: string, a: Attrs, page: MarkdownPage, ctx: Context) => selfClosingCases.get(tag)?.(a, page, ctx);
+const paired = (tag: string, a: Attrs, page: MarkdownPage, ctx: Context): [string, string] => pairedCases.get(tag)?.(a, page, ctx) ?? ['', ''];
 
 /** Parses JSX attributes starting at s[i] (just after the tag name); returns attrs and the index after `>`. */
 function parseTag(s: string, i: number): { attrs: Attrs; end: number; selfClose: boolean } | null {
@@ -65,12 +65,21 @@ function authoringImports(body: string): Set<string> {
 	return names;
 }
 
-/** Converts MDX prose (no fenced code) with a stack of open components. */
-function convertText(s: string, page: MarkdownPage, authoring: Set<string>): string {
+/** An open component: its case output so far starts at `start` in the output. */
+type Frame = { name: string; attrs: Attrs; close: string; start: number; ctx: Context };
+
+/** Placeholder for a fenced code block, so that components can span code (see mdxToMarkdown). */
+const FENCE = (n: number) => `\u0000${n}\u0000`;
+
+/** Converts MDX prose with a stack of open components. Fenced code arrives as FENCE placeholders
+ * and is restored in place, so a `transform` case sees its full children. */
+function convertText(s: string, page: MarkdownPage, authoring: Set<string>, fences: string[]): string {
 	let out = '';
-	const stack: string[] = [];
+	const stack: Frame[] = [];
+	const ctx = (): Context => ({ parents: stack.map(f => f.name) });
 	for (let i = 0; i < s.length;) {
 		const c = s[i];
+		if (c === '\u0000') { const j = s.indexOf('\u0000', i + 1); out += fences[Number(s.slice(i + 1, j))]; i = j + 1; continue; }
 		if (c === '`') { const run = /^`+/.exec(s.slice(i))![0]; const j = s.indexOf(run, i + run.length); const end = j < 0 ? i + run.length : j + run.length; out += s.slice(i, end); i = end; continue; }
 		if (c === '<' && /^<\/?[A-Z]/.test(s.slice(i, i + 3))) {
 			const closing = s[i + 1] === '/';
@@ -79,9 +88,25 @@ function convertText(s: string, page: MarkdownPage, authoring: Set<string>): str
 			if (t) {
 				// Guard: an authoring component without a case would silently degrade the export.
 				if (!closing && authoring.has(name) && !handledBy.has(name)) throw new Error(`page-markdown: <${name}> (on ${page.id}) has no case in src/lib/page-markdown/<batch>.ts`);
-				if (closing) { const top = stack.pop(); out += top ?? ''; }
-				else if (t.selfClose) { const r = selfClosing(name, t.attrs, page); out += r !== undefined ? `\n\n${r}\n\n` : paired(name, t.attrs, page).join(''); }
-				else { const [open, close] = paired(name, t.attrs, page); out += open; stack.push(close); }
+				if (closing) {
+					const f = stack.pop();
+					if (f) {
+						const transform = transformCases.get(f.name);
+						if (transform) out = out.slice(0, f.start) + transform(out.slice(f.start), f.attrs, page, f.ctx);
+						else out += f.close;
+					}
+				} else if (t.selfClose) {
+					const here = ctx();
+					const r = selfClosing(name, t.attrs, page, here);
+					if (r !== undefined) out += `\n\n${r}\n\n`;
+					else if (transformCases.has(name)) out += transformCases.get(name)!('', t.attrs, page, here);
+					else out += paired(name, t.attrs, page, here).join('');
+				} else {
+					const here = ctx();
+					const [open, close] = transformCases.has(name) ? ['', ''] : paired(name, t.attrs, page, here);
+					out += open;
+					stack.push({ name, attrs: t.attrs, close, start: out.length, ctx: here });
+				}
 				i = t.end;
 				continue;
 			}
@@ -117,20 +142,26 @@ export function mdxToMarkdown(body: string, page: MarkdownPage): string {
 	body = inlineShowcases(body);
 	const authoring = authoringImports(body);
 	const lines = body.replace(/\r\n/g, '\n').split('\n');
-	const parts: string[] = [];
-	let text: string[] = [];
-	let fence: string | null = null;
-	const flush = () => { if (text.length) parts.push(convertText(text.join('\n'), page, authoring)); text = []; };
+	const text: string[] = [];
+	const fences: string[] = [];
+	let fence: { marker: string; lines: string[] } | null = null;
+	const endFence = () => { text.push(FENCE(fences.length)); fences.push(fence!.lines.join('\n')); fence = null; };
 	for (const line of lines) {
 		const f = /^\s*(`{3,}|~{3,})/.exec(line);
-		if (fence) { parts.push(line); if (f && f[1][0] === fence[0] && f[1].length >= fence.length && line.trim() === f[1]) fence = null; continue; }
-		if (f) { flush(); fence = f[1]; parts.push(line); continue; }
+		if (fence) {
+			fence.lines.push(line);
+			if (f && f[1][0] === fence.marker[0] && f[1].length >= fence.marker.length && line.trim() === f[1]) endFence();
+			continue;
+		}
+		if (f) { fence = { marker: f[1], lines: [line] }; continue; }
 		if (/^(import|export)\s/.test(line)) continue;
 		text.push(line);
 	}
-	flush();
-	// Code fences were pushed line by line; join everything back and tidy blank lines.
-	return parts.join('\n').replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n').trim();
+	if (fence) endFence();
+	// Tidy trailing spaces and blank lines outside code; top-level fences stay verbatim.
+	const out = convertText(text.join('\n'), page, authoring, fences);
+	return out.split(/(^[ \t]*(?:`{3,}|~{3,})[^\n]*\n[\s\S]*?^[ \t]*(?:`{3,}|~{3,})[ \t]*$)/m)
+		.map((part, k) => (k % 2 ? part : part.replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n'))).join('').trim();
 }
 
 export function pageMarkdown(page: MarkdownPage): string {

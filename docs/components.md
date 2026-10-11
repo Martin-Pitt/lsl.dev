@@ -46,7 +46,7 @@ danger red. Accent blue is kept for links. Each takes an optional `title`.
 <Performance>Avoid `llSleep` in busy event handlers.</Performance>
 ```
 
-Export: `> **Gotcha:** body`. Only the first paragraph is quoted, so keep asides short.
+Export: `> **Gotcha:** body`, with the whole body (every paragraph, list and code block) in the quote.
 
 **Limits.** The figures on `/reference/limits/` live in `src/data/limits.yaml`, one entry per
 table row (119 rows in 17 sections). Each entry has an `id`, `section` and `label`; `value`, or
@@ -84,7 +84,8 @@ JavaScript. The id defaults to a slug of the summary, and a link to `#id` opens 
 ```
 
 Props: Details `summary` (required), `open`, `id`; FAQ `title`, `exclusive`. Export:
-`**Summary**` followed by the body, and the FAQ title as `### Title`.
+`**Summary**` followed by the body; inside a FAQ each question is `### Summary` followed by the
+answer, and the FAQ title is `### Title`.
 
 **Figure.** A local image in a frame, with a caption given as a prop or as Markdown children.
 `alt` is required (use `alt=""` only for decorative images). A string `src` is a path under `src/`
@@ -95,7 +96,8 @@ Props: Details `summary` (required), `open`, `id`; FAQ `title`, `exclusive`. Exp
 <Figure src="~/assets/door-linkset.png" alt="…" hint="Edit mode" width={320}>Caption with **Markdown**.</Figure>
 ```
 
-Export: `*[Figure: alt]*` followed by the caption.
+Export: `![alt](/_astro/…)` (the built image URL) followed by the caption. If the src can't be
+resolved (an imported image passed as `src={img}`), `*[Figure: alt]*` instead.
 
 **Since.** A small outline badge reading "Since Nov 2022". `date` is `YYYY-MM` or `YYYY-MM-DD`.
 An optional `note` opens as a hint popover on hover, focus or click.
@@ -191,15 +193,21 @@ How it works:
 - `scripts/build-hovercards.ts` (run by `bun run dev` and `bun run build`) slims
   `src/data/catalog.json` into the git-ignored `src/data/hovercards.json` (about 270 KB, read
   at build time only, never shipped).
-- `hovercards/rehype-api-hovercards.ts` runs after `rehype-inline-lsl`. For each API link it
-  inserts one `<span popover="hint" class="au-popover hc">` right after the link (after the
-  inline `<code>` when the link is inside one) and gives the link `interestfor` plus an inline
-  `anchor-name`. The card is `aria-hidden`, `data-pagefind-ignore` and holds no links.
-- CSS anchor positioning places the card below the link, flipping when there's no room. It
-  lives in the top layer, so tables and scroll containers never clip it.
+- `hovercards/rehype-api-hovercards.ts` runs after `rehype-inline-lsl`. It emits **one card per
+  API per file** (the page, or an imported MDX partial): a `<span popover="hint" class="au-popover hc"
+  id="hc<file hash>-<name>">` appended at the end of that file's content. Every link to the API in
+  the file gets `interestfor` pointing at that one card. The card is `aria-hidden`,
+  `data-pagefind-ignore` and holds no links.
+- The card anchors to whichever link opened it: an invoker is the popover's implicit anchor, so
+  there's no `anchor-name` on the links. CSS anchor positioning places it below that link and flips
+  it when there's no room. It lives in the top layer, so tables and scroll containers never clip it.
 - Browsers with `interestfor` open it on hover and focus natively. Elsewhere a small inline
   script (`hovercards/PageEnd.astro`, under 1 KB) does the same with a 300 ms hover delay; Esc
-  closes. Touch never opens a card.
+  closes. It opens the card with `showPopover({ source: link })` and also sets `anchor-name` on the
+  active link (the card's `position-anchor`) for engines without `source`. Touch never opens a card.
+- Only APIs with a reference page get a card or a link: deprecated or private names such as
+  `llSetPrimitiveParams` (in the catalog's `deprecated` list, no page) are shown as highlighted
+  code without a link, even when written as `[llSetPrimitiveParams](/functions/llSetPrimitiveParams/)`.
 - Skipped: links to the page itself, links in headings and code blocks, and the sidebar.
 - Markdown export: cards exist only in the HTML, so the `.md` export shows plain links.
 

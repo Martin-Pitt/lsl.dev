@@ -2,7 +2,10 @@
 /**
  * Hover-card fallback for browsers without `interestfor`: open on mouse/pen hover (300 ms intent)
  * and on keyboard focus, close on leave/blur and Esc. Touch is ignored, so a tap only navigates.
- * Rendered once per page via ../PageEnd.astro; it exits at once where interestfor is native.
+ * A card is shared by every link to its API, so it opens with showPopover({ source: link }) (the
+ * link becomes its implicit anchor) and the open link also gets anchor-name --hc, which the card
+ * uses as position-anchor, for engines without `source`. Rendered once per page via
+ * ../PageEnd.astro; it exits at once where interestfor is native.
  */
 ---
-<script is:inline>(()=>{if("interestForElement"in HTMLAnchorElement.prototype)return;let t,o,d=document,c=e=>e.target.closest?.("a[interestfor]"),p=a=>d.getElementById(a.getAttribute("interestfor")),h=()=>{clearTimeout(t);try{o?.hidePopover()}catch{}o=null},s=(a,w)=>{clearTimeout(t);t=setTimeout(()=>{let q=p(a);if(!q||q==o)return;h();try{q.showPopover();o=q}catch{}},w)};d.addEventListener("pointerover",e=>{if(e.pointerType=="touch")return;let a=c(e);a?s(a,300):e.target.closest?.(".hc")?clearTimeout(t):0});d.addEventListener("pointerout",e=>{if(e.pointerType!="touch"&&(c(e)||e.target.closest?.(".hc"))){clearTimeout(t);t=setTimeout(h,200)}});d.addEventListener("focusin",e=>{let a=c(e);a&&a.matches(":focus-visible")&&s(a,0)});d.addEventListener("focusout",e=>c(e)&&h());d.addEventListener("keydown",e=>e.key=="Escape"&&h())})()</script>
+<script is:inline>(()=>{if("interestForElement"in HTMLAnchorElement.prototype)return;let t,o,l,d=document,c=e=>e.target.closest?.("a[interestfor]"),p=a=>d.getElementById(a.getAttribute("interestfor")),h=()=>{clearTimeout(t);try{o?.hidePopover()}catch{}l&&(l.style.anchorName="");o=l=null},s=(a,w)=>{clearTimeout(t);t=setTimeout(()=>{let q=p(a);if(!q||q==o&&a==l)return;h();a.style.anchorName="--hc";q.style.positionAnchor="--hc";try{q.showPopover({source:a})}catch{try{q.showPopover()}catch{}}o=q;l=a},w)};d.addEventListener("pointerover",e=>{if(e.pointerType=="touch")return;let a=c(e);a?s(a,300):e.target.closest?.(".hc")?clearTimeout(t):0});d.addEventListener("pointerout",e=>{if(e.pointerType!="touch"&&(c(e)||e.target.closest?.(".hc"))){clearTimeout(t);t=setTimeout(h,200)}});d.addEventListener("focusin",e=>{let a=c(e);a&&a.matches(":focus-visible")&&s(a,0)});d.addEventListener("focusout",e=>c(e)&&h());d.addEventListener("keydown",e=>e.key=="Escape"&&h())})()</script>

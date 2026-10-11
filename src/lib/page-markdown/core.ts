@@ -7,7 +7,7 @@ import { catalog, apiMap, apiHref, constantGroupHref, constantsInGroup, category
 import { categoryLink } from '../categories';
 import { featurePageMap, featureHref } from '../features';
 import { parseSeeAlsoItem } from '../feature-mdx.mjs';
-import { code, need } from './util';
+import { code, need, quote } from './util';
 import type { Attrs, CaseFile, Source } from './types';
 
 const lslType = (t: string) => ({ boolean: 'integer', asset: 'string', uuid: 'key' } as Record<string, string>)[t] ?? t;
@@ -104,8 +104,15 @@ export default {
 		SeeAlso: (a) => [`\n\nSee also: ${seeAlso(a.items ?? [])}`, '\n\n'],
 		Planned: () => [' (planned: ', ')'],
 		LinkButton: (a) => ['[', `](${a.href})`],
-		Aside: (a) => [`\n\n**${a.title ?? (a.type ? a.type[0].toUpperCase() + a.type.slice(1) : 'Note')}:** `, '\n\n'],
 	},
 	/** Layout components whose children are exported as they are, with no text of their own. */
+	transform: {
+		/** The whole aside, every block, quoted under its title. */
+		Aside: (children, a) => `
+
+${quote(`**${a.title ?? (a.type ? a.type[0].toUpperCase() + a.type.slice(1) : 'Note')}:** ${children.trim()}`)}
+
+`,
+	},
 	passthrough: ['Column', 'Columns', 'CardGrid', 'PortalColumns', 'Tabs', 'TabItem'],
 } satisfies CaseFile;

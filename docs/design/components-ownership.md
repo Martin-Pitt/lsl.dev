@@ -57,6 +57,23 @@ the batches. Leave it alone.
   integrator to add the dependency).
 - Leave any dev server on port 4321 alone. Build into a temporary outDir outside the repo
   (`bun run build -- --outDir <dir>`) and delete it afterwards.
+- Run builds one at a time. Two `astro build` runs in the same checkout share Astro's build
+  scratch space even with different `--outDir`s: the `.prerender/` staging directory (under
+  `build.server`, which defaults into `.astro/`) and `cacheDir` (content data store and image cache,
+  by default `node_modules/.astro/`). They break each other's output. For a concurrent build, give
+  it its own outDir, cacheDir **and** `build.server` through a throwaway config in the git-ignored
+  `node_modules/` (`--config` resolves from the repo root), with the temp folder on the **same
+  drive** as the repo (Astro renames `.prerender` into the outDir, which fails across drives):
+
+  ```js
+  // node_modules/.my-build.config.mjs, run: bun scripts/build-hovercards.ts && bunx astro build --config node_modules/.my-build.config.mjs
+  import base from '../astro.config.mjs';
+  const tmp = 'D:/tmp/my-build'; // outside the repo, same drive
+  export default { ...base, cacheDir: `${tmp}/cache`, outDir: `${tmp}/out`, build: { ...base.build, server: `${tmp}/server` } };
+  ```
+
+  Delete the config and the temp folder afterwards. Separate git worktrees also work. The normal
+  `bun run build` stays as it is.
 - Check your work before handing it back: `bun run check`, the build, `bun run test:links <dir>`
   and `bun run test:sidebar <dir>`, plus your showcase section by eye. Don't commit test suites
   (decision 6). The build fails if one of your components has no case in

@@ -243,7 +243,7 @@ import { FunctionSignature, Param, Returns } from '~/components/authoring';
   optional parameters, so say in the description what to pass for the usual behaviour
   ("Pass `0.0` for none.").
 - Rendering: same highlighting and colours as the API pages' syntax block (inline-lsl, types
-  linked to their `/types/` page). The code lines are `float InterpolateFloatHermite(`, one indented
+  linked to their `/fundamentals/types/` page). The code lines are `float InterpolateFloatHermite(`, one indented
   `type name,` line per Param, then `)`; the Returns row sits under the first line wherever it is
   written. Rows are faint accent bands in the body font and take any inline Markdown (code, links,
   hover cards); keep each description on the same line as its tag.

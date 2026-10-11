@@ -23,11 +23,14 @@ const SECTIONS: Record<string, Crumb> = {
 	features: { label: 'Features', href: '/features/' },
 	wiki: { label: 'Wiki archive', href: '/wiki/' },
 	fundamentals: { label: 'Fundamentals', href: '/fundamentals/' },
-	types: { label: 'Types', href: '/types/' },
-	controls: { label: 'Flow control', href: '/controls/' },
 	guides: { label: 'Guides', href: '/guides/' },
 	recipes: { label: 'Recipes', href: '/recipes/' },
 	reference: { label: 'Reference', href: '/reference/' },
+};
+/** Nested sections under a top-level section, for their breadcrumb label (keyed by the first two URL parts). */
+const SUBSECTIONS: Record<string, Crumb> = {
+	'fundamentals/types': { label: 'Types', href: '/fundamentals/types/' },
+	'fundamentals/flow-control': { label: 'Flow control', href: '/fundamentals/flow-control/' },
 };
 const KINDS: Record<string, any[]> = { functions: catalog.functions, events: catalog.events, constants: catalog.constants };
 const api = new Map<string, any>();
@@ -85,7 +88,7 @@ export function pageNav(pathname: string, title: string, siblings: { label: stri
 		sidebar.push(`/features/${parts[1]}/`, '/features/');
 	} else {
 		// Generic: every ancestor path that is a section index.
-		for (let i = 2; i < parts.length; i++) crumbs.push({ label: parts[i - 1] });
+		for (let i = 2; i < parts.length; i++) crumbs.push(SUBSECTIONS[parts.slice(0, i).join('/')] ?? { label: parts[i - 1] });
 		sidebar.push(...parts.map((_, i) => '/' + parts.slice(0, parts.length - i).join('/') + '/'));
 	}
 	crumbs.push({ label: title });

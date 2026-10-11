@@ -155,9 +155,9 @@ const rawTree: Topic[] = [
 		{ label: 'Events', to: 'f:events' },
 		{ label: 'Scripts', to: 'f:script' },
 		{ label: 'Time', to: 'f:time' },
-		{ label: 'Keywords', to: '/controls/' },
+		{ label: 'Keywords', to: '/fundamentals/flow-control/' },
 		{ label: 'Math', to: 'f:math' },
-		{ label: 'Types', to: '/types/' },
+		{ label: 'Types', to: '/fundamentals/types/' },
 	] },
 ];
 

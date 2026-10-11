@@ -94,7 +94,16 @@ const featureItems = features.map(f => f.subpages.length === 0
 /** Hidden pages kept out of the sitemap (they also set robots noindex and pagefind: false). */
 const sitemapExcluded = ['/meta/'];
 
+/** Types and Flow control moved from /types/ and /controls/ into Fundamentals. */
+const movedRedirects = Object.fromEntries([
+	['/types/', '/fundamentals/types/'],
+	['/controls/', '/fundamentals/flow-control/'],
+	...catalog.types.map((/** @type {any} */ t) => [`/types/${t.name}/`, `/fundamentals/types/${t.name}/`]),
+	...catalog.controls.map((/** @type {any} */ c) => [`/controls/${c.name}/`, `/fundamentals/flow-control/${c.name}/`]),
+]);
+
 export default defineConfig({
+	redirects: movedRedirects,
 	site: 'https://lsl.dev',
 	// Inline `code` and links to API pages in Markdown/MDX are highlighted as LSL (see the plugin).
 	// API hover cards run after it (src/components/authoring/hovercards/, Batch 1 of docs/design/components-plan.md).
@@ -154,8 +163,6 @@ export default defineConfig({
 							{ label: 'Constant groups', link: '/constants/groups/' },
 						],
 					},
-					{ label: 'Types', collapsed: true, items: [{ autogenerate: { directory: 'types' } }] },
-					{ label: 'Flow control', collapsed: true, items: [{ autogenerate: { directory: 'controls' } }] },
 					{ label: 'Limits', link: '/reference/limits/' },
 				],
 			},

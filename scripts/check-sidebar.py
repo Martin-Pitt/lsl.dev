@@ -28,7 +28,7 @@ for label,href in [('Wiki archive','/wiki/'),('About these docs','/about/')]:
  check(re.search(r'<a href="'+re.escape(href)+r'"[^>]*class="large[^"]*"',s),f'{label} is no longer a plain top-level link')
 check(not re.search(r'<li class="split-group(?! top-split)[^"]*">[\s\S]{0,300}?<span class="large',s),'a nested split group has a large label')
 # Split groups.
-for label,href in [('Combat','/features/combat/'),('Categories','/categories/'),('Constants','/constants/'),('Types','/types/'),('Flow control','/controls/')]:
+for label,href in [('Combat','/features/combat/'),('Categories','/categories/'),('Constants','/constants/'),('Types','/fundamentals/types/'),('Flow control','/fundamentals/flow-control/')]:
  g=split(s,label)
  check(g,f'{label} is not a split group')
  if not g:continue
@@ -40,8 +40,9 @@ for label,href in [('Combat','/features/combat/'),('Categories','/categories/'),
 a,b,d=split(s,'Combat')
 check(attr(a,'aria-current')=='page' and attr(b,'aria-expanded')=='true' and re.search(r'\sopen[\s>]',d),'Combat is not current and open on its overview page')
 ref=s[s.index('>Reference</span>'):s.index('>Features</span>')]
-for href in ['/features/combat/','/categories/','/constants/','/types/','/controls/']:
- check((s if href.startswith('/features/') else ref).count(f'href="{href}"')==1,f'{href} is listed again besides the split label (Overview child not removed)')
+fund=s[s.index('>Fundamentals</span>'):s.index('>Reference</span>')]
+for href in ['/features/combat/','/categories/','/constants/','/fundamentals/types/','/fundamentals/flow-control/']:
+ check((s if href.startswith('/features/') else fund if href.startswith('/fundamentals/') else ref).count(f'href="{href}"')==1,f'{href} is listed again besides the split label (Overview child not removed)')
 # A nested group without an overview link stays a single toggle, not large.
 # A category group with its own category is a split control whose label opens that category
 # (Effects › Effects, Avatars › Avatar Target); groups without one stay plain toggles.
@@ -82,9 +83,9 @@ def current(page):
  if not m:return None
  i=m.start();at=lambda l:h.rindex('<li',0,h.index(f'>{l}</span>'))
  return 'Fundamentals' if at('Fundamentals')<=i<at('Reference') else 'Reference' if i<at('Features') else 'other'
-for page in ['/types/','/types/integer/','/controls/','/controls/if/']:
+for page in ['/reference/','/functions/']:
  check(current(page)=='Reference',f'{page} does not mark a Reference entry as current')
-for page in ['/fundamentals/','/fundamentals/types/']:
+for page in ['/fundamentals/','/fundamentals/types/','/fundamentals/types/integer/','/fundamentals/flow-control/','/fundamentals/flow-control/if/']:
  check(current(page)=='Fundamentals',f'{page} does not mark a Fundamentals entry as current')
 if errors:
  print('\n'.join(errors));sys.exit(1)

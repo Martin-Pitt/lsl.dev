@@ -53,7 +53,7 @@ function parseTag(s: string, i: number): { attrs: Attrs; end: number; selfClose:
 function flowExpression(expr: string, page: MarkdownPage): string {
 	const e = expr.trim();
 	if (!e || /^\/\*[\s\S]*\*\/$/.test(e)) return '';
-	if (e.startsWith('catalog.controls.map')) return (catalog.controls as any[]).map(c => `- [${c.name}](/controls/${c.name}/): ${c.description.split('\n')[0]}`).join('\n');
+	if (e.startsWith('catalog.controls.map')) return (catalog.controls as any[]).map(c => `- [${c.name}](/fundamentals/flow-control/${c.name}/): ${c.description.split('\n')[0]}`).join('\n');
 	return `*(Generated list; see ${SITE}${pageHref(page.id)})*`;
 }
 

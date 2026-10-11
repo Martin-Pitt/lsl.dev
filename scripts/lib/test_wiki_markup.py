@@ -44,7 +44,7 @@ class RepoTests(unittest.TestCase):
 
 class DetectorTests(unittest.TestCase):
     def test_code_frontmatter_and_markdown_tables_are_not_leaks(self):
-        text = '---\nlicense: "Template:LSL Const {{x}}"\n---\n\n| a | b |\n|---|---|\n\n```lsl\nif (x) {{ y(); }}\n```\n\n\\[[float](/types/float/) x\\]\n'
+        text = '---\nlicense: "Template:LSL Const {{x}}"\n---\n\n| a | b |\n|---|---|\n\n```lsl\nif (x) {{ y(); }}\n```\n\n\\[[float](/fundamentals/types/float/) x\\]\n'
         self.assertEqual(leaks(text), [])
 
     def test_escaped_and_raw_markup_are_leaks(self):

@@ -35,7 +35,7 @@ function apiHeader(kind: 'function' | 'event' | 'constant', name: string, showDe
 			out.push(`${f.mode === 'set' ? 'Set' : 'Get'} with ${fns}:\n\n` + '```lsl\n' + (f.returns ? `${f.call} → ${f.returns}` : f.call) + '\n```');
 		}
 		const notes = (a: any) => [a.details, a.range && `Range ${a.range}.`, a.access === 'read' && 'Returned only.', a.access === 'write' && 'Set only.', a.enum && `Values: [${a.enum}](${constantGroupHref(a.enum)})`].filter(Boolean).join(' ');
-		if (usage.args.length) out.push(usage.args.map(a => `- ${code(`${a.type} ${a.name}`)}${notes(a) ? `: ${notes(a)}` : ''}`).join('\n'));
+		if (usage.args.some(a => notes(a))) out.push(usage.args.map(a => `- ${code(`${a.type} ${a.name}`)}${notes(a) ? `: ${notes(a)}` : ''}`).join('\n'));
 	}
 	if (kind !== 'constant' && e.parameters?.length) out.push(e.parameters.map((p: any) => `- ${code(`${p.type} ${p.name}`)}${p.description ? `: ${p.description}` : ''}`).join('\n'));
 	const sleep = d['mono-sleep'] ?? d.sleep;

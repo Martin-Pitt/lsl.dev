@@ -36,7 +36,9 @@ const forms = await Promise.all(usage.forms.map(async f => ({
 	functions: await Promise.all(f.functions.map(n => inlineLsl(n))),
 	code: await inlineLsl(f.returns ? `${f.call} → ${f.returns}` : f.call, { self }),
 })));
-const ruleRows = await Promise.all(usage.args.map(async a => ({
+// Argument notes; left out when none of the arguments has any (the rule line says it all).
+const noted = usage.args.some(a => a.details || a.range || a.enum || a.access === 'read' || a.access === 'write');
+const ruleRows = !noted ? [] : await Promise.all(usage.args.map(async a => ({
 	code: await inlineLsl(`${a.type} ${a.name}`, { self }),
 	description: [a.details && await enhanceText(a.details, { self }), a.range && `Range ${a.range}.`, a.access === 'read' && 'Returned only.', a.access === 'write' && 'Set only.'].filter(Boolean).join(' '),
 	enum: a.enum,
@@ -67,7 +69,7 @@ const ruleRows = await Promise.all(usage.args.map(async a => ({
 			{ruleRows.map(r => (
 				<li>
 					<span class="api-syntax-param"><Fragment set:html={r.code} /></span>
-					{(r.description || r.enum) && <span class="api-syntax-comment">// <Fragment set:html={r.description} />{r.enum && <> <span class="api-syntax-values">Values: <a href={constantGroupHref(r.enum)}>{r.enum}</a></span></>}</span>}
+					{(r.description || r.enum) && <span class="api-syntax-comment">// <Fragment set:html={r.description} />{r.enum && <> <span class:list={['api-syntax-values', !r.description && 'api-syntax-values-only']}>Values: <a href={constantGroupHref(r.enum)}>{r.enum}</a></span></>}</span>}
 				</li>
 			))}
 		</ol>
@@ -92,6 +94,7 @@ const ruleRows = await Promise.all(usage.args.map(async a => ({
 	.api-syntax-param { white-space: nowrap; }
 	.api-syntax-comment { flex: 1 1 18rem; color: var(--sl-color-gray-3); font-family: var(--__sl-font); }
 	.api-syntax-values { display: block; font-size: var(--sl-text-xs); }
+	.api-syntax-values-only { display: inline; }
 	.api-syntax :global(code.lsl-inline) { padding: 0; background: none; border: 0; font-size: inherit; }
 	@media (max-width: 40rem) {
 		.api-syntax-form { margin-top: .6rem; }

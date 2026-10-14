@@ -1,0 +1,270 @@
+---
+// Animated homepage hero: a script card drops into a plywood prim, the prim
+// sparkles, and local chat answers "Hello, World!". Pure HTML/CSS, decorative.
+// One shared 10s timeline (--loop); every step is a keyframe window on it.
+import plywood from '../../assets/hero/plywood.webp';
+const particles = Array.from({ length: 10 }, (_, i) => i);
+---
+
+<div class="scene" aria-hidden="true" style={`--plywood: url(${plywood.src})`}>
+	<div class="stage">
+		<div class="float">
+			<div class="cube">
+				{Array.from({ length: 6 }, () => <div class="face" />)}
+				<div class="shadow" />
+			</div>
+		</div>
+		<div class="burst">
+			{particles.map((i) => <span style={`--i: ${i}`} />)}
+		</div>
+	</div>
+
+	<div class="script-card">
+		<div class="card-title">New Script</div>
+		<pre><code><span class="k">default</span> &#123;
+  <span class="e">state_entry</span>() &#123;
+    <span class="f">llSay</span>(<span class="n">0</span>, <span class="s">"Hello, World!"</span>);
+    <span class="f">llParticleSystem</span>([…]);
+  &#125;
+&#125;</code></pre>
+	</div>
+
+	<div class="bubble">
+		<span class="dots"><i></i><i></i><i></i></span>
+		<span class="text"><b>Object:</b> Hello, World!</span>
+	</div>
+</div>
+
+<style>
+	@property --spin {
+		syntax: '<angle>';
+		inherits: false;
+		initial-value: 0deg;
+	}
+
+	.scene {
+		--loop: 10s;
+		--cube: 34cqi;
+		position: relative;
+		width: 100%;
+		aspect-ratio: 1;
+		container-type: inline-size;
+		pointer-events: none;
+		user-select: none;
+	}
+
+	/* ---- Cube ---- */
+	.stage {
+		position: absolute;
+		inset: 0;
+		display: grid;
+		place-items: center;
+		perspective: 140cqi;
+	}
+	.float {
+		transform-style: preserve-3d;
+		animation: float 6s ease-in-out infinite;
+	}
+	/* Cube technique from the author's CodePen (nexii/yLwRyMq): Z-up prim, faces
+	   stacked in one grid cell and pushed out by --offset, lit by a ::before veil. */
+	.cube {
+		--offset: calc(var(--cube) * 0.499);
+		display: grid;
+		width: var(--cube);
+		aspect-ratio: 1;
+		transform-style: preserve-3d;
+		transform: rotateX(70deg) rotateZ(var(--spin));
+		animation:
+			spin 16s linear infinite,
+			pulse var(--loop) ease-out infinite;
+	}
+	.face,
+	.shadow {
+		grid-area: 1 / -1;
+	}
+	.face {
+		display: grid;
+		backface-visibility: hidden;
+		transform-style: preserve-3d;
+		background: var(--plywood) center / 100% no-repeat;
+	}
+	.face:nth-child(1) { transform: translateZ(var(--offset)); }
+	.face:nth-child(2) { transform: rotateX(0.25turn) rotateZ(0.5turn) translateZ(var(--offset)); }
+	.face:nth-child(3) { transform: rotateY(0.25turn) rotateZ(0.75turn) translateZ(var(--offset)); }
+	.face:nth-child(4) { transform: rotateX(0.75turn) translateZ(var(--offset)); }
+	.face:nth-child(5) { transform: rotateY(0.75turn) rotateZ(0.25turn) translateZ(var(--offset)); }
+	.face:nth-child(6) { transform: rotateY(0.5turn) translateZ(var(--offset)); }
+
+	/* Lighting: side faces brighten as they turn toward the viewer. */
+	.face::before {
+		content: '';
+		background: black;
+		opacity: 0.4;
+		transform: scale(1.002);
+		backface-visibility: hidden;
+	}
+	.face:nth-child(1)::before { opacity: 0; }
+	.face:nth-child(6)::before { opacity: 0.6; }
+	.face:nth-child(n + 2):nth-child(-n + 5)::before {
+		animation: lighting 16s linear infinite;
+	}
+	.face:nth-child(3)::before { animation-delay: -4s; }
+	.face:nth-child(4)::before { animation-delay: -8s; }
+	.face:nth-child(5)::before { animation-delay: -12s; }
+
+	/* Ground contact shadow under the prim. */
+	.shadow {
+		background: black;
+		transform: translateZ(calc(var(--offset) * -1));
+		box-shadow: 0 0 6cqi 2cqi black;
+		opacity: 0.15;
+	}
+
+	@keyframes lighting {
+		0% { opacity: 0.3; animation-timing-function: cubic-bezier(0.47, 0, 0.75, 0.72); }
+		50% { opacity: 0.01; animation-timing-function: cubic-bezier(0.39, 0.58, 0.57, 1); }
+		100% { opacity: 0.3; }
+	}
+	@keyframes spin { to { --spin: 360deg; } }
+	@keyframes float {
+		50% { transform: translateY(-2.5cqi); }
+	}
+	/* The prim "takes" the script: a short squash at ~40%. */
+	@keyframes pulse {
+		0%, 39%, 50%, 100% { scale: 1; }
+		42% { scale: 1.07; }
+		45% { scale: 0.97; }
+	}
+
+	/* ---- Script card: appears, hovers, then drops into the cube (0–40%). ---- */
+	.script-card {
+		position: absolute;
+		left: 4cqi;
+		top: 6cqi;
+		width: 52cqi;
+		padding: 2cqi 2.5cqi;
+		border-radius: 2cqi;
+		background: light-dark(oklch(0.99 0 0 / 0.92), oklch(0.24 0.02 260 / 0.92));
+		border: 1px solid color-mix(in oklch, var(--sl-color-gray-5) 70%, transparent);
+		box-shadow: 0 2cqi 5cqi oklch(0 0 0 / 0.18);
+		color: var(--sl-color-gray-2);
+		font-size: 2.6cqi;
+		transform-origin: 80% 80%;
+		opacity: 0;
+		animation: card var(--loop) cubic-bezier(0.5, 0, 0.3, 1) infinite;
+	}
+	.card-title {
+		font-family: var(--sl-font-system, system-ui);
+		font-weight: 600;
+		margin-bottom: 1cqi;
+		color: var(--sl-color-white);
+	}
+	.script-card pre {
+		margin: 0;
+		padding: 0;
+		background: none;
+		border: 0;
+		font: inherit;
+		font-family: var(--__sl-font-mono, ui-monospace, monospace);
+		line-height: 1.45;
+		white-space: pre;
+	}
+	.k { color: light-dark(oklch(0.5 0.2 300), oklch(0.75 0.15 300)); }
+	.e { color: light-dark(oklch(0.5 0.15 250), oklch(0.78 0.12 230)); }
+	.f { color: light-dark(oklch(0.5 0.13 160), oklch(0.8 0.13 160)); }
+	.s { color: light-dark(oklch(0.52 0.15 40), oklch(0.8 0.12 60)); }
+	.n { color: light-dark(oklch(0.55 0.15 20), oklch(0.78 0.14 20)); }
+
+	@keyframes card {
+		0% { opacity: 0; transform: translate(0, -3cqi) scale(0.96); }
+		6%, 26% { opacity: 1; transform: translate(0, 0) scale(1); }
+		38% { opacity: 0.6; transform: translate(26cqi, 36cqi) scale(0.15); }
+		40%, 100% { opacity: 0; transform: translate(26cqi, 38cqi) scale(0.05); }
+	}
+
+	/* ---- Particle burst from the cube centre (40–56%). ---- */
+	.burst {
+		position: absolute;
+		inset: 0;
+		display: grid;
+		place-items: center;
+	}
+	.burst span {
+		grid-area: 1 / 1;
+		width: 2.4cqi;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: radial-gradient(circle, white, oklch(0.85 0.17 calc(60 + var(--i) * 25)) 45%, transparent 70%);
+		opacity: 0;
+		/* Ten particles evenly spaced around the circle, alternating reach. */
+		--a: calc(var(--i) * 36deg + 10deg);
+		--r: calc(30cqi + mod(var(--i), 2) * 8cqi);
+		animation: burst var(--loop) cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+	}
+	@keyframes burst {
+		0%, 40% { opacity: 0; transform: rotate(var(--a)) translateX(4cqi) scale(0.4); }
+		43% { opacity: 1; }
+		56%, 100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--r)) scale(1); }
+	}
+
+	/* ---- Chat bubble: typing dots (48–64%), then the message until ~94%. ---- */
+	.bubble {
+		position: absolute;
+		left: 50%;
+		top: 8cqi;
+		display: grid;
+		place-items: center;
+		padding: 1.8cqi 3.6cqi;
+		border-radius: 999px;
+		background: oklch(0.15 0 0 / 0.72);
+		backdrop-filter: blur(4px);
+		color: white;
+		font-family: var(--sl-font-system, system-ui);
+		font-size: 3.6cqi;
+		white-space: nowrap;
+		translate: -50% 0;
+		opacity: 0;
+		animation: bubble var(--loop) ease-out infinite;
+	}
+	.bubble > * { grid-area: 1 / 1; }
+	.dots { display: flex; gap: 1cqi; animation: dots var(--loop) step-end infinite; }
+	.dots i {
+		width: 1.4cqi;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: currentColor;
+		animation: dot 0.9s ease-in-out infinite;
+	}
+	.dots i:nth-child(2) { animation-delay: 0.15s; }
+	.dots i:nth-child(3) { animation-delay: 0.3s; }
+	.text { opacity: 0; animation: text var(--loop) ease-out infinite; }
+	.text b { font-weight: 600; opacity: 0.75; }
+
+	@keyframes bubble {
+		0%, 47% { opacity: 0; transform: translateY(2cqi) scale(0.9); }
+		50%, 92% { opacity: 1; transform: none; }
+		97%, 100% { opacity: 0; transform: translateY(-2cqi); }
+	}
+	@keyframes dots {
+		0% { opacity: 1; }
+		64% { opacity: 0; }
+	}
+	@keyframes text {
+		0%, 64% { opacity: 0; }
+		67%, 100% { opacity: 1; }
+	}
+	@keyframes dot {
+		0%, 100% { opacity: 0.35; transform: translateY(0); }
+		50% { opacity: 1; transform: translateY(-0.6cqi); }
+	}
+
+	/* Reduced motion: a still, composed final frame (cube + "Hello, World!"). */
+	@media (prefers-reduced-motion: reduce) {
+			.scene *, .scene *::before { animation: none !important; }
+		.cube { --spin: 30deg; }
+		.face::before { opacity: 0.15; }
+		.face:nth-child(1)::before { opacity: 0; }
+		.script-card, .burst, .dots { display: none; }
+		.bubble, .text { opacity: 1; }
+	}
+</style>

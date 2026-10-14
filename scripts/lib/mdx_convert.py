@@ -433,7 +433,9 @@ class Converter:
                     inner = []
                     for kind, body in self.blocks(cell.children):
                         if kind == 'table': inner.append(body if body.startswith('\t') else self.indent(body, depth + 3))
-                        else: inner.append(self.indent(body, depth + 3))
+                        # Markdown stays at column 0: a fence (or list) indented four or more columns
+                        # is no longer Markdown to MDX, so code loses highlighting and its newlines.
+                        else: inner.append(body)
                     lines.append(f'{ind}\t\t<{cell.tag}{attrs}>\n\n' + '\n\n'.join(inner) + f'\n\n{ind}\t\t</{cell.tag}>')
                 else:
                     text = self.rule_cell(cell) if cell is row[0] and cell.tag == 'td' else self.inline(cell.children).strip()
@@ -444,7 +446,6 @@ class Converter:
 
     @staticmethod
     def indent(text: str, depth: int) -> str:
-        # Fenced code keeps its own indentation; everything else is indented to the cell.
         ind = '\t' * depth
         return '\n'.join(ind + l if l else l for l in text.split('\n'))
 

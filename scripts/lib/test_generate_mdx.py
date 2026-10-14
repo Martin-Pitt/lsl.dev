@@ -139,6 +139,11 @@ class ConverterTests(unittest.TestCase):
         self.assertIn('<td>**x**</td>', md)
         self.assertIn('| C |', md)
 
+    def test_code_in_html_table_cell_is_not_indented(self):
+        md = Converter().convert('<table><tr><th>A</th></tr><tr><td><pre class="lsl">a();\nb();</pre><table><tr><td>x</td></tr></table></td></tr></table>')
+        self.assertIn('\n\n```lsl\na();\nb();\n```\n\n', md)
+        self.assertNotRegex(md, r'(?m)^[ \t]+(```|a\(\);)')
+
     def test_mdx_specials_are_escaped(self):
         md = Converter().convert('<div class="wiki-line">a <b> {c} * [d] </font></div>')
         self.assertNotIn('<b>', md)

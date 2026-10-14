@@ -35,18 +35,6 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 	</div>
 </div>
 
-<script>
-	// Copying any part of the script card copies the whole working script, including the particle
-	// rules collapsed behind the "…" (browsers differ on copying clipped text, so don't rely on it).
-	document.addEventListener('copy', (event) => {
-		const code = document.querySelector<HTMLElement>('.scene .script-card code');
-		const selection = document.getSelection();
-		if (!code || !selection || selection.isCollapsed || !selection.getRangeAt(0).intersectsNode(code)) return;
-		event.clipboardData?.setData('text/plain', code.textContent ?? '');
-		event.preventDefault();
-	});
-</script>
-
 <style>
 	@property --spin {
 		syntax: '<angle>';
@@ -185,13 +173,15 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 	/* The real particle rules are in the text (so copying the script gives a working one) but
 	   collapsed; the "…" shown in their place is generated content, which copying skips. */
 	.hidden-rules {
-		display: inline-block;
-		width: 0;
-		height: 1lh;
-		overflow: clip;
-		vertical-align: bottom;
+		/* Visually hidden (the usual screen-reader-only box): out of layout but still selectable. */
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
 		white-space: nowrap;
 	}
+	.rules { position: relative; }
 	.rules::before { content: '…'; }
 	.f { color: light-dark(oklch(0.5 0.13 160), oklch(0.8 0.13 160)); }
 	.s { color: light-dark(oklch(0.52 0.15 40), oklch(0.8 0.12 60)); }

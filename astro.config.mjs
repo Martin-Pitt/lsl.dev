@@ -105,6 +105,8 @@ const movedRedirects = Object.fromEntries([
 export default defineConfig({
 	redirects: movedRedirects,
 	site: 'https://lsl.dev',
+	// Listen on IPv4 and IPv6: `localhost` alone bound only ::1, so browsers resolving it to 127.0.0.1 lost the HMR socket.
+	server: { host: true },
 	// Inline `code` and links to API pages in Markdown/MDX are highlighted as LSL (see the plugin).
 	// API hover cards run after it (src/components/authoring/hovercards/, Batch 1 of docs/design/components-plan.md).
 	markdown: { processor: unified({ rehypePlugins: [rehypeInlineLsl, rehypeApiHovercards] }) },

@@ -1,6 +1,9 @@
 ---
-// Copied from slua.dev src/components/starlight/Header.astro; adds a compact title and
-// search for narrow screens, where slua.dev's sidebar header is hidden.
+// Copied from slua.dev src/components/starlight/Header.astro; adds a compact title for narrow
+// screens, where slua.dev's sidebar header is hidden. This is the page's only <Search>: Starlight's
+// search can't be rendered twice (both copies bind Ctrl+K and Pagefind mounts into the first
+// #starlight__search, which was the hidden one). On wide pages with a sidebar its button moves
+// into the sidebar header's slot (PageFrame.astro), so it looks unchanged; the dialog stays here.
 import LanguageSelect from '@astrojs/starlight/components/LanguageSelect.astro';
 import Search from '@astrojs/starlight/components/Search.astro';
 import SiteTitle from '@astrojs/starlight/components/SiteTitle.astro';
@@ -11,9 +14,9 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 ---
 <div class="header">
     {hasSidebar && (
-        <div class="mobile-group md:sl-hidden print:hidden">
-            <SiteTitle />
-            <Search />
+        <div class="mobile-group print:hidden">
+            <div class="md:sl-hidden"><SiteTitle /></div>
+            <Search class="sidebar-search" />
         </div>
     )}
     {!hasSidebar && (
@@ -32,6 +35,16 @@ const { hasSidebar } = Astro.locals.starlightRoute;
         <LanguageSelect />
     </div>
 </div>
+
+<script>
+	// Wide screens: the search button sits in the sidebar header; narrow: back in the mobile header.
+	const button = document.querySelector<HTMLElement>('.sidebar-search > button[data-open-modal]');
+	const home = button?.parentElement, slot = document.querySelector('.search-slot');
+	const wide = matchMedia('(min-width: 50rem)');
+	const place = () => { if (button && home && slot) (wide.matches ? slot : home).prepend(button); };
+	place();
+	wide.addEventListener('change', place);
+</script>
 
 <style>
 	@layer starlight.core {

@@ -3,7 +3,6 @@
 // the site title and search sit at the top of the sidebar and the header floats over the page
 // on wide screens. Narrow screens keep Starlight's fixed bar so the popover menu works.
 import MobileMenuToggle from '@astrojs/starlight/components/MobileMenuToggle.astro';
-import Search from '@astrojs/starlight/components/Search.astro';
 import SiteTitle from '@astrojs/starlight/components/SiteTitle.astro';
 
 const { hasSidebar } = Astro.locals.starlightRoute;
@@ -46,7 +45,8 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 				<sl-sidebar-pane popover="" id="starlight__sidebar" class="sidebar-pane">
 					<div class="sidebar-header sl-hidden md:sl-flex">
 						<SiteTitle />
-						<Search />
+						<!-- The header's search button moves here on wide screens (Header.astro). -->
+						<div class="search-slot"></div>
 					</div>
 					<div class="sidebar-content sl-flex">
 						<slot name="sidebar" />
@@ -101,6 +101,10 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 			scrollbar-gutter: stable;
 		}
 
+		.search-slot {
+			display: flex;
+			min-height: 2.5rem;
+		}
 		.sidebar-header {
 			flex-direction: column;
 			gap: 1rem;

@@ -13,21 +13,21 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 				{Array.from({ length: 6 }, () => <div class="face" />)}
 				<div class="shadow" />
 			</div>
+			<div class="script-card">
+				<div class="card-title">New Script</div>
+				<pre><code><span class="k">default</span> &#123;
+  <span class="e">state_entry</span>() &#123;
+    <span class="f">llSay</span>(<span class="n">0</span>, <span class="s">"Hello, World!"</span>);
+    <span class="f">llParticleSystem</span>([<span class="rules"><span class="hidden-rules">PSYS_PART_FLAGS, PSYS_PART_EMISSIVE_MASK | PSYS_PART_INTERP_COLOR_MASK | PSYS_PART_INTERP_SCALE_MASK | PSYS_PART_FOLLOW_VELOCITY_MASK, PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE, PSYS_SRC_BURST_PART_COUNT, 10, PSYS_SRC_BURST_RATE, 0.1, PSYS_SRC_BURST_SPEED_MIN, 0.5, PSYS_SRC_BURST_SPEED_MAX, 1.0, PSYS_SRC_MAX_AGE, 1.0, PSYS_PART_MAX_AGE, 1.0, PSYS_PART_START_COLOR, &lt;1.0, 0.85, 0.4&gt;, PSYS_PART_END_COLOR, &lt;1.0, 1.0, 1.0&gt;, PSYS_PART_START_ALPHA, 1.0, PSYS_PART_END_ALPHA, 0.0, PSYS_PART_START_SCALE, &lt;0.15, 0.15, 0.0&gt;, PSYS_PART_END_SCALE, &lt;0.05, 0.05, 0.0&gt;</span></span>]);
+  &#125;
+&#125;</code></pre>
+			</div>
 		</div>
 		<div class="burst">
 			{particles.map((i) => <span style={`--i: ${i}`} />)}
 		</div>
 	</div>
 
-	<div class="script-card">
-		<div class="card-title">New Script</div>
-		<pre><code><span class="k">default</span> &#123;
-  <span class="e">state_entry</span>() &#123;
-    <span class="f">llSay</span>(<span class="n">0</span>, <span class="s">"Hello, World!"</span>);
-    <span class="f">llParticleSystem</span>([<span class="rules"><span class="hidden-rules">PSYS_PART_FLAGS, PSYS_PART_EMISSIVE_MASK | PSYS_PART_INTERP_COLOR_MASK | PSYS_PART_INTERP_SCALE_MASK | PSYS_PART_FOLLOW_VELOCITY_MASK, PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE, PSYS_SRC_BURST_PART_COUNT, 10, PSYS_SRC_BURST_RATE, 0.1, PSYS_SRC_BURST_SPEED_MIN, 0.5, PSYS_SRC_BURST_SPEED_MAX, 1.0, PSYS_SRC_MAX_AGE, 1.0, PSYS_PART_MAX_AGE, 1.0, PSYS_PART_START_COLOR, &lt;1.0, 0.85, 0.4&gt;, PSYS_PART_END_COLOR, &lt;1.0, 1.0, 1.0&gt;, PSYS_PART_START_ALPHA, 1.0, PSYS_PART_END_ALPHA, 0.0, PSYS_PART_START_SCALE, &lt;0.15, 0.15, 0.0&gt;, PSYS_PART_END_SCALE, &lt;0.05, 0.05, 0.0&gt;</span></span>]);
-  &#125;
-&#125;</code></pre>
-	</div>
 
 	<div class="bubble">
 		<span class="dots"><i></i><i></i><i></i></span>
@@ -135,11 +135,17 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		45% { scale: 0.97; }
 	}
 
-	/* ---- Script card: appears, hovers, then drops into the cube (0–40%). ---- */
+	/* ---- Script card: appears above the prim, hovers, then falls in through the top face (0–40%).
+	   It lives in the cube's 3D context (inside .float), so the faces really intersect and hide it. ---- */
+	.float {
+		display: grid;
+		place-items: center;
+	}
+	.cube,
 	.script-card {
-		position: absolute;
-		left: 4cqi;
-		top: 6cqi;
+		grid-area: 1 / 1;
+	}
+	.script-card {
 		width: 52cqi;
 		padding: 2cqi 2.5cqi;
 		border-radius: 2cqi;
@@ -148,9 +154,8 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		box-shadow: 0 2cqi 5cqi oklch(0 0 0 / 0.18);
 		color: var(--sl-color-gray-2);
 		font-size: 2.6cqi;
-		transform-origin: 80% 80%;
 		opacity: 0;
-		animation: card var(--loop) cubic-bezier(0.5, 0, 0.3, 1) infinite;
+		animation: card var(--loop) infinite;
 	}
 	.card-title {
 		user-select: none;
@@ -188,11 +193,16 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 	.s { color: light-dark(oklch(0.52 0.15 40), oklch(0.8 0.12 60)); }
 	.n { color: light-dark(oklch(0.55 0.15 20), oklch(0.78 0.14 20)); }
 
+	/* Each step eases on its own: settle in, hover, a small lift (anticipation), then a gravity-like
+	   fall that accelerates into the prim, landing as it squashes (pulse, ~40%). */
 	@keyframes card {
-		0% { opacity: 0; transform: translate(0, -3cqi) scale(0.96); }
-		6%, 26% { opacity: 1; transform: translate(0, 0) scale(1); }
-		38% { opacity: 0.6; transform: translate(26cqi, 36cqi) scale(0.15); }
-		40%, 100% { opacity: 0; transform: translate(26cqi, 38cqi) scale(0.05); }
+		0% { opacity: 0; transform: translateY(-34cqi) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+		7% { opacity: 1; transform: translateY(-38cqi) scale(0.85); animation-timing-function: ease-in-out; }
+		16% { transform: translateY(-36.5cqi) scale(0.85); animation-timing-function: ease-in-out; }
+		25% { transform: translateY(-38cqi) scale(0.85); animation-timing-function: cubic-bezier(0.3, 0, 0.5, 1); }
+		30% { opacity: 1; transform: translateY(-42cqi) scale(0.8) rotateX(-6deg); animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.4); }
+		39.5% { opacity: 1; transform: translateY(0) scale(0.45); }
+		40%, 100% { opacity: 0; transform: translateY(0) scale(0.45); }
 	}
 
 	/* ---- Particle burst from the cube centre (40–56%). ---- */

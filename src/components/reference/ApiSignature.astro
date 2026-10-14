@@ -1,9 +1,12 @@
 ---
 /**
  * Signature block in the style of the hand-written pages' LSLFunction template: return type and
- * name, one parameter per line with its definition text as a trailing comment.
+ * name, one parameter per line with its definition text as a trailing comment. Rule constants
+ * also get their set/get forms in the rules list of the functions that take them (lib/rule-usage).
  */
 import { inlineLsl, enhanceText } from '../../lib/inline-lsl';
+import { ruleUsage } from '../../lib/rule-usage';
+import { constantGroupHref } from '../../lib/catalog';
 const { entry } = Astro.props;
 const self = entry.name;
 const params = entry.parameters as { name: string; type: string; description?: string; 'enum-semantics'?: string }[];
@@ -27,6 +30,17 @@ const rows = await Promise.all(params.map(async (p, i) => ({
 	description: p.description ? await enhanceText(p.description, { self }) : '',
 	values: p['enum-semantics'] ? await enhanceText(String(p['enum-semantics']), { self }) : '',
 })));
+const usage = entry.kind === 'constant' ? ruleUsage(entry) : { forms: [], args: [] };
+const forms = await Promise.all(usage.forms.map(async f => ({
+	label: `${f.mode === 'set' ? 'Set' : 'Get'} with `,
+	functions: await Promise.all(f.functions.map(n => inlineLsl(n))),
+	code: await inlineLsl(f.returns ? `${f.call} → ${f.returns}` : f.call, { self }),
+})));
+const ruleRows = await Promise.all(usage.args.map(async a => ({
+	code: await inlineLsl(`${a.type} ${a.name}`, { self }),
+	description: [a.details && await enhanceText(a.details, { self }), a.range && `Range ${a.range}.`, a.access === 'read' && 'Returned only.', a.access === 'write' && 'Set only.'].filter(Boolean).join(' '),
+	enum: a.enum,
+})));
 ---
 <div class="api-syntax not-content">
 	<small class="api-syntax-title">{kindLabel}</small>
@@ -42,6 +56,22 @@ const rows = await Promise.all(params.map(async (p, i) => ({
 		</ol>
 	)}
 	{tail && <div class="api-syntax-line"><Fragment set:html={tail} /></div>}
+	{forms.map(f => (
+		<>
+			<small class="api-syntax-title api-syntax-form">{f.label}{f.functions.map((h, i) => <>{i > 0 && ', '}<Fragment set:html={h} /></>)}</small>
+			<div class="api-syntax-line"><Fragment set:html={f.code} /></div>
+		</>
+	))}
+	{ruleRows.length > 0 && (
+		<ol class="api-syntax-params">
+			{ruleRows.map(r => (
+				<li>
+					<span class="api-syntax-param"><Fragment set:html={r.code} /></span>
+					{(r.description || r.enum) && <span class="api-syntax-comment">// <Fragment set:html={r.description} />{r.enum && <> <span class="api-syntax-values">Values: <a href={constantGroupHref(r.enum)}>{r.enum}</a></span></>}</span>}
+				</li>
+			))}
+		</ol>
+	)}
 </div>
 <style>
 	.api-syntax {
@@ -55,6 +85,8 @@ const rows = await Promise.all(params.map(async (p, i) => ({
 		overflow-wrap: anywhere;
 	}
 	.api-syntax-title { display: block; margin-bottom: .2rem; font-family: var(--__sl-font); font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); user-select: none; }
+	.api-syntax-form { margin-top: .6rem; }
+	.api-syntax-form :global(code.lsl-inline) { font-family: var(--__sl-font-mono); }
 	.api-syntax-params { list-style: none; margin: 0; padding: 0 0 0 1.5rem; }
 	.api-syntax-params li { display: flex; flex-wrap: wrap; column-gap: 1rem; margin: .1rem 0; }
 	.api-syntax-param { white-space: nowrap; }
@@ -62,7 +94,9 @@ const rows = await Promise.all(params.map(async (p, i) => ({
 	.api-syntax-values { display: block; font-size: var(--sl-text-xs); }
 	.api-syntax :global(code.lsl-inline) { padding: 0; background: none; border: 0; font-size: inherit; }
 	@media (max-width: 40rem) {
-		.api-syntax-params { padding-inline-start: 1rem; }
+		.api-syntax-form { margin-top: .6rem; }
+	.api-syntax-form :global(code.lsl-inline) { font-family: var(--__sl-font-mono); }
+	.api-syntax-params { padding-inline-start: 1rem; }
 		.api-syntax-comment { flex-basis: 100%; }
 	}
 </style>

@@ -1,24 +1,53 @@
 ---
-// Animated homepage hero: a script card drops into a plywood prim, the prim
-// sparkles, and local chat answers "Hello, World!". Pure HTML/CSS, decorative.
-// One shared 10s timeline (--loop); every step is a keyframe window on it.
+// Animated homepage hero: four script cards drop into a plywood prim in turn, and
+// the prim reacts to each (sparkles + chat, orange tint, fast spin, hover text).
+// Pure HTML/CSS, decorative. One shared 40s timeline (--loop) of four 10s
+// segments (--seg); every step is a keyframe window on it, and each card runs
+// the same keyframes delayed by its segment (--k).
 import plywood from '../../assets/hero/plywood.webp';
 const particles = Array.from({ length: 10 }, (_, i) => i);
 ---
 
 <div class="scene" aria-hidden="true" style={`--plywood: url("${plywood.src}")`}>
 	<div class="stage">
+		<div class="omega-cue" />
 		<div class="float">
 			<div class="cube">
 				{Array.from({ length: 6 }, () => <div class="face" />)}
 				<div class="shadow" />
 			</div>
-			<div class="script-card">
+			<div class="script-card" style="--k: 0">
 				<div class="card-title">New Script</div>
 				<pre><code><span class="k">default</span> &#123;
   <span class="e">state_entry</span>() &#123;
     <span class="f">llSay</span>(<span class="n">0</span>, <span class="s">"Hello, World!"</span>);
     <span class="f">llParticleSystem</span>([<span class="rules"><span class="hidden-rules">PSYS_PART_FLAGS, PSYS_PART_EMISSIVE_MASK | PSYS_PART_INTERP_COLOR_MASK | PSYS_PART_INTERP_SCALE_MASK | PSYS_PART_FOLLOW_VELOCITY_MASK, PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE, PSYS_SRC_BURST_PART_COUNT, 10, PSYS_SRC_BURST_RATE, 0.1, PSYS_SRC_BURST_SPEED_MIN, 0.5, PSYS_SRC_BURST_SPEED_MAX, 1.0, PSYS_SRC_MAX_AGE, 1.0, PSYS_PART_MAX_AGE, 1.0, PSYS_PART_START_COLOR, &lt;1.0, 0.85, 0.4&gt;, PSYS_PART_END_COLOR, &lt;1.0, 1.0, 1.0&gt;, PSYS_PART_START_ALPHA, 1.0, PSYS_PART_END_ALPHA, 0.0, PSYS_PART_START_SCALE, &lt;0.15, 0.15, 0.0&gt;, PSYS_PART_END_SCALE, &lt;0.05, 0.05, 0.0&gt;</span></span>]);
+  &#125;
+&#125;</code></pre>
+			</div>
+			<div class="script-card" style="--k: 1; --drop: 2.5cqi">
+				<div class="card-title">New Script</div>
+				<pre><code><span class="k">default</span> &#123;
+  <span class="e">state_entry</span>() &#123;
+    <span class="f">llSetColor</span>(&lt;<span class="n">1</span>, <span class="n">0.4</span>, <span class="n">0.2</span>&gt;, <span class="c">ALL_SIDES</span>);
+    <span class="f">llSleep</span>(<span class="n">2.0</span>);
+    <span class="f">llSetColor</span>(&lt;<span class="n">1</span>, <span class="n">1</span>, <span class="n">1</span>&gt;, <span class="c">ALL_SIDES</span>);
+  &#125;
+&#125;</code></pre>
+			</div>
+			<div class="script-card" style="--k: 2">
+				<div class="card-title">New Script</div>
+				<pre><code><span class="k">default</span> &#123;
+  <span class="e">state_entry</span>() &#123;
+    <span class="f">llTargetOmega</span>(&lt;<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>&gt;, <span class="c">PI</span>, <span class="n">1.0</span>);
+  &#125;
+&#125;</code></pre>
+			</div>
+			<div class="script-card" style="--k: 3">
+				<div class="card-title">New Script</div>
+				<pre><code><span class="k">default</span> &#123;
+  <span class="e">state_entry</span>() &#123;
+    <span class="f">llSetText</span>(<span class="s">"Hello!"</span>, &lt;<span class="n">1</span>, <span class="n">1</span>, <span class="n">1</span>&gt;, <span class="n">1.0</span>);
   &#125;
 &#125;</code></pre>
 			</div>
@@ -28,6 +57,7 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		</div>
 	</div>
 
+	<div class="hover-text">Hello!</div>
 
 	<div class="bubble">
 		<span class="dots"><i></i><i></i><i></i></span>
@@ -41,9 +71,16 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		inherits: true; /* the faces read it for their shading */
 		initial-value: 0deg;
 	}
+	/* Extra rotation from llTargetOmega (segment 3), added to --spin wherever --spin is read. */
+	@property --omega {
+		syntax: '<angle>';
+		inherits: true;
+		initial-value: 0deg;
+	}
 
 	.scene {
-		--loop: 10s;
+		--loop: 40s;
+		--seg: 10s;
 		--cube: 34cqi;
 		position: relative;
 		width: 100%;
@@ -71,10 +108,11 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		width: var(--cube);
 		aspect-ratio: 1;
 		transform-style: preserve-3d;
-		transform: rotateX(70deg) rotateZ(var(--spin));
+		transform: rotateX(70deg) rotateZ(calc(var(--spin) + var(--omega)));
 		animation:
 			spin 16s linear infinite,
-			pulse var(--loop) ease-out infinite;
+			pulse var(--seg) ease-out infinite,
+			omega var(--loop) infinite;
 	}
 	.face,
 	.shadow {
@@ -104,10 +142,21 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		--lit: 0.02;
 		--unlit: 0.5;
 	}
-	.face::before {
+	.face::before,
+	.face::after {
 		content: '';
+		grid-area: 1 / 1;
+	}
+	.face::before {
 		background: black;
-		opacity: calc(var(--lit) + (var(--unlit) - var(--lit)) * (1 - max(0, cos(var(--n) + var(--spin) - var(--light)))));
+		opacity: calc(var(--lit) + (var(--unlit) - var(--lit)) * (1 - max(0, cos(var(--n) + var(--spin) + var(--omega) - var(--light)))));
+	}
+	/* llSetColor (segment 2): a multiply tint over texture and shading, so both stay readable. */
+	.face::after {
+		background: rgb(255 102 51); /* <1, 0.4, 0.2> */
+		mix-blend-mode: multiply;
+		opacity: 0;
+		animation: tint var(--loop) ease-in-out infinite;
 	}
 	.face:nth-child(1)::before { opacity: 0; }
 	.face:nth-child(6)::before { opacity: 0.6; }
@@ -128,14 +177,30 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 	@keyframes float {
 		50% { transform: translateY(-2.5cqi); }
 	}
-	/* The prim "takes" the script: a short squash at ~40%. */
+	/* The prim "takes" each script: a short squash at ~40% of every segment (4s). */
 	@keyframes pulse {
 		0%, 39%, 50%, 100% { scale: 1; }
 		42% { scale: 1.07; }
 		45% { scale: 0.97; }
 	}
+	/* Segment 2: tint as the card lands (14s), hold for the script's llSleep(2.0), then back. */
+	@keyframes tint {
+		0%, 35.25% { opacity: 0; }
+		36.5%, 41.5% { opacity: 0.75; }
+		43%, 100% { opacity: 0; }
+	}
+	/* Segment 3 (lands at 24s): ease in to a fast spin, hold, ease out: 4 extra turns, so the
+	   wrap back to 0 at the loop end is invisible. The curves' end/start slopes (2x) match the
+	   linear middle, so the speed is continuous. */
+	@keyframes omega {
+		0%, 60.5% { --omega: 0deg; animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.5); }
+		64.5% { --omega: 360deg; animation-timing-function: linear; }
+		68.5% { --omega: 1080deg; animation-timing-function: cubic-bezier(0.25, 0.5, 0.5, 1); }
+		72.5%, 100% { --omega: 1440deg; }
+	}
 
-	/* ---- Script card: appears above the prim, hovers, then falls in through the top face (0–40%).
+	/* ---- Script cards: each appears above the prim, hovers, then falls in through the top face
+	   (the first 4s of its segment; card --k runs the same keyframes delayed by k segments).
 	   It lives in the cube's 3D context (inside .float), so the faces really intersect and hide it. ---- */
 	.float {
 		display: grid;
@@ -146,7 +211,8 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		grid-area: 1 / 1;
 	}
 	.script-card {
-		width: 52cqi;
+		min-width: 52cqi;
+		width: max-content;
 		padding: 2cqi 2.5cqi;
 		border-radius: 2cqi;
 		background: light-dark(oklch(0.99 0 0 / 0.92), oklch(0.24 0.02 260 / 0.92));
@@ -154,8 +220,11 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		box-shadow: 0 2cqi 5cqi oklch(0 0 0 / 0.18);
 		color: var(--sl-color-gray-2);
 		font-size: 2.6cqi;
+		/* A taller card (more lines) sits a little lower so its top stays inside the scene. */
+		position: relative;
+		top: var(--drop, 0);
 		opacity: 0;
-		animation: card var(--loop) infinite;
+		animation: card var(--loop) calc(var(--k) * var(--seg)) infinite;
 	}
 	.card-title {
 		user-select: none;
@@ -192,20 +261,21 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 	.f { color: light-dark(oklch(0.5 0.13 160), oklch(0.8 0.13 160)); }
 	.s { color: light-dark(oklch(0.52 0.15 40), oklch(0.8 0.12 60)); }
 	.n { color: light-dark(oklch(0.55 0.15 20), oklch(0.78 0.14 20)); }
+	.c { color: light-dark(oklch(0.5 0.15 250), oklch(0.78 0.12 230)); }
 
 	/* Each step eases on its own: settle in, hover, a small lift (anticipation), then a gravity-like
 	   fall that accelerates into the prim, landing as it squashes (pulse, ~40%). */
 	@keyframes card {
 		0% { opacity: 0; transform: translateY(-34cqi) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
-		7% { opacity: 1; transform: translateY(-38cqi) scale(0.85); animation-timing-function: ease-in-out; }
-		16% { transform: translateY(-36.5cqi) scale(0.85); animation-timing-function: ease-in-out; }
-		25% { transform: translateY(-38cqi) scale(0.85); animation-timing-function: cubic-bezier(0.3, 0, 0.5, 1); }
-		30% { opacity: 1; transform: translateY(-42cqi) scale(0.8) rotateX(-6deg); animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.4); }
-		39.5% { opacity: 1; transform: translateY(0) scale(0.45); }
-		40%, 100% { opacity: 0; transform: translateY(0) scale(0.45); }
+		1.75% { opacity: 1; transform: translateY(-38cqi) scale(0.85); animation-timing-function: ease-in-out; }
+		4% { transform: translateY(-36.5cqi) scale(0.85); animation-timing-function: ease-in-out; }
+		6.25% { transform: translateY(-38cqi) scale(0.85); animation-timing-function: cubic-bezier(0.3, 0, 0.5, 1); }
+		7.5% { opacity: 1; transform: translateY(-42cqi) scale(0.8) rotateX(-6deg); animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.4); }
+		9.875% { opacity: 1; transform: translateY(0) scale(0.45); }
+		10%, 100% { opacity: 0; transform: translateY(0) scale(0.45); }
 	}
 
-	/* ---- Particle burst from the cube centre (40–56%). ---- */
+	/* ---- Segment 1: particle burst from the cube centre (4–5.6s). ---- */
 	.burst {
 		position: absolute;
 		inset: 0;
@@ -225,12 +295,12 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		animation: burst var(--loop) cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
 	}
 	@keyframes burst {
-		0%, 40% { opacity: 0; transform: rotate(var(--a)) translateX(4cqi) scale(0.4); }
-		43% { opacity: 1; }
-		56%, 100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--r)) scale(1); }
+		0%, 10% { opacity: 0; transform: rotate(var(--a)) translateX(4cqi) scale(0.4); }
+		10.75% { opacity: 1; }
+		14%, 100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--r)) scale(1); }
 	}
 
-	/* ---- Chat bubble: typing dots (48–64%), then the message until ~94%. ---- */
+	/* ---- Segment 1: chat bubble, typing dots (4.8–6.4s), then the message until ~9.4s. ---- */
 	.bubble {
 		position: absolute;
 		left: 50%;
@@ -264,28 +334,106 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 	.text b { font-weight: 600; opacity: 0.75; }
 
 	@keyframes bubble {
-		0%, 47% { opacity: 0; transform: translateY(2cqi) scale(0.9); }
-		50%, 92% { opacity: 1; transform: none; }
-		97%, 100% { opacity: 0; transform: translateY(-2cqi); }
+		0%, 11.75% { opacity: 0; transform: translateY(2cqi) scale(0.9); }
+		12.5%, 23% { opacity: 1; transform: none; }
+		24.25%, 100% { opacity: 0; transform: translateY(-2cqi); }
 	}
 	@keyframes dots {
 		0% { opacity: 1; }
-		64% { opacity: 0; }
+		16% { opacity: 0; }
 	}
 	@keyframes text {
-		0%, 64% { opacity: 0; }
-		67%, 100% { opacity: 1; }
+		0%, 16% { opacity: 0; }
+		16.75%, 100% { opacity: 1; }
 	}
 	@keyframes dot {
 		0%, 100% { opacity: 0.35; transform: translateY(0); }
 		50% { opacity: 1; transform: translateY(-0.6cqi); }
 	}
 
-	/* Reduced motion: a still, composed final frame (cube + "Hello, World!"). */
+	/* ---- Segment 4: llSetText hover text above the prim (34–39.4s), SL-style: plain white text
+	   with a soft shadow, no background. ---- */
+	.hover-text {
+		position: absolute;
+		left: 50%;
+		top: 20cqi;
+		color: white;
+		font-family: var(--sl-font-system, system-ui);
+		font-size: 4.2cqi;
+		font-weight: 500;
+		/* White like in-world; the shadow is darker on light backgrounds so it still reads. */
+		text-shadow:
+			0 0.2cqi 0.4cqi light-dark(oklch(0 0 0 / 0.85), oklch(0 0 0 / 0.7)),
+			0 0 0.2cqi light-dark(oklch(0 0 0 / 0.9), oklch(0 0 0 / 0.8));
+		white-space: nowrap;
+		translate: -50% 0;
+		opacity: 0;
+		animation: hover-text var(--loop) ease-out infinite;
+	}
+	@keyframes hover-text {
+		0%, 85.5% { opacity: 0; transform: translateY(1cqi); }
+		86.75%, 96% { opacity: 1; transform: none; }
+		98.5%, 100% { opacity: 0; transform: none; }
+	}
+
+	/* Reduced-motion stand-in for the segment 3 spin (see below); unused otherwise. */
+	.omega-cue { display: none; }
+
+	/* Reduced motion. Project convention: never just remove animations or freeze a frame;
+	   replace each motion with a non-motion equivalent (fades, glows, colour) on the same
+	   timeline. Motion stays only where it carries critical information (none here). */
 	@media (prefers-reduced-motion: reduce) {
-			.scene *, .scene *::before { animation: none !important; }
-		.cube { --spin: 30deg; }
-		.script-card, .burst, .dots { display: none; }
-		.bubble, .text { opacity: 1; }
+		/* The prim holds still at a fixed angle, shaded for it: no float, spin, squash or omega. */
+		.float { animation: none; }
+		.cube { --spin: 30deg; animation: none; }
+		/* Cards cross-fade in and out in place, above the prim. */
+		.script-card { animation-name: card-fade; }
+		/* Sparkles glow up and fade where they are, instead of flying out. */
+		.burst span { animation-name: burst-fade; animation-timing-function: ease-in-out; }
+		/* llTargetOmega: a soft warm glow behind the prim instead of a fast spin. */
+		.omega-cue {
+			display: block;
+			grid-area: 1 / 1;
+			width: 60cqi;
+			aspect-ratio: 1;
+			border-radius: 50%;
+			background: radial-gradient(circle, oklch(0.85 0.15 80 / 0.55), transparent 65%);
+			opacity: 0;
+			animation: omega-cue var(--loop) ease-in-out infinite;
+		}
+		.stage > .float { grid-area: 1 / 1; }
+		/* Bubble, typing dots and hover text fade only. */
+		.bubble { animation-name: bubble-fade; }
+		.dots i { animation-name: dot-fade; }
+		.hover-text { animation-name: hover-text-fade; }
+	}
+	@keyframes card-fade {
+		0% { opacity: 0; transform: translateY(-38cqi) scale(0.85); }
+		1.75%, 8.75% { opacity: 1; transform: translateY(-38cqi) scale(0.85); }
+		10%, 100% { opacity: 0; transform: translateY(-38cqi) scale(0.85); }
+	}
+	@keyframes burst-fade {
+		0%, 10% { opacity: 0; transform: rotate(var(--a)) translateX(calc(var(--r) * 0.7)); }
+		11.5% { opacity: 1; transform: rotate(var(--a)) translateX(calc(var(--r) * 0.7)); }
+		15%, 100% { opacity: 0; transform: rotate(var(--a)) translateX(calc(var(--r) * 0.7)); }
+	}
+	@keyframes omega-cue {
+		0%, 60.5% { opacity: 0; }
+		64.5%, 68.5% { opacity: 1; }
+		72.5%, 100% { opacity: 0; }
+	}
+	@keyframes bubble-fade {
+		0%, 11.75% { opacity: 0; }
+		12.5%, 23% { opacity: 1; }
+		24.25%, 100% { opacity: 0; }
+	}
+	@keyframes dot-fade {
+		0%, 100% { opacity: 0.35; }
+		50% { opacity: 1; }
+	}
+	@keyframes hover-text-fade {
+		0%, 85.5% { opacity: 0; }
+		86.75%, 96% { opacity: 1; }
+		98.5%, 100% { opacity: 0; }
 	}
 </style>

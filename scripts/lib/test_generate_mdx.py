@@ -144,6 +144,9 @@ class ConverterTests(unittest.TestCase):
         self.assertIn('\n\n```lsl\na();\nb();\n```\n\n', md)
         self.assertNotRegex(md, r'(?m)^[ \t]+(```|a\(\);)')
 
+    def test_pre_keeps_a_non_lsl_language(self):
+        self.assertTrue(Converter().convert('<pre data-lang="js"><code>{ "a": 1 }</code></pre>').startswith('```js' + chr(10)))
+
     def test_mdx_specials_are_escaped(self):
         md = Converter().convert('<div class="wiki-line">a <b> {c} * [d] </font></div>')
         self.assertNotIn('<b>', md)

@@ -283,4 +283,37 @@ class DatasetTests(unittest.TestCase):
         self.assertEqual(report['apiWithoutWiki']['events'],[])
     def test_unique_archive_routes(self):
         self.assertEqual(len({x['slug'] for x in self.c['wiki']}),len(self.c['wiki']))
+class ConstantPageTests(unittest.TestCase):
+    def setUp(self):
+        page=lambda title,text,ns=10:({'title':title,'namespace':ns},text)
+        pages=[
+            page('Template:LSL Constant/Demo','{{#if:\n{{#vardefine:functions|{{!}}\n{{LSL DefineRow||[[llSay]]|Says}}\n}}\n}}'),
+        ]
+        self.r=Renderer({'llsay':'/functions/llSay/'},{t['title'].casefold():(t,x) for t,x in pages})
+
+    def test_variables_from_a_transcluded_helper_fill_constant_fields(self):
+        text='{{LSL Constant/Demo}}{{LSL Constant\n|name=DEMO\n|type=integer\n|value=1\n|desc\n|functions\n}}'
+        sections={x['id']:x['html'] for x in page_sections(text,self.r)}
+        self.assertIn('see-also-functions',sections)
+        self.assertIn('<a href="/functions/llSay/">llSay</a> — Says',sections['see-also-functions'])
+        self.assertNotIn('|',re.sub(r'<[^>]+>','',sections['see-also-functions']))
+
+    def test_pa_uses_page_variables_and_specialbox(self):
+        text=('{{#if:{{#vardefine:demo/note|Avatars move too.}}}}{{LSL Constant|name=DEMO|type=integer|value=1|desc=Demo.'
+              '|pa={{SpecialBox|1=[[llSay]]([ DEMO<nowiki></nowiki>, [[vector{{#var:lang}}|vector]] {{LSL Param|pos}} ]);|3=\n{{{!}}\n{{LSL_ParamRow|1=vector|2=pos|3=|disp=pos}}\n{{!}}}\n{{LSL Generic/Caveats|caveats=* Careful.|title=*}}\n{{#var:demo/note}}}}}}')
+        html={x['id']:x['html'] for x in page_sections(text,self.r)}['usage']
+        self.assertIn('<h3><a href="/functions/llSay/">llSay</a>([ DEMO, ',html)
+        self.assertNotIn('\x07',html); self.assertNotIn('{{',html)
+        self.assertIn('<h4>Caveats</h4>',html); self.assertIn('Avatars move too.',html)
+
+    def test_code_language_is_kept(self):
+        self.assertIn('<pre data-lang="js"><code>',self.r.render('<syntaxhighlight lang="JavaScript">{ "a": 1 }</syntaxhighlight>'))
+        self.assertIn('<pre><code>',self.r.render('<source lang="lsl2">default{}</source>'))
+
+    def test_head_without_prose_adds_no_section(self):
+        text='{{LSL Function/Headless|summary=Both.|head={{LSL Function/Head|func=llA|p1_type=integer|p1_name=x}}\n{{LSL Function/Head|func=llB}}}}'
+        sections=page_sections(text,self.r,variant='llA')
+        self.assertNotIn('{{','\n'.join(x['html'] for x in sections))
+
+
 if __name__=='__main__': unittest.main()

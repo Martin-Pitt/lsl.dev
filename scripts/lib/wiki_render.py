@@ -77,13 +77,22 @@ UNEVALUATED_FUNCTIONS={'#ifexpr','#expr','#pos','#rpos','#sub','#len','#replace'
 SECTION_VARIABLES=(('caveats','Caveats'),('caveats_set','Caveats'),('caveats_get','Caveats'),('notes','Notes'),('deepnotes','Deep notes'))
 
 # Variables that pages append to ({{#vardefine:caveats|{{#var:caveats}} ...}}); undefined means empty.
-ACCUMULATOR=re.compile(r'^(?:caveats|notes|deepnotes|issues|examples|helpers|also_\w+|constants(?:_nb)?|footnotes\w*|hidden[\w-]*|header\w*|spec|caveats-get|caveats-set)(?:[_-](?:get|set))?$')
+ACCUMULATOR=re.compile(r'^(?:lang|caveats|notes|deepnotes|issues|examples|helpers|also_\w+|constants(?:_nb)?|footnotes\w*|hidden[\w-]*|header\w*|spec|caveats-get|caveats-set)(?:[_-](?:get|set))?$')
 # Marker of a value the offline renderer cannot know (see Renderer.call); removed or acted on later.
 UNRESOLVED=re.compile('\x07[^\x07]*\x07')
 
 # Local templates that hold page content (tables, cheat sheets) rather than template logic; they
 # are expanded in place like {{:Page}} transclusions.
-CONTENT_TEMPLATES={'lsl animation states','lsl regular expressions','llsitonlinkconstants'}
+CONTENT_TEMPLATES={'lsl animation states','lsl regular expressions','llsitonlinkconstants','lsl extended error http'}
+
+# Code block languages other than LSL, from <syntaxhighlight lang=...> and <source lang=...>.
+CODE_LANGS={'javascript':'js','js':'js','php':'php','html':'html','html4strict':'html','xml':'xml','python':'python','bash':'bash','sh':'bash','json':'json','css':'css','c':'c','cpp':'cpp','csharp':'csharp','perl':'perl','ruby':'ruby','java':'java','sql':'sql','text':'txt','txt':'txt','none':'txt'}
+
+def code_block(attrs, code):
+    """<pre> for a wiki code element; data-lang names a language that is not LSL."""
+    lang=re.search(r'\blang\s*=\s*["\']?([\w+#-]+)',attrs or '',re.I)
+    lang=CODE_LANGS.get(lang[1].lower()) if lang else None
+    return '<pre'+(' data-lang="'+lang+'"' if lang else '')+'><code>'+html.escape(code.strip('\n'))+'</code></pre>'
 
 def anchor(s):
     return re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-') or 'section'
@@ -268,6 +277,7 @@ class Renderer:
     def transclusion_source(self, name):
         """Local page transcluded by {{:Page}} or a {{LSL Constants ...}} template, following redirects."""
         name=name.strip()
+        if name.lower().startswith('template:'): name=name[9:].strip()
         if name.startswith(':'): key=name[1:].replace('_',' ').strip().casefold()
         elif name.replace('_',' ').casefold().startswith(('lsl constants','lsl constant/','issues/')) or name.replace('_',' ').strip().casefold() in CONTENT_TEMPLATES: key='template:'+name.replace('_',' ').strip().casefold()
         else: return None
@@ -328,7 +338,10 @@ class Renderer:
     def render(self, text, depth=0):
         if depth > 8: return html.escape(text)
         text = self.evaluate(self.expand(text))
-        tokens = []
+        # One placeholder table for a render and the renders nested in it: template arguments
+        # already hold this render's placeholders (e.g. a <nowiki></nowiki> in {{SpecialBox|1=...}}).
+        if depth == 0 or not hasattr(self, '_tokens'): self._tokens = []
+        tokens = self._tokens
         def token(s):
             tokens.append(s)
             return '\x01' + str(len(tokens)-1) + '\x02'
@@ -341,7 +354,7 @@ class Renderer:
                 s=s.replace('\x01'+str(i)+'\x02',value).replace('\x03'+str(i)+'\x04',value)
             return s
         text = re.sub(r'<!--.*?-->', '', text, flags=re.S)
-        text = re.sub(r'<(syntaxhighlight|source|pre|nowiki|lsl)\b[^>]*>(.*?)</\1\s*>', lambda m: token('<pre><code>'+html.escape(m[2].strip('\n'))+'</code></pre>') if m[1].lower() != 'nowiki' else token(html.escape(m[2])), text, flags=re.I|re.S)
+        text = re.sub(r'<(syntaxhighlight|source|pre|nowiki|lsl)\b([^>]*)>(.*?)</\1\s*>', lambda m: token(code_block(m[2], m[3])) if m[1].lower() != 'nowiki' else token(html.escape(m[3])), text, flags=re.I|re.S)
         # <ref>note</ref> and {{Footnote|note}} become footnotes; the reference list is the converter's job.
         text = re.sub(r'<ref\b[^>/]*>(.*?)</ref\s*>', lambda m: token('<sup class="wiki-footnote">'+self.inline(m[1].strip(),depth)+'</sup>'), text, flags=re.I|re.S)
         text = re.sub(r'<ref\b[^>]*/>|<references\s*/?>', '', text, flags=re.I)
@@ -351,6 +364,8 @@ class Renderer:
         outer = [n for n in nodes if not any(p['start'] < n['start'] and p['end'] >= n['end'] for p in nodes)]
         for n in sorted(outer, key=lambda n:n['start'], reverse=True):
             name=n['name']; args=[p[2].strip() for p in n['parts'][1:]]
+            if name.strip().lower().startswith('template:'): name=name.strip()[9:]
+            if tname(name).lower()=='lsl const/ja': name='LSL Const'  # Japanese copy, same arguments; not in the snapshot
             positional=[a for a in args if not re.match(r'[A-Za-z0-9_ -]+=',a)]
             arg=lambda i:n['fields'][str(i)]['value'] if str(i) in n['fields'] else (positional[i-1] if len(positional)>=i else '')
             lname=name.lower().strip()
@@ -420,6 +435,56 @@ class Renderer:
                     rendered='<p>Archived '+html.escape(args[0])+' parameter table from '+self.link(source[0]['title'])+'. Variable-based or conditional cells retain their original syntax.</p>'+self.render(body,depth+1)
                 else:
                     rendered=self.link('Template:'+name)+': <code>'+html.escape(text[n['start']:n['end']])+'</code>'
+            elif tname(lname) in ('lsl function/keyvalue','lsl function/color','kbvideo','help','cn','citation needed','lsl injection test') or (tname(lname).startswith('lsl constant/') and not self.sources.get('template:'+tname(lname))):
+                # Variable definitions, categories or embeds only: no visible text on the page. (A missing
+                # {{LSL Constant/...}} helper, e.g. Pathfinding Character, only set variables either.)
+                rendered=''
+            elif tname(lname)=='lsl function/permission' and arg(1):
+                grant=n['fields'].get('grant',{}).get('value','').strip()
+                rendered=self.inline('To run this function the script must request the [['+arg(1)+']] '+('or [['+arg(2)+']] ' if arg(2) else '')+'permission with [[llRequestPermissions]]'+(' and it must be granted by '+grant if grant and grant!='anyone' else '')+'.',depth)
+            elif tname(lname) in ('collapsible table','collapsible table/simple'):
+                f=lambda k:n['fields'].get(k,{}).get('value','').strip()
+                title=re.sub(r'<[^>]+>','',f('title')).strip()
+                content=re.sub(r'^\s*\{\{!\}\}','',f('content'))
+                rendered='<details><summary>'+self.inline(title or 'Details',depth)+'</summary>'+self.render(content,depth+1)+'</details>'
+            elif tname(lname)=='samp' and arg(1):
+                rendered='<pre data-lang="txt"><code>'+html.escape(arg(1).strip('\n'))+'</code></pre>'
+            elif tname(lname)=='sourcelink/github' and (arg(2) or n['fields'].get('text')):
+                f=lambda *ks:next((n['fields'][k]['value'].strip() for k in ks if n['fields'].get(k,{}).get('value','').strip()),'')
+                line=f('line','Line'); rev=f('rev','Rev') or 'master'
+                href='https://github.com/'+(f('user','User') or 'secondlife')+'/'+(arg(1) or 'viewer')+'/blob/'+rev+'/'+arg(2)+('#L'+line if line else '')
+                rendered='<a href="'+html.escape(href,quote=True)+'" rel="noreferrer">'+html.escape(f('text') or (arg(1) or 'viewer')+' - '+arg(2)+(' Line '+line if line else ''))+'</a>'
+            elif tname(lname)=='ll':
+                url,label={'TOS':('https://secondlife.com/corporate/tos.php','LL:Terms Of Service'),'PP':('https://secondlife.com/corporate/privacy.php','LL:Privacy Policy'),'CS':('https://secondlife.com/corporate/cs.php','LL:Community Standards'),'SL':('https://secondlife.com/','Second Life')}.get(arg(1),('https://lindenlab.com','Linden Lab'))
+                rendered='<a href="'+url+'" rel="noreferrer">'+label+'</a>'
+            elif tname(lname)=='rfc' and arg(1):
+                target=n['fields'].get('target',{}).get('value','').strip()
+                rendered='<a href="http://tools.ietf.org/html/'+quote(arg(1))+'.html'+('#'+quote(target) if target else '')+'" rel="noreferrer">RFC-'+html.escape(arg(1))+(': '+self.inline(arg(2),depth) if arg(2) else '')+'</a>'
+            elif tname(lname)=='slh' and arg(1):
+                rendered='<a href="http://secondlife.wikia.com/index.php/'+quote(arg(1))+'" rel="noreferrer">'+html.escape(arg(2) or 'SL Wikia:'+arg(1))+'</a>'
+            elif tname(lname)=='slurl' and (arg(1) or n['fields'].get('region')):
+                g=lambda k,i,d:n['fields'].get(k,{}).get('value','').strip() or arg(i) or d
+                region=g('region',1,''); x,y,z=g('x',2,'128'),g('y',3,'128'),g('z',4,'0')
+                title=n['fields'].get('title',{}).get('value','').strip() or region+' ('+x+', '+y+', '+z+')'
+                rendered='<a href="http://slurl.com/secondlife/'+quote(region)+'/'+quote(x)+'/'+quote(y)+'/'+quote(z)+'/" rel="noreferrer">'+html.escape(title)+'</a>'
+            elif tname(lname)=='date' and arg(1):
+                rendered=html.escape(arg(1))  # Template:Date formats a date; an ISO date reads as is
+            elif tname(lname) in ('mrg','mrm','mra'):
+                # Maturity rating: a parcel icon (not part of this site) and the bold rating name.
+                rendered='<strong>'+{'mrg':'General','mrm':'Moderate','mra':'Adult'}[tname(lname)]+'</strong>'
+            elif tname(lname)=='specialbox' and (arg(1) or arg(3)):
+                # Template:SpecialBox: a boxed section whose header is {{{1}}} and body {{{3}}}. On
+                # {{LSL Constant}} pages ({{LSL Constant/List}}) the header is the rule's call syntax
+                # and the body a one-table list of {{LSL ParamRow}}s, shown here as rows.
+                body=re.sub(r'^[ \t]*(?:\{\{\{!\}\}|\{\{!\}\}\}|\{\||\|\})[ \t]*$','',arg(3),flags=re.M)
+                rendered=('<h3>'+self.inline(arg(1),depth)+'</h3>' if arg(1) else '')+self.render(body,depth+1)
+            elif tname(lname)=='lsl paramrow' and (arg(1) or arg(2)):
+                disp=n['fields'].get('disp',{}).get('value','').strip() or arg(2)
+                desc=UNRESOLVED.sub('',arg(3)).strip()
+                rendered='<div class="wiki-related-row">'+self.link(arg(1),arg(1))+' <span class="wiki-param"><code>'+html.escape(disp)+'</code></span>'+(' — '+self.inline(desc,depth) if desc else '')+'</div>'
+            elif tname(lname)=='lsl generic/caveats':
+                caveats=n['fields'].get('caveats',{}).get('value','').strip()
+                rendered=('<h4>Caveats</h4>' if n['fields'].get('title',{}).get('value','').strip() else '')+self.render(caveats,depth+1) if caveats else ''
             elif name.lower() in ATTRIBUTE_TEMPLATES or name.lower()=='pbr':
                 rendered=''
             elif name.lower()=='lsl pl' and args:
@@ -566,7 +631,7 @@ SECTION_FIELDS = {'summary':'Overview','head':'Function variants','func_desc':'W
 PROSE_IDS = {'overview','wiki-description','return-value-notes','function-notes','event-notes','constant-notes','function-guidance','function-details'}
 
 # {{LSL Constant}} pages use their own field names; there constants/functions/events are related-entry lists.
-CONSTANT_FIELDS = {'desc':'Wiki description','caveats':'Caveats','examples':'Examples','helpers':'Helper functions','notes':'Notes','constants':'See also: constants','functions':'See also: functions','events':'See also: events','articles':'See also: articles','history':'History','issues':'Known issues','deepnotes':'Deep notes'}
+CONSTANT_FIELDS = {'desc':'Wiki description','pa':'Usage','pb':'Usage','pc':'Usage','pd':'Usage','caveats':'Caveats','examples':'Examples','helpers':'Helper functions','notes':'Notes','constants':'See also: constants','functions':'See also: functions','events':'See also: events','articles':'See also: articles','history':'History','issues':'Known issues','deepnotes':'Deep notes'}
 
 def tname(name):
     return name.replace('_',' ').strip()
@@ -580,6 +645,13 @@ def page_sections(text, renderer, depth=0, variant=None):
         # One variable table per page: values defined anywhere (often inside <onlyinclude>) are
         # visible to every field, as on the wiki.
         renderer.vars={}; renderer.dropped=[]
+        # Templates the page transcludes outside its page template (e.g. {{LSL Constant/Attachment}}
+        # before {{LSL Constant}}) set variables the page template prints; run them first, in order.
+        nodes=templates(text)
+        for n in nodes:
+            if any(p['start']<n['start'] and p['end']>=n['end'] for p in nodes): continue
+            if renderer.transclusion_source(n['name']) and tname(n['name']) not in ('LSL Constant','LSL Function','LSL Event'):
+                renderer.evaluate(renderer.expand(text[n['start']:n['end']]),1)
         text=renderer.evaluate(text)
         sections=page_sections(text,renderer,1,variant)
         if not sections: return sections
@@ -610,8 +682,16 @@ def page_sections(text, renderer, depth=0, variant=None):
         return []
     node=max(candidates,key=lambda n:n['end']-n['start'])
     sections=[]; siblings=[]
-    for field,title in (CONSTANT_FIELDS if tname(node['name'])=='LSL Constant' else SECTION_FIELDS).items():
+    is_constant=tname(node['name'])=='LSL Constant'
+    for field,title in (CONSTANT_FIELDS if is_constant else SECTION_FIELDS).items():
         value=node['fields'].get(field,{}).get('value','').strip()
+        if is_constant and field not in ('caveats','notes','deepnotes'):
+            # Template:LSL Constant prints {{{field|}}}{{#var:field}}: shared templates such as
+            # {{LSL Constant/Attachment}} fill the related lists and pa..pd through variables.
+            # (Caveats and notes variables are appended per section below, in page_sections.)
+            # The related-list variables open with {{!}}, continuing the template's own table.
+            extra=re.sub(r'^\s*\{\{!\}\}[ \t]*(?:\n|$)','',UNRESOLVED.sub('',renderer.vars.get(field,''))).strip()
+            if extra and extra not in value: value=(value+'\n'+extra).strip()
         if value:
             if field=='head':
                 sub=[]
@@ -627,7 +707,9 @@ def page_sections(text, renderer, depth=0, variant=None):
                         sub.append(''.join(('' if x['id'] in PROSE_IDS else '<h3 id="'+x['id']+'">'+x['title']+'</h3>')+x['html'] for x in parts))
                     else:
                         sub.append('<h3 id="'+anchor(name)+'">'+html.escape(name)+'</h3>'+''.join('<h4>'+x['title']+'</h4>'+x['html'] for x in parts))
-                rendered=''.join(sub) or renderer.render(value)
+                # Heads without prose fields (name, parameters, ids only) say nothing beyond the signature.
+                rendered=''.join(sub) or ('' if heads else renderer.render(value))
+                if not rendered.strip(): continue
                 if own: title='Function details'
             else: rendered=renderer.render(value)
             if field=='return_text':
@@ -637,6 +719,9 @@ def page_sections(text, renderer, depth=0, variant=None):
                     lead='Returns '+('an' if rtype[0].lower() in 'aeiou' else 'a')+' '+renderer.link(rtype)+' '
                     w='<div class="wiki-line">'
                     rendered=rendered.replace(w,w+lead,1) if rendered.startswith(w) else '<p>'+lead+'</p>'+rendered
+            if field in ('pa','pb','pc','pd') and sections and sections[-1]['title']==title:
+                # {{LSL Constant}} prints pa..pd one after another (e.g. the set and get forms of a PRIM_* rule).
+                sections[-1]['html']+=rendered; continue
             if field=='constants':
                 # The wiki prints the constants field directly after the specification, without its own heading.
                 rendered='<span id="constants"></span>'+rendered

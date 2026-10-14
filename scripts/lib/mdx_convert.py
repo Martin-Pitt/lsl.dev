@@ -323,6 +323,7 @@ class Converter:
         if t == 'pre':
             code = n.text()
             if 'wiki-source' in cls: f = fence(code, 'txt')
+            elif n.attrs.get('data-lang'): f = fence(code, n.attrs['data-lang'])  # wiki code in another language
             else: f = fence(code, 'lsl', collapse_meta(code.strip('\n'), self.focus))
             return [('code', f)] if f else []
         if t in ('ul', 'ol'): return [('list', self.list(n))]

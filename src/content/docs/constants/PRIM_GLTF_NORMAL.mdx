@@ -19,6 +19,35 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 
 Used to get or set the [GLTF](https://wiki.secondlife.com/wiki/GLTF_Overrides) normal map override of an object's `face`.
 
+## Usage
+
+### \[ [PRIM_GLTF_NORMAL](/constants/PRIM_GLTF_NORMAL/), [integer](https://wiki.secondlife.com/wiki/integer) **face**, [string](https://wiki.secondlife.com/wiki/string) **texture**, [vector](https://wiki.secondlife.com/wiki/vector) **repeats**, [vector](https://wiki.secondlife.com/wiki/vector) **offsets**, [float](https://wiki.secondlife.com/wiki/float) **rot** \]
+
+- [integer](https://wiki.secondlife.com/wiki/integer) **face** — a [face](https://wiki.secondlife.com/wiki/Face) number or [ALL_SIDES](/constants/ALL_SIDES/)
+- [string](https://wiki.secondlife.com/wiki/string) **texture**
+- [vector](https://wiki.secondlife.com/wiki/vector) **repeats** — x and y range from -10000.0 to 10000.0. Negative values flip the texture (z is ignored)
+- [vector](https://wiki.secondlife.com/wiki/vector) **offsets** — x and y range from -1.0 to 1.0. (z is ignored)
+- [float](https://wiki.secondlife.com/wiki/float) **rot**
+
+Used with [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) & [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams).
+
+### [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)(\[ [PRIM_GLTF_NORMAL](/constants/PRIM_GLTF_NORMAL/), [integer](https://wiki.secondlife.com/wiki/integer) **face** \]);
+
+- [integer](https://wiki.secondlife.com/wiki/integer) **face** — a [face](https://wiki.secondlife.com/wiki/Face) number or [ALL_SIDES](/constants/ALL_SIDES/)
+- [string](https://wiki.secondlife.com/wiki/string) **texture**
+- [vector](https://wiki.secondlife.com/wiki/vector) **repeats** — x and y range from -10000.0 to 10000.0. Negative values flip the texture (z is ignored)
+- [vector](https://wiki.secondlife.com/wiki/vector) **offsets** — x and y range from -1.0 to 1.0. (z is ignored)
+- [float](https://wiki.secondlife.com/wiki/float) **rot**
+
+#### Caveats
+
+- **repeats** is not only used to get the number of repeats but the sign of the individual components indicate if "Flip" is set.
+- In the [default](/constants/PRIM_TEXGEN_DEFAULT/) [texture mapping](/constants/PRIM_TEXGEN/) **tg_type** the [texture](/constants/PRIM_GLTF_NORMAL/) **repeats** units are in texture repeats per face. In the [planar](/constants/PRIM_TEXGEN_PLANAR/) texture mapping mode the texture **repeats** units are in texture repeats per half meter. This is in contrast to the in-world editing tool, in which the planar texture scaling units are repeats per meter.
+
+##### Target
+
+In the case of [llGetPrimitiveParams](/functions/llGetPrimitiveParams/) is either the prim the script resides in, or the prim specified by the immediately prior [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/) call. However in the case of [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/), it is either the value of the **link** parameter, or the prim specified by the immediately prior [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/) call.
+
 ## Caveats
 
 - **repeats** is not only used to set the number of repeats but the sign of the individual components is also used to set the "Flip" attribute.

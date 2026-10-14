@@ -18,6 +18,55 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 
 Used to specify how the alpha channel of the diffuse texture should affect rendering of a prim’s face.
 
+## Usage
+
+### \[ [PRIM_ALPHA_MODE](/constants/PRIM_ALPHA_MODE/), [integer](https://wiki.secondlife.com/wiki/integer) **face**, [integer](https://wiki.secondlife.com/wiki/integer) **alpha_mode**, [integer](https://wiki.secondlife.com/wiki/integer) **mask_cutoff** \]
+
+- [integer](https://wiki.secondlife.com/wiki/integer) **face** — a [face](https://wiki.secondlife.com/wiki/Face) number or [ALL_SIDES](/constants/ALL_SIDES/)
+- [integer](https://wiki.secondlife.com/wiki/integer) **alpha_mode** — PRIM_ALPHA_MODE\_\* flag
+- [integer](https://wiki.secondlife.com/wiki/integer) **mask_cutoff** — when the alpha rendering mode is **[PRIM_ALPHA_MODE_MASK](/constants/PRIM_ALPHA_MODE_MASK/)**, sets the alpha value above which a pixel renders as fully opaque, in the range 0 to 255
+
+When used with [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) & [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams)
+
+### [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)(\[ [PRIM_ALPHA_MODE](/constants/PRIM_ALPHA_MODE/), [integer](https://wiki.secondlife.com/wiki/integer) **face** \]);
+
+- [integer](https://wiki.secondlife.com/wiki/integer) **face** — a [face](https://wiki.secondlife.com/wiki/Face) number or [ALL_SIDES](/constants/ALL_SIDES/)
+- [integer](https://wiki.secondlife.com/wiki/integer) **alpha_mode** — PRIM_ALPHA_MODE\_\* flag
+- [integer](https://wiki.secondlife.com/wiki/integer) **mask_cutoff** — when the alpha rendering mode is **[PRIM_ALPHA_MODE_MASK](/constants/PRIM_ALPHA_MODE_MASK/)**, sets the alpha value above which a pixel renders as fully opaque, in the range 0 to 255
+
+<table>
+	<tr>
+		<th>**alpha_mode** Flags</th>
+		<th>V</th>
+		<th colspan="3">Description</th>
+		<th colspan="3">Notes</th>
+	</tr>
+	<tr>
+		<td>[PRIM_ALPHA_MODE_NONE](/constants/PRIM_ALPHA_MODE_NONE/)</td>
+		<td>0</td>
+		<td colspan="3">Render the diffuse texture as though the alpha channel were nonexistent</td>
+		<td colspan="3">The viewer’s build tool sets this by default when a face has a material and no alpha channel is present in the diffuse texture.</td>
+	</tr>
+	<tr>
+		<td>[PRIM_ALPHA_MODE_BLEND](/constants/PRIM_ALPHA_MODE_BLEND/)</td>
+		<td>1</td>
+		<td colspan="3">Render the diffuse texture with alpha-blending.</td>
+		<td colspan="3">This value is also used as the default to clear the materials settings from a prim face.</td>
+	</tr>
+	<tr>
+		<td>[PRIM_ALPHA_MODE_MASK](/constants/PRIM_ALPHA_MODE_MASK/)</td>
+		<td>2</td>
+		<td colspan="3">Render the prim face in alpha-masked mode.</td>
+		<td colspan="3">Diffuse texture pixels which are more opaque than **mask_cutoff** will be rendered as fully opaque, while the other pixels will be fully transparent.</td>
+	</tr>
+	<tr>
+		<td>[PRIM_ALPHA_MODE_EMISSIVE](/constants/PRIM_ALPHA_MODE_EMISSIVE/)</td>
+		<td>3</td>
+		<td colspan="3">Render the prim face in emissivity mode.</td>
+		<td colspan="3">Diffuse texture pixels opacity maps to their emissivity when rendered. Fully opaque pixels will effectively be rendered as ‘full bright’.</td>
+	</tr>
+</table>
+
 ## Examples
 
 <details open>

@@ -19,6 +19,53 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 
 `PRIM_POSITION` is used to get or set the prim's position.
 
+## Usage
+
+### [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams)(\[ ..., [PRIM_POSITION](/constants/PRIM_POSITION/), [vector](https://wiki.secondlife.com/wiki/vector) **position**, ... \]);
+
+- [vector](https://wiki.secondlife.com/wiki/vector) **position**
+
+The same syntax applies to [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams) and [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/) but with an additional prefixed [link](https://wiki.secondlife.com/wiki/Category:LSL_Parameters/link) parameter in the function call.
+
+#### Caveats
+
+- Depending upon the situation **positionset** may need to be in [local coordinates](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#local) or [region coordinates](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region), See [llSetPos](/functions/llSetPos/#specification) for details.
+  - It is usually not a good idea to combine [PRIM_POSITION](/constants/PRIM_POSITION/) with [LINK_SET](/constants/LINK_SET/). The root will treat the coordinates as world or attachment, while the children will treat them as local, yielding inconsistent results or failure. If you want to move the object as a unit, use [LINK_ROOT](/constants/LINK_ROOT/) instead.
+- The range the prim can move is limited if it is an unattached root prim. The distance is capped to 10m per [PRIM_POSITION](/constants/PRIM_POSITION/) call. See [WarpPos](https://wiki.secondlife.com/wiki/WarpPos). This is a very special case. Do not rely on rule duplication of other flags - the results are undefined, and things *will* break in the future.
+- Moving [avatar](https://wiki.secondlife.com/wiki/Avatar)s with [PRIM_POSITION](/constants/PRIM_POSITION/)
+  - Moving the prim the avatar sat upon does not move the avatar.
+  - Moving an avatar does not move the prim they sat upon.
+  - Sit-target coordinates do not easily map to prim coordinates, use [UpdateSitTarget](/functions/llSitTarget/#useful-snippets).
+  - If you have explicitally set your object as "static obstacle" for pathfinding , the function will fail with the error in the debug channel : "Unable to set prim position or scale: object contributes to the navmesh."
+  - If **positionset** is greater than 54 meters away from the center, the repositioning will silently fail.
+- A world object cannot be moved below the region ground level, and the midpoint of the root will be snapped to the ground instead.
+
+##### [Avatars](/categories/avatar/)
+
+Avatars sitting on the object can be moved with [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams) and [PRIM_POSITION](/constants/PRIM_POSITION/). This was originally a mis-feature but according to [Andrew Linden](http://jira.secondlife.com/browse/SVC-3408?focusedCommentId=88574#action_88574) LL has decided to support it.
+
+###### Examples
+
+The below example moves an avatar to x,y,z without moving the prim they are sitting on. If x,y,z is more than 54 meters away the call will silently fail. Remember x,y,z is in object relative coordinates just like any other linked prim in a set.
+
+Avatars are always the last prims in the set, so [llGetNumberOfPrims](/functions/llGetNumberOfPrims/) can be used for a single avatar sitting on a vehicle.
+
+Example:
+
+```lsl
+llSetLinkPrimitiveParams(llGetNumberOfPrims(), [PRIM_POSITION, <x,y,z>]);
+```
+
+### [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)(\[ ..., [PRIM_POSITION](/constants/PRIM_POSITION/), ... \]);
+
+- [vector](https://wiki.secondlife.com/wiki/vector) **position**
+
+The same syntax applies to [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/), but with an additional prefixed [link](https://wiki.secondlife.com/wiki/Category:LSL_Parameters/link) parameter in the function call.
+
+#### Caveats
+
+- **positionget** is always in [region coordinates](https://wiki.secondlife.com/wiki/Viewer_coordinate_frames#region), even if the prim is a child or the root prim of an [attachment](https://wiki.secondlife.com/wiki/Attachment).
+
 ## See also
 
 ### Constants

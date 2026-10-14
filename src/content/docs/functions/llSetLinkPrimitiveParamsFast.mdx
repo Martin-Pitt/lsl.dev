@@ -326,7 +326,17 @@ The old [PRIM_TYPE](/constants/PRIM_TYPE/) interface (labeled PRIM_TYPE_LEGACY),
 
 ### [PRIM_POSITION](/constants/PRIM_POSITION/)
 
-`{{#var:PRIM_POSITION/SLPP&A}}`
+Avatars sitting on the object can be moved with [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams) and [PRIM_POSITION](/constants/PRIM_POSITION/). This was originally a mis-feature but according to [Andrew Linden](http://jira.secondlife.com/browse/SVC-3408?focusedCommentId=88574#action_88574) LL has decided to support it.
+
+#### Examples
+
+The below example moves an avatar to x,y,z without moving the prim they are sitting on. If x,y,z is more than 54 meters away the call will silently fail. Remember x,y,z is in object relative coordinates just like any other linked prim in a set.
+
+Avatars are always the last prims in the set, so [llGetNumberOfPrims](/functions/llGetNumberOfPrims/) can be used for a single avatar sitting on a vehicle.
+
+```lsl
+llSetLinkPrimitiveParams(llGetNumberOfPrims(), [PRIM_POSITION, <x,y,z>]);
+```
 
 ## History
 
@@ -337,7 +347,7 @@ The old [PRIM_TYPE](/constants/PRIM_TYPE/) interface (labeled PRIM_TYPE_LEGACY),
 
 From the issue templates included by the wiki article:
 
-- SVC-2105 (nf): '''llSetLinkListPrimitiveParams'''() for setting multiple, specific linked items
+- SVC-2105 (nf): **llSetLinkListPrimitiveParams**() for setting multiple, specific linked items
 
 ## See also
 

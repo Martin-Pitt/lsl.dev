@@ -19,6 +19,50 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 
 Used to get or set the [Blinn-Phong](https://wiki.secondlife.com/wiki/PBR_Materials#nomenclature-changes) specular map texture settings of a prim's `face`.
 
+## Usage
+
+### \[ [PRIM_SPECULAR](/constants/PRIM_SPECULAR/), [integer](https://wiki.secondlife.com/wiki/integer) **face**, [string](https://wiki.secondlife.com/wiki/string) **texture**, [vector](https://wiki.secondlife.com/wiki/vector) **repeats**, [vector](https://wiki.secondlife.com/wiki/vector) **offsets**, [float](https://wiki.secondlife.com/wiki/float) **rot**, [vector](https://wiki.secondlife.com/wiki/vector) **specular_color**, [integer](https://wiki.secondlife.com/wiki/integer) **glossiness**, [integer](https://wiki.secondlife.com/wiki/integer) **environment** \]
+
+- [integer](https://wiki.secondlife.com/wiki/integer) **face** — a [face](https://wiki.secondlife.com/wiki/Face) number or [ALL_SIDES](/constants/ALL_SIDES/)
+- [string](https://wiki.secondlife.com/wiki/string) **texture**
+- [vector](https://wiki.secondlife.com/wiki/vector) **repeats** — x and y range from -100.0 to 100.0, in 0.0001 increments. Negative values flip the texture (z is ignored)
+- [vector](https://wiki.secondlife.com/wiki/vector) **offsets** — x and y range from 0.0 to 1.0, in 0.0001 increments. (z is ignored)
+- [float](https://wiki.secondlife.com/wiki/float) **rot**
+- [vector](https://wiki.secondlife.com/wiki/vector) **specular_color** — specular color, in the range [ZERO_VECTOR](/constants/ZERO_VECTOR/) (black) to `<1,1,1>` (white)
+- [integer](https://wiki.secondlife.com/wiki/integer) **glossiness** — glossiness exponent, in the range 0 to 255
+- [integer](https://wiki.secondlife.com/wiki/integer) **environment** — environmental reflection exponent, in the range 0 to 255
+
+Used with [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) & [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams).
+
+##### Examples
+
+```lsl
+llSetPrimitiveParams([ PRIM_SPECULAR, ALL_SIDES, "3a97e824-fd26-1d9f-ffe7-00d0264e6631", <1.0, 1.0, 0.0>, <0.0, 0.0, 0.0>, 0.0, <0.275, 0.624, 0.832>, 180, 10]);
+llSetPrimitiveParams([ PRIM_SPECULAR, ALL_SIDES, llGetInventoryName(INVENTORY_TEXTURE, 0), <1.0, 1.0, 0.0>, <0.0, 0.0, 0.0>, 0.0, <1,1,1>, 200, 0]);
+```
+
+### [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)(\[ [PRIM_SPECULAR](/constants/PRIM_SPECULAR/), [integer](https://wiki.secondlife.com/wiki/integer) **face** \]);
+
+- [integer](https://wiki.secondlife.com/wiki/integer) **face** — a [face](https://wiki.secondlife.com/wiki/Face) number or [ALL_SIDES](/constants/ALL_SIDES/)
+- [string](https://wiki.secondlife.com/wiki/string) **texture**
+- [vector](https://wiki.secondlife.com/wiki/vector) **repeats** — x and y range from -100.0 to 100.0, in 0.0001 increments. Negative values flip the texture (z is ignored)
+- [vector](https://wiki.secondlife.com/wiki/vector) **offsets** — x and y range from 0.0 to 1.0, in 0.0001 increments. (z is ignored)
+- [float](https://wiki.secondlife.com/wiki/float) **rot**
+- [vector](https://wiki.secondlife.com/wiki/vector) **specular_color** — specular color, in the range [ZERO_VECTOR](/constants/ZERO_VECTOR/) (black) to `<1,1,1>` (white)
+- [integer](https://wiki.secondlife.com/wiki/integer) **glossiness** — glossiness exponent, in the range 0 to 255
+- [integer](https://wiki.secondlife.com/wiki/integer) **environment** — environmental reflection exponent, in the range 0 to 255
+
+#### Caveats
+
+- **repeats** is not only used to get the number of repeats but the sign of the individual components indicate if "Flip" is set.
+- With **texture** as with [llGetTexture](/functions/llGetTexture/), [NULL_KEY](/constants/NULL_KEY/) is returned when the [owner](https://wiki.secondlife.com/wiki/Category:LSL_Owner) does not have [full permissions](https://wiki.secondlife.com/wiki/Category:LSL_Permissions/Asset) to the object and the [texture](/constants/PRIM_SPECULAR/) is not in the prim's inventory.
+- If **face** indicates a face that exists but does not contain a material, the [PRIM_SPECULAR](/constants/PRIM_SPECULAR/) return is **\[ [NULL_KEY](/constants/NULL_KEY/), `<1,1,0>`, [ZERO_VECTOR](/constants/ZERO_VECTOR/), 0.0 `<1,1,1>`, 51, 0\]**
+- In the [default](/constants/PRIM_TEXGEN_DEFAULT/) [texture mapping](/constants/PRIM_TEXGEN/) **tg_type** the [texture](/constants/PRIM_SPECULAR/) **repeats** units are in texture repeats per face. In the [planar](/constants/PRIM_TEXGEN_PLANAR/) texture mapping mode the texture **repeats** units are in texture repeats per half meter. This is in contrast to the in-world editing tool, in which the planar texture scaling units are repeats per meter.
+
+##### Target
+
+In the case of [llGetPrimitiveParams](/functions/llGetPrimitiveParams/) is either the prim the script resides in, or the prim specified by the immediately prior [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/) call. However in the case of [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/), it is either the value of the **link** parameter, or the prim specified by the immediately prior [PRIM_LINK_TARGET](/constants/PRIM_LINK_TARGET/) call.
+
 ## Caveats
 
 - **repeats** is not only used to set the number of repeats but the sign of the individual components is also used to set the "Flip" attribute.

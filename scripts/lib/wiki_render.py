@@ -373,8 +373,16 @@ class Renderer:
                 where=('<a href="'+html.escape(remote,quote=True)+'" rel="noreferrer">SL '+html.escape(arg(1))+'</a>') if remote else self.link('Release Notes/Second Life Server/'+arg(1)+arg(2),'SL '+arg(1))
                 name=n['fields'].get('name',{}).get('value','')
                 rendered=(self.inline(name,depth)+' ' if name else '')+'Added in '+where
-            elif lname=='footnote' and arg(1):
-                rendered='<sup class="wiki-footnote">'+self.inline(arg(1),depth)+'</sup>'
+            elif lname=='footnote' and (arg(1) or n['fields'].get('handle')):
+                # {{Footnote|text|handle=h}} defines a note; a later {{Footnote|handle=h}} repeats it.
+                handle=n['fields'].get('handle',{}).get('value','').strip()
+                notes=self.__dict__.setdefault('footnote_handles',{})
+                if arg(1):
+                    note=self.inline(arg(1),depth)
+                    if handle: notes[handle]=note
+                else:
+                    note=notes.get(handle)
+                rendered='<sup class="wiki-footnote">'+note+'</sup>' if note else ''
             elif lname=='string':
                 rendered='<code>'+html.escape(arg(2)+'"'+arg(1)+'"'+arg(3))+'</code>'
             elif lname in ('keypress','k','keycombo') and args:

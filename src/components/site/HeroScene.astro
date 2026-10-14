@@ -38,7 +38,7 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 <style>
 	@property --spin {
 		syntax: '<angle>';
-		inherits: false;
+		inherits: true; /* the faces read it for their shading */
 		initial-value: 0deg;
 	}
 
@@ -97,20 +97,26 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 	.face:nth-child(5) { transform: rotateY(0.75turn) rotateZ(0.25turn) translateZ(var(--offset)) scale(1.005); }
 	.face:nth-child(6) { transform: rotateY(0.5turn) translateZ(var(--offset)) scale(1.005); }
 
-	/* Lighting: side faces brighten as they turn toward the viewer. */
+	/* Lighting: a directional light at --light (angle around the prim's Z axis). Each side face's
+	   outward normal is at --n; as the prim spins, the face is darkened by how far it turns away
+	   from the light (Lambert: 1 − max(0, cos θ)), between --lit and --unlit. The top is always
+	   lit, the bottom always dark. */
+	.cube {
+		--light: 225deg;
+		--lit: 0.02;
+		--unlit: 0.5;
+	}
 	.face::before {
 		content: '';
 		background: black;
-		opacity: 0.4;
+		opacity: calc(var(--lit) + (var(--unlit) - var(--lit)) * (1 - max(0, cos(var(--n) + var(--spin) - var(--light)))));
 	}
 	.face:nth-child(1)::before { opacity: 0; }
 	.face:nth-child(6)::before { opacity: 0.6; }
-	.face:nth-child(n + 2):nth-child(-n + 5)::before {
-		animation: lighting 16s linear infinite;
-	}
-	.face:nth-child(3)::before { animation-delay: -4s; }
-	.face:nth-child(4)::before { animation-delay: -8s; }
-	.face:nth-child(5)::before { animation-delay: -12s; }
+	.face:nth-child(2) { --n: 270deg; }
+	.face:nth-child(3) { --n: 0deg; }
+	.face:nth-child(4) { --n: 90deg; }
+	.face:nth-child(5) { --n: 180deg; }
 
 	/* Ground contact shadow under the prim. */
 	.shadow {
@@ -120,11 +126,6 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		opacity: 0.15;
 	}
 
-	@keyframes lighting {
-		0% { opacity: 0.3; animation-timing-function: cubic-bezier(0.47, 0, 0.75, 0.72); }
-		50% { opacity: 0.01; animation-timing-function: cubic-bezier(0.39, 0.58, 0.57, 1); }
-		100% { opacity: 0.3; }
-	}
 	@keyframes spin { to { --spin: 360deg; } }
 	@keyframes float {
 		50% { transform: translateY(-2.5cqi); }
@@ -262,8 +263,6 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 	@media (prefers-reduced-motion: reduce) {
 			.scene *, .scene *::before { animation: none !important; }
 		.cube { --spin: 30deg; }
-		.face::before { opacity: 0.15; }
-		.face:nth-child(1)::before { opacity: 0; }
 		.script-card, .burst, .dots { display: none; }
 		.bubble, .text { opacity: 1; }
 	}

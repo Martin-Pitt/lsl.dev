@@ -144,6 +144,11 @@ class ConverterTests(unittest.TestCase):
         self.assertIn('\n\n```lsl\na();\nb();\n```\n\n', md)
         self.assertNotRegex(md, r'(?m)^[ \t]+(```|a\(\);)')
 
+    def test_markdown_table_in_html_cell_is_not_indented_and_caption_bold_once(self):
+        md = Converter().convert('<table><tr><td><table><caption><strong>Body</strong></caption><tr><th>A</th></tr><tr><td>x</td></tr></table><ul><li>y</li></ul></td><td>z</td></tr></table>')
+        self.assertIn('\n**Body**\n\n| A |', md)
+        self.assertNotRegex(md, r'(?m)^[ \t]+(\||\*\*)')
+
     def test_pre_keeps_a_non_lsl_language(self):
         self.assertTrue(Converter().convert('<pre data-lang="js"><code>{ "a": 1 }</code></pre>').startswith('```js' + chr(10)))
 

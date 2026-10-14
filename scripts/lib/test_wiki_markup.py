@@ -17,14 +17,8 @@ from lib.wiki_render import Renderer, page_sections
 ROOT = Path(__file__).resolve().parents[2]
 
 # Leaks that may stay, as (page, pattern, text in the snippet). Keep this empty unless a page cannot
-# be changed here. functions/llSetLinkPrimitiveParamsFast.mdx has the user's own uncommitted edits;
-# remove these entries once its two leftovers (the {{#var:PRIM_POSITION/SLPP&A}} cell and the
-# '''bold''' issue title) are fixed by hand.
-ALLOWED = {
-    ('functions/llSetLinkPrimitiveParamsFast.mdx', 'template {{…}}', '#var:PRIM_POSITION/SLPP&A'),
-    ('functions/llSetLinkPrimitiveParamsFast.mdx', '#var:', '#var:PRIM_POSITION/SLPP&A'),
-    ('functions/llSetLinkPrimitiveParamsFast.mdx', "bold/italic quotes '''", "'''llSetLinkListPrimitiveParams'''"),
-}
+# be changed here.
+ALLOWED: set = set()
 
 
 class RepoTests(unittest.TestCase):

@@ -476,7 +476,8 @@ class Renderer:
                 # Template:SpecialBox: a boxed section whose header is {{{1}}} and body {{{3}}}. On
                 # {{LSL Constant}} pages ({{LSL Constant/List}}) the header is the rule's call syntax
                 # and the body a one-table list of {{LSL ParamRow}}s, shown here as rows.
-                body=re.sub(r'^[ \t]*(?:\{\{\{!\}\}|\{\{!\}\}\}|\{\||\|\})[ \t]*$','',arg(3),flags=re.M)
+                # Drop the table frame: open/close, row separators and the <hr/> row between inputs and results.
+                body=re.sub(r'^[ \t]*(?:\{\{\{!\}\}|\{\{!\}\}\}|\{\||\|\}|(?:\{\{!\}\}|\|)-|(?:\{\{!\}\}|\|)[^\n]*<hr\s*/?>)[ \t]*$','',arg(3),flags=re.M)
                 rendered=('<h3>'+self.inline(arg(1),depth)+'</h3>' if arg(1) else '')+self.render(body,depth+1)
             elif tname(lname)=='lsl paramrow' and (arg(1) or arg(2)):
                 disp=n['fields'].get('disp',{}).get('value','').strip() or arg(2)

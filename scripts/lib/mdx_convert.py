@@ -397,7 +397,8 @@ class Converter:
             texts = ''.join(cell.text() for cell in rows[0] if not cell.find('table')).strip()
             if len(inner) == 1 and inner[0].tag == 'table' and not texts: return self.table(inner[0])
         caption = n.find('caption')
-        cap = f'**{self.inline(caption.children).strip()}**\n\n' if caption and caption in n.children else ''
+        cap = self.inline(caption.children).strip() if caption and caption in n.children else ''
+        if cap: cap = (cap if re.fullmatch(r'\*\*[^*].*\*\*', cap) else f'**{cap}**') + '\n\n'  # already bold: as is
         if self.simple(n):
             self.stats['markdownTables'] += 1
             rows = self.rows(n)
@@ -433,9 +434,9 @@ class Converter:
                 if has_block(cell):
                     inner = []
                     for kind, body in self.blocks(cell.children):
-                        if kind == 'table': inner.append(body if body.startswith('\t') else self.indent(body, depth + 3))
-                        # Markdown stays at column 0: a fence (or list) indented four or more columns
-                        # is no longer Markdown to MDX, so code loses highlighting and its newlines.
+                        if kind == 'table' and body.lstrip().startswith('<'): inner.append(body if body.startswith('\t') else self.indent(body, depth + 3))
+                        # Markdown (fences, lists, Markdown tables) stays at column 0: indented four or more
+                        # columns it is no longer Markdown to MDX, so code loses highlighting and its newlines.
                         else: inner.append(body)
                     lines.append(f'{ind}\t\t<{cell.tag}{attrs}>\n\n' + '\n\n'.join(inner) + f'\n\n{ind}\t\t</{cell.tag}>')
                 else:

@@ -13,7 +13,7 @@ source:
     - { wiki: "PRIM TYPE", revision: 1186427, date: 2014-01-05 }
     - { wiki: "Template:LSL PrimitiveParam Categorize", revision: 1180644, date: 2013-08-09 }
 ---
-import { LSLConstant, WikiSource } from '~/components/lsl';
+import { LSLConstant, WikiSource, ConstantGroup } from '~/components/lsl';
 
 <LSLConstant name="PRIM_TYPE" description />
 
@@ -21,7 +21,9 @@ Gets or sets the `type_flag` of the prim and associated type `type_parameters`.
 
 ## Usage
 
-### \[ [PRIM_TYPE](/constants/PRIM_TYPE/), [integer](https://wiki.secondlife.com/wiki/integer) **flag** \] + **flag_parameters**
+```lsl
+[ PRIM_TYPE, integer flag ] + flag_parameters
+```
 
 - [integer](https://wiki.secondlife.com/wiki/integer) **flag** — PRIM_TYPE\_\* flag
 
@@ -34,9 +36,11 @@ The values needed for **type_parameters** is dependent on **type_flag**, please 
 - [PRIM_TYPE](/constants/PRIM_TYPE/) can only be used with [LINK_SET](/constants/LINK_SET/) if the object contains 10 or fewer prims. It can only be used with [LINK_ALL_OTHERS](/constants/LINK_ALL_OTHERS/) or [LINK_ALL_CHILDREN](/constants/LINK_ALL_CHILDREN/) if the object contains 11 or fewer prims. If there are more prims, the operation will fail and an error will be shouted to [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/). Work around this by looping through the prims with [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/).
 - [PRIM_TYPE](/constants/PRIM_TYPE/) will silently fail when executed by a script placed inside a mesh, whether the affect object is the mesh or not (in linksets for example), use a normal prim as your root prim.
 
-### [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)(\[ [PRIM_TYPE](/constants/PRIM_TYPE/) \]);
+```lsl
+llGetLinkPrimitiveParams(LINK_THIS, [ PRIM_TYPE ]);
+```
 
-- [integer](https://wiki.secondlife.com/wiki/integer) **flag** — PRIM_TYPE\_\* flag
+Returns the same values, in the same order.
 
 The values that follow after **type_flag**, the **type_parameters**, are dependent on the value of **flag**, please refer to the individual PRIM_TYPE\_\* articles for further information.
 
@@ -83,33 +87,17 @@ The values that follow after **type_flag**, the **type_parameters**, are depende
 	</tr>
 </table>
 
-| Constant | Type | Value | Description |
-| --- | --- | --- | --- |
-| [PRIM_HOLE_DEFAULT](/constants/PRIM_HOLE_DEFAULT/) | integer | `hex=0x00` | Default |
-| [PRIM_HOLE_SQUARE](/constants/PRIM_HOLE_SQUARE/) | integer | `hex=0x20` | Square |
-| [PRIM_HOLE_CIRCLE](/constants/PRIM_HOLE_CIRCLE/) | integer | `hex=0x10` | Circle |
-| [PRIM_HOLE_TRIANGLE](/constants/PRIM_HOLE_TRIANGLE/) | integer | `hex=0x30` | Triangle |
-
-<table>
-	<tr>
-		<th colspan="2">**hole_shape** Flags</th>
-		<th>Shape</th>
-		<th colspan="2">**hole_shape** Flags</th>
-		<th>Shape</th>
-	</tr>
-</table>
+<ConstantGroup name="PrimTypeHole" />
 
 ## See also
 
 ### Constants
 
-| Constant | Type | Value | Description |
-| --- | --- | --- | --- |
-| [CHANGED_SHAPE](/constants/CHANGED_SHAPE/) |  |  |  |
+- [CHANGED_SHAPE](/constants/CHANGED_SHAPE/)
 
 ### Functions
 
-- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
 
 ### Events
 

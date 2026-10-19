@@ -12,7 +12,7 @@ source:
   sources:
     - { wiki: "PRIM TYPE BOX", revision: 1194697, date: 2015-01-24 }
 ---
-import { LSLConstant, WikiSource } from '~/components/lsl';
+import { LSLConstant, WikiSource, ConstantGroup } from '~/components/lsl';
 
 <LSLConstant name="PRIM_TYPE_BOX" />
 
@@ -20,7 +20,9 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 
 ## Usage
 
-### \[ [PRIM_TYPE](/constants/PRIM_TYPE/), [PRIM_TYPE_BOX](/constants/PRIM_TYPE_BOX/), [integer](https://wiki.secondlife.com/wiki/integer) **hole_shape**, [vector](https://wiki.secondlife.com/wiki/vector) **cut**, [float](https://wiki.secondlife.com/wiki/float) **hollow**, [vector](https://wiki.secondlife.com/wiki/vector) **twist**, [vector](https://wiki.secondlife.com/wiki/vector) **top_size**, [vector](https://wiki.secondlife.com/wiki/vector) **top_shear** \]
+```lsl
+PRIM_TYPE, PRIM_TYPE_BOX, integer hole_shape, vector cut, float hollow, vector twist, vector top_size, vector top_shear
+```
 
 - [integer](https://wiki.secondlife.com/wiki/integer) **hole_shape** — PRIM_HOLE\_\* flag
 - [vector](https://wiki.secondlife.com/wiki/vector) **cut** — x and y range from 0.0 to 1.0, x must be at least 0.05 smaller than y (z is ignored)
@@ -29,31 +31,7 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 - [vector](https://wiki.secondlife.com/wiki/vector) **top_size** — ranges from 0.0 to 1.0 to 2.0 for both x and y (z is ignored)[!](#z-taper)
 - [vector](https://wiki.secondlife.com/wiki/vector) **top_shear** — ranges from -0.5 to 0.5 for both x and y (z is ignored)
 
-| Constant | Type | Value | Description |
-| --- | --- | --- | --- |
-| [PRIM_HOLE_DEFAULT](/constants/PRIM_HOLE_DEFAULT/) | integer | `hex=0x00` | Default |
-| [PRIM_HOLE_SQUARE](/constants/PRIM_HOLE_SQUARE/) | integer | `hex=0x20` | Square |
-| [PRIM_HOLE_CIRCLE](/constants/PRIM_HOLE_CIRCLE/) | integer | `hex=0x10` | Circle |
-| [PRIM_HOLE_TRIANGLE](/constants/PRIM_HOLE_TRIANGLE/) | integer | `hex=0x30` | Triangle |
-
-<table>
-	<tr>
-		<th colspan="2">**hole_shape** Flags</th>
-		<th>Shape</th>
-		<th colspan="2">**hole_shape** Flags</th>
-		<th>Shape</th>
-	</tr>
-</table>
-
-### \[ 1, [PRIM_TYPE_BOX](/constants/PRIM_TYPE_BOX/), [vector](https://wiki.secondlife.com/wiki/vector) **cut**, [float](https://wiki.secondlife.com/wiki/float) **hollow**, [float](https://wiki.secondlife.com/wiki/float) **twist**, [vector](https://wiki.secondlife.com/wiki/vector) **top_size**, [vector](https://wiki.secondlife.com/wiki/vector) **top_shear** \]
-
-- [vector](https://wiki.secondlife.com/wiki/vector) **cut** — x and y range from 0.0 to 1.0, x must be at least 0.05 smaller than y (z is ignored)
-- [float](https://wiki.secondlife.com/wiki/float) **hollow** — ranges from 0.0 (solid) to 0.95 (maximum hollowed)
-- [float](https://wiki.secondlife.com/wiki/float) **twist** — ranges from -0.5 (-180 degree in the edit window) to 0.5 (+180 degree in the edit window)
-- [vector](https://wiki.secondlife.com/wiki/vector) **top_size** — ranges from 0.0 to 1.0 for both x and y (z is ignored)[!](#z-taper)
-- [vector](https://wiki.secondlife.com/wiki/vector) **top_shear** — ranges from -0.5 to 0.5 for both x and y (z is ignored)
-
-This is the old [PRIM_TYPE](/constants/PRIM_TYPE/) format for boxes ([PRIM_TYPE](/constants/PRIM_TYPE/) used to be 1 instead of 9). Use the new format unless you are maintaining old code.
+<ConstantGroup name="PrimTypeHole" />
 
 ## Caveats
 
@@ -65,7 +43,7 @@ This is the old [PRIM_TYPE](/constants/PRIM_TYPE/) format for boxes ([PRIM_TYPE]
 <summary>Example 1</summary>
 
 ```lsl
-llSetPrimitiveParams([PRIM_TYPE,
+llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_TYPE,
                         PRIM_TYPE_BOX,
                             PRIM_HOLE_DEFAULT,  // hole_shape
                             <0.00, 1.0, 0.0>,   // cut
@@ -103,36 +81,20 @@ llSetPrimitiveParams([PRIM_TYPE,
 		<td>1.0</td>
 		<td>2.0</td>
 	</tr>
-	<tr>
-		<th>[LEGACY](#prim-type-legacy)</th>
-		<td>\[0, 1\]</td>
-		<td>0.0</td>
-		<td>1.0</td>
-		<td>NA</td>
-	</tr>
-	<tr>
-		<th>Client &lt; 1.11</th>
-		<td>\[0, 1\]</td>
-		<td>0.0</td>
-		<td>1.0</td>
-		<td>NA</td>
-	</tr>
 </table>
 
-When the original [PRIM_TYPE](/constants/PRIM_TYPE/) interface was retired ([PRIM_TYPE_LEGACY](#prim-type-legacy), [SL 1.5](http://secondlife.wikia.com/wiki/Version_1.5)), the new [PRIM_TYPE](/constants/PRIM_TYPE/) interface did not yet support tapering of the bottom of the prim, this feature wasn't added until [SL 1.11](http://secondlife.wikia.com/wiki/Version_1.11) (two years later). Instead of retiring the new [PRIM_TYPE](/constants/PRIM_TYPE/) when it was added, the range of **top_size** was enlarged; meanwhile in the client they redefined the parameter and it's values. This redefinition and range enlargement resulted in two interfaces that did the same thing but achieved it through different values. Meanwhile [PRIM_TYPE_LEGACY](#prim-type-legacy)'s interface was not updated to support tapering of the bottom of the prim. Consequently all three interfaces have different ranges, making for a rather nasty caveat.
+The client's taper and [PRIM_TYPE](/constants/PRIM_TYPE/)'s **top_size** use different ranges. When bottom tapering was added in 2006, **top_size** was widened to \[0, 2\] while the client redefined taper as \[-1, 1\].
 
 ## See also
 
 ### Constants
 
-| Constant | Type | Value | Description |
-| --- | --- | --- | --- |
-| [PRIM_TYPE](/constants/PRIM_TYPE/) |  |  |  |
-| [CHANGED_SHAPE](/constants/CHANGED_SHAPE/) |  |  |  |
+- [PRIM_TYPE](/constants/PRIM_TYPE/)
+- [CHANGED_SHAPE](/constants/CHANGED_SHAPE/)
 
 ### Functions
 
-- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
 
 ### Events
 

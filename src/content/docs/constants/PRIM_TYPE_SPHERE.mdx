@@ -12,7 +12,7 @@ source:
   sources:
     - { wiki: "PRIM TYPE SPHERE", revision: 1194702, date: 2015-01-24 }
 ---
-import { LSLConstant, WikiSource } from '~/components/lsl';
+import { LSLConstant, WikiSource, ConstantGroup } from '~/components/lsl';
 
 <LSLConstant name="PRIM_TYPE_SPHERE" />
 
@@ -20,7 +20,9 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 
 ## Usage
 
-### \[ [PRIM_TYPE](/constants/PRIM_TYPE/), [PRIM_TYPE_SPHERE](/constants/PRIM_TYPE_SPHERE/), [integer](https://wiki.secondlife.com/wiki/integer) **hole_shape**, [vector](https://wiki.secondlife.com/wiki/vector) **cut**, [float](https://wiki.secondlife.com/wiki/float) **hollow**, [vector](https://wiki.secondlife.com/wiki/vector) **twist**, [vector](https://wiki.secondlife.com/wiki/vector) **dimple** \]
+```lsl
+PRIM_TYPE, PRIM_TYPE_SPHERE, integer hole_shape, vector cut, float hollow, vector twist, vector dimple
+```
 
 - [integer](https://wiki.secondlife.com/wiki/integer) **hole_shape** — PRIM_HOLE\_\* flag
 - [vector](https://wiki.secondlife.com/wiki/vector) **cut** — x and y range from 0.0 to 1.0, x must be at least 0.05 smaller than y (z is ignored)
@@ -28,29 +30,7 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 - [vector](https://wiki.secondlife.com/wiki/vector) **twist** — ranges from -1.0 (-360 degree in the edit window) to 1.0 (+360 degree in the edit window) for both x and y (z is ignored)
 - [vector](https://wiki.secondlife.com/wiki/vector) **dimple** — x and y range from 0.0 to 1.0, x must be at least 0.05 smaller than y (z is ignored)
 
-| Constant | Type | Value | Description |
-| --- | --- | --- | --- |
-| [PRIM_HOLE_DEFAULT](/constants/PRIM_HOLE_DEFAULT/) | integer | `hex=0x00` | Default |
-| [PRIM_HOLE_SQUARE](/constants/PRIM_HOLE_SQUARE/) | integer | `hex=0x20` | Square |
-| [PRIM_HOLE_CIRCLE](/constants/PRIM_HOLE_CIRCLE/) | integer | `hex=0x10` | Circle |
-| [PRIM_HOLE_TRIANGLE](/constants/PRIM_HOLE_TRIANGLE/) | integer | `hex=0x30` | Triangle |
-
-<table>
-	<tr>
-		<th colspan="2">**hole_shape** Flags</th>
-		<th>Shape</th>
-		<th colspan="2">**hole_shape** Flags</th>
-		<th>Shape</th>
-	</tr>
-</table>
-
-### \[ 1, [PRIM_TYPE_SPHERE](/constants/PRIM_TYPE_SPHERE/), [vector](https://wiki.secondlife.com/wiki/vector) **cut**, [float](https://wiki.secondlife.com/wiki/float) **hollow**, [vector](https://wiki.secondlife.com/wiki/vector) **dimple** \]
-
-- [vector](https://wiki.secondlife.com/wiki/vector) **cut** — x and y range from 0.0 to 1.0, x must be at least 0.05 smaller than y (z is ignored)
-- [float](https://wiki.secondlife.com/wiki/float) **hollow** — ranges from 0.0 (solid) to 0.95 (maximum hollowed)
-- [vector](https://wiki.secondlife.com/wiki/vector) **dimple** — x and y range from 0.0 to 1.0, x must be at least 0.05 smaller than y (z is ignored)
-
-This is the old [PRIM_TYPE](/constants/PRIM_TYPE/) format for the sphere ([PRIM_TYPE](/constants/PRIM_TYPE/) used to be 1 instead of 9). Use the new format unless you are maintaining old code.
+<ConstantGroup name="PrimTypeHole" />
 
 ## Examples
 
@@ -63,7 +43,7 @@ vector cut = <0.0, 1.0, 0.0>;      // 0.0 to 1.0
 float hollow = 0.0;                // 0.0 to 0.95
 vector twist = <0.0, 0.0, 0.0>;    // -1.0 to 1.0
 vector dimple = <0.0, 1.0, 0.0>;   // 0.0 to 1.0
-llSetPrimitiveParams( [PRIM_TYPE, PRIM_TYPE_SPHERE, PRIM_HOLE_DEFAULT,
+llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_TYPE, PRIM_TYPE_SPHERE, PRIM_HOLE_DEFAULT,
                         cut, hollow, twist, dimple ]  );
 ```
 
@@ -73,14 +53,12 @@ llSetPrimitiveParams( [PRIM_TYPE, PRIM_TYPE_SPHERE, PRIM_HOLE_DEFAULT,
 
 ### Constants
 
-| Constant | Type | Value | Description |
-| --- | --- | --- | --- |
-| [PRIM_TYPE](/constants/PRIM_TYPE/) |  |  |  |
-| [CHANGED_SHAPE](/constants/CHANGED_SHAPE/) |  |  |  |
+- [PRIM_TYPE](/constants/PRIM_TYPE/)
+- [CHANGED_SHAPE](/constants/CHANGED_SHAPE/)
 
 ### Functions
 
-- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
 
 ### Events
 

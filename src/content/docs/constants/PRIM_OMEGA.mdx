@@ -17,23 +17,23 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 
 <LSLConstant name="PRIM_OMEGA" description />
 
-Used to make the object spin at the specified axis and rate, or retrieve spin settings. See [llTargetOmega](/functions/llTargetOmega/) for specification.
-
 ## Usage
 
-### \[ [PRIM_OMEGA](/constants/PRIM_OMEGA/), [vector](https://wiki.secondlife.com/wiki/vector) **axis**, [float](https://wiki.secondlife.com/wiki/float) **spinrate**, [float](https://wiki.secondlife.com/wiki/float) **gain** \]
+```lsl
+PRIM_OMEGA, vector axis, float spinrate, float gain
+```
 
 - [vector](https://wiki.secondlife.com/wiki/vector) **axis** — arbitrary axis to rotate the object around
 - [float](https://wiki.secondlife.com/wiki/float) **spinrate** — rate of rotation in radians per second
 - [float](https://wiki.secondlife.com/wiki/float) **gain** — also modulates the final spinrate and disables the rotation behavior if zero
 
-When used with [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) & [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams)
+When used with [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
 
-### [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)(\[ [PRIM_OMEGA](/constants/PRIM_OMEGA/) \]);
+```lsl
+llGetLinkPrimitiveParams(LINK_THIS, [ PRIM_OMEGA ]);
+```
 
-- [vector](https://wiki.secondlife.com/wiki/vector) **axis** — arbitrary axis to rotate the object around
-- [float](https://wiki.secondlife.com/wiki/float) **spinrate** — rate of rotation in radians per second
-- [float](https://wiki.secondlife.com/wiki/float) **gain** — also modulates the final spinrate and disables the rotation behavior if zero
+Returns the same values, in the same order.
 
 ## Caveats
 
@@ -52,7 +52,7 @@ When used with [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrim
 llTargetOmega(<1.0,3.0,0.5>, TWO_PI, 1.0);
 
 // Read back this prim's current target omega
-list current_omega = llGetPrimitiveParams([PRIM_OMEGA]); // returns [axis, spinrate, gain]
+list current_omega = llGetLinkPrimitiveParams(LINK_THIS, [PRIM_OMEGA]); // returns [axis, spinrate, gain]
 vector axis = llList2Vector(current_omega, 0); // Should be llVecNorm(<1.0,3.0,0.5>)
 float spinrate = llList2Float(current_omega, 1); // Should be TWO_PI*llVecMag(<1.0,3.0,0.5>)
 float gain = llList2Float(current_omega, 2); // Should be 1.0
@@ -96,7 +96,7 @@ default
 
 ### Functions
 
-- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
 - [llTargetOmega](/functions/llTargetOmega/)
 
 <WikiSource />

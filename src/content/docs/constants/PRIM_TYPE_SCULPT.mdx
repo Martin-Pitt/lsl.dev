@@ -12,7 +12,7 @@ source:
   sources:
     - { wiki: "PRIM TYPE SCULPT", revision: 1194701, date: 2015-01-24 }
 ---
-import { LSLConstant, WikiSource } from '~/components/lsl';
+import { LSLConstant, WikiSource, ConstantGroup } from '~/components/lsl';
 
 <LSLConstant name="PRIM_TYPE_SCULPT" />
 
@@ -22,24 +22,18 @@ import { LSLConstant, WikiSource } from '~/components/lsl';
 
 ## Usage
 
-### \[ [PRIM_TYPE](/constants/PRIM_TYPE/), [PRIM_TYPE_SCULPT](/constants/PRIM_TYPE_SCULPT/), [string](https://wiki.secondlife.com/wiki/string) **map**, [integer](https://wiki.secondlife.com/wiki/integer) **type** \]
+```lsl
+PRIM_TYPE, PRIM_TYPE_SCULPT, string map, integer type
+```
 
 - [string](https://wiki.secondlife.com/wiki/string) **map**
 - [integer](https://wiki.secondlife.com/wiki/integer) **type** — PRIM_SCULPT_TYPE\_\* flag with optional additional PRIM_SCULPT_FLAG\_\* flags OR'ed on
 
 For use with [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) and [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams)
 
-| Constant | Type | Value | Description |
-| --- | --- | --- | --- |
-| [PRIM_SCULPT_TYPE_SPHERE](/constants/PRIM_SCULPT_TYPE_SPHERE/) | integer | `1` |  |
-| [PRIM_SCULPT_TYPE_TORUS](/constants/PRIM_SCULPT_TYPE_TORUS/) | integer | `2` |  |
-| [PRIM_SCULPT_TYPE_PLANE](/constants/PRIM_SCULPT_TYPE_PLANE/) | integer | `3` |  |
-| [PRIM_SCULPT_TYPE_CYLINDER](/constants/PRIM_SCULPT_TYPE_CYLINDER/) | integer | `4` |  |
-| [PRIM_SCULPT_TYPE_MESH](/constants/PRIM_SCULPT_TYPE_MESH/) | integer | `5` |  |
-| [PRIM_SCULPT_FLAG_ZZZZZZZZ](https://wiki.secondlife.com/wiki/PRIM_SCULPT_FLAG_ZZZZZZZZ) | integer | `63` |  |
-| [PRIM_SCULPT_FLAG_ANIMESH](/constants/PRIM_SCULPT_FLAG_ANIMESH/) | integer | `hex=0x20` |  |
-| [PRIM_SCULPT_FLAG_INVERT](/constants/PRIM_SCULPT_FLAG_INVERT/) | integer | `hex=0x40` |  |
-| [PRIM_SCULPT_FLAG_MIRROR](/constants/PRIM_SCULPT_FLAG_MIRROR/) | integer | `hex=0x80` |  |
+<ConstantGroup name="PrimTypeSculptType" />
+
+<ConstantGroup name="PrimTypeSculptFlag" />
 
 <table>
 	<tr>
@@ -98,7 +92,7 @@ For use with [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimit
 <summary>Example 1</summary>
 
 ```lsl
-llSetPrimitiveParams([PRIM_TYPE,
+llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_TYPE,
                         PRIM_TYPE_SCULPT,
                             "d962089b-2197-993c-9ec9-4993eb0a95f2",  // sculpty texture
                             PRIM_SCULPT_TYPE_SPHERE                  // type
@@ -117,13 +111,13 @@ default
 {
     touch_start(integer a)
     {
-        list b = llGetPrimitiveParams([PRIM_TYPE]);
+        list b = llGetLinkPrimitiveParams(LINK_THIS, [PRIM_TYPE]);
         integer type = llList2Integer(b,2) % 4;
         llSetObjectDesc(llList2String([ "Sphere",
                                         "Torus",
                                         "Plane",
                                         "Cylinder"], type));
-        llSetPrimitiveParams(PRIM_TYPE + llList2List(b, 0, 1) + (type + 1));
+        llSetLinkPrimitiveParamsFast(LINK_THIS, PRIM_TYPE + llList2List(b, 0, 1) + (type + 1));
     }
 }
 ```
@@ -139,7 +133,7 @@ default
 {
     state_entry()
     {
-        llSetPrimitiveParams([
+        llSetLinkPrimitiveParamsFast(LINK_THIS, [
             PRIM_TYPE, PRIM_TYPE_SCULPT, "your Sculpt map name in the object", PRIM_SCULPT_TYPE_SPHERE
           , PRIM_TEXTURE, ALL_SIDES, "your texture name in the object", <1.0, 1.0, 0.0>, <0.0, 0.0, 0.0>, 0.0 //comment out if not needed.
 //          , PRIM_SIZE, <0.63,0.199,0.52> // If you need to change the scale (size) of the object, uncomment this line.
@@ -159,14 +153,12 @@ default
 
 ### Constants
 
-| Constant | Type | Value | Description |
-| --- | --- | --- | --- |
-| [PRIM_TYPE](/constants/PRIM_TYPE/) |  |  |  |
-| [CHANGED_SHAPE](/constants/CHANGED_SHAPE/) |  |  |  |
+- [PRIM_TYPE](/constants/PRIM_TYPE/)
+- [CHANGED_SHAPE](/constants/CHANGED_SHAPE/)
 
 ### Functions
 
-- [llGetPrimitiveParams](/functions/llGetPrimitiveParams/)
+- [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
 
 ### Events
 

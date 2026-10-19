@@ -1,0 +1,49 @@
+---
+/**
+ * Event order: which events fire for an action and in what order, one action per row, styled like
+ * the "I want to" task list. Data from the wiki's Event Order page. Used on the Events feature page
+ * and the events index.
+ */
+interface Step { event: string; note?: string }
+interface Props { id?: string; heading?: string }
+const { id = 'event-order', heading = 'Event order' } = Astro.props;
+const rows: { action: string; steps: Step[] }[] = [
+	{ action: 'Wear or attach from inventory, or log in wearing it', steps: [{ event: 'on_rez' }, { event: 'attach', note: 'id is the avatar' }] },
+	{ action: 'Wear or attach from inventory after an owner change', steps: [{ event: 'on_rez' }, { event: 'attach', note: 'id is the avatar' }, { event: 'changed', note: 'CHANGED_OWNER' }] },
+	{ action: 'Attach from the ground', steps: [{ event: 'attach', note: 'id is the avatar' }] },
+	{ action: 'Detach to inventory, or drop to the ground', steps: [{ event: 'attach', note: 'id is NULL_KEY' }] },
+	{ action: 'Rez to the ground', steps: [{ event: 'on_rez' }] },
+	{ action: 'Rez to the ground after an owner change', steps: [{ event: 'on_rez' }, { event: 'changed', note: 'CHANGED_OWNER' }] },
+	{ action: 'Reset, worn or on the ground', steps: [{ event: 'state_entry' }] },
+	{ action: 'Change state', steps: [{ event: 'state_exit', note: 'old state' }, { event: 'state_entry', note: 'new state' }] },
+];
+---
+<section class="event-order" aria-labelledby={id}>
+	<h2 id={id}>{heading}</h2>
+	<p>Which events fire for an action, and in what order. Otherwise events are handled first in, first out; only <a href="/events/state_entry/"><code>state_entry</code></a> can jump the queue. From the wiki's <a href="https://wiki.secondlife.com/wiki/Event_Order">Event Order</a> page.</p>
+	<ul>
+		{rows.map(r => (
+			<li>
+				<span class="action">{r.action}:</span>
+				<ol>
+					{r.steps.map(s => (
+						<li><a href={`/events/${s.event}/`}><code>{s.event}</code></a>{s.note && <span class="note">{s.note}</span>}</li>
+					))}
+				</ol>
+			</li>
+		))}
+	</ul>
+</section>
+<style>
+	.event-order h2 { margin-top: 2rem; }
+	.event-order > ul { list-style: none; padding: 0; margin: 1rem 0 0; border-top: 1px solid var(--sl-color-hairline); }
+	.event-order > ul > li { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .5rem; padding: .5rem 0; border-bottom: 1px solid var(--sl-color-hairline); }
+	.action { font-weight: 600; margin-right: .5rem; }
+	ol { display: contents; list-style: none; }
+	ol li { margin: 0; display: inline-flex; align-items: center; gap: .375rem; }
+	ol li + li::before { content: '→'; color: var(--sl-color-gray-3); margin-right: .125rem; }
+	ol a { text-decoration: none; }
+	ol code { font-size: var(--sl-text-xs); }
+	.note { font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); }
+	.event-order a:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 2px; }
+</style>

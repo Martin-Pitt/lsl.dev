@@ -20,6 +20,7 @@ const keyApiNames: Record<string, string[]> = {
 	script: ['llResetScript', 'llGetStartParameter', 'llSetScriptState', 'llGetUsedMemory'],
 	time: ['llSetTimerEvent', 'timer', 'llGetUnixTime', 'llGetTimestamp'],
 	inventory: ['llGetInventoryName', 'llGiveInventory', 'llRezObjectWithParams', 'llDerezObject', 'llGetNotecardLineSync'],
+	pathfinding: ['llGetStaticPath', 'llCreateCharacter', 'llNavigateTo', 'llPursue'],
 };
 /** Key APIs: `keyApiNames`, else the first names a feature page links (its <ApiLinks> come first). */
 export function keyApis(f: FeaturePage, n = 4) { return (keyApiNames[f.id] ?? f.items).slice(0, n); }
@@ -97,7 +98,7 @@ const tasks: { task: string; feature: string; apis: string[] }[] = [
 	{ task: 'Make particles or hover text', feature: 'effects', apis: ['llParticleSystem', 'llSetText'] },
 	{ task: 'Animate an avatar', feature: 'avatar', apis: ['llRequestPermissions', 'llStartAnimation'] },
 	{ task: 'Make a HUD or attachment', feature: 'avatar', apis: ['llAttachToAvatar', 'attach'] },
-	{ task: 'Take keyboard controls (vehicles, weapons)', feature: 'input', apis: ['llTakeControls', 'control'] },
+	{ task: 'Take mouse/keyboard controls (vehicles, weapons)', feature: 'input', apis: ['llTakeControls', 'control'] },
 	{ task: 'Deal damage or track health', feature: 'combat', apis: ['llDamage', 'llGetHealth'] },
 	{ task: 'Accept payment for a vendor', feature: 'money', apis: ['llSetPayPrice', 'money'] },
 	{ task: 'Rez an object from inventory', feature: 'inventory', apis: ['llRezObjectWithParams', 'object_rez'] },
@@ -107,7 +108,7 @@ const tasks: { task: string; feature: string; apis: string[] }[] = [
 	{ task: 'Push, launch or make an object fall', feature: 'physics', apis: ['llSetStatus', 'llApplyImpulse'] },
 	{ task: 'Control the camera', feature: 'camera', apis: ['llSetCameraParams'] },
 	{ task: 'Find out who owns this parcel', feature: 'land', apis: ['llGetParcelDetails', 'llGetLandOwnerAt'] },
-	{ task: 'Make an NPC walk around', feature: 'pathfinding', apis: ['llCreateCharacter', 'llNavigateTo'] },
+	{ task: 'Make an NPC walk around', feature: 'pathfinding', apis: ['llGetStaticPath', 'llCreateCharacter', 'llNavigateTo'] },
 ];
 
 const ranked = usageOrder.map(id => need(id, 'usageOrder'));

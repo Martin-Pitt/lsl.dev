@@ -32,12 +32,12 @@ Caveat, Gotcha, Performance, Limit, LimitsTable, Details, FAQ, Since. Showcase:
 `/meta/components/#showcase-asides`.
 
 ```mdx
-import { Caveat, Gotcha, Performance, Limit, LimitsTable, Details, FAQ, Since } from '~/components/authoring';
+import { Caveat, Gotcha, Experimental, Performance, Limit, LimitsTable, Details, FAQ, Since } from '~/components/authoring';
 ```
 
 **Asides.** All asides share one look: a left rule and a tint in a semantic colour. Starlight's
 own (`:::note`, `:::tip`, `:::caution`, `:::danger`, `<Aside>`) are restyled to match. Note,
-Caveat and Limit are neutral gray-blue, tip and Performance green, caution and Gotcha orange,
+Caveat and Limit are neutral gray-blue, tip and Performance green, caution, Gotcha and Experimental orange,
 danger red. Accent blue is kept for links. Each takes an optional `title`.
 
 ```mdx
@@ -45,6 +45,10 @@ danger red. Accent blue is kept for links. Each takes an optional `title`.
 <Gotcha>`llSetTimerEvent(0)` stops the timer, but a pending event may still fire once.</Gotcha>
 <Performance>Avoid `llSleep` in busy event handlers.</Performance>
 ```
+
+**Experimental.** `<Experimental feature="Game control" />` marks a feature Linden Lab may still
+change, with a default sentence (or your own body). API pages in a category listed in
+`src/components/authoring/asides/experimental.ts` get one automatically under the header.
 
 Export: `> **Gotcha:** body`, with the whole body (every paragraph, list and code block) in the quote.
 

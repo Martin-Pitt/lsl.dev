@@ -33,6 +33,8 @@ export const collections = {
 			source: source.optional(),
 			/** `false` turns off API hover cards on the page (docs/components.md). */
 			hoverCards: z.boolean().optional(),
+			/** `false` leaves inline `code` on the page plain instead of LSL-highlighted (src/lib/rehype-inline-lsl.ts). */
+			inlineLsl: z.boolean().optional(),
 		}) }),
 	}),
 };

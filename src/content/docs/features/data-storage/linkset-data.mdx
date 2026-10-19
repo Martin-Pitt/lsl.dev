@@ -1,0 +1,85 @@
+---
+title: "Linkset Data"
+description: "The linkset datastore: 128 KiB of key-value pairs kept in the object, protected keys, searching and the linkset_data event."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, SeeAlso, Signatures } from '../../../../components/features';
+
+Linkset data is a key-value store kept in the object itself, shared by every script in the linkset. It is the usual place for an object's own persistent state. Part of the [Data Storage](/features/data-storage/) feature.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- The store holds up to 128 KiB of string **name:value** pairs and does not use script memory
+  - It survives script resets, deletion of the script and cloning the object
+  - Each pair costs the UTF-8 length of name plus value, and 32 bytes more if protected; [`llLinksetDataAvailable`](/functions/llLinksetDataAvailable/) gives the bytes left
+- [Write](/functions/llLinksetDataWrite/) creates or updates a pair, [read](/functions/llLinksetDataRead/) returns its value, [delete](/functions/llLinksetDataDelete/) removes it
+  - Writing an empty value deletes the pair
+  - Writes return a [result code](/constants/groups/LinksetDataError/) such as [`LINKSETDATA_OK`](/constants/LINKSETDATA_OK/) or [`LINKSETDATA_EMEMORY`](/constants/LINKSETDATA_EMEMORY/)
+  - Many small keys are cheaper than reading and rewriting one large value
+- [Protected pairs](/functions/llLinksetDataWriteProtected/) need the same **pass** to [read](/functions/llLinksetDataReadProtected/), update or [delete](/functions/llLinksetDataDeleteProtected/)
+  - The value of a protected pair is not sent in `linkset_data`
+- Keys can be [listed](/functions/llLinksetDataListKeys/) alphabetically and [counted](/functions/llLinksetDataCountKeys/)
+  - [Find](/functions/llLinksetDataFindKeys/), [count](/functions/llLinksetDataCountFound/) and [delete](/functions/llLinksetDataDeleteFound/) keys matching a regular expression, so prefixes like `cfg:` group related keys
+- [`llLinksetDataReset`](/functions/llLinksetDataReset/) erases everything, protected pairs included
+- Every change raises [`linkset_data`](/events/linkset_data/) in all scripts of the linkset, with the [action](/constants/groups/LinksetDataAction/), the **name** and the new **value**
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llLinksetDataWrite", "llLinksetDataRead", "llLinksetDataDelete",
+  "llLinksetDataWriteProtected", "llLinksetDataFindKeys", "llLinksetDataAvailable",
+  "linkset_data"
+]} />
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llLinksetDataWrite", "llLinksetDataRead", "llLinksetDataDelete",
+  "llLinksetDataWriteProtected", "llLinksetDataReadProtected",
+  "llLinksetDataDeleteProtected", "llLinksetDataFindKeys",
+  "llLinksetDataListKeys", "llLinksetDataCountKeys",
+  "llLinksetDataCountFound", "llLinksetDataDeleteFound",
+  "llLinksetDataAvailable", "llLinksetDataReset", "linkset_data"
+]} descriptions />
+
+</Box>
+
+## Example
+
+```lsl
+default
+{
+    touch_start(integer num_detected)
+    {
+        integer count = (integer)llLinksetDataRead("touches") + 1;
+        llLinksetDataWrite("touches", (string)count);
+    }
+
+    linkset_data(integer action, string name, string value)
+    {
+        if (action == LINKSETDATA_UPDATE && name == "touches")
+            llSetText("Touched " + value + " times", <1, 1, 1>, 1);
+    }
+}
+```
+
+## Constant groups
+
+<ConstantGroups names={["LinksetDataAction", "LinksetDataError"]} />
+
+## Related
+
+<SeeAlso items={[
+  "feature:data-storage", "category:linkset_data", "wiki:Linkset data",
+  "/guides/link-numbers/#linkset-resources|Guide: linkset resources (reusable prims in linkset data)"
+]} />
+
+<FeatureFooter related={["data-storage", "linkset", "data-transmission"]} />

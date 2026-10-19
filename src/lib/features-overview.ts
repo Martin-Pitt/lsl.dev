@@ -17,7 +17,6 @@ export function apiHref(name: string) {
 }
 /** Hand-picked key APIs, where the first names a page links are not the most useful shortcuts. */
 const keyApiNames: Record<string, string[]> = {
-	'viewer-uris': ['llSay', 'llDialog', 'llDetectedKey', 'llGetRegionName'],
 	script: ['llResetScript', 'llGetStartParameter', 'llSetScriptState', 'llGetUsedMemory'],
 	time: ['llSetTimerEvent', 'timer', 'llGetUnixTime', 'llGetTimestamp'],
 	inventory: ['llGetInventoryName', 'llGiveInventory', 'llRezObjectWithParams', 'llDerezObject', 'llGetNotecardLineSync'],
@@ -40,13 +39,12 @@ const purposes: Record<string, string> = {
 	communications: 'Chat, listen and message other scripts',
 	'data-storage': 'Keep data across resets and restarts',
 	'data-transmission': 'Turn lists into strings, CSV or JSON and back',
-	dialog: 'Show menus and text boxes, read answers',
 	effects: 'Particles, hover text, glow and texture animation',
 	environments: 'Sky, water, sun, moon and day cycles',
 	events: 'States, handlers, changes and detection',
 	experience: 'One-time permissions and key-value storage',
 	inventory: 'Read, give, rez and derez the contents of a prim',
-	input: 'Touch, keyboard, mouse and gamepad',
+	input: 'Touch, keyboard, mouse and game control',
 	land: 'Parcels, regions, estates and moderation',
 	linkset: 'Link numbers, linking and rezzing',
 	math: 'Vectors, rotations, random numbers',
@@ -59,7 +57,6 @@ const purposes: Record<string, string> = {
 	sound: 'Play, loop and trigger sounds',
 	textures: 'Textures, colors, alpha and PBR materials',
 	time: 'Timers, sleeping, clocks and time dilation',
-	'viewer-uris': 'Clickable names, profiles and places in chat',
 };
 export function purpose(f: FeaturePage) { return purposes[f.id] ?? f.description; }
 
@@ -69,16 +66,16 @@ export function purpose(f: FeaturePage) { return purposes[f.id] ?? f.description
  */
 const icons: Record<string, string> = {
 	animesh: 'puzzle', avatar: 'star', camera: 'magnifier', combat: 'warning', communications: 'comment',
-	'data-storage': 'document', 'data-transmission': 'random', dialog: 'list-format', effects: 'sun',
+	'data-storage': 'document', 'data-transmission': 'random', effects: 'sun',
 	environments: 'moon', events: 'setting', experience: 'approve-check', input: 'pencil', inventory: 'seti:folder', land: 'translate',
 	linkset: 'external', math: 'seti:clock', money: 'seti:shell', movement: 'rocket', pathfinding: 'right-arrow',
-	physics: 'information', prims: 'seti:default', script: 'seti:config', sound: 'seti:audio', textures: 'seti:image', time: 'seti:clock', 'viewer-uris': 'link',
+	physics: 'information', prims: 'seti:default', script: 'seti:config', sound: 'seti:audio', textures: 'seti:image', time: 'seti:clock',
 };
 export function icon(f: FeaturePage) { return icons[f.id] ?? 'document'; }
 
 /** Editorial "most used" order, highest first (Serial Position). Replace with analytics when available. */
-const usageOrder = ['communications', 'events', 'time', 'input', 'prims', 'inventory', 'avatar', 'textures', 'data-storage', 'dialog',
-	'movement', 'effects', 'script', 'sound', 'data-transmission', 'linkset', 'physics', 'math', 'money', 'viewer-uris', 'land', 'experience',
+const usageOrder = ['communications', 'events', 'time', 'input', 'prims', 'inventory', 'avatar', 'textures', 'data-storage',
+	'movement', 'effects', 'script', 'sound', 'data-transmission', 'linkset', 'physics', 'math', 'money', 'land', 'experience',
 	'camera', 'combat', 'environments', 'animesh', 'pathfinding'];
 /** How many cards the "Most used" section shows. */
 export const mostUsedCount = 6;
@@ -87,8 +84,8 @@ export const mostUsedCount = 6;
 const tasks: { task: string; feature: string; apis: string[] }[] = [
 	{ task: 'React when someone touches my object', feature: 'input', apis: ['touch_start', 'llDetectedKey'] },
 	{ task: 'Say something in chat or listen to it', feature: 'communications', apis: ['llSay', 'llListen', 'listen'] },
-	{ task: 'Link to an avatar or place in chat', feature: 'viewer-uris', apis: ['llSay', 'llDetectedKey', 'llGetRegionName'] },
-	{ task: 'Show a menu with buttons', feature: 'dialog', apis: ['llDialog', 'listen'] },
+	{ task: 'Link to an avatar or place in chat', feature: 'communications', apis: ['llSay', 'llDetectedKey', 'llGetRegionName'] },
+	{ task: 'Show a menu with buttons', feature: 'communications', apis: ['llDialog', 'listen'] },
 	{ task: 'Run code on a timer', feature: 'time', apis: ['llSetTimerEvent', 'timer'] },
 	{ task: 'Reset a script', feature: 'script', apis: ['llResetScript', 'llResetOtherScript'] },
 	{ task: 'Store data that survives a reset', feature: 'data-storage', apis: ['llLinksetDataWrite', 'llLinksetDataRead'] },

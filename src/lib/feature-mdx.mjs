@@ -13,11 +13,14 @@ import { parse as parseYaml } from 'yaml';
 
 /**
  * @typedef {{ id: string, title: string, description: string, categories: string[], related: string[], archive: string[],
- *   items: string[], groups: string[], links: string[], hrefs: string[], planned: string[] }} FeatureMdx
+ *   items: string[], groups: string[], links: string[], hrefs: string[], planned: string[], badge?: SidebarBadge }} FeatureMdx
+ * `badge`: frontmatter `sidebar.badge` (Starlight's string or { text, variant }), for the config-built sidebar.
  * `items`: every API the page links (component names plus prose links to /functions|events|constants/<name>/).
  * `groups`: constant groups (<ConstantGroups> plus prose links to /constants/groups/<group>/).
  * `links`: <SeeAlso> items; `hrefs`: every Markdown link target in the prose.
  */
+
+/** @typedef {string | { text: string, variant?: 'note' | 'danger' | 'success' | 'caution' | 'tip' | 'default' }} SidebarBadge */
 
 /** @param {string} body @param {string} tag @param {string} prop */
 function arrayProps(body, tag, prop) {
@@ -67,6 +70,7 @@ export function parseFeatureMdx(id, source) {
 		links: arrayProps(body, 'SeeAlso', 'items'),
 		hrefs,
 		planned: planned(body),
+		...(data.sidebar?.badge ? { badge: data.sidebar.badge } : {}),
 	};
 }
 
@@ -91,7 +95,7 @@ export function parseSeeAlsoItem(item) {
  * group and link names count as the feature's own (chips, coverage, migration check).
  * @param {FeatureMdx} main
  * @param {FeatureMdx[]} subs parsed sub-pages; their `id` is the topic file name
- * @returns {FeatureMdx & { subpages: { id: string, title: string, description: string, href: string }[] }}
+ * @returns {FeatureMdx & { subpages: { id: string, title: string, description: string, href: string, badge?: SidebarBadge }[] }}
  */
 export function withSubpages(main, subs) {
 	const sorted = [...subs].sort((a, b) => a.id.localeCompare(b.id));
@@ -102,6 +106,6 @@ export function withSubpages(main, subs) {
 		links: [...main.links, ...sorted.flatMap(s => s.links)],
 		hrefs: [...main.hrefs, ...sorted.flatMap(s => s.hrefs)],
 		planned: [...main.planned, ...sorted.flatMap(s => s.planned)],
-		subpages: sorted.map(s => ({ id: s.id, title: s.title, description: s.description, href: `/features/${main.id}/${s.id}/` })),
+		subpages: sorted.map(s => ({ id: s.id, title: s.title, description: s.description, href: `/features/${main.id}/${s.id}/`, ...(s.badge ? { badge: s.badge } : {}) })),
 	};
 }

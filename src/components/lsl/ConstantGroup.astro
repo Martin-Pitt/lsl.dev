@@ -92,18 +92,21 @@ if (order) {
 	if (missing.length) throw new Error(`<ConstantGroup name="${name}" order>: missing ${missing.join(', ')}. Add them to the order data.`);
 } else {
 	const code = (c: any) => (isRules ? ruleCode([c.name], argsOf(c)) : `${c.type} ${c.name} = ${literal(c)};`);
+	// By value (hex strings parsed as numbers), definition order on ties.
+	const num = (c: any) => { const n = Number(c.value); return Number.isNaN(n) ? Infinity : n; };
+	const sorted = members.map((c, i) => [c, i] as const).sort(([a, i], [b, j]) => num(a) - num(b) || i - j).map(([c]) => c);
 	// Sub-groups: the word after the shared prefix, when that splits a long group into real clusters.
 	const prefix = info.prefix || '';
 	const word = (n: string) => n.slice(prefix.length).split('_')[0];
 	const counts = new Map<string, number>();
-	for (const c of members) counts.set(word(c.name), (counts.get(word(c.name)) ?? 0) + 1);
+	for (const c of sorted) counts.set(word(c.name), (counts.get(word(c.name)) ?? 0) + 1);
 	const clusters = [...counts.values()].filter(n => n > 1).length;
-	const split = members.length >= 12 && clusters >= 2;
+	const split = sorted.length >= 12 && clusters >= 2;
 	const cluster = (c: any) => (split && counts.get(word(c.name))! > 1 ? word(c.name) : '');
-	// Definition order, but each cluster gathered where its first member appears; unclustered members first.
+	// Value order, but each cluster gathered where its first member appears; unclustered members first.
 	const firstSeen = new Map<string, number>();
-	members.forEach((c, i) => { if (!firstSeen.has(cluster(c))) firstSeen.set(cluster(c), cluster(c) ? i + 1 : 0); });
-	const ordered = split ? members.map((c, i) => [c, i] as const).sort(([a, i], [b, j]) => firstSeen.get(cluster(a))! - firstSeen.get(cluster(b))! || i - j).map(([c]) => c) : members;
+	sorted.forEach((c, i) => { if (!firstSeen.has(cluster(c))) firstSeen.set(cluster(c), cluster(c) ? i + 1 : 0); });
+	const ordered = split ? sorted.map((c, i) => [c, i] as const).sort(([a, i], [b, j]) => firstSeen.get(cluster(a))! - firstSeen.get(cluster(b))! || i - j).map(([c]) => c) : sorted;
 	let last: string | undefined;
 	for (const c of ordered) {
 		const w = cluster(c);
@@ -114,7 +117,7 @@ if (order) {
 const caption = mode === 'get' ? ' (rule and request, then what it returns)' : isRules ? ' (rule, then its arguments)' : '';
 ---
 <figure class="lsl-glance not-content">
-	<figcaption>{title ?? <>From the LSL definitions: <a href={constantGroupHref(name)}>{name}</a>{caption}</>}</figcaption>
+	<figcaption>{title ?? <>{info.local ? 'Grouped by lsl.dev' : 'From the LSL definitions'}: <a href={constantGroupHref(name)}>{name}</a>{caption}</>}</figcaption>
 	<pre>{rows.map(r => r.header !== undefined
 		? <span class="lsl-glance-header">// {r.href ? <a href={r.href}>{r.header}</a> : r.header}</span>
 		: <span class="lsl-glance-line"><Fragment set:html={r.html} /></span>)}</pre>

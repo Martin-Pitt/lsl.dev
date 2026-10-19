@@ -59,7 +59,7 @@ catalog without requiring Python or access to the original Windows download path
 ### Local overlay (not upstream)
 
 `data/overlays/categories.yaml` is **lsl.dev's own data, not an upstream source**. It adds
-topic categories that the definitions do not have, currently `gamepad` ("Gamepad"): every
+topic categories that the definitions do not have, currently `game_control` ("Game Control", the same id upstream will use): every
 public API matching `llGetGameControl*`, `game_control` or `GAME_CONTROL_*`, plus
 `PERMISSION_GAME_CONTROL`. The importer applies it after the YAML through
 `scripts/lib/category_overlay.py`. Membership is additive: YAML categories are kept and stay
@@ -68,12 +68,51 @@ match. The catalog records the file, its SHA-256 and per-category member counts 
 `meta.sources.overlays` (`"local": true`). `data/reports/import-report.json` lists any
 `include` name that is not public under `categoryOverlay.skipped`.
 
+`data/overlays/groups.yaml` is lsl.dev's own data too. It adds constant-group membership
+(`member-of`) that the definitions lack: the canonical `GameControlAxis` members, and
+`GameControlAvatarAxis`/`Button` and `GameControlFlycamAxis`/`Button` for the modal
+`GAME_CONTROL_AXIS_*` and `GAME_CONTROL_BUTTON_*` actions, which upstream left ungrouped
+(their values overlap across modes, so one group per prefix cannot hold them). The importer
+applies it to the definitions right after reading the YAML, through
+`scripts/lib/group_overlay.py`, so every consumer of `member-of` sees it. New groups are
+marked `"local": true` in the catalog's `enums`, and pages say they are lsl.dev's grouping.
+As upstream, non-deprecated members of a group must have distinct values. The catalog records
+the file under `meta.sources.overlays`; `import-report.json` lists skipped names under
+`groupOverlay.skipped`. Drop each entry once upstream groups these constants.
+
 Wiki prose is attributed to Second Life Wiki contributors under CC BY-SA 3.0.
 Each page includes its original revision ID, timestamp, latest revision contributor,
 source/revision URL, and history URL. The latest contributor is **not** a list of
 all authors; the history link supplies the original attribution chain. Do not
 relicense wiki content as part of the site's code license. Examples can carry their
 own notices, which remain in the archived wikitext.
+
+### Release notes (tracking, not imported)
+
+`release-notes/` holds text snapshots of every simulator and viewer page on
+releasenotes.secondlife.com, written by `scripts/release-notes.py`. The importer does not
+read them; they are for checking what shipped and when. The page list comes from the site's
+`sitemap.xml`, which also has pages that the index pages and RSS feeds leave out (the game
+control alpha viewer is `viewer/26.4.0.35904126261`). Pages on other sites go in
+`release-notes/extra-urls.txt` as `<channel> <url>` lines.
+
+- `pages.json`: URL and release date of each snapshot.
+- `index.json`: per page, the public LSL names it mentions and `unknown` LSL-looking names
+  that the definitions lack (typos, renamed or unreleased names).
+- `review.json`: per channel, the last page reviewed and when.
+- `data/reports/release-notes-lsl.json`: per LSL name, the first page per channel that
+  mentions it and every page that does. A mention can be a fix or a known issue, not the
+  release itself, so read the page before you treat it as an implementation date.
+
+Event names that are ordinary words (`control`, `timer`, `sensor`) only count when written
+as `name(` or `name event`.
+
+```sh
+python scripts/release-notes.py fetch            # network: new pages only (--refetch for all)
+python scripts/release-notes.py review -v        # simulator pages after the review marker
+python scripts/release-notes.py review --channel viewer
+python scripts/release-notes.py mark-reviewed    # move the marker to the newest page
+```
 
 ## Regeneration
 

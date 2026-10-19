@@ -64,7 +64,7 @@ A notecard is the usual way for owners to configure a product without editing it
 </Box>
 <Box title="Vendors and givers">
 
-Selling and handing out items combines this feature with [Money](/features/money/) for payment, [Dialog](/features/dialog/) for menus and [`llGiveInventoryList`](/functions/llGiveInventoryList/) to deliver a folder.
+Selling and handing out items combines this feature with [Money](/features/money/) for payment, [Dialog](/features/communications/dialog/) for menus and [`llGiveInventoryList`](/functions/llGiveInventoryList/) to deliver a folder.
 
 </Box>
 <Box title="Rezzers">
@@ -82,14 +82,14 @@ Here are the functions and events in detail.
 ### Reading items
 
 <Signatures>
-<Signature name="llGetInventoryNumber">Returns the number of items of a given type (`INVENTORY_*`, or [`INVENTORY_ALL`](/constants/INVENTORY_ALL/)) in the prim</Signature>
+<Signature name="llGetInventoryNumber">Returns the number of items of a given type ([`INVENTORY_*`](/constants/groups/InventoryType/), or [`INVENTORY_ALL`](/constants/INVENTORY_ALL/)) in the prim</Signature>
 <Signature name="llGetInventoryName">Returns the name of the item of a given type at **index**. Items are sorted alphabetically</Signature>
-<Signature name="llGetInventoryType">Returns the `INVENTORY_*` type of the named item, or [`INVENTORY_NONE`](/constants/INVENTORY_NONE/) if there is no such item</Signature>
+<Signature name="llGetInventoryType">Returns the [`INVENTORY_*`](/constants/groups/InventoryType/) type of the named item, or [`INVENTORY_NONE`](/constants/INVENTORY_NONE/) if there is no such item</Signature>
 <Signature name="llGetInventoryKey">Returns the asset key of the item. Returns `NULL_KEY` unless the item is copy, modify and transfer; a notecard that has never been saved also has `NULL_KEY`</Signature>
 <Signature name="llGetInventoryCreator">Returns the key of the item's creator</Signature>
 <Signature name="llGetInventoryDesc">Returns the item's description</Signature>
 <Signature name="llGetInventoryAcquireTime">Returns when the item was placed in the prim, as a UTC timestamp `"YYYY-MM-DDThh:mm:ssZ"`</Signature>
-<Signature name="llGetInventoryPermMask">Returns the item's [`PERM_*` flags](/constants/groups/AssetPermission/) for the `MASK_*` category in **group**</Signature>
+<Signature name="llGetInventoryPermMask">Returns the item's [`PERM_*` flags](/constants/groups/AssetPermission/) for the [`MASK_*`](/constants/groups/AssetPermissionCategory/) category in **group**</Signature>
 </Signatures>
 
 ### Giving and removing items
@@ -106,14 +106,14 @@ Here are the functions and events in detail.
 <Signatures>
 <Signature name="llRezObject">Rezzes an inventory object with its bounding box centred on **pos**, passing **start_param** to the new object's [`on_rez`](/events/on_rez/) event</Signature>
 <Signature name="llRezAtRoot">Like `llRezObject`, but places the object's root prim at **pos**</Signature>
-<Signature name="llRezObjectWithParams">Rezzes an inventory object with a list of `REZ_*` parameters, and returns its key, or a blank key on failure</Signature>
+<Signature name="llRezObjectWithParams">Rezzes an inventory object with a list of [`REZ_*`](/constants/groups/RezParam/) parameters, and returns its key, or a blank key on failure</Signature>
 <Signature name="object_rez">Triggered in the rezzer when it has rezzed an object from inventory, with the new object's key</Signature>
 </Signatures>
 
 ### Derezzing to inventory
 
 <Signatures>
-<Signature name="llDerezObject">With [`DEREZ_TO_INVENTORY`](/constants/DEREZ_TO_INVENTORY/) in **flags**, takes an object rezzed by this linkset back into the rezzer's inventory, saving its current state in place of the original item; other `DEREZ_*` flags delete it or mark it temporary. Returns `TRUE` on success. The target must have the same owner, be copyable and not be an attachment</Signature>
+<Signature name="llDerezObject">With [`DEREZ_TO_INVENTORY`](/constants/DEREZ_TO_INVENTORY/) in **flags**, takes an object rezzed by this linkset back into the rezzer's inventory, saving its current state in place of the original item; other [`DEREZ_*`](/constants/groups/DerezMode/) flags delete it or mark it temporary. Returns `TRUE` on success. The target must have the same owner, be copyable and not be an attachment</Signature>
 </Signatures>
 
 ### Notecards
@@ -161,11 +161,11 @@ Here are the functions and events in detail.
 - [`llGiveAgentInventory`](/functions/llGiveAgentInventory/) — **options** and return values
   - [`TRANSFER_DEST`](/constants/TRANSFER_DEST/) — The root folder to put the new folder in
   - [`TRANSFER_FLAGS`](/constants/TRANSFER_FLAGS/) — Flags that control the transfer
-  - [`TRANSFER_OK`](/constants/TRANSFER_OK/) — The offer was made; other `TRANSFER_*` codes such as [`TRANSFER_NO_ITEMS`](/constants/TRANSFER_NO_ITEMS/) and [`TRANSFER_THROTTLE`](/constants/TRANSFER_THROTTLE/) explain a failure
+  - [`TRANSFER_OK`](/constants/TRANSFER_OK/) — The offer was made; other [`TRANSFER_*`](/constants/groups/TransferError/) codes such as [`TRANSFER_NO_ITEMS`](/constants/TRANSFER_NO_ITEMS/) and [`TRANSFER_THROTTLE`](/constants/TRANSFER_THROTTLE/) explain a failure
 - [`llRezObjectWithParams`](/functions/llRezObjectWithParams/) — Rezzing options that replace the positional arguments of `llRezObject`
   - [`REZ_POS`](/constants/REZ_POS/) — Position, relative or in region coordinates, centred on the object or its root
   - [`REZ_PARAM`](/constants/REZ_PARAM/) — The start parameter passed to [`on_rez`](/events/on_rez/)
-  - [`REZ_FLAGS`](/constants/REZ_FLAGS/) — `REZ_FLAG_*` options such as [`REZ_FLAG_TEMP`](/constants/REZ_FLAG_TEMP/) and [`REZ_FLAG_PHYSICAL`](/constants/REZ_FLAG_PHYSICAL/)
+  - [`REZ_FLAGS`](/constants/REZ_FLAGS/) — [`REZ_FLAG_*`](/constants/groups/RezFlag/) options such as [`REZ_FLAG_TEMP`](/constants/REZ_FLAG_TEMP/) and [`REZ_FLAG_PHYSICAL`](/constants/REZ_FLAG_PHYSICAL/)
 - [`llDerezObject`](/functions/llDerezObject/) — **flags** chooses what happens to the object; only one of them puts it in an inventory
   - [`DEREZ_TO_INVENTORY`](/constants/DEREZ_TO_INVENTORY/) — Returns the object to the derezzer's inventory and saves its current state, replacing the original item. The derezzer must be modifiable and not an attachment, and the object in its inventory must still exist and must not be a coalesced object
   - [`DEREZ_DIE`](/constants/DEREZ_DIE/) — Deletes the object at once; it does not go to inventory

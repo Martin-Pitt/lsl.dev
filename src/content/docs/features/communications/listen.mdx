@@ -1,0 +1,87 @@
+---
+title: "Listen"
+description: "Chat between objects and avatars: channels, ranges, listeners and the listen event."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../../components/features';
+
+Chat carries text between objects and avatars nearby or across a region. A script speaks on an integer channel and hears through listeners, which filter what reaches its [`listen`](/events/listen/) event. Part of the [Communications](/features/communications/) feature.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Every message is sent on a channel
+  - Channel 0 is [public chat](/constants/PUBLIC_CHANNEL/), seen by people; other channels are only heard by scripts
+  - [`DEBUG_CHANNEL`](/constants/DEBUG_CHANNEL/) shows in the script warning window
+- Range depends on the function
+  - [Whisper](/functions/llWhisper/) reaches 10 m, [say](/functions/llSay/) 20 m and [shout](/functions/llShout/) 100 m from the speaking prim
+  - [`llRegionSay`](/functions/llRegionSay/) reaches the whole region, but not on channel 0
+  - [`llRegionSayTo`](/functions/llRegionSayTo/) speaks to one avatar or object in the region; on channel 0 to an avatar, only that avatar sees it
+  - [`llOwnerSay`](/functions/llOwnerSay/) sends text only to the owner
+- Messages from scripts are truncated to 1024 bytes
+- A prim cannot hear itself, but can hear other prims in the same object; use [link messages](/functions/llMessageLinked/) inside an object instead
+- [`llListen`](/functions/llListen/) opens a listener on a channel, optionally filtered by speaker name, key and exact message, and returns a handle
+  - Only messages that match every filter raise [`listen`](/events/listen/), with the channel, name, key and message
+  - Filters cannot be changed later; a listener on [`llGetOwner`](/functions/llGetOwner/) keeps the old owner after a [change of owner](/constants/CHANGED_OWNER/)
+- Listeners cost the region, so keep them few and narrow
+  - [Pause or resume](/functions/llListenControl/) a listener, or [remove](/functions/llListenRemove/) it with its handle
+  - A script can have 65 listeners open; a state change or reset removes them all
+  - Prefer a filtered, non-zero channel to listening on channel 0
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llSay", "llRegionSay", "llRegionSayTo", "llOwnerSay",
+  "llListen", "llListenControl", "llListenRemove", "listen"
+]} />
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llOwnerSay", "llInstantMessage", "llWhisper", "llSay", "llShout", "llRegionSay",
+  "llRegionSayTo", "llListen", "llListenControl", "llListenRemove", "listen"
+]} descriptions />
+
+</Box>
+
+## Example
+
+Two objects on a private channel: one sends commands, the other obeys only its owner's objects.
+
+```lsl
+integer CHANNEL = -731942;
+
+default
+{
+    state_entry()
+    {
+        llListen(CHANNEL, "", NULL_KEY, "");
+    }
+
+    listen(integer channel, string name, key id, string message)
+    {
+        if (llGetOwnerKey(id) != llGetOwner()) return;
+        if (message == "on") llSetText("On", <0, 1, 0>, 1);
+        else if (message == "off") llSetText("", ZERO_VECTOR, 0);
+    }
+}
+```
+
+## Constant groups
+
+<ConstantGroups names={["Channel", "ChannelNonPublic"]} />
+
+## Related
+
+<SeeAlso items={["feature:communications", "category:chat", "wiki:Listen", "wiki:Category:LSL Chat"]}>
+  <Planned>Guide: listeners and channels</Planned>
+</SeeAlso>
+
+<FeatureFooter related={["communications"]} />

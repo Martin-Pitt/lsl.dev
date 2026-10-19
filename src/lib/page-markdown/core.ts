@@ -8,6 +8,7 @@ import { categoryLink } from '../categories';
 import { featurePageMap, featureHref } from '../features';
 import { parseSeeAlsoItem } from '../feature-mdx.mjs';
 import { ruleUsage } from '../rule-usage';
+import { experimentalFeature, experimentalText } from '../../components/authoring/asides/experimental';
 import { code, need, quote } from './util';
 import type { Attrs, CaseFile, Source } from './types';
 
@@ -25,6 +26,8 @@ function apiHeader(kind: 'function' | 'event' | 'constant', name: string, showDe
 	const out: string[] = [];
 	const flags = [['experience', 'requires an experience'], ['linden-experience', 'Linden experience only'], ['god-mode', 'privileged function']].filter(([k]) => d[k]).map(([, l]) => l);
 	out.push(`*LSL ${kind}${flags.length ? ` (${flags.join(', ')})` : ''}*`);
+	const experimental = experimentalFeature(e.categories);
+	if (experimental) out.push(quote(`**Experimental:** ${experimentalText(experimental)}`));
 	if (e.replaces?.length) out.push(`Replaces deprecated ${e.replaces.map(code).join(', ')}.`);
 	const sig = kind === 'constant' ? `${e.type} ${e.name} = ${literal(e)};` : kind === 'function' ? `${e.returnType} ${e.signature};` : `${e.signature}`;
 	out.push('```lsl\n' + sig + '\n```');

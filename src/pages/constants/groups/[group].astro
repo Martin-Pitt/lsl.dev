@@ -18,8 +18,9 @@ const users = catalog.functions.filter(f => JSON.stringify((f as any).parameters
 ---
 <StarlightPage frontmatter={{ title: group, description: info.tooltip || `${group} constants.`, editUrl: false }}>
 	<p>{info.tooltip || `Constants in the ${group} ${info.type === 'flag' ? 'flag set' : 'enum'}.`} {info.type === 'flag' && 'These are flags and can be combined with bitwise OR.'}</p>
+	{info.local && <p>lsl.dev groups these constants itself; the LSL definitions do not have this group yet.</p>}
 	<p><a href="/constants/groups/">All constant groups</a></p>
-	<ConstantGroup name={group} order={order} mode={getterGroups.has(group) ? 'get' : 'set'} title="At a glance, from the LSL definitions" />
+	<ConstantGroup name={group} order={order} mode={getterGroups.has(group) ? 'get' : 'set'} title={info.local ? 'At a glance' : 'At a glance, from the LSL definitions'} />
 	<h2 id="constants">Constants</h2>
 	{sections.map(s => (<>
 		{s.title && <h3 id={s.id}>{s.title}</h3>}

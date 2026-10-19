@@ -15,7 +15,7 @@ import { singleMemberCategories } from './src/lib/category-members.mjs';
 /** @returns {import('astro').AstroIntegration} */
 function reloadSidebarOnFeatureChanges() {
 	const dir = 'src/content/docs/features';
-	const snapshot = () => JSON.stringify(loadFeatures().map(f => [f.id, f.title, f.categories, f.subpages.map(s => [s.title, s.href])]));
+	const snapshot = () => JSON.stringify(loadFeatures().map(f => [f.id, f.title, f.badge, f.categories, f.subpages.map(s => [s.title, s.href, s.badge])]));
 	return {
 		name: 'reload-sidebar-on-feature-changes',
 		hooks: {
@@ -83,21 +83,25 @@ const referenceCategories = features
 /** Flat, in slua.dev order (alphabetical by slug): Features Overview, then one entry per feature page.
  * lsl.dev additions beyond slua.dev's set (Inventory) slot in alphabetically. */
 const featureItems = features.map(f => f.subpages.length === 0
-	? { label: f.title, link: `/features/${f.id}/` }
+	? { label: f.title, link: `/features/${f.id}/`, ...(f.badge ? { badge: f.badge } : {}) }
 	: {
 		/** A feature with sub-pages (features/<id>/<topic>.mdx) becomes a collapsed group. */
 		label: f.title,
 		collapsed: true,
-		items: [{ label: 'Overview', link: `/features/${f.id}/`, attrs: { 'data-sidebar-group-link': '' } }, ...f.subpages.map(s => ({ label: s.title, link: s.href }))],
+		items: [{ label: 'Overview', link: `/features/${f.id}/`, attrs: { 'data-sidebar-group-link': '' } }, ...f.subpages.map(s => ({ label: s.title, link: s.href, ...(s.badge ? { badge: s.badge } : {}) }))],
 	});
 
 /** Hidden pages kept out of the sitemap (they also set robots noindex and pagefind: false). */
 const sitemapExcluded = ['/meta/'];
 
-/** Types and Flow control moved from /types/ and /controls/ into Fundamentals. */
+/** Pages that moved: Types and Flow control into Fundamentals, Dialog and Viewer URIs under Communications. */
 const movedRedirects = Object.fromEntries([
 	['/types/', '/fundamentals/types/'],
 	['/controls/', '/fundamentals/flow-control/'],
+	['/features/dialog/', '/features/communications/dialog/'],
+	['/features/viewer-uris/', '/features/communications/viewer-uris/'],
+	['/features/viewer-uris/reference/', '/reference/viewer-uris/'],
+	['/features/input/gamepad/', '/features/input/game-control/'],
 	...catalog.types.map((/** @type {any} */ t) => [`/types/${t.name}/`, `/fundamentals/types/${t.name}/`]),
 	...catalog.controls.map((/** @type {any} */ c) => [`/controls/${c.name}/`, `/fundamentals/flow-control/${c.name}/`]),
 ]);
@@ -166,6 +170,8 @@ export default defineConfig({
 						],
 					},
 					{ label: 'Limits', link: '/reference/limits/' },
+					{ label: 'Viewer URIs', link: '/reference/viewer-uris/' },
+					{ label: 'Simulator release notes ↗', link: 'https://releasenotes.secondlife.com/categories/simulator.html', attrs: { target: '_blank', rel: 'noopener' } },
 				],
 			},
 			{ label: 'Features', collapsed: true, items: [{ label: 'Features Overview', link: '/features/', attrs: { 'data-sidebar-group-link': '' } }, ...featureItems] },

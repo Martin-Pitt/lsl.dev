@@ -8,12 +8,15 @@
 import ApiSignature from '../reference/ApiSignature.astro';
 import { catalog, apiHref, constantGroupHref } from '../../lib/catalog';
 import { inlineLsl, enhanceText } from '../../lib/inline-lsl';
+import Experimental from '../authoring/asides/Experimental.astro';
+import { experimentalFeature } from '../authoring/asides/experimental';
 interface Props { name: string; kind: 'function' | 'event' | 'constant'; description?: boolean }
 const { name, kind, description: showDescription = false } = Astro.props;
 const list = { function: catalog.functions, event: catalog.events, constant: catalog.constants }[kind] as any[];
 const entry = list.find(e => e.name === name);
 if (!entry) throw new Error(`<${{ function: 'LSLFunction', event: 'LSLEvent', constant: 'LSLConstant' }[kind]} name="${name}" />: "${name}" is not a public ${kind} in the LSL definitions. It may have been removed or deprecated; see \`npm run generate:mdx -- --check\`.`);
 const d = entry.definition;
+const experimental = experimentalFeature(entry.categories);
 const memberships: string[] = d['member-of'] || [];
 const flags = [['experience', 'Requires an experience'], ['linden-experience', 'Linden experience only'], ['god-mode', 'Privileged function']].filter(([key]) => d[key]);
 const description = await enhanceText(entry.description, { self: entry.name });
@@ -40,6 +43,7 @@ const groups = await Promise.all(memberships.map(async group => ({
 	<p class="api-replaces" data-pagefind-weight="3">Replaces deprecated {replacesHtml.map((h, i) => <>{i > 0 && ', '}<Fragment set:html={h} /></>)}.</p>
 )}
 
+{experimental && <Experimental feature={experimental} />}
 <ApiSignature entry={entry} />
 {facts.length > 0 && <dl class="api-facts not-content">{facts.map(([k, v]) => <div><dt>{k}</dt><dd set:html={v} /></div>)}</dl>}
 

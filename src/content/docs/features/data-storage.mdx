@@ -6,7 +6,7 @@ import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, 
 
 Script memory is small and lost on reset, so larger or longer-lived scripts store data elsewhere. Each store has a different size, lifetime, speed and audience.
 
-As a rule: [linkset data](#linkset-data) for an object's own persistent state, [experience key-value storage](#experience-persistent-storage) for data shared across objects and regions, [notecards](#notecards) for read-only configuration, and an external server through [HTTP](/features/communications/) for anything bigger.
+As a rule: [linkset data](/features/data-storage/linkset-data/) for an object's own persistent state, [experience key-value storage](/features/data-storage/experience-data/) for data shared across objects and regions, [notecards](/features/data-storage/notecards/) for read-only configuration, and an external server through [HTTP](/features/communications/) for anything bigger.
 
 <Columns>
 <Column>
@@ -15,14 +15,14 @@ As a rule: [linkset data](#linkset-data) for an object's own persistent state, [
 - Script memory: global variables persist until the script resets
   - Each script has a memory limit, which can be [read](/functions/llGetMemoryLimit/) and [lowered](/functions/llSetMemoryLimit/)
   - Check [free](/functions/llGetFreeMemory/) and [used](/functions/llGetUsedMemory/) memory, or the [profiled peak](/functions/llGetSPMaxMemory/)
-- [Linkset data](/functions/llLinksetDataWrite/): up to 128 KiB of string key-value pairs stored in the object, readable and writable by every script in it
+- [Linkset data](/features/data-storage/linkset-data/): up to 128 KiB of string key-value pairs stored in the object, readable and writable by every script in it
   - It survives script resets, taking the object into inventory and rezzing it again
   - Keys can be [protected with a password](/functions/llLinksetDataWriteProtected/)
   - Spreading data across many keys is cheaper than reading and rewriting one large value
   - Changes are reported in the [`linkset_data`](/events/linkset_data/) event
-- [Experience persistent storage](/functions/llCreateKeyValue/): scripts compiled to an [experience](/features/experience/) share a key-value store that any object in that experience can use, anywhere on the grid
+- [Experience persistent storage](/features/data-storage/experience-data/): scripts compiled to an [experience](/features/experience/) share a key-value store that any object in that experience can use, anywhere on the grid
   - Every call is asynchronous and answers in the [`dataserver`](/events/dataserver/) event
-- Notecards are read-only text in the object's inventory, good for configuration that users edit by hand
+- [Notecards](/features/data-storage/notecards/) are read-only text in the object's inventory, good for configuration that users edit by hand
   - Lines can be read [synchronously](/functions/llGetNotecardLineSync/) when the notecard is cached, or [asynchronously](/functions/llGetNotecardLine/) through `dataserver`
   - From the [`llGetNotecardLineSync` wiki page](https://wiki.secondlife.com/wiki/LlGetNotecardLineSync): "Notecards are cached into a fixed-size buffer, with the oldest (least-recently read) notecard getting removed first. It is not safe to assume a notecard has been previously cached."
   - Reload when the inventory [changes](/constants/CHANGED_INVENTORY/)
@@ -43,7 +43,7 @@ As a rule: [linkset data](#linkset-data) for an object's own persistent state, [
 ]} />
 
 </Box>
-<Box title="Linkset data" id="linkset-data-summary" href="#linkset-data">
+<Box title="Linkset data" id="linkset-data-summary" href="/features/data-storage/linkset-data/">
 
 Persistent per-object storage shared by all its scripts, with optional password protection per key ([wiki guide](https://wiki.secondlife.com/wiki/Linkset_data)).
 

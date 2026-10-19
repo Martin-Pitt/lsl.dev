@@ -2,30 +2,41 @@
 title: "Touch"
 description: "Clicking objects: touch events, where a prim was touched, click actions and touch text."
 ---
-import { Box, ConstantGroups, Planned, SeeAlso, Signatures } from '../../../../components/features';
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../../components/features';
 
 Clicking an object raises touch events in its scripts, and the detected functions tell who touched, which prim and exactly where. Touch needs no permission. Part of the [Input](/features/input/) feature.
 
-## Touch events
+<Columns>
+<Column>
+<Box title="Concepts">
 
 - [`touch_start`](/events/touch_start/) is triggered when an avatar first touches the object, [`touch`](/events/touch/) continuously while it touches, and [`touch_end`](/events/touch_end/) when it stops
   - Each passes **num_detected**, the number of touching agents; read [who touched](/functions/llDetectedKey/) with the detected functions
   - [`llDetectedLinkNumber`](/functions/llDetectedLinkNumber/) gives the link number of the touched prim: 0 for an unlinked object, 1 for the root, 2 and up for child prims
 - By default touches only trigger events in the touched child prim; child prims can [pass touches to the root](/functions/llPassTouches/) (see the [pass modes](/constants/groups/PassMode/))
+- Where the prim was touched, for the touch at **index**:
+  - [Face](/functions/llDetectedTouchFace/): the index of the clicked face, or [`TOUCH_INVALID_FACE`](/constants/TOUCH_INVALID_FACE/)
+  - [Surface coordinates](/functions/llDetectedTouchST/) (s, t) and [texture coordinates](/functions/llDetectedTouchUV/) (u, v, affected by repeats and rotation), typically in [0.0, 1.0], or [`TOUCH_INVALID_TEXCOORD`](/constants/TOUCH_INVALID_TEXCOORD/)
+  - [Position](/functions/llDetectedTouchPos/) in region coordinates, or screen-space coordinates on a HUD
+  - [Surface normal](/functions/llDetectedTouchNormal/) and [binormal](/functions/llDetectedTouchBinormal/), which together give the tangent space; position, normal and binormal return [`TOUCH_INVALID_VECTOR`](/constants/TOUCH_INVALID_VECTOR/) when the touch position is not valid
+- [`llSetClickAction`](/functions/llSetClickAction/) sets what a left-click on the prim does, with an **action** from the [`CLICK_ACTION_*`](/constants/groups/ClickAction/) [click actions](/constants/groups/ClickAction/)
+- [`llSetTouchText`](/functions/llSetTouchText/) shows **text** instead of "Touch" in the right-click menu
 
-<ConstantGroups names={["PassMode"]} />
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
 
-## Touch position
+<Signatures names={[
+  "touch_start", "touch", "touch_end", "llDetectedTouchFace", "llDetectedTouchST",
+  "llDetectedLinkNumber", "llPassTouches", "llSetClickAction", "llSetTouchText"
+]} />
 
-Each function takes the **index** of the detected touch.
+</Box>
+</Column>
+</Columns>
 
-- [Face](/functions/llDetectedTouchFace/): the index of the clicked face, or [`TOUCH_INVALID_FACE`](/constants/TOUCH_INVALID_FACE/)
-- [Surface coordinates](/functions/llDetectedTouchST/) (s, t) and [texture coordinates](/functions/llDetectedTouchUV/) (u, v, affected by repeats and rotation), typically in [0.0, 1.0], or [`TOUCH_INVALID_TEXCOORD`](/constants/TOUCH_INVALID_TEXCOORD/)
-- [Position](/functions/llDetectedTouchPos/) in region coordinates, or screen-space coordinates on a HUD
-- [Surface normal](/functions/llDetectedTouchNormal/) and [binormal](/functions/llDetectedTouchBinormal/), which together give the tangent space
-  - Position, normal and binormal return [`TOUCH_INVALID_VECTOR`](/constants/TOUCH_INVALID_VECTOR/) when the touch position is not valid
-
-<Box title="Touch functions and events">
+<Box title="Scripting Details">
 
 <Signatures names={[
   "touch_start", "touch", "touch_end", "llDetectedTouchFace", "llDetectedTouchST",
@@ -36,17 +47,24 @@ Each function takes the **index** of the detected touch.
 
 </Box>
 
+<Box title="Additional">
+
+- [`llSetLinkPrimitiveParamsFast`](/functions/llSetLinkPrimitiveParamsFast/) — set the click action per prim
+  - [`PRIM_CLICK_ACTION`](/constants/PRIM_CLICK_ACTION/) — followed by a [`CLICK_ACTION_*`](/constants/groups/ClickAction/) constant
+
+</Box>
+
+## Constant groups
+
+<ConstantGroups names={["PassMode", "ClickAction"]} />
+
+## Related
+
 <SeeAlso items={[
-  "category:touch", "wiki:LSL Touch Position",
+  "feature:input", "category:touch", "wiki:LSL Touch Position",
   "wiki:CatTouchDetection|Script library: touch detection"
 ]}>
   <Planned>Recipe: buttons on one prim with touch positions</Planned>
 </SeeAlso>
 
-## Click actions and touch text
-
-- [`llSetClickAction`](/functions/llSetClickAction/) sets what a left-click on the prim does, with an **action** from the `CLICK_ACTION_*` [click actions](/constants/groups/ClickAction/)
-  - Per prim through [`llSetLinkPrimitiveParamsFast`](/functions/llSetLinkPrimitiveParamsFast/) with [`PRIM_CLICK_ACTION`](/constants/PRIM_CLICK_ACTION/), followed by a `CLICK_ACTION_*` constant
-- [`llSetTouchText`](/functions/llSetTouchText/) shows **text** instead of "Touch" in the right-click menu
-
-<ConstantGroups names={["ClickAction"]} />
+<FeatureFooter related={["input", "communications", "prims"]} />

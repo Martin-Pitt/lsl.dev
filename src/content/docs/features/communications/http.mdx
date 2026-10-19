@@ -1,0 +1,102 @@
+---
+title: "HTTP"
+description: "Calling web services with llHTTPRequest, and serving HTTP from an object with its own URL."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../../components/features';
+
+Scripts reach the outside world over HTTP. An object can call any web server, and can also act as a small web server itself with a temporary URL. Part of the [Communications](/features/communications/) feature.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- [`llHTTPRequest`](/functions/llHTTPRequest/) sends a request and returns a key; the answer arrives in [`http_response`](/events/http_response/) with the status, metadata and body
+  - [Parameters](/constants/groups/HTTPRequestParam/) set the [method](/constants/HTTP_METHOD/), [content type](/constants/HTTP_MIMETYPE/), [custom headers](/constants/HTTP_CUSTOM_HEADER/) and [certificate checks](/constants/HTTP_VERIFY_CERT/)
+  - The response body is cut to 2048 bytes by default; [`HTTP_BODY_MAXLENGTH`](/constants/HTTP_BODY_MAXLENGTH/) raises it to 16384 in Mono
+  - Requests are throttled per object; a throttled request returns [`NULL_KEY`](/constants/NULL_KEY/)
+  - [Escape](/functions/llEscapeURL/) values put into a URL
+- An object can serve HTTP
+  - [Request a URL](/functions/llRequestURL/) (or a [secure one](/functions/llRequestSecureURL/)); the URL arrives in [`http_request`](/events/http_request/) with the method [`URL_REQUEST_GRANTED`](/constants/URL_REQUEST_GRANTED/)
+  - Each incoming request also arrives in `http_request`; [read its headers](/functions/llGetHTTPHeader/) and answer with [`llHTTPResponse`](/functions/llHTTPResponse/) within 25 seconds
+  - [`llSetContentType`](/functions/llSetContentType/) sets the type of the response, such as [`CONTENT_TYPE_JSON`](/constants/CONTENT_TYPE_JSON/)
+  - URLs are a limited resource: [count the free ones](/functions/llGetFreeURLs/) and [release](/functions/llReleaseURL/) those no longer needed
+  - URLs persist across state changes, but are lost when the object changes region or the region restarts; request a new one on [`CHANGED_REGION`](/constants/CHANGED_REGION/), [`CHANGED_REGION_START`](/constants/CHANGED_REGION_START/) and [`on_rez`](/events/on_rez/)
+- Objects can call each other's URLs, which is the usual way to talk across regions
+- Send structured data as [JSON](/features/data-transmission/json/)
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llHTTPRequest", "http_response", "llRequestURL", "http_request", "llHTTPResponse"
+]} />
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+### Requests
+
+<Signatures names={["llHTTPRequest", "http_response", "llEscapeURL", "llUnescapeURL"]} descriptions />
+
+### Serving
+
+<Signatures names={[
+  "llRequestURL", "llRequestSecureURL", "llReleaseURL", "http_request",
+  "llHTTPResponse", "llGetHTTPHeader", "llSetContentType", "llGetFreeURLs"
+]} descriptions />
+
+</Box>
+
+## Example
+
+An object that answers web requests with its region name.
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llRequestURL();
+    }
+
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+
+    changed(integer change)
+    {
+        if (change & (CHANGED_REGION | CHANGED_REGION_START)) llResetScript();
+    }
+
+    http_request(key id, string method, string body)
+    {
+        if (method == URL_REQUEST_GRANTED)
+            llOwnerSay("URL: " + body);
+        else if (method == "GET")
+            llHTTPResponse(id, 200, llGetRegionName());
+        else
+            llHTTPResponse(id, 405, "Method not allowed");
+    }
+}
+```
+
+## Constant groups
+
+<ConstantGroups names={["HTTPRequestParam", "HTTPContentType", "HTTPResponseError"]} />
+
+## Related
+
+<SeeAlso items={[
+  "feature:communications", "category:web", "wiki:Category:LSL HTTP",
+  "wiki:HTTP Server URL Registration", "feature:data-transmission"
+]}>
+  <Planned>Guide: an object as a web server</Planned>
+</SeeAlso>
+
+<FeatureFooter related={["communications", "data-transmission"]} />

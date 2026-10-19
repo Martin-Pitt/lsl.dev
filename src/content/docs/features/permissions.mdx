@@ -1,0 +1,106 @@
+---
+title: "Permissions"
+description: "Runtime permissions: asking an avatar to let a script animate, control, attach, teleport or pay on its behalf."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+
+Some things a script can do affect an avatar directly: animating it, taking its controls, moving its camera, attaching to it, teleporting it or spending its owner's money. Before a script may do any of these, an avatar has to grant it the matching runtime permission. These are separate from the [permission masks](/features/inventory/) on inventory items, which control copying, modifying and transferring.
+
+A script asks with [`llRequestPermissions`](/functions/llRequestPermissions/), and the answer arrives in the [`run_time_permissions`](/events/run_time_permissions/) event. Each permission is a bit in a [script permission](/constants/groups/ScriptPermission/) mask.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Permissions are flags combined with `|` and requested together in one call
+  - A script holds permissions from one avatar at a time; a new request replaces the previous grant
+  - [`llGetPermissions`](/functions/llGetPermissions/) returns the granted mask and [`llGetPermissionsKey`](/functions/llGetPermissionsKey/) the avatar who granted it
+- The avatar sees a dialog and can accept or decline
+  - Declining fires [`run_time_permissions`](/events/run_time_permissions/) with the declined bits missing, so always check the mask
+  - Some permissions are granted without a dialog when the avatar is sitting on or wearing the object, such as [`PERMISSION_TAKE_CONTROLS`](/constants/PERMISSION_TAKE_CONTROLS/), [`PERMISSION_TRIGGER_ANIMATION`](/constants/PERMISSION_TRIGGER_ANIMATION/) and the camera permissions
+- Some permissions can only be granted by the object's owner, such as [`PERMISSION_DEBIT`](/constants/PERMISSION_DEBIT/), [`PERMISSION_CHANGE_LINKS`](/constants/PERMISSION_CHANGE_LINKS/) and [`PERMISSION_ATTACH`](/constants/PERMISSION_ATTACH/)
+- Calling a function without its permission fails with a script error instead of acting
+- Grants survive state changes but are cleared when the script resets
+  - [`PERMISSION_CONTROL_CAMERA`](/constants/PERMISSION_CONTROL_CAMERA/) is revoked when the avatar stands up or detaches
+- [Experiences](/features/experience/) use [`llRequestExperiencePermissions`](/functions/llRequestExperiencePermissions/) instead: an avatar accepts the experience once and later requests are granted silently
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+These are the functions and events for requesting and checking permissions.
+
+<Signatures names={[
+  "llRequestPermissions", "run_time_permissions", "llGetPermissions", "llGetPermissionsKey",
+  "llRequestExperiencePermissions", "experience_permissions", "experience_permissions_denied"
+]} />
+
+</Box>
+<Box title="Requesting permissions">
+
+Request in response to the avatar, from [`touch_start`](/events/touch_start/), [`attach`](/events/attach/) or a sit in [`changed`](/events/changed/), and act once the grant arrives:
+
+```lsl
+default
+{
+    touch_start(integer total_number)
+    {
+        llRequestPermissions(llDetectedKey(0), PERMISSION_TRIGGER_ANIMATION);
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_TRIGGER_ANIMATION)
+            llStartAnimation("dance1");
+    }
+}
+```
+
+</Box>
+</Column>
+</Columns>
+
+## Permissions
+
+| Permission | Value | Allows | Granted by |
+| --- | --- | --- | --- |
+| [`PERMISSION_DEBIT`](/constants/PERMISSION_DEBIT/) | `0x2` | Paying out L$ with [`llGiveMoney`](/functions/llGiveMoney/) and [`llTransferLindenDollars`](/functions/llTransferLindenDollars/) | Owner |
+| [`PERMISSION_TAKE_CONTROLS`](/constants/PERMISSION_TAKE_CONTROLS/) | `0x4` | Capturing movement keys with [`llTakeControls`](/functions/llTakeControls/) | Any avatar |
+| [`PERMISSION_TRIGGER_ANIMATION`](/constants/PERMISSION_TRIGGER_ANIMATION/) | `0x10` | [Starting](/functions/llStartAnimation/) and [stopping](/functions/llStopAnimation/) animations | Any avatar |
+| [`PERMISSION_ATTACH`](/constants/PERMISSION_ATTACH/) | `0x20` | [Attaching](/functions/llAttachToAvatar/) and [detaching](/functions/llDetachFromAvatar/) the object | Owner |
+| [`PERMISSION_CHANGE_LINKS`](/constants/PERMISSION_CHANGE_LINKS/) | `0x80` | [Linking](/functions/llCreateLink/) and [unlinking](/functions/llBreakLink/) prims | Owner |
+| [`PERMISSION_TRACK_CAMERA`](/constants/PERMISSION_TRACK_CAMERA/) | `0x400` | Reading the camera [position](/functions/llGetCameraPos/) and [rotation](/functions/llGetCameraRot/) | Any avatar |
+| [`PERMISSION_CONTROL_CAMERA`](/constants/PERMISSION_CONTROL_CAMERA/) | `0x800` | [Setting](/functions/llSetCameraParams/) and [clearing](/functions/llClearCameraParams/) camera parameters | Sitting or wearing avatar |
+| [`PERMISSION_TELEPORT`](/constants/PERMISSION_TELEPORT/) | `0x1000` | Teleporting with [`llTeleportAgent`](/functions/llTeleportAgent/) | Any avatar |
+| [`PERMISSION_SILENT_ESTATE_MANAGEMENT`](/constants/PERMISSION_SILENT_ESTATE_MANAGEMENT/) | `0x4000` | Changing estate access with [`llManageEstateAccess`](/functions/llManageEstateAccess/) | Owner |
+| [`PERMISSION_OVERRIDE_ANIMATIONS`](/constants/PERMISSION_OVERRIDE_ANIMATIONS/) | `0x8000` | [Replacing default animations](/functions/llSetAnimationOverride/) | Any avatar |
+| [`PERMISSION_RETURN_OBJECTS`](/constants/PERMISSION_RETURN_OBJECTS/) | `0x10000` | Returning objects [by key](/functions/llReturnObjectsByID/) or [by owner](/functions/llReturnObjectsByOwner/) | Owner |
+| [`PERMISSION_PRIVILEGED_LAND_ACCESS`](/constants/PERMISSION_PRIVILEGED_LAND_ACCESS/) | `0x80000` | Selling parcels with [`llSetParcelForSale`](/functions/llSetParcelForSale/) | Owner |
+| [`PERMISSION_GAME_CONTROL`](/constants/PERMISSION_GAME_CONTROL/) | `0x100000` | Receiving [game control input](/features/input/game-control/) | Any avatar |
+
+<Box title="Scripting Details">
+
+Here are the functions and events in detail.
+
+<Signatures names={[
+  "llRequestPermissions", "run_time_permissions", "llGetPermissions", "llGetPermissionsKey",
+  "llRequestExperiencePermissions", "experience_permissions", "experience_permissions_denied"
+]} descriptions />
+
+</Box>
+
+<ConstantGroups names={["ScriptPermission"]} />
+
+## Related
+
+<SeeAlso items={[
+  "feature:experience", "feature:money", "feature:input", "feature:avatar", "feature:camera", "category:permissions"
+]}>
+  <Planned>Recipe: animation and control HUD</Planned>
+</SeeAlso>
+
+<FeatureFooter
+  related={["experience", "money", "input", "avatar", "camera"]}
+  categories={["permissions"]}
+/>

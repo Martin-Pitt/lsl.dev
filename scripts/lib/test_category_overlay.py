@@ -17,12 +17,12 @@ class OverlayUnitTests(unittest.TestCase):
     def test_applies_and_preserves_yaml_categories(self):
         cat=self.catalog(); defn=cat['functions'][0]['categories']
         labels,report=apply_category_overlay(cat,OVERLAY)
-        self.assertEqual(labels['gamepad'],'Gamepad')
-        self.assertEqual(cat['functions'][0]['categories'],['avatar','input','gamepad'])
+        self.assertEqual(labels['game_control'],'Game Control')
+        self.assertEqual(cat['functions'][0]['categories'],['avatar','input','game_control'])
         self.assertEqual(defn,['avatar','input'],'the definition list must not be mutated')
-        self.assertEqual(cat['constants'][1]['categories'],['gamepad'])
+        self.assertEqual(cat['constants'][1]['categories'],['game_control'])
         self.assertEqual(cat['constants'][2]['categories'],['input'])
-        self.assertEqual(report['categories']['gamepad'],4)
+        self.assertEqual(report['categories']['game_control'],4)
     def test_non_public_include_is_reported(self):
         cat=self.catalog(); cat['constants']=[c for c in cat['constants'] if c['name']!='PERMISSION_GAME_CONTROL']
         _,report=apply_category_overlay(cat,OVERLAY)
@@ -33,10 +33,10 @@ class OverlayCatalogTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.c=json.loads((ROOT/'src/data/catalog.json').read_text(encoding='utf8'))
-        cls.g=next(x for x in cls.c['categories'] if x['id']=='gamepad')
+        cls.g=next(x for x in cls.c['categories'] if x['id']=='game_control')
         cls.members=set(cls.g['functions']+cls.g['events']+cls.g['constants'])
-    def test_gamepad_category(self):
-        self.assertEqual(self.g['label'],'Gamepad')
+    def test_game_control_category(self):
+        self.assertEqual(self.g['label'],'Game Control')
         want={n for k in ('functions','events','constants') for n,d in DEFS[k].items()
               if (n.startswith('llGetGameControl') or n=='game_control' or n.startswith('GAME_CONTROL_') or n=='PERMISSION_GAME_CONTROL')
               and not d.get('deprecated') and not d.get('private')}
@@ -55,9 +55,9 @@ class OverlayCatalogTests(unittest.TestCase):
                 self.assertEqual(e['categories'][:len(yaml_cats)],yaml_cats,e['name'])
                 self.assertEqual(e['definition'].get('categories',[]),yaml_cats,e['name'])
                 extra=e['categories'][len(yaml_cats):]
-                self.assertEqual(extra,['gamepad'] if e['name'] in self.members else [],e['name'])
+                self.assertEqual(extra,['game_control'] if e['name'] in self.members else [],e['name'])
     def test_overlay_recorded_as_local(self):
-        o=self.c['meta']['sources']['overlays']
-        self.assertEqual([(x['file'],x['local'],x['categories']) for x in o],[('data/overlays/categories.yaml',True,{'gamepad':75})])
+        o=[x for x in self.c['meta']['sources']['overlays'] if 'categories' in x]
+        self.assertEqual([(x['file'],x['local'],x['categories']) for x in o],[('data/overlays/categories.yaml',True,{'game_control':75})])
 
 if __name__=='__main__': unittest.main()

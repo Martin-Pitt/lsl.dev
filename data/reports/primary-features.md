@@ -13,17 +13,17 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 ## Counts
 
 - APIs: 1585
-- With a primary feature: 1553
+- With a primary feature: 1559
   - override: 0
   - main: 548
-  - subpage: 12
-  - group: 924
-  - prose: 57
-  - minor: 11
-  - category: 1
-- No feature (breadcrumb falls back to the category or constant group): 32
-  - with neither category nor group (breadcrumb is section › name): 32
-- Ambiguous (tied on tier and category ownership, decided by size or id): 162
+  - subpage: 13
+  - group: 968
+  - prose: 20
+  - minor: 10
+  - category: 0
+- No feature (breadcrumb falls back to the category or constant group): 26
+  - with neither category nor group (breadcrumb is section › name): 26
+- Ambiguous (tied on tier and category ownership, decided by size or id): 166
 
 ## Ambiguous choices
 
@@ -33,7 +33,6 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llApplyRotationalImpulse | movement | main | physics | smallest |
 | llCollisionSound | sound | main | physics | smallest |
 | llDerezObject | linkset | main | inventory | smallest |
-| llDialog | dialog | main | communications | smallest |
 | llGetAgentList | land | main | avatar | smallest |
 | llGetCenterOfMass | linkset | main | physics | smallest |
 | llGetInventoryPermMask | prims | main | inventory | smallest |
@@ -42,6 +41,8 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetObjectMass | linkset | main | physics | smallest |
 | llGetOwner | prims | main | avatar | smallest |
 | llGetOwnerKey | linkset | main | data-transmission | smallest |
+| llGetPermissions | permissions | main | avatar | smallest |
+| llGetPermissionsKey | permissions | main | avatar | smallest |
 | llGetScriptState | script | main | inventory | smallest |
 | llGetStartParameter | script | main | linkset | smallest |
 | llGetStartString | script | main | linkset | smallest |
@@ -51,12 +52,14 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llReadKeyValue | experience | main | data-storage | smallest |
 | llRemoteLoadScriptPin | script | main | prims, inventory | smallest |
 | llReplaceAgentEnvironment | experience | main | environments | smallest |
+| llRequestExperiencePermissions | experience | main | permissions | smallest |
+| llRequestPermissions | permissions | main | avatar | smallest |
 | llResetOtherScript | script | main | inventory | smallest |
 | llRezAtRoot | linkset | main | inventory | smallest |
 | llRezObject | linkset | main | inventory | smallest |
 | llRezObjectWithParams | linkset | main | combat, inventory | smallest |
 | llSetAgentEnvironment | experience | main | environments | smallest |
-| llSetClickAction | money | main | dialog, prims, input | smallest |
+| llSetClickAction | money | main | input, prims | smallest |
 | llSetForce | movement | main | physics | smallest |
 | llSetLinkAlpha | linkset | main | textures | smallest |
 | llSetLinkColor | linkset | main | textures | smallest |
@@ -72,32 +75,31 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSetText | effects | main | prims | smallest |
 | llSetTextureAnim | effects | main | textures | smallest |
 | llSetTorque | movement | main | physics | smallest |
-| llSetTouchText | dialog | main | prims | smallest |
 | llSetVelocity | movement | main | physics | smallest |
 | llSitOnLink | experience | main | avatar | smallest |
 | llTeleportAgentHome | land | main | avatar | smallest |
-| llTextBox | dialog | main | communications | smallest |
 | llUpdateKeyValue | experience | main | data-storage | smallest |
 | llWorldPosToHUD | camera | main | avatar | smallest |
 | changed | linkset | main | textures, prims, inventory, avatar | smallest |
+| experience_permissions | experience | main | permissions | smallest |
+| experience_permissions_denied | experience | main | permissions | smallest |
 | moving_end | pathfinding | main | movement | smallest |
 | moving_start | pathfinding | main | movement | smallest |
 | on_rez | script | main | linkset | smallest |
-| touch_start | dialog | main | input | smallest |
+| run_time_permissions | permissions | main | avatar | smallest |
 | AGENT_LIST_PARCEL | land | group | avatar | smallest |
 | AGENT_LIST_PARCEL_OWNER | land | group | avatar | smallest |
 | AGENT_LIST_REGION | land | group | avatar | smallest |
-| CLICK_ACTION_BUY | dialog | group | input | smallest |
-| CLICK_ACTION_DISABLED | dialog | group | input | smallest |
-| CLICK_ACTION_IGNORE | dialog | group | input | smallest |
-| CLICK_ACTION_NONE | dialog | group | input | smallest |
-| CLICK_ACTION_OPEN | dialog | group | input | smallest |
-| CLICK_ACTION_OPEN_MEDIA | dialog | group | input | smallest |
-| CLICK_ACTION_PLAY | dialog | group | input | smallest |
-| CLICK_ACTION_SIT | dialog | group | input | smallest |
-| CLICK_ACTION_TOUCH | dialog | group | input | smallest |
-| CLICK_ACTION_ZOOM | dialog | group | input | smallest |
-| DEBUG_CHANNEL | dialog | group | communications | smallest |
+| CLICK_ACTION_BUY | input | group | communications | smallest |
+| CLICK_ACTION_DISABLED | input | group | communications | smallest |
+| CLICK_ACTION_IGNORE | input | group | communications | smallest |
+| CLICK_ACTION_NONE | input | group | communications | smallest |
+| CLICK_ACTION_OPEN | input | group | communications | smallest |
+| CLICK_ACTION_OPEN_MEDIA | input | group | communications | smallest |
+| CLICK_ACTION_PLAY | input | group | communications | smallest |
+| CLICK_ACTION_SIT | input | group | communications | smallest |
+| CLICK_ACTION_TOUCH | input | group | communications | smallest |
+| CLICK_ACTION_ZOOM | input | group | communications | smallest |
 | DEREZ_DIE | linkset | group | inventory | smallest |
 | DEREZ_MAKE_TEMP | linkset | group | inventory | smallest |
 | INVENTORY_ANIMATION | prims | group | inventory | smallest |
@@ -113,6 +115,8 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | INVENTORY_SOUND | prims | group | inventory | smallest |
 | INVENTORY_TEXTURE | prims | group | inventory | smallest |
 | JSON_ARRAY | combat | prose | data-transmission | smallest |
+| JSON_NUMBER | combat | prose | data-transmission | smallest |
+| JSON_STRING | combat | prose | data-transmission | smallest |
 | MASK_BASE | prims | group | inventory | smallest |
 | MASK_COMBINED | prims | group | inventory | smallest |
 | MASK_EVERYONE | prims | group | inventory | smallest |
@@ -124,16 +128,16 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | PERM_MODIFY | prims | group | inventory | smallest |
 | PERM_MOVE | prims | group | inventory | smallest |
 | PERM_TRANSFER | prims | group | inventory | smallest |
-| PERMISSION_ATTACH | experience | group | camera, avatar | smallest |
-| PERMISSION_CONTROL_CAMERA | experience | group | camera, avatar | smallest |
-| PERMISSION_GAME_CONTROL | experience | group | camera, avatar | smallest |
-| PERMISSION_OVERRIDE_ANIMATIONS | experience | group | camera, avatar | smallest |
-| PERMISSION_PRIVILEGED_LAND_ACCESS | experience | group | camera, avatar | smallest |
-| PERMISSION_SILENT_ESTATE_MANAGEMENT | experience | group | camera, avatar | smallest |
-| PERMISSION_TAKE_CONTROLS | experience | group | camera, avatar | smallest |
-| PERMISSION_TELEPORT | experience | group | camera, avatar | smallest |
-| PERMISSION_TRACK_CAMERA | experience | group | camera, avatar | smallest |
-| PERMISSION_TRIGGER_ANIMATION | experience | group | camera, avatar | smallest |
+| PERMISSION_ATTACH | experience | group | camera, permissions, avatar | smallest |
+| PERMISSION_CONTROL_CAMERA | experience | group | camera, permissions, avatar | smallest |
+| PERMISSION_GAME_CONTROL | experience | group | camera, permissions, avatar | smallest |
+| PERMISSION_OVERRIDE_ANIMATIONS | experience | group | camera, permissions, avatar | smallest |
+| PERMISSION_PRIVILEGED_LAND_ACCESS | experience | group | camera, permissions, avatar | smallest |
+| PERMISSION_SILENT_ESTATE_MANAGEMENT | experience | group | camera, permissions, avatar | smallest |
+| PERMISSION_TAKE_CONTROLS | experience | group | camera, permissions, avatar | smallest |
+| PERMISSION_TELEPORT | experience | group | camera, permissions, avatar | smallest |
+| PERMISSION_TRACK_CAMERA | experience | group | camera, permissions, avatar | smallest |
+| PERMISSION_TRIGGER_ANIMATION | experience | group | camera, permissions, avatar | smallest |
 | PROFILE_NONE | script | group | events | smallest |
 | PROFILE_SCRIPT_MEMORY | script | group | events | smallest |
 | SIM_STAT_ACTIVE_SCRIPT_COUNT | land | group | events | smallest |
@@ -196,7 +200,6 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 
 | API | Kind | Breadcrumb fallback |
 | --- | --- | --- |
-| FALSE | constants | section only |
 | IMG_USE_BAKED_AUX1 | constants | section only |
 | IMG_USE_BAKED_AUX2 | constants | section only |
 | IMG_USE_BAKED_AUX3 | constants | section only |
@@ -208,10 +211,6 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | IMG_USE_BAKED_LOWER | constants | section only |
 | IMG_USE_BAKED_SKIRT | constants | section only |
 | IMG_USE_BAKED_UPPER | constants | section only |
-| JSON_DELETE | constants | section only |
-| JSON_FALSE | constants | section only |
-| JSON_NULL | constants | section only |
-| JSON_TRUE | constants | section only |
 | OBJECT_UNKNOWN_DETAIL | constants | section only |
 | PRIM_MEDIA_MAX_HEIGHT_PIXELS | constants | section only |
 | PRIM_MEDIA_MAX_URL_LENGTH | constants | section only |
@@ -227,7 +226,6 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | TEXTURE_TRANSPARENT | constants | section only |
 | TRUE | constants | section only |
 | URL_REQUEST_DENIED | constants | section only |
-| URL_REQUEST_GRANTED | constants | section only |
 
 ## All choices
 
@@ -281,7 +279,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llDetectedDamage | functions | Combat (combat) | main |
 | llDetectedGrab | functions | Events (events) | minor |
 | llDetectedGroup | functions | Events (events) | minor |
-| llDetectedKey | functions | Events (events) | main + category |
+| llDetectedKey | functions | Events (events) | main |
 | llDetectedLinkNumber | functions | Input (input) | subpage |
 | llDetectedName | functions | Events (events) | minor |
 | llDetectedOwner | functions | Combat (combat) | prose |
@@ -296,7 +294,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llDetectedTouchUV | functions | Input (input) | subpage |
 | llDetectedType | functions | Events (events) | minor |
 | llDetectedVel | functions | Physics (physics) | main |
-| llDialog | functions | Dialog (dialog) | main + smallest |
+| llDialog | functions | Communications (communications) | main |
 | llDie | functions | Linksets (linkset) | main |
 | llDumpList2String | functions | Data Transmission (data-transmission) | main |
 | llEdgeOfWorld | functions | Parcels & Regions (land) | main |
@@ -307,12 +305,12 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llEvade | functions | Pathfinding (pathfinding) | main |
 | llExecCharacterCmd | functions | Pathfinding (pathfinding) | main |
 | llFabs | functions | Math (math) | main |
-| llFindNotecardTextCount | functions | Data Storage (data-storage) | category |
+| llFindNotecardTextCount | functions | Data Storage (data-storage) | subpage |
 | llFindNotecardTextSync | functions | Data Storage (data-storage) | main |
 | llFleeFrom | functions | Pathfinding (pathfinding) | main |
 | llFloor | functions | Math (math) | main |
 | llForceMouselook | functions | Camera (camera) | main + category |
-| llFrand | functions | Math (math) | main + category |
+| llFrand | functions | Math (math) | main |
 | llGenerateKey | functions | Data Transmission (data-transmission) | main + category |
 | llGetAccel | functions | Movement (movement) | main |
 | llGetAgentInfo | functions | Avatars (avatar) | main + category |
@@ -391,7 +389,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetNumberOfSides | functions | Prims (prims) | main |
 | llGetObjectAnimationNames | functions | Animesh (animesh) | main |
 | llGetObjectDesc | functions | Prims (prims) | main + category |
-| llGetObjectDetails | functions | Linksets (linkset) | main + category |
+| llGetObjectDetails | functions | Linksets (linkset) | main |
 | llGetObjectLinkKey | functions | Data Transmission (data-transmission) | main |
 | llGetObjectMass | functions | Linksets (linkset) | main + smallest |
 | llGetObjectName | functions | Prims (prims) | main + category |
@@ -406,8 +404,8 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetParcelMusicURL | functions | Parcels & Regions (land) | main |
 | llGetParcelPrimCount | functions | Parcels & Regions (land) | main |
 | llGetParcelPrimOwners | functions | Parcels & Regions (land) | main |
-| llGetPermissions | functions | Avatars (avatar) | main + category |
-| llGetPermissionsKey | functions | Avatars (avatar) | main |
+| llGetPermissions | functions | Permissions (permissions) | main + smallest |
+| llGetPermissionsKey | functions | Permissions (permissions) | main + smallest |
 | llGetPhysicsMaterial | functions | Physics (physics) | main |
 | llGetPos | functions | Movement (movement) | main |
 | llGetPrimitiveParams | functions | Prims (prims) | main |
@@ -420,7 +418,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llGetRegionFPS | functions | Parcels & Regions (land) | main |
 | llGetRegionMoonDirection | functions | Environments (environments) | main |
 | llGetRegionMoonRotation | functions | Environments (environments) | main |
-| llGetRegionName | functions | Parcels & Regions (land) | main + category |
+| llGetRegionName | functions | Parcels & Regions (land) | main |
 | llGetRegionSunDirection | functions | Environments (environments) | main |
 | llGetRegionSunRotation | functions | Environments (environments) | main |
 | llGetRegionTimeDilation | functions | Parcels & Regions (land) | main + category |
@@ -471,7 +469,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llHTTPRequest | functions | Communications (communications) | main + category |
 | llHTTPResponse | functions | Communications (communications) | main |
 | llInsertString | functions | Data Transmission (data-transmission) | main |
-| llInstantMessage | functions | Communications (communications) | main + category |
+| llInstantMessage | functions | Communications (communications) | main |
 | llIntegerToBase64 | functions | Data Transmission (data-transmission) | main |
 | llIsFriend | functions | Avatars (avatar) | main |
 | llIsLinkGLTFMaterial | functions | Textures & Materials (textures) | main |
@@ -514,9 +512,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llList2Rot | functions | Data Transmission (data-transmission) | main |
 | llList2String | functions | Data Transmission (data-transmission) | main |
 | llList2Vector | functions | Data Transmission (data-transmission) | main |
-| llListen | functions | Communications (communications) | main + category |
-| llListenControl | functions | Communications (communications) | main + category |
-| llListenRemove | functions | Communications (communications) | main + category |
+| llListen | functions | Communications (communications) | main |
+| llListenControl | functions | Communications (communications) | main |
+| llListenRemove | functions | Communications (communications) | main |
 | llListFindList | functions | Data Transmission (data-transmission) | main |
 | llListFindListNext | functions | Data Transmission (data-transmission) | main |
 | llListFindStrided | functions | Data Transmission (data-transmission) | main |
@@ -548,7 +546,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llOpenFloater | functions | Communications (communications) | main |
 | llOrd | functions | Data Transmission (data-transmission) | main |
 | llOverMyLand | functions | Parcels & Regions (land) | main |
-| llOwnerSay | functions | Communications (communications) | main + category |
+| llOwnerSay | functions | Communications (communications) | main |
 | llParcelMediaCommandList | functions | Parcels & Regions (land) | main |
 | llParcelMediaQuery | functions | Parcels & Regions (land) | main |
 | llParseString2List | functions | Data Transmission (data-transmission) | main |
@@ -565,7 +563,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llPushObject | functions | Physics (physics) | main + category |
 | llReadKeyValue | functions | Experience (experience) | main + smallest |
 | llRegionSay | functions | Communications (communications) | main |
-| llRegionSayTo | functions | Communications (communications) | main + category |
+| llRegionSayTo | functions | Communications (communications) | main |
 | llReleaseControls | functions | Input (input) | main |
 | llReleaseURL | functions | Communications (communications) | main |
 | llRemoteLoadScriptPin | functions | Scripts (script) | main + smallest |
@@ -578,9 +576,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llReplaceSubString | functions | Data Transmission (data-transmission) | main |
 | llRequestAgentData | functions | Avatars (avatar) | main + category |
 | llRequestDisplayName | functions | Avatars (avatar) | main |
-| llRequestExperiencePermissions | functions | Experience (experience) | main |
+| llRequestExperiencePermissions | functions | Experience (experience) | main + smallest |
 | llRequestInventoryData | functions | Inventory (inventory) | main + category |
-| llRequestPermissions | functions | Avatars (avatar) | main + category |
+| llRequestPermissions | functions | Permissions (permissions) | main + smallest |
 | llRequestSecureURL | functions | Communications (communications) | main |
 | llRequestSimulatorData | functions | Parcels & Regions (land) | main |
 | llRequestURL | functions | Communications (communications) | main |
@@ -610,7 +608,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llRotTargetRemove | functions | Movement (movement) | main |
 | llRound | functions | Math (math) | main |
 | llSameGroup | functions | Avatars (avatar) | main |
-| llSay | functions | Communications (communications) | main + category |
+| llSay | functions | Communications (communications) | main |
 | llScaleByFactor | functions | Linksets (linkset) | main + category |
 | llScaleTexture | functions | Textures & Materials (textures) | main |
 | llScriptDanger | functions | Scripts (script) | minor + category |
@@ -672,9 +670,9 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llSetText | functions | Effects (effects) | main + smallest |
 | llSetTexture | functions | Textures & Materials (textures) | main |
 | llSetTextureAnim | functions | Effects (effects) | main + smallest |
-| llSetTimerEvent | functions | Time (time) | main + category |
+| llSetTimerEvent | functions | Time (time) | main |
 | llSetTorque | functions | Movement (movement) | main + smallest |
-| llSetTouchText | functions | Dialog (dialog) | main + smallest |
+| llSetTouchText | functions | Prims (prims) | main |
 | llSetVehicleFlags | functions | Movement (movement) | main |
 | llSetVehicleFloatParam | functions | Movement (movement) | main |
 | llSetVehicleRotationParam | functions | Movement (movement) | main |
@@ -712,7 +710,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | llTeleportAgent | functions | Avatars (avatar) | main + category |
 | llTeleportAgentGlobalCoords | functions | Avatars (avatar) | main |
 | llTeleportAgentHome | functions | Parcels & Regions (land) | main + smallest |
-| llTextBox | functions | Dialog (dialog) | main + smallest |
+| llTextBox | functions | Communications (communications) | main |
 | llToLower | functions | Data Transmission (data-transmission) | main |
 | llToUpper | functions | Data Transmission (data-transmission) | main |
 | llTransferLindenDollars | functions | Money (money) | main |
@@ -744,8 +742,8 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | control | events | Input (input) | main |
 | dataserver | events | Data Storage (data-storage) | main + category |
 | email | events | Communications (communications) | main |
-| experience_permissions | events | Experience (experience) | main |
-| experience_permissions_denied | events | Experience (experience) | main |
+| experience_permissions | events | Experience (experience) | main + smallest |
+| experience_permissions_denied | events | Experience (experience) | main + smallest |
 | final_damage | events | Combat (combat) | main |
 | game_control | events | Input (input) | main |
 | http_request | events | Communications (communications) | main |
@@ -755,7 +753,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | land_collision_start | events | Physics (physics) | main |
 | link_message | events | Communications (communications) | main |
 | linkset_data | events | Data Storage (data-storage) | main + category |
-| listen | events | Communications (communications) | main + category |
+| listen | events | Communications (communications) | main |
 | money | events | Money (money) | main |
 | moving_end | events | Pathfinding (pathfinding) | main + smallest |
 | moving_start | events | Pathfinding (pathfinding) | main + smallest |
@@ -767,14 +765,14 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | on_death | events | Combat (combat) | main |
 | on_rez | events | Scripts (script) | main + smallest |
 | path_update | events | Pathfinding (pathfinding) | main + category |
-| run_time_permissions | events | Avatars (avatar) | main + category |
+| run_time_permissions | events | Permissions (permissions) | main + smallest |
 | sensor | events | Events (events) | main |
 | state_entry | events | Scripts (script) | main + category |
 | state_exit | events | Scripts (script) | main + category |
-| timer | events | Time (time) | main + category |
+| timer | events | Time (time) | main |
 | touch | events | Input (input) | main |
 | touch_end | events | Input (input) | main |
-| touch_start | events | Dialog (dialog) | main + smallest |
+| touch_start | events | Input (input) | main |
 | transaction_result | events | Money (money) | main |
 | ACTIVE | constants | Events (events) | group |
 | AGENT | constants | Events (events) | group |
@@ -860,7 +858,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | AVOID_CHARACTERS | constants | Pathfinding (pathfinding) | group |
 | AVOID_DYNAMIC_OBSTACLES | constants | Pathfinding (pathfinding) | group |
 | AVOID_NONE | constants | Pathfinding (pathfinding) | group |
-| BEACON_MAP | constants | Dialog (dialog) | group |
+| BEACON_MAP | constants | Communications (communications) | group |
 | CAMERA_ACTIVE | constants | Camera (camera) | group |
 | CAMERA_BEHINDNESS_ANGLE | constants | Camera (camera) | group |
 | CAMERA_BEHINDNESS_LAG | constants | Camera (camera) | group |
@@ -909,17 +907,17 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | CHARACTER_TYPE_C | constants | Pathfinding (pathfinding) | group |
 | CHARACTER_TYPE_D | constants | Pathfinding (pathfinding) | group |
 | CHARACTER_TYPE_NONE | constants | Pathfinding (pathfinding) | group |
-| CLICK_ACTION_BUY | constants | Dialog (dialog) | group + smallest |
-| CLICK_ACTION_DISABLED | constants | Dialog (dialog) | group + smallest |
-| CLICK_ACTION_IGNORE | constants | Dialog (dialog) | group + smallest |
-| CLICK_ACTION_NONE | constants | Dialog (dialog) | group + smallest |
-| CLICK_ACTION_OPEN | constants | Dialog (dialog) | group + smallest |
-| CLICK_ACTION_OPEN_MEDIA | constants | Dialog (dialog) | group + smallest |
+| CLICK_ACTION_BUY | constants | Input (input) | group + smallest |
+| CLICK_ACTION_DISABLED | constants | Input (input) | group + smallest |
+| CLICK_ACTION_IGNORE | constants | Input (input) | group + smallest |
+| CLICK_ACTION_NONE | constants | Input (input) | group + smallest |
+| CLICK_ACTION_OPEN | constants | Input (input) | group + smallest |
+| CLICK_ACTION_OPEN_MEDIA | constants | Input (input) | group + smallest |
 | CLICK_ACTION_PAY | constants | Money (money) | main |
-| CLICK_ACTION_PLAY | constants | Dialog (dialog) | group + smallest |
-| CLICK_ACTION_SIT | constants | Dialog (dialog) | group + smallest |
-| CLICK_ACTION_TOUCH | constants | Dialog (dialog) | group + smallest |
-| CLICK_ACTION_ZOOM | constants | Dialog (dialog) | group + smallest |
+| CLICK_ACTION_PLAY | constants | Input (input) | group + smallest |
+| CLICK_ACTION_SIT | constants | Input (input) | group + smallest |
+| CLICK_ACTION_TOUCH | constants | Input (input) | group + smallest |
+| CLICK_ACTION_ZOOM | constants | Input (input) | group + smallest |
 | COMBAT_CHANNEL | constants | Combat (combat) | subpage |
 | COMBAT_LOG_ID | constants | Combat (combat) | subpage |
 | CONTENT_TYPE_ATOM | constants | Communications (communications) | group |
@@ -967,7 +965,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | DATA_SIM_POS | constants | Parcels & Regions (land) | group |
 | DATA_SIM_RATING | constants | Parcels & Regions (land) | group |
 | DATA_SIM_STATUS | constants | Parcels & Regions (land) | group |
-| DEBUG_CHANNEL | constants | Dialog (dialog) | group + smallest |
+| DEBUG_CHANNEL | constants | Communications (communications) | group |
 | DEG_TO_RAD | constants | Math (math) | main |
 | DENSITY | constants | Physics (physics) | group |
 | DEREZ_DIE | constants | Linksets (linkset) | group + smallest |
@@ -996,44 +994,44 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | ESTATE_ACCESS_ALLOWED_GROUP_REMOVE | constants | Parcels & Regions (land) | group |
 | ESTATE_ACCESS_BANNED_AGENT_ADD | constants | Parcels & Regions (land) | group |
 | ESTATE_ACCESS_BANNED_AGENT_REMOVE | constants | Parcels & Regions (land) | group |
-| FALSE | constants | — (section only) | none |
+| FALSE | constants | Input (input) | prose |
 | FILTER_FLAG_HUDS | constants | Avatars (avatar) | group |
 | FILTER_FLAGS | constants | Avatars (avatar) | group |
 | FILTER_INCLUDE | constants | Avatars (avatar) | group |
 | FORCE_DIRECT_PATH | constants | Pathfinding (pathfinding) | group |
 | FRICTION | constants | Physics (physics) | group |
-| GAME_CONTROL_AXIS_ADVANCE | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_BOOM | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_DOLLY | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_LEFT_TRIGGER | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_LEFTX | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_LEFTY | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_LOOK | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_PAN | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_RIGHT_TRIGGER | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_RIGHTX | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_RIGHTY | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_RISE | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_ROLL | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_STRAFE | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_TILT | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_TRUCK | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_TURN | constants | Input (input) | prose |
-| GAME_CONTROL_AXIS_ZOOM | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_ADVANCE_BACK | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_ADVANCE_FORWARD | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_CROUCH | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_DOLLY_BACK | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_DOLLY_FORWARD | constants | Input (input) | prose |
+| GAME_CONTROL_AXIS_ADVANCE | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_BOOM | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_DOLLY | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_LEFT_TRIGGER | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_LEFTX | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_LEFTY | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_LOOK | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_PAN | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_RIGHT_TRIGGER | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_RIGHTX | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_RIGHTY | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_RISE | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_ROLL | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_STRAFE | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_TILT | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_TRUCK | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_TURN | constants | Input (input) | group |
+| GAME_CONTROL_AXIS_ZOOM | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_ADVANCE_BACK | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_ADVANCE_FORWARD | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_CROUCH | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_DOLLY_BACK | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_DOLLY_FORWARD | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_DPAD_DOWN | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_DPAD_LEFT | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_DPAD_RIGHT | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_DPAD_UP | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_EAST | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_HOME | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_JUMP | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_JUMP | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_LEFTSHOULDER | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_LEFTSTICK | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_MISC1 | constants | Input (input) | group |
@@ -1042,31 +1040,31 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | GAME_CONTROL_BUTTON_PADDLE2 | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_PADDLE3 | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_PADDLE4 | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_PAN_LEFT | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_PAN_RIGHT | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_RESET | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_PAN_LEFT | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_PAN_RIGHT | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_RESET | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_RIGHTSHOULDER | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_RIGHTSTICK | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_ROLL_CCW | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_ROLL_CW | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_ROLL_CCW | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_ROLL_CW | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_SELECT | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_SIT | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_SIT | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_SOUTH | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_START | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_STRAFE_LEFT | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_STRAFE_RIGHT | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_TOGGLE_ALT_ZOOM | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_TOGGLE_CURSOR | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_TOGGLE_FLYCAM | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_TOGGLE_FOLLOW | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_TOGGLE_SPEAK | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_STRAFE_LEFT | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_STRAFE_RIGHT | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_TOGGLE_ALT_ZOOM | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_TOGGLE_CURSOR | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_TOGGLE_FLYCAM | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_TOGGLE_FOLLOW | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_TOGGLE_SPEAK | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_TOUCHPAD | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_TRUCK_LEFT | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_TRUCK_RIGHT | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_TRUCK_LEFT | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_TRUCK_RIGHT | constants | Input (input) | group |
 | GAME_CONTROL_BUTTON_WEST | constants | Input (input) | group |
-| GAME_CONTROL_BUTTON_ZOOM_IN | constants | Input (input) | prose |
-| GAME_CONTROL_BUTTON_ZOOM_OUT | constants | Input (input) | prose |
+| GAME_CONTROL_BUTTON_ZOOM_IN | constants | Input (input) | group |
+| GAME_CONTROL_BUTTON_ZOOM_OUT | constants | Input (input) | group |
 | GAME_CONTROL_MODE_AVATAR | constants | Input (input) | group |
 | GAME_CONTROL_MODE_CAPTIVE | constants | Input (input) | group |
 | GAME_CONTROL_MODE_CURSOR | constants | Input (input) | group |
@@ -1112,16 +1110,16 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | INVENTORY_SETTING | constants | Prims (prims) | group + smallest |
 | INVENTORY_SOUND | constants | Prims (prims) | group + smallest |
 | INVENTORY_TEXTURE | constants | Prims (prims) | group + smallest |
-| JSON_APPEND | constants | Data Transmission (data-transmission) | minor |
+| JSON_APPEND | constants | Data Transmission (data-transmission) | prose |
 | JSON_ARRAY | constants | Combat (combat) | prose + smallest |
-| JSON_DELETE | constants | — (section only) | none |
-| JSON_FALSE | constants | — (section only) | none |
+| JSON_DELETE | constants | Data Transmission (data-transmission) | prose |
+| JSON_FALSE | constants | Data Transmission (data-transmission) | prose |
 | JSON_INVALID | constants | Data Transmission (data-transmission) | prose |
-| JSON_NULL | constants | — (section only) | none |
-| JSON_NUMBER | constants | Combat (combat) | prose |
+| JSON_NULL | constants | Data Transmission (data-transmission) | prose |
+| JSON_NUMBER | constants | Combat (combat) | prose + smallest |
 | JSON_OBJECT | constants | Data Transmission (data-transmission) | prose |
-| JSON_STRING | constants | Combat (combat) | prose |
-| JSON_TRUE | constants | — (section only) | none |
+| JSON_STRING | constants | Combat (combat) | prose + smallest |
+| JSON_TRUE | constants | Data Transmission (data-transmission) | prose |
 | KFM_CMD_PAUSE | constants | Movement (movement) | group |
 | KFM_CMD_PLAY | constants | Movement (movement) | group |
 | KFM_CMD_STOP | constants | Movement (movement) | group |
@@ -1746,7 +1744,7 @@ Ties within a tier go to the feature that owns one of the API's categories, then
 | TYPE_STRING | constants | Data Transmission (data-transmission) | group |
 | TYPE_VECTOR | constants | Data Transmission (data-transmission) | group |
 | URL_REQUEST_DENIED | constants | — (section only) | none |
-| URL_REQUEST_GRANTED | constants | — (section only) | none |
+| URL_REQUEST_GRANTED | constants | Communications (communications) | prose |
 | VEHICLE_ANGULAR_DEFLECTION_EFFICIENCY | constants | Movement (movement) | group |
 | VEHICLE_ANGULAR_DEFLECTION_TIMESCALE | constants | Movement (movement) | group |
 | VEHICLE_ANGULAR_FRICTION_TIMESCALE | constants | Movement (movement) | group |

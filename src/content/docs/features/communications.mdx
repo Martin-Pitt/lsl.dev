@@ -18,19 +18,20 @@ Pick the narrowest channel that works. It is cheaper for the region and easier t
 - Chat is sent on an integer channel
   - Channel 0 is [public chat](/constants/PUBLIC_CHANNEL/); other channels are invisible to people
   - Range depends on the function: [whisper](/functions/llWhisper/), [say](/functions/llSay/) and [shout](/functions/llShout/) reach further, [`llRegionSay`](/functions/llRegionSay/) reaches the whole region, and [`llRegionSayTo`](/functions/llRegionSayTo/) targets one avatar or object
-  - A [listener](/functions/llListen/) filters by channel, and optionally by name, key and message; matches arrive in [`listen`](/events/listen/)
+  - A [listener](/features/communications/listen/) filters by channel, and optionally by name, key and message; matches arrive in [`listen`](/events/listen/)
   - Each open listener costs the region, so [remove](/functions/llListenRemove/) or [disable](/functions/llListenControl/) listeners you no longer need
 - [Link messages](/functions/llMessageLinked/) send an integer, a string and a key to scripts in one prim, or to all prims, of the same linkset
   - The [`link_message`](/events/link_message/) event receives them along with the sender's link number
 - [Linkset data](/features/data-storage/) is key-value storage shared by every script in the object
   - Scripts can pass state to each other by [writing](/functions/llLinksetDataWrite/) and [reading](/functions/llLinksetDataRead/) it; the [`linkset_data`](/events/linkset_data/) event reports changes
-- [HTTP requests](/functions/llHTTPRequest/) call an external web server, or another object's URL
+- [HTTP requests](/features/communications/http/) call an external web server, or another object's URL
   - The answer arrives in [`http_response`](/events/http_response/)
   - Requests are throttled, and the response body is truncated to a maximum length
   - From the [`llHTTPRequest` wiki page](https://wiki.secondlife.com/wiki/LlHTTPRequest): "Object requests are throttled at approximately 25 requests per 20 seconds." and "[`NULL_KEY`](/constants/NULL_KEY/) is returned if the request is throttled."
-- An object can act as a [small web server](#web-server-http-in)
+- An object can act as a [small web server](/features/communications/http/)
 - Objects can [send email](/functions/llEmail/), and [receive it](/functions/llGetNextEmail/) at their own address by polling
-- Scripts can ask the viewer to show a [dialog](/functions/llDialog/), [open a URL](/functions/llLoadURL/), [show a map location](/functions/llMapDestination/) or [open a floater](/functions/llOpenFloater/)
+- Text in chat, dialogs and hover text can hold [viewer URIs](/features/communications/viewer-uris/): links that show an avatar's name, open a profile or map, or teleport
+- Scripts can ask the viewer to show a [dialog](/features/communications/dialog/), [open a URL](/functions/llLoadURL/), [show a map location](/functions/llMapDestination/) or [open a floater](/functions/llOpenFloater/)
 
 </Box>
 </Column>
@@ -44,14 +45,14 @@ Pick the narrowest channel that works. It is cheaper for the region and easier t
 ]} />
 
 </Box>
-<Box title="Web server (HTTP-in)" href="https://wiki.secondlife.com/wiki/HTTP_Server_URL_Registration">
+<Box title="Web server (HTTP-in)" href="/features/communications/http/">
 
 [Request a URL](/functions/llRequestURL/), and each incoming request arrives in [`http_request`](/events/http_request/), which you answer with [`llHTTPResponse`](/functions/llHTTPResponse/). URLs are temporary: they are lost when the object changes region or the region restarts ([`CHANGED_REGION_START`](/constants/CHANGED_REGION_START/)), so request a new one then.
 
 </Box>
-<Box title="Talking to the viewer" href="#viewer-interaction">
+<Box title="Talking to the viewer" href="/features/communications/dialog/">
 
-Dialogs, [text boxes](/functions/llTextBox/), URLs, [map beacons](/functions/llMapBeacon/) and floaters are covered on the [dialog page](/features/dialog/).
+Dialogs, [text boxes](/functions/llTextBox/), URLs, [map beacons](/functions/llMapBeacon/) and floaters are covered on the [dialog page](/features/communications/dialog/).
 
 </Box>
 </Column>
@@ -133,14 +134,12 @@ Dialogs, [text boxes](/functions/llTextBox/), URLs, [map beacons](/functions/llM
 <SeeAlso items={[
   "category:chat", "wiki:Listen", "wiki:Category:LSL Chat", "wiki:Link message",
   "feature:data-storage", "category:web", "wiki:Category:LSL HTTP",
-  "wiki:HTTP Server URL Registration", "wiki:Category:LSL Email", "feature:dialog"
+  "wiki:HTTP Server URL Registration", "wiki:Category:LSL Email"
 ]}>
-  <Planned>Guide: listeners and channels</Planned>
-  <Planned>Guide: an object as a web server</Planned>
 </SeeAlso>
 
 <FeatureFooter
-  related={["data-transmission", "data-storage", "dialog"]}
-  categories={["chat", "avatar_communication", "script_communication", "web"]}
+  related={["data-transmission", "data-storage", "input"]}
+  categories={["chat", "avatar_communication", "script_communication", "web", "user_interface"]}
   archive={["Category:LSL Communications"]}
 />

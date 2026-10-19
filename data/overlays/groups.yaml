@@ -1,0 +1,66 @@
+# lsl.dev local constant-group overlay -- NOT upstream data.
+#
+# data/sources/lsl_definitions.yaml is a read-only upstream snapshot. This file adds
+# constant-group membership (`member-of`) on top of it. scripts/import-datasets.py applies it
+# to the definitions right after reading the YAML (see scripts/lib/group_overlay.py):
+#
+#   - A group the YAML already defines only gains members; a new group is added to the
+#     YAML's `enums` with the fields given here (plus `local: true`).
+#   - Membership is additive: a constant keeps its YAML groups, the overlay group goes last.
+#   - `match` holds regular expressions tested (re.fullmatch) against non-private constant
+#     names; `include` lists extra names explicitly.
+#   - As upstream, non-deprecated members of a group must have distinct values; the
+#     importer fails otherwise.
+#
+# Game control: upstream PR #187 (2026-09-30) added the modal GAME_CONTROL_AXIS_* and
+# GAME_CONTROL_BUTTON_* actions and left them, and the canonical axes, without a group.
+# Canonical values are the physical controller layout delivered to `game_control`; modal
+# values are actions read with llGetGameControlModeAxes/llGetGameControlModeButtons, whose
+# layout depends on llGetGameControlMode. Checked against the viewer's game control release
+# (secondlife/viewer#6202, merge 923f645a, indra/llwindow/llgamecontrol.cpp): AVATAR, MOUSELOOK
+# and CAPTIVE send five axes (STRAFE..RISE; ZOOM has no slot), CURSOR six cursor axes with no
+# constants, FLYCAM seven (TRUCK..ZOOM). AVATAR/MOUSELOOK/CAPTIVE/CURSOR share the button bits;
+# FLYCAM has its own, of which the viewer only sends ZOOM_OUT, ZOOM_IN, TOGGLE_FLYCAM, toggle
+# cursor (0x10) and orbit (0x400). Some YAML tooltips disagree (TURN/LOOK claim CURSOR, ZOOM
+# claims the avatar modes). Drop each entry once upstream groups these constants.
+groups:
+  GameControlAxis:
+    members:
+      include: [GAME_CONTROL_AXIS_LEFTX, GAME_CONTROL_AXIS_LEFTY, GAME_CONTROL_AXIS_RIGHTX,
+        GAME_CONTROL_AXIS_RIGHTY, GAME_CONTROL_AXIS_LEFT_TRIGGER, GAME_CONTROL_AXIS_RIGHT_TRIGGER,
+        GAME_CONTROL_AXIS_TRIGGERLEFT, GAME_CONTROL_AXIS_TRIGGERRIGHT]
+  GameControlAvatarAxis:
+    type: enum
+    prefix: GAME_CONTROL_AXIS_
+    tooltip: Semantic axes (indices into llGetGameControlModeAxes) for the AVATAR, MOUSELOOK and CAPTIVE game control modes. CURSOR mode has its own axes.
+    members:
+      include: [GAME_CONTROL_AXIS_STRAFE, GAME_CONTROL_AXIS_ADVANCE, GAME_CONTROL_AXIS_TURN,
+        GAME_CONTROL_AXIS_LOOK, GAME_CONTROL_AXIS_RISE]
+  GameControlFlycamAxis:
+    type: enum
+    prefix: GAME_CONTROL_AXIS_
+    tooltip: Semantic axes (indices into llGetGameControlModeAxes) for the FLYCAM game control mode.
+    members:
+      include: [GAME_CONTROL_AXIS_TRUCK, GAME_CONTROL_AXIS_DOLLY, GAME_CONTROL_AXIS_PAN,
+        GAME_CONTROL_AXIS_TILT, GAME_CONTROL_AXIS_BOOM, GAME_CONTROL_AXIS_ROLL, GAME_CONTROL_AXIS_ZOOM]
+  GameControlAvatarButton:
+    type: flag
+    prefix: GAME_CONTROL_BUTTON_
+    tooltip: Semantic buttons (bits of llGetGameControlModeButtons) for the AVATAR, MOUSELOOK, CAPTIVE and CURSOR game control modes. CURSOR_BUTTON_LEFT and CURSOR_BUTTON_RIGHT are only sent in MOUSELOOK and CURSOR.
+    members:
+      include: [GAME_CONTROL_BUTTON_JUMP, GAME_CONTROL_BUTTON_CROUCH, GAME_CONTROL_BUTTON_SIT,
+        GAME_CONTROL_BUTTON_TOGGLE_CURSOR, GAME_CONTROL_BUTTON_TOGGLE_SPEAK,
+        GAME_CONTROL_BUTTON_TOGGLE_MOUSELOOK, GAME_CONTROL_BUTTON_TOGGLE_FLYCAM,
+        GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT, GAME_CONTROL_BUTTON_CURSOR_BUTTON_RIGHT,
+        GAME_CONTROL_BUTTON_ADVANCE_FORWARD, GAME_CONTROL_BUTTON_ADVANCE_BACK,
+        GAME_CONTROL_BUTTON_STRAFE_LEFT, GAME_CONTROL_BUTTON_STRAFE_RIGHT]
+  GameControlFlycamButton:
+    type: flag
+    prefix: GAME_CONTROL_BUTTON_
+    tooltip: Semantic buttons (bits of llGetGameControlModeButtons) for the FLYCAM game control mode, as listed in the LSL definitions. The current viewer only sends ZOOM_OUT, ZOOM_IN and TOGGLE_FLYCAM of these, plus toggle cursor (0x10) and orbit (0x400).
+    members:
+      include: [GAME_CONTROL_BUTTON_ZOOM_OUT, GAME_CONTROL_BUTTON_PAN_RIGHT, GAME_CONTROL_BUTTON_PAN_LEFT,
+        GAME_CONTROL_BUTTON_ZOOM_IN, GAME_CONTROL_BUTTON_TOGGLE_ALT_ZOOM, GAME_CONTROL_BUTTON_TOGGLE_FOLLOW,
+        GAME_CONTROL_BUTTON_RESET, GAME_CONTROL_BUTTON_TOGGLE_FLYCAM, GAME_CONTROL_BUTTON_ROLL_CCW,
+        GAME_CONTROL_BUTTON_ROLL_CW, GAME_CONTROL_BUTTON_DOLLY_FORWARD, GAME_CONTROL_BUTTON_DOLLY_BACK,
+        GAME_CONTROL_BUTTON_TRUCK_LEFT, GAME_CONTROL_BUTTON_TRUCK_RIGHT]

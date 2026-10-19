@@ -1,0 +1,131 @@
+---
+title: "Game Control"
+sidebar:
+  badge:
+    text: New
+    variant: success
+description: "Game control input from controllers, or keyboard and mouse translated by the viewer: game-control modes, physical controls, the semantic actions they map to in each mode, and the game_control event."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, SeeAlso, Signatures } from '../../../../components/features';
+import { ConstantGroup } from '~/components/lsl';
+import { Experimental } from '~/components/authoring';
+
+A compatible viewer can send an avatar's game control input to scripts. It comes from a game controller, or from the [keyboard and mouse](#keyboard-and-mouse) when the viewer is set to translate avatar movement into game control; either way it arrives in a controller's shape, as sticks, triggers and buttons. This is separate from [captured controls](/features/input/controls/). Part of the [Input](/features/input/) feature; lsl.dev lists these APIs together in the [Game Control](/categories/game_control/) category.
+
+<Experimental feature="Game control" />
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Changes in game control input raise [`game_control`](/events/game_control/), but only for scripts in attachments or seats
+  - **id** is the avatar supplying the input
+  - **button_levels** is a 32-bit mask of the [physical buttons](#physical-buttons) currently held down
+  - **axes** is a list of six floats in the range [-1.0, 1.0], the [physical axes](#physical-axes) indexed by `GAME_CONTROL_AXIS_*`
+- A script can [read the current game-control mode](/functions/llGetGameControlMode/) of an avatar, as a [`GAME_CONTROL_MODE_*`](/constants/groups/GameControlMode/) value
+  - The viewer also maps the controls to *semantic actions* such as strafe, jump or camera dolly; a script reads them with [`llGetGameControlModeAxes`](/functions/llGetGameControlModeAxes/) and [`llGetGameControlModeButtons`](/functions/llGetGameControlModeButtons/), and element count, index and bit meanings vary by mode
+  - AVATAR, MOUSELOOK and CAPTIVE share one layout ([axes](/constants/groups/GameControlAvatarAxis/), [buttons](/constants/groups/GameControlAvatarButton/)); CURSOR shares those buttons but has its own six cursor axes; FLYCAM has its own ([axes](/constants/groups/GameControlFlycamAxis/), [buttons](/constants/groups/GameControlFlycamButton/)). See [semantic actions by mode](#semantic-actions-by-mode)
+  - Physical and semantic constants share the `GAME_CONTROL_AXIS_*` and `GAME_CONTROL_BUTTON_*` prefixes and reuse the same values, so check the mode before reading a semantic action
+- [`PERMISSION_GAME_CONTROL`](/constants/PERMISSION_GAME_CONTROL/) is a [script permission](/constants/groups/ScriptPermission/) for game control
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={["game_control", "llGetGameControlMode", "llGetGameControlModeAxes", "llGetGameControlModeButtons"]} />
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={["game_control", "llGetGameControlMode", "llGetGameControlModeAxes", "llGetGameControlModeButtons"]} descriptions />
+
+</Box>
+
+## Keyboard and mouse
+
+Besides a game controller, the viewer [translates the avatar's movement controls](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/llwindow/llgamecontrol.cpp#L2760-L2790) into game control: movement keys, mouse buttons bound to movement, and click-to-walk, which [moves the avatar](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/newview/llagent.cpp#L1923-L2015) through the same controls. A held key counts as half deflection, or full when running, and adds to any controller input on the same axis, so a keyboard-only user still produces semantic axes. Movement the viewer applies directly is not included: turning by [dragging with the mouse](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/newview/lltoolpie.cpp#L2106-L2185) changes the avatar's rotation without reaching the TURN axis.
+
+Mouse clicks are not translated. In mouselook, `GAME_CONTROL_BUTTON_CURSOR_BUTTON_LEFT` and `RIGHT` are set by the controller's [shoulder buttons](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/llwindow/llgamecontrol.cpp#L764-L765), which also simulate a mouse click; a real mouse click sets no game control bit. To catch mouse clicks, take controls with [`llTakeControls`](/functions/llTakeControls/) (`CONTROL_ML_LBUTTON`) and handle the [`control`](/events/control/) event, as before. A script that only listens to `game_control` misses mouse users.
+
+The viewer only sends any game control data when its game control "send data to server" setting is on, which [it is not by default](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/llwindow/llgamecontrol.cpp#L870-L880), and only in regions that support game control.
+
+## Constant groups
+
+### Game-control modes
+
+`llGetGameControlMode` returns one of these [`GAME_CONTROL_MODE_*`](/constants/groups/GameControlMode/) values for the avatar given by **id**.
+
+<ConstantGroups names={["GameControlMode"]} />
+
+<ConstantGroup name="GameControlMode" />
+
+#### How the viewer picks the mode
+
+The script cannot choose the mode; the viewer derives it from the avatar's state every frame. In the Second Life viewer's [game control release](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/newview/llagent.cpp#L5046-L5072) the first match wins:
+
+1. **CURSOR**: the left stick is driving the on-screen mouse cursor. This wins even over flycam; the flycam keeps running underneath and keeps any controls the cursor does not use.
+2. **FLYCAM**: the flycam is engaged.
+3. **MOUSELOOK**: the camera is in mouselook. This is checked before sitting, so a seated avatar in mouselook reports MOUSELOOK, not CAPTIVE.
+4. **CAPTIVE**: the avatar is sitting.
+5. **AVATAR**: otherwise.
+
+CAPTIVE is [documented in the viewer](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/llwindow/llgamecontrol.h#L97) as "sitting, or controls have been taken", but this release only checks sitting: an avatar standing while a script holds its controls with [`llTakeControls`](/functions/llTakeControls/) reports AVATAR. Captive and avatar modes share one action layout, and in both the controller still moves the avatar, so a script that took controls keeps receiving [`control`](/events/control/) events from controller movement.
+
+This is observed viewer behaviour rather than a documented guarantee, and other viewers may differ.
+
+### Physical axes
+
+The sticks and triggers as laid out on the controller, whatever the mode: the six entries of the **axes** list in `game_control`. The LSL definitions call this the *canonical* layout.
+
+<ConstantGroups names={["GameControlAxis"]} />
+
+<ConstantGroup name="GameControlAxis" />
+
+### Physical buttons
+
+The controller's buttons, whatever the mode: bits of **button_levels** in `game_control`.
+
+<ConstantGroups names={["GameControlButton"]} />
+
+### Semantic actions by mode
+
+Indices into the list returned by `llGetGameControlModeAxes`, and masks for the bitmask returned by `llGetGameControlModeButtons`. Their meaning depends on the mode, so the same values are reused. In the Second Life viewer's game control release ([axis slots](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/llwindow/llgamecontrol.cpp#L4042-L4118), [default button bindings](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/llwindow/llgamecontrol.cpp#L706-L867)):
+
+| Mode | Semantic axes | Semantic buttons |
+| --- | --- | --- |
+| AVATAR, CAPTIVE | 5: [avatar axes](#avatar-mouselook-and-captive-modes) | [avatar buttons](#avatar-mouselook-and-captive-modes), except `CURSOR_BUTTON_LEFT`/`RIGHT` |
+| MOUSELOOK | 5: [avatar axes](#avatar-mouselook-and-captive-modes) | [avatar buttons](#avatar-mouselook-and-captive-modes) |
+| CURSOR | 6: cursor movement and position (no constants yet) | [avatar buttons](#avatar-mouselook-and-captive-modes) |
+| FLYCAM | 7: [flycam axes](#flycam-mode) | [flycam buttons](#flycam-mode), see below |
+
+These groups are lsl.dev's own: the LSL definitions do not group the semantic constants yet. The viewer source calls them *semantic*; the LSL definitions call them *modal*.
+
+#### Avatar, mouselook and captive modes
+
+CURSOR mode uses these buttons too, but not these axes: its six axes are the cursor's movement (0, 1), pixel position (2, 3) and normalized position (4, 5), which have no `GAME_CONTROL_AXIS_*` names yet.
+
+<ConstantGroups names={["GameControlAvatarAxis", "GameControlAvatarButton"]} />
+
+<ConstantGroup name="GameControlAvatarAxis" />
+
+<ConstantGroup name="GameControlAvatarButton" />
+
+#### Flycam mode
+
+The definitions list more flycam buttons than the viewer sends. A button only gets a bit when the action [has a default binding](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/llwindow/llgamecontrol.cpp#L2588-L2622), and in this release only `ZOOM_OUT` (0x1), `ZOOM_IN` (0x8), `TOGGLE_FLYCAM` (0x100), toggle cursor (0x10, the value of `GAME_CONTROL_BUTTON_TOGGLE_CURSOR` and of `TOGGLE_ALT_ZOOM`) and orbit (0x400, the value of `ROLL_CW`, no constant of its own) [are bound](https://github.com/secondlife/viewer/blob/923f645a923e7f061f7ff2790d8510aa4b5ced36/indra/llwindow/llgamecontrol.cpp#L820-L841). The pan, dolly, truck, roll, reset and follow buttons are never set.
+
+<ConstantGroups names={["GameControlFlycamAxis", "GameControlFlycamButton"]} />
+
+<ConstantGroup name="GameControlFlycamAxis" />
+
+<ConstantGroup name="GameControlFlycamButton" />
+
+## Related
+
+<SeeAlso items={["feature:input", "category:game_control", "wiki:Game control", "wiki:Category:LSL GameControls"]} />
+
+<FeatureFooter related={["input", "camera", "avatar"]} />

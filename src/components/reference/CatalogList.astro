@@ -84,6 +84,10 @@ const catOptions = present;
 const catCloud = catOptions.length > 0;
 const legend = BADGES.filter(b => flagged.some(it => it.flags?.some((f: any) => f.code === b.code)));
 const badges = (f?: { code: string }[]) => (f?.length ? f.map(x => x.code).join(' ') : undefined);
+// Kind filter (functions / events / constants), shown when the list mixes kinds.
+const KINDS: [string, string][] = [['function', 'Functions'], ['event', 'Events'], ['constant', 'Constants']];
+const kinds = KINDS.filter(([k]) => rows.some(it => it.kind === k));
+const kindCount = (k: string) => rows.filter(it => it.kind === k).length;
 const cats = (c?: string[]) => (c?.length ? c.join(' ') : undefined);
 ---
 <catalog-list class="catalog-browser not-content">
@@ -98,6 +102,7 @@ const cats = (c?: string[]) => (c?.length ? c.join(' ') : undefined);
 {catCloud && <div class="cloud" role="group" aria-label={`Filter by ${filterLabel.toLowerCase()}`}><span>{filterLabel}</span>{catGroups.map(g => g.single
 	? <button type="button" aria-pressed="false" data-v={g.segs[0].id}>{g.head}</button>
 	: <span class="seg" role="group" aria-label={g.head}>{!g.segs.some(s => s.label === g.head) && <span class="seg-head">{g.head}</span>}{g.segs.map(s => <button type="button" aria-pressed="false" data-v={s.id} aria-label={s.label === g.head ? g.head : `${g.head}: ${s.label}`}>{s.label}</button>)}</span>)}</div>}
+{kinds.length > 1 && <div class="pick kind" role="group" aria-label="Filter by kind" data-key="kind"><span>Kind</span>{kinds.map(([v, l]) => <button type="button" aria-pressed="false" data-v={v}>{l} <small>{kindCount(v)}</small></button>)}</div>}
 {prefixes.length > 0 && <div class="pick prefix" role="group" aria-label="Filter by name prefix" data-key="p"><span>Prefix</span>{prefixes.map(([v, n]) => <button type="button" aria-pressed="false" data-v={v}>{v} <small>{n}</small></button>)}</div>}
 {blocks ? (
 	<div class="cl-groups" data-pagefind-ignore>{blocks.map(g => (
@@ -108,7 +113,7 @@ const cats = (c?: string[]) => (c?.length ? c.join(' ') : undefined);
 	))}</div>
 ) : (
 	<ul class:list={["cl-rows", { "sig-only": !rows.some(it => it.description || it.descriptionHtml), gutter: rows.some(it => it.type) }]} data-pagefind-ignore>{rows.map(it => (
-		<li id={it.id} data-c={cats(it.categories)} data-b={badges(it.flags)} data-l={az ? it.letter : undefined} data-p={prefixes.some(([v]) => v === it.prefix) ? it.prefix : undefined}>{it.type !== undefined && <span class="t">{it.type}</span>}<a href={it.href} title={it.hover}>{it.code ? <Fragment set:html={it.code} /> : <code>{it.title}</code>}</a>{it.descriptionHtml ? <span class="d" set:html={it.descriptionHtml} /> : it.description && <span class="d">{it.description}</span>}{(it.kind || it.flags?.length > 0) ? <span class="f">{it.kind && <span class="k">{it.kind}</span>}{it.flags?.map((f: any) => <b class="b" data-k={f.code} title={f.title}>{f.code}<span class="sr-only"> ({f.title})</span></b>)}</span> : null}</li>
+		<li id={it.id} data-c={cats(it.categories)} data-b={badges(it.flags)} data-l={az ? it.letter : undefined} data-kind={it.kind} data-p={prefixes.some(([v]) => v === it.prefix) ? it.prefix : undefined}>{it.type !== undefined && <span class="t">{it.type}</span>}<a href={it.href} title={it.hover}>{it.code ? <Fragment set:html={it.code} /> : <code>{it.title}</code>}</a>{it.descriptionHtml ? <span class="d" set:html={it.descriptionHtml} /> : it.description && <span class="d">{it.description}</span>}{(it.kind || it.flags?.length > 0) ? <span class="f">{it.kind && <span class="k">{it.kind}</span>}{it.flags?.map((f: any) => <b class="b" data-k={f.code} title={f.title}>{f.code}<span class="sr-only"> ({f.title})</span></b>)}</span> : null}</li>
 	))}</ul>
 )}
 <p class="no-results" hidden>No matching entries. Try a different term or filter.</p>
@@ -125,7 +130,8 @@ class CatalogList extends HTMLElement {
 		const rows: HTMLLIElement[] = $$('li'), sections: HTMLElement[] = $$('section'), buttons: HTMLButtonElement[] = $$('.legend [data-b]');
 		const state = new Map<string, number>(), url = new URL(location.href);
 		// Letter and prefix: one mutually exclusive single-select (?letter=s or ?prefix=Set); a second click turns it off.
-		const picks: HTMLElement[] = $$('.pick'), pick: Record<string, string> = {}, param = { l: 'letter', p: 'prefix' } as Record<string, string>;
+		// Kind (?kind=event) is a single-select of its own, combined with either.
+		const picks: HTMLElement[] = $$('.pick'), pick: Record<string, string> = {}, param = { l: 'letter', p: 'prefix', kind: 'kind' } as Record<string, string>;
 		for (const g of picks) pick[g.dataset.key!] = url.searchParams.get(param[g.dataset.key!]) ?? '';
 		if (pick.l && pick.p) pick.l = '';
 		for (const [i, key] of [[1, 'include'], [2, 'exclude']] as const) for (const b of url.searchParams.get(key)?.split(',') ?? []) state.set(b, i);
@@ -182,18 +188,25 @@ class CatalogList extends HTMLElement {
 		// Clear resets the badge filters (and their URL params) only; text and category stay.
 		clear?.addEventListener('click', () => { state.clear(); update(); buttons[0]?.focus(); });
 		input.addEventListener('input', () => update(false)); select?.addEventListener('change', () => update(false));
-		for (const g of picks) g.addEventListener('click', e => { const b = (e.target as Element).closest<HTMLButtonElement>('button'); if (!b) return; const k = g.dataset.key!, v = pick[k] === b.dataset.v ? '' : b.dataset.v!; for (const o in pick) pick[o] = ''; pick[k] = v; update(); });
+		for (const g of picks) g.addEventListener('click', e => { const b = (e.target as Element).closest<HTMLButtonElement>('button'); if (!b) return; const k = g.dataset.key!, v = pick[k] === b.dataset.v ? '' : b.dataset.v!; if (k !== 'kind') for (const o in pick) if (o !== 'kind') pick[o] = ''; pick[k] = v; update(); });
 		cloud?.addEventListener('click', e => { const b = (e.target as Element).closest<HTMLButtonElement>('button'); if (!b) return; cat = cat === b.dataset.v ? '' : b.dataset.v!; update(); });
 		if (state.size || cat || Object.values(pick).some(Boolean)) update(false);
 		// Preview: hovering or focusing a category, letter or prefix fades the visible rows it would filter out.
 		const unfade = () => { for (const r of rows) r.classList.remove('fade'); };
 		const preview = (e: Event) => {
+			// Badge toggles preview their next click: off → include fades rows without the badge, include → exclude fades rows with it.
+			const lb = (e.target as Element).closest<HTMLButtonElement>('.legend [data-b]');
+			if (lb) {
+				const s = lb.dataset.state; if (s === 'exclude') return unfade();
+				for (const r of rows) r.classList.toggle('fade', !r.hidden && (s === 'off') !== (r.dataset.b ?? '').split(' ').includes(lb.dataset.b!));
+				return;
+			}
 			const b = (e.target as Element).closest<HTMLButtonElement>('.cloud button, .pick button');
 			if (!b || b.disabled || b.getAttribute('aria-pressed') === 'true') return unfade();
 			const key = (b.closest('.pick') as HTMLElement | null)?.dataset.key, v = b.dataset.v!;
 			for (const r of rows) r.classList.toggle('fade', !r.hidden && !(key ? r.dataset[key] === v : (r.dataset.c ?? '').split(' ').includes(v)));
 		};
-		for (const g of [...picks, cloud].filter(Boolean) as HTMLElement[]) {
+		for (const g of [...picks, cloud, $('.legend')].filter(Boolean) as HTMLElement[]) {
 			g.addEventListener('pointerover', preview); g.addEventListener('focusin', preview);
 			g.addEventListener('pointerleave', unfade); g.addEventListener('focusout', unfade);
 			g.addEventListener('click', unfade);
@@ -215,7 +228,7 @@ if (!customElements.get('catalog-list')) customElements.define('catalog-list', C
 	.pick, .cloud { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem; margin: .4rem 0 0; font-size: var(--sl-text-xs); }
 	:is(.pick, .cloud) > span { font-weight: 600; color: var(--sl-color-gray-2); margin-inline-end: .35rem; }
 	:is(.pick, .cloud) button { min-width: 1.6rem; padding: .15rem .35rem; border: 1px solid transparent; border-radius: .3rem; background: none; color: var(--sl-color-text-accent); font: inherit; font-family: var(--__sl-font-mono); cursor: pointer; }
-	:is(.pick.prefix, .cloud) button { font-family: inherit; }
+	:is(.pick.prefix, .pick.kind, .cloud) button { font-family: inherit; }
 	:is(.pick, .cloud) small { color: var(--sl-color-gray-3); font-size: .9em; }
 	:is(.pick, .cloud) button:hover { background: var(--sl-color-gray-6); }
 	:is(.pick, .cloud) button:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 1px; }
@@ -256,7 +269,6 @@ if (!customElements.get('catalog-list')) customElements.define('catalog-list', C
 	.legend button { --fill: transparent; --line: transparent; --shape: superellipse(1); display: inline-flex; align-items: center; gap: .3rem; padding: .1rem .45rem .1rem .2rem; border: 1px solid var(--line); border-radius: .5rem; corner-shape: var(--shape); background: var(--fill); color: inherit; font: inherit; cursor: pointer; transition: background-color .08s, border-color .08s; }
 	.legend button:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 2px; }
 	.legend [hidden] { display: none; }
-	.legend [data-b]:hover { filter: brightness(1.08); }
 	.legend [data-state='off']:hover { --fill: var(--sl-color-gray-6); }
 	.legend [data-state='include'] { --shape: squircle; border-radius: .7rem; }
 	.legend [data-state='exclude'] { --shape: scoop; border-radius: .3rem; color: var(--sl-color-gray-2); }
@@ -278,6 +290,10 @@ if (!customElements.get('catalog-list')) customElements.define('catalog-list', C
 	@media (prefers-reduced-motion: reduce) { .legend button { transition: none; } }
 	/* Badge colours: reusable --au-badge-* tokens (src/styles/custom.css); tint and border mix from the text colour. */
 	.b { --b: var(--sl-color-gray-2); display: inline-block; min-width: 1.5rem; padding: 0 .25rem; border: 1px solid color-mix(in oklab, var(--b) 55%, transparent); border-radius: .25rem; background: color-mix(in oklab, var(--b) 18%, transparent); color: var(--bt, var(--b)); font: 700 .66rem/1.45 var(--__sl-font-mono); text-align: center; white-space: nowrap; }
+	/* Hover: a stronger tint and full-colour border, on row badges and legend toggles alike. */
+	.b { transition: background-color .08s, border-color .08s; }
+	:is(.cl-rows, .cl-groups) .b:hover, .legend [data-b]:is(:hover, :focus-visible) .b { background: color-mix(in oklab, var(--b) 34%, transparent); border-color: var(--b); }
+	@media (prefers-reduced-motion: reduce) { .b { transition: none; } }
 	/* Zero specificity, so the [data-b='…'] colour rules below win on legend buttons. */
 	:where(.legend button) { --b: var(--sl-color-gray-2); }
 	[data-k='X'], [data-b='X'] { --b: var(--au-badge-x); --bt: var(--au-badge-x-text); }

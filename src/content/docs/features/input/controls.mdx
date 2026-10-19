@@ -1,0 +1,83 @@
+---
+title: "Controls"
+description: "Capturing keyboard and mouse controls: taking and releasing controls, the control event, and mouselook."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../../components/features';
+
+A script can capture an avatar's movement keys and left mouse button, which is how vehicles, weapons and HUDs read input. Part of the [Input](/features/input/) feature.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- Controls need [`PERMISSION_TAKE_CONTROLS`](/constants/PERMISSION_TAKE_CONTROLS/), [requested](/functions/llRequestPermissions/) from the avatar and granted in [`run_time_permissions`](/events/run_time_permissions/)
+  - Granted without a dialog when the avatar is sitting on the object or wearing it
+- [`llTakeControls`](/functions/llTakeControls/) takes **controls**, a mask of [`CONTROL_*`](/constants/groups/ControlButton/) [control buttons](/constants/groups/ControlButton/)
+  - **accept** decides whether the controls raise [`control`](/events/control/) events
+  - **pass_on** decides whether they still perform their normal function, such as moving the avatar
+  - With both **accept** and **pass_on** [`FALSE`](/constants/FALSE/), every control *except* the specified ones is disabled
+- [`llReleaseControls`](/functions/llReleaseControls/) gives the controls back and also revokes `PERMISSION_TAKE_CONTROLS`
+- A script that has taken controls keeps running in "No Outside Scripts" parcels, which keeps vehicles and AOs working; this applies only to the prim holding the script
+- [`control`](/events/control/) passes **id**, the avatar, plus two masks of [`CONTROL_*`](/constants/groups/ControlButton/) bits
+  - **level** has a bit set for each control held down
+  - **edge** has a bit set for each control that changed since the last event
+- Mouselook
+  - [`CONTROL_LBUTTON`](/constants/CONTROL_LBUTTON/) is the left mouse button in normal view, [`CONTROL_ML_LBUTTON`](/constants/CONTROL_ML_LBUTTON/) the same button in mouselook
+  - [`llForceMouselook`](/functions/llForceMouselook/) puts avatars that sit on the prim into mouselook
+  - [`llGetAgentInfo`](/functions/llGetAgentInfo/) reports [`AGENT_MOUSELOOK`](/constants/AGENT_MOUSELOOK/) while an avatar is in mouselook
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llRequestPermissions", "run_time_permissions", "llTakeControls", "llReleaseControls",
+  "control", "llForceMouselook"
+]} />
+
+</Box>
+<Box title="Presses, releases and held keys" href="/events/control/">
+
+Combine **level** and **edge** in the `control` event:
+
+```lsl
+integer start = level & edge;   // pressed this event
+integer end = ~level & edge;    // released this event
+integer held = level & ~edge;   // still held
+```
+
+</Box>
+<Box title="Touch" href="/features/input/touch/">
+
+Clicking objects, touch positions, click actions and touch text.
+
+</Box>
+<Box title="Game Control" href="/features/input/game-control/">
+
+Controller-shaped [buttons and axes](/events/game_control/), from a game controller or translated keyboard and mouse, and game-control modes.
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llRequestPermissions", "run_time_permissions", "llTakeControls", "llReleaseControls",
+  "control", "llForceMouselook", "llGetAgentInfo"
+]} descriptions />
+
+</Box>
+
+## Constant groups
+
+<ConstantGroups names={["ControlButton"]} />
+
+## Related
+
+<SeeAlso items={["feature:input", "feature:permissions", "category:input", "wiki:Category:LSL Controls"]}>
+  <Planned>Guide: capturing controls for a vehicle or weapon</Planned>
+</SeeAlso>
+
+<FeatureFooter related={["input", "permissions", "camera"]} />

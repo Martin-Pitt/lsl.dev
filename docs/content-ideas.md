@@ -62,7 +62,7 @@ Each idea appears once, under its first feature area; the Features column lists 
 | Play an animation on the wearer | high | Request PERMISSION_TRIGGER_ANIMATION, then start and stop an animation from an attachment. | avatar | llStartAnimation; Run time permissions; Be happy |  |
 | Sit target and sit animation (pose ball) | high | A chair or pose ball that seats the avatar and plays an animation. | avatar, animesh | llSitTarget; llStartAnimation; AO Overriding Pose Ball; Avatar Position Adjustement to Avatar Height When Sitting |  |
 | Teleport pad or sit teleporter | high | Move an avatar to a destination when they sit, or with llTeleportAgent. | avatar, movement | llSitTarget; llSetLinkPrimitiveParamsFast; llTeleportAgent |  |
-| Visitor greeter | high | Greet each new visitor once, naming them with an agent link. | avatar, viewer-uris | llSensorRepeat; llGetAgentList; Viewer URI Name Space | Planned on [viewer-uris](../src/content/docs/features/viewer-uris.mdx): "Recipe: a greeter that names visitors with agent links" |
+| Visitor greeter | high | Greet each new visitor once, naming them with an agent link. | avatar, viewer-uris | llSensorRepeat; llGetAgentList; Viewer URI Name Space | Planned on [viewer-uris](../src/content/docs/features/communications/viewer-uris.mdx): "Recipe: a greeter that names visitors with agent links" |
 | Access list and blacklist | medium | Allow or deny avatars by name. | avatar, land | Blacklist and Remote Kill; llAddToLandBanList; llEjectFromLand |  |
 | Avatar radar HUD | medium | List nearby avatars and their distances in floating text. | avatar, dialog | Avatar Radar (NewAge); 3D Radar; llGetAgentList; llGetObjectDetails |  |
 | Find the sitting avatar and unsit them | medium | Use changed(CHANGED_LINK) to see who sat down, and unsit people your rules don't allow. | avatar, linkset | llAvatarOnSitTarget; llAvatarOnLinkSitTarget; llUnSit; CHANGED LINK |  |
@@ -122,7 +122,7 @@ Each idea appears once, under its first feature area; the Features column lists 
 
 | Title | Pri | Description | Features | Wiki sources | Status |
 |---|---|---|---|---|---|
-| Multi-page dialog menu | high | Split more than 12 buttons across pages with Next and Back buttons. | dialog | llDialog; Dialog Menus; DialogPlus | Planned on [dialog](../src/content/docs/features/dialog.mdx): "Recipe: multi-page dialog menu" |
+| Multi-page dialog menu | high | Split more than 12 buttons across pages with Next and Back buttons. | dialog | llDialog; Dialog Menus; DialogPlus | Planned on [dialog](../src/content/docs/features/communications/dialog.mdx): "Recipe: multi-page dialog menu" |
 | Simple dialog menu with a timeout | high | Open a menu on touch, listen on a random channel, and remove the listener after a timeout. | dialog, communications | llDialog; llListenRemove; Dialog Menus |  |
 | Text box input | medium | Ask the user for free text and read the reply. | dialog | llTextBox |  |
 
@@ -164,7 +164,7 @@ Each idea appears once, under its first feature area; the Features column lists 
 | Buttons on one prim with touch positions | medium | A grid of buttons on one face, chosen by where the face was touched. | input, textures | llDetectedTouchST; LSL Touch Position; Button Click Detector | Planned on [input/touch](../src/content/docs/features/input/touch.mdx): "Recipe: buttons on one prim with touch positions" |
 | Detect a long press versus a tap | low | Time touch_start to touch_end to tell a click from a hold. | input | Touch; Touch end; llGetTime |  |
 | Double-tap a movement key | low | Detect a double tap on an arrow key without a timer. | input | Double Tap Detection; Control |  |
-| Gamepad-controlled object | low | Read gamepad sticks and buttons with game_control. | input | Game control; llGetGameControlMode; PERMISSION GAME CONTROL |  |
+| Game-controller-driven object | low | Read game controller sticks and buttons with game_control. | input | Game control; llGetGameControlMode; PERMISSION GAME CONTROL |  |
 
 ### inventory
 
@@ -283,7 +283,7 @@ Each idea appears once, under its first feature area; the Features column lists 
 
 | Title | Pri | Description | Features | Wiki sources | Status |
 |---|---|---|---|---|---|
-| Landmark giver that posts teleport links | medium | Give a landmark and post a clickable SLurl. | viewer-uris, inventory | Viewer URI Name Space; BuildSlurl (NewAge) | Planned on [viewer-uris](../src/content/docs/features/viewer-uris.mdx): "Recipe: a landmark giver that posts teleport links" |
+| Landmark giver that posts teleport links | medium | Give a landmark and post a clickable SLurl. | viewer-uris, inventory | Viewer URI Name Space; BuildSlurl (NewAge) | Planned on [viewer-uris](../src/content/docs/features/communications/viewer-uris.mdx): "Recipe: a landmark giver that posts teleport links" |
 
 ## 3. Guides by feature area
 
@@ -349,7 +349,7 @@ Each idea appears once, under its first feature area; the Features column lists 
 
 | Title | Pri | Description | Features | Wiki sources | Status |
 |---|---|---|---|---|---|
-| Building a prim HUD | high | HUD layout, attachment points and touch handling. | dialog, input | AutoHUD constructor; llWorldPosToHUD; ATTACH HUD CENTER 1 | Planned on [dialog](../src/content/docs/features/dialog.mdx): "Guide: building a prim HUD" |
+| Building a prim HUD | high | HUD layout, attachment points and touch handling. | dialog, input | AutoHUD constructor; llWorldPosToHUD; ATTACH HUD CENTER 1 | Planned on [dialog](../src/content/docs/features/communications/dialog.mdx): "Guide: building a prim HUD" |
 | Dialog menus in depth | high | Channels, button order, menu trees and cleanup. | dialog | Dialog Menus; DialogPlus; llDialog; Dialog Message |  |
 
 ### effects

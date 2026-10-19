@@ -4,6 +4,7 @@
  */
 export { default as Caveat } from './Caveat.astro';
 export { default as Gotcha } from './Gotcha.astro';
+export { default as Experimental } from './Experimental.astro';
 export { default as Performance } from './Performance.astro';
 export { default as Limit } from './Limit.astro';
 export { default as LimitsTable } from './LimitsTable.astro';

@@ -1,0 +1,98 @@
+---
+title: "Notecards"
+description: "Reading notecards: synchronous reads from the cache, dataserver reads, line counts, searching and reloading on change."
+---
+import { Box, Column, Columns, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../../components/features';
+
+Notecards are text in the object's inventory. Scripts can read them but not write them, which makes them good for configuration that users edit by hand. Part of the [Data Storage](/features/data-storage/) feature.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- [`llGetNotecardLine`](/functions/llGetNotecardLine/) requests a line, which arrives in [`dataserver`](/events/dataserver/); lines start at 0
+  - A line past the end returns [`EOF`](/constants/EOF/)
+- [`llGetNotecardLineSync`](/functions/llGetNotecardLineSync/) returns a line immediately if the region has the notecard cached
+  - It returns [`NAK`](/constants/NAK/) when the notecard is not cached; fall back to `llGetNotecardLine`, or read the line count first to load it into the cache
+  - The cache drops the least recently read notecards first, so never assume a notecard is still cached
+  - No `dataserver` event is raised, and memory is not garbage-collected inside a tight read loop
+- [`llGetNumberOfNotecardLines`](/functions/llGetNumberOfNotecardLines/) returns the line count through `dataserver`
+- [`llFindNotecardTextSync`](/functions/llFindNotecardTextSync/) searches a cached notecard with a regular expression, returning up to 64 matches as row, column and length
+- Lines longer than 1024 bytes are truncated
+- A notecard with embedded inventory items, such as landmarks, returns `EOF` for every line
+- When a user edits the notecard, [`changed`](/events/changed/) reports [`CHANGED_INVENTORY`](/constants/CHANGED_INVENTORY/); reload the configuration then
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llGetNotecardLine", "llGetNotecardLineSync", "llGetNumberOfNotecardLines",
+  "llFindNotecardTextSync", "dataserver"
+]} />
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llGetNotecardLineSync", "llGetNotecardLine", "llGetNumberOfNotecardLines",
+  "llFindNotecardTextSync", "llFindNotecardTextCount", "dataserver", "changed"
+]} descriptions />
+
+</Box>
+
+## Example
+
+Reads a whole notecard, using the cache where possible.
+
+```lsl
+string NOTECARD = "config";
+integer line;
+key request;
+
+readLines()
+{
+    string data = llGetNotecardLineSync(NOTECARD, line);
+    while (data != NAK && data != EOF)
+    {
+        llOwnerSay((string)line + ": " + data);
+        data = llGetNotecardLineSync(NOTECARD, ++line);
+    }
+    if (data == NAK)
+        request = llGetNotecardLine(NOTECARD, line);  // not cached: ask the dataserver
+}
+
+default
+{
+    state_entry()
+    {
+        line = 0;
+        readLines();
+    }
+
+    dataserver(key id, string data)
+    {
+        if (id != request || data == EOF) return;
+        llOwnerSay((string)line + ": " + data);
+        ++line;
+        readLines();
+    }
+
+    changed(integer change)
+    {
+        if (change & CHANGED_INVENTORY) llResetScript();
+    }
+}
+```
+
+## Related
+
+<SeeAlso items={["feature:data-storage", "category:notecard", "feature:inventory", "wiki:Category:LSL Notecard"]}>
+  <Planned>Guide: reading a configuration notecard</Planned>
+</SeeAlso>
+
+<FeatureFooter related={["data-storage", "inventory"]} />

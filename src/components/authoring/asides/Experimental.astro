@@ -1,0 +1,17 @@
+---
+/**
+ * <Experimental>: an "Experimental" callout for features Linden Lab may still change, rendered as
+ * Starlight Aside markup (base type `caution`). With no body it uses a default sentence; pass
+ * `feature` to name the feature in it. ApiHeader adds one to every API page of an experimental
+ * category (./experimental.ts).
+ *
+ *   <Experimental feature="Game control" />
+ *   <Experimental>Custom body in **Markdown**.</Experimental>
+ */
+import AsideBox from './AsideBox.astro';
+import { experimentalText } from './experimental';
+
+interface Props { title?: string; feature?: string }
+const { title = 'Experimental', feature } = Astro.props;
+---
+<AsideBox kind="experimental" base="caution" title={title}>{Astro.slots.has('default') ? <slot /> : <p>{experimentalText(feature)}</p>}</AsideBox>

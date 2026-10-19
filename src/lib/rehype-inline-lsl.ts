@@ -10,6 +10,7 @@
  * - A link to an API that has no page (deprecated or private, e.g. llSetPrimitiveParams) is
  *   unlinked: only the highlighted code remains, so no dead link and no hover card.
  * The page's own name (its frontmatter title) is never linked.
+ * Frontmatter `inlineLsl: false` leaves inline code plain (links are still handled).
  */
 import { fromHtml } from 'hast-util-from-html';
 import { inlineLsl, hasApiPage, apiHrefName } from './inline-lsl';
@@ -26,6 +27,7 @@ const fragment = (html: string) => fromHtml(html, { fragment: true }).children a
 export default function rehypeInlineLsl() {
 	return async (tree: Node, file: any) => {
 		const self: string | undefined = file?.data?.astro?.frontmatter?.title;
+		const highlightCode = file?.data?.astro?.frontmatter?.inlineLsl !== false;
 		const jobs: Promise<void>[] = [];
 		/** Visits node's children, or only `only` of them; jobs always splice the real node.children. */
 		const visit = (node: Node, inLink: boolean, only?: Node[]) => {
@@ -34,7 +36,7 @@ export default function rehypeInlineLsl() {
 				if (isEl(child, 'pre')) continue;
 				if (isEl(child, 'code')) {
 					const kids = child.children ?? [];
-					if (kids.length && kids.every(k => k.type === 'text')) {
+					if (highlightCode && kids.length && kids.every(k => k.type === 'text')) {
 						const code = textOf(child);
 						jobs.push(inlineLsl(code, { self, link: !inLink }).then(html => { Object.assign(child, fragment(html)[0]); }));
 					}

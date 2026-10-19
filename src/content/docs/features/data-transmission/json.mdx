@@ -1,0 +1,81 @@
+---
+title: "JSON"
+description: "Building, reading and changing JSON: llList2Json, llJson2List, paths of specifiers and the JSON_* type constants."
+---
+import { Box, Column, Columns, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../../components/features';
+
+JSON carries nested objects and arrays in one string, and is the format web services expect. LSL builds JSON from lists, reads and changes values by path, and converts JSON back to lists. Part of the [Data Transmission](/features/data-transmission/) feature.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- [`llList2Json`](/functions/llList2Json/) builds a [`JSON_OBJECT`](/constants/JSON_OBJECT/) from a strided list of key-value pairs, or a [`JSON_ARRAY`](/constants/JSON_ARRAY/) from any list
+  - Integers and floats become numbers; `"true"`, `"false"` and `"null"` become bare words
+  - Strings that are already valid JSON are kept as-is, so nested objects and arrays are built inside out
+  - Other strings become JSON strings, trimmed of surrounding whitespace; a string holding a number stays a string
+- [`llJson2List`](/functions/llJson2List/) returns the top level only: a strided key-value list for an object, the items for an array
+  - Nested objects and arrays come back as JSON strings, ready for another call
+- A path is a list of **specifiers**: a string selects an object key, an integer an array index
+  - Negative indices are not supported
+- [`llJsonGetValue`](/functions/llJsonGetValue/) reads the value at a path; [`llJsonValueType`](/functions/llJsonValueType/) tells its type
+- [`llJsonSetValue`](/functions/llJsonSetValue/) returns new JSON with the value at a path set, creating missing keys
+  - [`JSON_APPEND`](/constants/JSON_APPEND/) as the last specifier appends to an array
+  - [`JSON_DELETE`](/constants/JSON_DELETE/) as the value removes it, without pruning empty parents
+- Errors return [`JSON_INVALID`](/constants/JSON_INVALID/): badly formed input, a missing path or an out-of-bounds index
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={["llList2Json", "llJson2List", "llJsonGetValue", "llJsonSetValue", "llJsonValueType"]} />
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={["llList2Json", "llJson2List", "llJsonGetValue", "llJsonSetValue", "llJsonValueType"]} descriptions />
+
+</Box>
+
+## Example
+
+```lsl
+string json = llList2Json(JSON_OBJECT, [
+    "name", "Door",
+    "pos", llList2Json(JSON_ARRAY, [12, 40, 22])
+]);
+// {"name":"Door","pos":[12,40,22]}
+
+string x = llJsonGetValue(json, ["pos", 0]);             // "12"
+json = llJsonSetValue(json, ["locked"], JSON_TRUE);      // adds "locked":true
+json = llJsonSetValue(json, ["pos", JSON_APPEND], "1");  // appends to the array
+```
+
+## Type constants
+
+[`llJsonValueType`](/functions/llJsonValueType/) returns one of these; some are also accepted as values. Each is a single reserved Unicode character, so it cannot collide with real text.
+
+| Constant | Meaning |
+| --- | --- |
+| [`JSON_INVALID`](/constants/JSON_INVALID/) | Input not well formed, or no value at the path |
+| [`JSON_OBJECT`](/constants/JSON_OBJECT/) | An object; also a type for `llList2Json` |
+| [`JSON_ARRAY`](/constants/JSON_ARRAY/) | An array; also a type for `llList2Json` |
+| [`JSON_NUMBER`](/constants/JSON_NUMBER/) | A number |
+| [`JSON_STRING`](/constants/JSON_STRING/) | A string |
+| [`JSON_NULL`](/constants/JSON_NULL/) | `null`; returned by `llJsonGetValue` for a null value |
+| [`JSON_TRUE`](/constants/JSON_TRUE/) | `true`; as a value, `llJsonSetValue` writes the bare word |
+| [`JSON_FALSE`](/constants/JSON_FALSE/) | `false`; as a value, `llJsonSetValue` writes the bare word |
+| [`JSON_APPEND`](/constants/JSON_APPEND/) | Specifier for `llJsonSetValue` that appends to an array |
+| [`JSON_DELETE`](/constants/JSON_DELETE/) | Value for `llJsonSetValue` that removes the key or element |
+
+## Related
+
+<SeeAlso items={["feature:data-transmission", "category:json", "wiki:Json usage in LSL", "/constants/CONTENT_TYPE_JSON/|CONTENT_TYPE_JSON"]}>
+  <Planned>Guide: sending nested data as JSON</Planned>
+</SeeAlso>
+
+<FeatureFooter related={["data-transmission", "communications", "data-storage"]} />

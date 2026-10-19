@@ -1,14 +1,14 @@
 ---
 title: "Input"
-description: "Input from users: touch, keyboard and mouse controls, and gamepads."
+description: "Input from users: touch, keyboard and mouse controls, and game control."
 ---
-import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
+import { Box, Column, Columns, FeatureFooter, SeeAlso, Signatures } from '../../../components/features';
 
-Users interact with objects by clicking them, and with scripted vehicles, weapons and HUDs through captured controls. A script can capture movement keys and the mouse button, and read gamepad buttons and axes.
+Users interact with objects by clicking them, and with scripted vehicles, weapons and HUDs through captured controls. A script can capture movement keys and the mouse button, and read game control buttons and axes from a controller, or from the keyboard and mouse translated by the viewer.
 
-Input is not free text: for choices and typed input, use [dialogs](/features/dialog/), text boxes or [chat commands](/features/communications/).
+Input is not free text: for choices and typed input, use [dialogs](/features/communications/dialog/), text boxes or [chat commands](/features/communications/).
 
-Touch needs no permission. Controls need [`PERMISSION_TAKE_CONTROLS`](/constants/PERMISSION_TAKE_CONTROLS/); gamepads need [`PERMISSION_GAME_CONTROL`](/constants/PERMISSION_GAME_CONTROL/) and viewer support.
+Touch needs no permission. Controls need [`PERMISSION_TAKE_CONTROLS`](/constants/PERMISSION_TAKE_CONTROLS/); game control needs [`PERMISSION_GAME_CONTROL`](/constants/PERMISSION_GAME_CONTROL/) and viewer support.
 
 <Columns>
 <Column>
@@ -16,12 +16,12 @@ Touch needs no permission. Controls need [`PERMISSION_TAKE_CONTROLS`](/constants
 
 - Clicking an object raises [touch events](/features/input/touch/), with [who touched](/functions/llDetectedKey/), [which prim](/functions/llDetectedLinkNumber/) and [where](/functions/llDetectedTouchST/) read by the detected functions
   - A [click action](/functions/llSetClickAction/) changes what a left-click does
-- Scripts can [capture](/functions/llTakeControls/) movement keys and the left mouse button
+- Scripts can [capture](/features/input/controls/) movement keys and the left mouse button
   - Needs [permission](/functions/llRequestPermissions/) from the avatar, granted in [`run_time_permissions`](/events/run_time_permissions/)
   - The [`control`](/events/control/) event reports which keys are held and which changed
   - Controls can also pass through to normal movement
   - Sitting avatars can be [forced into mouselook](/functions/llForceMouselook/), and [agent info](/functions/llGetAgentInfo/) tells whether an avatar is [in mouselook](/constants/AGENT_MOUSELOOK/)
-- [Gamepad](/features/input/gamepad/) buttons and axes arrive in [`game_control`](/events/game_control/), for scripts in attachments or seats
+- [Game control](/features/input/game-control/) buttons and axes, from a controller or translated keyboard and mouse, arrive in [`game_control`](/events/game_control/), for scripts in attachments or seats
 
 </Box>
 </Column>
@@ -39,9 +39,14 @@ Touch needs no permission. Controls need [`PERMISSION_TAKE_CONTROLS`](/constants
 [Touch events](/events/touch_start/), [where a prim was touched](/functions/llDetectedTouchFace/), click actions and touch text.
 
 </Box>
-<Box title="Gamepad" href="/features/input/gamepad/">
+<Box title="Controls" href="/features/input/controls/">
 
-Game controller [buttons and axes](/events/game_control/) and the avatar's [game-control mode](/functions/llGetGameControlMode/), with modal axes and buttons per mode.
+[Capturing keys and the mouse button](/functions/llTakeControls/), the [`control`](/events/control/) event and mouselook.
+
+</Box>
+<Box title="Game Control" href="/features/input/game-control/">
+
+Controller-shaped [buttons and axes](/events/game_control/), from a game controller or translated keyboard and mouse, and the avatar's [game-control mode](/functions/llGetGameControlMode/), with the semantic actions mapped in each mode.
 
 </Box>
 </Column>
@@ -60,24 +65,16 @@ Game controller [buttons and axes](/events/game_control/) and the avatar's [game
 
 - [`llRequestPermissions`](/functions/llRequestPermissions/) — permissions for input
   - [`PERMISSION_TAKE_CONTROLS`](/constants/PERMISSION_TAKE_CONTROLS/) — allows [`llTakeControls`](/functions/llTakeControls/)
-  - [`PERMISSION_GAME_CONTROL`](/constants/PERMISSION_GAME_CONTROL/) — needed for gamepad input
-- [`llTakeControls`](/functions/llTakeControls/) — keys to capture are `CONTROL_*` [control buttons](/constants/groups/ControlButton/)
+  - [`PERMISSION_GAME_CONTROL`](/constants/PERMISSION_GAME_CONTROL/) — needed for game control input
+- [`llTakeControls`](/functions/llTakeControls/) — keys to capture are [`CONTROL_*`](/constants/groups/ControlButton/) [control buttons](/constants/groups/ControlButton/)
 
 </Box>
 
-## Keyboard and mouse controls
-
-<ConstantGroups names={["ControlButton"]} />
-
-<SeeAlso items={["category:input", "wiki:Category:LSL Controls"]}>
-  <Planned>Guide: capturing controls for a vehicle or weapon</Planned>
-</SeeAlso>
-
 ## Related
 
-<SeeAlso items={["feature:dialog", "feature:communications", "feature:camera"]} />
+<SeeAlso items={["/features/communications/dialog/|Dialog", "feature:communications", "feature:camera"]} />
 
 <FeatureFooter
-  related={["dialog", "camera", "avatar"]}
-  categories={["touch", "input", "gamepad"]}
+  related={["communications", "camera", "avatar"]}
+  categories={["touch", "input", "game_control"]}
 />

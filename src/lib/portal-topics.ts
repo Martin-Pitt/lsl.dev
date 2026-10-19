@@ -50,7 +50,7 @@ const rawAZ: Topic[] = [
 	{ label: 'Communications', to: 'f:communications', also: ['c:chat'] },
 	{ label: 'Controls', to: 'f:input', also: ['g:ControlButton'] },
 	{ label: 'Dataserver', to: 'c:dataserver' },
-	{ label: 'Dialog', to: 'f:dialog' },
+	{ label: 'Dialog', to: '/features/communications/dialog/' },
 	{ label: 'Events', to: 'f:events' },
 	{ label: 'Experience', to: 'f:experience', also: ['c:experience_data'] },
 	{ label: 'Face', to: 'f:textures', also: ['g:Faces'] },
@@ -65,7 +65,7 @@ const rawAZ: Topic[] = [
 	{ label: 'Money', to: 'f:money' },
 	{ label: 'Parcels & Regions', to: 'f:land', also: ['c:parcel', 'c:region'] },
 	{ label: 'Pathfinding', to: 'f:pathfinding' },
-	{ label: 'Permissions', to: 'c:permissions', also: ['g:ScriptPermission'] },
+	{ label: 'Permissions', to: 'f:permissions', also: ['c:permissions', 'g:ScriptPermission'] },
 	{ label: 'Physics', to: 'f:physics' },
 	{ label: 'Prims', to: 'f:prims', also: ['g:PrimParam'] },
 	{ label: 'Rotation', to: 'c:quaternion', also: ['f:math'] },
@@ -82,7 +82,7 @@ const rawAZ: Topic[] = [
 	{ label: 'Time', to: 'f:time', also: ['c:time'] },
 	{ label: 'Vehicle', to: 'c:vehicles', also: ['g:VehicleType'] },
 	{ label: 'Video', to: 'c:parcel_media', also: ['c:prim_media'] },
-	{ label: 'Viewer URIs', to: 'f:viewer-uris', also: ['c:chat'] },
+	{ label: 'Viewer URIs', to: '/features/communications/viewer-uris/', also: ['c:chat'] },
 	{ label: 'World', to: 'c:region', also: ['f:environments'] },
 ];
 
@@ -97,9 +97,9 @@ const rawTree: Topic[] = [
 	] },
 	{ label: 'Communications', to: 'f:communications', children: [
 		{ label: 'Chat', to: 'c:chat' },
-		{ label: 'Dialog', to: 'f:dialog' },
+		{ label: 'Dialog', to: '/features/communications/dialog/' },
 		{ label: 'HTTP', to: 'c:web' },
-		{ label: 'Viewer URIs', to: 'f:viewer-uris' },
+		{ label: 'Viewer URIs', to: '/features/communications/viewer-uris/' },
 		{ label: 'XML-RPC' },
 	] },
 	{ label: 'Detection', to: 'c:detected', children: [
@@ -131,9 +131,9 @@ const rawTree: Topic[] = [
 		{ label: 'Linksets', to: 'f:linkset' },
 		{ label: 'Vehicle', to: 'c:vehicles' },
 	] },
-	{ label: 'Permissions', to: 'c:permissions', children: [
+	{ label: 'Permissions', to: 'f:permissions', children: [
 		{ label: 'Asset', to: 'c:asset_permissions' },
-		{ label: 'Script', to: 'g:ScriptPermission' },
+		{ label: 'Script', to: 'f:permissions' },
 	] },
 	{ label: 'Prims', to: 'f:prims', children: [
 		{ label: 'Effects', to: 'f:effects', children: [{ label: 'Light' }, { label: 'Particles', to: 'c:particles' }] },

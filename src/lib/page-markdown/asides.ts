@@ -1,5 +1,5 @@
 /**
- * Markdown export cases for Batch 3 (asides and disclosure): Caveat, Limit, Gotcha, Performance,
+ * Markdown export cases for Batch 3 (asides and disclosure): Caveat, Limit, Gotcha, Experimental, Performance,
  * LimitsTable, Details, FAQ, Since (Figure is in ./media.ts). Owned by the asides batch agent. See ./types.ts and
  * docs/design/components-plan.md for the agreed Markdown form of each component.
  *
@@ -8,10 +8,12 @@
  *   the linked value and the row's note. LimitsTable: a Markdown table built from the data.
  * - Details: `**Summary**` and the body, never collapsed; inside a FAQ, `### Summary` and the body.
  *   FAQ: its title, if any, as `## Title`, so its `###` questions sit under it.
+ * - Experimental: like Gotcha; self-closing, the default sentence (../../components/authoring/asides/experimental.ts).
  * - Since: `(since 2022-11)`.
  */
 import type { CaseFile } from './types';
 import { quote } from './util';
+import { experimentalText } from '../../components/authoring/asides/experimental';
 import { getLimit, limitHref, limitsIn, limitSections, limitValue, type LimitField } from '../../components/authoring/asides/limits';
 
 /** The whole body goes into the blockquote, every paragraph and code block. */
@@ -39,6 +41,7 @@ export default {
 		/** The inline form returns undefined, so it falls back to `paired` and stays in its sentence. */
 		Limit: (a) => (a.note ? limitCallout(a) : undefined),
 		Since: () => undefined,
+		Experimental: (a) => `\n\n${quote(`**${a.title ?? 'Experimental'}:** ${experimentalText(a.feature)}`)}\n\n`,
 	},
 	paired: {
 		Limit: (a) => (a.note ? [`\n\n${limitCallout(a)}\n\n`, '\n\n'] : [`[${value(a.id)}](${limitHref(a.id)})`, '']),
@@ -49,6 +52,7 @@ export default {
 	transform: {
 		Caveat: callout('Caveat'),
 		Gotcha: callout('Gotcha'),
+		Experimental: callout('Experimental'),
 		Performance: callout('Performance'),
 	},
 	passthrough: [],

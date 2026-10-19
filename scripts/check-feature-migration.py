@@ -36,7 +36,7 @@ MOVED_CATEGORIES = {
     'time': ('events', 'time'),
 }
 # Categories added after the conversion (data/overlays/categories.yaml): category -> home feature.
-ADDED_CATEGORIES = {'gamepad': 'input'}
+ADDED_CATEGORIES = {'game_control': 'input'}
 
 
 def href_for(item, wiki_slugs):

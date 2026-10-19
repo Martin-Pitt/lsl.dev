@@ -1,0 +1,80 @@
+---
+title: "Experience Data"
+description: "Experience persistent storage: a grid-wide key-value store shared by every script in an experience, answered through dataserver."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, SeeAlso, Signatures } from '../../../../components/features';
+
+Scripts compiled to an [experience](/features/experience/) share a key-value store that any object in that experience can use, in any region. It suits data shared between objects, such as scores, player records or game state. Part of the [Data Storage](/features/data-storage/) feature.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- The store belongs to the script's experience, not to an object; a script outside an experience gets an error
+- Keys are up to 1011 bytes and values up to 4095 bytes
+  - Avoid commas in keys, since [`llKeysKeyValue`](/functions/llKeysKeyValue/) returns them as CSV
+- Every call is asynchronous: it returns a request key, and the result arrives in [`dataserver`](/events/dataserver/)
+  - The data starts with `1` on success, followed by a comma and the result
+  - It starts with `0` on failure, followed by a comma and an [`XP_ERROR_*`](/constants/groups/ExperienceError/) code
+- [Create](/functions/llCreateKeyValue/) fails if the key exists; [read](/functions/llReadKeyValue/) fails with [`XP_ERROR_KEY_NOT_FOUND`](/constants/XP_ERROR_KEY_NOT_FOUND/) if it does not
+- [Update](/functions/llUpdateKeyValue/) writes a value, creating the key if needed
+  - With **checked** set, it only writes if the current value equals **original_value**, else fails with [`XP_ERROR_RETRY_UPDATE`](/constants/XP_ERROR_RETRY_UPDATE/); this makes safe read-modify-write possible
+- [Delete](/functions/llDeleteKeyValue/) removes a key
+- [List keys](/functions/llKeysKeyValue/) a page at a time, [count them](/functions/llKeyCountKeyValue/), or read [used and total data](/functions/llDataSizeKeyValue/)
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llCreateKeyValue", "llReadKeyValue", "llUpdateKeyValue",
+  "llDeleteKeyValue", "dataserver"
+]} />
+
+</Box>
+</Column>
+</Columns>
+
+<Box title="Scripting Details">
+
+<Signatures names={[
+  "llCreateKeyValue", "llReadKeyValue", "llUpdateKeyValue",
+  "llDeleteKeyValue", "llKeysKeyValue", "llKeyCountKeyValue",
+  "llDataSizeKeyValue", "llGetExperienceErrorMessage", "dataserver"
+]} descriptions />
+
+</Box>
+
+## Example
+
+```lsl
+key request;
+
+default
+{
+    touch_start(integer num_detected)
+    {
+        request = llReadKeyValue("highscore");
+    }
+
+    dataserver(key id, string data)
+    {
+        if (id != request) return;
+        if (llGetSubString(data, 0, 0) == "1")
+            llSay(0, "High score: " + llGetSubString(data, 2, -1));
+        else
+            llSay(0, "Error: " + llGetExperienceErrorMessage((integer)llGetSubString(data, 2, -1)));
+    }
+}
+```
+
+## Constant groups
+
+<ConstantGroups names={["ExperienceError"]} />
+
+## Related
+
+<SeeAlso items={["feature:data-storage", "feature:experience", "category:experience_data", "category:dataserver"]} />
+
+<FeatureFooter related={["data-storage", "experience"]} />

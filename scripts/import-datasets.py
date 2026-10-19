@@ -6,6 +6,7 @@ from urllib.parse import quote
 import yaml
 from lib.wiki_render import Renderer, page_sections, anchor, head_funcs
 from lib.category_overlay import apply_category_overlay
+from lib.group_overlay import apply_group_overlay
 
 ROOT=Path(__file__).resolve().parents[1]
 def digest(path): return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -94,6 +95,9 @@ def main():
     parser.add_argument('--definitions',type=Path,default=ROOT/'data/sources/lsl_definitions.yaml')
     args=parser.parse_args()
     defs=yaml.safe_load(args.definitions.read_text(encoding='utf8'))
+    # lsl.dev-local constant groups (not upstream): data/overlays/groups.yaml, applied to the definitions themselves.
+    group_overlay_path=ROOT/'data/overlays/groups.yaml'
+    group_report=apply_group_overlay(defs,yaml.safe_load(group_overlay_path.read_text(encoding='utf8')))
     supplements=args.supplement if args.supplement is not None else sorted((ROOT/'data/sources').glob('wiki-supplement-*.xml'))
     pages={}  # exact title (MediaWiki titles are case-sensitive) -> (timestamp, page element, namespaces); insertion order is deterministic
     for source in [args.wiki,*supplements]:
@@ -259,10 +263,10 @@ def main():
     catalog['categories']=sorted(cats.values(),key=lambda x:x['label'])
     for plural in ('functions','events','constants','types','controls'): catalog[plural].sort(key=lambda x:x['name'].lower())
     catalog['wiki'].sort(key=lambda x:x['title'].lower())
-    catalog['meta']={'schemaVersion':1,'sourcePolicy':'Definitions are authoritative for signatures, parameter names and categories; sources.overlays lists lsl.dev-local category additions. Wiki text remains a historical community source; templates are partially rendered; source.sources lists every wiki page and template each page was built from, with its revision.','sources':{'wiki':{'file':args.wiki.name,'sha256':digest(args.wiki)},'supplements':[{'file':x.name,'sha256':digest(x)} for x in supplements],'definitions':{'file':args.definitions.name,'sha256':digest(args.definitions)},'overlays':[{'file':'data/overlays/categories.yaml','sha256':digest(overlay_path),'local':True,'note':'lsl.dev-local category overlay, not upstream data; adds category membership on top of the definitions','categories':overlay_report['categories']}]},'counts':{k:len(catalog[k]) for k in ('functions','events','constants','categories','wiki','types','controls')},'wikiLicense':'Creative Commons Attribution-ShareAlike 3.0','wikiLicenseUrl':'https://creativecommons.org/licenses/by-sa/3.0/','definitionsLicense':'MIT','latestWikiRevision':max(w['source']['timestamp'] for w in catalog['wiki'])}
+    catalog['meta']={'schemaVersion':1,'sourcePolicy':'Definitions are authoritative for signatures, parameter names and categories; sources.overlays lists lsl.dev-local category and constant-group additions. Wiki text remains a historical community source; templates are partially rendered; source.sources lists every wiki page and template each page was built from, with its revision.','sources':{'wiki':{'file':args.wiki.name,'sha256':digest(args.wiki)},'supplements':[{'file':x.name,'sha256':digest(x)} for x in supplements],'definitions':{'file':args.definitions.name,'sha256':digest(args.definitions)},'overlays':[{'file':'data/overlays/categories.yaml','sha256':digest(overlay_path),'local':True,'note':'lsl.dev-local category overlay, not upstream data; adds category membership on top of the definitions','categories':overlay_report['categories']},{'file':'data/overlays/groups.yaml','sha256':digest(group_overlay_path),'local':True,'note':'lsl.dev-local constant-group overlay, not upstream data; adds member-of groups on top of the definitions','groups':group_report['groups']}]},'counts':{k:len(catalog[k]) for k in ('functions','events','constants','categories','wiki','types','controls')},'wikiLicense':'Creative Commons Attribution-ShareAlike 3.0','wikiLicenseUrl':'https://creativecommons.org/licenses/by-sa/3.0/','definitionsLicense':'MIT','latestWikiRevision':max(w['source']['timestamp'] for w in catalog['wiki'])}
     if history: catalog['meta']['definitionsHistory']={'file':history_path.name,'sha256':digest(history_path),'commit':history['commit'],'commitDate':history['commitDate'],'baseline':history['baseline'],'note':'added/updated on functions, events and constants are dates (YYYY-MM-DD) from lsl-definitions git history; added = null means the item existed at the baseline import; updated counts behaviour changes only'}
     write_split(catalog)
-    report={'counts':catalog['meta']['counts'],'excluded':excluded,'apiWithoutWiki':{k:[e['name'] for e in catalog[k] if not e['wiki']] for k in ('functions','events','constants')},'unexpandedTemplates':sorted(renderer.unknown),'referencedTitlesWithoutLocalRoute':sorted(renderer.missing),'deprecatedAliasesSkipped':skipped,'categoryOverlay':overlay_report}
+    report={'counts':catalog['meta']['counts'],'excluded':excluded,'apiWithoutWiki':{k:[e['name'] for e in catalog[k] if not e['wiki']] for k in ('functions','events','constants')},'unexpandedTemplates':sorted(renderer.unknown),'referencedTitlesWithoutLocalRoute':sorted(renderer.missing),'deprecatedAliasesSkipped':skipped,'categoryOverlay':overlay_report,'groupOverlay':group_report}
     write_json(ROOT/'data/reports/import-report.json',report)
     print(json.dumps(report['counts']))
 if __name__=='__main__': main()

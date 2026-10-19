@@ -38,6 +38,7 @@ export const GET: APIRoute = () => {
 		`- [Fundamentals](${md('/fundamentals/')}): types, operators, flow control, states and events, memory, errors`,
 		`- [Reference overview](${SITE}/reference/): entry point to functions, events, constants and categories`,
 		`- [Limits](${md('/reference/limits/')}): script, memory, chat, HTTP and other numeric limits`,
+		`- [Viewer URIs](${md('/reference/viewer-uris/')}): every secondlife:// and secondlife:///app/ URI form`,
 		`- [Features overview](${SITE}/features/): Second Life features with their APIs`,
 		`- [Guides](${md('/guides/')}): longer explanations and techniques`,
 		`- [Recipes](${md('/recipes/')}): small complete scripts`,

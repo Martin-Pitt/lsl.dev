@@ -10,8 +10,9 @@ import hovercards from './hovercards';
 import guide from './guide';
 import media from './media';
 import scene from './scene';
+import diagrams from './diagrams';
 
-export const caseFiles: Record<string, CaseFile> = { core, asides, recipe, hovercards, guide, media, scene };
+export const caseFiles: Record<string, CaseFile> = { core, asides, recipe, hovercards, guide, media, scene, diagrams };
 
 type SelfClosing = (a: Attrs, page: MarkdownPage, ctx: Context) => string | undefined;
 type Paired = (a: Attrs, page: MarkdownPage, ctx: Context) => [string, string];

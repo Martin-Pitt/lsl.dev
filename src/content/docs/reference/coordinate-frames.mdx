@@ -1,0 +1,98 @@
+---
+title: "Coordinate frames"
+description: "A quick reference for Second Life coordinate frames: region, global, local, attachment, HUD, camera and prim-local frames, conversions, touch coordinates and texture transforms."
+---
+import { Diagram } from '~/components/authoring';
+
+<div class="wide-page" hidden></div>
+
+The tables below summarise each frame. For explanations and worked examples, see the
+[Coordinate frames](/guides/coordinate-frames/) guide.
+
+## Space frames
+
+| Frame | Origin | Axes / units | Read with | Set with |
+| --- | --- | --- | --- | --- |
+| Region | South-west corner of the region, height 0 | +X east, +Y north, +Z up; metres, 0–256 horizontally | [`llGetPos`](/functions/llGetPos/) (unattached), [`llGetRootPosition`](/functions/llGetRootPosition/), [`llGetRootRotation`](/functions/llGetRootRotation/), [`llGetRot`](/functions/llGetRot/) (except an attachment root), [`llDetectedPos`](/functions/llDetectedPos/), [`llCastRay`](/functions/llCastRay/), [`OBJECT_POS`](/constants/OBJECT_POS/), [`PRIM_POSITION`](/constants/PRIM_POSITION/) and [`PRIM_ROTATION`](/constants/PRIM_ROTATION/) (always region, also for children and attachments) | [`llSetRegionPos`](/functions/llSetRegionPos/), [`llSetPos`](/functions/llSetPos/) on an unattached root |
+| Global (grid) | South-west corner of the grid | Region axes; metres | [`llGetRegionCorner`](/functions/llGetRegionCorner/) `+` region position | Convert to region first |
+| Local (child prims) | The root prim | The root's axes; metres | [`llGetLocalPos`](/functions/llGetLocalPos/), [`llGetLocalRot`](/functions/llGetLocalRot/), [`PRIM_POS_LOCAL`](/constants/PRIM_POS_LOCAL/), [`PRIM_ROT_LOCAL`](/constants/PRIM_ROT_LOCAL/) | [`llSetPos`](/functions/llSetPos/) on a child, [`llSetLocalRot`](/functions/llSetLocalRot/), `PRIM_POS_LOCAL`, `PRIM_ROT_LOCAL` |
+| Attachment | The attach point | The attach point's axes; metres | `llGetLocalPos`, `llGetLocalRot` in the attachment root | `llSetPos`, `llSetLocalRot` on the attachment root |
+| Avatar (in an attachment) | The wearer | Region axes | `llGetPos` (wearer's region position), `llGetRootRotation` (wearer's region rotation) | Not settable |
+| HUD (screen) | Each HUD attach point, on screen | +X into the screen, +Y left, +Z up; about 1 unit tall (Z −0.5 to +0.5), width depends on aspect ratio | `llGetLocalPos`, `llGetLocalRot` | `llSetPos`, `llSetLocalRot` |
+| Object axes (`local` flag) | — | `FALSE`: region axes; `TRUE`: the object's axes | — | [`llApplyImpulse`](/functions/llApplyImpulse/), [`llSetForce`](/functions/llSetForce/), [`llSetTorque`](/functions/llSetTorque/), [`llSetAngularVelocity`](/functions/llSetAngularVelocity/), [`llApplyRotationalImpulse`](/functions/llApplyRotationalImpulse/) |
+| Camera | Region frame (the avatar's region for `CAMERA_POSITION` and `CAMERA_FOCUS`) | Region axes; metres | [`llGetCameraPos`](/functions/llGetCameraPos/), [`llGetCameraRot`](/functions/llGetCameraRot/) | [`CAMERA_POSITION`](/constants/CAMERA_POSITION/), [`CAMERA_FOCUS`](/constants/CAMERA_FOCUS/) |
+| Camera (follow) | The avatar's position | Relative to the avatar; metres | — | [`CAMERA_FOCUS_OFFSET`](/constants/CAMERA_FOCUS_OFFSET/) (`ZERO_VECTOR` looks at the avatar's `llGetPos`), [`CAMERA_DISTANCE`](/constants/CAMERA_DISTANCE/), [`CAMERA_PITCH`](/constants/CAMERA_PITCH/) |
+| Prim-local offsets | The prim | The prim's axes; metres | — | [`llSitTarget`](/functions/llSitTarget/) offset and rotation, [`llSetLinkCamera`](/functions/llSetLinkCamera/) eye and at |
+
+[`llTargetOmega`](/functions/llTargetOmega/) spins a root around a region axis (an attachment
+around the attachment's axis) and a child around its own local axis. Seated avatars are links
+after the last prim, positioned relative to the root.
+
+<Diagram name="frames/region-global" />
+
+<Diagram name="frames/root-child" />
+
+## Conversions
+
+```lsl
+// Child local to region
+vector regionPos = llGetRootPosition() + llGetLocalPos() * llGetRootRotation();
+rotation regionRot = llGetLocalRot() * llGetRootRotation();
+
+// Region to child local
+vector localPos = (regionPos - llGetRootPosition()) / llGetRootRotation();
+rotation localRot = regionRot / llGetRootRotation();
+
+// Region to global, and back
+vector globalPos = llGetRegionCorner() + llGetPos();
+vector backToRegion = globalPos - llGetRegionCorner();
+
+// Velocity from region axes to the object's axes
+vector localVel = llGetVel() / llGetRot();
+```
+
+## Gotchas
+
+- [`llSetRot`](/functions/llSetRot/) on a child is offset by the root rotation; use
+  `llSetLocalRot(globalRot / llGetRootRotation())` or `PRIM_ROT_LOCAL` instead
+- `llSetPos` is local on a child, region on an unattached root, and relative to the attach point
+  on an attachment root
+- `llGetLocalPos` on an unattached root returns the region position
+- `PRIM_POSITION` with `LINK_SET` mixes frames (root in region or attachment coordinates,
+  children local); use `LINK_ROOT`
+- `llGetRot` on an attachment root reports the avatar's rotation; use `llGetLocalRot`
+- An avatar's facing is only accurate seated or in mouselook
+- Animations are invisible to the simulator: there is no skeleton to read
+- No member access on a function return: assign `llGetPos()` to a variable before reading `.z`
+
+<Diagram name="frames/hud" />
+
+## Surface frames
+
+| Function | Frame | Notes |
+| --- | --- | --- |
+| [`llDetectedTouchST`](/functions/llDetectedTouchST/) | Face, `[0, 1]`, origin bottom-left | Unaffected by the texture |
+| [`llDetectedTouchUV`](/functions/llDetectedTouchUV/) | Texture coordinates | Change with repeats and rotation; vertical flipped on glTF mesh |
+| [`llDetectedTouchPos`](/functions/llDetectedTouchPos/) | Region | Metres |
+| [`llDetectedTouchNormal`](/functions/llDetectedTouchNormal/), [`llDetectedTouchBinormal`](/functions/llDetectedTouchBinormal/) | Region axes | Surface normal and the +T tangent |
+
+## Texture transforms
+
+| | Blinn-Phong (`PRIM_TEXTURE`, `PRIM_NORMAL`, `PRIM_SPECULAR`) | PBR (`PRIM_GLTF_*`) |
+| --- | --- | --- |
+| Origin | Bottom-left | Top-left |
+| V direction | Up | Down |
+| Pivot | Centre | Top-left corner |
+| Positive rotation | Counter-clockwise | Clockwise |
+| Order | Rotate, scale, offset | Scale, rotate, offset |
+| Offset | From the centre | From the top-left corner |
+| Repeats | Per face (default mapping) or per half metre (planar) | The same |
+
+Converting Blinn-Phong to PBR: rotation becomes `-rotation`, the V offset changes sign, and the
+scale is only exact at multiples of 90°. Source: the viewer's texture transform code
+(`llface.cpp`, `textureUtilV.glsl`, `llgltfmaterial.cpp`). Not yet tested in-world: whether
+`PRIM_GLTF_*` values from LSL reach the viewer unchanged, and which way the texture visibly
+turns. LSL functions for the conversion are in the guide's
+[Texture transforms](/guides/coordinate-frames/#texture-transforms) section.
+
+<Diagram name="frames/texture-transforms" />

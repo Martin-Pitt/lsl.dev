@@ -169,6 +169,7 @@ export default defineConfig({
 							{ label: 'Constant groups', link: '/constants/groups/' },
 						],
 					},
+					{ label: 'Coordinate frames', link: '/reference/coordinate-frames/' },
 					{ label: 'Limits', link: '/reference/limits/' },
 					{ label: 'Viewer URIs', link: '/reference/viewer-uris/' },
 					{ label: 'Simulator release notes ↗', link: 'https://releasenotes.secondlife.com/categories/simulator.html', attrs: { target: '_blank', rel: 'noopener' } },

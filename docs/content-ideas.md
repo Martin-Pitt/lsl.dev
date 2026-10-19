@@ -411,7 +411,7 @@ Each idea appears once, under its first feature area; the Features column lists 
 
 | Title | Pri | Description | Features | Wiki sources | Status |
 |---|---|---|---|---|---|
-| Vectors and rotations | high | Quaternions, local and global frames, and common mistakes. | math | llRot2Euler; llRotBetween; Angle Between Two Vectors; ZERO ROTATION |  |
+| Vectors and rotations | high | Quaternions, local and global frames, and common mistakes. | math | llRot2Euler; llRotBetween; Angle Between Two Vectors; ZERO ROTATION | Frames covered: [Coordinate frames](../src/content/docs/guides/coordinate-frames.mdx) |
 | Bitwise flags and bit fields | medium | Masks, flags, and packing values into integers. | math | Bit field; Boolean; LSL Operators |  |
 | Constraining rotations (and turret) | medium | Clamping rotations, with a turret sub-page. | math, movement | llRotBetween; llRot2Euler | Covered: [Constraining rotations](../src/content/docs/guides/constraining-rotations/index.mdx) |
 | Interpolation and easing | medium | Lerp, slerp and easing curves. | math, movement | llSetKeyframedMotion | Covered: [Interpolation](../src/content/docs/guides/interpolation.mdx) |

@@ -437,6 +437,38 @@ item.
 </Inventory>
 ```
 
+## Diagrams
+
+Diagram: a static SVG diagram picked by name from a registry.
+
+```mdx
+import { Diagram } from '~/components/authoring';
+```
+
+```mdx
+<Diagram name="frames/root-child" />
+<Diagram name="frames/tank" caption="The turret on a sloped hull." />
+<Diagram name="frames/hud">Caption with **Markdown**.</Diagram>
+<Diagram name="frames/hud" caption="" />
+```
+
+The caption is the diagram's own by default, or the `caption` prop, or Markdown children;
+`caption=""` shows none. The SVG is drawn at build time, with no client JS. It is `role="img"`,
+labelled by the diagram's title and description. Colours follow the theme through `light-dark()`,
+with axes coloured as in the Second Life build tool: X red, Y green, Z blue. Below a minimum width
+(34rem) the diagram keeps its size and scrolls horizontally. An unknown name fails the build.
+
+Names: `frames/region-global`, `frames/root-child`, `frames/rotate-vector`, `frames/attachment`,
+`frames/local-flag`, `frames/hud`, `frames/st-uv`, `frames/texture-transforms`, `frames/tank`,
+`frames/tank-steps`.
+
+Markdown export: `*[Diagram: title]* description`, then the caption in italics (Markdown children
+as they are).
+
+To add a diagram, add a `DiagramDef` (`width`, `height`, `title`, `desc`, optional `caption`, and
+a `build(svg)` function) to a module under `src/components/authoring/diagrams/`, and register the
+module's record in `registry.ts`.
+
 ## Deferred
 
 CodeGroup (LSL ⇄ SLua tabs) and StateFlow/EventFlow diagrams are planned but not scheduled. Use

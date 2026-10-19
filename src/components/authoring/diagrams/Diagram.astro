@@ -1,0 +1,33 @@
+---
+/**
+ * <Diagram>: a static SVG diagram from the registry in ./registry.ts, drawn at build time. No
+ * client JS. The SVG is role="img" with the diagram's title and description; the caption is the
+ * diagram's own, or the prop, or Markdown children. An unknown name fails the build.
+ *
+ *   <Diagram name="frames/root-child" />
+ *   <Diagram name="frames/tank" caption="The turret on a sloped hull." />
+ *   <Diagram name="frames/hud">Caption with **Markdown**.</Diagram>
+ *   <Diagram name="frames/hud" caption="" />   no caption
+ */
+import { Svg } from './lib';
+import { diagram } from './registry';
+
+interface Props { name: string; caption?: string }
+const { name } = Astro.props;
+const def = diagram(name);
+const id = `dg-${name.replace(/[^a-z0-9]+/gi, '-')}`;
+const svg = new Svg(id);
+def.build(svg);
+const hasSlot = Astro.slots.has('default');
+const caption = Astro.props.caption ?? (hasSlot ? undefined : def.caption);
+---
+<figure class="au-diagram">
+	<div class="au-diagram__scroll">
+		<svg viewBox={`0 0 ${def.width} ${def.height}`} role="img" aria-labelledby={`${id}-t ${id}-d`} style={`--dg-w:${def.width}`}>
+			<title id={`${id}-t`}>{def.title}</title>
+			<desc id={`${id}-d`}>{def.desc}</desc>
+			<Fragment set:html={svg.toString()} />
+		</svg>
+	</div>
+	{(caption || hasSlot) && <figcaption>{caption}<slot /></figcaption>}
+</figure>

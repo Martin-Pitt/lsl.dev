@@ -1,0 +1,505 @@
+---
+title: "Coordinate frames"
+description: "Which frame every LSL position, rotation and direction is in: region and global, root and child prims, attachments, HUDs, object axes, the camera, touch coordinates and texture transforms, and how to convert between them."
+sidebar:
+  order: 6
+---
+
+import { Caveat, Gotcha, Diagram } from '~/components/authoring';
+
+A vector in LSL is three numbers, and nothing in the type says what they are measured from or
+along which axes. `<1.0, 0.0, 0.0>` can mean "one metre east of the region's corner", "one metre
+along the root prim's forward axis", "a little into the screen" or "forward, whichever way this
+object faces". Most frame bugs come from mixing two of these. So for every position, rotation or
+direction you handle, ask one question: **which frame is it in?** Then convert before you combine
+it with anything from another frame.
+
+For a one-page summary of which function uses which frame, see
+[Coordinate frames reference](/reference/coordinate-frames/).
+
+## Region and global
+
+<Diagram name="frames/region-global" />
+
+The region frame is the one most functions use. Its origin is the region's south-west corner at
+height 0, +X points east, +Y north and +Z up, in metres; a standard region runs 0 to 256 on X and
+Y. These are all region coordinates:
+
+- [`llGetPos`](/functions/llGetPos/) in an unattached object, and [`llSetRegionPos`](/functions/llSetRegionPos/)
+- [`llGetRootPosition`](/functions/llGetRootPosition/)
+- [`llDetectedPos`](/functions/llDetectedPos/) and [`llDetectedTouchPos`](/functions/llDetectedTouchPos/)
+- [`llGetCameraPos`](/functions/llGetCameraPos/), and `CAMERA_POSITION` and `CAMERA_FOCUS` in [`llSetCameraParams`](/functions/llSetCameraParams/)
+- [`llCastRay`](/functions/llCastRay/) start and end points and hit positions
+- [`OBJECT_POS`](/constants/OBJECT_POS/) from [`llGetObjectDetails`](/functions/llGetObjectDetails/)
+- [`PRIM_POSITION`](/constants/PRIM_POSITION/) when you *get* it, for any prim
+
+Velocities have a frame too. [`llGetVel`](/functions/llGetVel/) is in region axes; to get the
+velocity along the object's own axes (forward speed, sideways slip), rotate it back:
+
+```lsl
+vector localVel = llGetVel() / llGetRot();
+float forwardSpeed = localVel.x;
+```
+
+Global coordinates place a point on the whole grid. [`llGetRegionCorner`](/functions/llGetRegionCorner/)
+returns the global position of the region's south-west corner in metres (with z 0), so a global
+position is the corner plus the region position. Divide the corner by 256 to get the region's
+grid offset.
+
+```lsl
+vector corner = llGetRegionCorner();
+vector globalPos = corner + llGetPos();
+// The region's grid offset, in regions
+integer gridX = (integer)(corner.x / 256.0);
+integer gridY = (integer)(corner.y / 256.0);
+```
+
+## Rotating vectors
+
+<Diagram name="frames/rotate-vector" />
+
+Two operators move a direction between frames:
+
+- `v * rot` takes a vector measured along `rot`'s axes and gives it in the outer frame's axes
+  (local to region)
+- `v / rot` does the inverse (region to local)
+
+So `<1.0, 0.0, 0.0> * llGetRot()` is the object's forward direction in region axes (the same as
+[`llRot2Fwd`](/functions/llRot2Fwd/)), and `(target - llGetPos()) / llGetRot()` is where a target
+lies from the object's point of view: positive x in front, positive y to its left, positive z
+above.
+
+Rotations combine left to right: `a * b` applies `a` first, then `b`. A rotation inside a frame
+times the frame's rotation gives the rotation in the outer frame, which is why every conversion
+below has the inner thing on the left.
+
+Positions need a translation as well as a rotation: rotate the offset, then add the frame's origin.
+To rez something forward and a little above a prim, turn the offset by the prim's rotation and add
+its position:
+
+```lsl
+vector relativeOffset = <2.0, 0.0, 1.0>; // forward and a little above, in the prim's axes
+vector myPos = llGetPos();
+rotation myRot = llGetRot();
+vector rezPos = myPos + (relativeOffset * myRot);
+llRezObjectWithParams("Object", [REZ_POS, rezPos, FALSE, FALSE]); // region coordinates
+```
+
+## Linksets: root and child
+
+<Diagram name="frames/root-child" />
+
+In a linkset the root prim lives in the region frame, and every child prim's position and
+rotation are measured in the root's frame: an offset from the root's position, along the root's
+axes. [`llGetLocalPos`](/functions/llGetLocalPos/), [`llGetLocalRot`](/functions/llGetLocalRot/),
+[`llSetLocalRot`](/functions/llSetLocalRot/), [`PRIM_POS_LOCAL`](/constants/PRIM_POS_LOCAL/) and
+[`PRIM_ROT_LOCAL`](/constants/PRIM_ROT_LOCAL/) all use this frame. On the root itself,
+`llGetLocalPos` returns the region position (or, when attached, the offset from the attach point).
+
+{/* TODO: screenshot pair (Compare) of the build floater Ruler set to World and to Local on a rotated linkset */}
+
+To convert between a child's local values and region values:
+
+```lsl
+// Region position and rotation of a child, from its local values
+vector regionPos = llGetRootPosition() + localPos * llGetRootRotation();
+rotation regionRot = localRot * llGetRootRotation();
+
+// And back
+vector localPos = (regionPos - llGetRootPosition()) / llGetRootRotation();
+rotation localRot = regionRot / llGetRootRotation();
+```
+
+### Functions that mix frames
+
+Not every function uses the same frame for getting and setting, or for root and child:
+
+- [`llSetPos`](/functions/llSetPos/) is in region coordinates on an unattached root, relative to
+  the attach point on an attachment's root, and local to the root on a child
+- [`llGetRot`](/functions/llGetRot/) on a child returns its global (region) rotation, but
+  [`llSetRot`](/functions/llSetRot/) on a child is offset by the root's rotation. Its page's
+  workaround is to divide by the root rotation (to set a rotation relative to the root), or
+  divide by it twice (to set a global rotation). Use `llSetLocalRot` or `PRIM_ROT_LOCAL` instead:
+  `llSetLocalRot(globalRot / llGetRootRotation())` sets a global rotation on a child
+- `PRIM_POSITION` *get* always returns region coordinates, and [`PRIM_ROTATION`](/constants/PRIM_ROTATION/)
+  *get* always the global rotation, so read local values with `PRIM_POS_LOCAL` and `PRIM_ROT_LOCAL`
+- [`llGetGeometricCenter`](/functions/llGetGeometricCenter/) is relative to the root;
+  [`llGetCenterOfMass`](/functions/llGetCenterOfMass/) called from a child returns that child's
+  centre of mass, still in region coordinates
+
+<Gotcha title="PRIM_POSITION with LINK_SET">
+Setting `PRIM_POSITION` on `LINK_SET` doesn't move the object: the root treats the vector as a
+region (or attachment) position and every child treats it as a local offset, so the children all
+pile up at that offset from the root. To move the whole object, set `PRIM_POSITION` on
+`LINK_ROOT`.
+</Gotcha>
+
+Seated avatars are links too, numbered after the last prim (see
+[Working with link numbers](/guides/link-numbers/)), and setting their `PRIM_POSITION` is relative
+to the root like any other child.
+
+### Helpers
+
+These assume an unattached object and work from any prim in it.
+
+```lsl
+// Root-relative (local) position to region coordinates
+vector LocalToRegion(vector local)
+{
+    return llGetRootPosition() + local * llGetRootRotation();
+}
+
+// Region coordinates to a root-relative (local) position
+vector RegionToLocal(vector region)
+{
+    return (region - llGetRootPosition()) / llGetRootRotation();
+}
+
+// Root-relative (local) rotation to a region rotation
+rotation LocalRotToRegion(rotation local)
+{
+    return local * llGetRootRotation();
+}
+
+// Region rotation to a root-relative (local) rotation
+rotation RegionRotToLocal(rotation region)
+{
+    return region / llGetRootRotation();
+}
+
+// Region direction (no translation) to the root's axes
+vector RegionDirToLocal(vector dir)
+{
+    return dir / llGetRootRotation();
+}
+```
+
+For example, a child can move itself to a region position with
+`llSetLinkPrimitiveParamsFast(LINK_THIS, [PRIM_POS_LOCAL, RegionToLocal(target)])`.
+
+## Attachments
+
+<Diagram name="frames/attachment" />
+
+The simulator has no skeleton. It knows an avatar's position, rotation and physics shape (the
+hull in the diagram), and to the simulator every attach point is the avatar's position, whichever
+one an attachment uses. The attachment's offset and rotation from its attach point are real and
+stored with it ([`llGetLocalPos`](/functions/llGetLocalPos/) and `llGetLocalRot` report them),
+but where that attach point is, on the animated skeleton, only viewers know; that is how a hand
+attachment ends up in the hand. So a
+script in an attachment never sees where the attachment is drawn: `llGetPos` reports the
+avatar's position, and [`llSensor`](/functions/llSensor/) in the root looks the way the avatar
+faces, wherever the object is attached.
+
+In an attachment:
+
+- `llGetPos` in the root returns the wearer's region position, not the attachment's
+- `llGetPos` in a child prim is relative to the avatar's position and rotation plus the root's
+  offset, which matches what you see only at [`ATTACH_AVATAR_CENTER`](/constants/ATTACH_AVATAR_CENTER/)
+  with zero offset and `ZERO_ROTATION`
+- `llGetLocalPos` in the root is the offset from the attach point
+- `llGetRot` in the root reports the avatar's rotation; use `llGetLocalRot` for the attachment's
+  own rotation on its attach point
+- [`llGetRootRotation`](/functions/llGetRootRotation/) returns the avatar's region rotation. Its
+  page gives
+  `llList2Rot(llGetLinkPrimitiveParams(!!llGetLinkNumber(), [PRIM_ROT_LOCAL]), 0)` as working in
+  all cases for the attachment's local rotation
+- The avatar's rotation is an accurate facing only when the avatar is seated or in mouselook;
+  otherwise it is a rough direction
+
+## HUDs
+
+<Diagram name="frames/hud" />
+
+A HUD attachment lives on the viewer window, not in the region. Each HUD attach point is an origin
+on the screen, and they all share the same axes: +Y to the left, +Z up, and +X into the screen
+(the HUD camera looks along +X). The window is about one unit tall (Z from −0.5 to +0.5), and its
+width depends on the window's aspect ratio, so anything placed near the sides can end up off
+screen on a narrower window.
+
+`llSetPos` on a HUD's root sets its offset from the attach point in these units. To move a HUD
+button 0.1 up and 0.2 to the right:
+
+```lsl
+vector pos = llGetLocalPos();
+llSetPos(pos + <0.0, -0.2, 0.1>);
+```
+
+`llDetectedTouchPos` on a HUD isn't in region coordinates; the
+[`llDetectedTouchPos`](/functions/llDetectedTouchPos/) page has a `GetRealTouchPos` helper that
+adds the attach point's offset for one aspect ratio. For positions within one face, the touch's ST
+coordinates (below) are usually simpler.
+
+## Object axes
+
+<Diagram name="frames/local-flag" />
+
+Physics functions that take a direction also take a `local` flag:
+[`llApplyImpulse`](/functions/llApplyImpulse/), [`llSetForce`](/functions/llSetForce/),
+[`llSetTorque`](/functions/llSetTorque/), [`llSetAngularVelocity`](/functions/llSetAngularVelocity/)
+and [`llApplyRotationalImpulse`](/functions/llApplyRotationalImpulse/). With `FALSE` the vector is
+in region axes; with `TRUE` it is along the object's own axes, so `<1.0, 0.0, 0.0>` means
+"forward" whichever way the object faces.
+
+```lsl
+// Push east, whichever way the object faces
+llApplyImpulse(<5.0, 0.0, 0.0>, FALSE);
+// Push forward along the object's own X axis
+llApplyImpulse(<5.0, 0.0, 0.0>, TRUE);
+```
+
+Other functions have a fixed frame:
+
+- [`llTargetOmega`](/functions/llTargetOmega/) on the root spins around a region axis (an
+  attachment's around the attachment's axis); on a child it spins around the child's own axis. On
+  a non-physical object or a child it's only a viewer-side effect
+- [`llRotLookAt`](/functions/llRotLookAt/) takes a region rotation. To point the object's +Y at a
+  target, its page uses `llRotBetween(<0.0, 1.0, 0.0>, llVecNorm(target - llGetPos()))`
+- [`llSitTarget`](/functions/llSitTarget/)'s offset and rotation are relative to the prim the
+  script is in
+- [`llSetLinkCamera`](/functions/llSetLinkCamera/)'s eye and focus offsets are local to the prim
+
+## Camera
+
+[`llGetCameraPos`](/functions/llGetCameraPos/) and [`llGetCameraRot`](/functions/llGetCameraRot/)
+are in the region frame and need [`PERMISSION_TRACK_CAMERA`](/constants/PERMISSION_TRACK_CAMERA/).
+The camera looks along its rotation's +X. To find where the camera is pointing relative to a
+vehicle, rotate it into the vehicle's frame:
+
+```lsl
+rotation camRot = llGetCameraRot();
+rotation camInVehicle = camRot / llGetRootRotation();
+```
+
+[`llSetCameraParams`](/functions/llSetCameraParams/) mixes two frames. With
+[`CAMERA_POSITION_LOCKED`](/constants/CAMERA_POSITION_LOCKED/) and
+[`CAMERA_FOCUS_LOCKED`](/constants/CAMERA_FOCUS_LOCKED/),
+[`CAMERA_POSITION`](/constants/CAMERA_POSITION/) and [`CAMERA_FOCUS`](/constants/CAMERA_FOCUS/)
+are region positions in the region the avatar is in, not offsets from the avatar or the object.
+The viewer turns them into a fixed point in the world when they arrive, so a locked camera stays
+put while the avatar or vehicle moves. Near a region border, remember that they are measured from
+the avatar's region, which may not be the scripted object's. The follow-camera
+rules, such as [`CAMERA_DISTANCE`](/constants/CAMERA_DISTANCE/),
+[`CAMERA_PITCH`](/constants/CAMERA_PITCH/) and
+[`CAMERA_FOCUS_OFFSET`](/constants/CAMERA_FOCUS_OFFSET/), are relative to the avatar instead: a
+focus offset of `ZERO_VECTOR` looks at the avatar's own `llGetPos()`. To lock the camera behind
+and above an object, convert the offset to region coordinates first:
+
+```lsl
+vector pos = llGetPos();
+rotation rot = llGetRot();
+llSetCameraParams([
+    CAMERA_ACTIVE, TRUE,
+    CAMERA_POSITION_LOCKED, TRUE,
+    CAMERA_FOCUS_LOCKED, TRUE,
+    CAMERA_POSITION, pos + (<-4.0, 0.0, 2.0> * rot),
+    CAMERA_FOCUS, pos
+]);
+```
+
+## Surfaces: touch coordinates
+
+<Diagram name="frames/st-uv" />
+
+A touch tells you where on a face it landed in several frames:
+
+- [`llDetectedTouchPos`](/functions/llDetectedTouchPos/): the point, in region coordinates
+- [`llDetectedTouchNormal`](/functions/llDetectedTouchNormal/) and
+  [`llDetectedTouchBinormal`](/functions/llDetectedTouchBinormal/): the surface normal and the
+  binormal (the tangent along +T), in region axes
+- [`llDetectedTouchST`](/functions/llDetectedTouchST/): the position on the face, usually 0 to 1
+  from the bottom-left corner, whatever texture is on it
+- [`llDetectedTouchUV`](/functions/llDetectedTouchUV/): the position in the texture's space, which
+  changes with repeats, offsets and rotation
+
+Use ST for buttons and sliders laid out on a face, and UV to find the pixel of the texture that
+was touched. On a glTF mesh the vertical coordinate is flipped for both.
+
+```lsl
+touch_start(integer total)
+{
+    vector st = llDetectedTouchST(0);
+    // Left half or right half of the face
+    if (st.x < 0.5) llOwnerSay("Left");
+    else llOwnerSay("Right");
+}
+```
+
+## Texture transforms: Blinn-Phong and PBR
+
+<Diagram name="frames/texture-transforms" />
+
+Faces have two sets of texture transforms, in different conventions:
+
+- **Blinn-Phong** ([`PRIM_TEXTURE`](/constants/PRIM_TEXTURE/), [`PRIM_NORMAL`](/constants/PRIM_NORMAL/),
+  [`PRIM_SPECULAR`](/constants/PRIM_SPECULAR/)) works around the face's centre: the viewer
+  subtracts 0.5, rotates, scales by the repeats, adds the offset and adds 0.5 back. V points up and
+  offsets are measured from the centre. Repeats are per face with default mapping, or per half
+  metre with planar mapping. See [Texture coordinates](/guides/texture-coordinates/) for atlas maths
+- **PBR** ([`PRIM_GLTF_BASE_COLOR`](/constants/PRIM_GLTF_BASE_COLOR/) and the other `PRIM_GLTF_*`
+  parameters) uses glTF's `KHR_texture_transform`: the origin and pivot are the top-left corner,
+  V points down, and the order is scale, then rotate, then offset. Texture animation
+  ([`llSetTextureAnim`](/functions/llSetTextureAnim/)) is applied before this, in the SL
+  convention
+
+So the same numbers give different results in the two. The rotation has the opposite sign, the
+V offset has the opposite sign, and the pivot moves from the centre to a corner. Because
+Blinn-Phong scales after rotating and glTF scales before, a non-uniform repeat on a rotated texture
+shears differently: the conversion is exact only at multiples of 90°, and Linden Lab's own
+converter calls it close enough at 45°.
+
+These functions follow the viewer's conversion (`convertTextureTransformToPBR` and
+`convertPBRTransformToTexture` in `llgltfmaterial.cpp`). Rotations are in radians. Offsets are
+periodic, so the result is wrapped into −1 to 1, the range `PRIM_GLTF_*` documents.
+
+```lsl
+// Blinn-Phong repeats, offsets and rotation to PRIM_GLTF_* values: [repeats, offsets, rotation]
+list TextureToPBR(vector repeats, vector offsets, float rot)
+{
+    float c = llCos(rot);
+    float s = llSin(rot);
+    vector scale = <(repeats.x * c * c) + (repeats.y * s * s),
+                    (repeats.x * s * s) + (repeats.y * c * c), 0.0>;
+    float ps = -0.5 * scale.x;
+    float pt = -0.5 * scale.y;
+    float rotS = (ps * c) - (pt * s);
+    float rotT = (ps * s) + (pt * c);
+    float ox = rotS + 0.5 + offsets.x;
+    float oy = rotT + 0.5 - offsets.y;
+    // Wrap the offsets into (-1, 1)
+    ox -= (integer)ox;
+    oy -= (integer)oy;
+    return [scale, <ox, oy, 0.0>, -rot];
+}
+
+// PRIM_GLTF_* repeats, offsets and rotation to Blinn-Phong values: [repeats, offsets, rotation]
+list PBRToTexture(vector repeats, vector offsets, float rot)
+{
+    float texRot = -rot;
+    float c = llCos(texRot);
+    float s = llSin(texRot);
+    float denom = (c * c) - (s * s);
+    vector scale;
+    if (llFabs(denom) < 0.0001)
+    {
+        // At 45°, the two repeats can't be separated
+        float avg = (repeats.x + repeats.y) * 0.5;
+        scale = <avg, avg, 0.0>;
+    }
+    else
+    {
+        scale = <((repeats.x * c * c) - (repeats.y * s * s)) / denom,
+                 ((repeats.y * c * c) - (repeats.x * s * s)) / denom, 0.0>;
+    }
+    float ps = -0.5 * repeats.x;
+    float pt = -0.5 * repeats.y;
+    float rotS = (ps * c) - (pt * s);
+    float rotT = (ps * s) + (pt * c);
+    float ox = offsets.x - rotS - 0.5;
+    float oy = -(offsets.y - rotT - 0.5);
+    ox -= (integer)ox;
+    oy -= (integer)oy;
+    return [scale, <ox, oy, 0.0>, texRot];
+}
+```
+
+To copy a face's Blinn-Phong transform onto its PBR base colour:
+
+```lsl
+list tex = llGetLinkPrimitiveParams(LINK_THIS, [PRIM_TEXTURE, 0]);
+list pbr = TextureToPBR(llList2Vector(tex, 1), llList2Vector(tex, 2), llList2Float(tex, 3));
+// Keep the other base colour values; replace repeats, offsets and rotation
+list base = llGetLinkPrimitiveParams(LINK_THIS, [PRIM_GLTF_BASE_COLOR, 0]);
+llSetLinkPrimitiveParamsFast(LINK_THIS,
+    [PRIM_GLTF_BASE_COLOR, 0] + llListReplaceList(base, pbr, 1, 3));
+```
+
+<Caveat title="Untested in-world">
+The conversion follows the viewer source and matches Linden Lab's own test cases, but it hasn't
+been tested in Second Life. Two things in particular aren't confirmed: that the simulator passes
+`PRIM_GLTF_*` repeats, offsets and rotation to the viewer unchanged (the build floater shows them
+unchanged apart from radians shown as degrees), and which way an image visibly turns on the face
+for a positive rotation. The diagram's arrows show each parameter's sign convention, not a
+measured direction.
+</Caveat>
+
+Negative repeats (a flipped texture) keep their sign at 0° rotation. At other angles the formula
+mixes the two repeats through cos² and sin², so a flip on one axis doesn't convert cleanly; flip
+in whichever system you are working in rather than converting a flipped transform.
+
+## Putting it together: a tank
+
+<Diagram name="frames/tank" />
+
+A tank uses almost every frame on this page. The hull is the root, sitting on a slope in the
+region. The turret turns around the hull's up axis, and the barrel tilts up and down, then turns
+with the turret.
+
+Linksets are flat: every child is relative to the root, never to another child. The barrel is
+logically mounted on the turret, but LSL doesn't know that, so the script multiplies the turret's
+rotation in by hand:
+
+- Turret: `PRIM_ROT_LOCAL` is `yaw`
+- Barrel: `PRIM_ROT_LOCAL` is `pitch * yaw` (tilt, then turn with the ring), and `PRIM_POS_LOCAL`
+  is `turretBase + ((offset * pitch) * yaw)`, where `turretBase` is the turret's pivot in the
+  hull's frame and `offset` is where the barrel sits from that pivot
+
+<Diagram name="frames/tank-steps" />
+
+**Outward, to the region.** To fire, you need the muzzle's region position and direction, for
+[`llRezObjectWithParams`](/functions/llRezObjectWithParams/) or `llCastRay`. Keep going left to
+right: add the hull's rotation and position.
+
+```lsl
+rotation hullRot = llGetRootRotation();
+vector muzzleLocal = turretBase + ((<barrelLength, 0.0, 0.0> * pitch) * yaw);
+vector muzzle = llGetRootPosition() + (muzzleLocal * hullRot);
+rotation barrelRot = (pitch * yaw) * hullRot;
+vector fireDir = llRot2Fwd(barrelRot);
+
+list hit = llCastRay(muzzle, muzzle + (fireDir * 100.0), []);
+llRezObjectWithParams("Shell", [
+    REZ_POS, muzzle, FALSE, FALSE,      // region coordinates, centre of the shell
+    REZ_ROT, barrelRot, FALSE,          // region rotation
+    REZ_VEL, fireDir * 40.0, FALSE, TRUE, // region axes, plus the tank's own velocity
+    REZ_PARAM, 1
+]);
+```
+
+Every rez rule says which frame its value is in: [`REZ_POS`](/constants/REZ_POS/) and
+[`REZ_ROT`](/constants/REZ_ROT/) take a **relative** flag, and [`REZ_VEL`](/constants/REZ_VEL/) a
+**local** flag. The muzzle, rotation and direction above are already in region space, so all
+three are `FALSE`. `REZ_VEL`'s last flag, **inherit**, adds the rezzer's own velocity, so the
+shell leaves a moving tank at the right speed.
+
+**Inward, for aiming.** To aim at a target in the region, go the other way: bring the target into
+the hull's frame, then split the direction into yaw and pitch with `ConstrainYaw` and
+`ConstrainPitch` from [Constraining rotations](/guides/constraining-rotations/#the-functions).
+In the hull's frame its up axis is just `<0.0, 0.0, 1.0>`.
+
+```lsl
+vector dir = (target - llGetRootPosition()) / llGetRootRotation();
+rotation aim = llRotBetween(<1.0, 0.0, 0.0>, llVecNorm(dir));
+rotation yaw = ConstrainYaw(aim, <0.0, 0.0, 1.0>);
+rotation pitch = ConstrainPitch(aim / yaw, <0.0, 0.0, 1.0>);
+```
+
+<Gotcha title="Sloped hulls">
+Building the turret's rotation from region Euler angles (for example
+`llEuler2Rot(<0.0, 0.0, heading>)`) turns it around region Z. That looks right on flat ground,
+but on a slope the turret tips out of its ring. Work in the hull's frame, as above, so it turns
+around the hull's up axis.
+</Gotcha>
+
+[Turret rotation](/guides/constraining-rotations/turret/) has a complete script that follows a
+seated avatar's camera this way.
+
+## Notes and limits
+
+- These conversions assume an unattached object. In an attachment, `llGetPos`, `llGetRot` and
+  `llGetRootRotation` describe the avatar (see [Attachments](#attachments)), and animations aren't
+  visible to scripts at all
+- The helpers read the root's position and rotation each time; if the object is moving, values
+  computed a moment apart describe slightly different frames
+- The texture transform conversion is approximate for rotated, non-uniform repeats, and untested
+  in-world (see the caveat above)

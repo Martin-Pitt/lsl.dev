@@ -12,3 +12,4 @@ export * from './hovercards/index';
 export * from './guide/index';
 export * from './media/index';
 export * from './scene/index';
+export * from './diagrams/index';

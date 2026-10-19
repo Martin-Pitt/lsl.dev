@@ -6,7 +6,7 @@
  * for the Astro routes alike.
  */
 import { catalog, categoryMap, constantGroupHref, featureByCategory, featureHref } from './catalog';
-import { featuresForApi } from './features';
+import { featuresForApi, featurePageByCategory } from './features';
 import { categoryLinkHref as categoryHref } from './categories';
 import { primaryFeature } from './primary-feature';
 
@@ -79,8 +79,12 @@ export function pageNav(pathname: string, title: string, siblings: { label: stri
 		sidebar.push(constantGroupHref(parts[2]), '/constants/groups/', '/constants/');
 	} else if (section === 'categories') {
 		const f = featureByCategory.get(parts[1]);
+		// Sub-pages of the home feature that name the category in their footer (e.g. Input › Game Control).
+		const subs = featurePageByCategory.get(parts[1])?.subpages.filter(s => s.categories.includes(parts[1])) ?? [];
 		if (f) chips.push(...featureChips([f]));
-		sidebar.push(categoryHref(parts[1]), ...(f ? [featureHref(f.id)] : []), '/categories/');
+		chips.push(...subs.map(s => ({ label: s.title, href: s.href, kind: 'Page' as const })));
+		// Highlight a sub-page in the sidebar only when it is the category's one page.
+		sidebar.push(categoryHref(parts[1]), ...(subs.length === 1 ? [subs[0].href] : []), ...(f ? [featureHref(f.id)] : []), '/categories/');
 	} else if (section === 'features' && parts.length >= 3) {
 		const parent = siblings.find(s => s.href === `/features/${parts[1]}/`);
 		if (parent) crumbs.push({ label: parent.label, href: parent.href });

@@ -61,6 +61,11 @@ class FeaturePageTests(unittest.TestCase):
                          if e['name'] not in self.items and e['name'] not in self.UNASSIGNED_OK)
         self.assertEqual(missing, [])
 
+    def test_subpage_categories_belong_to_the_home_feature(self):
+        # A sub-page's footer categories only add a link on the category page; the main page owns them.
+        stray = [(s['href'], c) for f in self.features for s in f['subpages'] for c in s['categories'] if c not in f['categories']]
+        self.assertEqual(stray, [])
+
     def test_every_constant_group_is_assigned(self):
         public = {g for c in self.catalog['constants'] for g in (c.get('groups') or [])}
         self.assertEqual(sorted(public - self.groups), [])

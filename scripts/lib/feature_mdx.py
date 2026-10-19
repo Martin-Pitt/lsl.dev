@@ -67,7 +67,7 @@ def load_features():
         f = parse_feature(p)
         subs = [parse_feature(s) for s in sorted((FEATURE_DIR / p.stem).glob('*.mdx'))]
         f['pages'] = [(f'/features/{f["id"]}/', f['body'])] + [(f'/features/{f["id"]}/{s["id"]}/', s['body']) for s in subs]
-        f['subpages'] = [{'id': s['id'], 'title': s['title'], 'description': s['description'], 'href': f'/features/{f["id"]}/{s["id"]}/'} for s in subs]
+        f['subpages'] = [{'id': s['id'], 'title': s['title'], 'description': s['description'], 'href': f'/features/{f["id"]}/{s["id"]}/', 'categories': s['categories']} for s in subs]
         for s in subs:
             f['items'] = _uniq(f['items'] + s['items'])
             f['groups'] = _uniq(f['groups'] + s['groups'])

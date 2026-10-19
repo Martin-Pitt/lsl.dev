@@ -95,7 +95,9 @@ export function parseSeeAlsoItem(item) {
  * group and link names count as the feature's own (chips, coverage, migration check).
  * @param {FeatureMdx} main
  * @param {FeatureMdx[]} subs parsed sub-pages; their `id` is the topic file name
- * @returns {FeatureMdx & { subpages: { id: string, title: string, description: string, href: string, badge?: SidebarBadge }[] }}
+ * A sub-page's footer `categories` stay on the sub-page (the category page links home feature and sub-page);
+ * only the main page's footer makes a feature a category's home.
+ * @returns {FeatureMdx & { subpages: { id: string, title: string, description: string, href: string, categories: string[], badge?: SidebarBadge }[] }}
  */
 export function withSubpages(main, subs) {
 	const sorted = [...subs].sort((a, b) => a.id.localeCompare(b.id));
@@ -106,6 +108,6 @@ export function withSubpages(main, subs) {
 		links: [...main.links, ...sorted.flatMap(s => s.links)],
 		hrefs: [...main.hrefs, ...sorted.flatMap(s => s.hrefs)],
 		planned: [...main.planned, ...sorted.flatMap(s => s.planned)],
-		subpages: sorted.map(s => ({ id: s.id, title: s.title, description: s.description, href: `/features/${main.id}/${s.id}/`, ...(s.badge ? { badge: s.badge } : {}) })),
+		subpages: sorted.map(s => ({ id: s.id, title: s.title, description: s.description, href: `/features/${main.id}/${s.id}/`, categories: s.categories, ...(s.badge ? { badge: s.badge } : {}) })),
 	};
 }

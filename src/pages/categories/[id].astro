@@ -5,7 +5,6 @@ import { inlineLsl, enhanceText } from '../../lib/inline-lsl';
 import CatalogList from '../../components/reference/CatalogList.astro';
 import { apiFlags } from '../../components/reference/catalog-items';
 import { catalog, apiMap, apiHref } from '../../lib/catalog';
-import { featurePageByCategory, featureHref } from '../../lib/features';
 import { categoryPageIds } from '../../lib/categories';
 import guides from '../../data/topic-guides.json';
 // Single-member categories get no page; every link points at the member instead (src/lib/categories.ts).
@@ -24,11 +23,9 @@ const tasks=await Promise.all((guide?.tasks || []).map(async (task:any)=>{
 	const entry=task.function ? apiMap.get(task.function) : undefined;
 	return {...task, href: task.href || apiHref('function',task.function), signature: entry?.signature ? await inlineLsl(entry.signature,{link:false}) : undefined, descriptionHtml: task.description ? await enhanceText(task.description,{link:false, self:entry?.name, params:(entry?.parameters||[]).map((p:any)=>p.name)}) : undefined};
 }));
-const feature=featurePageByCategory.get(category.id);
 ---
 <StarlightPage frontmatter={{title:category.label,description:guide?.summary || `LSL ${category.label.toLowerCase()} functions, events, and constants.`,editUrl:false}}>
 <p>{guide?.summary || `Explore the functions and events for ${category.label.toLowerCase()}. Follow an entry for its parameters, examples, and technical constraints.`}</p>
-{feature && <p>Feature: <a href={featureHref(feature.id)}>{feature.title}</a></p>}
 {tasks.length>0 && <><h2 id="start-here">What do you want to do?</h2><CardGrid>{tasks.map((task:any)=>(
 	<a class="task-card" href={task.href}>
 		{task.signature ? <span class="title sig" set:html={task.signature}/> : <span class="title">{task.label}</span>}

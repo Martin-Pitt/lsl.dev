@@ -4,7 +4,7 @@ import argparse, hashlib, json, re, xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import quote
 import yaml
-from lib.wiki_render import Renderer, page_sections, anchor, head_funcs
+from lib.wiki_render import Renderer, page_sections, anchor, head_funcs, constant_usage
 from lib.category_overlay import apply_category_overlay
 from lib.group_overlay import apply_group_overlay
 
@@ -81,7 +81,12 @@ def write_split(catalog):
     api={}
     for plural in ('functions','events','constants'):
         for e in catalog[plural]:
-            if e['wiki']: api[e['name']]={'kind':e['kind'],'title':e['wiki']['title'],'sections':e['wiki']['sections']}
+            if not e['wiki']: continue
+            sections=e['wiki']['sections']
+            if plural=='constants':
+                # API pages modernise the wiki's rule syntax and calls; the archive page keeps them as is.
+                sections=[{**x,'html':constant_usage(x['html'])} for x in sections]
+            api[e['name']]={'kind':e['kind'],'title':e['wiki']['title'],'sections':sections}
     write_json(ROOT/'data/derived/api-wiki.json',api)
     slim=dict(catalog)
     for plural in ('functions','events','constants','types','controls'):

@@ -634,6 +634,31 @@ PROSE_IDS = {'overview','wiki-description','return-value-notes','function-notes'
 # {{LSL Constant}} pages use their own field names; there constants/functions/events are related-entry lists.
 CONSTANT_FIELDS = {'desc':'Wiki description','pa':'Usage','pb':'Usage','pc':'Usage','pd':'Usage','caveats':'Caveats','examples':'Examples','helpers':'Helper functions','notes':'Notes','constants':'See also: constants','functions':'See also: functions','events':'See also: events','articles':'See also: articles','history':'History','issues':'Known issues','deepnotes':'Deep notes'}
 
+# Deprecated prim-params calls in constant pages, rewritten to the link-number forms.
+MODERN_CALLS = [(re.compile(r'\bllSetPrimitiveParams\(\s*'),'llSetLinkPrimitiveParamsFast(LINK_THIS, '),
+                (re.compile(r'\bllGetPrimitiveParams\(\s*'),'llGetLinkPrimitiveParams(LINK_THIS, '),
+                (re.compile(r'\bllSetLinkPrimitiveParams\('),'llSetLinkPrimitiveParamsFast(')]
+
+def modern_calls(code):
+    for pattern,repl in MODERN_CALLS: code=pattern.sub(repl,code)
+    return code
+
+def constant_usage(rendered):
+    """Constant Usage and code: rule-syntax headings become LSL code, deprecated calls the link forms."""
+    def heading(m):
+        text=re.sub(r'\s+',' ',html.unescape(re.sub(r'<[^>]+>','',m[1])).replace('\xa0',' ')).strip()
+        if not text.startswith(('[','ll')): return m[0]
+        # {{LSL Constant}} pages for PRIM_TYPE_* print the PRIM_TYPE rule as a number or nothing.
+        text=re.sub(r'^\[ (?:\d+)? ?, (?=PRIM_TYPE_)','[ PRIM_TYPE, ',text)
+        # A bare rule: the commas already read as list items, as elsewhere on the site.
+        if text.startswith('[') and text.endswith(']'): text=text[1:-1].strip()
+        return '<pre><code>'+html.escape(modern_calls(text),quote=False)+'</code></pre>'
+    rendered=re.sub(r'<h3>(.*?)</h3>',heading,rendered,flags=re.S)
+    rendered=re.sub(r'(<pre[^>]*>)(.*?)(</pre>)',lambda m:m[1]+modern_calls(m[2])+m[3],rendered,flags=re.S)
+    # "When used with llSetPrimitiveParams & llSetLinkPrimitiveParams[ & …Fast]"
+    return re.sub(r'When used with (?:<a [^>]*>ll(Set|Get)(?:Link)?PrimitiveParams(?:Fast)?</a>(?:,|&amp;| )*)+',
+                  lambda m:'When used with <a href="/functions/ll'+m[1]+'LinkPrimitiveParams'+('Fast' if m[1]=='Set' else '')+'/">ll'+m[1]+'LinkPrimitiveParams'+('Fast' if m[1]=='Set' else '')+'</a>',rendered)
+
 def tname(name):
     return name.replace('_',' ').strip()
 

@@ -4,7 +4,7 @@
  * name, one parameter per line with its definition text as a trailing comment. Rule constants
  * also get their set/get forms in the rules list of the functions that take them (lib/rule-usage).
  */
-import { inlineLsl, enhanceText } from '../../lib/inline-lsl';
+import { inlineLsl, enhanceText, dropFinalPeriod } from '../../lib/inline-lsl';
 import { ruleUsage } from '../../lib/rule-usage';
 import { constantGroupHref } from '../../lib/catalog';
 const { entry } = Astro.props;
@@ -52,7 +52,7 @@ const ruleRows = !noted ? [] : await Promise.all(usage.args.map(async a => ({
 			{rows.map(r => (
 				<li>
 					<span class="api-syntax-param"><Fragment set:html={r.code} /></span>
-					{r.description && <span class="api-syntax-comment">// <Fragment set:html={r.description} />{r.values && <> <span class="api-syntax-values">Values: <Fragment set:html={r.values} /></span></>}</span>}
+					{r.description && <span class="api-syntax-comment">// <Fragment set:html={r.values ? r.description : dropFinalPeriod(r.description)} />{r.values && <> <span class="api-syntax-values">Values: <Fragment set:html={r.values} /></span></>}</span>}
 				</li>
 			))}
 		</ol>
@@ -69,7 +69,7 @@ const ruleRows = !noted ? [] : await Promise.all(usage.args.map(async a => ({
 			{ruleRows.map(r => (
 				<li>
 					<span class="api-syntax-param"><Fragment set:html={r.code} /></span>
-					{(r.description || r.enum) && <span class="api-syntax-comment">// <Fragment set:html={r.description} />{r.enum && <> <span class:list={['api-syntax-values', !r.description && 'api-syntax-values-only']}>Values: <a href={constantGroupHref(r.enum)}>{r.enum}</a></span></>}</span>}
+					{(r.description || r.enum) && <span class="api-syntax-comment">// <Fragment set:html={r.enum ? r.description : dropFinalPeriod(r.description)} />{r.enum && <> <span class:list={['api-syntax-values', !r.description && 'api-syntax-values-only']}>Values: <a href={constantGroupHref(r.enum)}>{r.enum}</a></span></>}</span>}
 				</li>
 			))}
 		</ol>

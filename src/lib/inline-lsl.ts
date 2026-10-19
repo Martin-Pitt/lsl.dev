@@ -24,6 +24,9 @@ export const unescapeHtml = (s: string) => s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+)
 /** True if the API has a reference page. Every catalog function, event and constant has one
  * (src/content/docs/<kind>/<name>.mdx); deprecated or private names (catalog.deprecated, `replaces`,
  * e.g. llSetPrimitiveParams) are not in apiMap and have none, so they are never linked or carded. */
+/** A code comment with nothing after it ends without a full stop, like list items (keeps `...`). Works on text or HTML. */
+export const dropFinalPeriod = (s: string) => s.replace(/(?<!\.)\.((?:\s|<\/[a-z]+>)*)$/i, '$1');
+
 export const hasApiPage = (name: string) => apiMap.has(name);
 /** Name in an API page href (/functions/llSay/), or undefined. */
 export const apiHrefName = (href: string) => href.match(/^\/(?:functions|events|constants)\/([A-Za-z_][A-Za-z0-9_]*)\/(?:#[^"]*)?$/)?.[1];

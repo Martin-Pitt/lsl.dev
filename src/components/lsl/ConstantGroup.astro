@@ -13,7 +13,7 @@
  * once and each header links to the `###` section of the same id (see docs/editing-api-pages.md).
  */
 import { catalog, constantsInGroup, constantGroupHref } from '../../lib/catalog';
-import { inlineLsl } from '../../lib/inline-lsl';
+import { inlineLsl, dropFinalPeriod } from '../../lib/inline-lsl';
 import type { RuleSection, RuleLine } from '../../data/rule-groups/types';
 interface Props { name: string; title?: string; order?: RuleSection[]; mode?: 'set' | 'get' }
 const { name, title, order, mode = 'set' } = Astro.props;
@@ -56,7 +56,7 @@ function ruleCode(head: string[], args: Arg[]) {
 }
 /** First sentence of a description, minus any `[RULE, …]` shape it restates. */
 const gist = (d: string) => (d.split('\n')[0].replace(/\[[^\]]*\]/g, '').replace(/\s+/g, ' ').replace(/\s+([,.;])/g, '$1').trim().match(/^.*?[.!?](?=\s|$)/)?.[0] ?? d.split('\n')[0]).trim();
-const withComment = (code: string, comment?: string) => (comment ? `${code}  // ${comment}` : code);
+const withComment = (code: string, comment?: string) => (comment ? `${code}  // ${dropFinalPeriod(comment)}` : code);
 const html = (code: string) => inlineLsl(code, { self: undefined });
 
 type Row = { header?: string; href?: string; html?: string; indent?: boolean };

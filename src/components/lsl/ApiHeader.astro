@@ -2,11 +2,11 @@
 /**
  * Data-driven header of a function, event or constant page: kind, flag, category and feature
  * the signature block, facts (return type, delay, energy, permission), the definition's
- * description and, for constants, their groups. Everything here comes from the LSL definitions;
+ * description and, for constants, the other values in their groups. Everything here comes from the LSL definitions;
  * the prose below it lives in the page's MDX. Breadcrumbs and category/feature chips are under the title (PageTitle override).
  */
 import ApiSignature from '../reference/ApiSignature.astro';
-import { catalog, apiHref, constantGroupHref } from '../../lib/catalog';
+import { catalog, apiHref } from '../../lib/catalog';
 import { inlineLsl, enhanceText } from '../../lib/inline-lsl';
 import Experimental from '../authoring/asides/Experimental.astro';
 import { experimentalFeature } from '../authoring/asides/experimental';
@@ -19,7 +19,10 @@ const d = entry.definition;
 const experimental = experimentalFeature(entry.categories);
 const memberships: string[] = d['member-of'] || [];
 const flags = [['experience', 'Requires an experience'], ['linden-experience', 'Linden experience only'], ['god-mode', 'Privileged function']].filter(([key]) => d[key]);
-const description = await enhanceText(entry.description, { self: entry.name });
+// Rule constants' tooltips end with a typed parameter list (`float gravity – …`) that the page's Usage section covers.
+const paramList = /^\s*(?:(?:integer|float|vector|rotation|string|key|list)\s+\w+\b.*(?:\n|$))+\s*$/;
+const text = kind === 'constant' ? entry.description.split(/\n\s*\n/).filter((p: string) => !paramList.test(p)).join('\n\n') : entry.description;
+const description = await enhanceText(text, { self: entry.name });
 const sleep = d['mono-sleep'] ?? d.sleep;
 const facts = [
 	kind === 'function' && entry.returnType !== 'void' && ['Returns', await inlineLsl(entry.returnType)],
@@ -49,10 +52,8 @@ const groups = await Promise.all(memberships.map(async group => ({
 
 {showDescription && <p class="api-description" set:html={description} />}
 
-{memberships.length > 0 && (
+{groups.some(g => g.related.length > 0) && (
 	<section class="api-groups">
-		<h2 id="constant-groups">Constant groups</h2>
-		<p>{memberships.map((g, i) => <>{i > 0 && ' · '}<a href={constantGroupHref(g)}>{g}</a></>)}</p>
 		{groups.map(({ group, related }) => related.length > 0 && (
 			<details><summary>Other {group} values ({related.length})</summary>
 				<ul>{related.map(c => <li><a class="lsl-ref" href={c.href} set:html={c.name} /> <code>{c.value}</code></li>)}</ul>

@@ -16,7 +16,7 @@ import { LSLFunction, WikiSource } from '~/components/lsl';
 
 <LSLFunction name="llReplaceAgentEnvironment" />
 
-The `llReplaceAgentEnvironment` function overrides the current region and parcel environment seen by an agent. The new environment persists until the agent crosses to a new region or this function is called with the [NULL_KEY](/constants/NULL_KEY/) or empty string in the **environment** parameter for the particular agent, doing so will strip all environmental settings applied to this agent as part of the experience. This function must be executed as part of an experience.
+The `llReplaceAgentEnvironment` function overrides the current region and parcel environment seen by an agent. The new environment persists until the agent crosses to a new region[^v1] or this function is called with the [NULL_KEY](/constants/NULL_KEY/) or empty string in the **environment** parameter for the particular agent, doing so will strip all environmental settings applied to this agent as part of the experience. This function must be executed as part of an experience.
 
 ```lsl title="How to use" frame="terminal"
 integer result = llReplaceAgentEnvironment(NULL_KEY, 0.0, "");
@@ -39,7 +39,7 @@ integer result = llReplaceAgentEnvironment(NULL_KEY, 0.0, "");
 ## Caveats
 
 - The agent's viewer may choose to ignore this command.
-- An environment set locally on the viewer will override any environment set from this function.
+- An environment set locally on the viewer will override any environment set from this function.[^v2]
 - If a UUID is passed as the **environment** parameter and that UUID does not specify an environment setting, the environment is not applied and the agent's viewer shows a modal "Could not load the settings for [NAME] from the database" alert
 - The [ENV_OK](/constants/ENV_OK/) constant is only present on Lua-enabled sims. On older sims, use it's value of 1 instead
 
@@ -97,5 +97,8 @@ default
 - [llSetAgentEnvironment](/functions/llSetAgentEnvironment/)
 - [llSetEnvironment](/functions/llSetEnvironment/)
 - [llReplaceEnvironment](/functions/llReplaceEnvironment/)
+
+[^v1]: Viewer `746d768339`: [`newview/llenvironment.cpp:1011-1017`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L1011-L1017)
+[^v2]: Viewer `746d768339`: [`newview/llenvironment.h:97-108`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.h#L97-L108); [`newview/llenvironment.cpp:1472-1483`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L1472-L1483)
 
 <WikiSource />

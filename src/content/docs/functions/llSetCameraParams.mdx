@@ -35,12 +35,12 @@ llSetCameraParams([]);
 ## Caveats
 
 - Camera control currently (server 1.38) only supported for attachments and objects on which you are sitting. An attempt otherwise will result in an error being shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/).
-- Scripted camera parameters are overriden for agents who are in [Free Camera mode](https://wiki.secondlife.com/wiki/Flycam) *(Alt + Click)*. **No error is returned if this is the case**; however when the agent returns to regular camera mode, their camera will go to the scripted camera position.
+- Scripted camera parameters are overriden for agents who are in [Free Camera mode](https://wiki.secondlife.com/wiki/Flycam) *(Alt + Click)*. **No error is returned if this is the case**; however when the agent returns to regular camera mode, their camera will go to the scripted camera position.[^v1]
 - When [CAMERA_FOCUS](/constants/CAMERA_FOCUS/) is not defined, it is advised that [CAMERA_FOCUS_THRESHOLD](/constants/CAMERA_FOCUS_THRESHOLD/) is set to 0.0 - this is because when left at it's default value, it may prevent the camera from focusing on the correct point, instead focusing just to the side of the intended point.
 - A [CAMERA_FOCUS_OFFSET](/constants/CAMERA_FOCUS_OFFSET/) of [ZERO_VECTOR](/constants/ZERO_VECTOR/) will always look at the same position as returned by `llGetPos()` for the avatar
 - When seated, this is also the position of "Avatar Center" when hover height is 0
 - When standing, this has a shape-dependent z-offset from "Avatar Center". (currently investigating [Tapple Gao](https://wiki.secondlife.com/wiki/User:Tapple_Gao) ([talk](https://wiki.secondlife.com/wiki/User_talk:Tapple_Gao)))
-- Cannot be used to control the camera in Mouselook.
+- Cannot be used to control the camera in Mouselook.[^v2]
 
 ## Examples
 
@@ -131,5 +131,8 @@ From the issue templates included by the wiki article:
 ### Articles
 
 - [FollowCam](https://wiki.secondlife.com/wiki/FollowCam)
+
+[^v1]: Viewer `746d768339`: [`newview/llagentcamera.cpp:1265-1270`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagentcamera.cpp#L1265-L1270); [`newview/llagentcamera.cpp:1372-1377`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagentcamera.cpp#L1372-L1377)
+[^v2]: Viewer `746d768339`: [`newview/llagentcamera.h:100`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagentcamera.h#L100); [`newview/llagentcamera.cpp:1265-1270`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagentcamera.cpp#L1265-L1270)
 
 <WikiSource />

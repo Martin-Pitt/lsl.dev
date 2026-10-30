@@ -27,14 +27,14 @@ llSetSoundQueueing(0);
 
 ## Caveats
 
-- The sound queue is only 1 level deep - this means that beside the sound that is currently playing, there can only be 1 sound in reserve. The sound queue is first-come, first-serve.\* [SVC-4260](#svc-4260)
+- The sound queue is only 1 level deep - this means that beside the sound that is currently playing, there can only be 1 sound in reserve. The sound queue is first-come, first-serve.[^v1]\* [SVC-4260](#svc-4260)
 - Further to the above, the queue order is reversed when using [llPlaySoundSlave](/functions/llPlaySoundSlave/) - using the below example, the default behaviour would be to play SoundName1 and SoundName2, however when using the aforementioned function the order would be to play SoundName2 and SoundName3.
 - Sound queuing is a property of the prim, not the script. It can be activated and deactivated by any script in the prim and survives script reset, re-rez and script removal.
 - If used to make smooth transitions using slave/master sounds the sounds tend to go out of sync.
-- Although sounds are queued, the volume of all sounds in the queue is set by the last item in the queue. If your application requires the use of differing volume values, you may wish to implement [llAdjustSoundVolume](/functions/llAdjustSoundVolume/) alongside the sound queue
+- Although sounds are queued, the volume of all sounds in the queue is set by the last item in the queue.[^v2] If your application requires the use of differing volume values, you may wish to implement [llAdjustSoundVolume](/functions/llAdjustSoundVolume/) alongside the sound queue
 - There is a very small (but audible) gap of silence between sounds due to network latency and processing time.
 - The queued sound must be fully loaded in the viewer, or else it will not play. [llPreloadSound](/functions/llPreloadSound/) is not always reliable in doing its job.
-- Queueing a sound that is identical to the one currently playing will fail. Use [llLoopSound](/functions/llLoopSound/) instead.
+- Queueing a sound that is identical to the one currently playing will fail.[^v3] Use [llLoopSound](/functions/llLoopSound/) instead.
 - While this function does not have a delay, enabling or disabling the sound queue is not instant. It seems to take approx ~0.1 seconds to set the queueing flag.
 
 ## Examples
@@ -89,5 +89,9 @@ The original wiki page documents these functions together with this one:
 - [llLoopSoundSlave](/functions/llLoopSoundSlave/) — 3=Plays a looped sound `attached`, synced with the master.
 - [llPlaySoundSlave](/functions/llPlaySoundSlave/) — 3=Plays a sound once `attached`, synced with the master.
 - [llAdjustSoundVolume](/functions/llAdjustSoundVolume/) — 3=Adjusts the volume of playing sound(s).
+
+[^v1]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:1547-1556`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1547-L1556)
+[^v2]: Viewer `746d768339`: [`newview/llviewerobject.cpp:6605-6607`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6605-L6607); [`llaudio/llaudioengine.cpp:1547-1564`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1547-L1564)
+[^v3]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:1558-1563`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1558-L1563)
 
 <WikiSource />

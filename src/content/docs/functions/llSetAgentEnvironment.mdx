@@ -18,7 +18,7 @@ import { environmentParams } from '~/data/rule-groups/environment-params';
 
 <LSLFunction name="llSetAgentEnvironment" />
 
-This function sets environment values for an individual agent in an experience. The changes to the environment persist until the agent moves to a new region or `llSetAgentEnvironment` is called for an agent with an empty list. Passing an empty list in **params** will strip all environmental settings applied to this agent as part of the experience
+This function sets environment values for an individual agent in an experience. The changes to the environment persist until the agent moves to a new region[^v1] or `llSetAgentEnvironment` is called for an agent with an empty list. Passing an empty list in **params** will strip all environmental settings applied to this agent as part of the experience
 
 ```lsl title="How to use" frame="terminal"
 integer result = llSetAgentEnvironment(NULL_KEY, 0.0, []);
@@ -181,7 +181,7 @@ integer result = llSetAgentEnvironment(NULL_KEY, 0.0, []);
 			  range = \[0.25, 20\]
 			- sun_color: The sun's color.
 
-			  range = \[`<0,0,0>`, `<3,3,3>`\]
+			  range = \[`<0,0,0>`, `<1,1,1>`\]
 
 		</td>
 	</tr>
@@ -241,7 +241,7 @@ integer result = llSetAgentEnvironment(NULL_KEY, 0.0, []);
 			  range = \[-10, 10\]
 			- modulation:
 
-			  range = \[0, 20\]
+			  range = \[0, 20\][^v3]
 
 		</td>
 	</tr>
@@ -323,7 +323,7 @@ integer result = llSetAgentEnvironment(NULL_KEY, 0.0, []);
 		<td>[SKY_REFLECTION_PROBE_AMBIANCE](/constants/SKY_REFLECTION_PROBE_AMBIANCE/)</td>
 		<td>24</td>
 		<td>float ambiance</td>
-		<td>Minimum ambiance value for all [reflection probes](/constants/PRIM_REFLECTION_PROBE/). range = \[0.0, 10.0\]</td>
+		<td>Minimum ambiance value for all [reflection probes](/constants/PRIM_REFLECTION_PROBE/). range = \[0.0, 10.0\][^v4]</td>
 	</tr>
 </table>
 
@@ -331,7 +331,7 @@ integer result = llSetAgentEnvironment(NULL_KEY, 0.0, []);
 
 - The list of valid parameters differs from those available for [llGetEnvironment](/functions/llGetEnvironment/).
 - The agent's viewer may choose to ignore this command.
-- An environment set locally on the viewer will override any environment set from this function.
+- An environment set locally on the viewer will override any environment set from this function.[^v5]
 - The [ENV_OK](/constants/ENV_OK/) constant is only present on Lua-enabled sims. On older sims, use it's value of 1 instead
 
 ## Examples
@@ -392,5 +392,10 @@ default
 - [llSetEnvironment](/functions/llSetEnvironment/)
 - [llReplaceAgentEnvironment](/functions/llReplaceAgentEnvironment/)
 - [llReplaceEnvironment](/functions/llReplaceEnvironment/)
+
+[^v1]: Viewer `746d768339`: [`newview/llenvironment.cpp:1011-1017`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L1011-L1017)
+[^v3]: Viewer `746d768339`: [`llinventory/llsettingswater.cpp:330-331`](https://github.com/secondlife/viewer/blob/746d768339/indra/llinventory/llsettingswater.cpp#L330-L331)
+[^v4]: Viewer `746d768339`: [`llinventory/llsettingssky.cpp:812-813`](https://github.com/secondlife/viewer/blob/746d768339/indra/llinventory/llsettingssky.cpp#L812-L813)
+[^v5]: Viewer `746d768339`: [`newview/llenvironment.h:97-108`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.h#L97-L108); [`newview/llenvironment.cpp:1472-1483`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L1472-L1483)
 
 <WikiSource />

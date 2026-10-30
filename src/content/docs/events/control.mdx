@@ -43,13 +43,13 @@ control(key id, integer level, integer edge)
 | [CONTROL_DOWN](/constants/CONTROL_DOWN/) | 0x00000020 | Move down control (<kbd>PgDn</kbd> or <kbd>C</kbd>) |
 | [CONTROL_LBUTTON](/constants/CONTROL_LBUTTON/) | 0x10000000 | Left mouse button control |
 | [CONTROL_ML_LBUTTON](/constants/CONTROL_ML_LBUTTON/) | 0x40000000 | Left mouse button control while in [mouselook](https://wiki.secondlife.com/wiki/mouselook) |
-| (undocumented) | 0x02000000 | Avatar left rotation detected. Triggers [llGetAnimation](/functions/llGetAnimation/) == "Turning Left" |
-| (undocumented) | 0x04000000 | Avatar right rotation detected. Triggers [llGetAnimation](/functions/llGetAnimation/) == "Turning Right" |
+| (undocumented) | 0x02000000 | Avatar left rotation detected.[^v1] Triggers [llGetAnimation](/functions/llGetAnimation/) == "Turning Left" |
+| (undocumented) | 0x04000000 | Avatar right rotation detected.[^v2] Triggers [llGetAnimation](/functions/llGetAnimation/) == "Turning Right" |
 
 ## Caveats
 
 - [CONTROL_ROT_LEFT](/constants/CONTROL_ROT_LEFT/) and [CONTROL_ROT_RIGHT](/constants/CONTROL_ROT_RIGHT/) can be triggered when an object is selected or edited. If the user is running Viewer 2.0 and later, [llGetAgentInfo](/functions/llGetAgentInfo/) will have [AGENT_AUTOPILOT](/constants/AGENT_AUTOPILOT/) set in this case.
-- Sitting upon an object that takes control may also trigger [CONTROL_FWD](/constants/CONTROL_FWD/), [CONTROL_BACK](/constants/CONTROL_BACK/), [CONTROL_DOWN](/constants/CONTROL_DOWN/) and [CONTROL_UP](/constants/CONTROL_UP/), depending on avatar position relative to the seat.
+- Sitting upon an object that takes control may also trigger [CONTROL_FWD](/constants/CONTROL_FWD/), [CONTROL_BACK](/constants/CONTROL_BACK/), [CONTROL_DOWN](/constants/CONTROL_DOWN/) and [CONTROL_UP](/constants/CONTROL_UP/), depending on avatar position relative to the seat.[^v3]
 - Autopilot control events can continue for a short time after [AGENT_AUTOPILOT](/constants/AGENT_AUTOPILOT/) drops.
 - The 'levels' and 'edges' of the control() event both receive ([CONTROL_FWD](/constants/CONTROL_FWD/) + [CONTROL_BACK](/constants/CONTROL_BACK/)) (value 3) after teleport, effecting scripts that use this combination for faster movement. Calling `llTakeControls()` again after a `llSleep(3)` will filter this out.
 
@@ -122,5 +122,9 @@ From the issue templates included by the wiki article:
 ### Events
 
 - [run_time_permissions](/events/run_time_permissions/)
+
+[^v1]: Viewer `746d768339`: [`llcommon/indra_constants.h:349`](https://github.com/secondlife/viewer/blob/746d768339/indra/llcommon/indra_constants.h#L349)
+[^v2]: Viewer `746d768339`: [`llcommon/indra_constants.h:350`](https://github.com/secondlife/viewer/blob/746d768339/indra/llcommon/indra_constants.h#L350)
+[^v3]: Viewer `746d768339`: [`newview/llviewermessage.cpp:4250-4257`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L4250-L4257); [`newview/llagent.cpp:1919-1929`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagent.cpp#L1919-L1929); [`newview/llagent.cpp:1975-1978`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagent.cpp#L1975-L1978); [`newview/llagent.cpp:1986-1990`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagent.cpp#L1986-L1990)
 
 <WikiSource />

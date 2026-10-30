@@ -28,9 +28,9 @@ llPlaySound("", 0.0);
 ## Caveats
 
 - A call to `llPlaySound` replaces any other sound (so that only one sound can be played at the same time from the same prim), except sounds started with the deprecated [llSound](https://wiki.secondlife.com/wiki/LlSound) which always plays sound files till the end.
-- Sound files must be 30 seconds or shorter.
-- [Sounds are always sampled](https://wiki.secondlife.com/wiki/Sound_Clips) at 44.1KHz, 16-bit (unsigned), mono (stereo files will have one channel dropped — merged (as in combined) — when uploading).
-- If the object playing the sound is a [HUD](https://wiki.secondlife.com/wiki/HUD), the sound is only heard by the user the HUD is attached to.
+- Sound files must be 30 seconds or shorter.[^v1]
+- [Sounds are always sampled](https://wiki.secondlife.com/wiki/Sound_Clips) at 44.1KHz,[^v2] 16-bit (unsigned), mono (stereo files will have one channel dropped — merged (as in combined) — when uploading).
+- If the object playing the sound is a [HUD](https://wiki.secondlife.com/wiki/HUD), the sound is only heard by the user the HUD is attached to.[^v3]
 - To play a sound inworld from a HUD use [llTriggerSound](/functions/llTriggerSound/).
 - It is impossible to play two (or more) sounds at the same time and have them start playing at exactly the same time ~ [VWR-15663](https://jira.secondlife.com/browse/VWR-15663)
 - If multiple sound emitters play the same exact sound within range of the viewer at the same time, they are usually not in sync due to latency between the server/client and script execution & communication delays. This can produce echoes, odd resonance, and other strange effects that you (probably) do not want.
@@ -60,7 +60,7 @@ default
 From the issue templates included by the wiki article:
 
 - SVC-4897 (nf): **llSetSyncTime**() - a function for synchronising client side effects
-- BUG-4130 (bug): llTriggerSoundLimited generates an improper script error when avatar sounds are disabled, llPlaySound disregards parcel settings. The parcel part is historical: current viewers mute both attached and triggered sounds that come from outside a parcel with local sounds only enabled
+- BUG-4130 (bug): llTriggerSoundLimited generates an improper script error when avatar sounds are disabled, llPlaySound disregards parcel settings. The parcel part is historical: current viewers mute both attached and triggered sounds that come from outside a parcel with local sounds only enabled[^v4]
 
 ## See also
 
@@ -81,5 +81,10 @@ From the issue templates included by the wiki article:
 ### Articles
 
 - [Sound Clips](https://wiki.secondlife.com/wiki/Sound_Clips) — 3=Specifications for uploading sounds.
+
+[^v1]: Viewer `746d768339`: [`llaudio/llvorbisencode.h:43-47`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llvorbisencode.h#L43-L47); [`llaudio/llaudiodecodemgr.cpp:240-245`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudiodecodemgr.cpp#L240-L245)
+[^v2]: Viewer `746d768339`: [`llaudio/llvorbisencode.h:45`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llvorbisencode.h#L45)
+[^v3]: Viewer `746d768339`: [`newview/llaudiosourcevo.cpp:241-248`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L241-L248)
+[^v4]: Viewer `746d768339`: [`newview/llaudiosourcevo.cpp:148-171`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L148-L171); [`newview/llviewermessage.cpp:3789-3791`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3789-L3791)
 
 <WikiSource />

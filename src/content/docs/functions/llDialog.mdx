@@ -64,13 +64,13 @@ llDialog(NULL_KEY, "", [], 0);
 
 - This function **only** opens a dialog box. The script must then also register a listener on the same **channel** using [llListen](/functions/llListen/) and have a [listen](/events/listen/) event handler to receive the response.
 - There is no way by script to kill a dialog box.
-- There is no way for the script to detect if the user clicked the small `["Ignore"]` button (no chat is generated as a result of pressing this button).
+- There is no way for the script to detect if the user clicked the small `["Ignore"]` button (no chat is generated as a result of pressing this button).[^v1]
 - There is no way to distinguish the input from a dialog box and regular chat made by the same user.
 - It is important to expect that the response may not be one of the **buttons**.
 - In most cases, the listener will be in the same script as the `llDialog`, however if not, the distance between the root prim of the [listen](/events/listen/)ing object and the dialog generating prim becomes a factor. If this distance is greater than 20 meters when a button is pressed, the response will not be heard. See [limits](#limits).
 - This limitation affects attachments too if the wearer moves more than 20 meters from where the listener is located. See [limits](#limits).
 - If the [listen](/events/listen/)er resides in the same script that created the dialog, then the dialog button is heard sim-wide.
-- By default, only one dialog can be displayed per object in the Second Life Viewer. This can be overridden by the [ScriptDialogLimitations debug setting](https://wiki.secondlife.com/wiki/Debug_Settings) in the Viewer.
+- By default, only one dialog can be displayed per object in the Second Life Viewer. This can be overridden by the [ScriptDialogLimitations debug setting](https://wiki.secondlife.com/wiki/Debug_Settings) in the Viewer.[^v2]
 
 ---
 
@@ -96,7 +96,7 @@ llDialog(NULL_KEY, "", [], 0);
 ### `buttons` limits
 
 - If **buttons** is an empty list, it will default to as if it were `["OK"]`
-- Buttons named "Client_Side_Mute" or "Client_Side_Ignore" will be interpreted by the viewer as if the user click the special "Mute" or "Ignore" **buttons**, respectively.
+- Buttons named "Client_Side_Mute" or "Client_Side_Ignore" will be interpreted by the viewer as if the user click the special "Mute" or "Ignore" **buttons**, respectively.[^v3]
 - Prior to [SL viewer 3.3.1](https://wiki.secondlife.com/wiki/Release_Notes/Second_Life_Release/3.3.1) (released in 2012) the viewer treated the **buttons** with values of "Mute" and "Ignore" as being equivalent to the dialogs special **buttons** "Mute" and "Ignore". This was changed as a result of [STORM-1718](https://jira.secondlife.com/browse/STORM-1718). Some very old versions of some viewer, especially those with a V1-style interface, could still have this old behavior and should be tested.
 - If you need a button in your menu that will collide with one of these special values, please consider adding spaces in the button name (e.g. `[" Ignore "]`).
 - An error will be shouted on [DEBUG_CHANNEL](/constants/DEBUG_CHANNEL/), if...
@@ -124,7 +124,7 @@ llDialog(NULL_KEY, "", [], 0);
       return llBase64ToString(llGetSubString(encoded, 0, end)); }
   ```
 - The client will not display all the characters of a button if the text is wider than the text space of the button. See [appearance](#appearance).
-- If the script generates button labels from outside sources like inventory or object names, take care to avoid the special string `"!!llTextBox!!"`. This text, used as any button label, will cause [llDialog](/functions/llDialog/) to behave as [llTextBox](/functions/llTextBox/) instead.
+- If the script generates button labels from outside sources like inventory or object names, take care to avoid the special string `"!!llTextBox!!"`. This text, used as any button label, will cause [llDialog](/functions/llDialog/) to behave as [llTextBox](/functions/llTextBox/) instead.[^v4]
 
 ## Examples
 
@@ -480,5 +480,10 @@ The wiki article also includes shared templates whose conditional content is not
 ### Articles
 
 - [Dialog Menus: A step by step guide](https://wiki.secondlife.com/wiki/Dialog_Menus) — A walk through of the entire dialog menu process (aimed at learners).
+
+[^v1]: Viewer `746d768339`: [`newview/llviewermessage.cpp:6509`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L6509); [`newview/llviewermessage.cpp:6525-6536`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L6525-L6536)
+[^v2]: Viewer `746d768339`: [`newview/llscriptfloater.cpp:390-460`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llscriptfloater.cpp#L390-L460); [`newview/app_settings/settings.xml:10714-10723`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L10714-L10723)
+[^v3]: Viewer `746d768339`: [`newview/skins/default/xui/en/notifications.xml:8694-8701`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/notifications.xml#L8694-L8701); [`newview/llviewermessage.cpp:6512-6522`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L6512-L6522)
+[^v4]: Viewer `746d768339`: [`llprimitive/lllslconstants.h:213`](https://github.com/secondlife/viewer/blob/746d768339/indra/llprimitive/lllslconstants.h#L213); [`newview/llscriptfloater.cpp:764-771`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llscriptfloater.cpp#L764-L771)
 
 <WikiSource />

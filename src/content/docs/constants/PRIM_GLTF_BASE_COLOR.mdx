@@ -32,8 +32,8 @@ PRIM_GLTF_BASE_COLOR, integer face, string texture, vector repeats, vector offse
 - [float](https://wiki.secondlife.com/wiki/float) **rot**
 - [vector](https://wiki.secondlife.com/wiki/vector) **tint_color** — tint color in linear RGB
 - [float](https://wiki.secondlife.com/wiki/float) **alpha** — opacity in the range 0.0 to 1.0
-- [integer](https://wiki.secondlife.com/wiki/integer) **alpha_mode** — alpha mode: [PRIM_GLTF_ALPHA_MODE_OPAQUE](/constants/PRIM_GLTF_ALPHA_MODE_OPAQUE/), [PRIM_GLTF_ALPHA_MODE_BLEND](/constants/PRIM_GLTF_ALPHA_MODE_BLEND/) or [PRIM_GLTF_ALPHA_MODE_MASK](/constants/PRIM_GLTF_ALPHA_MODE_MASK/)
-- [float](https://wiki.secondlife.com/wiki/float) **alpha_mask_cutoff** — cutoff value for alpha masking mode in the range 0.0 to 1.0
+- [integer](https://wiki.secondlife.com/wiki/integer) **alpha_mode** — alpha mode: [PRIM_GLTF_ALPHA_MODE_OPAQUE](/constants/PRIM_GLTF_ALPHA_MODE_OPAQUE/), [PRIM_GLTF_ALPHA_MODE_BLEND](/constants/PRIM_GLTF_ALPHA_MODE_BLEND/) or [PRIM_GLTF_ALPHA_MODE_MASK](/constants/PRIM_GLTF_ALPHA_MODE_MASK/)[^v1]
+- [float](https://wiki.secondlife.com/wiki/float) **alpha_mask_cutoff** — cutoff value for alpha masking mode in the range 0.0 to 1.0[^v2]
 - [integer](https://wiki.secondlife.com/wiki/integer) **double_sided** — render material as double sided
 
 Used with [llSetPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams) & [llSetLinkPrimitiveParams](https://wiki.secondlife.com/wiki/LlSetPrimitiveParams#llSetLinkPrimitiveParams).
@@ -58,12 +58,16 @@ In the case of [llGetPrimitiveParams](/functions/llGetPrimitiveParams/) is eithe
 - **repeats** is not only used to set the number of repeats but the sign of the individual components is also used to set the "Flip" attribute.
 - To clear any override parameters, supply an empty string ("") in the parameter slot.
 - **tint_color** is in linear RGB color space, unlike legacy tint that uses sRGB. Use [llsRGB2Linear](/functions/llsRGB2Linear/) and [llLinear2sRGB](/functions/llLinear2sRGB/) to perform conversions.
-- In the [default](/constants/PRIM_TEXGEN_DEFAULT/) [texture mapping](/constants/PRIM_TEXGEN/) **tg_type** the [texture](/constants/PRIM_GLTF_BASE_COLOR/) **repeats** units are in texture repeats per face. In the [planar](/constants/PRIM_TEXGEN_PLANAR/) texture mapping mode the texture **repeats** units are in texture repeats per half meter. This is in contrast to the in-world editing tool, in which the planar texture scaling units are repeats per meter.
+- In the [default](/constants/PRIM_TEXGEN_DEFAULT/) [texture mapping](/constants/PRIM_TEXGEN/) **tg_type** the [texture](/constants/PRIM_GLTF_BASE_COLOR/) **repeats** units are in texture repeats per face. In the [planar](/constants/PRIM_TEXGEN_PLANAR/) texture mapping mode the texture **repeats** units are in texture repeats per half meter.[^v3] This is in contrast to the in-world editing tool, in which the planar texture scaling units are repeats per meter.
 
 ## See also
 
 ### Functions
 
 - [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
+
+[^v1]: Viewer `746d768339`: [`llprimitive/llgltfmaterial.h:82-87`](https://github.com/secondlife/viewer/blob/746d768339/indra/llprimitive/llgltfmaterial.h#L82-L87); [`llprimitive/llgltfmaterial.cpp:514`](https://github.com/secondlife/viewer/blob/746d768339/indra/llprimitive/llgltfmaterial.cpp#L514)
+[^v2]: Viewer `746d768339`: [`llprimitive/llgltfmaterial.cpp:453`](https://github.com/secondlife/viewer/blob/746d768339/indra/llprimitive/llgltfmaterial.cpp#L453)
+[^v3]: Viewer `746d768339`: [`newview/llface.cpp:114-115`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llface.cpp#L114-L115); [`newview/llface.cpp:908-910`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llface.cpp#L908-L910)
 
 <WikiSource />

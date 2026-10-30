@@ -27,7 +27,7 @@ PRIM_POINT_LIGHT, integer boolean, vector linear_color, float intensity, float r
 - [vector](https://wiki.secondlife.com/wiki/vector) **linear_color**
 - [float](https://wiki.secondlife.com/wiki/float) **intensity** — ranges from 0.0 to 1.0
 - [float](https://wiki.secondlife.com/wiki/float) **radius** — ranges from 0.1 to 20.0
-- [float](https://wiki.secondlife.com/wiki/float) **falloff** — ranges from 0.0 to 2.0
+- [float](https://wiki.secondlife.com/wiki/float) **falloff** — ranges from 0.0 to 2.0[^v1]
 
 When used with [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
 
@@ -39,9 +39,9 @@ Returns the same values, in the same order.
 
 ## Caveats
 
-- The viewer renders only the nearest local lights, up to its `RenderLocalLightCount` setting (default 256); lights beyond that count, or outside the draw distance, are not rendered
+- The viewer renders only the nearest local lights, up to its `RenderLocalLightCount` setting (default 256); lights beyond that count, or outside the draw distance, are not rendered[^v2]
 - Lights with a high intensity have a wash-out effect when overlapping. Keep this in mind when using multiple lights. ***Never*** create an abundance of lights to get around the per-viewer light limit, as other viewers will be washed out and may suffer from client lag.
-- Unlike most color in LSL, which expects a gamma-encoded value (sRGB), this expects a non-gamma-encoded value (linear RGB). This means that the value you set as the light color is not the same value you'd pass to make the source (e.g. filament ) glow the same color. You may wish to implement an [sRGB Electro-Optical Transfer Function (EOTF)](/functions/llsRGB2Linear/) to bypass this.
+- Unlike most color in LSL, which expects a gamma-encoded value (sRGB), this expects a non-gamma-encoded value (linear RGB).[^v3] This means that the value you set as the light color is not the same value you'd pass to make the source (e.g. filament ) glow the same color. You may wish to implement an [sRGB Electro-Optical Transfer Function (EOTF)](/functions/llsRGB2Linear/) to bypass this.
 - The `falloff` parameter is a bit of a misnomer. Instead of modifying the characteristics of light decay over distance, it instead acts as a modifier to a light's overall intensity value.
 
 ## Examples
@@ -132,5 +132,9 @@ default
 - [llSetLinkPrimitiveParamsFast](/functions/llSetLinkPrimitiveParamsFast/)
 - [llGetLinkPrimitiveParams](/functions/llGetLinkPrimitiveParams/)
 - [llsRGB2Linear](/functions/llsRGB2Linear/)
+
+[^v1]: Viewer `746d768339`: [`llprimitive/llprimitive.cpp:77-79`](https://github.com/secondlife/viewer/blob/746d768339/indra/llprimitive/llprimitive.cpp#L77-L79); [`llprimitive/llprimitive.h:163`](https://github.com/secondlife/viewer/blob/746d768339/indra/llprimitive/llprimitive.h#L163)
+[^v2]: Viewer `746d768339`: [`newview/app_settings/settings.xml:7733-7742`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L7733-L7742); [`newview/pipeline.cpp:8656`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/pipeline.cpp#L8656); [`newview/pipeline.cpp:8699-8702`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/pipeline.cpp#L8699-L8702); [`newview/pipeline.cpp:5584-5587`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/pipeline.cpp#L5584-L5587)
+[^v3]: Viewer `746d768339`: [`llprimitive/llprimitive.h:138`](https://github.com/secondlife/viewer/blob/746d768339/indra/llprimitive/llprimitive.h#L138); [`llprimitive/llprimitive.h:155-160`](https://github.com/secondlife/viewer/blob/746d768339/indra/llprimitive/llprimitive.h#L155-L160)
 
 <WikiSource />

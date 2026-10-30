@@ -4,7 +4,7 @@ description: "Playing, looping, triggering and synchronising sounds, including c
 ---
 import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../components/features';
 
-A prim plays sounds from its inventory or by asset key. Attached sounds follow the prim, and a prim has one attached sound at a time. Triggered sounds play at a fixed position and can overlap.
+A prim plays sounds from its inventory or by asset key. Attached sounds follow the prim, and a prim has one attached sound at a time. Triggered sounds play at a fixed position and can overlap.[^v1]
 
 Volume runs from 0.0 to 1.0. Sound radius, queueing and preloading help sounds start on time and stay in range.
 
@@ -15,10 +15,10 @@ Streaming music is not a prim sound: it belongs to the [parcel](#parcel-music).
 <Box title="Concepts">
 
 - Attached sounds: [play once](/functions/llPlaySound/), [loop](/functions/llLoopSound/) or [stop](/functions/llStopSound/)
-  - Only one sound is attached to a prim at a time; a new one replaces it
+  - Only one sound is attached to a prim at a time; a new one replaces it[^v2]
   - The Link variants [play](/functions/llLinkPlaySound/) and [stop](/functions/llLinkStopSound/) on any prim in the linkset
 - Triggered sounds [play at the prim's position](/functions/llTriggerSound/) without being attached to it, optionally [limited to a box](/functions/llTriggerSoundLimited/)
-  - They do not move with the object and cannot be stopped or adjusted
+  - They do not move with the object and cannot be stopped or adjusted[^v3]
 - [Adjust the volume](/functions/llAdjustSoundVolume/) of a playing sound, [limit how far it carries](/functions/llSetSoundRadius/), and [preload sounds](/functions/llPreloadSound/) so they play without delay
 - With [queueing](/functions/llSetSoundQueueing/) on, the next sound waits for the current one to finish
   - Engines and weapons play a start sound, a loop for as long as needed, and an end sound without a pop at the transitions
@@ -86,6 +86,10 @@ Streaming music belongs to the parcel, not the prim. The object owner must match
   <Planned>Recipe: trigger a random sound from a list of keys</Planned>
   <Planned>Guide: start-loop-end sounds for engines and weapons</Planned>
 </SeeAlso>
+
+[^v1]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:784-811`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L784-L811); [`newview/llviewermessage.cpp:3783-3791`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3783-L3791)
+[^v2]: Viewer `746d768339`: [`newview/llviewerobject.h:934`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.h#L934); [`newview/llviewerobject.cpp:6612-6615`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6612-L6615)
+[^v3]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:784-811`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L784-L811); [`newview/llviewerobject.cpp:6646-6653`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6646-L6653)
 
 <FeatureFooter
   related={["effects", "physics", "land"]}

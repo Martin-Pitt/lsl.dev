@@ -27,7 +27,7 @@ If **accept** is [FALSE](/constants/FALSE/) and **pass_on** is [FALSE](/constant
 
 If **accept** is [FALSE](/constants/FALSE/) and **pass_on** is [TRUE](/constants/TRUE/), then the specified controls do not generate events but perform their normal functions.
 
-If **accept** is [TRUE](/constants/TRUE/) and **pass_on** is [FALSE](/constants/FALSE/), then the specified controls generate events but do not perform their normal functions.
+If **accept** is [TRUE](/constants/TRUE/) and **pass_on** is [FALSE](/constants/FALSE/), then the specified controls generate events but do not perform their normal functions.[^v3]
 
 If **accept** is [TRUE](/constants/TRUE/) and **pass_on** is [TRUE](/constants/TRUE/), then the specified controls generate events and perform their normal functions.
 
@@ -49,8 +49,8 @@ llTakeControls(0, 0, 0);
 | [CONTROL_DOWN](/constants/CONTROL_DOWN/) | 0x00000020 | Move down control (<kbd>PgDn</kbd> or <kbd>C</kbd>) |
 | [CONTROL_LBUTTON](/constants/CONTROL_LBUTTON/) | 0x10000000 | Left mouse button control |
 | [CONTROL_ML_LBUTTON](/constants/CONTROL_ML_LBUTTON/) | 0x40000000 | Left mouse button control while in [mouselook](https://wiki.secondlife.com/wiki/mouselook) |
-| (undocumented) | 0x02000000 | Avatar left rotation detected. Triggers [llGetAnimation](/functions/llGetAnimation/) == "Turning Left" |
-| (undocumented) | 0x04000000 | Avatar right rotation detected. Triggers [llGetAnimation](/functions/llGetAnimation/) == "Turning Right" |
+| (undocumented) | 0x02000000 | Avatar left rotation detected.[^v1] Triggers [llGetAnimation](/functions/llGetAnimation/) == "Turning Left" |
+| (undocumented) | 0x04000000 | Avatar right rotation detected.[^v2] Triggers [llGetAnimation](/functions/llGetAnimation/) == "Turning Right" |
 
 ## Caveats
 
@@ -58,7 +58,7 @@ llTakeControls(0, 0, 0);
 - There is a bug in some permissions that prevents left clicks from working in mouselook if they are set to **accept** = [FALSE](/constants/FALSE/), **pass_on** = [TRUE](/constants/TRUE/)
 - If you sit/are sitting on the object that has taken your controls using **accept** = [TRUE](/constants/TRUE/) and **pass_on** = [TRUE](/constants/TRUE/), then [CONTROL_FWD](/constants/CONTROL_FWD/), [CONTROL_BACK](/constants/CONTROL_BACK/), [CONTROL_ROT_LEFT](/constants/CONTROL_ROT_LEFT/), and [CONTROL_ROT_RIGHT](/constants/CONTROL_ROT_RIGHT/) will never generate events; instead these controls will only perform their normal functions.
 - if the undocumented controls 0x02000000 or 0x04000000 are taken with **pass_on** = [FALSE](/constants/FALSE/), then [llGetAnimation](/functions/llGetAnimation/) will never be "Turning Left" or "Turning Right", respectively, and those animations set by [llSetAnimationOverride](/functions/llSetAnimationOverride/) will never play
-- all control flags documented in [libopenmetaverse](https://github.com/openmetaversefoundation/libopenmetaverse/blob/master/OpenMetaverse/AgentManagerMovement.cs#L42) [secondlife viewer](https://github.com/secondlife/viewer/blob/c7053a6928fd5eafdc935453742e92951ae4e0c1/indra/llcommon/indra_constants.h#L255)
+- all control flags documented in [libopenmetaverse](https://github.com/openmetaversefoundation/libopenmetaverse/blob/master/OpenMetaverse/AgentManagerMovement.cs#L42) [secondlife viewer](https://github.com/secondlife/viewer/blob/746d768339/indra/llcommon/indra_constants.h#L321-L357)
 - If your viewer's 'Single click on land' setting is set to 'Move to clicked point', then [CONTROL_LBUTTON](/constants/CONTROL_LBUTTON/) might not be sent to the server when taken by `llTakeControls()`.
 
 ## Examples
@@ -125,5 +125,9 @@ From the issue templates included by the wiki article:
 ### Events
 
 - [control](/events/control/)
+
+[^v1]: Viewer `746d768339`: [`llcommon/indra_constants.h:349`](https://github.com/secondlife/viewer/blob/746d768339/indra/llcommon/indra_constants.h#L349)
+[^v2]: Viewer `746d768339`: [`llcommon/indra_constants.h:350`](https://github.com/secondlife/viewer/blob/746d768339/indra/llcommon/indra_constants.h#L350)
+[^v3]: Viewer `746d768339`: [`newview/llagent.cpp:3814-3843`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagent.cpp#L3814-L3843); [`newview/llagent.cpp:3502-3526`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagent.cpp#L3502-L3526); [`newview/llviewerinput.cpp:421`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerinput.cpp#L421); [`newview/llviewerinput.cpp:547`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerinput.cpp#L547)
 
 <WikiSource />

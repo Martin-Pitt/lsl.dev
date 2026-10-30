@@ -1,15 +1,145 @@
 ---
 title: Show floating text
-description: How to show text above an object and update it.
+description: Put a label above a prim with llSetText, update it, lay it out over several lines, and remove it again; with what the viewer does to the text you set.
 sidebar:
   order: 4
-  badge:
-    text: Stub
-    variant: danger
 ---
+import { RecipeMeta, Prerequisites, Requires, Steps, BuildStep, ScriptFile, Limit } from '~/components/authoring';
 
-:::caution[Stub]
-This documentation page is a stub and is currently under development.
-:::
+[`llSetText`](/functions/llSetText/) sets a prim's floating text: a block of text that hovers
+above the prim, faces the camera and shows through walls. It is a prim property, not a script
+effect: the text stays after the script is removed, and only another `llSetText` or
+[`PRIM_TEXT`](/constants/PRIM_TEXT/) changes it.
 
-How to show text above an object and update it.
+<RecipeMeta scripts={1} time="5 min" />
+
+<Prerequisites>
+- [States and events](/fundamentals/states-and-events/)
+- [Touch input](/features/input/touch/)
+- [`llSetText`](/functions/llSetText/)
+</Prerequisites>
+
+<Requires land="build" />
+
+<Steps>
+<BuildStep title="Rez a prim">
+Any prim works. The text hangs above the prim's centre, so a tall prim puts the label higher.
+</BuildStep>
+<BuildStep title="Add the script">
+Drop this script in. It labels the prim and counts touches, updating the text on each one.
+
+<ScriptFile name="floating-text.lsl" in="The prim">
+```lsl title="floating-text.lsl"
+integer touches;
+
+show()
+{
+    // A space on the blank line keeps it; an empty line would be dropped
+    llSetText("Touch me\n \nTouches: " + (string)touches, <1.0, 1.0, 1.0>, 1.0);
+}
+
+default
+{
+    state_entry()
+    {
+        show();
+    }
+
+    touch_start(integer n)
+    {
+        ++touches;
+        show();
+    }
+}
+```
+</ScriptFile>
+</BuildStep>
+</Steps>
+
+The colour is an RGB vector with each component 0.0 to 1.0; alpha 1.0 is opaque and 0.0 is
+invisible. The text is at most <Limit id="building-length-hovertext" /> and is truncated beyond
+that.
+
+## Removing the text
+
+Set an empty string. The colour and alpha arguments don't matter: the viewer drops the text as
+soon as the string is empty.[^v1]
+
+```lsl
+llSetText("", ZERO_VECTOR, 0.0);
+```
+
+Because the text outlives the script, a label set by a script that was later deleted stays until
+something clears it. Dropping this one-shot script in a prim clears it and then removes itself:
+
+```lsl
+default
+{
+    state_entry()
+    {
+        llSetText("", ZERO_VECTOR, 0.0);
+        llRemoveInventory(llGetScriptName());
+    }
+}
+```
+
+To clear text on other prims of a linkset, use
+[`llSetLinkPrimitiveParamsFast`](/functions/llSetLinkPrimitiveParamsFast/) with
+[`PRIM_TEXT`](/constants/PRIM_TEXT/), for example
+`llSetLinkPrimitiveParamsFast(LINK_SET, [PRIM_TEXT, "", ZERO_VECTOR, 0.0])`.
+
+## Lines and layout
+
+- `\n` starts a new line. Lines are centred under each other
+- Empty lines are dropped: the viewer splits the text on line breaks and discards empty pieces,
+  so `"A\n\nB"` shows as two lines, not three. To keep a gap, put a space on the line (`"A\n \nB"`).
+  The same applies at the end: trailing `\n` do nothing, `"\n "` adds a blank line[^v2]
+- A long line wraps at a fixed pixel width (1000 px in the current viewer), at a word boundary
+  where it can, so one line of your text can show as two[^v3]
+- The font is the viewer's own sans-serif UI font; neither font nor size can be set from LSL[^v4]
+- Nothing in LSL positions the text. The viewer places it 0.6 × the prim's Z size above the
+  prim's centre, straight up in world axes regardless of the prim's rotation. The block's bottom
+  edge sits at that point, so adding lines pushes the first line higher, not the last one
+  lower.[^v5] To move a label, move or resize the prim, or put the text on a
+  transparent child prim where you want it
+
+## How far away it shows
+
+Visibility is decided by each viewer, not the simulator: what you set is the same for everyone,
+what they see depends on distance and their settings. Figures below are the Linden viewer's:
+
+- The text starts fading at 8 m and is gone at 12 m, measured after the viewer pulls the text's
+  position toward the camera by the prim's bounding radius, so roughly from the prim's bounding
+  sphere. That is why a bigger prim's text can be read from further away[^v6]
+- Independently of the fade, text whose anchor point (the spot above the prim where it hangs,
+  without the bounding-radius pull-in) is more than a set distance from the camera is not drawn
+  at all. The default is 64 m (setting `PrimTextMaxDrawDistance`, which users can change; the
+  viewer clamps it to 0 to 300 m).[^v7] A huge prim therefore doesn't give you unlimited range
+- Text whose alpha after fading is below 0.01 is not drawn. An alpha of 0.0 with a non-empty
+  string is a valid way to hide text while keeping it set, but values just above zero look the
+  same as hidden[^v8]
+- Text on attachments worn by an avatar the user has blocked is hidden. Blocking does not hide
+  text on that avatar's rezzed objects[^v9]
+
+## Text on a HUD
+
+Floating text on a HUD attachment is drawn in the HUD layer and is always visible: no distance
+fade and no draw-distance cutoff.[^v10] The text still sits 0.6 × the prim's Z size above the
+prim, so leave room above a HUD prim on screen.
+
+## Related
+
+- [`llSetText`](/functions/llSetText/) and [`PRIM_TEXT`](/constants/PRIM_TEXT/)
+- [`llGetLinkPrimitiveParams`](/functions/llGetLinkPrimitiveParams/) with `PRIM_TEXT` reads a prim's current text, colour and alpha
+- [Limits: building](/reference/limits/#building)
+
+[^v1]: Viewer `746d768339`: [`newview/llviewerobject.cpp:1510-1544`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L1510-L1544). A text field of one byte (just the terminator) destroys the viewer's text object and clears the cached string
+[^v2]: Viewer `746d768339`: [`newview/llhudtext.cpp:262-266`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L262-L266). `boost::char_separator` on `\r\n` with its default behaviour drops empty tokens
+[^v3]: Viewer `746d768339`: [`newview/llhudtext.cpp:55`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L55); [`newview/llhudtext.cpp:272-281`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L272-L281). `HUD_TEXT_MAX_WIDTH_NO_BUBBLE = 1000.f` and `maxDrawableChars` with `WORD_BOUNDARY_IF_POSSIBLE`
+[^v4]: Viewer `746d768339`: [`newview/llviewerobject.cpp:6219-6227`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6219-L6227). `setFont(LLFontGL::getFontSansSerif())`, top-aligned, unlimited lines
+[^v5]: Viewer `746d768339`: [`newview/llviewerobject.cpp:6308-6316`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6308-L6316); [`newview/llhudtext.cpp:138`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L138). `up_offset.mV[2] = getScale().mV[VZ]*0.6f` added to the render position; with `ALIGN_VERT_TOP` the block is offset by its full height, so it sits above the anchor; lines are drawn top-down from `y_offset` ([`newview/llhudtext.cpp:189-210`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L189-L210))
+[^v6]: Viewer `746d768339`: [`newview/llhudtext.cpp:86-88`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L86-L88); [`newview/llhudtext.cpp:124-130`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L124-L130); [`newview/llhudtext.cpp:380-389`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L380-L389). `mFadeDistance = 8.f; mFadeRange = 4.f`; position pulled toward the camera by `getVObjRadius()`; hidden past `mFadeDistance + mFadeRange`
+[^v7]: Viewer `746d768339`: [`newview/llhudtext.cpp:56`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L56); [`newview/llhudtext.cpp:391-411`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L391-L411); [`newview/app_settings/settings.xml:7050-7059`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L7050-L7059). `MAX_DRAW_DISTANCE = 300.f`; `PrimTextMaxDrawDistance` default `64.0`, clamped to 0..300, measured from the text anchor nudged 1 m toward the camera
+[^v8]: Viewer `746d768339`: [`newview/llhudtext.cpp:132-135`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L132-L135); [`newview/llviewerobject.cpp:1522-1528`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L1522-L1528). `if (text_color.mV[3] < 0.01f) return;` and the 8-bit colour from the object update
+[^v9]: Viewer `746d768339`: [`newview/llviewerobject.cpp:6302-6306`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6302-L6306). `mText->setHidden(avatar->isInMuteList())`; `getAvatar()` ([`newview/llviewerobject.cpp:7616-7636`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L7616-L7636)) only resolves for attachments and animesh, not for an owner's rezzed objects
+[^v10]: Viewer `746d768339`: [`newview/llhudtext.cpp:354-360`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llhudtext.cpp#L354-L360); [`newview/llviewerobject.cpp:6226`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6226). "for now, all text on hud objects is visible"

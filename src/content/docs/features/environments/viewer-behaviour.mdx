@@ -1,0 +1,78 @@
+---
+title: "How viewers apply environments"
+description: "Layer precedence, fade times, what clears an agent push, and the error a bad environment asset produces."
+---
+
+A script changes an environment on the simulator, but the sky the avatar actually sees is assembled in their viewer. This page covers what the Second Life viewer does with a scripted change: which environment wins when several apply, how long the fade takes, when it drops an experience push on its own, and what the avatar sees when a pushed asset fails. Part of the [Environments](/features/environments/) feature; the simulator side is on the function pages.
+
+## Layers and precedence
+
+The viewer keeps one slot per environment source and displays the first populated one, from the top:[^v1]
+
+1. **Local** — an environment the user picked in their own viewer, or the environment editor while it is open
+2. **Push** — an experience override from [`llReplaceAgentEnvironment`](/functions/llReplaceAgentEnvironment/) or [`llSetAgentEnvironment`](/functions/llSetAgentEnvironment/)
+3. **Parcel** — the parcel environment, set in the land settings or by [`llReplaceEnvironment`](/functions/llReplaceEnvironment/) and [`llSetEnvironment`](/functions/llSetEnvironment/) on a parcel
+4. **Region** — the region environment, or the built-in default if the region has none
+
+So a user who has selected a personal sky sees none of your scripted changes, parcel or push, until they switch back to the shared environment. Nothing in LSL can detect or override that; the "may choose to ignore" caveat on the agent functions is this layer. [`llGetEnvironment`](/functions/llGetEnvironment/) reports the parcel or region environment at a position, not what any particular avatar is looking at.
+
+## Fade times
+
+The viewer blends from the old sky and water to the new ones rather than cutting. The durations are fixed in the viewer:[^v2]
+
+| Change | Fade |
+| --- | --- |
+| Parcel or region environment replaced or edited | 5 s |
+| Same, but the viewer fetches it while the avatar is mid-teleport | 1 s |
+| Agent push from [`llReplaceAgentEnvironment`](/functions/llReplaceAgentEnvironment/) or [`llSetAgentEnvironment`](/functions/llSetAgentEnvironment/) | the `transition` argument |
+| Push cleared by region change | 5 s |
+| Push cleared because the parcel disallows the experience, or the user forgets it | 1 s |
+| Push cleared because the user blocks the experience | instant |
+| Avatar crosses a [sky track altitude](/constants/SKY_TRACKS/) | 5 s |
+
+Only the agent functions let a script choose the time; parcel and region changes have no transition argument and always use the viewer's 5 s default. A parcel change is also not applied by the viewer until the simulator's parcel update reaches it and it fetches the new environment, so the fade starts some time after the function returns.[^v3]
+
+For per-parameter overrides from [`llSetAgentEnvironment`](/functions/llSetAgentEnvironment/), a `transition` of 0.1 s or less is applied instantly; anything longer blends each parameter separately over that time.[^v4]
+
+## What an agent push is
+
+Both agent functions send the avatar's viewer a generic message with one of three actions: clear, replace the whole environment with an asset, or apply partial settings. Each is also recorded in the avatar's Experience log with the object and parcel names, so the user can see which experience changed their sky and when.[^v5]
+
+A pushed day cycle keeps the parcel or region's day length and day offset; the asset's own values are not used.[^v6] Pushes sit above the parcel and region layers and below local, as in the precedence list above.
+
+## What clears a push
+
+An experience environment is removed by the viewer, without the script doing anything, when:
+
+- The avatar enters another region, by any means. All experience pushes are cleared with a 5 s fade[^v7]
+- The avatar moves to a parcel where the experience is not allowed. The viewer asks the simulator which of its active experiences are permitted on the new parcel and clears any that are not, with a 1 s fade[^v8]
+- The user forgets the experience (1 s fade) or blocks it (instant)[^v8]
+
+A script clears its own push with [`llSetAgentEnvironment`](/functions/llSetAgentEnvironment/) and an empty list, or [`llReplaceAgentEnvironment`](/functions/llReplaceAgentEnvironment/) with [`NULL_KEY`](/constants/NULL_KEY/) or an empty string; the viewer fades back to the parcel or region environment over the given `transition`, and treats a partial push that carries neither sky nor water settings the same way.[^v9] Clearing only removes what that experience set; a sky pushed by one experience survives another experience clearing its own.[^v9]
+
+Because region crossings clear the push, a script that wants a persistent per-avatar sky across regions has to reapply it: watch for [`CHANGED_REGION`](/constants/CHANGED_REGION/) or [`CHANGED_TELEPORT`](/constants/CHANGED_TELEPORT/) in [`changed`](/events/changed/) on an attachment, or detect arrival some other way, then push again.
+
+## Bad or missing assets
+
+If [`llReplaceAgentEnvironment`](/functions/llReplaceAgentEnvironment/) is given a UUID the viewer cannot load as a settings asset, the push is dropped and the avatar gets a modal alert, "Could not load the settings for [NAME] from the database", where NAME is the experience's key. The current environment is left unchanged.[^v10] The simulator cannot tell the script this happened: the call already returned [`ENV_OK`](/constants/ENV_OK/) (1) when the simulator accepted it. Pass an asset from the object's inventory or a key you know is a settings asset.
+
+## Altitude tracks
+
+A day cycle carries a water track, a ground sky and up to three altitude skies. The viewer picks the sky track from the region's altitude boundaries, the values [`SKY_TRACKS`](/constants/SKY_TRACKS/) reports, using the avatar's position rather than the camera, and switches every layer to the new track with a 5 s fade when the avatar crosses a boundary.[^v11]
+
+## Related
+
+- [Environments](/features/environments/) overview, settings constants and the `ENV_*` return codes
+- [Experience](/features/experience/) permissions, which both agent functions require
+
+[^v1]: Viewer `746d768339`: [`newview/llenvironment.h:97-108`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.h#L97-L108); [`newview/llenvironment.cpp:1474-1485`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L1474-L1485)
+[^v2]: Viewer `746d768339`: [`newview/llenvironment.cpp:810-814`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L810-L814); [`newview/llenvironment.cpp:1500-1517`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L1500-L1517); [`newview/llenvironment.cpp:1897-1901`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L1897-L1901)
+[^v3]: Viewer `746d768339`: [`newview/llviewerparcelmgr.cpp:1718`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerparcelmgr.cpp#L1718); [`newview/llviewerparcelmgr.cpp:1794-1798`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerparcelmgr.cpp#L1794-L1798); [`newview/llenvironment.cpp:1288-1291`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L1288-L1291)
+[^v4]: Viewer `746d768339`: [`newview/llenvironment.cpp:384-397`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L384-L397)
+[^v5]: Viewer `746d768339`: [`newview/llenvironment.cpp:83-96`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L83-L96); [`newview/llenvironment.cpp:315-348`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L315-L348); [`newview/llenvironment.cpp:2455-2484`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L2455-L2484)
+[^v6]: Viewer `746d768339`: [`newview/llenvironment.cpp:2491-2496`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L2491-L2496); [`newview/llenvironment.cpp:3285-3293`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L3285-L3293)
+[^v7]: Viewer `746d768339`: [`newview/llenvironment.cpp:1013-1017`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L1013-L1017)
+[^v8]: Viewer `746d768339`: [`newview/llenvironment.cpp:2612-2622`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L2612-L2622); [`newview/llenvironment.cpp:3544-3555`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L3544-L3555); [`newview/llenvironment.cpp:3396-3406`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L3396-L3406); [`newview/llenvironment.cpp:3436-3444`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L3436-L3444)
+[^v9]: Viewer `746d768339`: [`newview/llenvironment.cpp:2577-2586`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L2577-L2586); [`newview/llenvironment.cpp:3329-3350`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L3329-L3350)
+[^v10]: Viewer `746d768339`: [`newview/llenvironment.cpp:2535-2546`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L2535-L2546); [`newview/skins/default/xui/en/notifications.xml:12372-12379`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/notifications.xml#L12372-L12379)
+[^v11]: Viewer `746d768339`: [`newview/llenvironment.cpp:2419-2452`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L2419-L2452); [`newview/llenvironment.cpp:215-237`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L215-L237); [`newview/llenvironment.cpp:1772-1777`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llenvironment.cpp#L1772-L1777)

@@ -1,0 +1,70 @@
+---
+title: "Viewer 26.5 for scripters"
+description: "What changed for LSL scripters between the Second Life viewer 26.2 and 26.5 releases: game control on by default, scripted camera fixes, the SLua-aware script editor, the VS Code plugin and chat tabs."
+---
+
+The changes in the Linden Lab viewer that a script can notice, from release 26.2 to release 26.5 (`26.5.0`, source commit [`746d768339`](https://github.com/secondlife/viewer/commit/746d768339)). Everything here is viewer behaviour: it depends on the viewer the other avatar runs, and third-party viewers pick these changes up on their own schedule. Simulator changes are in the [simulator release notes](https://releasenotes.secondlife.com/categories/simulator.html).
+
+## Game control
+
+Game control arrives on the main release line with 26.5 ([#6202](https://github.com/secondlife/viewer/pull/6202)); 26.2 had none of it. The viewer sends controller input to the region, and scripts read it in the [`game_control`](/events/game_control/) event after [`PERMISSION_GAME_CONTROL`](/constants/PERMISSION_GAME_CONTROL/) is granted. The [Game Control](/features/input/game-control/) feature page has the modes, axes and buttons.
+
+- Sending is on by default: the "send data to server" preference ships enabled ([#6507](https://github.com/secondlife/viewer/pull/6507)), so a 26.5 user produces game control data without touching preferences.[^v1]
+- Data goes only to regions that advertise the `GameControlEnabled` simulator feature. In other regions the viewer computes the state but sends nothing.[^v2]
+- The controller "toggle sit" action looks for a seat before it sits on the ground: the nearest non-attached prim with its click action set to [`CLICK_ACTION_SIT`](/constants/CLICK_ACTION_SIT/) within twice the avatar's height. Set that action with [`llSetClickAction`](/functions/llSetClickAction/) and your furniture answers a controller button; a seat with a [sit target](/functions/llSitTarget/) but the default click action is not found.[^v3]
+- With no seat in range the action sits on the ground, but refuses when the ground is more than 30 m away, and otherwise autopilots the avatar to the spot first instead of snapping down ([#6341](https://github.com/secondlife/viewer/issues/6341)).[^v4]
+
+## Scripted camera
+
+Fixes to the follow camera driven by [`llSetCameraParams`](/functions/llSetCameraParams/):
+
+- [`CAMERA_POSITION_LAG`](/constants/CAMERA_POSITION_LAG/) and [`CAMERA_FOCUS_LAG`](/constants/CAMERA_FOCUS_LAG/) are no longer cut short by the distance limit. The camera may now drag beyond [`CAMERA_DISTANCE`](/constants/CAMERA_DISTANCE/) while the avatar moves, as the lag asks for; only the viewer's own maximum distance, scaled down when the user zooms in, still clamps it ([#6532](https://github.com/secondlife/viewer/issues/6532), after [#6278](https://github.com/secondlife/viewer/issues/6278) had rebuilt the clamp around the subject-relative offset so a moving avatar keeps the intended geometry).[^v5]
+- A scripted camera survives momentary loss of its source. When the follow-cam parameters drop out for a moment, as can happen at a parcel or region border while the seat is re-established, the viewer keeps the last valid camera for up to 3 s before falling back to third person ([#6237](https://github.com/secondlife/viewer/pull/6237)).[^v6]
+- When a seat disappears for good, the viewer now clears the active follow-cam parameters as it stands the avatar up, instead of leaving the camera locked where the vehicle was.[^v7]
+
+## Script editor and SLua
+
+The SLua editor work, previously a project viewer, is in the release ([#3537](https://github.com/secondlife/viewer/pull/3537) and follow-ups). What a scripter sees:
+
+- The editor's compiler menu offers LSL on Mono, LSL Legacy, LSL on Lua and Lua. The two Lua targets are enabled only when the region reports the `LuaScriptsEnabled` simulator feature.[^v8]
+- In such a region, the New Script button in the Build floater's Contents tab defaults to a Lua script; the choice is remembered while you stay on the same object and resets when you edit a different object or the region's Lua support changes ([#6221](https://github.com/secondlife/viewer/issues/6221)).[^v9] Pick LSL explicitly if that is what you want
+- The Build menu gains separate recompile entries per target, and the recompile queue skips scripts whose metadata says they are the wrong language ([#5574](https://github.com/secondlife/viewer/issues/5574)).[^v16]
+- Keyword highlighting and tooltips fall back to the viewer's bundled definitions when the region omits a language's definitions, instead of going blank ([#6162](https://github.com/secondlife/viewer/issues/6162)).[^v10]
+- Tabs in incoming chat, including script chat and error text, are expanded to four spaces before any other formatting, so indentation in [`llSay`](/functions/llSay/) output survives ([#4926](https://github.com/secondlife/viewer/issues/4926)).[^v11]
+
+For the language itself see [LSL vs SLua](/fundamentals/lsl-vs-slua/) and [slua.dev](https://slua.dev/).
+
+## External editor and the VS Code plugin
+
+The viewer runs a local WebSocket JSON-RPC server for an external editor, used by the [sl-vscode-plugin](https://github.com/secondlife/sl-vscode-plugin) ([#4599](https://github.com/secondlife/viewer/pull/4599), [#5834](https://github.com/secondlife/viewer/pull/5834)). The protocol is documented in the viewer tree at [`doc/external-editor-json-rpc.md`](https://github.com/secondlife/viewer/blob/746d768339/doc/external-editor-json-rpc.md).
+
+- The server and the forwarding of script output are both on by default (`ExternalWebsocketSyncEnable`, `ExternalWebsocketForwardDebug`).[^v12]
+- [`llOwnerSay`](/functions/llOwnerSay/) output and [`DEBUG_CHANNEL`](/constants/DEBUG_CHANNEL/) errors are copied to the connected editor, tagged as owner-say or debug; they still appear in nearby chat as before.[^v13]
+- The editor can explore an object's whole inventory, save a rezzed object's scripts back to the rezzer's inventory ([plugin #99](https://github.com/secondlife/sl-vscode-plugin/issues/99)), and run recompile-all and reset-all on an object ([#6191](https://github.com/secondlife/viewer/issues/6191)).[^v14]
+- Compile errors are parsed from the simulator message with their line and column, so the editor can jump to them.[^v17]
+
+## Environment
+
+- The viewer no longer switches existing users back to the shared environment after every teleport; `SwitchToSharedEnvAfterTeleport` defaults off and is turned on only for first logins ([#5806](https://github.com/secondlife/viewer/issues/5806)).[^v15] A user who has chosen a local environment keeps it across teleports, and still sees nothing from [`llSetAgentEnvironment`](/functions/llSetAgentEnvironment/) or parcel settings until they switch back to shared
+
+## Chat
+
+- Chat modernization ([#6179](https://github.com/secondlife/viewer/pull/6179)) rebuilds IM and conversation history on top of the Chat Service. It changes how the viewer stores and shows history; nothing in it changes what a script sends with [`llInstantMessage`](/functions/llInstantMessage/) or receives
+
+[^v1]: Viewer `746d768339`: [`llwindow/llgamecontrol.cpp:600`](https://github.com/secondlife/viewer/blob/746d768339/indra/llwindow/llgamecontrol.cpp#L600); [`llwindow/llgamecontrol.cpp:4346`](https://github.com/secondlife/viewer/blob/746d768339/indra/llwindow/llgamecontrol.cpp#L4346)
+[^v2]: Viewer `746d768339`: [`newview/llappviewer.cpp:5471-5484`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llappviewer.cpp#L5471-L5484); [`newview/llviewerregion.cpp:3776-3780`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerregion.cpp#L3776-L3780)
+[^v3]: Viewer `746d768339`: [`newview/llviewermenu.cpp:4682-4696`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermenu.cpp#L4682-L4696); [`newview/llagent.cpp:5100-5109`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagent.cpp#L5100-L5109)
+[^v4]: Viewer `746d768339`: [`newview/llagent.cpp:120`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagent.cpp#L120); [`newview/llagent.cpp:1362-1375`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagent.cpp#L1362-L1375)
+[^v5]: Viewer `746d768339`: [`newview/llfollowcam.cpp:415-434`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llfollowcam.cpp#L415-L434)
+[^v6]: Viewer `746d768339`: [`newview/llagentcamera.cpp:85`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagentcamera.cpp#L85); [`newview/llagentcamera.cpp:1383-1396`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagentcamera.cpp#L1383-L1396)
+[^v7]: Viewer `746d768339`: [`newview/llvoavatar.cpp:8072-8076`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llvoavatar.cpp#L8072-L8076); [`newview/llfollowcam.cpp:859`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llfollowcam.cpp#L859)
+[^v8]: Viewer `746d768339`: [`newview/skins/default/xui/en/panel_script_ed.xml:244-259`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/panel_script_ed.xml#L244-L259); [`newview/llpreviewscript.cpp:556-564`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L556-L564)
+[^v9]: Viewer `746d768339`: [`newview/llpanelcontents.cpp:150-173`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpanelcontents.cpp#L150-L173)
+[^v10]: Viewer `746d768339`: [`newview/llsyntaxid.cpp:287-293`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llsyntaxid.cpp#L287-L293)
+[^v11]: Viewer `746d768339`: [`newview/llviewermessage.cpp:2462-2463`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L2462-L2463)
+[^v12]: Viewer `746d768339`: [`newview/app_settings/settings.xml:14168-14178`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L14168-L14178); [`newview/app_settings/settings.xml:14212-14222`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L14212-L14222)
+[^v13]: Viewer `746d768339`: [`newview/llfloaterimnearbychathandler.cpp:567-582`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llfloaterimnearbychathandler.cpp#L567-L582)
+[^v14]: Viewer `746d768339`: [`newview/llscripteditorws.cpp:256-264`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llscripteditorws.cpp#L256-L264)
+[^v15]: Viewer `746d768339`: [`newview/app_settings/settings.xml:13463-13473`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L13463-L13473); [`newview/llagent.cpp:588-589`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagent.cpp#L588-L589); [`newview/llagent.cpp:4215-4219`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llagent.cpp#L4215-L4219)
+[^v16]: Viewer `746d768339`: [`newview/llcompilequeue.cpp:481-483`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llcompilequeue.cpp#L481-L483)
+[^v17]: Viewer `746d768339`: [`newview/llscripteditorws.cpp:2265-2283`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llscripteditorws.cpp#L2265-L2283)

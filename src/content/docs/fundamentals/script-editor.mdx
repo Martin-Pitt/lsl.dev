@@ -1,0 +1,87 @@
+---
+title: Script editor
+description: "The viewer's script editor for LSL scripters: compiler targets, the 256 KB source limit, compile errors, keyword help, syntax definitions and external editors including VS Code."
+sidebar:
+  order: 11
+---
+
+The script editor is part of the viewer, not the simulator. It holds the source text, sends it to the region to compile when you save, and shows what comes back. Everything on this page is viewer behaviour as of the Second Life Viewer 26.5 release; third-party viewers may differ, and nothing here says how the simulator compiles or runs the script.
+
+## Compiler targets
+
+The **Compiler** dropdown at the bottom of the editor has four entries.[^v1]
+
+| Label | Value sent | Meaning |
+| --- | --- | --- |
+| LSL on Mono (recommended) | `mono` | LSL source compiled for the Mono runtime |
+| LSL Legacy | `lsl2` | LSL source compiled for the original LSO runtime |
+| LSL on Lua | `lsl-luau` | LSL source compiled for the Luau runtime |
+| Lua | `luau` | SLua source, see [LSL vs SLua](/fundamentals/lsl-vs-slua/) |
+
+- The two Lua entries are only enabled when the region's simulator features report `LuaScriptsEnabled`; elsewhere they are greyed out[^v1]
+- The chosen value is sent as `target` with every save, both for scripts in your inventory and for scripts in an object; object saves also carry the running flag and the associated Experience[^v2]
+- When a script opens, the dropdown shows the runtime recorded in the script's inventory metadata; an LSL script recorded as running on `luau` shows LSL on Lua. A script that has never been compiled has no runtime, and the viewer then guesses: source containing `default {` is treated as LSL on Mono, anything else as Lua[^v3]
+- For a script in an object the simulator's reply to the running-state query overrides that guess with its own Mono, Luau and Luau-language flags[^v4]
+
+New scripts default to Lua on Lua-enabled regions. The **New Script** button in the Build tool's Content tab is a flyout with LSL and Lua entries; it selects Lua whenever the region reports `LuaScriptsEnabled`, and a new LSL script from it is created with the `mono` VM. A new script created in your inventory is also requested as Lua on such regions, and the server picks the matching default script.[^v5] If you want LSL, choose it explicitly.
+
+**Build > Scripts** also offers bulk recompiles of every script in the selected objects: Recompile LSL Scripts (Mono), (Legacy LSL) and (LSL on Lua), and Recompile Lua Scripts. The queue skips scripts you cannot both copy and modify, and scripts whose source language does not match the target, so an LSL script is never sent to the Lua compiler.[^v6]
+
+## Source size
+
+The editor's text control accepts at most 262,144 characters (256 KB) of source.[^v7] This is a viewer limit on the source text; it is separate from the script's [memory limit](/fundamentals/memory/), which applies to the compiled script. See [Limits](/reference/limits/#scripting).
+
+## Line numbers and compile errors
+
+- The gutter and the "Line, Column" status count from 0 for LSL and from 1 for Lua[^v8]
+- The region replies with `compiled` plus an `errors` array; the editor prints "Compile successful!" or lists each error, and selecting an entry moves the cursor to its row and column. A save that never reached the compiler shows "File upload failed:" and the reason[^v9]
+- Run-time errors do not appear in the editor; they go to [`DEBUG_CHANNEL`](/constants/DEBUG_CHANNEL/) and the Script Warning/Error window. See [Errors](/fundamentals/errors/)
+
+## Keyword help
+
+**Help > Keyword Help...** opens the LSL REFERENCE window (LUA REFERENCE for a Lua script), an embedded browser with a keyword list and a **Follow cursor** checkbox. With it ticked (the `ScriptHelpFollowsCursor` setting, default off) the window follows the keyword under the cursor; otherwise it stays on the keyword you picked.[^v10]
+
+The page it loads is the `LSLHelpURL` setting with `[LSL_STRING]` replaced by the keyword; the default is `https://wiki.secondlife.com/wiki/[LSL_STRING]`, and an empty keyword opens `LSL_Portal`. In a Lua script `ll.GetOwner` is mapped to `llGetOwner` before substitution, Luau library symbols (`math.`, `string.`, `table.` and so on) go to the Luau library reference, and other Lua symbols to the wiki's Lua page.[^v11] Because the substitution is flat, the setting can only point at a site where one URL pattern serves functions, events and constants alike; lsl.dev keeps them under `/functions/`, `/events/` and `/constants/`, so it cannot be set as the target directly.
+
+## Syntax highlighting and tooltips
+
+Highlighting, the keyword list and the hover tooltips come from LLSD keyword files. The viewer ships `keywords_lsl_default.xml` and `keywords_lua_default.xml`, and when the region's simulator features include an `LSLSyntaxId` it fetches current definitions from the region's `ScriptDefinitions` capability (falling back to the older `LSLSyntax` capability), caching them by that id. A region may omit the file for a language it does not support, in which case the previous definitions are kept.[^v12] In practice a new function gets highlighting and a tooltip once the region you are on publishes definitions that include it.
+
+A function's tooltip is its signature followed by `Energy:` (omitted when the definition gives a negative energy) and, when the definition has one, `Sleep:`, then its description; constants show their type and value.[^v13] The sleep is the forced delay the simulator adds after the call, as listed on each function page here.
+
+## External editors
+
+**Edit...** below the compiler dropdown hands the script to another program.[^v14] Set it up under **Preferences > Advanced > Script Development**, which opens the SCRIPT DEVELOPMENT SETTINGS window.[^v15]
+
+- The command comes from the `ExternalEditor` setting, or failing that the `LL_SCRIPT_EDITOR` environment variable, with `"%s"` standing for the file; with neither set the viewer falls back to the operating system's open handler for the file[^v16]
+- The viewer writes `sl_script_<name>_<hash>.lsl` (or `.luau` for a Lua script) in the system temp directory and watches it; saving in the external editor reloads the text into the viewer's editor, and you still save and compile from the viewer[^v17]
+- Compile errors from a script open externally are also written to `<file>.log` beside the temp file, one per line with a timestamp header[^v18]
+
+The same window configures a WebSocket JSON-RPC server for editor plug-ins such as the VS Code extension. `ExternalWebsocketSyncEnable` is on by default, listening on port 9020 for local connections only; with `ExternalWebsocketForwardDebug` (also on by default) the viewer forwards the script's [`llOwnerSay`](/functions/llOwnerSay/) output and `DEBUG_CHANNEL` errors to the connected editor.[^v19] A **VS Code Tight Integration** checkbox is meant to make Edit... launch VS Code through the `code` command with a `vscode://` URI instead of writing a temp file. In this release the editor tests a differently named setting (`ExternalWebsocketSyncTightIntegration`) that the checkbox does not set, so Edit... takes the temp-file path regardless.[^v20]
+
+## Reference
+
+- [Script memory and limits](/fundamentals/memory/), [Errors](/fundamentals/errors/), [LSL vs SLua](/fundamentals/lsl-vs-slua/)
+- [Limits](/reference/limits/#scripting), [Scripts](/features/script/), [Experiences](/features/experience/)
+- [`DEBUG_CHANNEL`](/constants/DEBUG_CHANNEL/), [`llOwnerSay`](/functions/llOwnerSay/)
+
+[^v1]: Viewer `746d768339`: [`newview/skins/default/xui/en/panel_script_ed.xml:244-259`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/panel_script_ed.xml#L244-L259); [`newview/llpreviewscript.cpp:134-155`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L134-L155); [`newview/llpreviewscript.cpp:556-564`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L556-L564)
+[^v2]: Viewer `746d768339`: [`newview/llviewerassetupload.cpp:834-846`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerassetupload.cpp#L834-L846)
+[^v3]: Viewer `746d768339`: [`newview/llpreviewscript.cpp:2131-2157`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L2131-L2157); [`newview/llpreviewscript.cpp:158-169`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L158-L169)
+[^v4]: Viewer `746d768339`: [`newview/llpreviewscript.cpp:2750-2776`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L2750-L2776)
+[^v5]: Viewer `746d768339`: [`newview/llpanelcontents.cpp:150-171`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpanelcontents.cpp#L150-L171); [`newview/llpanelcontents.cpp:300-306`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpanelcontents.cpp#L300-L306); [`newview/llviewerinventory.cpp:1789-1800`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerinventory.cpp#L1789-L1800)
+[^v6]: Viewer `746d768339`: [`newview/skins/default/xui/en/menu_viewer.xml:1362-1404`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/menu_viewer.xml#L1362-L1404); [`newview/llcompilequeue.cpp:386-392`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llcompilequeue.cpp#L386-L392); [`newview/llcompilequeue.cpp:481-497`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llcompilequeue.cpp#L481-L497)
+[^v7]: Viewer `746d768339`: [`newview/skins/default/xui/en/panel_script_ed.xml:170-180`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/panel_script_ed.xml#L170-L180)
+[^v8]: Viewer `746d768339`: [`newview/llscripteditor.cpp:321`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llscripteditor.cpp#L321); [`newview/llpreviewscript.cpp:780-790`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L780-L790)
+[^v9]: Viewer `746d768339`: [`newview/llpreviewscript.cpp:1993-2001`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L1993-L2001); [`newview/llpreviewscript.cpp:2020-2024`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L2020-L2024); [`newview/llpreviewscript.cpp:535`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L535); [`newview/llpreviewscript.cpp:1253-1273`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L1253-L1273); [`newview/skins/default/xui/en/strings.xml:2681-2684`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/strings.xml#L2681-L2684)
+[^v10]: Viewer `746d768339`: [`newview/skins/default/xui/en/panel_script_ed.xml:136-145`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/panel_script_ed.xml#L136-L145); [`newview/skins/default/xui/en/floater_lsl_guide.xml:19-24`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/floater_lsl_guide.xml#L19-L24); [`newview/llpreviewscript.cpp:1001-1048`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L1001-L1048); [`newview/llpreviewscript.cpp:815-818`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L815-L818); [`newview/app_settings/settings.xml:10692-10701`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L10692-L10701)
+[^v11]: Viewer `746d768339`: [`newview/llpreviewscript.cpp:87-125`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L87-L125); [`newview/llpreviewscript.cpp:891-906`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L891-L906); [`newview/app_settings/settings.xml:4174-4184`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L4174-L4184)
+[^v12]: Viewer `746d768339`: [`newview/llsyntaxid.cpp:44-53`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llsyntaxid.cpp#L44-L53); [`newview/llsyntaxid.cpp:90-121`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llsyntaxid.cpp#L90-L121); [`newview/llsyntaxid.cpp:287-293`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llsyntaxid.cpp#L287-L293)
+[^v13]: Viewer `746d768339`: [`llui/llkeywords.cpp:355`](https://github.com/secondlife/viewer/blob/746d768339/indra/llui/llkeywords.cpp#L355); [`llui/llkeywords.cpp:361-370`](https://github.com/secondlife/viewer/blob/746d768339/indra/llui/llkeywords.cpp#L361-L370)
+[^v14]: Viewer `746d768339`: [`newview/skins/default/xui/en/panel_script_ed.xml:230-234`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/panel_script_ed.xml#L230-L234); [`newview/llpreviewscript.cpp:1144-1245`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L1144-L1245)
+[^v15]: Viewer `746d768339`: [`newview/skins/default/xui/en/panel_preferences_advanced.xml:228-235`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/panel_preferences_advanced.xml#L228-L235); [`newview/llfloaterpreference.cpp:1932-1935`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llfloaterpreference.cpp#L1932-L1935); [`newview/skins/default/xui/en/floater_scripting_settings.xml:9`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/floater_scripting_settings.xml#L9)
+[^v16]: Viewer `746d768339`: [`newview/llexternaleditor.cpp:37-57`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llexternaleditor.cpp#L37-L57); [`newview/llpreviewscript.cpp:1215-1234`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L1215-L1234); [`newview/app_settings/settings.xml:14157-14167`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L14157-L14167); [`newview/skins/default/xui/en/strings.xml:4052-4057`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/strings.xml#L4052-L4057)
+[^v17]: Viewer `746d768339`: [`newview/llpreviewscript.cpp:1190-1213`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L1190-L1213); [`newview/llpreviewscript.cpp:1626-1639`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L1626-L1639)
+[^v18]: Viewer `746d768339`: [`newview/llpreviewscript.cpp:1649-1701`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L1649-L1701)
+[^v19]: Viewer `746d768339`: [`newview/app_settings/settings.xml:14168-14200`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L14168-L14200); [`newview/app_settings/settings.xml:14212-14222`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L14212-L14222); [`newview/llscripteditorws.cpp:291-295`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llscripteditorws.cpp#L291-L295); [`newview/llfloaterimnearbychathandler.cpp:567-582`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llfloaterimnearbychathandler.cpp#L567-L582)
+[^v20]: Viewer `746d768339`: [`newview/skins/default/xui/en/floater_scripting_settings.xml:85-91`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/skins/default/xui/en/floater_scripting_settings.xml#L85-L91); [`newview/app_settings/settings.xml:14201-14211`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L14201-L14211); [`newview/llscripteditorws.cpp:297-301`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llscripteditorws.cpp#L297-L301); [`newview/llpreviewscript.cpp:1163-1166`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llpreviewscript.cpp#L1163-L1166); [`newview/llscripteditorws.cpp:383-410`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llscripteditorws.cpp#L383-L410)

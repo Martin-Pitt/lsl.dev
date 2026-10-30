@@ -172,6 +172,7 @@ export default defineConfig({
 					{ label: 'Coordinate frames', link: '/reference/coordinate-frames/' },
 					{ label: 'Limits', link: '/reference/limits/' },
 					{ label: 'Viewer URIs', link: '/reference/viewer-uris/' },
+					{ label: 'Viewer 26.5 for scripters', link: '/reference/whats-new-26-5/' },
 					{ label: 'Simulator release notes ↗', link: 'https://releasenotes.secondlife.com/categories/simulator.html', attrs: { target: '_blank', rel: 'noopener' } },
 				],
 			},

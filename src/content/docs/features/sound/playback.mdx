@@ -1,0 +1,137 @@
+---
+title: "Sound playback"
+description: "How the viewer plays scripted sounds: attached and triggered sources, the one-deep queue, sync master and slaves, cut-off radius, parcel and mute filters, mixing limits, preloading and postponed sounds."
+---
+import { Box, Column, Columns, ConstantGroups, FeatureFooter, Planned, SeeAlso, Signatures } from '../../../../components/features';
+
+A script asks the simulator to play a sound; each viewer in range decides for itself whether, where and how loudly it is heard. Most "my sound does not play" caveats on the sound function pages come from that second step. This page follows a sound from the message the viewer receives to the channel it plays on, so the behaviour scripts observe has a concrete cause. Part of the [Sound](/features/sound/) feature.
+
+Everything here is viewer behaviour, read from the Second Life viewer source. Other viewers may differ, and what the simulator sends for a given LSL call is only visible where the viewer reacts to it.
+
+<Columns>
+<Column>
+<Box title="Concepts">
+
+- An [attached sound](/functions/llPlaySound/) belongs to a prim: the viewer keeps one audio source per prim, and every new attached sound re-targets that source[^v1]
+- A [triggered sound](/functions/llTriggerSound/) gets a fresh, anonymous source at a fixed position, so triggered sounds overlap and nothing can stop or adjust them later[^v2]
+- With [queueing](/functions/llSetSoundQueueing/) on, the viewer holds one more sound behind the current one and starts it when the current one ends, or when a loop wraps[^v3]
+- A [sync master](/functions/llLoopSoundMaster/) and [slaves](/functions/llLoopSoundSlave/) line up loops: the viewer picks one master at a time and restarts every slave each time the master loops[^v4]
+- The [sound radius](/functions/llSetSoundRadius/) is a cut-off measured from the listener's camera (or avatar, by preference); a radius of 0.1 m or less is treated as off[^v5]
+- Parcel [local sound](/constants/PARCEL_FLAG_LOCAL_SOUND_ONLY/) rules and the listener's mute list silence attached and triggered sounds client-side[^v6]
+- The viewer mixes at most 30 sounds at once; a new sound only displaces a playing one if it is louder or closer[^v7]
+- [Preloading](/functions/llPreloadSound/) starts the asset download; a sound that arrives before the object does is held for up to 15 s[^v8]
+
+</Box>
+</Column>
+<Column>
+<Box title="Functions and events">
+
+<Signatures names={[
+  "llPlaySound", "llLoopSound", "llStopSound", "llTriggerSound", "llSetSoundQueueing",
+  "llLoopSoundMaster", "llLoopSoundSlave", "llPlaySoundSlave", "llSetSoundRadius",
+  "llAdjustSoundVolume", "llPreloadSound"
+]} />
+
+</Box>
+</Column>
+</Columns>
+
+## Attached and triggered sources
+
+An attached sound reaches the viewer as a small update for one object: a sound key, an owner, a gain and a byte of flags. The same fields are also carried on full object updates, which is why a viewer that rezzes the object later still hears its loop.[^v1] The viewer keeps a single audio source per object and points it at whatever sound arrived last, so a prim has one attached sound at a time and a new [`llPlaySound`](/functions/llPlaySound/) or [`llLoopSound`](/functions/llLoopSound/) replaces the current one.[^v1] Without queueing the viewer stops the current sound before starting the new one.[^v9]
+
+The flag byte has bits for loop, sync master, sync slave, sync pending, queue and stop.[^v10] Which bits the simulator sets for each LSL call is not visible in viewer code, but the viewer's reactions line up with the function pages:
+
+- A loop bit on a sound the source is already looping is ignored, gain included. That is why a second [`llLoopSound`](/functions/llLoopSound/) with the same sound and a new volume changes nothing, and [`llAdjustSoundVolume`](/functions/llAdjustSoundVolume/) is the way to change it[^v11]
+- A stop arrives as an update with a null sound key. A looping source is torn down; a one-shot source is stopped only when the stop bit is set, otherwise it plays to its end[^v12]
+- [`llAdjustSoundVolume`](/functions/llAdjustSoundVolume/) arrives as a gain change for the object and is applied to that one source; the viewer clamps gain to 0.0 to 1.0[^v13]
+
+A triggered sound takes a different path. It arrives with a region handle and a position instead of an object to follow, and the viewer creates a new source with a generated id for every trigger.[^v2] Nothing links it back to the prim, so it stays where it started, several can play at once, and no later call can stop or adjust it.
+
+A sound attached to a HUD is positioned at the wearer's camera, and other viewers never receive HUD objects, so only the wearer hears it.[^v14]
+
+## The queue
+
+Queueing is a flag on each sound update, set by [`llSetSoundQueueing`](/functions/llSetSoundQueueing/). With it clear, the viewer stops the running sound before starting the next (the "farts of doom" fix).[^v9] With it set, the new sound goes into a single slot behind the current one: the queue is a FIFO of exactly one, a third sound while the slot is full is dropped, and queueing the sound that is already looping is refused.[^v3] A non-looping duplicate queues normally.
+
+Each frame the viewer promotes the queued sound when the current channel has stopped playing, or, for a loop, on the frame the loop wraps.[^v15] The gain is set on the source immediately when the update arrives and the queue slot stores only the asset, so whatever volume was sent last applies to whatever plays next.[^v3] A source with something queued is not cleaned up while it waits.[^v16]
+
+## Sync master and slaves
+
+Sync is global in the viewer, not per linkset. Each frame it picks one master: the unmuted sync-master source with the highest priority (gain over distance squared from the listener). When that master's channel loops this frame, every slave source that has a channel but is not playing is started in time with the master's channel.[^v4]
+
+A slave never starts on its own. When a slave source is given a channel it is flagged as waiting and holds that channel without playing until a master loops.[^v17] So [`llLoopSoundSlave`](/functions/llLoopSoundSlave/) and [`llPlaySoundSlave`](/functions/llPlaySoundSlave/) sounds with no audible [`llLoopSoundMaster`](/functions/llLoopSoundMaster/) nearby are silent, and a slave that is only in earshot of a master in another object still follows that master. [`SOUND_SYNC`](/constants/SOUND_SYNC/) on [`llLinkPlaySound`](/functions/llLinkPlaySound/) asks for the slave treatment.
+
+## Cut-off radius and the ear
+
+[`llSetSoundRadius`](/functions/llSetSoundRadius/) reaches the viewer as a cut-off radius on the object update.[^v1] When a sound starts and on every update, the viewer measures the distance from the sound's position to its "ear" and mutes the source when that distance is not under the radius.[^v5] The ear is the camera by default; a preference (`MediaSoundsEarLocation`, 0 = camera, 1 = avatar) moves it to the avatar.[^v18] For an attachment the sound's position is the wearing avatar, not the prim.[^v5] A radius of 0.1 m or less is treated as no cut-off, so 0.0 means unlimited rather than silent.[^v5]
+
+The radius is a hard switch, not a falloff: inside it the sound plays at normal distance attenuation, outside it the source is muted. A muted source keeps its data, so a loop resumes when the listener comes back into range.[^v19]
+
+## Parcel and mute filters
+
+Before a sound plays, the viewer checks parcel rules and mute lists. For an attached source these run on every update; for a triggered sound they run once, when the trigger arrives.
+
+- Parcel local sound: the viewer asks whether the sound's position is audible from the listener's parcel. In the same parcel it always is; across a parcel border it is not if either the listener's parcel or the sound's parcel has local sound only set ([`PARCEL_FLAG_LOCAL_SOUND_ONLY`](/constants/PARCEL_FLAG_LOCAL_SOUND_ONLY/), readable with [`llGetParcelFlags`](/functions/llGetParcelFlags/))[^v6]
+  - An attached sound from the object the listener is sitting on is exempt, so a vehicle keeps its sounds across parcel borders for its riders[^v20]
+- Mute list: a muted object, a muted parent object (for triggered sounds), an owner muted with the object-sounds flag or, for attachments, a muted wearer all silence the sound[^v21]
+- Region maturity above the listener's preference drops the sound[^v22]
+- Triggered sounds only: a trigger whose object id is the owner id (a gesture or inventory sound) from another avatar is dropped when gesture sounds are off, and the built-in collision material sounds are dropped when collision sounds are off[^v23]
+
+Muting from the mute list or parcel rules does not destroy an attached source. It stops the channel and keeps the sound data; when the condition clears the viewer restarts the current sound, so a loop silenced by a parcel border picks up again on the other side.[^v19]
+
+## Channels and mixing
+
+The viewer plays at most 30 sounds at once and keeps 40 decoded buffers.[^v7] Each frame every source gets a priority of gain divided by the squared distance to the listener (at least 1 m²); muted sources get 0.[^v24] Among sources that want a channel and have decoded data, only the highest-priority one is considered per frame. It takes a free channel if there is one; otherwise the lowest-priority playing channel is flushed for it, but only if that channel's priority is no higher than the new sound's.[^v25] A quiet or distant sound in a busy scene may therefore never get a channel.
+
+Sources have lifetimes.[^v26] A looping source never ends on its own. A one-shot source is force-ended after 60 s of playing, dropped after 15 s if it never got a channel (11 s while muted), and dropped once it has played through. Decoded buffers unused for 30 s are flushed, which is why a sound not played for a while can start late again.[^v27]
+
+For a scripter this means:
+
+- Keep one-shot sounds under 60 s; the viewer cuts longer ones off
+- A sound that fails to decode or download within 15 s is dropped, so a slow asset fetch means silence, not a late start
+- A stopped loop's source lingers while it has preloads pending, and a null stop only tears down a looping source that has none[^v12]
+
+## Preloading and postponed sounds
+
+[`llPreloadSound`](/functions/llPreloadSound/) arrives as a preload message. If the viewer does not yet know the object it is dropped; otherwise it creates the object's audio source if needed (at a token gain of 0.01) and adds the asset to that source's preload list, which starts the download; when the asset arrives the viewer decodes it to disk.[^v8] Only the load into a playback buffer waits for the first play, so a preloaded sound starts without a fetch or decode delay.[^v29] Preloads from muted objects or owners are dropped like any other sound.[^v28]
+
+A sound played right after rez, in [`on_rez`](/events/on_rez/) or [`state_entry`](/events/state_entry/), can reach a viewer before the object itself. The viewer parks such a sound keyed by object id for up to 15 s and plays it once the object update arrives; a later null stop for the same object cancels the parked sound.[^v8] An object that takes longer than 15 s to appear loses it. [`REZ_SOUND`](/constants/REZ_SOUND/) on [`llRezObjectWithParams`](/functions/llRezObjectWithParams/) lets the rezzer set the new object's sound as part of the rez request instead of from a script call after it appears.
+
+## Related
+
+<SeeAlso items={["feature:sound", "feature:land", "category:sound"]}>
+  <Planned>Guide: start-loop-end sounds for engines and weapons</Planned>
+</SeeAlso>
+
+[^v1]: Viewer `746d768339`: [`newview/llviewerobject.h:934-936`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.h#L934-L936); [`newview/llviewerobject.cpp:1366-1369`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L1366-L1369); [`newview/llviewerobject.cpp:1945-1947`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L1945-L1947); [`newview/llviewermessage.cpp:3872-3905`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3872-L3905)
+[^v2]: Viewer `746d768339`: [`newview/llviewermessage.cpp:3760-3830`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3760-L3830); [`llaudio/llaudioengine.cpp:784-811`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L784-L811)
+[^v3]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:1547-1564`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1547-L1564); [`newview/llviewerobject.cpp:6604-6615`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6604-L6615)
+[^v4]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:395-442`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L395-L442)
+[^v5]: Viewer `746d768339`: [`newview/llaudiosourcevo.cpp:60-126`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L60-L126); [`newview/llaudiosourcevo.cpp:139-145`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L139-L145); [`newview/llviewerobject.cpp:6618-6623`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6618-L6623)
+[^v6]: Viewer `746d768339`: [`newview/llviewerparcelmgr.cpp:813-838`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerparcelmgr.cpp#L813-L838); [`newview/llaudiosourcevo.cpp:148-171`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L148-L171); [`newview/llviewermessage.cpp:3792`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3792)
+[^v7]: Viewer `746d768339`: [`llaudio/llaudioengine.h:51-52`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.h#L51-L52); [`llaudio/llaudioengine.cpp:577-629`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L577-L629)
+[^v8]: Viewer `746d768339`: [`newview/llviewermessage.cpp:3832-3869`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3832-L3869); [`newview/llviewermessage.cpp:3471-3492`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3471-L3492); [`newview/llviewermessage.cpp:3524-3551`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3524-L3551); [`newview/llviewermessage.cpp:3886-3905`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3886-L3905)
+[^v9]: Viewer `746d768339`: [`newview/llviewerobject.cpp:6612-6615`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6612-L6615)
+[^v10]: Viewer `746d768339`: [`llcommon/lldefs.h:129-136`](https://github.com/secondlife/viewer/blob/746d768339/indra/llcommon/lldefs.h#L129-L136)
+[^v11]: Viewer `746d768339`: [`newview/llviewerobject.cpp:6579-6585`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6579-L6585); [`newview/llviewerobject.cpp:6646-6653`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6646-L6653)
+[^v12]: Viewer `746d768339`: [`newview/llviewerobject.cpp:6556-6578`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6556-L6578)
+[^v13]: Viewer `746d768339`: [`newview/llviewermessage.cpp:3908-3925`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3908-L3925); [`newview/llviewerobject.cpp:6646-6653`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewerobject.cpp#L6646-L6653); [`newview/llaudiosourcevo.cpp:55-58`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L55-L58)
+[^v14]: Viewer `746d768339`: [`newview/llaudiosourcevo.cpp:241-248`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L241-L248)
+[^v15]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:312-390`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L312-L390)
+[^v16]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:1473-1477`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1473-L1477)
+[^v17]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:1439-1444`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1439-L1444); [`llaudio/llaudioengine.cpp:292-302`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L292-L302)
+[^v18]: Viewer `746d768339`: [`newview/llaudiosourcevo.cpp:103-126`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L103-L126); [`newview/app_settings/settings.xml:13783-13793`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L13783-L13793)
+[^v19]: Viewer `746d768339`: [`newview/llaudiosourcevo.cpp:198-215`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L198-L215)
+[^v20]: Viewer `746d768339`: [`newview/llaudiosourcevo.cpp:148-171`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L148-L171)
+[^v21]: Viewer `746d768339`: [`newview/llviewermessage.cpp:3496-3500`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3496-L3500); [`newview/llviewermessage.cpp:3794-3805`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3794-L3805); [`newview/llaudiosourcevo.cpp:173-196`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llaudiosourcevo.cpp#L173-L196)
+[^v22]: Viewer `746d768339`: [`newview/llviewermessage.cpp:3502-3507`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3502-L3507); [`newview/llviewermessage.cpp:3808-3811`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3808-L3811)
+[^v23]: Viewer `746d768339`: [`newview/llviewermessage.cpp:3813-3827`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3813-L3827)
+[^v24]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:1317-1341`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1317-L1341)
+[^v25]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:243-274`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L243-L274); [`llaudio/llaudioengine.cpp:281-303`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L281-L303); [`llaudio/llaudioengine.cpp:577-629`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L577-L629)
+[^v26]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:1451-1515`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1451-L1515)
+[^v27]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:447-459`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L447-L459)
+[^v28]: Viewer `746d768339`: [`newview/llviewermessage.cpp:3851-3852`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3851-L3852)
+[^v29]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:1587-1592`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1587-L1592); [`llaudio/llaudioengine.cpp:1196-1235`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1196-L1235); [`llaudio/llaudioengine.cpp:1418-1431`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1418-L1431)
+
+<FeatureFooter related={["sound", "land"]} categories={["sound"]} />

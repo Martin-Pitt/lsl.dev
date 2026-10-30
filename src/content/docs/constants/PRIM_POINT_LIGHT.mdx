@@ -39,9 +39,8 @@ Returns the same values, in the same order.
 
 ## Caveats
 
-- Viewers that do not have advanced lighting enabled can only render 6 lights at a time and projectors will be rendered as omnidirectional light sources. (OpenGL limitations allow for 8 light sources, SL appears to reserve one each for the Sun and Moon.)
-- Viewers that **do** have advanced lighting enabled can render as many lights as their graphics card allows; it is not hard-limited by the viewer.
-- Lights with a high intensity have a wash-out effect when overlapping. Keep this in mind when using multiple lights. ***Never*** create an abundance of lights to get around the 6 light maximum in basic lighting, as viewers with advanced lighting will be washed out and may suffer from client lag.
+- The viewer renders only the nearest local lights, up to its `RenderLocalLightCount` setting (default 256); lights beyond that count, or outside the draw distance, are not rendered
+- Lights with a high intensity have a wash-out effect when overlapping. Keep this in mind when using multiple lights. ***Never*** create an abundance of lights to get around the per-viewer light limit, as other viewers will be washed out and may suffer from client lag.
 - Unlike most color in LSL, which expects a gamma-encoded value (sRGB), this expects a non-gamma-encoded value (linear RGB). This means that the value you set as the light color is not the same value you'd pass to make the source (e.g. filament ) glow the same color. You may wish to implement an [sRGB Electro-Optical Transfer Function (EOTF)](/functions/llsRGB2Linear/) to bypass this.
 - The `falloff` parameter is a bit of a misnomer. Instead of modifying the characteristics of light decay over distance, it instead acts as a modifier to a light's overall intensity value.
 

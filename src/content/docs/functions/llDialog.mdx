@@ -91,7 +91,7 @@ llDialog(NULL_KEY, "", [], 0);
   ```
 
   If the message length is greater than or equal to 512 bytes, it shouts (again on the [debug channel](/constants/DEBUG_CHANNEL/)): `"llDialog: message too long, must be less than 512 characters"`; in both instances, the dialog box will not be created for `avatar`.
-- The client only displays 20 lines of `message` at a time, not counting the top line containing the owner and name of the object. If there are more than 20 lines the dialog displays a scroll bar. See [appearance](#appearance).
+- The current viewer does not cap the number of lines shown: the dialog panel grows to fit the whole `message`, so the only practical limit is the 512 byte cap. Older viewers displayed about 20 lines at a time (not counting the top line containing the owner and name of the object) and showed a scroll bar beyond that. See [appearance](#appearance)
 
 ### `buttons` limits
 
@@ -431,9 +431,7 @@ privchan = ((integer)("0x"+llGetSubString((string)llGetKey(),-8,-1)) & 0x3FFFFFF
 
 ### Appearance
 
-If `message` requires more than 8 lines, a vertical scroll bar will appear in the dialog.
-
-: In viewer 3 there is no scroll bar, only the 512 chars message limit is effective, so you may show more than 40 short lines in the message
+The viewer does not limit the number of lines in the dialog: there is no scroll bar, the panel simply grows to fit the message, and only the 512 byte message limit is effective, so you may show more than 40 short lines in the message. (Very old viewers showed a vertical scroll bar once `message` needed more than about 8 lines.)
 
 : Too many lines will hide some of the **buttons** or all of them outside the window though
 

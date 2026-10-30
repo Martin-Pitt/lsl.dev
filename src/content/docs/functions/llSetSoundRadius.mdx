@@ -17,7 +17,7 @@ import { LSLFunction, WikiSource } from '~/components/lsl';
 
 <LSLFunction name="llSetSoundRadius" />
 
-Establishes a hard cut-off **radius** for audibility for [llPlaySound](/functions/llPlaySound/), [llLoopSound](/functions/llLoopSound/) and [llLinkPlaySound](/functions/llLinkPlaySound/) in non-triggered mode. Sounds are not heard until an observer's camera enters the radius, and immediately stop when leaving the radius. Volume fading is still determined by the distance from camera, not the radius.
+Establishes a hard cut-off **radius** for audibility for [llPlaySound](/functions/llPlaySound/), [llLoopSound](/functions/llLoopSound/) and [llLinkPlaySound](/functions/llLinkPlaySound/) in non-triggered mode. Sounds are not heard until an observer's ear position enters the radius, and immediately stop when leaving the radius. The viewer measures the distance from the camera by default, or from the avatar if the *MediaSoundsEarLocation* setting is changed; for attached objects the distance is measured from the wearer's position, not the prim. A radius below 0.1 m is treated as off. Volume fading is still determined by the distance from the ear position, not the radius.
 
 ```lsl title="How to use" frame="terminal"
 llSetSoundRadius(0.0);
@@ -26,10 +26,10 @@ llSetSoundRadius(0.0);
 ## Caveats
 
 - This function is a prim property, thus will survive script resets.
-- Has no effect on [llTriggerSound](/functions/llTriggerSound/) or [llLinkPlaySound](/functions/llLinkPlaySound/) in triggered mode. Sounds will play regardless of camera position.
-- [llTriggerSoundLimited](/functions/llTriggerSoundLimited/) can be used instead for a similar effect but the function depends on **avatar** position, not camera position.
-- When used with [llPlaySound](/functions/llPlaySound/) or [llLinkPlaySound](/functions/llLinkPlaySound/) in non-looped mode, the sound will be played from the beginning only once, when the observer's camera enters the radius for the first time. This can happen significantly later than a one-off sound was actually played.
-- With [llLoopSound](/functions/llLoopSound/) or [llLinkPlaySound](/functions/llLinkPlaySound/) in looped mode, the sound will be played from the beginning every time the observer's camera enters the radius.
+- Has no effect on [llTriggerSound](/functions/llTriggerSound/) or [llLinkPlaySound](/functions/llLinkPlaySound/) in triggered mode. Sounds will play regardless of listener position.
+- [llTriggerSoundLimited](/functions/llTriggerSoundLimited/) can be used instead for a similar effect but the function always depends on **avatar** position, regardless of the viewer's ear setting.
+- When used with [llPlaySound](/functions/llPlaySound/) or [llLinkPlaySound](/functions/llLinkPlaySound/) in non-looped mode, the sound will be played from the beginning only once, when the observer's ear position enters the radius for the first time. This can happen significantly later than a one-off sound was actually played.
+- With [llLoopSound](/functions/llLoopSound/) or [llLinkPlaySound](/functions/llLinkPlaySound/) in looped mode, the sound will be played from the beginning every time the observer's ear position enters the radius.
 
 ## Examples
 
@@ -53,7 +53,7 @@ llSetSoundRadius(0); //Disable sound cutoff.
 
 ## Notes
 
-Pass 0 to this function to disable it.
+Pass 0 to this function to disable it; the viewer treats any radius below 0.1 m as off.
 
 ## History
 

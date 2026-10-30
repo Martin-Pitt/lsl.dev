@@ -18,7 +18,7 @@ export const cameraParams: RuleSection[] = [
 	{ title: 'Following the avatar', id: 'following-the-avatar', rules: [
 		{ rule: 'CAMERA_DISTANCE', note: '0.5 to 50; default 3.0' },
 		{ rule: 'CAMERA_PITCH', note: '-45 to 80; default 0.0' },
-		{ rule: 'CAMERA_FOCUS_OFFSET', note: '<-10,-10,-10> to <10,10,10>; default <1,0,0>' },
+		{ rule: 'CAMERA_FOCUS_OFFSET', note: '<-10,-10,-10> to <10,10,10>; viewer default <1,0,0> when not set' },
 		{ rule: 'CAMERA_BEHINDNESS_ANGLE', note: '0 to 180; default 10.0' },
 		{ rule: 'CAMERA_BEHINDNESS_LAG', note: '0 to 3; default 0.0' },
 	] },

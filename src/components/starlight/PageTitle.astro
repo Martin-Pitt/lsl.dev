@@ -23,9 +23,11 @@ if (feature) {
 	siblings = docs.sort((a, b) => a.id.length - b.id.length || a.data.title.localeCompare(b.data.title)).map(e => ({ label: e.data.title, href: `/${e.id}/` }));
 }
 const { crumbs, chips } = pageNav(path, title, siblings);
+// Wiki archive titles often match a current API page name; rank them below it in search (Pagefind's h1 default is 7).
+const titleWeight = path.startsWith('/wiki/') ? '2' : undefined;
 const chevron = '<svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><polyline points="9 18 15 12 9 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 ---
-<h1 id={PAGE_TITLE_ID}>{title}</h1>
+<h1 id={PAGE_TITLE_ID} data-pagefind-weight={titleWeight}>{title}</h1>
 {(crumbs.length > 1 || hasMarkdown) && (
 	<div class="page-meta-row">
 		{crumbs.length > 1 && (

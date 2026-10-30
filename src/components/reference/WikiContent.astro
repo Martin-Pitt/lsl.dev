@@ -1,8 +1,11 @@
 ---
 import WikiAttribution from './WikiAttribution.astro';
 const { wiki, html, attribution = true } = Astro.props;
+// Archive text ranks below the current docs in search: the body is down-weighted, and its headings
+// are stamped too, since Pagefind gives headings their own default weights (h2 6, h3 5 …).
+const weighted = html.replace(/<h([1-6])(?=[\s>])/g, '<h$1 data-pagefind-weight="0.5"');
 ---
-<div class="wiki-content" set:html={html} />
+<div class="wiki-content" data-pagefind-weight="0.3" set:html={weighted} />
 <details class="source-note" data-pagefind-ignore><summary>Original wiki source</summary>
 <p>Some wiki templates and tables need their original context. <a href={wiki.source.url}>View this article on the Second Life Wiki</a>. Technical wording and examples are retained from the source; historical guidance may differ from current behavior.</p></details>
 {attribution && <WikiAttribution source={wiki.source}/>}

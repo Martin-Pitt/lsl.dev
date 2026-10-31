@@ -91,6 +91,17 @@ Each call returns a query key; match it in [`dataserver`](/events/dataserver/) t
 
 </Box>
 
+## Key-value store vs permissions
+
+The two halves of an experience have different requirements:
+
+- Experience permissions ([`llRequestExperiencePermissions`](/functions/llRequestExperiencePermissions/) and the abilities it grants) only work where the experience is allowed on the land; elsewhere the request fails with [`XP_ERROR_NOT_PERMITTED_LAND`](/constants/XP_ERROR_NOT_PERMITTED_LAND/)
+- The key-value store ([`llCreateKeyValue`](/functions/llCreateKeyValue/), [`llReadKeyValue`](/functions/llReadKeyValue/), [`llUpdateKeyValue`](/functions/llUpdateKeyValue/), [`llDeleteKeyValue`](/functions/llDeleteKeyValue/), [`llDataSizeKeyValue`](/functions/llDataSizeKeyValue/), [`llKeysKeyValue`](/functions/llKeysKeyValue/), [`llKeyCountKeyValue`](/functions/llKeyCountKeyValue/)) only needs the script compiled with the experience. It works wherever the script runs, whether or not the experience is allowed on that land[^xp-land]
+
+See [`llGetExperienceErrorMessage`](/functions/llGetExperienceErrorMessage/) for which errors each family returns.
+
+[^xp-land]: Confirmed in-world by Nexii Malthus (October 2026); the wiki and the LSL definitions only say the script must be compiled into an experience
+
 ## Constant groups
 
 <ConstantGroups names={["ScriptPermission", "ExperienceError"]} />

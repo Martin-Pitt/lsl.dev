@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 import { unified } from '@astrojs/markdown-remark';
 import { readFileSync } from 'node:fs';
 import rehypeInlineLsl from './src/lib/rehype-inline-lsl.ts';
+import rehypeWikiLocal from './src/lib/rehype-wiki-local.ts';
 import rehypeApiHovercards from './src/components/authoring/hovercards/rehype-api-hovercards.ts';
 import sitemap from '@astrojs/sitemap';
 import { loadFeatures } from './scripts/feature-index.mjs';
@@ -113,7 +114,7 @@ export default defineConfig({
 	server: { host: true },
 	// Inline `code` and links to API pages in Markdown/MDX are highlighted as LSL (see the plugin).
 	// API hover cards run after it (src/components/authoring/hovercards/, Batch 1 of docs/design/components-plan.md).
-	markdown: { processor: unified({ rehypePlugins: [rehypeInlineLsl, rehypeApiHovercards] }) },
+	markdown: { processor: unified({ rehypePlugins: [rehypeWikiLocal, rehypeInlineLsl, rehypeApiHovercards] }) },
 	integrations: [reloadSidebarOnFeatureChanges(),
 		// Registered here, before Starlight, so Starlight doesn't add its own; hidden pages stay out of it.
 		sitemap({ filter: page => !sitemapExcluded.some(path => new URL(page).pathname.startsWith(path)) }),

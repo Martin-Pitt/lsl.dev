@@ -35,6 +35,8 @@ export const collections = {
 			hoverCards: z.boolean().optional(),
 			/** `false` leaves inline `code` on the page plain instead of LSL-highlighted (src/lib/rehype-inline-lsl.ts). */
 			inlineLsl: z.boolean().optional(),
+			/** SL wiki articles this page covers; links to them site-wide point here (src/lib/wiki-local.ts). */
+			wikiArticles: z.array(z.string()).optional(),
 		}) }),
 	}),
 };

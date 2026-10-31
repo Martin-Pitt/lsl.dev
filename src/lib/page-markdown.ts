@@ -12,6 +12,7 @@ import { selfClosingCases, pairedCases, transformCases, handledBy } from './page
 import { SITE, pageHref } from './page-markdown/util';
 import type { Attrs, Context, MarkdownPage } from './page-markdown/types';
 import { MARKDOWN_HEADER } from './llms';
+import { rewriteWikiLinks } from './wiki-local';
 
 export type { MarkdownPage } from './page-markdown/types';
 export const markdownHref = (id: string) => (id === 'index' ? '/index.md' : `/${id}/index.md`);
@@ -160,7 +161,7 @@ export function mdxToMarkdown(body: string, page: MarkdownPage): string {
 	}
 	if (fence) endFence();
 	// Tidy trailing spaces and blank lines outside code; top-level fences stay verbatim.
-	const out = convertText(text.join('\n'), page, authoring, fences);
+	const out = rewriteWikiLinks(convertText(text.join('\n'), page, authoring, fences), page.id);
 	return out.split(/(^[ \t]*(?:`{3,}|~{3,})[^\n]*\n[\s\S]*?^[ \t]*(?:`{3,}|~{3,})[ \t]*$)/m)
 		.map((part, k) => (k % 2 ? part : part.replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n'))).join('').trim();
 }

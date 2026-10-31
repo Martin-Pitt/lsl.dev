@@ -52,6 +52,22 @@ One sentence about the sub-topic.
 <FeatureFooter related={["physics"]} categories={["combat"]} archive={["Category:LSL Combat2"]} />
 ```
 
+## Wiki articles a page covers
+
+When a page covers a topic the SL wiki has its own article for, list those articles in the
+frontmatter:
+
+```yaml
+wikiArticles: ["Combat_Log"]
+```
+
+Prose links to those articles anywhere on the site (API pages included, HTML and the Markdown
+copies) then point at this page instead (`src/lib/wiki-local.ts`, `src/lib/rehype-wiki-local.ts`).
+Titles match like the wiki: spaces or underscores, first letter in either case; `#section` is
+dropped. One article belongs to one page, a second claim fails the build. Provenance and archive
+links (`source`, `<WikiSource />`, `wiki:` entries in `SeeAlso`, `FeatureFooter archive`) are not
+rewritten. Works on any page under `src/content/docs`, not only feature pages.
+
 Leave a blank line after an opening component tag and before its closing tag, or the Markdown
 inside is not parsed. Escape a literal `*` as `\*`, and don't use raw `{`, `}` or `<` in prose.
 

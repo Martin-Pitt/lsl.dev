@@ -26,6 +26,7 @@ Shape, light, glow and other prim properties live under [Prims](/features/prims/
 - [Reflection probes](/constants/PRIM_REFLECTION_PROBE/) control what PBR surfaces reflect nearby
 - [Frame animation and scrolling](/functions/llSetTextureAnim/) are covered under [Effects](/features/effects/)
 - A face can [show a web page](/functions/llSetPrimMediaParams/); media settings control the URL, size, controls and who may interact
+  - Its sound fades with distance from the listener's camera (or avatar, by preference): full volume up to 40 m, then 1 / (1 + 0.02 × (d − 40))², and silent past 80 m. HUD media is not attenuated[^v1]
 - The [`changed`](/events/changed/) event reports [color](/constants/CHANGED_COLOR/), [material](/constants/CHANGED_RENDER_MATERIAL/) and [media](/constants/CHANGED_MEDIA/) changes
 
 </Box>
@@ -112,6 +113,8 @@ Media functions return a [`STATUS_*`](/constants/groups/PrimMediaError/) code ([
   <Planned>Guide: Blinn-Phong and PBR offsets, repeats and rotation</Planned>
   <Planned>Guide: PBR materials and glTF overrides</Planned>
 </SeeAlso>
+
+[^v1]: Viewer `746d768339`: [`newview/llviewermedia.cpp:2178-2196`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermedia.cpp#L2178-L2196); [`newview/llviewermedia.cpp:3787-3821`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermedia.cpp#L3787-L3821); [`newview/app_settings/settings.xml:7248-7279`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/app_settings/settings.xml#L7248-L7279)
 
 <FeatureFooter
   related={["prims", "effects"]}

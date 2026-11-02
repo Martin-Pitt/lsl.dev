@@ -62,11 +62,15 @@ Sync is global in the viewer, not per linkset. Each frame it picks one master: t
 
 A slave never starts on its own. When a slave source is given a channel it is flagged as waiting and holds that channel without playing until a master loops.[^v17] So [`llLoopSoundSlave`](/functions/llLoopSoundSlave/) and [`llPlaySoundSlave`](/functions/llPlaySoundSlave/) sounds with no audible [`llLoopSoundMaster`](/functions/llLoopSoundMaster/) nearby are silent, and a slave that is only in earshot of a master in another object still follows that master. [`SOUND_SYNC`](/constants/SOUND_SYNC/) on [`llLinkPlaySound`](/functions/llLinkPlaySound/) asks for the slave treatment.
 
+The viewer notices a loop by seeing the master's playback position jump backwards between frames.[^v31] A master that plays once and does not loop therefore never releases its slaves, and the source code itself warns that the check can miss a wrap. A missed wrap leaves the slaves waiting for one more loop, which is one cause of slaves drifting or starting late.
+
 ## Cut-off radius and the ear
 
 [`llSetSoundRadius`](/functions/llSetSoundRadius/) reaches the viewer as a cut-off radius on the object update.[^v1] When a sound starts and on every update, the viewer measures the distance from the sound's position to its "ear" and mutes the source when that distance is not under the radius.[^v5] The ear is the camera by default; a preference (`MediaSoundsEarLocation`, 0 = camera, 1 = avatar) moves it to the avatar.[^v18] For an attachment the sound's position is the wearing avatar, not the prim.[^v5] A radius of 0.1 m or less is treated as no cut-off, so 0.0 means unlimited rather than silent.[^v5]
 
 The radius is a hard switch, not a falloff: inside it the sound plays at normal distance attenuation, outside it the source is muted. A muted source keeps its data, so a loop resumes when the listener comes back into range.[^v19]
+
+Inside the radius, loudness falls off with distance the way OpenAL does by default: the viewer sets no reference or maximum distance, so gain halves at 2 m, quarters at 4 m and never reaches zero on its own. The rolloff factor is 1, or 5 while the camera is underwater, which makes sounds die away much faster there.[^v30] Doppler is on with a factor of 1, so fast-moving sources shift in pitch.[^v30]
 
 ## Parcel and mute filters
 
@@ -133,5 +137,7 @@ A sound played right after rez, in [`on_rez`](/events/on_rez/) or [`state_entry`
 [^v27]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:447-459`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L447-L459)
 [^v28]: Viewer `746d768339`: [`newview/llviewermessage.cpp:3851-3852`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llviewermessage.cpp#L3851-L3852)
 [^v29]: Viewer `746d768339`: [`llaudio/llaudioengine.cpp:1587-1592`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1587-L1592); [`llaudio/llaudioengine.cpp:1196-1235`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1196-L1235); [`llaudio/llaudioengine.cpp:1418-1431`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L1418-L1431)
+[^v30]: Viewer `746d768339`: [`newview/llvieweraudio.cpp:418-430`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llvieweraudio.cpp#L418-L430); [`llaudio/llaudioengine_openal.cpp:390-397`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine_openal.cpp#L390-L397); [`llaudio/llaudioengine_openal.cpp:430-441`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine_openal.cpp#L430-L441)
+[^v31]: Viewer `746d768339`: [`llaudio/llaudioengine_openal.cpp:411-421`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine_openal.cpp#L411-L421); [`llaudio/llaudioengine.cpp:409`](https://github.com/secondlife/viewer/blob/746d768339/indra/llaudio/llaudioengine.cpp#L409)
 
 <FeatureFooter related={["sound", "land"]} categories={["sound"]} />

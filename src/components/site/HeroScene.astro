@@ -196,12 +196,19 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		width: var(--cube);
 		aspect-ratio: 1;
 		transform-style: preserve-3d;
-		transform: rotateX(70deg) rotateZ(calc(var(--spin) + var(--omega)));
+		/* The rotation is animated on transform itself (spin-rot, omega-rot, composited onto this
+		   base with add), not through var(--spin)/var(--omega): Safari doesn't recompute a transform
+		   that reads an animated custom property, so the prim never turned there. --spin/--omega
+		   still run in step for the faces' shading. */
+		transform: rotateX(70deg);
 		animation:
 			spin 16s linear infinite,
+			spin-rot 16s linear infinite,
 			pulse var(--seg) ease-out var(--start) infinite,
 			omega var(--loop) var(--start) infinite,
+			omega-rot var(--loop) var(--start) infinite,
 			press var(--loop) var(--start) infinite;
+		animation-composition: replace, add, replace, replace, add, replace;
 	}
 	.face,
 	.shadow {
@@ -269,6 +276,7 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 	}
 
 	@keyframes spin { to { --spin: 360deg; } }
+	@keyframes spin-rot { from { transform: rotateZ(0deg); } to { transform: rotateZ(360deg); } }
 	@keyframes float {
 		50% { transform: translateY(-2.5cqi); }
 	}
@@ -292,6 +300,13 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		28.667% { --omega: 360deg; animation-timing-function: linear; }
 		30.444% { --omega: 1080deg; animation-timing-function: cubic-bezier(0.25, 0.5, 0.5, 1); }
 		32.222%, 100% { --omega: 1440deg; }
+	}
+	/* The same curve on transform (see .cube). */
+	@keyframes omega-rot {
+		0%, 26.889% { transform: rotateZ(0deg); animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.5); }
+		28.667% { transform: rotateZ(360deg); animation-timing-function: linear; }
+		30.444% { transform: rotateZ(1080deg); animation-timing-function: cubic-bezier(0.25, 0.5, 0.5, 1); }
+		32.222%, 100% { transform: rotateZ(1440deg); }
 	}
 	/* Segment 5: the touch, a quick push in as the cursor clicks (45.4s). */
 	@keyframes press {
@@ -650,7 +665,7 @@ const particles = Array.from({ length: 10 }, (_, i) => i);
 		/* The prim holds still at a fixed angle, shaded for it: no float, spin, squash or omega,
 		   and no press or drive (those get their own cues below: click ring, gamepad arrows). */
 		.float { animation: none; }
-		.cube { --spin: 30deg; animation: none; }
+		.cube { --spin: 30deg; animation: none; transform: rotateX(70deg) rotateZ(var(--spin)); }
 		/* Cards cross-fade in and out in place, above the prim. */
 		.script-card { animation-name: card-fade; }
 		/* Sparkles glow up and fade where they are, instead of flying out. */

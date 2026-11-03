@@ -41,9 +41,9 @@ integer result = llGetRegionFlags();
 | ~~[REGION_FLAGS_ALLOW_LANDMARK](https://wiki.secondlife.com/wiki/REGION_FLAGS_ALLOW_LANDMARK)~~† | 0x00000002 | Can you make landmarks here? |
 | ~~[REGION_FLAGS_ALLOW_SET_HOME](https://wiki.secondlife.com/wiki/REGION_FLAGS_ALLOW_SET_HOME)~~† | 0x00000004 | Do we allow the home position to be set here? |
 | ~~[REGION_FLAGS_RESET_HOME_ON_TELEPORT](https://wiki.secondlife.com/wiki/REGION_FLAGS_RESET_HOME_ON_TELEPORT)~~† | 0x00000008 | Do we reset the home position when someone teleports away from here? |
-| ~~[REGION_FLAGS_TAX_FREE](https://wiki.secondlife.com/wiki/REGION_FLAGS_TAX_FREE)~~†\* | 0x00000020 | Tax free zone (no taxes on objects, land, etc.)<br />Taxes were abolished with SL version 1.2. See |
+| ~~REGION_FLAGS_ALLOW_ACCESS_OVERRIDE~~† | 0x00000020 | The estate lets parcel owners set their own access (private parcels). Formerly REGION_FLAGS_TAX_FREE, reused in 2017[^v1] |
 | ~~[REGION_FLAGS_BLOCK_LAND_RESELL](https://wiki.secondlife.com/wiki/REGION_FLAGS_BLOCK_LAND_RESELL)~~† | 0x00000080 | Can't release, sell, or buy land. |
-| ~~[REGION_FLAGS_NULL_LAYER](https://wiki.secondlife.com/wiki/REGION_FLAGS_NULL_LAYER)~~†\* | 0x00000200 |  |
+| ~~REGION_FLAGS_ALLOW_ENVIRONMENT_OVERRIDE~~† | 0x00000200 | Parcels may set their own environment. Formerly REGION_FLAGS_NULL_LAYER, reused in 2018[^v1] |
 | ~~[REGION_FLAGS_HARD_ALLOW_LAND_TRANSFER](https://wiki.secondlife.com/wiki/REGION_FLAGS_HARD_ALLOW_LAND_TRANSFER)~~†\* | 0x00000400 | Region allows land reselling |
 | ~~[REGION_FLAGS_SKIP_UPDATE_INTEREST_LIST](https://wiki.secondlife.com/wiki/REGION_FLAGS_SKIP_UPDATE_INTEREST_LIST)~~†\* | 0x00000800 | Region allows posting of classified ads |
 | ~~[REGION_FLAGS_SKIP_SCRIPTS](https://wiki.secondlife.com/wiki/REGION_FLAGS_SKIP_SCRIPTS)~~† | 0x00002000 |  |
@@ -56,11 +56,11 @@ integer result = llGetRegionFlags();
 | ~~[REGION_FLAGS_DENY_IDENTIFIED](https://wiki.secondlife.com/wiki/REGION_FLAGS_DENY_IDENTIFIED)~~†\* | 0x01000000 |  |
 | ~~[REGION_FLAGS_DENY_TRANSACTED](https://wiki.secondlife.com/wiki/REGION_FLAGS_DENY_TRANSACTED)~~†\* | 0x02000000 |  |
 | ~~[REGION_FLAGS_ALLOW_PARCEL_CHANGES](https://wiki.secondlife.com/wiki/REGION_FLAGS_ALLOW_PARCEL_CHANGES)~~† | 0x04000000 |  |
-| ~~[REGION_FLAGS_ABUSE_EMAIL_TO_ESTATE_OWNER](https://wiki.secondlife.com/wiki/REGION_FLAGS_ABUSE_EMAIL_TO_ESTATE_OWNER)~~†\* | 0x08000000 |  |
+| ~~REGION_FLAGS_BLOCK_FLYOVER~~† | 0x08000000 | Parcel access limits reach a higher ceiling, so restricted parcels can't be flown over. Formerly REGION_FLAGS_ABUSE_EMAIL_TO_ESTATE_OWNER, reused in 2013[^v1] |
 | ~~[REGION_FLAGS_ALLOW_VOICE](https://wiki.secondlife.com/wiki/REGION_FLAGS_ALLOW_VOICE)~~† | 0x10000000 |  |
 | ~~[REGION_FLAGS_BLOCK_PARCEL_SEARCH](https://wiki.secondlife.com/wiki/REGION_FLAGS_BLOCK_PARCEL_SEARCH)~~† | 0x20000000 |  |
 | ~~[REGION_FLAGS_DENY_AGEUNVERIFIED](https://wiki.secondlife.com/wiki/REGION_FLAGS_DENY_AGEUNVERIFIED)~~† | 0x40000000 |  |
-| ~~[REGION_FLAGS_SKIP_MONO_SCRIPTS](https://wiki.secondlife.com/wiki/REGION_FLAGS_SKIP_MONO_SCRIPTS)~~†\* | 0x80000000 |  |
+| ~~REGION_FLAGS_DENY_BOTS~~† | 0x80000000 | Scripted agents are blocked from the estate or region. Formerly REGION_FLAGS_SKIP_MONO_SCRIPTS, reused in 2023. In LSL this bit is the sign bit, so a mask test is `flags & 0x80000000`, or `flags < 0`[^v1] |
 
 <table>
 	<tr>
@@ -100,6 +100,7 @@ default
 ## History
 
 - SVN:960 r93583 Branch:Release Saturday, 02 August 2008 REGION_FLAGS_SKIP_MONO_SCRIPTS added.
+- 2013, 2017, 2018 and 2023: the viewer reuses four retired bits for BLOCK_FLYOVER, ALLOW_ACCESS_OVERRIDE, ALLOW_ENVIRONMENT_OVERRIDE and DENY_BOTS[^v1]
 
 ## See also
 
@@ -108,5 +109,7 @@ default
 - [llGetEnv](/functions/llGetEnv/) — for region settings that don't fit in a flag
 - [llGetParcelFlags](/functions/llGetParcelFlags/)
 - [llRequestSimulatorData](/functions/llRequestSimulatorData/)
+
+[^v1]: Viewer `746d768339`: [`llmessage/llregionflags.h:43-92`](https://github.com/secondlife/viewer/blob/746d768339/indra/llmessage/llregionflags.h#L43-L92); [`newview/llestateinfomodel.cpp:75-87`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llestateinfomodel.cpp#L75-L87); [`newview/llfloaterregioninfo.cpp:515`](https://github.com/secondlife/viewer/blob/746d768339/indra/newview/llfloaterregioninfo.cpp#L515)
 
 <WikiSource />
